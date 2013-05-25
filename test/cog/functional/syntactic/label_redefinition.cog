@@ -1,0 +1,11 @@
+symbols
+end
+code
+startup:
+if(1) break;
+startup:
+return;
+startup:
+startup:
+;
+end

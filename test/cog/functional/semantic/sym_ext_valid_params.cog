@@ -1,0 +1,21 @@
+symbols
+
+sector var00 local
+
+sector var01 desc=0xFF
+sector var02 desc=10
+sector var03 desc=10.1
+sector var04 desc=+test.wav
+sector var05 desc=int
+
+sector var06 mask=0x4
+sector var07 mask=10
+
+sector var08 linkid=1
+sector var09 linkid=0x5
+
+sector var10 nolink
+
+end
+code
+end

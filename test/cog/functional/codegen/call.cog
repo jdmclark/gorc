@@ -1,0 +1,30 @@
+symbols
+int n
+int result
+int i
+end
+
+code
+
+factorial_body:
+	if(n > 0)
+	{
+		result = result * n;
+		n = n - 1;
+		call factorial_body;
+	}
+	return;
+
+factorial:
+	result = 1;
+	call factorial_body;
+	return;
+
+startup:
+	for(i = 0; i < 6; i = i + 1)
+	{
+		n = i;
+		call factorial;
+		PrintInt(result);
+	}
+end

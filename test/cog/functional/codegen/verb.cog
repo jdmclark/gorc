@@ -1,0 +1,7 @@
+symbols
+end
+code
+startup:
+PrintInt(5);
+return;
+end

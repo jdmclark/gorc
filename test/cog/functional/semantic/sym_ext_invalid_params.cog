@@ -1,0 +1,22 @@
+# Errors expected: 11
+symbols
+
+sector var00 local=5
+sector var01 local=5.3
+sector var02 local=frag
+
+sector var03 desc
+
+sector var04 mask=frag
+sector var05 mask=100.5
+
+sector var06 linkid=frag
+sector var07 linkid=100.5
+
+sector var08 nolink=5
+sector var09 nolink=5.3
+sector var10 nolink=frag
+
+end
+code
+end

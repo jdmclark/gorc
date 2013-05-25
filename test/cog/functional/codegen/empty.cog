@@ -1,0 +1,6 @@
+symbols
+end
+code
+startup:
+return;
+end

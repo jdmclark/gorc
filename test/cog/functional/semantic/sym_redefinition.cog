@@ -1,0 +1,8 @@
+symbols
+
+int test
+int test		# Error: Redefinition
+
+end
+code
+end

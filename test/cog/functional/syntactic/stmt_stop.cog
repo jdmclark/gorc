@@ -1,0 +1,23 @@
+symbols
+end
+code
+stop;
+
+for(;;) stop;
+
+for(;;)
+{
+	stop;
+}
+
+for(;;)
+{
+	for(;;)
+	{
+		stop;
+	}
+
+	stop;
+}
+
+end

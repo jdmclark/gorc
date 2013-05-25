@@ -1,0 +1,7 @@
+symbols
+end
+code
+startup:
+PrintInt3(1, 2, 3);
+return;
+end

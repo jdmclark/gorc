@@ -1,0 +1,7 @@
+symbols
+end
+code
+startup:
+PrintInt(GetInt());
+return;
+end

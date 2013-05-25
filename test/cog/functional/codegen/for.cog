@@ -1,0 +1,34 @@
+symbols
+int i
+end
+
+code
+
+startup:
+	for(i = 0; i < 0; i = i + 1)
+	{
+		PrintInt(1);
+	}
+
+	for(i = 0; i < 3; i = i + 1)
+	{
+		PrintInt(2);
+	}
+
+	for(i = 0; i < 5; i = i + 1)
+	{
+		PrintInt(3);
+
+		if(i == 2) break;
+	}
+
+	i = 0;
+	for(;;)
+	{
+		PrintInt(4);
+		i = i + 1;
+
+		if(i == 3) break;
+	}
+
+end

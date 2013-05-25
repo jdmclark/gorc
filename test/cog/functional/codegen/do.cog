@@ -1,0 +1,30 @@
+symbols
+int i
+end
+
+code
+startup:
+	i = 5;
+
+	do
+	{
+		PrintInt(32);
+		i = 100;
+	} while(i < 5);
+
+	i = 5;
+
+	do
+	{
+		PrintInt(i);
+		i = i + 1;
+	} while(i < 11);
+
+	PrintInt(500);
+
+	do
+	{
+		PrintInt(1000);
+		break;
+	} while(i == i);
+end

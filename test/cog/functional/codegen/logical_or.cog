@@ -1,0 +1,32 @@
+symbols
+int i
+flex T
+flex F
+end
+code
+
+startup:
+	T = (i == i);
+	F = (i != i);
+
+	if(T || T)
+	{
+		PrintInt(1);
+	}
+
+	if(T || F)
+	{
+		PrintInt(2);
+	}
+
+	if(F || T)
+	{
+		PrintInt(3);
+	}
+
+	if(F || F)
+	{
+		PrintInt(4);
+	}
+
+end

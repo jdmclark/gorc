@@ -1,0 +1,44 @@
+symbols
+
+int a
+int b
+int c
+
+end
+
+code
+
+startup:
+	a = 0;
+	PrintInt(a);
+
+	b = 1;
+	PrintInt(b);
+
+	a = b;
+	PrintInt(a);
+	PrintInt(b);
+
+	b = a;
+	PrintInt(a);
+	PrintInt(b);
+
+	a = 2;
+	PrintInt(a);
+
+	a = a;
+	PrintInt(a);
+
+	a = 0;
+	b = 1;
+	c = 2;
+	PrintInt(a);
+	PrintInt(b);
+	PrintInt(c);
+
+	a = b = c;
+	PrintInt(a);
+	PrintInt(b);
+	PrintInt(c);
+
+end

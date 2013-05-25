@@ -1,0 +1,6 @@
+symbols
+int foo=8574 local desc=comment mask=0x857 linkid=2 nolink
+int foo=0x857 desc=comment nolink local mask=10 linkid=0x3
+end
+code
+end

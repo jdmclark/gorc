@@ -1,0 +1,20 @@
+# Array test cog
+
+symbols
+message startup
+
+int em
+int em1
+int em2
+int em3
+int em4
+
+end
+code
+startup:
+for(i = 0; i < 5; i = i + 1)
+{
+	em[i] = i;
+}
+return;
+end

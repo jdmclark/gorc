@@ -1,0 +1,49 @@
+symbols
+end
+
+code
+
+startup:
+	PrintInt(-0);
+	PrintInt(-1);
+	PrintInt(--1);
+
+	PrintInt(+0);
+	PrintInt(+1);
+	PrintInt(++1);
+	
+	PrintInt(-+1);
+	PrintInt(+-1);
+
+	PrintInt(0 + 0);
+	PrintInt(0 + 1);
+	PrintInt(1 + 0);
+	PrintInt(1 + 1);
+	
+	PrintInt(0 - 0);
+	PrintInt(0 - 1);
+	PrintInt(1 - 0);
+	PrintInt(1 - 1);
+
+	PrintInt(0 * 0);
+	PrintInt(0 * 1);
+	PrintInt(1 * 1);
+	PrintInt(2 * 2);
+	PrintInt(-1 * 2);
+	PrintInt(1 * -2);
+	PrintInt(-1 * -2);
+
+	PrintInt(0 / 1);
+	PrintInt(1 / 1);
+	PrintInt(1 / 2);
+	PrintInt(2 / 1);
+	PrintInt(4 / 2);
+	PrintInt(4 / -2);
+	PrintInt(-4 / 2);
+	PrintInt(-4 / -2);
+
+	PrintInt(1 % 1);
+	PrintInt(1 % 2);
+	PrintInt(13 % 6);
+
+end

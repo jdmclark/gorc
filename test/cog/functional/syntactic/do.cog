@@ -1,0 +1,8 @@
+symbols
+end
+code
+do
+{
+	return;
+} while(1);
+end

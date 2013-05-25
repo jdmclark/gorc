@@ -1,0 +1,17 @@
+symbols
+
+int i
+int a = 5
+int b = 10
+int c = 15
+int d = 20
+
+end
+code
+
+startup:
+	for(i = 0; i < 4; i = i + 1)
+	{
+		PrintInt(a[i]);
+	}
+end

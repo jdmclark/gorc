@@ -1,0 +1,12 @@
+symbols
+end
+
+code
+
+startup:
+	PrintInt(1 & 3);
+	PrintInt(1 | 2);
+	PrintInt(1 ^ 3);
+
+	PrintInt((-1 ^ 1) + 1);
+end

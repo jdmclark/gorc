@@ -1,0 +1,15 @@
+symbols
+end
+code
+
+label1:
+label2:
+label3:
+	return;
+label4:
+	if(1)
+	{
+	}
+label5:
+;
+end

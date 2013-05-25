@@ -1,0 +1,89 @@
+symbols
+int i
+flex T
+flex F
+end
+code
+
+startup:
+	T = (i == i);
+	F = (i != i);
+
+	if(T)
+	{
+		PrintInt(1);
+	}
+
+	if(F)
+	{
+		PrintInt(2);
+	}
+
+	if(T)
+	{
+		PrintInt(3);
+	}
+	else
+	{
+		PrintInt(4);
+	}
+
+	if(F)
+	{
+		PrintInt(5);
+	}
+	else
+	{
+		PrintInt(6);
+	}
+
+	if(T)
+	{
+		PrintInt(7);
+	}
+	else if(T)
+	{
+		PrintInt(8);
+	}
+
+	if(T)
+	{
+		PrintInt(9);
+	}
+	else if(F)
+	{
+		PrintInt(10);
+	}
+
+	if(F)
+	{
+		PrintInt(11);
+	}
+	else if(T)
+	{
+		PrintInt(12);
+	}
+
+	if(F)
+	{
+		PrintInt(13);
+	}
+	else if(F)
+	{
+		PrintInt(14);
+	}
+
+	if(F)
+	{
+		PrintInt(15);
+	}
+	else if(F)
+	{
+		PrintInt(16);
+	}
+	else
+	{
+		PrintInt(17);
+	}
+
+end
