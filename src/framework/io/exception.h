@@ -11,6 +11,8 @@ class FileCreateErrorException : public IOException { };
 class FileReadErrorException : public IOException { };
 class FileWriteErrorException : public IOException { };
 class FileInvalidSeekException : public IOException { };
+class FileCorruptException : public IOException { };
+class FileNotFoundException : public IOException { };
 
 }
 }

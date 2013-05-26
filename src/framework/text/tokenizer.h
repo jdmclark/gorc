@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <functional>
 #include "source.h"
 #include "token.h"
 #include "framework/diagnostics/report.h"
@@ -43,23 +44,27 @@ public:
 		report_eol = val;
 	}
 
-	inline const std::string& GetFilename() const {
-		return buffer.Filename;
-	}
-
 	void GetToken(Token& out);
-	void GetDelimitedString(Token& out, char delimiter = ' ');
+	void GetDelimitedString(Token& out, const std::function<bool(char)>& match_delim);
 
 	template <typename T> T GetNumber() {
 		GetToken(internalToken);
 		return internalToken.GetNumericValue<T>();
 	}
 
+	std::string& GetIdentifier();
+	std::string& GetStringLiteral();
+	std::string& GetFilename();
+
 	void AssertIdentifier(const std::string& id);
 	void AssertPunctuator(const std::string& punc);
 	void AssertLabel(const std::string& label);
 
 	void AssertEndOfFile();
+
+	inline const Text::Location& GetInternalTokenLocation() const {
+		return internalToken.Location;
+	}
 };
 
 }

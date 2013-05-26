@@ -13,6 +13,8 @@ public:
 
 	virtual size_t FileCount() const = 0;
 	virtual const VirtualFile& GetVirtualFile(size_t index) const = 0;
+	virtual bool IsEpisode() const = 0;
+	virtual const VirtualFile& GetEpisode() const = 0;
 };
 
 }

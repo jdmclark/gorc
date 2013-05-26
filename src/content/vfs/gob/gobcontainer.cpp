@@ -4,7 +4,7 @@
 #include <cstddef>
 
 Gorc::Content::VFS::Gob::GobContainer::GobContainer(IO::ReadOnlyFile& file)
-	: gobPath(file.Filename) {
+	: gobPath(file.Filename), isEpisode(false), episodeIndex(0) {
 
 	struct GOB_HEADER {
 		char magic[4];
@@ -37,12 +37,25 @@ Gorc::Content::VFS::Gob::GobContainer::GobContainer(IO::ReadOnlyFile& file)
 
 		entry.chunkName[127] = '\0';
 
+		if(strncasecmp(entry.chunkName, "episode.jk", 11) == 0) {
+			isEpisode = true;
+			episodeIndex = files.size();
+		}
+
 		files.emplace_back(entry.chunkOffset, entry.chunkLength, entry.chunkName, *this);
 	}
 }
 
 size_t Gorc::Content::VFS::Gob::GobContainer::FileCount() const {
 	return files.size();
+}
+
+bool Gorc::Content::VFS::Gob::GobContainer::IsEpisode() const {
+	return isEpisode;
+}
+
+const Gorc::Content::VFS::VirtualFile& Gorc::Content::VFS::Gob::GobContainer::GetEpisode() const {
+	return GetVirtualFile(episodeIndex);
 }
 
 const Gorc::Content::VFS::VirtualFile& Gorc::Content::VFS::Gob::GobContainer::GetVirtualFile(size_t index) const {

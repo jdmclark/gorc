@@ -241,15 +241,15 @@ void Tokenizer::GetToken(Token& out) {
 	out.Location.last_column = col;
 }
 
-void Tokenizer::GetDelimitedString(Token& out, char delimiter) {
+void Tokenizer::GetDelimitedString(Token& out, const std::function<bool(char)>& match_delim) {
 	skipWhitespace();
 
 	out.Value.clear();
-	out.Location.filename = GetFilename().c_str();
+	out.Location.filename = buffer.Filename.c_str();
 	out.Location.first_line = line;
 	out.Location.first_column = col;
 
-	while(current != delimiter) {
+	while(!match_delim(current)) {
 		out.Value.push_back(current);
 		scan();
 	}
@@ -259,6 +259,38 @@ void Tokenizer::GetDelimitedString(Token& out, char delimiter) {
 	out.Location.last_column = col;
 
 	return;
+}
+
+std::string& Tokenizer::GetIdentifier() {
+	GetToken(internalToken);
+
+	if(internalToken.Type != TokenType::Identifier) {
+		Diagnostics::Helper::Expected(ErrorReport, "tokenizer", "identifier", internalToken.Location);
+		throw TokenizerAssertionException();
+	}
+
+	return internalToken.Value;
+}
+
+std::string& Tokenizer::GetStringLiteral() {
+	GetToken(internalToken);
+
+	if(internalToken.Type != TokenType::String) {
+		Diagnostics::Helper::ExpectedString(ErrorReport, "tokenizer", internalToken.Location);
+		throw TokenizerAssertionException();
+	}
+
+	return internalToken.Value;
+}
+
+std::string& Tokenizer::GetFilename() {
+	GetDelimitedString(internalToken, [](char c) { return isspace(c); });
+	if(internalToken.Value.empty()) {
+		Diagnostics::Helper::Expected(ErrorReport, "tokenizer", "filename", internalToken.Location);
+		throw TokenizerAssertionException();
+	}
+
+	return internalToken.Value;
 }
 
 void Tokenizer::AssertIdentifier(const std::string& id) {

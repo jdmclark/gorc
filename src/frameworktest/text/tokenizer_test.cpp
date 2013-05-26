@@ -365,7 +365,7 @@ Case(AssertionTests)
 
 	Text::Token t;
 
-	tok.GetDelimitedString(t, '.');
+	tok.GetDelimitedString(t, [](char c) { return c == '.'; });
 	Test_Assert_Eq(t.Type, Text::TokenType::String);
 	Test_Assert_Eq(t.Value, "some~delimited~string");
 	Test_Assert_Eq(t.Location.first_line, 3);
