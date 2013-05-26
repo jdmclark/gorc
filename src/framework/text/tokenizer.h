@@ -58,6 +58,8 @@ public:
 	void AssertIdentifier(const std::string& id);
 	void AssertPunctuator(const std::string& punc);
 	void AssertLabel(const std::string& label);
+
+	void AssertEndOfFile();
 };
 
 }

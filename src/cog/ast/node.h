@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/diagnostics/errorlocation.h"
+#include "framework/text/location.h"
 #include "cog/vm/value.h"
 #include <string>
 #include <vector>
@@ -63,7 +63,7 @@ protected:
 public:
 	virtual ~Node();
 
-	Diagnostics::ErrorLocation Location;
+	Text::Location Location;
 };
 
 /* Symbol section */

@@ -7,7 +7,7 @@ namespace IO {
 
 class File : public ReadOnlyFile {
 public:
-	File(const std::string& filename);
+	File(const boost::filesystem::path& filename);
 	virtual ~File();
 
 	virtual void Write(const void* buffer, size_t size) = 0;

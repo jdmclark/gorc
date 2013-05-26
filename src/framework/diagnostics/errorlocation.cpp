@@ -2,11 +2,11 @@
 #include <cstring>
 
 Gorc::Diagnostics::ErrorLocation::ErrorLocation()
-	: filename(nullptr), first_line(1), first_column(1), last_line(1), last_column(1) {
+	: filename("unknown"), first_line(1), first_column(1), last_line(1), last_column(1) {
 	return;
 }
 
-Gorc::Diagnostics::ErrorLocation::ErrorLocation(const char* filename,
+Gorc::Diagnostics::ErrorLocation::ErrorLocation(const boost::filesystem::path& filename,
 		unsigned int firstline, unsigned int firstcol, unsigned int lastline, unsigned int lastcol)
 	: filename(filename), first_line(firstline), first_column(firstcol), last_line(lastline), last_column(lastcol) {
 	return;
@@ -26,6 +26,6 @@ const Gorc::Diagnostics::ErrorLocation& Gorc::Diagnostics::ErrorLocation::operat
 }
 
 bool Gorc::Diagnostics::ErrorLocation::operator==(const ErrorLocation& l) const {
-	return std::strcmp(filename, l.filename) == 0 && first_line == l.first_line && last_line == l.last_line
+	return filename == l.filename && first_line == l.first_line && last_line == l.last_line
 			&& first_column == l.first_column && last_column == l.last_column;
 }

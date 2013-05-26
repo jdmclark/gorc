@@ -145,6 +145,10 @@ void ExpectedLabel(Report& report, const std::string& visitorname, const std::st
 	report.AddError(visitorname, "expected label", location);
 }
 
+void ExpectedEndOfFile(Report& report, const std::string& visitorname, const std::string& found, const ErrorLocation& location) {
+	report.AddError(visitorname, "expected end of file", location);
+}
+
 void UnexpectedEndOfFileInString(Report& report, const std::string& visitorname, const ErrorLocation& location) {
 	report.AddError(visitorname, "unexpected end of file in string", location);
 }

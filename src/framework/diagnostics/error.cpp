@@ -21,8 +21,7 @@ std::string FormatError(const Error& error) {
 std::string FormatLineError(const Error& error) {
 	std::stringstream ss;
 
-	ss << (error.Location.filename ? error.Location.filename : "unknown")
-			<< "(" << error.Location.first_line << "," << error.Location.first_column << "): "
+	ss << error.Location.filename << "(" << error.Location.first_line << "," << error.Location.first_column << "): "
 			<< error.Level << ": " << error.Reason << " [" << error.Stage << "]";
 	return ss.str();
 }

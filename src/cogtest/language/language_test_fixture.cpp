@@ -13,7 +13,7 @@ void LanguageTestFixture::PrintErrors() const {
 				NullUnit::Test_Suite_Name,
 				NullUnit::Test_Case_Name,
 				static_cast<std::string>(error),
-				error.Location.filename ? error.Location.filename : "internal",
+				error.Location.filename.generic_string(),
 				error.Location.first_line);
 	}
 }

@@ -1,6 +1,6 @@
 #include "readonlyfile.h"
 
-Gorc::IO::ReadOnlyFile::ReadOnlyFile(const std::string& fn) : Filename(fn) {
+Gorc::IO::ReadOnlyFile::ReadOnlyFile(const boost::filesystem::path& fn) : Filename(fn) {
 	return;
 }
 

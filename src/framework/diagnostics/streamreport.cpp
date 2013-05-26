@@ -15,7 +15,7 @@ void StreamReport::PrintFormattedError(const std::string& level, const std::stri
 }
 
 void StreamReport::PrintLineFormattedError(const std::string& level, const std::string& stage, const std::string& reason, const ErrorLocation& location) {
-	stream << (location.filename ? location.filename : "unknown") << "(" << location.first_line << "," << location.first_column
+	stream << location.filename << "(" << location.first_line << "," << location.first_column
 			<< "): " << level << ": " << reason << " [" << stage << "]" << std::endl;
 }
 

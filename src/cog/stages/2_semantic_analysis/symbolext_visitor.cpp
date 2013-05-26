@@ -41,7 +41,7 @@ SymbolExtensionVisitor::SymbolExtensionVisitor(Symbols::SymbolType type, Diagnos
 	return;
 }
 
-bool SymbolExtensionVisitor::ValidateExtension(const std::string& name, Diagnostics::ErrorLocation& location) {
+bool SymbolExtensionVisitor::ValidateExtension(const std::string& name, Text::Location& location) {
 	if(name == "local") {
 		if(local) {
 			Diagnostics::Helper::ExtensionRedefinition(Report, VisitorName, name, location);

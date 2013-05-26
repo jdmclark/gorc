@@ -5,7 +5,7 @@ Gorc::Text::Token::Token()
 	return;
 }
 
-Gorc::Text::Token::Token(TokenType type, const std::string& value, const Diagnostics::ErrorLocation& location)
+Gorc::Text::Token::Token(TokenType type, const std::string& value, const Text::Location& location)
 	: Type(type), Value(value), Location(location) {
 	return;
 }

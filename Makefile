@@ -21,7 +21,7 @@ cog_HEADER_FILES += $(SRC_PATH)/cog/grammar/parser.hpp
 
 frameworktest_DEPENDENCIES = framework
 cogtest_DEPENDENCIES = cog framework
-contenttest_DEPENDENCIES = cog framework
+contenttest_DEPENDENCIES = cog framework content
 
 game_DEPENDENCIES = framework cog
 

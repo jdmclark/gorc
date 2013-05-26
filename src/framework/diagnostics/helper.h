@@ -48,6 +48,7 @@ void ExpectedIdentifier(Report& Report, const std::string& visitorname, const st
 void ExpectedFilename(Report& Report, const std::string& visitorname, const ErrorLocation& location);
 void ExpectedString(Report& Report, const std::string& visitorname, const ErrorLocation& location);
 void ExpectedLabel(Report& Report, const std::string& visitorname, const std::string& found, const std::string& expected, const ErrorLocation& location);
+void ExpectedEndOfFile(Report& Report, const std::string& visitorname, const std::string& found, const ErrorLocation& location);
 void UnexpectedEndOfFileInString(Report& Report, const std::string& visitorname, const ErrorLocation& location);
 void UnexpectedEndOfLineInString(Report& Report, const std::string& visitorname, const ErrorLocation& location);
 void Expected(Report& Report, const std::string& visitorname, const std::string& expected, const ErrorLocation& location);

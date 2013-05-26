@@ -2,7 +2,7 @@
 
 #include <string>
 #include <sstream>
-#include "framework/diagnostics/errorlocation.h"
+#include "framework/text/location.h"
 #include "framework/text/exception.h"
 
 namespace Gorc {
@@ -24,10 +24,10 @@ class Token {
 public:
 	TokenType Type;
 	std::string Value;
-	Diagnostics::ErrorLocation Location;
+	Text::Location Location;
 
 	Token();
-	Token(TokenType Type, const std::string& Value, const Diagnostics::ErrorLocation& Location);
+	Token(TokenType Type, const std::string& Value, const Text::Location& Location);
 
 	template <typename T> T GetNumericValue() {
 		bool formatSuccess = false;

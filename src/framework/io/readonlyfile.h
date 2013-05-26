@@ -1,15 +1,15 @@
 #pragma once
 
-#include <string>
+#include <boost/filesystem/path.hpp>
 
 namespace Gorc {
 namespace IO {
 
 class ReadOnlyFile {
 public:
-	const std::string Filename;
+	const boost::filesystem::path Filename;
 
-	ReadOnlyFile(const std::string& filename);
+	ReadOnlyFile(const boost::filesystem::path& filename);
 	virtual ~ReadOnlyFile();
 
 	virtual void Read(void* dest, size_t size) = 0;

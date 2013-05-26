@@ -2,38 +2,38 @@
 
 using namespace Gorc::Cog::AST;
 
-StringFragmentField* Factory::MakeStringFragmentField(const char* text, const Diagnostics::ErrorLocation& yyl) {
+StringFragmentField* Factory::MakeStringFragmentField(const char* text, const Text::Location& yyl) {
 	MAKE(StringFragmentField);
 	val->Value = text;
 	return val;
 }
 
-IntegerField* Factory::MakeIntegerField(int value, const Diagnostics::ErrorLocation& yyl) {
+IntegerField* Factory::MakeIntegerField(int value, const Text::Location& yyl) {
 	MAKE(IntegerField);
 	val->Value = value;
 	return val;
 }
 
-FloatField* Factory::MakeFloatField(float value, const Diagnostics::ErrorLocation& yyl) {
+FloatField* Factory::MakeFloatField(float value, const Text::Location& yyl) {
 	MAKE(FloatField);
 	val->Value = value;
 	return val;
 }
 
-BareExtension* Factory::MakeBareExtension(const char* name, const Diagnostics::ErrorLocation& yyl) {
+BareExtension* Factory::MakeBareExtension(const char* name, const Text::Location& yyl) {
 	MAKE(BareExtension);
 	val->Name = name;
 	return val;
 }
 
-ValuedExtension* Factory::MakeValuedExtension(const char* name, SymbolField* value, const Diagnostics::ErrorLocation& yyl) {
+ValuedExtension* Factory::MakeValuedExtension(const char* name, SymbolField* value, const Text::Location& yyl) {
 	MAKE(ValuedExtension);
 	val->Name = name;
 	val->Value = value;
 	return val;
 }
 
-Symbol* Factory::MakeSymbol(const char* type, const char* name, std::vector<SymbolExtension*>* extensions, const Diagnostics::ErrorLocation& yyl) {
+Symbol* Factory::MakeSymbol(const char* type, const char* name, std::vector<SymbolExtension*>* extensions, const Text::Location& yyl) {
 	MAKE(Symbol);
 	val->Type = type;
 	val->Name = name;
@@ -41,7 +41,7 @@ Symbol* Factory::MakeSymbol(const char* type, const char* name, std::vector<Symb
 	return val;
 }
 
-ValuedSymbol* Factory::MakeValuedSymbol(const char* type, const char* name, std::vector<SymbolExtension*>* extensions, SymbolField* value, const Diagnostics::ErrorLocation& yyl) {
+ValuedSymbol* Factory::MakeValuedSymbol(const char* type, const char* name, std::vector<SymbolExtension*>* extensions, SymbolField* value, const Text::Location& yyl) {
 	MAKE(ValuedSymbol);
 	val->Type = type;
 	val->Name = name;
@@ -50,31 +50,31 @@ ValuedSymbol* Factory::MakeValuedSymbol(const char* type, const char* name, std:
 	return val;
 }
 
-ConstantValueExpression* Factory::MakeConstantValueExpression(const VM::Value& value, const Diagnostics::ErrorLocation& yyl) {
+ConstantValueExpression* Factory::MakeConstantValueExpression(const VM::Value& value, const Text::Location& yyl) {
 	MAKE(ConstantValueExpression);
 	val->Value = value;
 	return val;
 }
 
-StringLiteralExpression* Factory::MakeStringLiteralExpression(const char* value, const Diagnostics::ErrorLocation& yyl) {
+StringLiteralExpression* Factory::MakeStringLiteralExpression(const char* value, const Text::Location& yyl) {
 	MAKE(StringLiteralExpression);
 	val->Value = value;
 	return val;
 }
 
-IntegerLiteralExpression* Factory::MakeIntegerLiteralExpression(int value, const Diagnostics::ErrorLocation& yyl) {
+IntegerLiteralExpression* Factory::MakeIntegerLiteralExpression(int value, const Text::Location& yyl) {
 	MAKE(IntegerLiteralExpression);
 	val->Value = value;
 	return val;
 }
 
-FloatLiteralExpression* Factory::MakeFloatLiteralExpression(float value, const Diagnostics::ErrorLocation& yyl) {
+FloatLiteralExpression* Factory::MakeFloatLiteralExpression(float value, const Text::Location& yyl) {
 	MAKE(FloatLiteralExpression);
 	val->Value = value;
 	return val;
 }
 
-VectorLiteralExpression* Factory::MakeVectorLiteralExpression(float x, float y, float z, const Diagnostics::ErrorLocation& yyl) {
+VectorLiteralExpression* Factory::MakeVectorLiteralExpression(float x, float y, float z, const Text::Location& yyl) {
 	MAKE(VectorLiteralExpression);
 	val->X = x;
 	val->Y = y;
@@ -82,34 +82,34 @@ VectorLiteralExpression* Factory::MakeVectorLiteralExpression(float x, float y, 
 	return val;
 }
 
-IdentifierExpression* Factory::MakeIdentifierExpression(const char* identifier, const Diagnostics::ErrorLocation& yyl) {
+IdentifierExpression* Factory::MakeIdentifierExpression(const char* identifier, const Text::Location& yyl) {
 	MAKE(IdentifierExpression);
 	val->Identifier = identifier;
 	return val;
 }
 
-SubscriptExpression* Factory::MakeSubscriptExpression(const char* base, Expression* index, const Diagnostics::ErrorLocation& yyl) {
+SubscriptExpression* Factory::MakeSubscriptExpression(const char* base, Expression* index, const Text::Location& yyl) {
 	MAKE(SubscriptExpression);
 	val->Base = base;
 	val->Index = index;
 	return val;
 }
 
-MethodCallExpression* Factory::MakeMethodCallExpression(const char* base, std::vector<Expression*>* arguments, const Diagnostics::ErrorLocation& yyl) {
+MethodCallExpression* Factory::MakeMethodCallExpression(const char* base, std::vector<Expression*>* arguments, const Text::Location& yyl) {
 	MAKE(MethodCallExpression);
 	val->Base = base;
 	val->Arguments = arguments;
 	return val;
 }
 
-UnaryExpression* Factory::MakeUnaryExpression(Expression* base, UnaryOperator op, const Diagnostics::ErrorLocation& yyl) {
+UnaryExpression* Factory::MakeUnaryExpression(Expression* base, UnaryOperator op, const Text::Location& yyl) {
 	MAKE(UnaryExpression);
 	val->Base = base;
 	val->Operator = op;
 	return val;
 }
 
-InfixExpression* Factory::MakeInfixExpression(Expression* left, Expression* right, InfixOperator op, const Diagnostics::ErrorLocation& yyl) {
+InfixExpression* Factory::MakeInfixExpression(Expression* left, Expression* right, InfixOperator op, const Text::Location& yyl) {
 	MAKE(InfixExpression);
 	val->Left = left;
 	val->Right = right;
@@ -117,61 +117,61 @@ InfixExpression* Factory::MakeInfixExpression(Expression* left, Expression* righ
 	return val;
 }
 
-AssignmentExpression* Factory::MakeAssignmentExpression(Expression* target, Expression* value, const Diagnostics::ErrorLocation& yyl) {
+AssignmentExpression* Factory::MakeAssignmentExpression(Expression* target, Expression* value, const Text::Location& yyl) {
 	MAKE(AssignmentExpression);
 	val->Target = target;
 	val->Value = value;
 	return val;
 }
 
-CommaExpression* Factory::MakeCommaExpression(Expression* left, Expression* right, const Diagnostics::ErrorLocation& yyl) {
+CommaExpression* Factory::MakeCommaExpression(Expression* left, Expression* right, const Text::Location& yyl) {
 	MAKE(CommaExpression);
 	val->Left = left;
 	val->Right = right;
 	return val;
 }
 
-CompoundStatement* Factory::MakeCompoundStatement(std::vector<Statement*>* code, const Diagnostics::ErrorLocation& yyl) {
+CompoundStatement* Factory::MakeCompoundStatement(std::vector<Statement*>* code, const Text::Location& yyl) {
 	MAKE(CompoundStatement);
 	val->Code = code;
 	return val;
 }
 
-EmptyStatement* Factory::MakeEmptyStatement(const Diagnostics::ErrorLocation& yyl) {
+EmptyStatement* Factory::MakeEmptyStatement(const Text::Location& yyl) {
 	MAKE(EmptyStatement);
 	return val;
 }
 
-ExpressionStatement* Factory::MakeExpressionStatement(Expression* expression, const Diagnostics::ErrorLocation& yyl) {
+ExpressionStatement* Factory::MakeExpressionStatement(Expression* expression, const Text::Location& yyl) {
 	MAKE(ExpressionStatement);
 	val->Expression = expression;
 	return val;
 }
 
-BreakStatement* Factory::MakeBreakStatement(const Diagnostics::ErrorLocation& yyl) {
+BreakStatement* Factory::MakeBreakStatement(const Text::Location& yyl) {
 	MAKE(BreakStatement);
 	return val;
 }
 
-ReturnStatement* Factory::MakeReturnStatement(const Diagnostics::ErrorLocation& yyl) {
+ReturnStatement* Factory::MakeReturnStatement(const Text::Location& yyl) {
 	MAKE(ReturnStatement);
 	return val;
 }
 
-CallStatement* Factory::MakeCallStatement(const char* label, const Diagnostics::ErrorLocation& yyl) {
+CallStatement* Factory::MakeCallStatement(const char* label, const Text::Location& yyl) {
 	MAKE(CallStatement);
 	val->Label = label;
 	return val;
 }
 
-IfStatement* Factory::MakeIfStatement(Expression* condition, Statement* code, const Diagnostics::ErrorLocation& yyl) {
+IfStatement* Factory::MakeIfStatement(Expression* condition, Statement* code, const Text::Location& yyl) {
 	MAKE(IfStatement);
 	val->Condition = condition;
 	val->Code = code;
 	return val;
 }
 
-IfElseStatement* Factory::MakeIfElseStatement(Expression* condition, Statement* code, Statement* elsecode, const Diagnostics::ErrorLocation& yyl) {
+IfElseStatement* Factory::MakeIfElseStatement(Expression* condition, Statement* code, Statement* elsecode, const Text::Location& yyl) {
 	MAKE(IfElseStatement);
 	val->Condition = condition;
 	val->Code = code;
@@ -179,32 +179,32 @@ IfElseStatement* Factory::MakeIfElseStatement(Expression* condition, Statement* 
 	return val;
 }
 
-WhileStatement* Factory::MakeWhileStatement(Expression* condition, Statement* code, const Diagnostics::ErrorLocation& yyl) {
+WhileStatement* Factory::MakeWhileStatement(Expression* condition, Statement* code, const Text::Location& yyl) {
 	MAKE(WhileStatement);
 	val->Condition = condition;
 	val->Code = code;
 	return val;
 }
 
-DoStatement* Factory::MakeDoStatement(Statement* code, Expression* condition, const Diagnostics::ErrorLocation& yyl) {
+DoStatement* Factory::MakeDoStatement(Statement* code, Expression* condition, const Text::Location& yyl) {
 	MAKE(DoStatement);
 	val->Code = code;
 	val->Condition = condition;
 	return val;
 }
 
-ForOptionalExpression* Factory::MakeForOptionalExpression(const Diagnostics::ErrorLocation& yyl) {
+ForOptionalExpression* Factory::MakeForOptionalExpression(const Text::Location& yyl) {
 	MAKE(ForOptionalExpression);
 	return val;
 }
 
-ForExpression* Factory::MakeForExpression(Expression* condition, const Diagnostics::ErrorLocation& yyl) {
+ForExpression* Factory::MakeForExpression(Expression* condition, const Text::Location& yyl) {
 	MAKE(ForExpression);
 	val->Condition = condition;
 	return val;
 }
 
-ForStatement* Factory::MakeForStatement(ForOptionalExpression* initializer, ForOptionalExpression* condition, ForOptionalExpression* incrementer, Statement* code, const Diagnostics::ErrorLocation& yyl) {
+ForStatement* Factory::MakeForStatement(ForOptionalExpression* initializer, ForOptionalExpression* condition, ForOptionalExpression* incrementer, Statement* code, const Text::Location& yyl) {
 	MAKE(ForStatement);
 	val->Initializer = initializer;
 	val->Condition = condition;
@@ -213,14 +213,14 @@ ForStatement* Factory::MakeForStatement(ForOptionalExpression* initializer, ForO
 	return val;
 }
 
-LabeledStatement* Factory::MakeLabeledStatement(const char* label, Statement* code, const Diagnostics::ErrorLocation& yyl) {
+LabeledStatement* Factory::MakeLabeledStatement(const char* label, Statement* code, const Text::Location& yyl) {
 	MAKE(LabeledStatement);
 	val->Label = label;
 	val->Code = code;
 	return val;
 }
 
-TranslationUnit* Factory::MakeTranslationUnit(std::vector<Symbol*>* symbols, std::vector<Statement*>* code, const Diagnostics::ErrorLocation& yyl) {
+TranslationUnit* Factory::MakeTranslationUnit(std::vector<Symbol*>* symbols, std::vector<Statement*>* code, const Text::Location& yyl) {
 	MAKE(TranslationUnit);
 	val->Symbols = symbols;
 	val->Code = code;

@@ -31,7 +31,7 @@ private:
 
 	ASTCLASS_SYMBOL_EXTENSION(AVPROTO);
 
-	bool ValidateExtension(const std::string& name, Diagnostics::ErrorLocation& location);
+	bool ValidateExtension(const std::string& name, Text::Location& location);
 };
 
 }

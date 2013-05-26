@@ -11,9 +11,9 @@
 %expect-rr 0
 
 %code requires {
-	#include "framework/diagnostics/errorlocation.h"
+	#include "framework/text/location.h"
 	#define YYLTYPE YYLTYPE
-	typedef Gorc::Diagnostics::ErrorLocation YYLTYPE;
+	typedef Gorc::Text::Location YYLTYPE;
 	
 	#define YYLLOC_DEFAULT(Cur, Rhs, N)                        \
      do                                                        \
@@ -115,9 +115,9 @@
 	using namespace Gorc::Cog;
 	using namespace Gorc::Cog::AST;
 	
-	int yylex(YYSTYPE* lvalp, Gorc::Diagnostics::ErrorLocation* llocp, void* scanner);
+	int yylex(YYSTYPE* lvalp, Gorc::Text::Location* llocp, void* scanner);
 	
-	void yyerror(Gorc::Diagnostics::ErrorLocation* llocp, Gorc::Cog::Grammar::Instance* instance, const char* err) {
+	void yyerror(Gorc::Text::Location* llocp, Gorc::Cog::Grammar::Instance* instance, const char* err) {
 		instance->Report.AddError("parser", err, *llocp);
 	}
 	

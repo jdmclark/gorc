@@ -294,3 +294,11 @@ void Tokenizer::AssertLabel(const std::string& label) {
 		throw TokenizerAssertionException();
 	}
 }
+
+void Tokenizer::AssertEndOfFile() {
+	GetToken(internalToken);
+	if(internalToken.Type != TokenType::EndOfFile) {
+		Diagnostics::Helper::ExpectedEndOfFile(ErrorReport, "tokenizer", internalToken.Value, internalToken.Location);
+		throw TokenizerAssertionException();
+	}
+}

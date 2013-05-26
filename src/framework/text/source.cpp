@@ -1,7 +1,7 @@
 #include "source.h"
 
 Gorc::Text::Source::Source(Gorc::IO::ReadOnlyFile& file)
-	: index(0), Filename(file.Filename) {
+	: index(0), Filename(file.Filename.generic_string()) {
 	size_t fsize = file.GetSize();
 	if(fsize == 0) {
 		return;
