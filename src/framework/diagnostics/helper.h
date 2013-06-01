@@ -9,6 +9,7 @@ namespace Helper {
 // Compiler internal errors
 void FeatureNotImplemented(Report& report, const std::string& visitorname, const std::string& action);
 void FileNotFound(Report& report, const std::string& visitorname, const std::string& filename);
+void CouldNotLoadFile(Report& report, const std::string& visitorname, const std::string& filename);
 
 // Compiler lexical errors
 void UnrecognizedInput(Report& report, const std::string& input, const ErrorLocation& location);

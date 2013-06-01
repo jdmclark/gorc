@@ -13,6 +13,10 @@ void FileNotFound(Report& report, const std::string& visitorname, const std::str
 	report.AddCriticalError(visitorname, boost::str(boost::format("file \'%s\' not found") % filename));
 }
 
+void CouldNotLoadFile(Report& report, const std::string& visitorname, const std::string& filename) {
+	report.AddCriticalError(visitorname, boost::str(boost::format("file \'%s\' was not loaded") % filename));
+}
+
 void UnrecognizedInput(Report& report, const std::string& input, const ErrorLocation& location) {
 	report.AddError("scanner", boost::str(boost::format("illegal character \'%s\'") % input), location);
 }
