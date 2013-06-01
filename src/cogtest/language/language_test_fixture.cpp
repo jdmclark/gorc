@@ -3,7 +3,12 @@
 #include <fstream>
 
 LanguageTestFixture::LanguageTestFixture(const boost::filesystem::path& BasePath)
-	: BasePath(BasePath) {
+	: nfs(BasePath), FileSystem(nfs) {
+	return;
+}
+
+LanguageTestFixture::LanguageTestFixture(const Gorc::Content::FileSystem& fs)
+	: nfs(""), FileSystem(fs) {
 	return;
 }
 

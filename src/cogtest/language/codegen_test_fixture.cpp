@@ -2,6 +2,7 @@
 #include "cog/stages/stages.h"
 #include "framework/io/nativefile.h"
 #include "cog/vm/virtualmachine.h"
+#include "cog/vm/exception.h"
 #include "cog/ir/codeprinter.h"
 #include <fstream>
 
@@ -9,7 +10,15 @@ using namespace Gorc::Cog;
 
 CodegenTestFixture::CodegenTestFixture(const boost::filesystem::path& BasePath)
 	: LanguageTestFixture(BasePath) {
+	PopulateTables();
+}
 
+CodegenTestFixture::CodegenTestFixture(const Gorc::Content::FileSystem& fs)
+	: LanguageTestFixture(fs) {
+	PopulateTables();
+}
+
+void CodegenTestFixture::PopulateTables() {
 #define MSG(x, y) MessageTable.insert(std::make_pair(x, y))
 		MSG("activate", MessageId::Activated);
 		MSG("activated", MessageId::Activated);
@@ -61,8 +70,16 @@ CodegenTestFixture::CodegenTestFixture(const boost::filesystem::path& BasePath)
 void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	Gorc::Cog::AST::Factory astFactory;
 
-	Gorc::IO::NativeFile file(BasePath / filename);
-	Gorc::Text::Source source(file);
+	std::unique_ptr<Gorc::IO::ReadOnlyFile> file;
+	try {
+		file = FileSystem.Open(filename);
+	}
+	catch(const std::exception& e) {
+		Report.AddCriticalError("CodegenTestFixture", "could not open file");
+		return;
+	}
+
+	Gorc::Text::Source source(*file);
 
 	Gorc::Cog::AST::TranslationUnit* ast = Gorc::Cog::Stages::GenerateAST::GenerateAST(source, Report, astFactory);
 
@@ -70,17 +87,15 @@ void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 		return;
 	}
 
-	Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(ast, SymbolTable, ConstantTable, VerbTable, Report);
+	Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(ast, Script.SymbolTable, ConstantTable, VerbTable, Report);
 
-	if(Report.GetErrorCount() != 0)
-	{
+	if(Report.GetErrorCount() != 0) {
 		return;
 	}
 
 	Gorc::Cog::Stages::ConstantFolding::ConstantFolding(astFactory, ast, Script.SymbolTable, ConstantTable, Report);
 
-	if(Report.GetErrorCount() != 0)
-	{
+	if(Report.GetErrorCount() != 0) {
 		return;
 	}
 
@@ -88,8 +103,7 @@ void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 
 	Gorc::Cog::Stages::GenerateCode::GenerateCode(ast, printer, Report);
 
-	if(Report.GetErrorCount() != 0)
-	{
+	if(Report.GetErrorCount() != 0) {
 		return;
 	}
 
@@ -100,5 +114,11 @@ void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	size_t startupAddr = Script.JumpTable.GetTarget(MessageId::Startup);
 
 	Gorc::Cog::VM::VirtualMachine vm;
-	vm.Execute(inst.Heap, inst.Script.Code, startupAddr, VerbTable);
+
+	try {
+		vm.Execute(inst.Heap, inst.Script.Code, startupAddr, VerbTable);
+	}
+	catch(const Gorc::Cog::VM::CodeBufferOverflowException& e) {
+		Report.AddCriticalError("CodeGenTestFixture::ParseFile", "code buffer overflow");
+	}
 }

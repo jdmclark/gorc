@@ -4,16 +4,22 @@
 #include <boost/filesystem/path.hpp>
 #include <vector>
 
+#include "content/filesystem.h"
+#include "content/nativefilesystem.h"
 #include "framework/diagnostics/storedreport.h"
 #include "cog/grammar/instance.h"
 
 class LanguageTestFixture : public NullUnit::Fixture {
+private:
+	Gorc::Content::NativeFileSystem nfs;
+
 public:
+	const Gorc::Content::FileSystem& FileSystem;
 	Gorc::Diagnostics::StoredReport Report;
-	const boost::filesystem::path BasePath;
 
 protected:
 	LanguageTestFixture(const boost::filesystem::path& BasePath);
+	LanguageTestFixture(const Gorc::Content::FileSystem& fs);
 
 public:
 	virtual void ParseFile(const boost::filesystem::path& file) = 0;

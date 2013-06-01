@@ -5,6 +5,7 @@
 #include "virtualfile.h"
 #include "container.h"
 #include "content/vfs/episode/episode.h"
+#include "content/filesystem.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -15,7 +16,7 @@ namespace VFS {
 
 typedef std::unordered_map<std::string, const VirtualFile*> vfsmap;
 
-class VirtualFileSystem {
+class VirtualFileSystem : public FileSystem {
 private:
 	class VfsEpisode {
 	private:
@@ -58,7 +59,7 @@ public:
 	VirtualFileSystem(const boost::filesystem::path& RestrictedPath, const boost::filesystem::path& ResourcePath,
 			const boost::filesystem::path& EpisodePath, const boost::filesystem::path& GamePath, Diagnostics::Report& report);
 
-	std::unique_ptr<IO::ReadOnlyFile> Open(const boost::filesystem::path& path) const;
+	virtual std::unique_ptr<IO::ReadOnlyFile> Open(const boost::filesystem::path& path) const override;
 
 	inline size_t GetEpisodeCount() const {
 		return Episodes.size();

@@ -15,7 +15,7 @@ public:
 	Gorc::Cog::Verbs::VerbTable VerbTable;
 
 protected:
-	SemanticTestFixture(const boost::filesystem::path& BasePath);
+	using LanguageTestFixture::LanguageTestFixture;
 
 public:
 	virtual void ParseFile(const boost::filesystem::path& file);

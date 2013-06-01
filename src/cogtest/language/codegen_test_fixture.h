@@ -11,8 +11,10 @@
 #include <unordered_map>
 
 class CodegenTestFixture : public LanguageTestFixture {
+private:
+	void PopulateTables();
+
 public:
-	Gorc::Cog::Symbols::SymbolTable SymbolTable;
 	std::unordered_map<std::string, Gorc::Cog::VM::Value> ConstantTable;
 	std::unordered_map<std::string, Gorc::Cog::MessageId> MessageTable;
 	Gorc::Cog::Verbs::VerbTable VerbTable;
@@ -20,6 +22,7 @@ public:
 
 protected:
 	CodegenTestFixture(const boost::filesystem::path& BasePath);
+	CodegenTestFixture(const Gorc::Content::FileSystem& fs);
 
 public:
 	virtual void ParseFile(const boost::filesystem::path& file);

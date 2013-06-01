@@ -7,4 +7,6 @@ src/cog/grammar/parser.cpp
 src/cog/grammar/parser.hpp
 src/cog/grammar/parser.output
 src/cog/grammar/lexer.cpp
+game/episode
+game/resource
 

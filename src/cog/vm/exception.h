@@ -6,7 +6,9 @@ namespace Gorc {
 namespace Cog {
 namespace VM {
 
-class CodeBufferOverflowException : public Exception {
+class VirtualMachineException : public Exception { };
+
+class CodeBufferOverflowException : public VirtualMachineException {
 public:
 	virtual const char* what() const throw() override;
 };

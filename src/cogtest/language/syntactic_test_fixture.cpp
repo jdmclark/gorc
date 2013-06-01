@@ -3,16 +3,19 @@
 #include "framework/io/nativefile.h"
 #include <fstream>
 
-SyntacticTestFixture::SyntacticTestFixture(const boost::filesystem::path& BasePath)
-	: LanguageTestFixture(BasePath) {
-	return;
-}
-
 void SyntacticTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	Gorc::Cog::AST::Factory astFactory;
 
-	Gorc::IO::NativeFile file(BasePath / filename);
-	Gorc::Text::Source source(file);
+	std::unique_ptr<Gorc::IO::ReadOnlyFile> file;
+	try {
+		file = FileSystem.Open(filename);
+	}
+	catch(const std::exception& e) {
+		Report.AddCriticalError("SyntacticTestFixture", "could not open file");
+		return;
+	}
+
+	Gorc::Text::Source source(*file);
 
 	Gorc::Cog::Stages::GenerateAST::GenerateAST(source, Report, astFactory);
 }

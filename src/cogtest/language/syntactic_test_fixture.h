@@ -4,7 +4,7 @@
 
 class SyntacticTestFixture : public LanguageTestFixture {
 protected:
-	SyntacticTestFixture(const boost::filesystem::path& BasePath);
+	using LanguageTestFixture::LanguageTestFixture;
 
 public:
 	virtual void ParseFile(const boost::filesystem::path& file);

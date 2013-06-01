@@ -20,7 +20,7 @@ cog_SOURCE_FILES += $(SRC_PATH)/cog/grammar/lexer.cpp $(SRC_PATH)/cog/grammar/pa
 cog_HEADER_FILES += $(SRC_PATH)/cog/grammar/parser.hpp
 
 frameworktest_DEPENDENCIES = framework
-cogtest_DEPENDENCIES = cog framework
+cogtest_DEPENDENCIES = cog framework content
 contenttest_DEPENDENCIES = cog framework content
 
 game_DEPENDENCIES = framework cog

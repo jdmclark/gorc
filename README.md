@@ -6,6 +6,12 @@ Description
 
 Collected C++11 code for handling Dark Forces II assets.
 
+Instructions
+------------
+
+* Create symbolic links to the `resource` and `episode` directories inside the `game` subdirectory.
+* Run `make` from the project root.
+
 Requirements
 ------------
 
