@@ -19,6 +19,7 @@ Requirements
 * GNU Make
 * Flex 2.5
 * Bison 2.5
+* SFML 1.6
 * [Boost](http://boost.org)
 * [NullUnit](http://github.com/jdmclark/nullunit)
 * Dark Forces II (for running test cases)

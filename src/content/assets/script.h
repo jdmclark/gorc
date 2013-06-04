@@ -2,7 +2,6 @@
 
 #include "content/asset.h"
 #include "content/loaders/script_loader.h"
-#include "cog/compiler.h"
 
 namespace Gorc {
 namespace Content {
@@ -10,9 +9,7 @@ namespace Assets {
 
 class Script : public Asset {
 public:
-	inline static Loaders::ScriptLoader GetLoader(const Cog::Compiler& compiler) {
-		return Loaders::ScriptLoader(compiler);
-	}
+	using Loader = Loaders::ScriptLoader;
 
 	Cog::Script Script;
 };

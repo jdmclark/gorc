@@ -30,7 +30,7 @@ public:
 		}
 
 		// Load asset from scratch.
-		auto loader = T::GetLoader(std::forward(args)...);
+		typename T::Loader loader(args...);
 		return *reinterpret_cast<T*>(InternalLoad(name, loader));
 	}
 };

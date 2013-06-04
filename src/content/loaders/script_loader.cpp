@@ -11,5 +11,5 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ScriptLoader::Dese
 
 	Compiler.Compile(file, script->Script, report);
 
-	return std::move(script);
+	return std::unique_ptr<Asset>(std::move(script));
 }

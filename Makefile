@@ -12,7 +12,7 @@ TEST_MODULES = frameworktest cogtest contenttest
 BIN_MODULES = game
 
 framework_LIBRARIES = boost_filesystem boost_system
-
+content_LIBRARIES = sfml-graphics sfml-window sfml-system
 content_DEPENDENCIES = cog framework
 
 cog_DEPENDENCIES = framework
@@ -23,7 +23,8 @@ frameworktest_DEPENDENCIES = framework
 cogtest_DEPENDENCIES = cog framework content
 contenttest_DEPENDENCIES = cog framework content
 
-game_DEPENDENCIES = framework cog
+game_DEPENDENCIES = framework cog content
+game_LIBRARIES = sfml-audio GL GLU
 
 # =================== #
 # Build configuration #

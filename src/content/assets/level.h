@@ -15,9 +15,7 @@ namespace Assets {
 
 class Level : public Asset {
 public:
-	inline static Loaders::LevelLoader GetLoader() {
-		return Loaders::LevelLoader();
-	}
+	using Loader = Loaders::LevelLoader;
 
 	LevelHeader Header;
 	std::vector<std::tuple<std::string, float, float>> MaterialEntries;
