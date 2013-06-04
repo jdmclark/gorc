@@ -1,7 +1,7 @@
 #pragma once
 
 #include "content/asset.h"
-#include "content/loaders/scriptloader.h"
+#include "content/loaders/script_loader.h"
 #include "cog/compiler.h"
 
 namespace Gorc {

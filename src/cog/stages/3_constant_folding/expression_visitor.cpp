@@ -30,7 +30,7 @@ void ExpressionVisitor::VisitFloatLiteralExpression(FloatLiteralExpression& e) {
 void ExpressionVisitor::VisitVectorLiteralExpression(VectorLiteralExpression& e) {
 	visitedExpression = &e;
 	isConstant = true;
-	constantValue = VM::Value(Math::Vector<float>(e.X, e.Y, e.Z));
+	constantValue = VM::Value(Math::Vec(e.X, e.Y, e.Z));
 }
 
 void ExpressionVisitor::VisitIdentifierExpression(IdentifierExpression& e) {

@@ -30,7 +30,7 @@ template <> struct helper_get_vm_type<bool> {
 	static const VM::Type Type = VM::Type::Boolean;
 };
 
-template <> struct helper_get_vm_type<Math::Vector<float>> {
+template <> struct helper_get_vm_type<Math::Vector<3>> {
 	static const VM::Type Type = VM::Type::Vector;
 };
 

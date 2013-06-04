@@ -1,4 +1,4 @@
-#include "scriptloader.h"
+#include "script_loader.h"
 #include "content/assets/script.h"
 
 Gorc::Content::Loaders::ScriptLoader::ScriptLoader(const Cog::Compiler& compiler)

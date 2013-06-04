@@ -16,12 +16,12 @@ class Manager {
 private:
 	std::unordered_map<std::string, std::unique_ptr<Asset>> assets;
 	Diagnostics::Report& report;
-	FileSystem& fs;
+	const FileSystem& fs;
 
 	Asset* InternalLoad(const boost::filesystem::path& name, Loader& loader);
 
 public:
-	Manager(Diagnostics::Report& report, FileSystem& fs);
+	Manager(Diagnostics::Report& report, const FileSystem& fs);
 
 	template <typename T, typename... ArgT> const T& Load(const boost::filesystem::path& name, ArgT... args) {
 		auto it = assets.find(name.generic_string());

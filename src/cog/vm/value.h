@@ -43,9 +43,9 @@ public:
 	const char* operator=(const char*);
 	operator const char*() const;
 
-	Value(const Math::Vector<float>&);
-	const Math::Vector<float>& operator=(const Math::Vector<float>&);
-	operator Math::Vector<float>() const;
+	Value(const Math::Vector<3>&);
+	const Math::Vector<3>& operator=(const Math::Vector<3>&);
+	operator Math::Vector<3>() const;
 
 	inline bool IsNumeric() const {
 		return type == Type::Integer || type == Type::Float;

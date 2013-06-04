@@ -141,7 +141,7 @@ Case(ReturnType) {
 	id = table.GetVerb("Float");
 	Test_Assert_Eq(table.ReturnType(id), Type::Float);
 
-	table.AddVerb("Vector", ZeroVerb<Gorc::Math::Vector<float>>);
+	table.AddVerb("Vector", ZeroVerb<Gorc::Math::Vector<3>>);
 	id = table.GetVerb("Vector");
 	Test_Assert_Eq(table.ReturnType(id), Type::Vector);
 

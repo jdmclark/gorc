@@ -35,8 +35,8 @@ void TextPrinter::writeValue(const VM::Value& value) {
 		break;
 
 	case VM::Type::Vector: {
-			Math::Vector<float> v = static_cast<Math::Vector<float>>(value);
-			stream << "vector(" << v.X << ", " << v.Y << ", " << v.Z << ")";
+			Math::Vector<3> v = static_cast<Math::Vector<3>>(value);
+			stream << "vector(" << Math::Get<Math::X>(v) << ", " << Math::Get<Math::Y>(v) << ", " << Math::Get<Math::Z>(v) << ")";
 		}
 		break;
 

@@ -67,7 +67,7 @@ void SymbolTable::ReplaceSymbol(SymbolType type, const std::string& name,
 		break;
 
 	case SymbolType::Vector:
-		defaultValue = VM::Value(Math::Vector<float>());
+		defaultValue = VM::Value(Math::Vector<3>());
 		break;
 
 	default:

@@ -3,7 +3,7 @@
 #include "framework/diagnostics/helper.h"
 #include <boost/format.hpp>
 
-Gorc::Content::Manager::Manager(Diagnostics::Report& report, FileSystem& fs)
+Gorc::Content::Manager::Manager(Diagnostics::Report& report, const FileSystem& fs)
 	: report(report), fs(fs) {
 	return;
 }

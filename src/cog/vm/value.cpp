@@ -4,41 +4,34 @@
 using namespace Gorc::Cog::VM;
 
 Value::Value()
-	: type(Type::Void)
-{
+	: type(Type::Void) {
 	return;
 }
 
-Value::Value(const Value& v)
-{
+Value::Value(const Value& v) {
 	*this = v;
 }
 
-const Value& Value::operator=(const Value& v)
-{
+const Value& Value::operator=(const Value& v) {
 	type = v.type;
 	data = v.data;
 
 	return v;
 }
 
-Value::Value(int v)
-{
+Value::Value(int v) {
 	*this = v;
 }
 
-int Value::operator=(int v)
-{
+int Value::operator=(int v) {
 	type = Type::Integer;
 	data.Integer = v;
 
 	return v;
 }
 
-Value::operator int() const
-{
-	switch(type)
-	{
+Value::operator int() const {
+	switch(type) {
 	case Type::Void:
 		return Constants::DefaultInt;
 
@@ -62,23 +55,19 @@ Value::operator int() const
 	}
 }
 
-Value::Value(float v)
-{
+Value::Value(float v) {
 	*this = v;
 }
 
-float Value::operator=(float v)
-{
+float Value::operator=(float v) {
 	type = Type::Float;
 	data.Floating = v;
 
 	return v;
 }
 
-Value::operator float() const
-{
-	switch(type)
-	{
+Value::operator float() const {
+	switch(type) {
 	case Type::Void:
 		return Constants::DefaultFloat;
 
@@ -102,23 +91,19 @@ Value::operator float() const
 	}
 }
 
-Value::Value(bool v)
-{
+Value::Value(bool v) {
 	*this = v;
 }
 
-bool Value::operator=(bool v)
-{
+bool Value::operator=(bool v) {
 	type = Type::Boolean;
 	data.Boolean = v;
 
 	return v;
 }
 
-Value::operator bool() const
-{
-	switch(type)
-	{
+Value::operator bool() const {
+	switch(type) {
 	case Type::Void:
 		return false;
 
@@ -142,23 +127,19 @@ Value::operator bool() const
 	}
 }
 
-Value::Value(const char* v)
-{
+Value::Value(const char* v) {
 	*this = v;
 }
 
-const char* Value::operator=(const char* v)
-{
+const char* Value::operator=(const char* v) {
 	type = Type::String;
 	data.String = v;
 
 	return v;
 }
 
-Value::operator const char*() const
-{
-	switch(type)
-	{
+Value::operator const char*() const {
+	switch(type) {
 	case Type::Void:
 		return Constants::DefaultString;
 
@@ -182,44 +163,40 @@ Value::operator const char*() const
 	}
 }
 
-Value::Value(const Math::Vector<float>& v)
-{
+Value::Value(const Math::Vector<3>& v) {
 	*this = v;
 }
 
-const Gorc::Math::Vector<float>& Value::operator=(const Math::Vector<float>& v)
-{
+const Gorc::Math::Vector<3>& Value::operator=(const Math::Vector<3>& v) {
 	type = Type::Vector;
-	data.Vector.X = v.X;
-	data.Vector.Y = v.Y;
-	data.Vector.Z = v.Z;
+	data.Vector.X = Math::Get<Math::X>(v);
+	data.Vector.Y = Math::Get<Math::Y>(v);
+	data.Vector.Z = Math::Get<Math::Z>(v);
 
 	return v;
 }
 
-Value::operator Gorc::Math::Vector<float>() const
-{
-	switch(type)
-	{
+Value::operator Gorc::Math::Vector<3>() const {
+	switch(type) {
 	case Type::Void:
-		return Math::Vector<float>();
+		return Math::Vector<3>();
 
 	case Type::Integer:
-		return Math::Vector<float>();
+		return Math::Vector<3>();
 
 	case Type::Float:
-		return Math::Vector<float>();
+		return Math::Vector<3>();
 
 	case Type::Boolean:
-		return Math::Vector<float>();
+		return Math::Vector<3>();
 
 	case Type::String:
-		return Math::Vector<float>();
+		return Math::Vector<3>();
 
 	case Type::Vector:
-		return Math::Vector<float>(data.Vector.X, data.Vector.Y, data.Vector.Z);
+		return Math::Vec(data.Vector.X, data.Vector.Y, data.Vector.Z);
 
 	default:
-		return Math::Vector<float>();
+		return Math::Vector<3>();
 	}
 }

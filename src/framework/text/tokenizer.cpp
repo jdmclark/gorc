@@ -1,5 +1,6 @@
 #include "tokenizer.h"
 #include "framework/diagnostics/helper.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace Gorc::Text;
 
@@ -202,6 +203,7 @@ void Tokenizer::GetToken(Token& out) {
 	skipWhitespace();
 
 	out.Value.clear();
+	out.Location.filename = buffer.Filename.c_str();
 	out.Location.first_line = line;
 	out.Location.first_column = col;
 
@@ -296,7 +298,7 @@ std::string& Tokenizer::GetFilename() {
 void Tokenizer::AssertIdentifier(const std::string& id) {
 	GetToken(internalToken);
 
-	if(internalToken.Type != TokenType::Identifier || internalToken.Value != id) {
+	if(internalToken.Type != TokenType::Identifier || !boost::iequals(internalToken.Value, id)) {
 		Diagnostics::Helper::ExpectedIdentifier(ErrorReport, "tokenizer", internalToken.Value, id, internalToken.Location);
 		throw TokenizerAssertionException();
 	}
@@ -314,7 +316,7 @@ void Tokenizer::AssertPunctuator(const std::string& punc) {
 void Tokenizer::AssertLabel(const std::string& label) {
 	GetToken(internalToken);
 
-	if(internalToken.Type != TokenType::Identifier || internalToken.Value != label) {
+	if(internalToken.Type != TokenType::Identifier || !boost::iequals(internalToken.Value, label)) {
 		Diagnostics::Helper::ExpectedLabel(ErrorReport, "tokenizer", internalToken.Value, label, internalToken.Location);
 		throw TokenizerAssertionException();
 	}
