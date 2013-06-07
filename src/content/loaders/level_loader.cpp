@@ -1,10 +1,13 @@
 #include "level_loader.h"
 #include "content/assets/level.h"
+#include "content/manager.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>
 #include <string>
 #include <tuple>
+
+const std::vector<boost::filesystem::path> Gorc::Content::Loaders::LevelLoader::AssetRootPath = { "jkl" };
 
 namespace Gorc {
 namespace Content {
@@ -328,6 +331,19 @@ void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& mana
 	}
 }
 
+void PostprocessLevel(Assets::Level& lev, Manager& manager, Diagnostics::Report& report) {
+	// Post-process; load colormaps and materials
+	for(const auto& cmp_entry : lev.ColormapEntries) {
+		lev.Colormaps.push_back(&manager.Load<Assets::Colormap>(cmp_entry));
+	}
+
+	const Assets::Colormap& master_cmp = *lev.Colormaps[0];
+
+	for(const auto& mat_entry : lev.MaterialEntries) {
+		lev.Materials.push_back(&manager.Load<Assets::Material>(std::get<0>(mat_entry), master_cmp));
+	}
+}
+
 }
 }
 }
@@ -363,6 +379,8 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::LevelLoader::Parse
 			}
 		}
 	}
+
+	PostprocessLevel(*lev, manager, report);
 
 	return std::unique_ptr<Asset>(std::move(lev));
 }

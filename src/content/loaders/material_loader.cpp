@@ -5,6 +5,8 @@
 #include <array>
 #include <boost/format.hpp>
 
+const std::vector<boost::filesystem::path> Gorc::Content::Loaders::MaterialLoader::AssetRootPath = { "mat", "3do/mat" };
+
 namespace Gorc {
 namespace Content {
 namespace Loaders {

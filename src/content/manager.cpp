@@ -1,6 +1,7 @@
 #include "manager.h"
 #include "loader.h"
 #include "framework/diagnostics/helper.h"
+#include "framework/io/exception.h"
 #include <boost/format.hpp>
 
 Gorc::Content::Manager::Manager(Diagnostics::Report& report, const FileSystem& fs)
@@ -8,22 +9,30 @@ Gorc::Content::Manager::Manager(Diagnostics::Report& report, const FileSystem& f
 	return;
 }
 
-Gorc::Content::Asset* Gorc::Content::Manager::InternalLoad(const boost::filesystem::path& name, Loader& loader) {
+Gorc::Content::Asset* Gorc::Content::Manager::InternalLoad(const boost::filesystem::path& name,
+		const std::vector<boost::filesystem::path>& basepaths, Loader& loader) {
 	std::unique_ptr<IO::ReadOnlyFile> file;
 
-	try {
-		file = fs.Open(name);
+	for(const auto& root : basepaths) {
+		try {
+			file = fs.Open(root / name);
+			break;
+		}
+		catch(...) {
+			continue;
+		}
 	}
-	catch(const std::exception&) {
+
+	if(!file) {
 		Diagnostics::Helper::FileNotFound(report, "ContentManager", name.generic_string());
-		throw;
+		throw IO::FileNotFoundException();
 	}
 
 	try {
 		return assets.insert(std::make_pair(name.generic_string(), loader.Deserialize(*file, *this, report))).first->second.get();
 	}
 	catch(const std::exception&) {
-		Diagnostics::Helper::CouldNotLoadFile(report, "ContentManager", name.generic_string());
+		Diagnostics::Helper::CouldNotLoadFile(report, "ContentManager", file->Filename.generic_string());
 		throw;
 	}
 }

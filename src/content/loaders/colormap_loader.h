@@ -8,6 +8,8 @@ namespace Loaders {
 
 class ColormapLoader : public Loader {
 public:
+	static const std::vector<boost::filesystem::path> AssetRootPath;
+
 	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) override;
 };
 

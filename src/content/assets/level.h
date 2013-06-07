@@ -8,6 +8,7 @@
 #include "level_adjoin.h"
 #include "level_surface.h"
 #include "level_sector.h"
+#include "material.h"
 
 namespace Gorc {
 namespace Content {
@@ -19,7 +20,9 @@ public:
 
 	LevelHeader Header;
 	std::vector<std::tuple<std::string, float, float>> MaterialEntries;
+	std::vector<Material const*> Materials;
 	std::vector<std::string> ColormapEntries;
+	std::vector<Colormap const*> Colormaps;
 
 	std::vector<Math::Vector<3>> Vertices;
 	std::vector<Math::Vector<2>> TextureVertices;

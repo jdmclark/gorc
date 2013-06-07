@@ -3,6 +3,8 @@
 #include "framework/diagnostics/helper.h"
 #include "framework/io/exception.h"
 
+const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ColormapLoader::AssetRootPath = { "misc/cmp" };
+
 std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ColormapLoader::Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) {
 	std::unique_ptr<Content::Assets::Colormap> cmp(new Content::Assets::Colormap());
 

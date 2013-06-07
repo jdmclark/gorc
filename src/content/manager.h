@@ -18,7 +18,7 @@ private:
 	Diagnostics::Report& report;
 	const FileSystem& fs;
 
-	Asset* InternalLoad(const boost::filesystem::path& name, Loader& loader);
+	Asset* InternalLoad(const boost::filesystem::path& name, const std::vector<boost::filesystem::path>& basepaths, Loader& loader);
 
 public:
 	Manager(Diagnostics::Report& report, const FileSystem& fs);
@@ -31,7 +31,7 @@ public:
 
 		// Load asset from scratch.
 		typename T::Loader loader(args...);
-		return *reinterpret_cast<T*>(InternalLoad(name, loader));
+		return *reinterpret_cast<T*>(InternalLoad(name, loader.AssetRootPath, loader));
 	}
 };
 

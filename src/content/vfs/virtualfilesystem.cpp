@@ -16,7 +16,9 @@ Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::VfsEpisode(IO::ReadOnlyFile& 
 
 	for(size_t i = 0; i < container->FileCount(); ++i) {
 		const VirtualFile& vf = container->GetVirtualFile(i);
-		FileMap.insert(std::make_pair(vf.GetFilename().generic_string(), &vf));
+		std::string fn = vf.GetFilename().generic_string();
+		std::transform(fn.begin(), fn.end(), fn.begin(), tolower);
+		FileMap.insert(std::make_pair(fn, &vf));
 	}
 
 	return;
@@ -81,7 +83,9 @@ void Gorc::Content::VFS::VirtualFileSystem::loadGob(const boost::filesystem::pat
 	else {
 		for(size_t i = 0; i < cnt->FileCount(); ++i) {
 			const VirtualFile& vf = cnt->GetVirtualFile(i);
-			map.insert(std::make_pair(vf.GetFilename().generic_string(), &vf));
+			std::string fn = vf.GetFilename().generic_string();
+			std::transform(fn.begin(), fn.end(), fn.begin(), tolower);
+			map.insert(std::make_pair(fn, &vf));
 		}
 
 		containers.push_back(std::move(cnt));
@@ -116,6 +120,7 @@ std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::f
 
 std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::Open(const boost::filesystem::path& path) const {
 	std::string generic_string = path.generic_string();
+	std::transform(generic_string.begin(), generic_string.end(), generic_string.begin(), tolower);
 
 	// Restricted files have the highest priority.
 	// These assets are internal to the engine recreation and should not be replaced.

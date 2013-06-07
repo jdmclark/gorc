@@ -12,6 +12,8 @@ protected:
 	const Assets::Colormap& Colormap;
 
 public:
+	static const std::vector<boost::filesystem::path> AssetRootPath;
+
 	MaterialLoader(const Assets::Colormap& Colormap);
 
 	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) override;

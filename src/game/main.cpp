@@ -29,8 +29,8 @@ int main(int argc, char** argv) {
 	Gorc::Content::Manager manager(Report, vfs);
 
 	// Temporary: load DFLT.MAT for display.
-	const auto& dflt_cmp = manager.Load<Gorc::Content::Assets::Colormap>("misc/cmp/dflt.cmp");
-	const auto& dflt_mat = manager.Load<Gorc::Content::Assets::Material>("mat/dflt.mat", dflt_cmp);
+	const auto& dflt_cmp = manager.Load<Gorc::Content::Assets::Colormap>("dflt.cmp");
+	const auto& dflt_mat = manager.Load<Gorc::Content::Assets::Material>("dflt.mat", dflt_cmp);
 
 	bool running = true;
 
@@ -92,7 +92,8 @@ int main(int argc, char** argv) {
 
 		// TODO: Render here
 		glClearDepth(1.0f);
-		glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+		glClearColor(0.392f, 0.584f, 0.929f, 0.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 

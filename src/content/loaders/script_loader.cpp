@@ -1,6 +1,8 @@
 #include "script_loader.h"
 #include "content/assets/script.h"
 
+const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ScriptLoader::AssetRootPath = { "cog" };
+
 Gorc::Content::Loaders::ScriptLoader::ScriptLoader(const Cog::Compiler& compiler)
 	: Compiler(compiler) {
 	return;
