@@ -102,6 +102,9 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 
 	if(header.Type == 0) {
 		// Color mat
+		mat->Width = 16;
+		mat->Height = 16;
+
 		for(int32_t i = 0; i < header.MatRecordCount; ++i) {
 			MaterialColorRecordHeader colorRecord;
 			file.Read(&colorRecord, sizeof(MaterialColorRecordHeader));

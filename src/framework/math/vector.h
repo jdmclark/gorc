@@ -17,6 +17,7 @@ template <size_t n, typename F> F Dot(const Vector<n, F>& v, const Vector<n, F>&
 template <size_t n, typename F> F Length2(const Vector<n, F>& v);
 template <size_t n, typename F> F Length(const Vector<n, F>& v);
 template <size_t n, typename F> Vector<n, F> Normalize(const Vector<n, F>& v);
+template <size_t n, typename F> Vector<n, F> operator*(F c, const Vector<n, F>& v);
 template <typename F> Vector<3, F> Cross(const Vector<3, F>& v, const Vector<3, F>& w);
 
 template <size_t n, typename F> class Vector {
@@ -26,7 +27,8 @@ template <size_t n, typename F> class Vector {
 	template <size_t m, typename G> friend G Length2(const Vector<m, G>&);
 	template <size_t m, typename G> friend G Length(const Vector<m, G>&);
 	template <size_t m, typename G> friend Vector<m, G> Normalize(const Vector<m, G>&);
-	template <typename G> friend Vector<3, F> Cross(const Vector<3, G>&, const Vector<3, G>&);
+	template <size_t m, typename G> friend Vector<m, G> operator*(G c, const Vector<m, G>&);
+	template <typename G> friend Vector<3, G> Cross(const Vector<3, G>&, const Vector<3, G>&);
 
 private:
 	std::array<F, n> data;
@@ -53,12 +55,28 @@ public:
 		return rv;
 	}
 
+	const Vector& operator+=(const Vector& w) {
+		for(size_t i = 0; i < n; ++i) {
+			data[i] += w.data[i];
+		}
+
+		return *this;
+	}
+
 	Vector operator-(const Vector& w) const {
 		Vector rv;
 		for(size_t i = 0; i < n; ++i) {
 			rv.data[i] = data[i] - w.data[i];
 		}
 		return rv;
+	}
+
+	const Vector& operator-=(const Vector& w) {
+		for(size_t i = 0; i < n; ++i) {
+			data[i] -= w.data[i];
+		}
+
+		return *this;
 	}
 
 	Vector operator*(F c) const {
@@ -69,12 +87,28 @@ public:
 		return rv;
 	}
 
+	const Vector& operator*=(F c) {
+		for(size_t i = 0; i < n; ++i) {
+			data[i] *= c;
+		}
+
+		return *this;
+	}
+
 	Vector operator/(F c) const {
 		Vector rv;
 		for(size_t i = 0; i < n; ++i) {
 			rv.data[i] = data[i] / c;
 		}
 		return rv;
+	}
+
+	const Vector& operator/=(F c) {
+		for(size_t i = 0; i < n; ++i) {
+			data[i] /= c;
+		}
+
+		return *this;
 	}
 
 	bool operator==(const Vector& v) {
