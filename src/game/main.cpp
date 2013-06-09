@@ -18,6 +18,44 @@
 
 #include <GL/glu.h>
 #include <set>
+#include <btBulletDynamicsCommon.h>
+
+class PhysicsDebugDraw : public btIDebugDraw {
+	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override {
+		glDisable(GL_TEXTURE_2D);
+
+		glBegin(GL_LINES);
+
+		glColor3fv(color.m_floats);
+		glVertex3fv(from.m_floats);
+
+		glColor3fv(color.m_floats);
+		glVertex3fv(to.m_floats);
+
+		glEnd();
+		return;
+	}
+
+	virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override {
+		return;
+	}
+
+	virtual void reportErrorWarning(const char* warningString) override {
+		return;
+	}
+
+	virtual void draw3dText(const btVector3& location, const char* textString) override {
+		return;
+	}
+
+	virtual void setDebugMode(int debugMode) override {
+		return;
+	}
+
+	virtual int getDebugMode() const override {
+		return DBG_DrawWireframe | DBG_DrawContactPoints;
+	}
+};
 
 const double gameplayTick = (1.0 / 60.0);
 
@@ -27,125 +65,12 @@ using namespace Gorc::Math;
 Vector<3> CameraPosition = Zero<3>();
 Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);
-float CameraRadius = 0.125f;
+float CameraRadius = 0.06f;
 size_t CameraCurrentSector = 104;
+Vector<3> CameraVelocity = Zero<3>();
 
-Vector<3> ds;
+double dt;
 std::set<int> pcs;
-
-class CollisionEvent {
-public:
-	float dist;
-
-	virtual ~CollisionEvent() {
-		return;
-	}
-
-	virtual void Apply() = 0;
-};
-
-class NullCollisionEvent : public CollisionEvent {
-public:
-	virtual void Apply() override {
-		CameraPosition += ds;
-		ds = Zero<3>();
-	}
-} nullEvent;
-
-class SectorTransitEvent : public CollisionEvent {
-public:
-	Vector<3> StopPoint;
-	Vector<3> ResidualDisplacement;
-	size_t NextCameraSector;
-
-	virtual void Apply() override {
-		CameraPosition = StopPoint;
-		ds = ResidualDisplacement;
-		CameraCurrentSector = NextCameraSector;
-
-		std::cout << "Moved to sector " << NextCameraSector << std::endl;
-	}
-} sectorTransitEvent;
-
-class PhysicalCollisionEvent : public CollisionEvent {
-public:
-	Vector<3> StopPoint;
-	Vector<3> ResidualDisplacement;
-
-	virtual void Apply() override {
-		CameraPosition = StopPoint;
-		ds = ResidualDisplacement;
-	}
-};
-
-class SurfaceCollisionEvent : public PhysicalCollisionEvent {
-} surfaceCollisionEvent;
-
-class EdgeCollisionEvent : public PhysicalCollisionEvent {
-} edgeCollisionEvent;
-
-class VertexCollisionEvent : public PhysicalCollisionEvent {
-} vertexCollisionEvent;
-
-CollisionEvent* CurrentCollisionEvent;
-
-void StepCameraPhysicsSurface(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec,
-		const Gorc::Content::Assets::LevelSurface& surf) {
-}
-
-void StepCameraPhysicsSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec);
-
-void StepCameraPhysicsAdjoin(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec,
-		const Gorc::Content::Assets::LevelSurface& surf) {
-	if(surf.AdjoinedSector == CameraCurrentSector || Dot(surf.Normal, ds) > 0.0f) {
-		return;
-	}
-
-	Vector<3> p = lev.Vertices[std::get<0>(surf.Vertices[0])];
-
-	float u = Dot(surf.Normal, p - CameraPosition) / Dot(surf.Normal, ds);
-	if(u < 0.0f || u > 1.0f) {
-		return;
-	}
-
-	// Check if point of intersection is inside polygon.
-	Vector<3> residual_displacement = u * ds;
-	Vector<3> stop_point = CameraPosition + residual_displacement;
-
-	Vector<3> prev_vx = lev.Vertices[std::get<0>(surf.Vertices[surf.Vertices.size() - 1])];
-	for(int i = 0; i < surf.Vertices.size(); ++i) {
-		Vector<3> next_vx = lev.Vertices[std::get<0>(surf.Vertices[i])];
-
-		Vector<3> edge_cross = Cross(next_vx - prev_vx, surf.Normal);
-		if(Dot(edge_cross, stop_point - prev_vx) > 0.0f) {
-			return;
-		}
-
-		prev_vx = next_vx;
-	}
-
-	float dist = Length2(residual_displacement);
-	if(dist <= CurrentCollisionEvent->dist) {
-		sectorTransitEvent.NextCameraSector = surf.AdjoinedSector;
-		sectorTransitEvent.ResidualDisplacement = residual_displacement;
-		sectorTransitEvent.StopPoint = stop_point;
-		sectorTransitEvent.dist = dist;
-		CurrentCollisionEvent = &sectorTransitEvent;
-	}
-}
-
-void StepCameraPhysicsSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec) {
-	for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
-		const auto& surf = lev.Surfaces[i];
-
-		if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
-			StepCameraPhysicsAdjoin(lev, sec, surf);
-		}
-		else {
-			StepCameraPhysicsSurface(lev, sec, surf);
-		}
-	}
-}
 
 void CameraBroadphaseVisitSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec, float max_dist) {
 	for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
@@ -164,34 +89,17 @@ void CameraBroadphaseVisitSector(const Gorc::Content::Assets::Level& lev, const 
 }
 
 void CameraBroadphase(const Gorc::Content::Assets::Level& lev) {
-	float max_dist = Length(ds) + CameraRadius + CameraRadius;
+	float max_dist = Length(CameraVelocity * dt) + CameraRadius + CameraRadius;
 	pcs.clear();
 	pcs.insert(CameraCurrentSector);
 	CameraBroadphaseVisitSector(lev, lev.Sectors[CameraCurrentSector], max_dist);
 }
 
-void StepCameraPhysics(const Gorc::Content::Assets::Level& lev) {
-	CurrentCollisionEvent = &nullEvent;
-	CurrentCollisionEvent->dist = Length2(ds);
-
-	for(int i : pcs) {
-		StepCameraPhysicsSector(lev, lev.Sectors[i]);
-	}
-
-	CurrentCollisionEvent->Apply();
-}
-
 void TranslateCamera(const Vector<3>& amt, const Gorc::Content::Assets::Level& lev) {
-	ds = Zero<3>();
-	ds += Get<X>(amt) * Cross(CameraLook, CameraUp);
-	ds += Get<Z>(amt) * CameraUp;
-	ds += Get<Y>(amt) * CameraLook;
-
-	// Perform collision detection against world.
-	CameraBroadphase(lev);
-	while(Length2(ds) > std::numeric_limits<float>::epsilon()) {
-		StepCameraPhysics(lev);
-	}
+	CameraVelocity = Zero<3>();
+	CameraVelocity += Get<X>(amt) * Cross(CameraLook, CameraUp);
+	CameraVelocity += Get<Z>(amt) * CameraUp;
+	CameraVelocity += Get<Y>(amt) * CameraLook;
 }
 
 void YawCamera(double amt) {
@@ -386,6 +294,64 @@ int main(int argc, char** argv) {
 	CameraPosition = lev.Sectors[CameraCurrentSector].Center;
 
 	const sf::Input& input = Window.GetInput();
+
+	// Initialize Bullet
+	PhysicsDebugDraw debugDraw;
+	std::unique_ptr<btBroadphaseInterface> broadphase(new btDbvtBroadphase());
+	std::unique_ptr<btDefaultCollisionConfiguration> collisionConfiguration(new btDefaultCollisionConfiguration());
+	std::unique_ptr<btCollisionDispatcher> dispatcher(new btCollisionDispatcher(collisionConfiguration.get()));
+	std::unique_ptr<btSequentialImpulseConstraintSolver> solver(new btSequentialImpulseConstraintSolver);
+	std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfiguration.get()));
+	dynamicsWorld->setDebugDrawer(&debugDraw);
+	dynamicsWorld->setGravity(btVector3(0, 0, -lev.Header.WorldGravity));
+
+	// Create level trimesh.
+	std::vector<int> index_buffer;
+	for(const auto& sec : lev.Sectors) {
+		for(int i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+			const auto& surf = lev.Surfaces[i];
+			if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
+				continue;
+			}
+
+			const auto& first_vx = std::get<0>(surf.Vertices[0]);
+			for(int j = 2; j < surf.Vertices.size(); ++j) {
+				index_buffer.push_back(first_vx);
+				index_buffer.push_back(std::get<0>(surf.Vertices[j - 1]));
+				index_buffer.push_back(std::get<0>(surf.Vertices[j]));
+			}
+		}
+	}
+
+	std::vector<float> vertex_buffer;
+	for(const auto& vert : lev.Vertices) {
+		vertex_buffer.push_back(Get<X>(vert));
+		vertex_buffer.push_back(Get<Y>(vert));
+		vertex_buffer.push_back(Get<Z>(vert));
+	}
+
+	std::unique_ptr<btTriangleIndexVertexArray> level(new btTriangleIndexVertexArray(
+			index_buffer.size() / 3, &index_buffer[0], sizeof(int) * 3, vertex_buffer.size() / 3, &vertex_buffer[0], sizeof(float) * 3));
+	std::unique_ptr<btBvhTriangleMeshShape> level_shape(new btBvhTriangleMeshShape(level.get(), true));
+	std::unique_ptr<btCollisionShape> camera_shape(new btSphereShape(CameraRadius));
+
+	std::unique_ptr<btDefaultMotionState> level_motion_state(new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))));
+	std::unique_ptr<btRigidBody> level_rigid_body(new btRigidBody(
+			btRigidBody::btRigidBodyConstructionInfo(0, level_motion_state.get(), level_shape.get(), btVector3(0,0,0))));
+
+	dynamicsWorld->addRigidBody(level_rigid_body.get());
+
+	std::unique_ptr<btDefaultMotionState> camera_motion_state(new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),
+			btVector3(Get<X>(CameraPosition), Get<Y>(CameraPosition), Get<Z>(CameraPosition)))));
+	btScalar mass = 1;
+	btVector3 fallInertia(0,0,0);
+	camera_shape->calculateLocalInertia(mass, fallInertia);
+	std::unique_ptr<btRigidBody> camera_rigid_body(new btRigidBody(
+			btRigidBody::btRigidBodyConstructionInfo(mass, camera_motion_state.get(), camera_shape.get(), fallInertia)));
+	camera_rigid_body->setFlags(BT_DISABLE_WORLD_GRAVITY);
+	camera_rigid_body->setSleepingThresholds(0, 0);
+
+	dynamicsWorld->addRigidBody(camera_rigid_body.get());
 	// END HACK
 
 	// Game loop:
@@ -416,6 +382,8 @@ int main(int argc, char** argv) {
 			gameplayAccumulator -= gameplayTick;
 
 			// TODO: Update simulation here
+			CameraVelocity = Zero<3>();
+
 			if(input.IsKeyDown(sf::Key::Escape)) {
 				Gorc::Events::ExitEvent evt;
 				eventBus.FireEvent(evt);
@@ -460,6 +428,10 @@ int main(int argc, char** argv) {
 				Translate *= gameplayTick;
 				TranslateCamera(Translate, lev);
 			}
+
+			CameraVelocity *= 40.0f;
+			camera_rigid_body->setLinearVelocity(btVector3(Get<X>(CameraVelocity), Get<Y>(CameraVelocity), Get<Z>(CameraVelocity)));
+			dynamicsWorld->stepSimulation(gameplayTick, 10);
 		}
 
 		Window.SetActive();
@@ -469,7 +441,13 @@ int main(int argc, char** argv) {
 		glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		btTransform trans;
+		camera_rigid_body->getMotionState()->getWorldTransform(trans);
+		btVector3 cam_origin = trans.getOrigin();
+
+		CameraPosition = Vec(cam_origin.getX(), cam_origin.getY(), cam_origin.getZ());
 		DrawLevel(lev, static_cast<double>(Window.GetWidth()) / static_cast<double>(Window.GetHeight()));
+		//dynamicsWorld->debugDrawWorld();
 
 		Window.Display();
 	}

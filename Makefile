@@ -24,7 +24,7 @@ cogtest_DEPENDENCIES = cog framework content
 contenttest_DEPENDENCIES = cog framework content
 
 game_DEPENDENCIES = framework cog content
-game_LIBRARIES = sfml-audio GL GLU
+game_LIBRARIES = sfml-audio GL GLU BulletDynamics BulletCollision LinearMath
 
 # =================== #
 # Build configuration #
@@ -37,7 +37,7 @@ SRC_PATH = $(BASE_PATH)/src
 OBJ_PATH = $(BASE_PATH)/obj
 BIN_PATH = $(BASE_PATH)/bin
 
-CPPFLAGS = -I$(SRC_PATH)
+CPPFLAGS = -I$(SRC_PATH) -I/usr/include/bullet
 CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -ggdb
 
 MODULES = $(LIB_MODULES) $(TEST_MODULES) $(BIN_MODULES)
