@@ -17,6 +17,7 @@
 #include "content/assets/level.h"
 
 #include <GL/glu.h>
+#include <set>
 
 const double gameplayTick = (1.0 / 60.0);
 
@@ -26,11 +27,171 @@ using namespace Gorc::Math;
 Vector<3> CameraPosition = Zero<3>();
 Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);
+float CameraRadius = 0.125f;
+size_t CameraCurrentSector = 104;
 
-void TranslateCamera(const Vector<3>& amt) {
-	CameraPosition += Get<X>(amt) * Cross(CameraLook, CameraUp);
-	CameraPosition += Get<Z>(amt) * CameraUp;
-	CameraPosition += Get<Y>(amt) * CameraLook;
+Vector<3> ds;
+std::set<int> pcs;
+
+class CollisionEvent {
+public:
+	float dist;
+
+	virtual ~CollisionEvent() {
+		return;
+	}
+
+	virtual void Apply() = 0;
+};
+
+class NullCollisionEvent : public CollisionEvent {
+public:
+	virtual void Apply() override {
+		CameraPosition += ds;
+		ds = Zero<3>();
+	}
+} nullEvent;
+
+class SectorTransitEvent : public CollisionEvent {
+public:
+	Vector<3> StopPoint;
+	Vector<3> ResidualDisplacement;
+	size_t NextCameraSector;
+
+	virtual void Apply() override {
+		CameraPosition = StopPoint;
+		ds = ResidualDisplacement;
+		CameraCurrentSector = NextCameraSector;
+
+		std::cout << "Moved to sector " << NextCameraSector << std::endl;
+	}
+} sectorTransitEvent;
+
+class PhysicalCollisionEvent : public CollisionEvent {
+public:
+	Vector<3> StopPoint;
+	Vector<3> ResidualDisplacement;
+
+	virtual void Apply() override {
+		CameraPosition = StopPoint;
+		ds = ResidualDisplacement;
+	}
+};
+
+class SurfaceCollisionEvent : public PhysicalCollisionEvent {
+} surfaceCollisionEvent;
+
+class EdgeCollisionEvent : public PhysicalCollisionEvent {
+} edgeCollisionEvent;
+
+class VertexCollisionEvent : public PhysicalCollisionEvent {
+} vertexCollisionEvent;
+
+CollisionEvent* CurrentCollisionEvent;
+
+void StepCameraPhysicsSurface(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec,
+		const Gorc::Content::Assets::LevelSurface& surf) {
+}
+
+void StepCameraPhysicsSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec);
+
+void StepCameraPhysicsAdjoin(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec,
+		const Gorc::Content::Assets::LevelSurface& surf) {
+	if(surf.AdjoinedSector == CameraCurrentSector || Dot(surf.Normal, ds) > 0.0f) {
+		return;
+	}
+
+	Vector<3> p = lev.Vertices[std::get<0>(surf.Vertices[0])];
+
+	float u = Dot(surf.Normal, p - CameraPosition) / Dot(surf.Normal, ds);
+	if(u < 0.0f || u > 1.0f) {
+		return;
+	}
+
+	// Check if point of intersection is inside polygon.
+	Vector<3> residual_displacement = u * ds;
+	Vector<3> stop_point = CameraPosition + residual_displacement;
+
+	Vector<3> prev_vx = lev.Vertices[std::get<0>(surf.Vertices[surf.Vertices.size() - 1])];
+	for(int i = 0; i < surf.Vertices.size(); ++i) {
+		Vector<3> next_vx = lev.Vertices[std::get<0>(surf.Vertices[i])];
+
+		Vector<3> edge_cross = Cross(next_vx - prev_vx, surf.Normal);
+		if(Dot(edge_cross, stop_point - prev_vx) > 0.0f) {
+			return;
+		}
+
+		prev_vx = next_vx;
+	}
+
+	float dist = Length2(residual_displacement);
+	if(dist <= CurrentCollisionEvent->dist) {
+		sectorTransitEvent.NextCameraSector = surf.AdjoinedSector;
+		sectorTransitEvent.ResidualDisplacement = residual_displacement;
+		sectorTransitEvent.StopPoint = stop_point;
+		sectorTransitEvent.dist = dist;
+		CurrentCollisionEvent = &sectorTransitEvent;
+	}
+}
+
+void StepCameraPhysicsSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec) {
+	for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+		const auto& surf = lev.Surfaces[i];
+
+		if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
+			StepCameraPhysicsAdjoin(lev, sec, surf);
+		}
+		else {
+			StepCameraPhysicsSurface(lev, sec, surf);
+		}
+	}
+}
+
+void CameraBroadphaseVisitSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec, float max_dist) {
+	for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+		const auto& surf = lev.Surfaces[i];
+
+		if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
+			if(pcs.find(surf.AdjoinedSector) == pcs.end()) {
+				float dist = Dot(CameraPosition - lev.Vertices[std::get<0>(surf.Vertices[0])], surf.Normal);
+				if(dist >= 0.0f && dist <= max_dist) {
+					pcs.insert(surf.AdjoinedSector);
+					CameraBroadphaseVisitSector(lev, lev.Sectors[surf.AdjoinedSector], max_dist);
+				}
+			}
+		}
+	}
+}
+
+void CameraBroadphase(const Gorc::Content::Assets::Level& lev) {
+	float max_dist = Length(ds) + CameraRadius + CameraRadius;
+	pcs.clear();
+	pcs.insert(CameraCurrentSector);
+	CameraBroadphaseVisitSector(lev, lev.Sectors[CameraCurrentSector], max_dist);
+}
+
+void StepCameraPhysics(const Gorc::Content::Assets::Level& lev) {
+	CurrentCollisionEvent = &nullEvent;
+	CurrentCollisionEvent->dist = Length2(ds);
+
+	for(int i : pcs) {
+		StepCameraPhysicsSector(lev, lev.Sectors[i]);
+	}
+
+	CurrentCollisionEvent->Apply();
+}
+
+void TranslateCamera(const Vector<3>& amt, const Gorc::Content::Assets::Level& lev) {
+	ds = Zero<3>();
+	ds += Get<X>(amt) * Cross(CameraLook, CameraUp);
+	ds += Get<Z>(amt) * CameraUp;
+	ds += Get<Y>(amt) * CameraLook;
+
+	// Perform collision detection against world.
+	CameraBroadphase(lev);
+	while(Length2(ds) > std::numeric_limits<float>::epsilon()) {
+		StepCameraPhysics(lev);
+	}
 }
 
 void YawCamera(double amt) {
@@ -69,6 +230,7 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 	glEnable(GL_CULL_FACE);
 	glShadeModel(GL_SMOOTH);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glEnable(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -94,6 +256,7 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 		for(size_t i = sector.FirstSurface; i < sector.SurfaceCount + sector.FirstSurface; ++i) {
 			const auto& surface = level.Surfaces[i];
 			if(surface.Material >= 0) {
+
 				const auto& material_entry = level.MaterialEntries[surface.Material];
 				const auto& material = level.Materials[surface.Material];
 
@@ -137,6 +300,41 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 				}
 
 				glEnd();
+
+				if(sector.Number == CameraCurrentSector) {
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glDisable(GL_TEXTURE_2D);
+
+					glBegin(GL_TRIANGLES);
+
+					Vector<3> first_geo = level.Vertices[std::get<0>(surface.Vertices[0])];
+					Vector<2> first_tex = level.TextureVertices[std::get<1>(surface.Vertices[0])];
+
+					for(size_t i = 2; i < surface.Vertices.size(); ++i) {
+						Vector<3> second_geo = level.Vertices[std::get<0>(surface.Vertices[i - 1])];
+						Vector<2> second_tex = level.TextureVertices[std::get<1>(surface.Vertices[i - 1])];
+
+						Vector<3> third_geo = level.Vertices[std::get<0>(surface.Vertices[i])];
+						Vector<2> third_tex = level.TextureVertices[std::get<1>(surface.Vertices[i])];
+
+						glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
+						glColor4f(1.0f, 1.0f, 0.6f, 1.0f);
+						glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
+
+						glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
+						glColor4f(1.0f, 1.0f, 0.6f, 1.0f);
+						glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
+
+						glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
+						glColor4f(1.0f, 1.0f, 0.6f, 1.0f);
+						glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
+					}
+
+					glEnd();
+
+					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+					glEnable(GL_TEXTURE_2D);
+				}
 			}
 		}
 	}
@@ -183,6 +381,9 @@ int main(int argc, char** argv) {
 	}
 
 	const auto& lev = manager.Load<Gorc::Content::Assets::Level>("01narshadda.jkl");
+
+	// Set camera position to centroid of current sector.
+	CameraPosition = lev.Sectors[CameraCurrentSector].Center;
 
 	const sf::Input& input = Window.GetInput();
 	// END HACK
@@ -257,7 +458,7 @@ int main(int argc, char** argv) {
 				Translate = Normalize(Translate);
 
 				Translate *= gameplayTick;
-				TranslateCamera(Translate);
+				TranslateCamera(Translate, lev);
 			}
 		}
 

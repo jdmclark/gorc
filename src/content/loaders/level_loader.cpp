@@ -342,6 +342,27 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Diagnostics::Report&
 	for(const auto& mat_entry : lev.MaterialEntries) {
 		lev.Materials.push_back(&manager.Load<Assets::Material>(std::get<0>(mat_entry), master_cmp));
 	}
+
+	// Add adjoined sector reference to adjoins.
+	for(auto& surf : lev.Surfaces) {
+		if(surf.Adjoin >= 0) {
+			int mirror_adj = lev.Adjoins[surf.Adjoin].Mirror;
+			for(const auto& sec : lev.Sectors) {
+				bool found = false;
+				for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+					if(lev.Surfaces[i].Adjoin == mirror_adj) {
+						found = true;
+						surf.AdjoinedSector = sec.Number;
+						break;
+					}
+				}
+
+				if(found) {
+					break;
+				}
+			}
+		}
+	}
 }
 
 }

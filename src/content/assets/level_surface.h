@@ -16,6 +16,7 @@ public:
 	LightMode LightMode;
 	TextureMode TextureMode;
 	int Adjoin;
+	int AdjoinedSector;
 	float ExtraLight;
 	std::vector<std::tuple<int, int, float>> Vertices;
 	Math::Vector<3> Normal;
