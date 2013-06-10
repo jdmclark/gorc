@@ -297,6 +297,10 @@ void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& mana
 
 				sec.CollideBox = Math::Box<3>(Math::Vec(x0, y0, z0), Math::Vec(x1, y1, z1));
 			}
+			else if(boost::iequals(t.Value, "sound")) {
+				sec.AmbientSound = &manager.Load<Assets::Sound>(tok.GetFilename());
+				sec.AmbientSoundVolume = tok.GetNumber<float>();
+			}
 			else if(boost::iequals(t.Value, "center")) {
 				float x = tok.GetNumber<float>();
 				float y = tok.GetNumber<float>();

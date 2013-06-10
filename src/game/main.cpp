@@ -19,6 +19,9 @@
 #include <GL/glu.h>
 #include <set>
 #include <btBulletDynamicsCommon.h>
+#include <SFML/Audio.hpp>
+
+sf::Sound AmbientSound;
 
 class PhysicsDebugDraw : public btIDebugDraw {
 	virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override {
@@ -72,6 +75,29 @@ Vector<3> CameraVelocity = Zero<3>();
 double dt;
 std::set<int> pcs;
 
+void UpdateCameraAmbientSound(const Gorc::Content::Assets::Level& lev) {
+	const auto& sec = lev.Sectors[CameraCurrentSector];
+	if(&sec.AmbientSound->Buffer == AmbientSound.GetBuffer()) {
+		AmbientSound.SetVolume(sec.AmbientSoundVolume * 100.0f);
+	}
+	else if (sec.AmbientSound != nullptr) {
+		AmbientSound.SetBuffer(sec.AmbientSound->Buffer);
+		AmbientSound.SetLoop(true);
+		AmbientSound.SetVolume(sec.AmbientSoundVolume * 100.0f);
+		AmbientSound.Play();
+	}
+	else {
+		AmbientSound.Stop();
+	}
+}
+
+void SetCameraCurrentSector(size_t sec_num, const Gorc::Content::Assets::Level& lev) {
+	if(CameraCurrentSector != sec_num) {
+		CameraCurrentSector = sec_num;
+		UpdateCameraAmbientSound(lev);
+	}
+}
+
 void CameraBroadphaseVisitSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec, float max_dist) {
 	for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
 		const auto& surf = lev.Surfaces[i];
@@ -93,6 +119,57 @@ void CameraBroadphase(const Gorc::Content::Assets::Level& lev) {
 	pcs.clear();
 	pcs.insert(CameraCurrentSector);
 	CameraBroadphaseVisitSector(lev, lev.Sectors[CameraCurrentSector], max_dist);
+}
+
+bool CameraInsideSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec) {
+	for(size_t i =  sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+		const auto& surf = lev.Surfaces[i];
+		const auto& p = lev.Vertices[std::get<0>(surf.Vertices[0])];
+
+		if(Dot(surf.Normal, CameraPosition - p) < 0.0f) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool CameraPathPassesThroughAdjoin(const Vector<3>& oldCameraPosition, const Gorc::Content::Assets::Level& lev,
+		const Gorc::Content::Assets::LevelSector& sec, const Gorc::Content::Assets::LevelSurface& surf) {
+	if(Dot(CameraPosition - oldCameraPosition, surf.Normal) > 0.0f) {
+		return false;
+	}
+
+	auto p = lev.Vertices[std::get<0>(surf.Vertices[0])];
+	auto u = Dot(surf.Normal, p - oldCameraPosition) / Dot(surf.Normal, CameraPosition - oldCameraPosition);
+	if(u < 0.0f || u > 1.0f) {
+		return false;
+	}
+
+	return true;
+}
+
+void UpdateCameraSector(const Vector<3>& oldCameraPosition, const Gorc::Content::Assets::Level& lev) {
+	std::vector<size_t> sectors { CameraCurrentSector };
+	while(!sectors.empty()) {
+		size_t sec_num = sectors.back();
+		sectors.pop_back();
+
+		const auto& sec = lev.Sectors[sec_num];
+
+		if(CameraInsideSector(lev, sec)) {
+			SetCameraCurrentSector(sec.Number, lev);
+			return;
+		}
+
+		for(int i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+			const auto& surf = lev.Surfaces[i];
+			if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)
+					&& CameraPathPassesThroughAdjoin(oldCameraPosition, lev, sec, surf)) {
+				sectors.push_back(surf.AdjoinedSector);
+			}
+		}
+	}
 }
 
 void TranslateCamera(const Vector<3>& amt, const Gorc::Content::Assets::Level& lev) {
@@ -170,8 +247,8 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 
 				float alpha = (surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f;
 
-				Vector<2> tex_scale = Vec(std::get<1>(material_entry) / static_cast<float>(material->Width),
-						std::get<2>(material_entry) / static_cast<float>(material->Height));
+				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
+						1.0f / static_cast<float>(material->Height));
 
 				material->Cels[0].Diffuse->Bind();
 
@@ -352,6 +429,8 @@ int main(int argc, char** argv) {
 	camera_rigid_body->setSleepingThresholds(0, 0);
 
 	dynamicsWorld->addRigidBody(camera_rigid_body.get());
+
+	UpdateCameraAmbientSound(lev);
 	// END HACK
 
 	// Game loop:
@@ -430,8 +509,18 @@ int main(int argc, char** argv) {
 			}
 
 			CameraVelocity *= 40.0f;
+
 			camera_rigid_body->setLinearVelocity(btVector3(Get<X>(CameraVelocity), Get<Y>(CameraVelocity), Get<Z>(CameraVelocity)));
+
 			dynamicsWorld->stepSimulation(gameplayTick, 10);
+
+			auto OldCameraPosition = CameraPosition;
+			btTransform trans;
+			camera_rigid_body->getMotionState()->getWorldTransform(trans);
+			btVector3 cam_origin = trans.getOrigin();
+
+			CameraPosition = Vec(cam_origin.getX(), cam_origin.getY(), cam_origin.getZ());
+			UpdateCameraSector(OldCameraPosition, lev);
 		}
 
 		Window.SetActive();
@@ -441,11 +530,6 @@ int main(int argc, char** argv) {
 		glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		btTransform trans;
-		camera_rigid_body->getMotionState()->getWorldTransform(trans);
-		btVector3 cam_origin = trans.getOrigin();
-
-		CameraPosition = Vec(cam_origin.getX(), cam_origin.getY(), cam_origin.getZ());
 		DrawLevel(lev, static_cast<double>(Window.GetWidth()) / static_cast<double>(Window.GetHeight()));
 		//dynamicsWorld->debugDrawWorld();
 
