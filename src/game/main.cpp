@@ -69,15 +69,13 @@ Vector<3> CameraPosition = Zero<3>();
 Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);
 float CameraRadius = 0.06f;
-size_t CameraCurrentSector = 104;
+//size_t CameraCurrentSector = 104;
+size_t CameraCurrentSector = 300;
 Vector<3> CameraVelocity = Zero<3>();
-
-double dt;
-std::set<int> pcs;
 
 void UpdateCameraAmbientSound(const Gorc::Content::Assets::Level& lev) {
 	const auto& sec = lev.Sectors[CameraCurrentSector];
-	if(&sec.AmbientSound->Buffer == AmbientSound.GetBuffer()) {
+	if(&sec.AmbientSound->Buffer == AmbientSound.GetBuffer() && AmbientSound.GetStatus() != sf::Sound::Stopped) {
 		AmbientSound.SetVolume(sec.AmbientSoundVolume * 100.0f);
 	}
 	else if (sec.AmbientSound != nullptr) {
@@ -96,29 +94,6 @@ void SetCameraCurrentSector(size_t sec_num, const Gorc::Content::Assets::Level& 
 		CameraCurrentSector = sec_num;
 		UpdateCameraAmbientSound(lev);
 	}
-}
-
-void CameraBroadphaseVisitSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec, float max_dist) {
-	for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
-		const auto& surf = lev.Surfaces[i];
-
-		if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
-			if(pcs.find(surf.AdjoinedSector) == pcs.end()) {
-				float dist = Dot(CameraPosition - lev.Vertices[std::get<0>(surf.Vertices[0])], surf.Normal);
-				if(dist >= 0.0f && dist <= max_dist) {
-					pcs.insert(surf.AdjoinedSector);
-					CameraBroadphaseVisitSector(lev, lev.Sectors[surf.AdjoinedSector], max_dist);
-				}
-			}
-		}
-	}
-}
-
-void CameraBroadphase(const Gorc::Content::Assets::Level& lev) {
-	float max_dist = Length(CameraVelocity * dt) + CameraRadius + CameraRadius;
-	pcs.clear();
-	pcs.insert(CameraCurrentSector);
-	CameraBroadphaseVisitSector(lev, lev.Sectors[CameraCurrentSector], max_dist);
 }
 
 bool CameraInsideSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec) {
@@ -260,16 +235,16 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 
 				Vector<3> first_geo = level.Vertices[std::get<0>(surface.Vertices[0])];
 				Vector<2> first_tex = level.TextureVertices[std::get<1>(surface.Vertices[0])];
-				float first_intensity = std::get<2>(surface.Vertices[0]) + sector.AmbientLight + sector.ExtraLight + surface.ExtraLight;
+				float first_intensity = std::get<2>(surface.Vertices[0]) + sector.ExtraLight + surface.ExtraLight;
 
 				for(size_t i = 2; i < surface.Vertices.size(); ++i) {
 					Vector<3> second_geo = level.Vertices[std::get<0>(surface.Vertices[i - 1])];
 					Vector<2> second_tex = level.TextureVertices[std::get<1>(surface.Vertices[i - 1])];
-					float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.AmbientLight + sector.ExtraLight + surface.ExtraLight;
+					float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.ExtraLight + surface.ExtraLight;
 
 					Vector<3> third_geo = level.Vertices[std::get<0>(surface.Vertices[i])];
 					Vector<2> third_tex = level.TextureVertices[std::get<1>(surface.Vertices[i])];
-					float third_intensity = std::get<2>(surface.Vertices[i]) + sector.AmbientLight + sector.ExtraLight + surface.ExtraLight;
+					float third_intensity = std::get<2>(surface.Vertices[i]) + sector.ExtraLight + surface.ExtraLight;
 
 					glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
 					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
@@ -286,7 +261,7 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 
 				glEnd();
 
-				if(sector.Number == CameraCurrentSector) {
+				/*if(sector.Number == CameraCurrentSector) {
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glDisable(GL_TEXTURE_2D);
 
@@ -319,11 +294,113 @@ void DrawLevel(const Gorc::Content::Assets::Level& level, double aspect) {
 
 					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 					glEnable(GL_TEXTURE_2D);
-				}
+				}*/
 			}
 		}
 	}
 }
+
+class CameraObjectData;
+class SurfaceObjectData;
+
+class PhysicsObjectDataVisitor {
+public:
+	virtual ~PhysicsObjectDataVisitor() {
+		return;
+	}
+
+	virtual void VisitCameraObjectData(const CameraObjectData&) = 0;
+	virtual void VisitSurfaceObjectData(const SurfaceObjectData&) = 0;
+};
+
+class PhysicsObjectData {
+public:
+	virtual ~PhysicsObjectData() {
+		return;
+	}
+	virtual void Accept(PhysicsObjectDataVisitor&) const = 0;
+};
+
+class CameraObjectData : public PhysicsObjectData {
+public:
+	virtual void Accept(PhysicsObjectDataVisitor& v) const override {
+		v.VisitCameraObjectData(*this);
+	}
+};
+
+class SurfaceObjectData : public PhysicsObjectData {
+public:
+	size_t SurfaceId;
+	size_t SectorId;
+
+	virtual void Accept(PhysicsObjectDataVisitor& v) const override {
+		v.VisitSurfaceObjectData(*this);
+	}
+};
+
+class SectorBroadphaseFilterCallback : public btOverlapFilterCallback {
+private:
+	mutable std::set<size_t> pcs;
+	const Gorc::Content::Assets::Level& lev;
+
+	void CameraBroadphaseVisitSector(const Gorc::Content::Assets::Level& lev, const Gorc::Content::Assets::LevelSector& sec, float max_dist) const {
+		for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+			const auto& surf = lev.Surfaces[i];
+
+			if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
+				if(pcs.find(surf.AdjoinedSector) == pcs.end()) {
+					float dist = Dot(CameraPosition - lev.Vertices[std::get<0>(surf.Vertices[0])], surf.Normal);
+					if(dist >= 0.0f && dist <= max_dist) {
+						pcs.insert(surf.AdjoinedSector);
+						CameraBroadphaseVisitSector(lev, lev.Sectors[surf.AdjoinedSector], max_dist);
+					}
+				}
+			}
+		}
+	}
+
+	void CameraBroadphase(float max_dist) const {
+		pcs.clear();
+		pcs.insert(CameraCurrentSector);
+		CameraBroadphaseVisitSector(lev, lev.Sectors[CameraCurrentSector], max_dist);
+	}
+
+public:
+	SectorBroadphaseFilterCallback(const Gorc::Content::Assets::Level& lev) : lev(lev) {
+		return;
+	}
+
+	virtual bool needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const override {
+		bool maskCollides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
+		maskCollides = maskCollides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask) != 0;
+		if(!maskCollides) {
+			return false;
+		}
+
+		btCollisionObject* object0 = reinterpret_cast<btCollisionObject*>(proxy0->m_clientObject);
+		btCollisionObject* object1 = reinterpret_cast<btCollisionObject*>(proxy1->m_clientObject);
+
+		PhysicsObjectData* userData0 = reinterpret_cast<PhysicsObjectData*>(object0->getUserPointer());
+		PhysicsObjectData* userData1 = reinterpret_cast<PhysicsObjectData*>(object1->getUserPointer());
+
+		CameraObjectData* camera = dynamic_cast<CameraObjectData*>(userData0);
+		SurfaceObjectData* surface = dynamic_cast<SurfaceObjectData*>(userData1);
+
+		if(!camera) {
+			camera = dynamic_cast<CameraObjectData*>(userData1);
+			surface = dynamic_cast<SurfaceObjectData*>(userData0);
+		}
+
+		if(!camera || !surface) {
+			// Two surfaces colliding.
+			return false;
+		}
+		else {
+			CameraBroadphase((proxy0->m_aabbMax - proxy0->m_aabbMin).length() + (proxy1->m_aabbMax - proxy1->m_aabbMin).length());
+			return pcs.count(surface->SectorId) > 0;
+		}
+	}
+};
 
 int main(int argc, char** argv) {
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
@@ -365,7 +442,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	const auto& lev = manager.Load<Gorc::Content::Assets::Level>("01narshadda.jkl");
+	const auto& lev = manager.Load<Gorc::Content::Assets::Level>("04escapehouse.jkl");
 
 	// Set camera position to centroid of current sector.
 	CameraPosition = lev.Sectors[CameraCurrentSector].Center;
@@ -373,6 +450,7 @@ int main(int argc, char** argv) {
 	const sf::Input& input = Window.GetInput();
 
 	// Initialize Bullet
+	SectorBroadphaseFilterCallback filterCallback(lev);
 	PhysicsDebugDraw debugDraw;
 	std::unique_ptr<btBroadphaseInterface> broadphase(new btDbvtBroadphase());
 	std::unique_ptr<btDefaultCollisionConfiguration> collisionConfiguration(new btDefaultCollisionConfiguration());
@@ -381,22 +459,16 @@ int main(int argc, char** argv) {
 	std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfiguration.get()));
 	dynamicsWorld->setDebugDrawer(&debugDraw);
 	dynamicsWorld->setGravity(btVector3(0, 0, -lev.Header.WorldGravity));
+	dynamicsWorld->getPairCache()->setOverlapFilterCallback(&filterCallback);
 
-	// Create level trimesh.
+	// Create level trimeshes.
 	std::vector<int> index_buffer;
-	for(const auto& sec : lev.Sectors) {
-		for(int i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
-			const auto& surf = lev.Surfaces[i];
-			if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)) {
-				continue;
-			}
-
-			const auto& first_vx = std::get<0>(surf.Vertices[0]);
-			for(int j = 2; j < surf.Vertices.size(); ++j) {
-				index_buffer.push_back(first_vx);
-				index_buffer.push_back(std::get<0>(surf.Vertices[j - 1]));
-				index_buffer.push_back(std::get<0>(surf.Vertices[j]));
-			}
+	for(const auto& surf : lev.Surfaces) {
+		const auto& first_vx = std::get<0>(surf.Vertices[0]);
+		for(int j = 2; j < surf.Vertices.size(); ++j) {
+			index_buffer.push_back(first_vx);
+			index_buffer.push_back(std::get<0>(surf.Vertices[j - 1]));
+			index_buffer.push_back(std::get<0>(surf.Vertices[j]));
 		}
 	}
 
@@ -407,16 +479,57 @@ int main(int argc, char** argv) {
 		vertex_buffer.push_back(Get<Z>(vert));
 	}
 
-	std::unique_ptr<btTriangleIndexVertexArray> level(new btTriangleIndexVertexArray(
-			index_buffer.size() / 3, &index_buffer[0], sizeof(int) * 3, vertex_buffer.size() / 3, &vertex_buffer[0], sizeof(float) * 3));
-	std::unique_ptr<btBvhTriangleMeshShape> level_shape(new btBvhTriangleMeshShape(level.get(), true));
-	std::unique_ptr<btCollisionShape> camera_shape(new btSphereShape(CameraRadius));
-
+	std::vector<std::unique_ptr<btTriangleIndexVertexArray>> index_vertex_arrays;
+	std::vector<std::unique_ptr<btBvhTriangleMeshShape>> surface_shapes;
+	std::vector<std::unique_ptr<btRigidBody>> surface_rigid_bodies;
 	std::unique_ptr<btDefaultMotionState> level_motion_state(new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))));
-	std::unique_ptr<btRigidBody> level_rigid_body(new btRigidBody(
-			btRigidBody::btRigidBodyConstructionInfo(0, level_motion_state.get(), level_shape.get(), btVector3(0,0,0))));
+	std::vector<SurfaceObjectData> surface_object_data(lev.Surfaces.size());
 
-	dynamicsWorld->addRigidBody(level_rigid_body.get());
+	unsigned int CollideTypeWall = 1;
+	unsigned int CollideTypeAdjoin = 2;
+	unsigned int CollideTypePlayer = 4;
+
+	size_t i = 0;
+	for(const auto& surf : lev.Surfaces) {
+		index_vertex_arrays.emplace_back(new btTriangleIndexVertexArray(
+			surf.Vertices.size() - 2, &index_buffer[i], sizeof(int) * 3, vertex_buffer.size() / 3, &vertex_buffer[0], sizeof(float) * 3));
+		surface_shapes.emplace_back(new btBvhTriangleMeshShape(index_vertex_arrays.back().get(), true));
+
+		surface_rigid_bodies.emplace_back(new btRigidBody(
+				btRigidBody::btRigidBodyConstructionInfo(0, level_motion_state.get(), surface_shapes.back().get(), btVector3(0,0,0))));
+
+		unsigned int CollideType = 0;
+		if(surf.Adjoin >= 0) {
+			CollideType = CollideTypeAdjoin;
+		}
+		else {
+			CollideType = CollideTypeWall;
+		}
+
+		unsigned int CollidesWith = 0;
+		if(surf.Adjoin < 0 || (surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable) ||
+				!(lev.Adjoins[surf.Adjoin].Flags & Gorc::Content::Assets::SurfaceAdjoinFlag::AllowMovement) ||
+				(lev.Adjoins[surf.Adjoin].Flags & Gorc::Content::Assets::SurfaceAdjoinFlag::AllowAiOnly)) {
+			CollidesWith = CollideTypePlayer;
+		}
+
+		dynamicsWorld->addRigidBody(surface_rigid_bodies.back().get(), CollideType, CollidesWith);
+
+		i += (surf.Vertices.size() - 2) * 3;
+	}
+
+	for(const auto& sec : lev.Sectors) {
+		for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
+			surface_object_data[i].SurfaceId = i;
+			surface_object_data[i].SectorId = sec.Number;
+		}
+	}
+
+	for(size_t i = 0; i < lev.Surfaces.size(); ++i) {
+		surface_rigid_bodies[i]->setUserPointer(&surface_object_data[i]);
+	}
+
+	std::unique_ptr<btCollisionShape> camera_shape(new btSphereShape(CameraRadius));
 
 	std::unique_ptr<btDefaultMotionState> camera_motion_state(new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),
 			btVector3(Get<X>(CameraPosition), Get<Y>(CameraPosition), Get<Z>(CameraPosition)))));
@@ -427,8 +540,10 @@ int main(int argc, char** argv) {
 			btRigidBody::btRigidBodyConstructionInfo(mass, camera_motion_state.get(), camera_shape.get(), fallInertia)));
 	camera_rigid_body->setFlags(BT_DISABLE_WORLD_GRAVITY);
 	camera_rigid_body->setSleepingThresholds(0, 0);
+	CameraObjectData camera_object_data;
+	camera_rigid_body->setUserPointer(&camera_object_data);
 
-	dynamicsWorld->addRigidBody(camera_rigid_body.get());
+	dynamicsWorld->addRigidBody(camera_rigid_body.get(), CollideTypePlayer, CollideTypeWall | CollideTypeAdjoin);
 
 	UpdateCameraAmbientSound(lev);
 	// END HACK
@@ -486,11 +601,11 @@ int main(int argc, char** argv) {
 			}
 
 			if(input.IsKeyDown(sf::Key::Q)) {
-				YawCamera(gameplayTick * 2.0f);
+				YawCamera(gameplayTick * 3.0f);
 			}
 
 			if(input.IsKeyDown(sf::Key::E)) {
-				YawCamera(-gameplayTick * 2.0f);
+				YawCamera(-gameplayTick * 3.0f);
 			}
 
 			if(input.IsKeyDown(sf::Key::PageUp)) {
@@ -508,7 +623,7 @@ int main(int argc, char** argv) {
 				TranslateCamera(Translate, lev);
 			}
 
-			CameraVelocity *= 40.0f;
+			CameraVelocity *= 60.0f;
 
 			camera_rigid_body->setLinearVelocity(btVector3(Get<X>(CameraVelocity), Get<Y>(CameraVelocity), Get<Z>(CameraVelocity)));
 
@@ -522,8 +637,6 @@ int main(int argc, char** argv) {
 			CameraPosition = Vec(cam_origin.getX(), cam_origin.getY(), cam_origin.getZ());
 			UpdateCameraSector(OldCameraPosition, lev);
 		}
-
-		Window.SetActive();
 
 		// TODO: Render here
 		glClearDepth(1.0f);
