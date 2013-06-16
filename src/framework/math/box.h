@@ -18,6 +18,12 @@ public:
 	Box(const Vector<d, F>& v, const Vector<d, F>& w) : v(v), w(w) {
 		return;
 	}
+
+	template <size_t e> F Size() const {
+		auto vx = Get<e>(v);
+		auto wx = Get<e>(w);
+		return std::max(vx, wx) - std::min(vx, wx);
+	}
 };
 
 }

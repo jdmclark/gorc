@@ -26,6 +26,10 @@ public:
 		}
 	}
 
+	explicit operator UT() const {
+		return value;
+	}
+
 	inline bool operator&(T val) const {
 		return value & static_cast<UT>(val);
 	}
