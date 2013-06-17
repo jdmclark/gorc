@@ -27,12 +27,12 @@ void SkipToNextSection(Text::Tokenizer& tok) {
 	tok.AssertPunctuator(":");
 }
 
-void ParseJKSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+void ParseJKSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	// JK section is empty.
 	return;
 }
 
-void ParseHeaderSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+void ParseHeaderSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	tok.AssertIdentifier("Version");
 	lev.Header.Version = tok.GetNumber<int>();
 
@@ -90,7 +90,7 @@ void ParseHeaderSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manag
 	lev.Header.GouraudDistance = tok.GetNumber<float>();
 }
 
-void ParseMaterialsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+void ParseMaterialsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	tok.AssertIdentifier("World");
 	tok.AssertIdentifier("materials");
 
@@ -121,7 +121,7 @@ void ParseMaterialsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& ma
 	}
 }
 
-void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	Text::Token t;
 
 	tok.AssertIdentifier("World");
@@ -191,9 +191,10 @@ void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& 
 
 	size_t num_surfaces = tok.GetNumber<size_t>();
 
-	Assets::LevelSurface surf;
-
 	for(size_t i = 0; i < num_surfaces; ++i) {
+		lev.Surfaces.emplace_back();
+		Assets::LevelSurface& surf = lev.Surfaces.back();
+
 		tok.GetNumber<int>();
 		tok.AssertPunctuator(":");
 
@@ -220,8 +221,6 @@ void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& 
 		for(auto& vx : surf.Vertices) {
 			std::get<2>(vx) = tok.GetNumber<float>();
 		}
-
-		lev.Surfaces.push_back(surf);
 	}
 
 	for(auto& surf : lev.Surfaces) {
@@ -236,7 +235,7 @@ void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& 
 	}
 }
 
-void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	Text::Token t;
 
 	tok.AssertIdentifier("World");
@@ -335,8 +334,41 @@ void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& mana
 	}
 }
 
-void PostprocessLevel(Assets::Level& lev, Manager& manager, Diagnostics::Report& report) {
-	// Post-process; load colormaps and materials
+void ParseCogscriptsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+	tok.AssertIdentifier("World");
+	tok.AssertIdentifier("scripts");
+
+	size_t num = tok.GetNumber<size_t>();
+
+	Text::Token t;
+	while(true) {
+		tok.GetToken(t);
+
+		if(t.Type == Text::TokenType::Identifier && boost::iequals(t.Value, "end")) {
+			break;
+		}
+		else {
+			tok.AssertPunctuator(":");
+
+			t.Value = tok.GetFilename();
+
+			lev.ScriptEntries.emplace_back(t.Value);
+		}
+	}
+
+	if(num != lev.ScriptEntries.size()) {
+		report.AddWarning("LevelLoader::ParseCogscriptsSection",
+				boost::str(boost::format("expected %d scripts, found %d entries") % num % lev.ScriptEntries.size()),
+				t.Location);
+	}
+}
+
+void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+
+}
+
+void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+	// Post-process; load colormaps, materials, scripts.
 	for(const auto& cmp_entry : lev.ColormapEntries) {
 		lev.Colormaps.push_back(&manager.Load<Assets::Colormap>(cmp_entry));
 	}
@@ -345,6 +377,10 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Diagnostics::Report&
 
 	for(const auto& mat_entry : lev.MaterialEntries) {
 		lev.Materials.push_back(&manager.Load<Assets::Material>(std::get<0>(mat_entry), master_cmp));
+	}
+
+	for(const auto& script_entry : lev.ScriptEntries) {
+		lev.Scripts.push_back(&manager.Load<Assets::Script>(script_entry, compiler));
 	}
 
 	// Add adjoined sector reference to adjoins.
@@ -367,6 +403,28 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Diagnostics::Report&
 			}
 		}
 	}
+
+	// Construct level index and vertex buffers.
+	for(const auto& surf : lev.Surfaces) {
+		const auto& first_vx = std::get<0>(surf.Vertices[0]);
+		for(size_t j = 2; j < surf.Vertices.size(); ++j) {
+			lev.SurfaceIndexBuffer.push_back(first_vx);
+			lev.SurfaceIndexBuffer.push_back(std::get<0>(surf.Vertices[j - 1]));
+			lev.SurfaceIndexBuffer.push_back(std::get<0>(surf.Vertices[j]));
+		}
+	}
+
+	// Construct surface collide shapes.
+	size_t i = 0;
+	for(auto& surf : lev.Surfaces) {
+		surf.SurfaceIndexVertexArray = std::unique_ptr<btTriangleIndexVertexArray>(new btTriangleIndexVertexArray(
+				surf.Vertices.size() - 2, &lev.SurfaceIndexBuffer[i], sizeof(int) * 3,
+				lev.Vertices.size(), reinterpret_cast<float*>(&lev.Vertices[0]), sizeof(Math::Vector<3>)));
+		surf.SurfaceShape = std::unique_ptr<btBvhTriangleMeshShape>(new btBvhTriangleMeshShape(
+				surf.SurfaceIndexVertexArray.get(), true));
+
+		i += (surf.Vertices.size() - 2) * 3;
+	}
 }
 
 }
@@ -376,13 +434,14 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Diagnostics::Report&
 std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::LevelLoader::Parse(Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
 	std::unique_ptr<Assets::Level> lev(new Assets::Level());
 
-	using sec_fn = std::function<void(Assets::Level&, Text::Tokenizer&, Manager&, Diagnostics::Report&)>;
+	using sec_fn = std::function<void(Assets::Level&, Text::Tokenizer&, Manager&, Cog::Compiler&, Diagnostics::Report&)>;
 	std::vector<std::tuple<std::string, sec_fn>> sectionmap {
 		std::make_tuple("jk", ParseJKSection),
 		std::make_tuple("header", ParseHeaderSection),
 		std::make_tuple("materials", ParseMaterialsSection),
 		std::make_tuple("georesource", ParseGeoresourceSection),
-		std::make_tuple("sectors", ParseSectorsSection)
+		std::make_tuple("sectors", ParseSectorsSection),
+		std::make_tuple("cogscripts", ParseCogscriptsSection)
 	};
 
 	Text::Token t;
@@ -400,12 +459,17 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::LevelLoader::Parse
 				report.AddWarning("LevelLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
 			}
 			else {
-				std::get<1>(*it)(*lev, tok, manager, report);
+				std::get<1>(*it)(*lev, tok, manager, compiler, report);
 			}
 		}
 	}
 
-	PostprocessLevel(*lev, manager, report);
+	PostprocessLevel(*lev, manager, compiler, report);
 
 	return std::unique_ptr<Asset>(std::move(lev));
+}
+
+Gorc::Content::Loaders::LevelLoader::LevelLoader(Cog::Compiler& compiler)
+	: compiler(compiler) {
+	return;
 }

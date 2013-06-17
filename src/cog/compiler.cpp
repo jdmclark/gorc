@@ -92,4 +92,6 @@ void Gorc::Cog::Compiler::Compile(IO::ReadOnlyFile& file, Script& output, Diagno
 	if(report.GetErrorCount() != prevErrorCount) {
 		return;
 	}
+
+	output.Flags = FlagSet<CogFlag> { ast->Flags };
 }

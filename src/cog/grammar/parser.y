@@ -66,7 +66,7 @@
 }
 
 /* Main keyword tokens */
-%token SYMBOLS CODE END
+%token FLAGS SYMBOLS CODE END
 
 /* Symbols keyword tokens */
 %token ENDLINE
@@ -663,6 +663,10 @@ code_section
 translation_unit
 	: SYMBOLS symbol_section END CODE code_section END
 		{
-			instance->SetReturnValue($$ = ast.MakeTranslationUnit($2, $5, @$));
+			instance->SetReturnValue($$ = ast.MakeTranslationUnit(0, $2, $5, @$));
+		}
+	| FLAGS '=' INTEGER_LITERAL SYMBOLS symbol_section END CODE code_section END
+		{
+			instance->SetReturnValue($$ = ast.MakeTranslationUnit($3, $5, $8, @$));
 		}
 	;

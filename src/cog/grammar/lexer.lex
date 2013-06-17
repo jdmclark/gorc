@@ -248,6 +248,11 @@ E			[Ee][+-]?{D}+
 
 <INITIAL>{
 	"#"						{ yy_push_state(LINE_COMMENT, yyextra->GetScanner()); }
+	
+	"flags"					{ return FLAGS; }
+	"="						{ return '='; }
+	0x{H}+					{ yylval->integer = parse_hex_int(yytext); return INTEGER_LITERAL; }
+	
 	"symbols"				{ yy_push_state(SYMBOL_SECTION, yyextra->GetScanner()); return SYMBOLS; }
 	"code"					{ yy_push_state(CODE_SECTION, yyextra->GetScanner()); return CODE; }
 

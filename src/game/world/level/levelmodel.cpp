@@ -12,30 +12,10 @@ Gorc::Game::World::Level::LevelModel::LevelModel(const Gorc::Content::Assets::Le
 	  CameraShape(CameraRadius), CameraMotionState(btTransform(btQuaternion(0,0,0,1), BtVec(Level.Sectors[CameraCurrentSector].Center))) {
 	DynamicsWorld.setGravity(btVector3(0, 0, -Level.Header.WorldGravity));
 
-	// Create level index and vertex buffers.
-	for(const auto& surf : Level.Surfaces) {
-		const auto& first_vx = std::get<0>(surf.Vertices[0]);
-		for(size_t j = 2; j < surf.Vertices.size(); ++j) {
-			SurfaceIndexBuffer.push_back(first_vx);
-			SurfaceIndexBuffer.push_back(std::get<0>(surf.Vertices[j - 1]));
-			SurfaceIndexBuffer.push_back(std::get<0>(surf.Vertices[j]));
-		}
-	}
-
-	for(const auto& vert : Level.Vertices) {
-		SurfaceVertexBuffer.push_back(Get<X>(vert));
-		SurfaceVertexBuffer.push_back(Get<Y>(vert));
-		SurfaceVertexBuffer.push_back(Get<Z>(vert));
-	}
-
 	size_t i = 0;
 	for(const auto& surf : Level.Surfaces) {
-		SurfaceIndexVertexArrays.emplace_back(new btTriangleIndexVertexArray(
-				surf.Vertices.size() - 2, &SurfaceIndexBuffer[i], sizeof(int) * 3,
-				SurfaceVertexBuffer.size() / 3, &SurfaceVertexBuffer[0], sizeof(float) * 3));
-		SurfaceShapes.emplace_back(new btBvhTriangleMeshShape(SurfaceIndexVertexArrays.back().get(), true));
 		SurfaceRigidBodies.emplace_back(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(
-				0, &SurfaceMotionState, SurfaceShapes.back().get(), btVector3(0,0,0))));
+				0, &SurfaceMotionState, surf.SurfaceShape.get(), btVector3(0,0,0))));
 
 		FlagSet<PhysicsCollideClass> CollideType;
 		if(surf.Adjoin >= 0) {
@@ -53,8 +33,6 @@ Gorc::Game::World::Level::LevelModel::LevelModel(const Gorc::Content::Assets::Le
 		}
 
 		DynamicsWorld.addRigidBody(SurfaceRigidBodies.back().get(), static_cast<unsigned int>(CollideType), static_cast<unsigned int>(CollidesWith));
-
-		i += (surf.Vertices.size() - 2) * 3;
 	}
 
 	for(const auto& sec : Level.Sectors) {

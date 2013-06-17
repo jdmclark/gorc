@@ -48,11 +48,6 @@ public:
 	btSequentialImpulseConstraintSolver ConstraintSolver;
 	btDiscreteDynamicsWorld DynamicsWorld;
 
-	std::vector<int> SurfaceIndexBuffer;
-	std::vector<float> SurfaceVertexBuffer;
-
-	std::vector<std::unique_ptr<btTriangleIndexVertexArray>> SurfaceIndexVertexArrays;
-	std::vector<std::unique_ptr<btBvhTriangleMeshShape>> SurfaceShapes;
 	std::vector<std::unique_ptr<btRigidBody>> SurfaceRigidBodies;
 	btDefaultMotionState SurfaceMotionState;
 	std::vector<SurfaceObjectData> SurfaceObjectData;

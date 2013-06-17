@@ -22,6 +22,7 @@
 #include "framework/diagnostics/streamreport.h"
 #include "content/manager.h"
 #include "content/assets/level.h"
+#include "cog/compiler.h"
 
 const double gameplayTick = (1.0 / 60.0);
 
@@ -33,6 +34,9 @@ int main(int argc, char** argv) {
 	Gorc::Event::EventBus EventBus;
 	Gorc::Content::VFS::VirtualFileSystem FileSystem("game/restricted",
 			"game/resource", "game/episode", Report);
+
+	Gorc::Cog::Verbs::VerbTable VerbTable;
+	Gorc::Cog::Compiler Compiler(VerbTable);
 
 	Gorc::Game::Screen::PresenterMapper ScreenPresenterMapper;
 	Gorc::Place::PlaceController<Gorc::Game::Screen::Place> ScreenPlaceController(EventBus, ScreenPresenterMapper);
@@ -88,7 +92,7 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("01narshadda.jkl");
+	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
 	WorldPlaceController.GoTo(Gorc::Game::World::Level::LevelPlace(contentManager, lev));
 
 	ScreenPlaceController.GoTo(Gorc::Game::Screen::Action::ActionPlace());

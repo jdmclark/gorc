@@ -88,7 +88,7 @@ public:
 	ForStatement* MakeForStatement(ForOptionalExpression* initializer, ForOptionalExpression* condition, ForOptionalExpression* incrementer, Statement* code, const Text::Location& yyl);
 	LabeledStatement* MakeLabeledStatement(const char* label, Statement* code, const Text::Location& yyl);
 
-	TranslationUnit* MakeTranslationUnit(std::vector<Symbol*>* symbols, std::vector<Statement*>* code, const Text::Location& yyl);
+	TranslationUnit* MakeTranslationUnit(unsigned int flags, std::vector<Symbol*>* symbols, std::vector<Statement*>* code, const Text::Location& yyl);
 };
 }
 }

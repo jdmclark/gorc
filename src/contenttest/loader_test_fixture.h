@@ -8,15 +8,20 @@
 #include "content/nativefilesystem.h"
 #include "framework/diagnostics/storedreport.h"
 #include "content/manager.h"
+#include "cog/compiler.h"
 
 class LoaderTestFixture : public NullUnit::Fixture {
 private:
 	Gorc::Content::NativeFileSystem nfs;
 
+	void CreateMockCogVerbs();
+
 public:
 	const Gorc::Content::FileSystem& FileSystem;
 	Gorc::Content::Manager ContentManager;
 	Gorc::Diagnostics::StoredReport Report;
+	Gorc::Cog::Verbs::VerbTable VerbTable;
+	Gorc::Cog::Compiler Compiler;
 
 protected:
 	LoaderTestFixture(const boost::filesystem::path& BasePath);
@@ -25,7 +30,7 @@ protected:
 public:
 	template <typename T, typename... ArgT> const T* TryLoad(const boost::filesystem::path& filename, ArgT... args) {
 		try {
-			return &ContentManager.Load<T>(filename, std::forward(args)...);
+			return &ContentManager.Load<T>(filename, args...);
 		}
 		catch(...) {
 			return nullptr;

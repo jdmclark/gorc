@@ -220,8 +220,9 @@ LabeledStatement* Factory::MakeLabeledStatement(const char* label, Statement* co
 	return val;
 }
 
-TranslationUnit* Factory::MakeTranslationUnit(std::vector<Symbol*>* symbols, std::vector<Statement*>* code, const Text::Location& yyl) {
+TranslationUnit* Factory::MakeTranslationUnit(unsigned int flags, std::vector<Symbol*>* symbols, std::vector<Statement*>* code, const Text::Location& yyl) {
 	MAKE(TranslationUnit);
+	val->Flags = flags;
 	val->Symbols = symbols;
 	val->Code = code;
 	return val;

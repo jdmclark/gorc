@@ -3,6 +3,9 @@
 #include "flags.h"
 #include "framework/math/vector.h"
 
+#include <btBulletDynamicsCommon.h>
+#include <memory>
+
 namespace Gorc {
 namespace Content {
 namespace Assets {
@@ -20,6 +23,9 @@ public:
 	float ExtraLight;
 	std::vector<std::tuple<int, int, float>> Vertices;
 	Math::Vector<3> Normal;
+
+	std::unique_ptr<btTriangleIndexVertexArray> SurfaceIndexVertexArray;
+	std::unique_ptr<btBvhTriangleMeshShape> SurfaceShape;
 };
 
 }

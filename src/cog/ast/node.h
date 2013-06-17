@@ -300,6 +300,7 @@ public:
 class TranslationUnit : public Node {
 	ASTVISITOR_ACCEPT
 public:
+	unsigned int Flags;
 	std::vector<Symbol*>* Symbols;
 	std::vector<Statement*>* Code;
 };
