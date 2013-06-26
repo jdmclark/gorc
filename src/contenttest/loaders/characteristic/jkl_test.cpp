@@ -16,15 +16,9 @@ BeginSuiteFixture(JklTest, JklTestFixture);
 
 Case(jk_01narshadda_test) {
 	VfsSingleton::SetEpisode("The Force Within");
-
-	/*auto f = VfsSingleton::Get().Open("cog/xcrane.cog");
-	std::vector<char> buffer(f->GetSize());
-	f->Read(&buffer[0], f->GetSize());
-	buffer.push_back('\0');
-	std::cout << &buffer[0] << std::endl;*/
-
 	auto lev = TryLoad<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
-	AssertResult(2, 144);
+
+	AssertResult(2, 1530);
 }
 
 EndSuite(JklTest);

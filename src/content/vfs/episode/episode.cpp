@@ -52,7 +52,7 @@ Gorc::Content::VFS::Episode::Episode::Episode(IO::ReadOnlyFile& file, Diagnostic
 				throw IO::FileCorruptException();
 			}
 
-			std::string filename = tok.GetFilename();
+			std::string filename = tok.GetSpaceDelimitedString();
 			int lightpow = tok.GetNumber<int>();
 			int darkpow = tok.GetNumber<int>();
 			int gotoa = tok.GetNumber<int>();

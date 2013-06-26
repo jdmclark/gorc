@@ -4,6 +4,13 @@
 #include <btBulletDynamicsCommon.h>
 
 namespace Gorc {
+
+namespace Content {
+namespace Assets {
+class Template;
+}
+}
+
 namespace Game {
 
 class Components;
@@ -13,6 +20,7 @@ namespace Level {
 
 class LevelPresenter;
 class LevelModel;
+class Thing;
 
 class LevelView : public View {
 private:
@@ -29,6 +37,7 @@ private:
 	} physicsDebugDraw;
 
 	void DrawLevel(double aspect);
+	void DrawThing(const Thing& thing, double aspect);
 
 public:
 	inline void SetPresenter(LevelPresenter* presenter) {

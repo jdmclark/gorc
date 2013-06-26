@@ -31,9 +31,19 @@ public:
 	size_t SurfaceId;
 };
 
+class Thing : public Content::Assets::Template {
+public:
+	std::unique_ptr<btDefaultMotionState> MotionState;
+	std::unique_ptr<btRigidBody> RigidBody;
+
+	Thing() = default;
+	Thing(const Content::Assets::Template& tpl);
+};
+
 class LevelModel {
 public:
 	const Content::Assets::Level& Level;
+	std::vector<Thing> Things;
 
 	Vector<3> CameraPosition;
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
@@ -41,6 +51,9 @@ public:
 	static constexpr float CameraRadius = 0.06f;
 	size_t CameraCurrentSector = 104;
 	Vector<3> CameraVelocity = Zero<3>();
+
+	std::vector<Content::Assets::Template const*> SpawnPoints;
+	unsigned int CurrentSpawnPoint = 0;
 
 	btDbvtBroadphase Broadphase;
 	btDefaultCollisionConfiguration CollisionConfiguration;
@@ -52,8 +65,8 @@ public:
 	btDefaultMotionState SurfaceMotionState;
 	std::vector<SurfaceObjectData> SurfaceObjectData;
 
-	btSphereShape CameraShape;
-	btDefaultMotionState CameraMotionState;
+	std::unique_ptr<btSphereShape> CameraShape;
+	std::unique_ptr<btDefaultMotionState> CameraMotionState;
 	std::unique_ptr<btRigidBody> CameraRigidBody;
 	CameraObjectData CameraObjectData;
 

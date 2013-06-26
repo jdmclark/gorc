@@ -10,7 +10,9 @@
 #include "level_sector.h"
 #include "script.h"
 #include "material.h"
+#include "template.h"
 
+#include <unordered_map>
 #include <btBulletDynamicsCommon.h>
 
 namespace Gorc {
@@ -24,8 +26,10 @@ public:
 	LevelHeader Header;
 	std::vector<std::tuple<std::string, float, float>> MaterialEntries;
 	std::vector<Material const*> Materials;
-	std::vector<std::string> ColormapEntries;
+
+	Colormap const* MasterColormap = nullptr;
 	std::vector<Colormap const*> Colormaps;
+
 	std::vector<std::string> ScriptEntries;
 	std::vector<Script const*> Scripts;
 	std::vector<std::tuple<Script const*, std::vector<Cog::VM::Value>>> Cogs;
@@ -36,7 +40,8 @@ public:
 	std::vector<LevelSurface> Surfaces;
 	std::vector<LevelSector> Sectors;
 
-	std::vector<int> SurfaceIndexBuffer;
+	std::unordered_map<std::string, Template> Templates;
+	std::vector<Template> Things;
 };
 
 }

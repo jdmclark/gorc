@@ -24,8 +24,7 @@ public:
 	std::vector<std::tuple<int, int, float>> Vertices;
 	Math::Vector<3> Normal;
 
-	std::unique_ptr<btTriangleIndexVertexArray> SurfaceIndexVertexArray;
-	std::unique_ptr<btBvhTriangleMeshShape> SurfaceShape;
+	btConvexHullShape SurfaceShape;
 };
 
 }

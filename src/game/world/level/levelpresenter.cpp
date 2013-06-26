@@ -21,7 +21,9 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
-	model->CameraRigidBody->setLinearVelocity(BtVec(model->CameraVelocity));
+	model->CameraRigidBody->applyCentralForce(BtVec(model->CameraVelocity * 800.0f));
+	model->CameraRigidBody->setDamping(0.999f, 0.99f);
+
 	model->DynamicsWorld.stepSimulation(dt, 10);
 
 	auto OldCameraPosition = model->CameraPosition;

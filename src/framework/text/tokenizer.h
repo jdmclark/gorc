@@ -44,6 +44,10 @@ public:
 		report_eol = val;
 	}
 
+	inline bool GetReportEOL() const {
+		return report_eol;
+	}
+
 	void GetToken(Token& out);
 	void GetDelimitedString(Token& out, const std::function<bool(char)>& match_delim);
 
@@ -54,7 +58,7 @@ public:
 
 	std::string& GetIdentifier();
 	std::string& GetStringLiteral();
-	std::string& GetFilename();
+	std::string& GetSpaceDelimitedString();
 
 	void AssertIdentifier(const std::string& id);
 	void AssertPunctuator(const std::string& punc);

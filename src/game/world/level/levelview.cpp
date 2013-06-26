@@ -2,6 +2,7 @@
 #include "levelpresenter.h"
 #include "game/components.h"
 #include "levelmodel.h"
+#include "content/assets/model.h"
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -21,7 +22,87 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		double height = static_cast<double>(view_size.Size<Y>());
 		double aspect = width / height;
 		DrawLevel(aspect);
+
+		for(const auto& thing : currentModel->Things) {
+			DrawThing(thing, aspect);
+		}
+
+		currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
+		//currentModel->DynamicsWorld.debugDrawWorld();
 	}
+}
+
+void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing, double aspect) {
+	if(!thing.Model3d) {
+		return;
+	}
+
+	glDisable(GL_CULL_FACE);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
+	btTransform trns;
+	thing.RigidBody->getMotionState()->getWorldTransform(trns);
+
+	float mat[16];
+	trns.getOpenGLMatrix(mat);
+
+	glMultMatrixf(mat);
+
+	const Content::Assets::Model& model = *thing.Model3d;
+
+	const Content::Assets::ModelGeoSet& geoset = model.GeoSets[0];
+	for(const auto& mesh : geoset.Meshes) {
+		for(const auto& face : mesh.Faces) {
+			if(face.Material >= 0) {
+				const auto& material = model.Materials[face.Material];
+
+				float alpha = (face.Type & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f;
+
+				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
+						1.0f / static_cast<float>(material->Height));
+
+				material->Cels[0].Diffuse->Bind();
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+				glBegin(GL_TRIANGLES);
+
+				Vector<3> first_geo = mesh.Vertices[std::get<0>(face.Vertices[0])];
+				Vector<2> first_tex = mesh.TextureVertices[std::get<1>(face.Vertices[0])];
+				float first_intensity = 1.0f;
+
+				for(size_t i = 2; i < face.Vertices.size(); ++i) {
+					Vector<3> second_geo = mesh.Vertices[std::get<0>(face.Vertices[i - 1])];
+					Vector<2> second_tex = mesh.TextureVertices[std::get<1>(face.Vertices[i - 1])];
+					float second_intensity = 1.0f;
+
+					Vector<3> third_geo = mesh.Vertices[std::get<0>(face.Vertices[i])];
+					Vector<2> third_tex = mesh.TextureVertices[std::get<1>(face.Vertices[i])];
+					float third_intensity = 1.0f;
+
+					glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
+					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
+					glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
+
+					glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
+					glColor4f(second_intensity, second_intensity, second_intensity, alpha);
+					glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
+
+					glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
+					glColor4f(third_intensity, third_intensity, third_intensity, alpha);
+					glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
+				}
+
+				glEnd();
+			}
+		}
+	}
+
+	glPopMatrix();
 }
 
 void Gorc::Game::World::Level::LevelView::DrawLevel(double aspect) {

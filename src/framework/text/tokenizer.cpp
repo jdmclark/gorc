@@ -285,7 +285,7 @@ std::string& Tokenizer::GetStringLiteral() {
 	return internalToken.Value;
 }
 
-std::string& Tokenizer::GetFilename() {
+std::string& Tokenizer::GetSpaceDelimitedString() {
 	GetDelimitedString(internalToken, [](char c) { return isspace(c); });
 	if(internalToken.Value.empty()) {
 		Diagnostics::Helper::Expected(ErrorReport, "tokenizer", "filename", internalToken.Location);

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <tuple>
+#include <vector>
 
 const std::vector<boost::filesystem::path> Gorc::Content::Loaders::LevelLoader::AssetRootPath = { "jkl" };
 
@@ -106,7 +107,7 @@ void ParseMaterialsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& ma
 		else {
 			tok.AssertPunctuator(":");
 
-			t.Value = tok.GetFilename();
+			t.Value = tok.GetSpaceDelimitedString();
 			float x_scale = tok.GetNumber<float>();
 			float y_scale = tok.GetNumber<float>();
 
@@ -133,7 +134,10 @@ void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& 
 		tok.GetNumber<int>();
 		tok.AssertPunctuator(":");
 
-		lev.ColormapEntries.push_back(tok.GetFilename());
+		lev.Colormaps.push_back(&manager.Load<Assets::Colormap>(tok.GetSpaceDelimitedString()));
+		if(!lev.MasterColormap) {
+			lev.MasterColormap = lev.Colormaps.back();
+		}
 	}
 
 	tok.AssertIdentifier("World");
@@ -297,7 +301,7 @@ void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& mana
 				sec.CollideBox = Math::Box<3>(Math::Vec(x0, y0, z0), Math::Vec(x1, y1, z1));
 			}
 			else if(boost::iequals(t.Value, "sound")) {
-				sec.AmbientSound = &manager.Load<Assets::Sound>(tok.GetFilename());
+				sec.AmbientSound = &manager.Load<Assets::Sound>(tok.GetSpaceDelimitedString());
 				sec.AmbientSoundVolume = tok.GetNumber<float>();
 			}
 			else if(boost::iequals(t.Value, "center")) {
@@ -350,7 +354,7 @@ void ParseCogscriptsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& m
 		else {
 			tok.AssertPunctuator(":");
 
-			t.Value = tok.GetFilename();
+			t.Value = tok.GetSpaceDelimitedString();
 
 			lev.ScriptEntries.emplace_back(t.Value);
 		}
@@ -363,20 +367,113 @@ void ParseCogscriptsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& m
 	}
 }
 
-void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+void ParseTemplatesSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+	tok.AssertIdentifier("World");
+	tok.AssertIdentifier("templates");
 
+	// Add 'none' template to list with default parameters.
+	lev.Templates.emplace("none", Assets::Template());
+
+	size_t num = tok.GetNumber<size_t>();
+
+	std::string tpl_name;
+	std::string base_name;
+	while(true) {
+		tpl_name = tok.GetSpaceDelimitedString();
+		std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
+
+		if(tpl_name == "end") {
+			break;
+		}
+		else if(!tpl_name.empty()) {
+			base_name = tok.GetSpaceDelimitedString();
+			std::transform(base_name.begin(), base_name.end(), base_name.begin(), tolower);
+
+			auto base_it = lev.Templates.find(base_name);
+			if(base_it == lev.Templates.end()) {
+				report.AddError("LevelLoader::ParseTemplatesSection",
+						boost::str(boost::format("template %s parent %s not defined") % tpl_name % base_name), tok.GetInternalTokenLocation());
+				tok.SkipToNextLine();
+				continue;
+			}
+
+			auto succ_pair = lev.Templates.emplace(tpl_name, base_it->second);
+			if(!succ_pair.second) {
+				report.AddWarning("LevelLoader::ParseTemplatesSection",
+						boost::str(boost::format("template %s redefinition") % tpl_name), tok.GetInternalTokenLocation());
+			}
+
+			succ_pair.first->second.ParseArgs(tok, manager, *lev.MasterColormap, report);
+		}
+		else {
+			report.AddError("LevelLoader::ParseTemplatesSection", "expected template name", tok.GetInternalTokenLocation());
+			break;
+		}
+	}
+
+	if(num != lev.Templates.size()) {
+		report.AddWarning("LevelLoader::ParseTemplatesSection",
+				boost::str(boost::format("expected %d templates, found %d entries") % num % lev.Templates.size()),
+				tok.GetInternalTokenLocation());
+	}
+}
+
+void ParseThingsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+	tok.AssertIdentifier("World");
+	tok.AssertIdentifier("things");
+
+	size_t num = tok.GetNumber<size_t>();
+
+	std::string tpl_name, thing_name;
+	Text::Token t;
+	while(true) {
+		tok.GetToken(t);
+
+		if(t.Type == Text::TokenType::Identifier && boost::iequals(t.Value, "end")) {
+			break;
+		}
+		else {
+			tok.AssertPunctuator(":");
+
+			tpl_name = tok.GetSpaceDelimitedString();
+			thing_name = tok.GetSpaceDelimitedString();
+
+			float x = tok.GetNumber<float>();
+			float y = tok.GetNumber<float>();
+			float z = tok.GetNumber<float>();
+			float pitch = tok.GetNumber<float>();
+			float yaw = tok.GetNumber<float>();
+			float roll = tok.GetNumber<float>();
+			unsigned int sector = tok.GetNumber<unsigned int>();
+
+			auto base_it = lev.Templates.find(tpl_name);
+			if(base_it == lev.Templates.end()) {
+				report.AddError("LevelLoader::ParseThingsSection",
+						boost::str(boost::format("thing uses undefined template \'%s\'") % tpl_name),
+						tok.GetInternalTokenLocation());
+				tok.SkipToNextLine();
+				continue;
+			}
+
+			lev.Things.emplace_back(base_it->second);
+			lev.Things.back().Sector = sector;
+			lev.Things.back().Position = Math::Vec(x, y, z);
+			lev.Things.back().Orientation = Math::Vec(pitch, yaw, roll);
+			lev.Things.back().ParseArgs(tok, manager, *lev.MasterColormap, report);
+		}
+	}
+
+	if(num != lev.Things.size()) {
+		report.AddWarning("LevelLoader::ParseThingsSection",
+				boost::str(boost::format("expected %d things, found %d entries") % num % lev.Things.size()),
+				t.Location);
+	}
 }
 
 void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
-	// Post-process; load colormaps, materials, scripts.
-	for(const auto& cmp_entry : lev.ColormapEntries) {
-		lev.Colormaps.push_back(&manager.Load<Assets::Colormap>(cmp_entry));
-	}
-
-	const Assets::Colormap& master_cmp = *lev.Colormaps[0];
-
+	// Post-process; load materials and scripts.
 	for(const auto& mat_entry : lev.MaterialEntries) {
-		lev.Materials.push_back(&manager.Load<Assets::Material>(std::get<0>(mat_entry), master_cmp));
+		lev.Materials.push_back(&manager.Load<Assets::Material>(std::get<0>(mat_entry), *lev.MasterColormap));
 	}
 
 	for(const auto& script_entry : lev.ScriptEntries) {
@@ -404,26 +501,14 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 		}
 	}
 
-	// Construct level index and vertex buffers.
-	for(const auto& surf : lev.Surfaces) {
-		const auto& first_vx = std::get<0>(surf.Vertices[0]);
-		for(size_t j = 2; j < surf.Vertices.size(); ++j) {
-			lev.SurfaceIndexBuffer.push_back(first_vx);
-			lev.SurfaceIndexBuffer.push_back(std::get<0>(surf.Vertices[j - 1]));
-			lev.SurfaceIndexBuffer.push_back(std::get<0>(surf.Vertices[j]));
-		}
-	}
-
 	// Construct surface collide shapes.
 	size_t i = 0;
 	for(auto& surf : lev.Surfaces) {
-		surf.SurfaceIndexVertexArray = std::unique_ptr<btTriangleIndexVertexArray>(new btTriangleIndexVertexArray(
-				surf.Vertices.size() - 2, &lev.SurfaceIndexBuffer[i], sizeof(int) * 3,
-				lev.Vertices.size(), reinterpret_cast<float*>(&lev.Vertices[0]), sizeof(Math::Vector<3>)));
-		surf.SurfaceShape = std::unique_ptr<btBvhTriangleMeshShape>(new btBvhTriangleMeshShape(
-				surf.SurfaceIndexVertexArray.get(), true));
+		for(const auto& pt : surf.Vertices) {
+			surf.SurfaceShape.addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]));
+		}
 
-		i += (surf.Vertices.size() - 2) * 3;
+		surf.SurfaceShape.setMargin(0);
 	}
 }
 
@@ -441,7 +526,9 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::LevelLoader::Parse
 		std::make_tuple("materials", ParseMaterialsSection),
 		std::make_tuple("georesource", ParseGeoresourceSection),
 		std::make_tuple("sectors", ParseSectorsSection),
-		std::make_tuple("cogscripts", ParseCogscriptsSection)
+		std::make_tuple("cogscripts", ParseCogscriptsSection),
+		std::make_tuple("templates", ParseTemplatesSection),
+		std::make_tuple("things", ParseThingsSection)
 	};
 
 	Text::Token t;

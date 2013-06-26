@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
 
 		gameplayElapsedTime += currentTime;
 		gameplayAccumulator += currentTime;
-		if(gameplayAccumulator >= gameplayTick) {
+		while(gameplayAccumulator >= gameplayTick) {
 			gameplayAccumulator -= gameplayTick;
 
 			// Update simulation.
