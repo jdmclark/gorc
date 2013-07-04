@@ -13,7 +13,7 @@ namespace Assets {
 
 class ModelFace {
 public:
-	size_t Material;
+	int Material;
 	FlagSet<FaceTypeFlag> Type;
 	GeometryMode Geo;
 	LightMode Light;

@@ -52,13 +52,13 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 
 	UpdateCameraAmbientSound();
 
-	for(auto& entity : model->TimerEntities) {
+	for(auto& entity : model->Animations) {
 		entity->Update(dt);
 	}
 
-	for(auto it = model->TimerEntities.begin(); it != model->TimerEntities.end(); ++it) {
+	for(auto it = model->Animations.begin(); it != model->Animations.end(); ++it) {
 		if((*it)->Expired) {
-			model->TimerEntities.Destroy(it.GetIndex());
+			model->Animations.Destroy(it.GetIndex());
 		}
 	}
 }
@@ -210,8 +210,8 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 
 // Anim / Cel verbs
 int Gorc::Game::World::Level::LevelPresenter::SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags) {
-	auto ent_tuple = model->TimerEntities.Create();
-	*std::get<0>(ent_tuple) = std::unique_ptr<TimerEntity>(new SurfaceAnimEntity(*model, surface, rate, flags));
+	auto ent_tuple = model->Animations.Create();
+	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SurfaceAnimation(*model, surface, rate, flags, std::get<1>(ent_tuple)));
 	model->SurfaceAnimNumber[surface] = std::get<1>(ent_tuple);
 	return std::get<1>(ent_tuple);
 }
@@ -221,7 +221,7 @@ int Gorc::Game::World::Level::LevelPresenter::GetSurfaceAnim(int surface) {
 }
 
 void Gorc::Game::World::Level::LevelPresenter::StopAnim(int anim) {
-	model->TimerEntities.Destroy(anim);
+	model->Animations.Destroy(anim);
 }
 
 int Gorc::Game::World::Level::LevelPresenter::GetSurfaceCel(int surface) {

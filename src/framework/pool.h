@@ -148,6 +148,7 @@ public:
 		auto& obj = GetPoolObject(index);
 		obj.next_free = first_free;
 		first_free = &obj;
+		del_cb(*this, index, obj.value);
 	}
 
 	Iterator begin() {

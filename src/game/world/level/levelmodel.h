@@ -3,7 +3,8 @@
 #include "content/assets/level.h"
 #include "cog/instance.h"
 #include "framework/pool.h"
-#include <btBulletDynamicsCommon.h>
+#include "thing.h"
+#include "animation.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -13,68 +14,6 @@ namespace Game {
 namespace World {
 namespace Level {
 
-class LevelModel;
-
-enum class PhysicsCollideClass : unsigned int {
-	Wall = 1,
-	Adjoin = 2,
-	Player = 4,
-	Enemy = 8,
-	Thing = 16
-};
-
-class PhysicsObjectData {
-public:
-	virtual ~PhysicsObjectData();
-};
-
-class SurfaceObjectData : public PhysicsObjectData {
-public:
-	unsigned int SectorId;
-	unsigned int SurfaceId;
-};
-
-class ThingObjectData : public PhysicsObjectData {
-public:
-	unsigned int ThingId;
-};
-
-class Thing : public Content::Assets::Template {
-public:
-	ThingObjectData ObjectData;
-	std::unique_ptr<btDefaultMotionState> MotionState;
-	std::unique_ptr<btRigidBody> RigidBody;
-
-	Thing() = default;
-	Thing(const Content::Assets::Template& tpl);
-
-	const Content::Assets::Template& operator=(const Content::Assets::Template& tpl);
-};
-
-class TimerEntity {
-public:
-	bool Expired = false;
-
-	virtual ~TimerEntity();
-
-	virtual void Update(double dt) = 0;
-};
-
-class SurfaceAnimEntity : public TimerEntity {
-private:
-	LevelModel& model;
-	unsigned int surface;
-	double framerate;
-	FlagSet<Content::Assets::SurfaceAnimationFlag> flag;
-	double framerate_accumulator = 0.0;
-	unsigned int num_cels;
-
-public:
-	SurfaceAnimEntity(LevelModel& model, unsigned int Surface, double framerate, FlagSet<Content::Assets::SurfaceAnimationFlag> flag);
-
-	void Update(double dt);
-};
-
 class LevelModel {
 public:
 	const Content::Assets::Level& Level;
@@ -82,7 +21,7 @@ public:
 	std::vector<int> SurfaceCelNumber;
 	std::vector<int> SurfaceAnimNumber;
 	Pool<Thing> Things;
-	Pool<std::unique_ptr<TimerEntity>> TimerEntities;
+	Pool<std::unique_ptr<Animation>> Animations;
 	std::vector<std::unique_ptr<Cog::Instance>> Cogs;
 
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);

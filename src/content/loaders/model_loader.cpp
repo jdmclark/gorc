@@ -147,7 +147,7 @@ void ParseGeometryDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager
 				tok.GetNumber<int>();
 				tok.AssertPunctuator(":");
 
-				face.Material = tok.GetNumber<size_t>();
+				face.Material = tok.GetNumber<int>();
 				face.Type = FlagSet<Assets::FaceTypeFlag>(tok.GetNumber<uint32_t>());
 				face.Geo = static_cast<Assets::GeometryMode>(tok.GetNumber<uint32_t>());
 				face.Light = static_cast<Assets::LightMode>(tok.GetNumber<uint32_t>());
