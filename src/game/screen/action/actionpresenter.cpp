@@ -20,6 +20,14 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		components.EventBus.FireEvent(evt);
 	}
 
+	if(r_key_down && !components.Input.IsKeyDown(sf::Key::R)) {
+		r_key_down = false;
+	}
+	else if(!r_key_down && components.Input.IsKeyDown(sf::Key::R)) {
+		r_key_down = true;
+		components.CurrentLevelPresenter->Respawn();
+	}
+
 	Vector<3> Translate = Zero<3>();
 	if(components.Input.IsKeyDown(sf::Key::W)) {
 		Translate += Vec(0.0f, 1.0f, 0.0f);
@@ -38,19 +46,19 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 	}
 
 	if(components.Input.IsKeyDown(sf::Key::Q)) {
-		components.LevelView.YawCamera(dt * 3.0f);
+		components.CurrentLevelPresenter->YawCamera(dt * 3.0f);
 	}
 
 	if(components.Input.IsKeyDown(sf::Key::E)) {
-		components.LevelView.YawCamera(-dt * 3.0f);
+		components.CurrentLevelPresenter->YawCamera(-dt * 3.0f);
 	}
 
 	if(components.Input.IsKeyDown(sf::Key::PageUp)) {
-		components.LevelView.PitchCamera(-dt * 1.5f);
+		components.CurrentLevelPresenter->PitchCamera(-dt * 1.5f);
 	}
 
 	if(components.Input.IsKeyDown(sf::Key::PageDown)) {
-		components.LevelView.PitchCamera(dt * 1.5f);
+		components.CurrentLevelPresenter->PitchCamera(dt * 1.5f);
 	}
 
 	if(Length2(Translate) > std::numeric_limits<float>::epsilon()) {
@@ -60,5 +68,5 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		Translate = Zero<3>();
 	}
 
-	components.LevelView.TranslateCamera(Translate);
+	components.CurrentLevelPresenter->TranslateCamera(Translate);
 }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "cog/vm/value.h"
+#include "cog/vm/virtualmachine.h"
+#include "cog/messageid.h"
 #include <vector>
 
 namespace Gorc {
@@ -14,6 +16,8 @@ public:
 	std::vector<VM::Value> Heap;
 
 	Instance(const Cog::Script& Script);
+
+	void Call(Verbs::VerbTable& verbTable, VM::VirtualMachine& vm, MessageId message);
 };
 
 }

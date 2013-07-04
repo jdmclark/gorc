@@ -32,6 +32,8 @@ public:
 
 	std::vector<std::string> ScriptEntries;
 	std::vector<Script const*> Scripts;
+
+	std::vector<std::unique_ptr<std::string>> CogStrings;
 	std::vector<std::tuple<Script const*, std::vector<Cog::VM::Value>>> Cogs;
 
 	std::vector<Math::Vector<3>> Vertices;

@@ -18,7 +18,7 @@ Case(jk_01narshadda_test) {
 	VfsSingleton::SetEpisode("The Force Within");
 	auto lev = TryLoad<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
 
-	AssertResult(2, 1530);
+	AssertResult(10, 1512);
 }
 
 EndSuite(JklTest);

@@ -4,12 +4,6 @@
 
 using namespace Gorc::Cog::Symbols;
 
-SymbolTable::~SymbolTable() {
-	for(auto& str : strings) {
-		free((void*)str);
-	}
-}
-
 void SymbolTable::AddSymbol(SymbolType type, const std::string& name,
 	const VM::Value& defaultValue, bool local, const std::string& desc, int mask, int linkid, bool nolink) {
 	if(IsSymbolDefined(name)) {
@@ -110,10 +104,8 @@ bool SymbolTable::IsSymbolDefined(const std::string& name) const {
 }
 
 const char* SymbolTable::AddString(const std::string& str) {
-	const char* newstr = strdup(str.c_str());
-	strings.push_back(newstr);
-
-	return newstr;
+	strings.emplace_back(new std::string(str));
+	return strings.back()->data();
 }
 
 size_t SymbolTable::GetSymbolIndex(const std::string& name) const {

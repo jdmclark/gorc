@@ -53,12 +53,6 @@ enum class AttachFlag : uint32_t {
 	NoMoveRelativeToAttachedThing	= 0x8
 };
 
-enum class CollideType : uint32_t {
-	NotColliding					= 0x0,
-	SphereColliding					= 0x1,
-	FaceColliding					= 0x3
-};
-
 enum class DamageFlag : uint32_t {
 	Impact							= 0x1,
 	Energy							= 0x2,
@@ -293,6 +287,22 @@ enum class MoveType : uint32_t {
 	None,
 	Physics,
 	Path
+};
+
+enum class CollideType : uint32_t {
+	None = 0,
+	Sphere = 1,
+	SphereUnknown = 2,
+	Face = 3
+};
+
+enum class MessageType {
+	Nothing = 0,
+	System = 1,
+	Thing = 3,
+	Sector = 5,
+	Surface = 6,
+	Cog = 9
 };
 
 }

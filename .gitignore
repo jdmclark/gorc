@@ -9,4 +9,4 @@ src/cog/grammar/parser.output
 src/cog/grammar/lexer.cpp
 game/episode
 game/resource
-
+*.ogg

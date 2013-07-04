@@ -4,7 +4,7 @@ Gorc
 Description
 -----------
 
-Collected C++11 code for handling Dark Forces II assets.
+Early-development Dark Forces II game engine recreation.
 
 Instructions
 ------------

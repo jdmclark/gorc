@@ -4,6 +4,7 @@
 #include "content/manager.h"
 #include <unordered_map>
 #include <functional>
+#include <type_traits>
 
 namespace Gorc {
 namespace Content {
@@ -58,6 +59,19 @@ template <typename T> void TemplateParameterNumberMapper(T& value, const T& defa
 	}
 }
 
+template <typename T> void TemplateParameterEnumNumberMapper(T& value, const T& defaultValue, Text::Tokenizer& tok, Diagnostics::Report& report) {
+	Text::Token t;
+	tok.GetToken(t);
+
+	if(t.Type == Text::TokenType::Float || t.Type == Text::TokenType::Integer || t.Type == Text::TokenType::HexInteger) {
+		value = static_cast<T>(t.GetNumericValue<typename std::underlying_type<T>::type>());
+	}
+	else {
+		report.AddWarning("Template::ParseArgs::TemplateParameterNumberMapper", "expected numeric value", t.Location);
+		value = defaultValue;
+	}
+}
+
 void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, Diagnostics::Report& report) {
 	tpl.Model3d = &manager.Load<Model>(tok.GetSpaceDelimitedString(), cmp);
 }
@@ -69,7 +83,9 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
 		TemplateParameterValueMapper(MoveTypeMap, tpl.Move, MoveType::None, tok, report); }},
 	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
-		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }}
+		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
+	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+		TemplateParameterEnumNumberMapper(tpl.Collide, CollideType::None, tok, report); }}
 };
 
 }

@@ -116,7 +116,7 @@ void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	Gorc::Cog::VM::VirtualMachine vm;
 
 	try {
-		vm.Execute(inst.Heap, inst.Script.Code, startupAddr, VerbTable);
+		vm.Execute(inst->Heap, inst->Script.Code, startupAddr, VerbTable);
 	}
 	catch(const Gorc::Cog::VM::CodeBufferOverflowException& e) {
 		Report.AddCriticalError("CodeGenTestFixture::ParseFile", "code buffer overflow");

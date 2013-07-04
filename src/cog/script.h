@@ -6,6 +6,7 @@
 #include "cog/instance.h"
 #include "cog/flags.h"
 #include "framework/flagset.h"
+#include <memory>
 
 namespace Gorc {
 namespace Cog {
@@ -19,8 +20,8 @@ public:
 	VM::JumpTable JumpTable;
 	VM::CodeBuffer Code;
 
-	Instance CreateInstance() const;
-	Instance CreateInstance(const std::vector<VM::Value>& values) const;
+	std::unique_ptr<Instance> CreateInstance() const;
+	std::unique_ptr<Instance> CreateInstance(const std::vector<VM::Value>& values) const;
 };
 
 }

@@ -26,8 +26,10 @@ public:
 	Model const* Model3d = nullptr;
 	ThingType Type = ThingType::Ghost;
 	MoveType Move = MoveType::None;
+	CollideType Collide = CollideType::None;
 
 	float Mass = 2.0f;
+	float Radius = 0.05f;
 
 	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Colormap& cmp, Diagnostics::Report& report);
 };

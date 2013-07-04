@@ -5,6 +5,12 @@
 
 namespace Gorc {
 
+namespace Cog {
+namespace Verbs {
+class VerbTable;
+}
+}
+
 namespace Content {
 namespace Assets {
 class Template;
@@ -36,8 +42,8 @@ private:
 		virtual int getDebugMode() const;
 	} physicsDebugDraw;
 
-	void DrawLevel(double aspect);
-	void DrawThing(const Thing& thing, double aspect);
+	void DrawLevel();
+	void DrawThing(const Thing& thing);
 
 public:
 	inline void SetPresenter(LevelPresenter* presenter) {
@@ -54,10 +60,6 @@ public:
 
 	void Update(double dt);
 	void Draw(double dt, const Math::Box<2, unsigned int>& view_size);
-
-	void TranslateCamera(const Math::Vector<3>& amt);
-	void YawCamera(double amt);
-	void PitchCamera(double amt);
 };
 
 }

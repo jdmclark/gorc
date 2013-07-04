@@ -367,6 +367,88 @@ void ParseCogscriptsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& m
 	}
 }
 
+void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
+	tok.AssertIdentifier("World");
+	tok.AssertIdentifier("Cogs");
+
+	size_t num = tok.GetNumber<size_t>();
+
+	Text::Token t;
+	while(true) {
+		tok.GetToken(t);
+
+		if(t.Type == Text::TokenType::Identifier && boost::iequals(t.Value, "end")) {
+			break;
+		}
+		else {
+			tok.AssertPunctuator(":");
+
+			Assets::Script const* script = nullptr;
+			try {
+				script = &manager.Load<Assets::Script>(tok.GetSpaceDelimitedString(), compiler);
+			}
+			catch(...) {
+				// Failed to load script. Advance to next entry.
+				tok.SkipToNextLine();
+				continue;
+			}
+
+			std::vector<Cog::VM::Value> values;
+
+			tok.SetReportEOL(true);
+
+			for(const Cog::Symbols::Symbol& symbol : script->Script.SymbolTable) {
+				if(!symbol.Local) {
+					switch(symbol.Type) {
+					case Cog::Symbols::SymbolType::Ai:
+					case Cog::Symbols::SymbolType::Cog:
+					case Cog::Symbols::SymbolType::Keyframe:
+					case Cog::Symbols::SymbolType::Material:
+					case Cog::Symbols::SymbolType::Model:
+					case Cog::Symbols::SymbolType::Sound:
+					case Cog::Symbols::SymbolType::String:
+					case Cog::Symbols::SymbolType::Template:
+						lev.CogStrings.emplace_back(new std::string(tok.GetSpaceDelimitedString()));
+						values.push_back(lev.CogStrings.back()->data());
+						break;
+
+					case Cog::Symbols::SymbolType::Sector:
+					case Cog::Symbols::SymbolType::Surface:
+					case Cog::Symbols::SymbolType::Thing:
+					case Cog::Symbols::SymbolType::Int:
+						values.push_back(tok.GetNumber<int>());
+						break;
+
+					case Cog::Symbols::SymbolType::Flex:
+					case Cog::Symbols::SymbolType::Float:
+						values.push_back(tok.GetNumber<float>());
+						break;
+
+					case Cog::Symbols::SymbolType::Message:
+						// Ignore
+						break;
+
+					default:
+					case Cog::Symbols::SymbolType::Vector:
+						report.AddWarning("LevelLoader::ParseCogsSection", "unhandled symbol type", t.Location);
+						continue;
+					}
+				}
+			}
+
+			tok.SetReportEOL(false);
+
+			lev.Cogs.emplace_back(script, values);
+		}
+	}
+
+	if(num != lev.Cogs.size()) {
+		report.AddWarning("LevelLoader::ParseCogsSection",
+				boost::str(boost::format("expected %d cog instances, found %d entries") % num % lev.Cogs.size()),
+				t.Location);
+	}
+}
+
 void ParseTemplatesSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	tok.AssertIdentifier("World");
 	tok.AssertIdentifier("templates");
@@ -470,6 +552,19 @@ void ParseThingsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manag
 	}
 }
 
+using LevelSectionParser = std::function<void(Assets::Level&, Text::Tokenizer&, Manager&, Cog::Compiler&, Diagnostics::Report&)>;
+const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap {
+	{"jk", ParseJKSection},
+	{"header", ParseHeaderSection},
+	{"materials", ParseMaterialsSection},
+	{"georesource", ParseGeoresourceSection},
+	{"sectors", ParseSectorsSection},
+	{"cogscripts", ParseCogscriptsSection},
+	{"cogs", ParseCogsSection},
+	{"templates", ParseTemplatesSection},
+	{"things", ParseThingsSection}
+};
+
 void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	// Post-process; load materials and scripts.
 	for(const auto& mat_entry : lev.MaterialEntries) {
@@ -477,7 +572,13 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 	}
 
 	for(const auto& script_entry : lev.ScriptEntries) {
-		lev.Scripts.push_back(&manager.Load<Assets::Script>(script_entry, compiler));
+		try {
+			lev.Scripts.push_back(&manager.Load<Assets::Script>(script_entry, compiler));
+		}
+		catch(...) {
+			// The main point of loading all scripts is to identify missing verbs.
+			// Silently consume errors.
+		}
 	}
 
 	// Add adjoined sector reference to adjoins.
@@ -519,18 +620,6 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::LevelLoader::Parse(Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
 	std::unique_ptr<Assets::Level> lev(new Assets::Level());
 
-	using sec_fn = std::function<void(Assets::Level&, Text::Tokenizer&, Manager&, Cog::Compiler&, Diagnostics::Report&)>;
-	std::vector<std::tuple<std::string, sec_fn>> sectionmap {
-		std::make_tuple("jk", ParseJKSection),
-		std::make_tuple("header", ParseHeaderSection),
-		std::make_tuple("materials", ParseMaterialsSection),
-		std::make_tuple("georesource", ParseGeoresourceSection),
-		std::make_tuple("sectors", ParseSectorsSection),
-		std::make_tuple("cogscripts", ParseCogscriptsSection),
-		std::make_tuple("templates", ParseTemplatesSection),
-		std::make_tuple("things", ParseThingsSection)
-	};
-
 	Text::Token t;
 	while(true) {
 		SkipToNextSection(tok);
@@ -540,13 +629,13 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::LevelLoader::Parse
 			break;
 		}
 		else {
-			auto it = std::find_if(sectionmap.begin(), sectionmap.end(),
-					[&t](const std::tuple<std::string, sec_fn>& key){ return boost::iequals(t.Value, std::get<0>(key)); });
-			if(it == sectionmap.end()) {
+			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
+			auto it = LevelSectionParserMap.find(t.Value);
+			if(it == LevelSectionParserMap.end()) {
 				report.AddWarning("LevelLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
 			}
 			else {
-				std::get<1>(*it)(*lev, tok, manager, compiler, report);
+				it->second(*lev, tok, manager, compiler, report);
 			}
 		}
 	}

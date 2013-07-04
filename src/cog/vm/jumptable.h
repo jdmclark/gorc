@@ -19,7 +19,7 @@ public:
 		table[static_cast<uint8_t>(id)] = target;
 	}
 
-	inline size_t GetTarget(MessageId id) {
+	inline size_t GetTarget(MessageId id) const {
 		return table[static_cast<uint8_t>(id)];
 	}
 };

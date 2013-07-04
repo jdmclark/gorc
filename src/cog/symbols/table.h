@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <unordered_map>
+#include <string>
+#include <memory>
 
 namespace Gorc {
 namespace Cog {
@@ -14,11 +16,9 @@ class SymbolTable
 private:
 	std::vector<Symbol> symbols;
 	std::unordered_map<std::string, size_t> symbolMap;
-	std::vector<const char*> strings;
+	std::vector<std::unique_ptr<std::string>> strings;
 
 public:
-	~SymbolTable();
-
 	void AddSymbol(SymbolType type, const std::string& name,
 		const VM::Value& defaultValue,
 		bool local, const std::string& desc, int mask, int linkid, bool nolink);

@@ -3,6 +3,7 @@
 #include "cog/stages/stages.h"
 #include "cog/ast/factory.h"
 #include "cog/ir/codeprinter.h"
+#include "framework/io/exception.h"
 
 void Gorc::Cog::Compiler::AddMessageId(const std::string& name, MessageId value) {
 	MessageTable.insert(std::make_pair(name, value));
@@ -70,19 +71,19 @@ void Gorc::Cog::Compiler::Compile(IO::ReadOnlyFile& file, Script& output, Diagno
 	AST::TranslationUnit* ast = Stages::GenerateAST::GenerateAST(source, report, astFactory);
 
 	if(report.GetErrorCount() != prevErrorCount) {
-		return;
+		throw IO::FileCorruptException();
 	}
 
 	Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(ast, output.SymbolTable, ConstantTable, VerbTable, report);
 
 	if(report.GetErrorCount() != prevErrorCount) {
-		return;
+		throw IO::FileCorruptException();
 	}
 
 	Gorc::Cog::Stages::ConstantFolding::ConstantFolding(astFactory, ast, output.SymbolTable, ConstantTable, report);
 
 	if(report.GetErrorCount() != prevErrorCount) {
-		return;
+		throw IO::FileCorruptException();
 	}
 
 	IR::CodePrinter printer(output.Code, output.SymbolTable, MessageTable, VerbTable, output.JumpTable);
@@ -90,7 +91,7 @@ void Gorc::Cog::Compiler::Compile(IO::ReadOnlyFile& file, Script& output, Diagno
 	Gorc::Cog::Stages::GenerateCode::GenerateCode(ast, printer, report);
 
 	if(report.GetErrorCount() != prevErrorCount) {
-		return;
+		throw IO::FileCorruptException();
 	}
 
 	output.Flags = FlagSet<CogFlag> { ast->Flags };

@@ -4,32 +4,32 @@ Gorc::Cog::Script::Script() {
 	return;
 }
 
-Gorc::Cog::Instance Gorc::Cog::Script::CreateInstance() const {
-	Gorc::Cog::Instance inst(*this);
+std::unique_ptr<Gorc::Cog::Instance> Gorc::Cog::Script::CreateInstance() const {
+	std::unique_ptr<Instance> inst(new Instance(*this));
 
-	inst.Heap.resize(SymbolTable.size());
+	inst->Heap.resize(SymbolTable.size());
 
 	auto it = SymbolTable.begin();
-	auto jt = inst.Heap.begin();
+	auto jt = inst->Heap.begin();
 
-	for( ; it != SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
+	for( ; it != SymbolTable.end() && jt != inst->Heap.end(); ++it, ++jt) {
 		(*jt) = it->DefaultValue;
 	}
 
-	return inst;
+	return std::move(inst);
 }
 
-Gorc::Cog::Instance Gorc::Cog::Script::CreateInstance(const std::vector<VM::Value>& values) const {
-	Gorc::Cog::Instance inst(*this);
+std::unique_ptr<Gorc::Cog::Instance> Gorc::Cog::Script::CreateInstance(const std::vector<VM::Value>& values) const {
+	std::unique_ptr<Instance> inst(new Instance(*this));
 
-	inst.Heap.resize(SymbolTable.size());
+	inst->Heap.resize(SymbolTable.size());
 
 	auto it = SymbolTable.begin();
-	auto jt = inst.Heap.begin();
+	auto jt = inst->Heap.begin();
 	auto kt = values.begin();
 
-	for( ; it != SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		if(kt != values.end() && !it->Local) {
+	for( ; it != SymbolTable.end() && jt != inst->Heap.end(); ++it, ++jt) {
+		if(kt != values.end() && !it->Local && it->Type != Symbols::SymbolType::Message) {
 			(*jt) = *kt;
 			++kt;
 		}
@@ -38,5 +38,5 @@ Gorc::Cog::Instance Gorc::Cog::Script::CreateInstance(const std::vector<VM::Valu
 		}
 	}
 
-	return inst;
+	return std::move(inst);
 }

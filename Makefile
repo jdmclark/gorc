@@ -9,7 +9,7 @@
 
 LIB_MODULES = framework cog content
 TEST_MODULES = frameworktest cogtest contenttest
-BIN_MODULES = game
+BIN_MODULES = game ungob
 
 framework_LIBRARIES = boost_filesystem boost_system
 content_LIBRARIES = sfml-audio sfml-graphics sfml-window sfml-system BulletDynamics BulletCollision LinearMath
@@ -25,6 +25,8 @@ contenttest_DEPENDENCIES = cog framework content
 
 game_DEPENDENCIES = framework cog content
 game_LIBRARIES = GL GLU
+
+ungob_DEPENDENCIES = framework cog content
 
 # =================== #
 # Build configuration #

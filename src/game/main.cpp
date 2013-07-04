@@ -24,7 +24,49 @@
 #include "content/assets/level.h"
 #include "cog/compiler.h"
 
+#include <iostream>
+
 const double gameplayTick = (1.0 / 60.0);
+
+void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Components& components) {
+	// Anim / Cel verbs
+	verbTable.AddVerb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
+		return components.CurrentLevelPresenter->SurfaceAnim(surface, rate, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAnimationFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 1>("getsurfaceanim", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceAnim(surface); });
+	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) { components.CurrentLevelPresenter->StopAnim(anim); });
+	verbTable.AddVerb<void, 1>("stopsurfaceanim", [&components](int surface) {
+		components.CurrentLevelPresenter->StopAnim(components.CurrentLevelPresenter->GetSurfaceAnim(surface));
+	});
+
+	verbTable.AddVerb<int, 1>("getwallcel", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceCel(surface); });
+	verbTable.AddVerb<int, 2>("setwallcel", [&components](int surface, int cel) { components.CurrentLevelPresenter->SetSurfaceCel(surface, cel); return 1; });
+
+	// Message verbs
+	verbTable.AddVerb<int, 1>("getparam", [&components](int param_num) { return components.CurrentLevelPresenter->GetParam(param_num); });
+	verbTable.AddVerb<int, 0>("getsenderid", [&components]{ return components.CurrentLevelPresenter->GetSenderId(); });
+	verbTable.AddVerb<int, 0>("getsenderref", [&components]{ return components.CurrentLevelPresenter->GetSenderRef(); });
+	verbTable.AddVerb<int, 0>("getsendertype", [&components]{ return components.CurrentLevelPresenter->GetSenderType(); });
+	verbTable.AddVerb<int, 0>("getsourceref", [&components]{ return components.CurrentLevelPresenter->GetSourceRef(); });
+	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{ return components.CurrentLevelPresenter->GetSourceType(); });
+
+	// Sound verbs
+	verbTable.AddVerb<int, 6>("playsoundpos", [&components](const char* wav, Gorc::Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+		// TODO
+		return -1;
+	});
+
+	// Surface verbs
+	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
+		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
+	});
+
+	// Thing verbs
+	verbTable.AddVerb<int, 2>("creatething", [&components](const char* tpl_name, int thing_pos) {
+		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_name, thing_pos);
+	});
+}
 
 int main(int argc, char** argv) {
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
@@ -52,12 +94,14 @@ int main(int argc, char** argv) {
 	Gorc::Game::World::Nothing::NothingView NothingView;
 	Gorc::Game::World::Level::LevelView LevelView;
 
-	Gorc::Game::Components Components(Report, EventBus, Input, FileSystem,
+	Gorc::Game::Components Components(Report, EventBus, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
 			ActionView, NothingView, LevelView);
 
 	ScreenPresenterMapper.SetComponents(Components);
 	WorldPresenterMapper.SetComponents(Components);
+
+	RegisterLevelVerbs(VerbTable, Components);
 
 	bool running = true;
 
@@ -122,6 +166,7 @@ int main(int argc, char** argv) {
 
 		gameplayElapsedTime += currentTime;
 		gameplayAccumulator += currentTime;
+
 		while(gameplayAccumulator >= gameplayTick) {
 			gameplayAccumulator -= gameplayTick;
 
