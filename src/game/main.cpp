@@ -52,6 +52,12 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{ return components.CurrentLevelPresenter->GetSourceType(); });
 	verbTable.AddVerb<void, 1>("settimer", [&components](float time) { components.CurrentLevelPresenter->SetTimer(time); });
 
+	// Options verbs
+	verbTable.AddVerb<int, 0>("getdifficulty", [&components] {
+		// TODO: Add actual difficulty setting.
+		return static_cast<int>(Gorc::Content::Assets::Difficulty::Medium);
+	});
+
 	// Sound verbs
 	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
 		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));

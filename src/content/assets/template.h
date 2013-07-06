@@ -27,6 +27,7 @@ public:
 	ThingType Type = ThingType::Ghost;
 	MoveType Move = MoveType::None;
 	CollideType Collide = CollideType::None;
+	FlagSet<ThingFlag> Flags;
 
 	float Mass = 2.0f;
 	float Radius = 0.05f;

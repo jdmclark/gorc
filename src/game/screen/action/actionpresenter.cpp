@@ -28,6 +28,14 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		components.CurrentLevelPresenter->Respawn();
 	}
 
+	if(space_key_down && !components.Input.IsKeyDown(sf::Key::Space)) {
+		space_key_down = false;
+	}
+	else if(!space_key_down && components.Input.IsKeyDown(sf::Key::Space)) {
+		space_key_down = true;
+		components.CurrentLevelPresenter->Activate();
+	}
+
 	Vector<3> Translate = Zero<3>();
 	if(components.Input.IsKeyDown(sf::Key::W)) {
 		Translate += Vec(0.0f, 1.0f, 0.0f);

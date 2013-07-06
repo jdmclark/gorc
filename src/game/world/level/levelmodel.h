@@ -17,11 +17,17 @@ namespace World {
 namespace Level {
 
 class LevelModel {
+private:
+	void AddCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
+			const std::vector<Cog::VM::Value>& values);
+
 public:
 	const Content::Assets::Level& Level;
+	std::vector<Content::Assets::LevelAdjoin> Adjoins;
+	std::vector<Content::Assets::LevelSurface> Surfaces;
+	std::vector<Content::Assets::LevelSector> Sectors;
+
 	std::vector<int> MaterialCelNumber;
-	std::vector<int> SurfaceCelNumber;
-	std::vector<int> SurfaceAnimNumber;
 	Pool<Thing> Things;
 	Pool<std::unique_ptr<Animation>> Animations;
 	Pool<Sound, 8> Sounds;

@@ -169,6 +169,10 @@ public:
 	Iterator end() {
 		return Iterator();
 	}
+
+	size_t size() const {
+		return pages.size() * PageSize;
+	}
 };
 
 }

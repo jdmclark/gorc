@@ -72,6 +72,7 @@ public:
 	void YawCamera(double amt);
 	void PitchCamera(double amt);
 	void Respawn();
+	void Activate();
 
 	// Anim / Cel verbs
 	int SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags);

@@ -243,16 +243,19 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position)));
 }
 
+void Gorc::Game::World::Level::LevelPresenter::Activate() {
+	// TODO: Implement surface and thing activation
+}
+
 // Anim / Cel verbs
 int Gorc::Game::World::Level::LevelPresenter::SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags) {
 	auto ent_tuple = model->Animations.Create();
 	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SurfaceAnimation(*model, surface, rate, flags, std::get<1>(ent_tuple)));
-	model->SurfaceAnimNumber[surface] = std::get<1>(ent_tuple);
 	return std::get<1>(ent_tuple);
 }
 
 int Gorc::Game::World::Level::LevelPresenter::GetSurfaceAnim(int surface) {
-	return model->SurfaceAnimNumber[surface];
+	return model->Surfaces[surface].AnimNumber;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::StopAnim(int anim) {
@@ -260,11 +263,11 @@ void Gorc::Game::World::Level::LevelPresenter::StopAnim(int anim) {
 }
 
 int Gorc::Game::World::Level::LevelPresenter::GetSurfaceCel(int surface) {
-	return model->SurfaceCelNumber[surface];
+	return model->Surfaces[surface].CelNumber;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::SetSurfaceCel(int surface, int cel) {
-	model->SurfaceCelNumber[surface] = cel;
+	model->Surfaces[surface].CelNumber = cel;
 }
 
 // Sound verbs

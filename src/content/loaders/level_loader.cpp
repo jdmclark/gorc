@@ -567,11 +567,13 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 	// Construct surface collide shapes.
 	size_t i = 0;
 	for(auto& surf : lev.Surfaces) {
+		lev.SurfaceShapes.emplace_back(new btConvexHullShape());
+
 		for(const auto& pt : surf.Vertices) {
-			surf.SurfaceShape.addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]));
+			lev.SurfaceShapes.back()->addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]));
 		}
 
-		surf.SurfaceShape.setMargin(0);
+		lev.SurfaceShapes.back()->setMargin(0);
 	}
 }
 

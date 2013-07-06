@@ -2,8 +2,6 @@
 
 #include "flags.h"
 #include "framework/math/vector.h"
-
-#include <btBulletDynamicsCommon.h>
 #include <memory>
 
 namespace Gorc {
@@ -23,8 +21,8 @@ public:
 	float ExtraLight;
 	std::vector<std::tuple<int, int, float>> Vertices;
 	Math::Vector<3> Normal;
-
-	btConvexHullShape SurfaceShape;
+	int CelNumber = -1;
+	int AnimNumber = -1;
 };
 
 }

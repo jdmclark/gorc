@@ -144,9 +144,9 @@ void Gorc::Game::World::Level::LevelView::DrawLevel() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	for(const auto& sector : lev.Sectors) {
+	for(const auto& sector : currentModel->Sectors) {
 		for(size_t i = sector.FirstSurface; i < sector.SurfaceCount + sector.FirstSurface; ++i) {
-			const auto& surface = lev.Surfaces[i];
+			const auto& surface = currentModel->Surfaces[i];
 			if(surface.Material >= 0) {
 
 				const auto& material_entry = lev.Materials[surface.Material];
@@ -157,7 +157,7 @@ void Gorc::Game::World::Level::LevelView::DrawLevel() {
 				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
 						1.0f / static_cast<float>(material->Height));
 
-				int surfaceCelNumber = currentModel->SurfaceCelNumber[i];
+				int surfaceCelNumber = surface.CelNumber;
 				if(surfaceCelNumber >= 0) {
 					material->Cels[surfaceCelNumber % material->Cels.size()].Diffuse->Bind();
 				}

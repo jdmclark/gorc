@@ -19,16 +19,16 @@ Gorc::Game::World::Level::SurfaceAnimation::SurfaceAnimation(LevelModel& model, 
 	num_cels = std::get<0>(model.Level.Materials[surface_material])->Cels.size();
 
 	if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstTwoFrames) {
-		model.SurfaceCelNumber[surface] = 2 % num_cels;
+		model.Surfaces[surface].CelNumber = 2 % num_cels;
 	}
 	else if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstFrame) {
-		model.SurfaceCelNumber[surface] = 1 % num_cels;
+		model.Surfaces[surface].CelNumber = 1 % num_cels;
 	}
 	else {
-		model.SurfaceCelNumber[surface] = 0;
+		model.Surfaces[surface].CelNumber = 0;
 	}
 
-	model.SurfaceAnimNumber[surface] = anim_num;
+	model.Surfaces[surface].AnimNumber = anim_num;
 }
 
 void Gorc::Game::World::Level::SurfaceAnimation::Update(double dt) {
@@ -37,7 +37,7 @@ void Gorc::Game::World::Level::SurfaceAnimation::Update(double dt) {
 	while(framerate_accumulator >= framerate) {
 		framerate_accumulator -= framerate;
 
-		int next_cel = model.SurfaceCelNumber[surface] + 1;
+		int next_cel = model.Surfaces[surface].CelNumber + 1;
 		if(next_cel >= num_cels) {
 			if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstTwoFrames) {
 				next_cel = 2 % num_cels;
@@ -50,10 +50,10 @@ void Gorc::Game::World::Level::SurfaceAnimation::Update(double dt) {
 			}
 		}
 
-		model.SurfaceCelNumber[surface] = next_cel;
+		model.Surfaces[surface].CelNumber = next_cel;
 	}
 }
 
 void Gorc::Game::World::Level::SurfaceAnimation::Stop() {
-	model.SurfaceAnimNumber[surface] = -1;
+	model.Surfaces[surface].AnimNumber = -1;
 }
