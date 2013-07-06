@@ -111,13 +111,13 @@ void ParseMaterialsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& ma
 			float x_scale = tok.GetNumber<float>();
 			float y_scale = tok.GetNumber<float>();
 
-			lev.MaterialEntries.emplace_back(t.Value, x_scale, y_scale);
+			lev.Materials.emplace_back(nullptr, x_scale, y_scale, t.Value);
 		}
 	}
 
-	if(num != lev.MaterialEntries.size()) {
+	if(num != lev.Materials.size()) {
 		report.AddWarning("LevelLoader::ParseMaterialsSection",
-				boost::str(boost::format("expected %d materials, found %d entries") % num % lev.MaterialEntries.size()),
+				boost::str(boost::format("expected %d materials, found %d entries") % num % lev.Materials.size()),
 				t.Location);
 	}
 }
@@ -338,35 +338,6 @@ void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& mana
 	}
 }
 
-void ParseCogscriptsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
-	tok.AssertIdentifier("World");
-	tok.AssertIdentifier("scripts");
-
-	size_t num = tok.GetNumber<size_t>();
-
-	Text::Token t;
-	while(true) {
-		tok.GetToken(t);
-
-		if(t.Type == Text::TokenType::Identifier && boost::iequals(t.Value, "end")) {
-			break;
-		}
-		else {
-			tok.AssertPunctuator(":");
-
-			t.Value = tok.GetSpaceDelimitedString();
-
-			lev.ScriptEntries.emplace_back(t.Value);
-		}
-	}
-
-	if(num != lev.ScriptEntries.size()) {
-		report.AddWarning("LevelLoader::ParseCogscriptsSection",
-				boost::str(boost::format("expected %d scripts, found %d entries") % num % lev.ScriptEntries.size()),
-				t.Location);
-	}
-}
-
 void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	tok.AssertIdentifier("World");
 	tok.AssertIdentifier("Cogs");
@@ -401,13 +372,13 @@ void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager
 				if(!symbol.Local) {
 					switch(symbol.Type) {
 					case Cog::Symbols::SymbolType::Ai:
-					case Cog::Symbols::SymbolType::Cog:
 					case Cog::Symbols::SymbolType::Keyframe:
+					case Cog::Symbols::SymbolType::Cog:
 					case Cog::Symbols::SymbolType::Material:
 					case Cog::Symbols::SymbolType::Model:
 					case Cog::Symbols::SymbolType::Sound:
-					case Cog::Symbols::SymbolType::String:
 					case Cog::Symbols::SymbolType::Template:
+					case Cog::Symbols::SymbolType::String:
 						lev.CogStrings.emplace_back(new std::string(tok.GetSpaceDelimitedString()));
 						values.push_back(lev.CogStrings.back()->data());
 						break;
@@ -454,7 +425,8 @@ void ParseTemplatesSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& ma
 	tok.AssertIdentifier("templates");
 
 	// Add 'none' template to list with default parameters.
-	lev.Templates.emplace("none", Assets::Template());
+	lev.TemplateMap.insert(std::make_pair("none", lev.Templates.size()));
+	lev.Templates.push_back(Assets::Template());
 
 	size_t num = tok.GetNumber<size_t>();
 
@@ -471,21 +443,22 @@ void ParseTemplatesSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& ma
 			base_name = tok.GetSpaceDelimitedString();
 			std::transform(base_name.begin(), base_name.end(), base_name.begin(), tolower);
 
-			auto base_it = lev.Templates.find(base_name);
-			if(base_it == lev.Templates.end()) {
+			auto base_it = lev.TemplateMap.find(base_name);
+			if(base_it == lev.TemplateMap.end()) {
 				report.AddError("LevelLoader::ParseTemplatesSection",
 						boost::str(boost::format("template %s parent %s not defined") % tpl_name % base_name), tok.GetInternalTokenLocation());
 				tok.SkipToNextLine();
 				continue;
 			}
 
-			auto succ_pair = lev.Templates.emplace(tpl_name, base_it->second);
+			auto succ_pair = lev.TemplateMap.emplace(tpl_name, lev.Templates.size());
 			if(!succ_pair.second) {
 				report.AddWarning("LevelLoader::ParseTemplatesSection",
 						boost::str(boost::format("template %s redefinition") % tpl_name), tok.GetInternalTokenLocation());
 			}
 
-			succ_pair.first->second.ParseArgs(tok, manager, *lev.MasterColormap, report);
+			lev.Templates.push_back(lev.Templates[base_it->second]);
+			lev.Templates.back().ParseArgs(tok, manager, *lev.MasterColormap, report);
 		}
 		else {
 			report.AddError("LevelLoader::ParseTemplatesSection", "expected template name", tok.GetInternalTokenLocation());
@@ -528,8 +501,8 @@ void ParseThingsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manag
 			float roll = tok.GetNumber<float>();
 			unsigned int sector = tok.GetNumber<unsigned int>();
 
-			auto base_it = lev.Templates.find(tpl_name);
-			if(base_it == lev.Templates.end()) {
+			auto base_it = lev.TemplateMap.find(tpl_name);
+			if(base_it == lev.TemplateMap.end()) {
 				report.AddError("LevelLoader::ParseThingsSection",
 						boost::str(boost::format("thing uses undefined template \'%s\'") % tpl_name),
 						tok.GetInternalTokenLocation());
@@ -537,7 +510,7 @@ void ParseThingsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manag
 				continue;
 			}
 
-			lev.Things.emplace_back(base_it->second);
+			lev.Things.emplace_back(lev.Templates[base_it->second]);
 			lev.Things.back().Sector = sector;
 			lev.Things.back().Position = Math::Vec(x, y, z);
 			lev.Things.back().Orientation = Math::Vec(pitch, yaw, roll);
@@ -559,7 +532,6 @@ const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap 
 	{"materials", ParseMaterialsSection},
 	{"georesource", ParseGeoresourceSection},
 	{"sectors", ParseSectorsSection},
-	{"cogscripts", ParseCogscriptsSection},
 	{"cogs", ParseCogsSection},
 	{"templates", ParseTemplatesSection},
 	{"things", ParseThingsSection}
@@ -567,18 +539,8 @@ const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap 
 
 void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compiler, Diagnostics::Report& report) {
 	// Post-process; load materials and scripts.
-	for(const auto& mat_entry : lev.MaterialEntries) {
-		lev.Materials.push_back(&manager.Load<Assets::Material>(std::get<0>(mat_entry), *lev.MasterColormap));
-	}
-
-	for(const auto& script_entry : lev.ScriptEntries) {
-		try {
-			lev.Scripts.push_back(&manager.Load<Assets::Script>(script_entry, compiler));
-		}
-		catch(...) {
-			// The main point of loading all scripts is to identify missing verbs.
-			// Silently consume errors.
-		}
+	for(auto& mat_entry : lev.Materials) {
+		std::get<0>(mat_entry) = &manager.Load<Assets::Material>(std::get<3>(mat_entry), *lev.MasterColormap);
 	}
 
 	// Add adjoined sector reference to adjoins.

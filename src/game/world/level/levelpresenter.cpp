@@ -3,10 +3,11 @@
 
 using namespace Gorc::Math;
 
-Gorc::Game::World::Level::LevelCogState::LevelCogState(int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-			int SourceRef, Content::Assets::MessageType SourceType,
-			int Param0, int Param1, int Param2, int Param3)
-	: SenderId(SenderId), SenderRef(SenderRef), SenderType(SenderType),
+Gorc::Game::World::Level::LevelCogState::LevelCogState(CogTimerState& TimerState,
+		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
+		int SourceRef, Content::Assets::MessageType SourceType,
+		int Param0, int Param1, int Param2, int Param3)
+	: TimerState(TimerState), SenderId(SenderId), SenderRef(SenderRef), SenderType(SenderType),
 	  SourceRef(SourceRef), SourceType(SourceType),
 	  Params({ Param0, Param1, Param2, Param3 }) {
 	return;
@@ -18,7 +19,7 @@ Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components,
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
-	model = std::unique_ptr<LevelModel>(new LevelModel(place.Level));
+	model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level));
 
 	components.LevelView.SetPresenter(this);
 	components.LevelView.SetLevelModel(model.get());
@@ -35,11 +36,13 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
+	// Update camera position
 	Thing& camera = model->Things[model->CameraThingId];
 
 	camera.RigidBody->applyCentralForce(BtVec(model->CameraVelocity * 800.0f));
 	camera.RigidBody->setDamping(0.999f, 1.0f);
 
+	// Update things
 	btTransform trans;
 	for(auto& thing : model->Things) {
 		if(thing.RigidBody) {
@@ -50,8 +53,24 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 		}
 	}
 
+	// Update listener
+	sf::Listener::SetTarget(0.0f, 0.0f, 1.0f);
+	sf::Listener::SetPosition(Math::Get<0>(camera.Position), Math::Get<1>(camera.Position), Math::Get<2>(camera.Position));
+	// TODO: Handle camera orientation (not currently properly implemented in SFML).
 	UpdateCameraAmbientSound();
 
+	// Update sounds
+	for(auto& sound : model->Sounds) {
+		sound.Update(dt, *model);
+	}
+
+	for(auto it = model->Sounds.begin(); it != model->Sounds.end(); ++it) {
+		if(it->GetExpired()) {
+			model->Sounds.Destroy(it.GetIndex());
+		}
+	}
+
+	// Update animations
 	for(auto& entity : model->Animations) {
 		entity->Update(dt);
 	}
@@ -59,6 +78,20 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	for(auto it = model->Animations.begin(); it != model->Animations.end(); ++it) {
 		if((*it)->Expired) {
 			model->Animations.Destroy(it.GetIndex());
+		}
+	}
+
+	// Update cogs
+	for(std::tuple<std::unique_ptr<Cog::Instance>, CogTimerState>& cog : model->Cogs) {
+		Cog::Instance& inst = *std::get<0>(cog);
+		CogTimerState& timer_state = std::get<1>(cog);
+
+		if(timer_state.TimerRemainingTime > 0.0) {
+			timer_state.TimerRemainingTime -= dt;
+			if(timer_state.TimerRemainingTime <= 0.0) {
+				timer_state.TimerRemainingTime = 0.0;
+				SendMessage(inst, timer_state, Cog::MessageId::Timer, -1, -1, Content::Assets::MessageType::Nothing);
+			}
 		}
 	}
 }
@@ -76,6 +109,9 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateCameraAmbientSound() {
 		AmbientSound.SetBuffer(sec.AmbientSound->Buffer);
 		AmbientSound.SetLoop(true);
 		AmbientSound.SetVolume(sec.AmbientSoundVolume * 100.0f);
+		AmbientSound.SetPosition(0,0,0);
+		AmbientSound.SetRelativeToListener(true);
+		AmbientSound.SetAttenuation(0.0f);
 		AmbientSound.Play();
 	}
 	else {
@@ -140,11 +176,12 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(Thing& thing, c
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SendMessage(Cog::Instance& script, Cog::MessageId message,
+void Gorc::Game::World::Level::LevelPresenter::SendMessage(Cog::Instance& script,
+		CogTimerState& timer_state, Cog::MessageId message,
 		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 		int SourceRef, Content::Assets::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
-	RunningCogState.emplace(SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
+	RunningCogState.emplace(timer_state, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
 
 	script.Call(components.VerbTable, VirtualMachine, message);
 
@@ -155,13 +192,11 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessageToAll(Cog::MessageId m
 		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 		int SourceRef, Content::Assets::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
-	RunningCogState.emplace(SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
-
 	for(auto& script : model->Cogs) {
-		script->Call(components.VerbTable, VirtualMachine, message);
+		SendMessage(*std::get<0>(script), std::get<1>(script),
+				message, SenderId, SenderRef, SenderType,
+				SourceRef, SourceType, Param0, Param1, Param2, Param3);
 	}
-
-	RunningCogState.pop();
 }
 
 void Gorc::Game::World::Level::LevelPresenter::TranslateCamera(const Vector<3>& amt) {
@@ -232,6 +267,36 @@ void Gorc::Game::World::Level::LevelPresenter::SetSurfaceCel(int surface, int ce
 	model->SurfaceCelNumber[surface] = cel;
 }
 
+// Sound verbs
+int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags) {
+	auto snd_tuple = model->Sounds.Create();
+
+	Sound& snd = *std::get<0>(snd_tuple);
+	snd.PlaySoundLocal(place.ContentManager->GetAsset<Content::Assets::Sound>(wav), volume, panning, flags);
+
+	return std::get<1>(snd_tuple);
+}
+
+int Gorc::Game::World::Level::LevelPresenter::PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad,
+		FlagSet<Content::Assets::SoundFlag> flags) {
+	auto snd_tuple = model->Sounds.Create();
+
+	Sound& snd = *std::get<0>(snd_tuple);
+	snd.PlaySoundPos(place.ContentManager->GetAsset<Content::Assets::Sound>(wav), pos, volume, minrad, maxrad, flags);
+
+	return std::get<1>(snd_tuple);
+}
+
+int Gorc::Game::World::Level::LevelPresenter::PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad,
+		FlagSet<Content::Assets::SoundFlag> flags) {
+	auto snd_tuple = model->Sounds.Create();
+
+	Sound& snd = *std::get<0>(snd_tuple);
+	snd.PlaySoundThing(*model, place.ContentManager->GetAsset<Content::Assets::Sound>(wav), thing, volume, minrad, maxrad, flags);
+
+	return std::get<1>(snd_tuple);
+}
+
 // Surface verbs
 Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter(int surface) {
 	auto vec = Math::Zero<3>();
@@ -245,7 +310,7 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter
 
 // Thing verbs
 
-int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(const char* tpl_name, int thing_id) {
+int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
-	return static_cast<int>(model->CreateThing(tpl_name, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
+	return static_cast<int>(model->CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
 }

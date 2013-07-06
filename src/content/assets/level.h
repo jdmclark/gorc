@@ -24,13 +24,11 @@ public:
 	using Loader = Loaders::LevelLoader;
 
 	LevelHeader Header;
-	std::vector<std::tuple<std::string, float, float>> MaterialEntries;
-	std::vector<Material const*> Materials;
+	std::vector<std::tuple<Material const*, float, float, std::string>> Materials;
 
 	Colormap const* MasterColormap = nullptr;
 	std::vector<Colormap const*> Colormaps;
 
-	std::vector<std::string> ScriptEntries;
 	std::vector<Script const*> Scripts;
 
 	std::vector<std::unique_ptr<std::string>> CogStrings;
@@ -42,7 +40,8 @@ public:
 	std::vector<LevelSurface> Surfaces;
 	std::vector<LevelSector> Sectors;
 
-	std::unordered_map<std::string, Template> Templates;
+	std::vector<Template> Templates;
+	std::unordered_map<std::string, int> TemplateMap;
 	std::vector<Template> Things;
 };
 

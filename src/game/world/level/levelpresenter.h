@@ -3,6 +3,7 @@
 #include "framework/place/presenter.h"
 #include "game/components.h"
 #include "levelplace.h"
+#include "cogtimerstate.h"
 #include "cog/vm/virtualmachine.h"
 
 #include <SFML/Audio.hpp>
@@ -20,6 +21,7 @@ class Thing;
 
 class LevelCogState {
 public:
+	CogTimerState& TimerState;
 	int SenderId;
 	int SenderRef;
 	Content::Assets::MessageType SenderType;
@@ -27,7 +29,8 @@ public:
 	Content::Assets::MessageType SourceType;
 	std::array<int, 4> Params;
 
-	LevelCogState(int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
+	LevelCogState(CogTimerState& TimerState,
+			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 			int SourceRef, Content::Assets::MessageType SourceType,
 			int Param0, int Param1, int Param2, int Param3);
 };
@@ -50,7 +53,8 @@ private:
 			const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf);
 	void UpdateThingSector(Thing& thing, const Math::Vector<3>& oldThingPosition);
 
-	void SendMessage(Cog::Instance& script, Cog::MessageId message, int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
+	void SendMessage(Cog::Instance& script, CogTimerState& timer_state, Cog::MessageId message,
+			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
 	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
@@ -103,11 +107,20 @@ public:
 		return static_cast<int>(RunningCogState.top().SourceType);
 	}
 
+	inline void SetTimer(float time) {
+		RunningCogState.top().TimerState.TimerRemainingTime = time;
+	}
+
+	// Sound verbs
+	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags);
+	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
+	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
+
 	// Surface verbs
 	Math::Vector<3> GetSurfaceCenter(int surface);
 
 	// Thing verbs
-	int CreateThingAtThing(const char* tpl_name, int thing_id);
+	int CreateThingAtThing(int tpl_id, int thing_id);
 };
 
 }

@@ -16,7 +16,7 @@ Gorc::Game::World::Level::SurfaceAnimation::SurfaceAnimation(LevelModel& model, 
 		return;
 	}
 
-	num_cels = model.Level.Materials[surface_material]->Cels.size();
+	num_cels = std::get<0>(model.Level.Materials[surface_material])->Cels.size();
 
 	if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstTwoFrames) {
 		model.SurfaceCelNumber[surface] = 2 % num_cels;

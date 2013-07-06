@@ -4,6 +4,7 @@
 #include "cog/vm/virtualmachine.h"
 #include "cog/vm/exception.h"
 #include "cog/ir/codeprinter.h"
+#include "cog/instance.h"
 #include <fstream>
 
 using namespace Gorc::Cog;
@@ -67,6 +68,21 @@ void CodegenTestFixture::PopulateTables() {
 	return;
 }
 
+std::unique_ptr<Gorc::Cog::Instance> CreateInstance(Gorc::Cog::Script& Script) {
+	std::unique_ptr<Gorc::Cog::Instance> inst(new Gorc::Cog::Instance(Script));
+
+	inst->Heap.resize(Script.SymbolTable.size());
+
+	auto it = Script.SymbolTable.begin();
+	auto jt = inst->Heap.begin();
+
+	for( ; it != Script.SymbolTable.end() && jt != inst->Heap.end(); ++it, ++jt) {
+		(*jt) = it->DefaultValue;
+	}
+
+	return std::move(inst);
+}
+
 void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	Gorc::Cog::AST::Factory astFactory;
 
@@ -108,7 +124,7 @@ void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	}
 
 	// Build instance
-	auto inst = Script.CreateInstance();
+	auto inst = CreateInstance(Script);
 
 	// Execute from the 'startup' message.
 	size_t startupAddr = Script.JumpTable.GetTarget(MessageId::Startup);

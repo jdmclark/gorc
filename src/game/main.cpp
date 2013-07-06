@@ -50,11 +50,19 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 0>("getsendertype", [&components]{ return components.CurrentLevelPresenter->GetSenderType(); });
 	verbTable.AddVerb<int, 0>("getsourceref", [&components]{ return components.CurrentLevelPresenter->GetSourceRef(); });
 	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{ return components.CurrentLevelPresenter->GetSourceType(); });
+	verbTable.AddVerb<void, 1>("settimer", [&components](float time) { components.CurrentLevelPresenter->SetTimer(time); });
 
 	// Sound verbs
-	verbTable.AddVerb<int, 6>("playsoundpos", [&components](const char* wav, Gorc::Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
-		// TODO
-		return -1;
+	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 6>("playsoundpos", [&components](int wav, Gorc::Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundPos(wav, pos, volume, min_rad, max_rad, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundThing(wav, thing, volume, min_rad, max_rad, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
 	});
 
 	// Surface verbs
@@ -62,9 +70,12 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
+	// System verbs
+	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
+
 	// Thing verbs
-	verbTable.AddVerb<int, 2>("creatething", [&components](const char* tpl_name, int thing_pos) {
-		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_name, thing_pos);
+	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
+		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
 	});
 }
 

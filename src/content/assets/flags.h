@@ -187,15 +187,6 @@ enum class SectorFlag : uint32_t {
 	ShownOnAutoMap					= 0x4000
 };
 
-enum class SoundFlag : uint32_t {
-	LoopsUntilStopped				= 0x1,
-	Ambient							= 0x4,
-	PositionInWorldCoordinates		= 0x40,
-	PositionMovesWithThing			= 0x80,
-	RaisePriority					= 0x100,
-	Voice							= 0x10000
-};
-
 enum class SurfaceFlag : uint32_t {
 	Floor							= 0x1,
 	CogLinked						= 0x2,
@@ -303,6 +294,28 @@ enum class MessageType {
 	Sector = 5,
 	Surface = 6,
 	Cog = 9
+};
+
+enum class Difficulty {
+	Easy = 0,
+	Medium = 1,
+	Hard = 2
+};
+
+enum class SoundFlag : uint32_t {
+	Loops = 0x1,
+	Voice = 0x2,
+	Ambient = 0x4,
+	MinimalVolume = 0x10,
+	Delay = 0x20,
+	ClassOriginDoesNotMove = 0x40,
+	ThingOriginMovesWithThing = 0x80,
+	Priority = 0x100,
+	Immediate = 0x200,
+	IgnoreIfAlreadyPlaying = 0x400,
+	IgnoreIfSoundclassAlreadyPlaying = 0x800,
+	VolumeQuickFalloff = 0x2000,
+	NotSimultaneous = 0x10000
 };
 
 }

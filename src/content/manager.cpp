@@ -9,7 +9,7 @@ Gorc::Content::Manager::Manager(Diagnostics::Report& report, const FileSystem& f
 	return;
 }
 
-Gorc::Content::Asset* Gorc::Content::Manager::InternalLoad(const boost::filesystem::path& name,
+std::tuple<int, Gorc::Content::Asset*> Gorc::Content::Manager::InternalLoad(const boost::filesystem::path& name,
 		const std::vector<boost::filesystem::path>& basepaths, Loader& loader) {
 	std::unique_ptr<IO::ReadOnlyFile> file;
 
@@ -29,7 +29,9 @@ Gorc::Content::Asset* Gorc::Content::Manager::InternalLoad(const boost::filesyst
 	}
 
 	try {
-		return assets.insert(std::make_pair(name.generic_string(), loader.Deserialize(*file, *this, report))).first->second.get();
+		assets.push_back(loader.Deserialize(*file, *this, report));
+		asset_map.insert(std::make_pair(name.generic_string(), assets.size() - 1));
+		return std::make_tuple(assets.size() - 1, assets.back().get());
 	}
 	catch(const std::exception&) {
 		Diagnostics::Helper::CouldNotLoadFile(report, "ContentManager", file->Filename.generic_string());

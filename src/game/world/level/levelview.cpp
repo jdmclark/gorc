@@ -149,8 +149,8 @@ void Gorc::Game::World::Level::LevelView::DrawLevel() {
 			const auto& surface = lev.Surfaces[i];
 			if(surface.Material >= 0) {
 
-				const auto& material_entry = lev.MaterialEntries[surface.Material];
-				const auto& material = lev.Materials[surface.Material];
+				const auto& material_entry = lev.Materials[surface.Material];
+				const auto& material = std::get<0>(material_entry);
 
 				float alpha = (surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f;
 

@@ -16,8 +16,8 @@ void OnAnimationDestroy(Pool<std::unique_ptr<Animation>>& pool, unsigned int ind
 }
 }
 
-Gorc::Game::World::Level::LevelModel::LevelModel(const Gorc::Content::Assets::Level& Level)
-	: Level(Level), MaterialCelNumber(Level.MaterialEntries.size(), 0), SurfaceCelNumber(Level.Surfaces.size(), -1), SurfaceAnimNumber(Level.Surfaces.size(), -1),
+Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler, const Gorc::Content::Assets::Level& Level)
+	: Level(Level), MaterialCelNumber(Level.Materials.size(), 0), SurfaceCelNumber(Level.Surfaces.size(), -1), SurfaceAnimNumber(Level.Surfaces.size(), -1),
 	  Animations(OnAnimationDestroy),
 	  Dispatcher(&CollisionConfiguration), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
 	  SurfaceMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))), SurfaceObjectData(Level.Surfaces.size()) {
@@ -108,7 +108,7 @@ Gorc::Game::World::Level::LevelModel::LevelModel(const Gorc::Content::Assets::Le
 		Content::Assets::Script const* script = std::get<0>(cog);
 		const std::vector<Cog::VM::Value>& values = std::get<1>(cog);
 
-		Cogs.push_back(script->Script.CreateInstance(values));
+		Cogs.emplace_back(script->CreateInstance(ContentManager, CogCompiler, *Level.MasterColormap, Level.TemplateMap, values), CogTimerState());
 	}
 
 	return;
@@ -123,6 +123,8 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		// Insert ghost thing to fill ID.
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
+		new_thing.Position = pos;
+		new_thing.Orientation = orient;
 		new_thing.Type = Content::Assets::ThingType::Ghost;
 		return std::get<1>(new_thing_tuple);
 	}
@@ -131,6 +133,8 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		// For now, insert ghost thing to fill ID.
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
+		new_thing.Position = pos;
+		new_thing.Orientation = orient;
 		new_thing.Type = Content::Assets::ThingType::Ghost;
 		return std::get<1>(new_thing_tuple);
 	}
@@ -140,6 +144,8 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		new_thing = tpl;
 
 		new_thing.Sector = sector_num;
+		new_thing.Position = pos;
+		new_thing.Orientation = orient;
 
 		static const float deg2rad = 0.0174532925f;
 		btQuaternion orientation = btQuaternion(btVector3(1.0f, 0.0f, 0.0f), deg2rad * Math::Get<0>(orient))
@@ -186,16 +192,23 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
 		new_thing.Type = Content::Assets::ThingType::Ghost;
+		new_thing.Position = pos;
+		new_thing.Orientation = orient;
 		return std::get<1>(new_thing_tuple);
 	}
+}
+
+unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(int tpl_id, unsigned int sector_num,
+		const Math::Vector<3>& pos, const Math::Vector<3>& orientation) {
+	return CreateThing(Level.Templates[tpl_id], sector_num, pos, orientation);
 }
 
 unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const std::string& tpl_name, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orientation) {
 	std::string temp;
 	std::transform(tpl_name.begin(), tpl_name.end(), std::back_inserter(temp), tolower);
-	auto it = Level.Templates.find(temp);
-	if(it != Level.Templates.end()) {
+	auto it = Level.TemplateMap.find(temp);
+	if(it != Level.TemplateMap.end()) {
 		return CreateThing(it->second, sector_num, pos, orientation);
 	}
 	else {

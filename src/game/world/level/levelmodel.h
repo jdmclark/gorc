@@ -5,6 +5,8 @@
 #include "framework/pool.h"
 #include "thing.h"
 #include "animation.h"
+#include "sound.h"
+#include "cogtimerstate.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -22,7 +24,8 @@ public:
 	std::vector<int> SurfaceAnimNumber;
 	Pool<Thing> Things;
 	Pool<std::unique_ptr<Animation>> Animations;
-	std::vector<std::unique_ptr<Cog::Instance>> Cogs;
+	Pool<Sound, 8> Sounds;
+	std::vector<std::tuple<std::unique_ptr<Cog::Instance>, CogTimerState>> Cogs;
 
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 	Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);
@@ -45,10 +48,11 @@ public:
 	std::unique_ptr<btSphereShape> CameraShape;
 	unsigned int CameraThingId;
 
-	LevelModel(const Content::Assets::Level& Level);
+	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level);
 
 	unsigned int CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 	unsigned int CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+	unsigned int CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 };
 
 }

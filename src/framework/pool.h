@@ -47,6 +47,13 @@ template <typename T, size_t PageSize = 128> class Pool {
 		return (*pages[page_num])[item_num];
 	}
 
+	const PoolObject& GetPoolObject(unsigned int index) const {
+		unsigned int page_num = index >> PageNumberShift;
+		unsigned int item_num = index & PageOffsetMask;
+
+		return (*pages[page_num])[item_num];
+	}
+
 	static void DefaultDestroyCallback(Pool& pool, unsigned int index, T& value) {
 		return;
 	}
@@ -128,6 +135,10 @@ public:
 	}
 
 	T& operator[](unsigned int index) {
+		return GetPoolObject(index).value;
+	}
+
+	const T& operator[](unsigned int index) const {
 		return GetPoolObject(index).value;
 	}
 
