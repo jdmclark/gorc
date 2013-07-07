@@ -44,12 +44,14 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 
 	// Update things
 	btTransform trans;
-	for(auto& thing : model->Things) {
+	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
+		auto& thing = *it;
+
 		if(thing.RigidBody) {
 			auto oldThingPosition = thing.Position;
 			thing.RigidBody->getMotionState()->getWorldTransform(trans);
 			thing.Position = VecBt(trans.getOrigin());
-			UpdateThingSector(thing, oldThingPosition);
+			UpdateThingSector(it.GetIndex(), thing, oldThingPosition);
 		}
 	}
 
@@ -119,10 +121,6 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateCameraAmbientSound() {
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetThingCurrentSector(Thing& thing, unsigned int sec_num) {
-	thing.Sector = sec_num;
-}
-
 bool Gorc::Game::World::Level::LevelPresenter::ThingInsideSector(Thing& thing, const Gorc::Content::Assets::LevelSector& sec) {
 	for(size_t i =  sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
 		const auto& surf = model->Level.Surfaces[i];
@@ -153,26 +151,71 @@ bool Gorc::Game::World::Level::LevelPresenter::ThingPathPassesThroughAdjoin(Thin
 	return true;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(Thing& thing, const Vector<3>& oldThingPosition) {
-	std::vector<size_t> sectors { thing.Sector };
-	while(!sectors.empty()) {
-		size_t sec_num = sectors.back();
-		sectors.pop_back();
+bool Gorc::Game::World::Level::LevelPresenter::InnerUpdateThingSector(Thing& thing, const Vector<3>& oldThingPosition,
+		const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
+	if(ThingInsideSector(thing, sector)) {
+		path.emplace_back(sector.Number, -1);
+		return true;
+	}
 
-		const auto& sec = model->Level.Sectors[sec_num];
+	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.SurfaceCount; ++sec_surf_id) {
+		const Content::Assets::LevelSurface& surf = model->Surfaces[sec_surf_id + sector.FirstSurface];
+		if(surf.Adjoin >= 0 && !(surf.Flags & Content::Assets::SurfaceFlag::Impassable)
+				&& ThingPathPassesThroughAdjoin(thing, oldThingPosition, sector, surf)) {
+			path.emplace_back(sector.Number, sec_surf_id + sector.FirstSurface);
 
-		if(ThingInsideSector(thing, sec)) {
-			SetThingCurrentSector(thing, sec.Number);
-			return;
+			if(InnerUpdateThingSector(thing, oldThingPosition, model->Sectors[surf.AdjoinedSector], path)) {
+				return true;
+			}
+
+			path.pop_back();
+		}
+	}
+
+	return false;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, Thing& thing,
+		const Vector<3>& oldThingPosition) {
+	if(ThingInsideSector(thing, model->Sectors[thing.Sector])) {
+		// Thing hasn't moved to a different sector.
+		return;
+	}
+
+	std::vector<std::tuple<unsigned int, unsigned int>> path;
+	if(InnerUpdateThingSector(thing, oldThingPosition, model->Sectors[thing.Sector], path)) {
+		// Fire messages along path
+		unsigned int first_adjoin = std::get<1>(path.front());
+		if(model->Surfaces[first_adjoin].Flags & Content::Assets::SurfaceFlag::CogLinked) {
+			SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Content::Assets::MessageType::Surface,
+					thing_id, Content::Assets::MessageType::Thing);
 		}
 
-		for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
-			const auto& surf = model->Level.Surfaces[i];
-			if(surf.Adjoin >= 0 && !(surf.Flags & Gorc::Content::Assets::SurfaceFlag::Impassable)
-					&& ThingPathPassesThroughAdjoin(thing, oldThingPosition, sec, surf)) {
-				sectors.push_back(surf.AdjoinedSector);
+		for(unsigned int i = 1; i < path.size() - 1; ++i) {
+			unsigned int sec_id = std::get<0>(path[i]);
+			thing.Sector = sec_id;
+			if(model->Sectors[sec_id].Flags & Content::Assets::SectorFlag::CogLinked) {
+				SendMessageToLinked(Cog::MessageId::Entered, sec_id, Content::Assets::MessageType::Sector,
+						thing_id, Content::Assets::MessageType::Thing);
+			}
+
+			unsigned int surf_id = std::get<1>(path[i]);
+			if(model->Surfaces[surf_id].Flags & Content::Assets::SurfaceFlag::CogLinked) {
+				SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Content::Assets::MessageType::Surface,
+						thing_id, Content::Assets::MessageType::Thing);
 			}
 		}
+
+		unsigned int last_sector = std::get<0>(path.back());
+		thing.Sector = last_sector;
+		if(model->Sectors[last_sector].Flags & Content::Assets::SectorFlag::CogLinked) {
+			SendMessageToLinked(Cog::MessageId::Entered, last_sector, Content::Assets::MessageType::Sector,
+					thing_id, Content::Assets::MessageType::Thing);
+		}
+	}
+	else {
+		// Thing hasn't moved.
+		// Need to run a backup random walk here.
 	}
 }
 
@@ -196,6 +239,42 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessageToAll(Cog::MessageId m
 		SendMessage(*std::get<0>(script), std::get<1>(script),
 				message, SenderId, SenderRef, SenderType,
 				SourceRef, SourceType, Param0, Param1, Param2, Param3);
+	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::SendMessageToLinked(Cog::MessageId message,
+		int SenderRef, Content::Assets::MessageType SenderType,
+		int SourceRef, Content::Assets::MessageType SourceType,
+		int Param0, int Param1, int Param2, int Param3) {
+	Cog::Symbols::SymbolType expectedSymbolType;
+
+	switch(SenderType) {
+	case Content::Assets::MessageType::Sector:
+		expectedSymbolType = Cog::Symbols::SymbolType::Sector;
+		break;
+
+	case Content::Assets::MessageType::Surface:
+		expectedSymbolType = Cog::Symbols::SymbolType::Surface;
+		break;
+
+	case Content::Assets::MessageType::Thing:
+		expectedSymbolType = Cog::Symbols::SymbolType::Thing;
+		break;
+	}
+
+	for(auto& script : model->Cogs) {
+		Cog::Instance& inst = *std::get<0>(script);
+
+		auto it = inst.Script.SymbolTable.begin();
+		auto jt = inst.Heap.begin();
+
+		for(; it != inst.Script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
+			if(it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef) {
+				SendMessage(inst, std::get<1>(script),
+						message, it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
+						Param0, Param1, Param2, Param3);
+			}
+		}
 	}
 }
 

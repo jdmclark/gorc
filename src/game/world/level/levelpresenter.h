@@ -47,11 +47,12 @@ private:
 
 	void UpdateCameraAmbientSound();
 
-	void SetThingCurrentSector(Thing& thing, unsigned int sector_id);
 	bool ThingInsideSector(Thing& thing, const Content::Assets::LevelSector& sec);
 	bool ThingPathPassesThroughAdjoin(Thing& thing, const Math::Vector<3>& oldThingPosition,
 			const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf);
-	void UpdateThingSector(Thing& thing, const Math::Vector<3>& oldThingPosition);
+	bool InnerUpdateThingSector(Thing& thing, const Math::Vector<3>& oldThingPosition, const Content::Assets::LevelSector& sector,
+			std::vector<std::tuple<unsigned int, unsigned int>>& path);
+	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 
 	void SendMessage(Cog::Instance& script, CogTimerState& timer_state, Cog::MessageId message,
 			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
@@ -60,6 +61,9 @@ private:
 	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 				int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
 				int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
+	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Content::Assets::MessageType SenderType,
+			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
+			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
 
 public:
 	LevelPresenter(Components& components, const LevelPlace& place);
