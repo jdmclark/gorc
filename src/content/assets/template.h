@@ -29,6 +29,8 @@ public:
 	CollideType Collide = CollideType::None;
 	FlagSet<ThingFlag> Flags;
 
+	std::vector<std::tuple<Math::Vector<3>, Math::Vector<3>>> Frames;
+
 	float Mass = 2.0f;
 	float Radius = 0.05f;
 

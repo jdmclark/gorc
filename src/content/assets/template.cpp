@@ -59,7 +59,7 @@ template <typename T> void TemplateParameterNumberMapper(T& value, const T& defa
 	}
 }
 
-template <typename T> void TemplateParameterEnumNumberMapper(T& value, const T& defaultValue, Text::Tokenizer& tok, Diagnostics::Report& report) {
+template <typename T> void TemplateParameterEnumMapper(T& value, const T& defaultValue, Text::Tokenizer& tok, Diagnostics::Report& report) {
 	Text::Token t;
 	tok.GetToken(t);
 
@@ -67,13 +67,52 @@ template <typename T> void TemplateParameterEnumNumberMapper(T& value, const T& 
 		value = static_cast<T>(t.GetNumericValue<typename std::underlying_type<T>::type>());
 	}
 	else {
-		report.AddWarning("Template::ParseArgs::TemplateParameterNumberMapper", "expected numeric value", t.Location);
+		report.AddWarning("Template::ParseArgs::TemplateParameterEnumMapper", "expected numeric value", t.Location);
+		value = defaultValue;
+	}
+}
+
+template <typename T> void TemplateParameterFlagMapper(FlagSet<T>& value, const FlagSet<T>& defaultValue, Text::Tokenizer& tok, Diagnostics::Report& report) {
+	Text::Token t;
+	tok.GetToken(t);
+
+	if(t.Type == Text::TokenType::Float || t.Type == Text::TokenType::Integer || t.Type == Text::TokenType::HexInteger) {
+		value = FlagSet<T>(t.GetNumericValue<typename std::underlying_type<T>::type>());
+	}
+	else {
+		report.AddWarning("Template::ParseArgs::TemplateParameterFlagMapper", "expected numeric value", t.Location);
 		value = defaultValue;
 	}
 }
 
 void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, Diagnostics::Report& report) {
 	tpl.Model3d = &manager.Load<Model>(tok.GetSpaceDelimitedString(), cmp);
+}
+
+void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
+	tok.AssertPunctuator("(");
+	float x = tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	float y = tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	float z = tok.GetNumber<float>();
+
+	Text::Token t;
+	tok.GetToken(t);
+
+	if(t.Value == ":") {
+		float p = tok.GetNumber<float>();
+		tok.AssertPunctuator("/");
+		float a = tok.GetNumber<float>();
+		tok.AssertPunctuator("/");
+		float r = tok.GetNumber<float>();
+		tok.AssertPunctuator(")");
+
+		tpl.Frames.emplace_back(Math::Vec(x, y, z), Math::Vec(p, a, r));
+	}
+	else {
+		tpl.Frames.emplace_back(Math::Vec(x, y, z), Math::Zero<3>());
+	}
 }
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
@@ -85,7 +124,13 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
 		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
 	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
-		TemplateParameterEnumNumberMapper(tpl.Collide, CollideType::None, tok, report); }}
+		TemplateParameterEnumMapper(tpl.Collide, CollideType::None, tok, report); }},
+	{ "thingflags", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+		TemplateParameterFlagMapper(tpl.Flags, FlagSet<ThingFlag>(), tok, report); }},
+	{ "numframes", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report&) {
+		/* Silently consume numframes */ tok.GetNumber<int>(); }},
+	{ "frame", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report&) {
+		TemplateAddFrame(tpl, tok); }}
 };
 
 }

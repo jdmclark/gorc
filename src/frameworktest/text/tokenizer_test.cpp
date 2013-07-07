@@ -8,8 +8,7 @@ using namespace Gorc;
 
 BeginSuite(TokenizerTest);
 
-Case(GetTokenTests)
-{
+Case(GetTokenTests) {
 	// Basic tests of GetToken and all token types.
 
 	// Set up source:
@@ -343,8 +342,7 @@ Case(GetTokenTests)
 	Test_Assert_Eq(t.Location.first_line, 20);
 }
 
-Case(AssertionTests)
-{
+Case(AssertionTests) {
 	// Set up source:
 	std::string input = " \
 		identifier!				\n\
@@ -382,6 +380,31 @@ Case(AssertionTests)
 	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
 	Test_Assert_Eq(t.Value, "nice_data");
 	Test_Assert_Eq(t.Location.first_line, 6);
+}
+
+Case(ParseVectorTest) {
+	std::string input = " \
+			frame=(-8.850002/-5.300000/-0.671531:0.000000/-90.000000/0.000000)";
+	Diagnostics::StreamReport report(std::cout);
+	Text::Source s(input);
+	Text::Tokenizer tok(s, report);
+
+	tok.AssertIdentifier("frame");
+	tok.AssertPunctuator("=");
+
+	tok.AssertPunctuator("(");
+	tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	tok.GetNumber<float>();
+	tok.AssertPunctuator(":");
+	tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	tok.GetNumber<float>();
+	tok.AssertPunctuator(")");
 }
 
 EndSuite(TokenizerTest);

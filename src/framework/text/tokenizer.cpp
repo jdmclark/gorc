@@ -231,9 +231,8 @@ void Tokenizer::GetToken(Token& out) {
 		else {
 			out.Value.push_back(current);
 			out.Type = TokenType::Punctuator;
+			scan();
 		}
-
-		scan();
 	}
 	else {
 		out.Type = TokenType::Invalid;
