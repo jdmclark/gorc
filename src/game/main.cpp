@@ -64,6 +64,26 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		return static_cast<int>(Gorc::Content::Assets::Difficulty::Medium);
 	});
 
+	// Player verbs
+	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] { return components.CurrentLevelPresenter->GetLocalPlayerThing(); });
+
+	// Sector verbs
+	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
+		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	});
+
+	verbTable.AddVerb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
+		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	});
+
+	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
+		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	});
+
+	verbTable.AddVerb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
+		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	});
+
 	// Sound verbs
 	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
 		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
@@ -85,12 +105,16 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	// System verbs
 	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
 
-	// Thing verbs
+	// Thing action verbs
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
 		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
 	});
 
 	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
+	verbTable.AddVerb<bool, 1>("ismoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
+
+	// Thing property verbs
+	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) { return components.CurrentLevelPresenter->GetThingSector(thing_id); });
 }
 
 int main(int argc, char** argv) {

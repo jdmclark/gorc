@@ -497,6 +497,11 @@ void Gorc::Game::World::Level::LevelPresenter::Sleep(float time) {
 	VirtualMachine.Abort();
 }
 
+// Player verbs
+int Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
+	return model->CameraThingId;
+}
+
 // Sound verbs
 int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags) {
 	auto snd_tuple = model->Sounds.Create();
@@ -527,6 +532,30 @@ int Gorc::Game::World::Level::LevelPresenter::PlaySoundThing(int wav, int thing,
 	return std::get<1>(snd_tuple);
 }
 
+// Sector verbs
+void Gorc::Game::World::Level::LevelPresenter::SetSectorAdjoins(int sector_id, bool state) {
+	Content::Assets::LevelSector& sector = model->Sectors[sector_id];
+	for(unsigned int i = 0; i < sector.SurfaceCount; ++i) {
+		Content::Assets::LevelSurface& surface = model->Surfaces[i + sector.FirstSurface];
+		if(surface.Adjoin >= 0) {
+			Content::Assets::LevelAdjoin& adjoin = model->Adjoins[surface.Adjoin];
+
+			if(state) {
+				adjoin.Flags += Content::Assets::SurfaceAdjoinFlag::Visible;
+			}
+			else {
+				adjoin.Flags -= Content::Assets::SurfaceAdjoinFlag::Visible;
+			}
+		}
+	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::SetSectorLight(int sector_id, float value, float delay) {
+	// TODO: Create animation to implement delay feature.
+	Content::Assets::LevelSector& sector = model->Sectors[sector_id];
+	sector.ExtraLight = value;
+}
+
 // Surface verbs
 Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter(int surface) {
 	auto vec = Math::Zero<3>();
@@ -538,8 +567,7 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter
 	return vec;
 }
 
-// Thing verbs
-
+// Thing action verbs
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
 	return static_cast<int>(model->CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
@@ -560,4 +588,9 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 	default:
 		return false;
 	}
+}
+
+// Thing property verbs
+int Gorc::Game::World::Level::LevelPresenter::GetThingSector(int thing_id) {
+	return model->Things[thing_id].Sector;
 }

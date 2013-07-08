@@ -89,6 +89,13 @@ public:
 	void SetTimer(float time);
 	void Sleep(float time);
 
+	// Player verbs
+	int GetLocalPlayerThing();
+
+	// Sector verbs
+	void SetSectorAdjoins(int sector_id, bool state);
+	void SetSectorLight(int sector_id, float value, float delay);
+
 	// Sound verbs
 	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags);
 	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
@@ -97,9 +104,12 @@ public:
 	// Surface verbs
 	Math::Vector<3> GetSurfaceCenter(int surface);
 
-	// Thing verbs
+	// Thing action verbs
 	int CreateThingAtThing(int tpl_id, int thing_id);
 	bool IsThingMoving(int thing_id);
+
+	// Thing property verbs
+	int GetThingSector(int thing_id);
 };
 
 }
