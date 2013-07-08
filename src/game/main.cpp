@@ -43,6 +43,11 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 1>("getwallcel", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceCel(surface); });
 	verbTable.AddVerb<int, 2>("setwallcel", [&components](int surface, int cel) { components.CurrentLevelPresenter->SetSurfaceCel(surface, cel); return 1; });
 
+	// Frame verbs
+	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) { return components.CurrentLevelPresenter->GetCurFrame(thing); });
+	verbTable.AddVerb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
+		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed); });
+
 	// Message verbs
 	verbTable.AddVerb<int, 1>("getparam", [&components](int param_num) { return components.CurrentLevelPresenter->GetParam(param_num); });
 	verbTable.AddVerb<int, 0>("getsenderid", [&components]{ return components.CurrentLevelPresenter->GetSenderId(); });
@@ -84,6 +89,8 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
 		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
 	});
+
+	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
 }
 
 int main(int argc, char** argv) {

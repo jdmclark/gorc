@@ -35,13 +35,17 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	// Update things
 	btTransform trans;
 	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
-		auto& thing = *it;
+		Thing& thing = *it;
 
 		if(thing.RigidBody) {
 			auto oldThingPosition = thing.Position;
 			thing.RigidBody->getMotionState()->getWorldTransform(trans);
 			thing.Position = VecBt(trans.getOrigin());
 			UpdateThingSector(it.GetIndex(), thing, oldThingPosition);
+
+			if(thing.PathMoving) {
+				UpdateThingPathMoving(it.GetIndex(), thing, dt);
+			}
 		}
 	}
 
@@ -93,9 +97,8 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 		std::get<0>(*it) -= dt;
 		if(std::get<0>(*it) <= 0.0) {
 			RunningCogState.push(std::get<1>(*it));
+			model->SleepingCogs.Destroy(it.GetIndex());
 		}
-
-		model->SleepingCogs.Destroy(it.GetIndex());
 	}
 
 	// Run sleeping cogs
@@ -103,6 +106,51 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 		Cog::Instance& inst = *std::get<0>(model->Cogs[RunningCogState.top().InstanceId]);
 		VirtualMachine.Execute(inst.Heap, inst.Script.Code, RunningCogState.top().ProgramCounter, components.VerbTable);
 		RunningCogState.pop();
+	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt) {
+	auto target_position_tuple = thing.Frames[thing.NextFrame];
+	Vector<3> targetPosition = std::get<0>(target_position_tuple);
+	Vector<3> targetOrientation = std::get<1>(target_position_tuple);
+
+	static const float deg2rad = 0.0174532925f;
+	btQuaternion targetOrientQuat = btQuaternion(btVector3(1.0f, 0.0f, 0.0f), deg2rad * Math::Get<0>(targetOrientation))
+			* btQuaternion(btVector3(0.0f, 0.0f, 1.0f), deg2rad * Math::Get<1>(targetOrientation))
+			* btQuaternion(btVector3(0.0f, 1.0f, 0.0f), deg2rad * Math::Get<2>(targetOrientation));
+
+	btTransform currentWorldTransform;
+	thing.RigidBody->getMotionState()->getWorldTransform(currentWorldTransform);
+
+	Vector<3> currentPosition = VecBt(currentWorldTransform.getOrigin());
+
+	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
+	// Use a magic multiple to correct it.
+	const float magic_number = 1.0f / 8.0f;
+	float alpha = magic_number * dt * thing.PathMoveSpeed / Math::Length(targetPosition - currentPosition);
+	if(alpha >= 1.0f) {
+		btTransform targetWorldTransform(targetOrientQuat, BtVec(targetPosition));
+		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
+
+		// Arrived at next frame. Advance to next.
+		thing.CurrentFrame = thing.NextFrame;
+		if(thing.CurrentFrame == thing.GoalFrame) {
+			thing.PathMoving = false;
+			thing.PathMoveSpeed = 0.0f;
+			SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Content::Assets::MessageType::Thing);
+			thing.RigidBody->setActivationState(0);
+		}
+		else if(thing.CurrentFrame < thing.GoalFrame) {
+			thing.NextFrame = thing.CurrentFrame + 1;
+		}
+		else {
+			thing.NextFrame = thing.CurrentFrame - 1;
+		}
+	}
+	else {
+		btTransform targetWorldTransform(currentWorldTransform.getRotation().slerp(targetOrientQuat, alpha),
+				currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
+		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
 	}
 }
 
@@ -405,6 +453,33 @@ void Gorc::Game::World::Level::LevelPresenter::SetSurfaceCel(int surface, int ce
 	model->Surfaces[surface].CelNumber = cel;
 }
 
+// Frame verbs
+int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(int thing_id) {
+	return model->Things[thing_id].CurrentFrame;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int frame, float speed) {
+	Thing& referenced_thing = model->Things[thing_id];
+
+	referenced_thing.GoalFrame = frame;
+	if(frame > referenced_thing.CurrentFrame) {
+		referenced_thing.NextFrame = referenced_thing.CurrentFrame + 1;
+	}
+	else if(frame < referenced_thing.CurrentFrame) {
+		referenced_thing.NextFrame = referenced_thing.CurrentFrame - 1;
+	}
+	else {
+		referenced_thing.NextFrame = frame;
+	}
+
+	referenced_thing.PathMoveSpeed = speed;
+	referenced_thing.PathMoving = true;
+
+	if(referenced_thing.RigidBody) {
+		referenced_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
+	}
+}
+
 // Message verbs
 void Gorc::Game::World::Level::LevelPresenter::SetTimer(float time) {
 	std::get<1>(model->Cogs[RunningCogState.top().InstanceId]).TimerRemainingTime = time;
@@ -412,13 +487,14 @@ void Gorc::Game::World::Level::LevelPresenter::SetTimer(float time) {
 
 void Gorc::Game::World::Level::LevelPresenter::Sleep(float time) {
 	CogContinuation continuation = RunningCogState.top();
-	RunningCogState.pop();
 
 	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
 
 	auto& sleep_tuple = *std::get<0>(model->SleepingCogs.Create());
 	std::get<0>(sleep_tuple) = time;
 	std::get<1>(sleep_tuple) = continuation;
+
+	VirtualMachine.Abort();
 }
 
 // Sound verbs
@@ -467,4 +543,21 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
 	return static_cast<int>(model->CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
+}
+
+bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
+	Thing& referencedThing = model->Things[thing_id];
+	switch(referencedThing.Move) {
+	case Content::Assets::MoveType::Physics:
+		if(referencedThing.RigidBody) {
+			return referencedThing.RigidBody->getLinearVelocity().length2() > 0.0f;
+		}
+		else {
+			return false;
+		}
+
+	case Content::Assets::MoveType::Path:
+	default:
+		return false;
+	}
 }

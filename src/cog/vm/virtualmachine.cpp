@@ -92,7 +92,6 @@ void Gorc::Cog::VM::VirtualMachine::Execute(std::vector<Value>& heap, const Code
 
 		case Opcode::CALLV: {
 				Verbs::VerbId verb = stream.Read<Verbs::VerbId>();
-				program_counter = stream.Tell(); // Stash program counter for engine code;
 				Push(verbTable.Invoke(verb, stack));
 			}
 			break;

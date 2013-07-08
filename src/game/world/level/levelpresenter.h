@@ -32,6 +32,8 @@ private:
 
 	void UpdateCameraAmbientSound();
 
+	void UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt);
+
 	bool ThingInsideSector(Thing& thing, const Content::Assets::LevelSector& sec);
 	bool ThingPathPassesThroughAdjoin(Thing& thing, const Math::Vector<3>& oldThingPosition,
 			const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf);
@@ -72,30 +74,17 @@ public:
 	int GetSurfaceCel(int surface);
 	void SetSurfaceCel(int surface, int cel);
 
+	// Frame verbs
+	int GetCurFrame(int thing_id);
+	void MoveToFrame(int thing_id, int frame, float speed);
+
 	// Message verbs
-	inline int GetParam(int param_num) {
-		return RunningCogState.top().Params[param_num % 4];
-	}
-
-	inline int GetSenderId() {
-		return RunningCogState.top().SenderId;
-	}
-
-	inline int GetSenderRef() {
-		return RunningCogState.top().SenderRef;
-	}
-
-	inline int GetSenderType() {
-		return static_cast<int>(RunningCogState.top().SenderType);
-	}
-
-	inline int GetSourceRef() {
-		return RunningCogState.top().SourceRef;
-	}
-
-	inline int GetSourceType() {
-		return static_cast<int>(RunningCogState.top().SourceType);
-	}
+	inline int GetParam(int param_num) { return RunningCogState.top().Params[param_num % 4]; }
+	inline int GetSenderId() { return RunningCogState.top().SenderId; }
+	inline int GetSenderRef() {	return RunningCogState.top().SenderRef; }
+	inline int GetSenderType() { return static_cast<int>(RunningCogState.top().SenderType); }
+	inline int GetSourceRef() { return RunningCogState.top().SourceRef; }
+	inline int GetSourceType() { return static_cast<int>(RunningCogState.top().SourceType); }
 
 	void SetTimer(float time);
 	void Sleep(float time);
@@ -110,6 +99,7 @@ public:
 
 	// Thing verbs
 	int CreateThingAtThing(int tpl_id, int thing_id);
+	bool IsThingMoving(int thing_id);
 };
 
 }

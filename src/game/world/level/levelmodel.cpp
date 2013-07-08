@@ -284,15 +284,20 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 			CollideWith = {PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing};
 		}
 
-		DynamicsWorld.addRigidBody(new_thing.RigidBody.get(), static_cast<unsigned int>(CollideType),
-				static_cast<unsigned int>(CollideWith));
-
 		// Associate thing info structure.
 		new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
-		new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
+		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
+			new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
+		}
+		else {
+			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
+		}
 
+		DynamicsWorld.addRigidBody(new_thing.RigidBody.get(), static_cast<unsigned int>(CollideType),
+				static_cast<unsigned int>(CollideWith));
 		return std::get<1>(new_thing_tuple);
 	}
 	else {
