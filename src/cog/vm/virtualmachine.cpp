@@ -3,10 +3,12 @@
 #include "opcode.h"
 
 void Gorc::Cog::VM::VirtualMachine::Execute(std::vector<Value>& heap, const CodeBuffer& code, size_t pc, const Verbs::VerbTable& verbTable) {
+	allow_run = true;
+
 	CodeBufferReadStream stream(code);
 	stream.Seek(pc);
 
-	while(true) {
+	while(allow_run) {
 		Opcode op = stream.Read<Opcode>();
 
 		switch(op) {
@@ -83,12 +85,14 @@ void Gorc::Cog::VM::VirtualMachine::Execute(std::vector<Value>& heap, const Code
 
 		case Opcode::CALL: {
 				Verbs::VerbId verb = stream.Read<Verbs::VerbId>();
+				program_counter = stream.Tell(); // Stash program counter for engine code.
 				verbTable.Invoke(verb, stack);
 			}
 			break;
 
 		case Opcode::CALLV: {
 				Verbs::VerbId verb = stream.Read<Verbs::VerbId>();
+				program_counter = stream.Tell(); // Stash program counter for engine code;
 				Push(verbTable.Invoke(verb, stack));
 			}
 			break;

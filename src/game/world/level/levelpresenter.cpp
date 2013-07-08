@@ -3,16 +3,6 @@
 
 using namespace Gorc::Math;
 
-Gorc::Game::World::Level::LevelCogState::LevelCogState(CogTimerState& TimerState,
-		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-		int SourceRef, Content::Assets::MessageType SourceType,
-		int Param0, int Param1, int Param2, int Param3)
-	: TimerState(TimerState), SenderId(SenderId), SenderRef(SenderRef), SenderType(SenderType),
-	  SourceRef(SourceRef), SourceType(SourceType),
-	  Params({ Param0, Param1, Param2, Param3 }) {
-	return;
-}
-
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
 	: components(components), place(place) {
 	return;
@@ -84,7 +74,8 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	}
 
 	// Update cogs
-	for(std::tuple<std::unique_ptr<Cog::Instance>, CogTimerState>& cog : model->Cogs) {
+	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
+		auto& cog = model->Cogs[i];
 		Cog::Instance& inst = *std::get<0>(cog);
 		CogTimerState& timer_state = std::get<1>(cog);
 
@@ -92,9 +83,26 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 			timer_state.TimerRemainingTime -= dt;
 			if(timer_state.TimerRemainingTime <= 0.0) {
 				timer_state.TimerRemainingTime = 0.0;
-				SendMessage(inst, timer_state, Cog::MessageId::Timer, -1, -1, Content::Assets::MessageType::Nothing);
+				SendMessage(i, Cog::MessageId::Timer, -1, -1, Content::Assets::MessageType::Nothing);
 			}
 		}
+	}
+
+	// Enqueue sleeping cogs
+	for(auto it = model->SleepingCogs.begin(); it != model->SleepingCogs.end(); ++it) {
+		std::get<0>(*it) -= dt;
+		if(std::get<0>(*it) <= 0.0) {
+			RunningCogState.push(std::get<1>(*it));
+		}
+
+		model->SleepingCogs.Destroy(it.GetIndex());
+	}
+
+	// Run sleeping cogs
+	while(!RunningCogState.empty()) {
+		Cog::Instance& inst = *std::get<0>(model->Cogs[RunningCogState.top().InstanceId]);
+		VirtualMachine.Execute(inst.Heap, inst.Script.Code, RunningCogState.top().ProgramCounter, components.VerbTable);
+		RunningCogState.pop();
 	}
 }
 
@@ -219,14 +227,13 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SendMessage(Cog::Instance& script,
-		CogTimerState& timer_state, Cog::MessageId message,
+void Gorc::Game::World::Level::LevelPresenter::SendMessage(unsigned int InstanceId, Cog::MessageId message,
 		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 		int SourceRef, Content::Assets::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
-	RunningCogState.emplace(timer_state, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
+	RunningCogState.emplace(InstanceId, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
 
-	script.Call(components.VerbTable, VirtualMachine, message);
+	std::get<0>(model->Cogs[InstanceId])->Call(components.VerbTable, VirtualMachine, message);
 
 	RunningCogState.pop();
 }
@@ -235,9 +242,8 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessageToAll(Cog::MessageId m
 		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 		int SourceRef, Content::Assets::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
-	for(auto& script : model->Cogs) {
-		SendMessage(*std::get<0>(script), std::get<1>(script),
-				message, SenderId, SenderRef, SenderType,
+	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
+		SendMessage(i, message, SenderId, SenderRef, SenderType,
 				SourceRef, SourceType, Param0, Param1, Param2, Param3);
 	}
 }
@@ -262,16 +268,16 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessageToLinked(Cog::MessageI
 		break;
 	}
 
-	for(auto& script : model->Cogs) {
-		Cog::Instance& inst = *std::get<0>(script);
+	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
+		Cog::Instance& inst = *std::get<0>(model->Cogs[i]);
 
 		auto it = inst.Script.SymbolTable.begin();
 		auto jt = inst.Heap.begin();
 
 		for(; it != inst.Script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
 			if(it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef) {
-				SendMessage(inst, std::get<1>(script),
-						message, it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
+				SendMessage(i, message,
+						it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
 						Param0, Param1, Param2, Param3);
 			}
 		}
@@ -347,6 +353,22 @@ int Gorc::Game::World::Level::LevelPresenter::GetSurfaceCel(int surface) {
 
 void Gorc::Game::World::Level::LevelPresenter::SetSurfaceCel(int surface, int cel) {
 	model->Surfaces[surface].CelNumber = cel;
+}
+
+// Message verbs
+void Gorc::Game::World::Level::LevelPresenter::SetTimer(float time) {
+	std::get<1>(model->Cogs[RunningCogState.top().InstanceId]).TimerRemainingTime = time;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::Sleep(float time) {
+	CogContinuation continuation = RunningCogState.top();
+	RunningCogState.pop();
+
+	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
+
+	auto& sleep_tuple = *std::get<0>(model->SleepingCogs.Create());
+	std::get<0>(sleep_tuple) = time;
+	std::get<1>(sleep_tuple) = continuation;
 }
 
 // Sound verbs

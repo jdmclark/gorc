@@ -7,6 +7,7 @@
 #include "animation.h"
 #include "sound.h"
 #include "cogtimerstate.h"
+#include "cogcontinuation.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -31,7 +32,9 @@ public:
 	Pool<Thing> Things;
 	Pool<std::unique_ptr<Animation>> Animations;
 	Pool<Sound, 8> Sounds;
+
 	std::vector<std::tuple<std::unique_ptr<Cog::Instance>, CogTimerState>> Cogs;
+	Pool<std::tuple<double, CogContinuation>, 8> SleepingCogs;
 
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 	Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);

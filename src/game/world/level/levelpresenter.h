@@ -4,6 +4,7 @@
 #include "game/components.h"
 #include "levelplace.h"
 #include "cogtimerstate.h"
+#include "cogcontinuation.h"
 #include "cog/vm/virtualmachine.h"
 
 #include <SFML/Audio.hpp>
@@ -19,22 +20,6 @@ namespace Level {
 class LevelModel;
 class Thing;
 
-class LevelCogState {
-public:
-	CogTimerState& TimerState;
-	int SenderId;
-	int SenderRef;
-	Content::Assets::MessageType SenderType;
-	int SourceRef;
-	Content::Assets::MessageType SourceType;
-	std::array<int, 4> Params;
-
-	LevelCogState(CogTimerState& TimerState,
-			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-			int SourceRef, Content::Assets::MessageType SourceType,
-			int Param0, int Param1, int Param2, int Param3);
-};
-
 class LevelPresenter : public Gorc::Place::Presenter {
 private:
 	Components& components;
@@ -43,7 +28,7 @@ private:
 	sf::Sound AmbientSound;
 	Cog::VM::VirtualMachine VirtualMachine;
 
-	std::stack<LevelCogState> RunningCogState;
+	std::stack<CogContinuation> RunningCogState;
 
 	void UpdateCameraAmbientSound();
 
@@ -54,7 +39,7 @@ private:
 			std::vector<std::tuple<unsigned int, unsigned int>>& path);
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 
-	void SendMessage(Cog::Instance& script, CogTimerState& timer_state, Cog::MessageId message,
+	void SendMessage(unsigned int InstanceId, Cog::MessageId message,
 			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
@@ -112,9 +97,8 @@ public:
 		return static_cast<int>(RunningCogState.top().SourceType);
 	}
 
-	inline void SetTimer(float time) {
-		RunningCogState.top().TimerState.TimerRemainingTime = time;
-	}
+	void SetTimer(float time);
+	void Sleep(float time);
 
 	// Sound verbs
 	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags);

@@ -51,6 +51,7 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 0>("getsourceref", [&components]{ return components.CurrentLevelPresenter->GetSourceRef(); });
 	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{ return components.CurrentLevelPresenter->GetSourceType(); });
 	verbTable.AddVerb<void, 1>("settimer", [&components](float time) { components.CurrentLevelPresenter->SetTimer(time); });
+	verbTable.AddVerb<void, 1>("sleep", [&components](float time) { components.CurrentLevelPresenter->Sleep(time); });
 
 	// Options verbs
 	verbTable.AddVerb<int, 0>("getdifficulty", [&components] {
