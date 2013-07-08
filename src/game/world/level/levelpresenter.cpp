@@ -329,7 +329,57 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Activate() {
-	// TODO: Implement surface and thing activation
+	// TODO: Implement actual surface and thing activation
+
+	Math::Vector<3> camera_position = model->Things[model->CameraThingId].Position;
+
+	int best_surf_candidate = -1;
+	float best_surf_dist = 0.25f;
+
+	int best_thing_candidate = -1;
+	float best_thing_dist = 0.25f;
+
+	for(int i = 0; i < model->Surfaces.size(); ++i) {
+		const Content::Assets::LevelSurface& surf = model->Surfaces[i];
+		if(surf.Adjoin >= 0 || !(surf.Flags & Content::Assets::SurfaceFlag::Impassable)
+				|| !(surf.Flags & Content::Assets::SurfaceFlag::CogLinked)
+				|| Math::Dot(surf.Normal, model->CameraLook) >= 0.0f) {
+			continue;
+		}
+
+		for(const auto& vx : surf.Vertices) {
+			float new_dist = Math::Length(camera_position - model->Level.Vertices[std::get<0>(vx)]);
+			if(new_dist < best_surf_dist) {
+				best_surf_candidate = i;
+				best_surf_dist = new_dist;
+				break;
+			}
+		}
+	}
+
+	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
+		auto dir_vec = it->Position - camera_position;
+		if(Math::Dot(dir_vec, model->CameraLook) <= 0.0f) {
+			continue;
+		}
+
+		float dir_len = Math::Length(dir_vec);
+		if(dir_len >= best_thing_dist) {
+			continue;
+		}
+
+		best_thing_candidate = it.GetIndex();
+		best_thing_dist = dir_len;
+	}
+
+	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
+		SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Content::Assets::MessageType::Surface,
+				model->CameraThingId, Content::Assets::MessageType::Thing);
+	}
+	else if(best_thing_candidate >= 0) {
+		SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Content::Assets::MessageType::Thing,
+				model->CameraThingId, Content::Assets::MessageType::Thing);
+	}
 }
 
 // Anim / Cel verbs
