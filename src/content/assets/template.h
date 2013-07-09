@@ -5,6 +5,7 @@
 #include "framework/text/tokenizer.h"
 #include "flags.h"
 #include "model.h"
+#include "soundclass.h"
 #include "colormap.h"
 #include <string>
 #include <memory>
@@ -24,6 +25,8 @@ public:
 	Math::Vector<3> Orientation;
 
 	Model const* Model3d = nullptr;
+	SoundClass const* SoundClass = nullptr;
+
 	ThingType Type = ThingType::Ghost;
 	MoveType Move = MoveType::None;
 	CollideType Collide = CollideType::None;

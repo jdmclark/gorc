@@ -86,7 +86,23 @@ template <typename T> void TemplateParameterFlagMapper(FlagSet<T>& value, const 
 }
 
 void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, Diagnostics::Report& report) {
-	tpl.Model3d = &manager.Load<Model>(tok.GetSpaceDelimitedString(), cmp);
+	std::string fn = tok.GetSpaceDelimitedString();
+	if(boost::iequals(fn, "none")) {
+		tpl.Model3d = nullptr;
+	}
+	else {
+		tpl.Model3d = &manager.Load<Model>(fn, cmp);
+	}
+}
+
+void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, Diagnostics::Report& report) {
+	std::string fn = tok.GetSpaceDelimitedString();
+	if(boost::iequals(fn, "none")) {
+		tpl.SoundClass = nullptr;
+	}
+	else {
+		tpl.SoundClass = &manager.Load<SoundClass>(fn);
+	}
 }
 
 void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
@@ -117,6 +133,7 @@ void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "model3d", &TemplateModel3DParser },
+	{ "soundclass", &TemplateSoundClassParser },
 	{ "type", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
 		TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, ThingType::Free, tok, report); }},
 	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
