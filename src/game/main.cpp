@@ -55,6 +55,7 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 0>("getsendertype", [&components]{ return components.CurrentLevelPresenter->GetSenderType(); });
 	verbTable.AddVerb<int, 0>("getsourceref", [&components]{ return components.CurrentLevelPresenter->GetSourceRef(); });
 	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{ return components.CurrentLevelPresenter->GetSourceType(); });
+	verbTable.AddVerb<void, 1>("setpulse", [&components](float time) { components.CurrentLevelPresenter->SetPulse(time); });
 	verbTable.AddVerb<void, 1>("settimer", [&components](float time) { components.CurrentLevelPresenter->SetTimer(time); });
 	verbTable.AddVerb<void, 1>("sleep", [&components](float time) { components.CurrentLevelPresenter->Sleep(time); });
 
@@ -66,6 +67,12 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 
 	// Player verbs
 	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] { return components.CurrentLevelPresenter->GetLocalPlayerThing(); });
+
+	// Print verbs
+	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, const char* message) {
+		// TODO: Add actual jkPrintUniString once localization is implemented.
+		std::cout << message << std::endl;
+	});
 
 	// Sector verbs
 	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
@@ -85,6 +92,10 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	});
 
 	// Sound verbs
+	verbTable.AddVerb<void, 3>("playsong", [&components](int start, int end, int loopto) {
+		components.CurrentLevelPresenter->PlaySong(start, end, loopto);
+	});
+
 	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
 		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
 	});
@@ -96,6 +107,8 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
 		return components.CurrentLevelPresenter->PlaySoundThing(wav, thing, volume, min_rad, max_rad, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
 	});
+
+	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) { components.CurrentLevelPresenter->SetMusicVol(vol); });
 
 	// Surface verbs
 	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {

@@ -210,7 +210,7 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 	DynamicsWorld.addRigidBody(camera_thing.RigidBody.get(), static_cast<unsigned int>(CameraCollideType),
 			static_cast<unsigned int>(CameraCollideWith));
 
-	Broadphase.optimize();
+	//Broadphase.optimize();
 
 	// Create COG script instances.
 	for(const auto& cog : Level.Cogs) {
@@ -257,9 +257,10 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		new_thing.Orientation = orient;
 
 		static const float deg2rad = 0.0174532925f;
-		btQuaternion orientation = btQuaternion(btVector3(1.0f, 0.0f, 0.0f), deg2rad * Math::Get<0>(orient))
-				* btQuaternion(btVector3(0.0f, 0.0f, 1.0f), deg2rad * Math::Get<1>(orient))
-				* btQuaternion(btVector3(0.0f, 1.0f, 0.0f), deg2rad * Math::Get<2>(orient));
+		btQuaternion orientation(0.0f, 0.0f, 0.0f, 1.0f);
+		orientation *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(orient)); // Yaw
+		orientation *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(orient)); // Pitch
+		orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
 
 		float thing_mass = 0.0f;
 		if(new_thing.Move == Content::Assets::MoveType::Physics && new_thing.Collide != Content::Assets::CollideType::None) {

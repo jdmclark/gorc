@@ -66,6 +66,8 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 		}
 	}
 
+	AmbientMusic.Update(dt);
+
 	// Update animations
 	for(auto& entity : model->Animations) {
 		entity->Update(dt);
@@ -90,6 +92,14 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 				SendMessage(i, Cog::MessageId::Timer, -1, -1, Content::Assets::MessageType::Nothing);
 			}
 		}
+
+		if(timer_state.PulseTime > 0.0) {
+			timer_state.PulseRemainingTime -= dt;
+			if(timer_state.PulseRemainingTime <= 0.0) {
+				timer_state.PulseRemainingTime = timer_state.PulseTime;
+				SendMessage(i, Cog::MessageId::Pulse, -1, -1, Content::Assets::MessageType::Nothing);
+			}
+		}
 	}
 
 	// Enqueue sleeping cogs
@@ -112,12 +122,13 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt) {
 	auto target_position_tuple = thing.Frames[thing.NextFrame];
 	Vector<3> targetPosition = std::get<0>(target_position_tuple);
-	Vector<3> targetOrientation = std::get<1>(target_position_tuple);
+	Vector<3> orient = std::get<1>(target_position_tuple);
 
 	static const float deg2rad = 0.0174532925f;
-	btQuaternion targetOrientQuat = btQuaternion(btVector3(1.0f, 0.0f, 0.0f), deg2rad * Math::Get<0>(targetOrientation))
-			* btQuaternion(btVector3(0.0f, 0.0f, 1.0f), deg2rad * Math::Get<1>(targetOrientation))
-			* btQuaternion(btVector3(0.0f, 1.0f, 0.0f), deg2rad * Math::Get<2>(targetOrientation));
+	btQuaternion targetOrientQuat(0.0f, 0.0f, 0.0f, 1.0f);
+	targetOrientQuat *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(orient)); // Yaw
+	targetOrientQuat *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(orient)); // Pitch
+	targetOrientQuat *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
 
 	btTransform currentWorldTransform;
 	thing.RigidBody->getMotionState()->getWorldTransform(currentWorldTransform);
@@ -407,7 +418,8 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 
 	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
 		auto dir_vec = it->Position - camera_position;
-		if(Math::Dot(dir_vec, model->CameraLook) <= 0.0f) {
+		if(!(it->Flags & Content::Assets::ThingFlag::CogLinked)
+				|| Math::Dot(dir_vec, model->CameraLook) <= 0.0f) {
 			continue;
 		}
 
@@ -481,6 +493,12 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int fra
 }
 
 // Message verbs
+void Gorc::Game::World::Level::LevelPresenter::SetPulse(float time) {
+	CogTimerState& state = std::get<1>(model->Cogs[RunningCogState.top().InstanceId]);
+	state.PulseTime = time;
+	state.PulseRemainingTime = time;
+}
+
 void Gorc::Game::World::Level::LevelPresenter::SetTimer(float time) {
 	std::get<1>(model->Cogs[RunningCogState.top().InstanceId]).TimerRemainingTime = time;
 }
@@ -503,6 +521,10 @@ int Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
 }
 
 // Sound verbs
+void Gorc::Game::World::Level::LevelPresenter::PlaySong(int start, int end, int loopto) {
+	AmbientMusic.PlaySong(start, end, loopto);
+}
+
 int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags) {
 	auto snd_tuple = model->Sounds.Create();
 
@@ -530,6 +552,10 @@ int Gorc::Game::World::Level::LevelPresenter::PlaySoundThing(int wav, int thing,
 	snd.PlaySoundThing(*model, place.ContentManager->GetAsset<Content::Assets::Sound>(wav), thing, volume, minrad, maxrad, flags);
 
 	return std::get<1>(snd_tuple);
+}
+
+void Gorc::Game::World::Level::LevelPresenter::SetMusicVol(float volume) {
+	AmbientMusic.SetVolume(volume);
 }
 
 // Sector verbs

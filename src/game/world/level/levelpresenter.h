@@ -6,6 +6,7 @@
 #include "cogtimerstate.h"
 #include "cogcontinuation.h"
 #include "cog/vm/virtualmachine.h"
+#include "music.h"
 
 #include <SFML/Audio.hpp>
 
@@ -26,6 +27,7 @@ private:
 	LevelPlace place;
 	std::unique_ptr<LevelModel> model;
 	sf::Sound AmbientSound;
+	Music AmbientMusic;
 	Cog::VM::VirtualMachine VirtualMachine;
 
 	std::stack<CogContinuation> RunningCogState;
@@ -86,6 +88,7 @@ public:
 	inline int GetSourceRef() { return RunningCogState.top().SourceRef; }
 	inline int GetSourceType() { return static_cast<int>(RunningCogState.top().SourceType); }
 
+	void SetPulse(float time);
 	void SetTimer(float time);
 	void Sleep(float time);
 
@@ -97,9 +100,11 @@ public:
 	void SetSectorLight(int sector_id, float value, float delay);
 
 	// Sound verbs
+	void PlaySong(int start, int end, int loopto);
 	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags);
 	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
 	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
+	void SetMusicVol(float volume);
 
 	// Surface verbs
 	Math::Vector<3> GetSurfaceCenter(int surface);
