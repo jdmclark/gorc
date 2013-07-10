@@ -54,6 +54,9 @@ private:
 			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
 
+	void PlayFoleyLoopClass(int thing, Content::Assets::SoundSubclassType subclass);
+	void StopFoleyLoop(int thing);
+
 public:
 	LevelPresenter(Components& components, const LevelPlace& place);
 
@@ -101,6 +104,7 @@ public:
 
 	// Sound verbs
 	void PlaySong(int start, int end, int loopto);
+	int PlaySoundClass(int thing, Content::Assets::SoundSubclassType subclass);
 	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags);
 	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
 	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);

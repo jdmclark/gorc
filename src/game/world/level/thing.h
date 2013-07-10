@@ -22,6 +22,8 @@ public:
 	int GoalFrame = 0;
 	float PathMoveSpeed = 0.0f;
 
+	int CurrentFoleyLoopChannel = -1;
+
 	Thing() = default;
 	Thing(const Content::Assets::Template& tpl);
 

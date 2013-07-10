@@ -50,7 +50,8 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	}
 
 	// Update listener
-	sf::Listener::SetTarget(0.0f, 0.0f, 1.0f);
+	auto listener_target = camera.Position + model->CameraLook;
+	sf::Listener::SetTarget(Math::Get<0>(listener_target), Math::Get<1>(listener_target), Math::Get<2>(listener_target));
 	sf::Listener::SetPosition(Math::Get<0>(camera.Position), Math::Get<1>(camera.Position), Math::Get<2>(camera.Position));
 	// TODO: Handle camera orientation (not currently properly implemented in SFML).
 	UpdateCameraAmbientSound();
@@ -150,6 +151,8 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 			thing.PathMoveSpeed = 0.0f;
 			SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Content::Assets::MessageType::Thing);
 			thing.RigidBody->setActivationState(0);
+			StopFoleyLoop(thing_id);
+			PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::StopMove);
 		}
 		else if(thing.CurrentFrame < thing.GoalFrame) {
 			thing.NextFrame = thing.CurrentFrame + 1;
@@ -439,6 +442,7 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	else if(best_thing_candidate >= 0) {
 		SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Content::Assets::MessageType::Thing,
 				model->CameraThingId, Content::Assets::MessageType::Thing);
+		PlaySoundClass(best_thing_candidate, Content::Assets::SoundSubclassType::Activate);
 	}
 }
 
@@ -486,6 +490,8 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int fra
 
 	referenced_thing.PathMoveSpeed = speed;
 	referenced_thing.PathMoving = true;
+	PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::StartMove);
+	PlayFoleyLoopClass(thing_id, Content::Assets::SoundSubclassType::Moving);
 
 	if(referenced_thing.RigidBody) {
 		referenced_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
@@ -523,6 +529,40 @@ int Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
 // Sound verbs
 void Gorc::Game::World::Level::LevelPresenter::PlaySong(int start, int end, int loopto) {
 	AmbientMusic.PlaySong(start, end, loopto);
+}
+
+int Gorc::Game::World::Level::LevelPresenter::PlaySoundClass(int thing, Content::Assets::SoundSubclassType subclass_type) {
+	Thing& referenced_thing = model->Things[thing];
+	if(referenced_thing.SoundClass) {
+		const Content::Assets::SoundSubclass& subclass = referenced_thing.SoundClass->Get(subclass_type);
+		if(subclass.sound >= 0) {
+			return PlaySoundThing(subclass.sound, thing, subclass.max_volume, subclass.min_radius, subclass.max_radius,
+					subclass.flags + Content::Assets::SoundFlag::ThingOriginMovesWithThing);
+		}
+	}
+
+	return -1;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::PlayFoleyLoopClass(int thing, Content::Assets::SoundSubclassType subclass_type) {
+	Thing& referenced_thing = model->Things[thing];
+
+	if(referenced_thing.CurrentFoleyLoopChannel >= 0) {
+		model->Sounds[referenced_thing.CurrentFoleyLoopChannel].Stop();
+	}
+
+	int channel = PlaySoundClass(thing, subclass_type);
+	if(channel >= 0) {
+		referenced_thing.CurrentFoleyLoopChannel = channel;
+	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::StopFoleyLoop(int thing) {
+	Thing& referenced_thing = model->Things[thing];
+
+	if(referenced_thing.CurrentFoleyLoopChannel >= 0) {
+		model->Sounds[referenced_thing.CurrentFoleyLoopChannel].Stop();
+	}
 }
 
 int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags) {

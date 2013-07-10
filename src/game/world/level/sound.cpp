@@ -40,7 +40,7 @@ void Gorc::Game::World::Level::Sound::PlayPositional(const Content::Assets::Soun
 	sound.SetVolume(volume * 100.0f);
 	sound.SetLoop(flags & Content::Assets::SoundFlag::Loops);
 	sound.SetMinDistance(actual_min_rad);
-	sound.SetAttenuation(100.0f);
+	sound.SetAttenuation(2.5f);
 	sound.Play();
 }
 
@@ -69,11 +69,15 @@ void Gorc::Game::World::Level::Sound::PlaySoundThing(const LevelModel& model, co
 	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
 }
 
+void Gorc::Game::World::Level::Sound::Stop() {
+	sound.Stop();
+}
+
 void Gorc::Game::World::Level::Sound::Update(double dt, const LevelModel& model) {
 	if(update_position) {
 		Math::Vector<3> pos = model.Things[thing].Position;
 		sound.SetPosition(Math::Get<0>(pos), Math::Get<1>(pos), Math::Get<2>(pos));
 	}
 
-	expired = (sound.GetStatus() == sf::Sound::Stopped);
+	expired = (sound.GetStatus() != sf::Sound::Playing);
 }

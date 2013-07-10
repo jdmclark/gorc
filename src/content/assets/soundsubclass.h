@@ -9,7 +9,7 @@ namespace Assets {
 
 class SoundSubclass {
 public:
-	Sound const* sound = nullptr;
+	int sound = -1;
 	FlagSet<SoundFlag> flags;
 	float min_radius = 1.0f;
 	float max_radius = 4.0f;

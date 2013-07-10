@@ -32,6 +32,8 @@ public:
 	void PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, unsigned int thing, float volume,
 			float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
 
+	void Stop();
+
 	void Update(double dt, const LevelModel& model);
 
 	inline bool GetExpired() {
