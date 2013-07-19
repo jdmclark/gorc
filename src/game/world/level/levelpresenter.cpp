@@ -26,6 +26,9 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
+	// Update world simulation
+	model->DynamicsWorld.stepSimulation(dt, 1, 1.0f / 120.0f);
+
 	// Update camera position
 	Thing& camera = model->Things[model->CameraThingId];
 
@@ -167,10 +170,6 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 				currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
 		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
 	}
-}
-
-void Gorc::Game::World::Level::LevelPresenter::UpdateSimulation(double dt) {
-	model->DynamicsWorld.stepSimulation(dt, 10, 1.0f / 120.0f);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateCameraAmbientSound() {

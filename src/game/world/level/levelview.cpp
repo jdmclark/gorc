@@ -17,10 +17,6 @@ void Gorc::Game::World::Level::LevelView::Update(double dt) {
 }
 
 void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
-	if(currentPresenter) {
-		currentPresenter->UpdateSimulation(dt);
-	}
-
 	if(currentModel) {
 		double width = static_cast<double>(view_size.Size<X>());
 		double height = static_cast<double>(view_size.Size<Y>());
@@ -67,6 +63,8 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		for(const auto& thing : currentModel->Things) {
 			DrawThing(thing);
 		}
+
+		glEnable(GL_CULL_FACE);
 
 		for(auto surf_tuple : translucent_surfaces_scratch) {
 			DrawSurfaceTranslucent(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)]);
@@ -216,7 +214,7 @@ void Gorc::Game::World::Level::LevelView::DrawSurfaceTranslucent(unsigned int su
 		const auto& material_entry = currentModel->Level.Materials[surface.Material];
 		const auto& material = std::get<0>(material_entry);
 
-		float alpha = 0.5f;
+		float alpha = (surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f;
 
 		Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
 				1.0f / static_cast<float>(material->Height));
@@ -273,7 +271,8 @@ void Gorc::Game::World::Level::LevelView::DrawSector(unsigned int sec_num) {
 	for(size_t i = sector.FirstSurface; i < sector.SurfaceCount + sector.FirstSurface; ++i) {
 		const auto& surface = currentModel->Surfaces[i];
 
-		if(surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) {
+		if((surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ||
+				(surface.Adjoin >= 0 && surface.GeometryMode != Content::Assets::GeometryMode::NotDrawn)) {
 			translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, i, 0.0f));
 		}
 		else {
@@ -380,6 +379,8 @@ void Gorc::Game::World::Level::LevelView::DrawLevel(const Math::Vector<3>& cam_p
 		const auto& surf = currentModel->Surfaces[surf_id];
 		auto vx_pos = currentModel->Level.Vertices[std::get<0>(surf.Vertices.front())];
 		std::get<2>(surf_tuple) = Math::Dot(surf.Normal, cam_pos - vx_pos);
+
+		// TODO: Compute actual distance to polygon
 	}
 
 	std::sort(translucent_surfaces_scratch.begin(), translucent_surfaces_scratch.end(),

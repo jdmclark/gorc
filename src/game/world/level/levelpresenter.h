@@ -62,7 +62,6 @@ public:
 
 	void Start(Event::EventBus& eventBus);
 	void Update(double dt);
-	void UpdateSimulation(double dt);
 
 	void TranslateCamera(const Math::Vector<3>& amt);
 	void YawCamera(double amt);
