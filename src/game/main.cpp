@@ -154,6 +154,7 @@ int main(int argc, char** argv) {
 
 	auto systemContentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
 	const auto& surfaceShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("surface.glsl");
+	const auto& horizonShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("horizon.glsl");
 
 	Gorc::Cog::Verbs::VerbTable VerbTable;
 	Gorc::Cog::Compiler Compiler(VerbTable);
@@ -170,7 +171,7 @@ int main(int argc, char** argv) {
 	Gorc::Game::Screen::Action::ActionView ActionView;
 
 	Gorc::Game::World::Nothing::NothingView NothingView;
-	Gorc::Game::World::Level::LevelView LevelView(surfaceShader);
+	Gorc::Game::World::Level::LevelView LevelView(surfaceShader, horizonShader);
 
 	Gorc::Game::Components Components(Report, EventBus, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
