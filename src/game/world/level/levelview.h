@@ -17,6 +17,7 @@ namespace Content {
 namespace Assets {
 class Template;
 class LevelSector;
+class Shader;
 }
 }
 
@@ -33,6 +34,8 @@ class Thing;
 
 class LevelView : public View {
 private:
+	const Content::Assets::Shader& surfaceShader;
+
 	LevelPresenter* currentPresenter = nullptr;
 	LevelModel* currentModel = nullptr;
 	std::unordered_set<unsigned int> sector_vis_scratch;
@@ -57,6 +60,8 @@ private:
 	void DrawThing(const Thing& thing);
 
 public:
+	LevelView(const Content::Assets::Shader& surfaceShader);
+
 	inline void SetPresenter(LevelPresenter* presenter) {
 		currentPresenter = presenter;
 	}

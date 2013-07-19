@@ -1,3 +1,4 @@
+#include "content/assets/shader.h"
 #include "levelview.h"
 #include "levelpresenter.h"
 #include "game/components.h"
@@ -10,6 +11,11 @@
 
 using namespace Gorc::Math;
 
+Gorc::Game::World::Level::LevelView::LevelView(const Content::Assets::Shader& surfaceShader)
+	: surfaceShader(surfaceShader), currentPresenter(nullptr), currentModel(nullptr) {
+	return;
+}
+
 void Gorc::Game::World::Level::LevelView::Update(double dt) {
 	if(currentPresenter) {
 		currentPresenter->Update(dt);
@@ -18,6 +24,25 @@ void Gorc::Game::World::Level::LevelView::Update(double dt) {
 
 void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
 	if(currentModel) {
+		glUseProgram(surfaceShader.program);
+
+		unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
+		const auto& current_camera_sector = currentModel->Sectors[current_camera_sector_id];
+
+		std::array<float, 4> tint_color;
+		const auto& current_sector_tint = current_camera_sector.Tint;
+		std::get<0>(tint_color) = Math::Get<0>(current_sector_tint);
+		std::get<1>(tint_color) = Math::Get<1>(current_sector_tint);
+		std::get<2>(tint_color) = Math::Get<2>(current_sector_tint);
+		std::get<3>(tint_color) = Math::Length(current_sector_tint);
+
+		auto diffuse_ul = glGetUniformLocation(surfaceShader.program, "diffuse");
+		glUniform1i(diffuse_ul, 0);
+		auto light_ul = glGetUniformLocation(surfaceShader.program, "light");
+		glUniform1i(light_ul, 1);
+		auto sector_tint_ul = glGetUniformLocation(surfaceShader.program, "sector_tint");
+		glUniform4fv(sector_tint_ul, 4, tint_color.data());
+
 		double width = static_cast<double>(view_size.Size<X>());
 		double height = static_cast<double>(view_size.Size<Y>());
 		double aspect = width / height;
@@ -47,19 +72,21 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		glGetDoublev(GL_MODELVIEW_MATRIX, view_matrix.data());
 		glGetIntegerv(GL_VIEWPORT, viewport.data());
 
-		unsigned int current_camera_sector = currentModel->Things[currentModel->CameraThingId].Sector;
 		Math::Box<2, double> adj_bbox(Math::Vec<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
 				Math::Vec<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
 						static_cast<double>(std::get<1>(viewport) + std::get<3>(viewport))));
 
-
 		sector_visited_scratch.clear();
 		sector_vis_scratch.clear();
-		sector_vis_scratch.emplace(current_camera_sector);
-		DoSectorVis(current_camera_sector, proj_matrix, view_matrix, viewport, adj_bbox, cameraThing.Position, currentModel->CameraLook);
+		sector_vis_scratch.emplace(current_camera_sector_id);
+		DoSectorVis(current_camera_sector_id, proj_matrix, view_matrix, viewport, adj_bbox, cameraThing.Position, currentModel->CameraLook);
 
+		glDisable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
 		DrawLevel(CamPosition);
 
+		glEnable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
 		for(const auto& thing : currentModel->Things) {
 			DrawThing(thing);
 		}
@@ -80,7 +107,8 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 		return;
 	}
 
-	glDisable(GL_CULL_FACE);
+	float sector_light = currentModel->Sectors[thing.Sector].AmbientLight
+			+ currentModel->Sectors[thing.Sector].ExtraLight;
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -106,7 +134,17 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
 						1.0f / static_cast<float>(material->Height));
 
+				glActiveTexture(GL_TEXTURE0);
 				material->Cels[0].Diffuse->Bind();
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+				glActiveTexture(GL_TEXTURE1);
+				material->Cels[0].Light->Bind();
+
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -116,16 +154,16 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 
 				Vector<3> first_geo = mesh.Vertices[std::get<0>(face.Vertices[0])];
 				Vector<2> first_tex = mesh.TextureVertices[std::get<1>(face.Vertices[0])];
-				float first_intensity = 1.0f;
+				float first_intensity = sector_light;
 
 				for(size_t i = 2; i < face.Vertices.size(); ++i) {
 					Vector<3> second_geo = mesh.Vertices[std::get<0>(face.Vertices[i - 1])];
 					Vector<2> second_tex = mesh.TextureVertices[std::get<1>(face.Vertices[i - 1])];
-					float second_intensity = 1.0f;
+					float second_intensity = sector_light;
 
 					Vector<3> third_geo = mesh.Vertices[std::get<0>(face.Vertices[i])];
 					Vector<2> third_tex = mesh.TextureVertices[std::get<1>(face.Vertices[i])];
-					float third_intensity = 1.0f;
+					float third_intensity = sector_light;
 
 					glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
 					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
@@ -162,12 +200,24 @@ void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, con
 				1.0f / static_cast<float>(material->Height));
 
 		int surfaceCelNumber = surface.CelNumber;
+		int actualSurfaceCelNumber;
 		if(surfaceCelNumber >= 0) {
-			material->Cels[surfaceCelNumber % material->Cels.size()].Diffuse->Bind();
+			actualSurfaceCelNumber = surfaceCelNumber % material->Cels.size();
 		}
 		else {
-			material->Cels[currentModel->MaterialCelNumber[surface.Material] % material->Cels.size()].Diffuse->Bind();
+			actualSurfaceCelNumber = currentModel->MaterialCelNumber[surface.Material] % material->Cels.size();
 		}
+
+		glActiveTexture(GL_TEXTURE0);
+		material->Cels[actualSurfaceCelNumber].Diffuse->Bind();
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glActiveTexture(GL_TEXTURE1);
+		material->Cels[actualSurfaceCelNumber].Light->Bind();
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -220,12 +270,24 @@ void Gorc::Game::World::Level::LevelView::DrawSurfaceTranslucent(unsigned int su
 				1.0f / static_cast<float>(material->Height));
 
 		int surfaceCelNumber = surface.CelNumber;
+		int actualSurfaceCelNumber;
 		if(surfaceCelNumber >= 0) {
-			material->Cels[surfaceCelNumber % material->Cels.size()].Diffuse->Bind();
+			actualSurfaceCelNumber = surfaceCelNumber % material->Cels.size();
 		}
 		else {
-			material->Cels[currentModel->MaterialCelNumber[surface.Material] % material->Cels.size()].Diffuse->Bind();
+			actualSurfaceCelNumber = currentModel->MaterialCelNumber[surface.Material] % material->Cels.size();
 		}
+
+		glActiveTexture(GL_TEXTURE0);
+		material->Cels[actualSurfaceCelNumber].Diffuse->Bind();
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glActiveTexture(GL_TEXTURE1);
+		material->Cels[actualSurfaceCelNumber].Light->Bind();
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -356,7 +418,6 @@ void Gorc::Game::World::Level::LevelView::DrawLevel(const Math::Vector<3>& cam_p
 
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_ALPHA_TEST);
-	//glDisable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
@@ -366,7 +427,6 @@ void Gorc::Game::World::Level::LevelView::DrawLevel(const Math::Vector<3>& cam_p
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	for(auto sec_num : sector_vis_scratch) {

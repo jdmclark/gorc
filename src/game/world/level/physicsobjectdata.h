@@ -8,11 +8,12 @@ namespace Level {
 class PhysicsObjectData {
 public:
 	virtual ~PhysicsObjectData();
+
+	unsigned int SectorId;
 };
 
 class SurfaceObjectData : public PhysicsObjectData {
 public:
-	unsigned int SectorId;
 	unsigned int SurfaceId;
 };
 

@@ -1,3 +1,5 @@
+#include "content/assets/shader.h"
+
 #include "components.h"
 
 #include "framework/events/printevent.h"
@@ -131,14 +133,27 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 }
 
 int main(int argc, char** argv) {
+	// Create window and OpenGL context.
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
 	Window.UseVerticalSync(true);
+	Window.SetActive();
+
+	// Initialize GLEW.
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		// TODO: Print error.
+		return 1;
+	}
+
 	const sf::Input& Input = Window.GetInput();
 
 	Gorc::Diagnostics::StreamReport Report(std::cout);
 	Gorc::Event::EventBus EventBus;
 	Gorc::Content::VFS::VirtualFileSystem FileSystem("game/restricted",
 			"game/resource", "game/episode", Report);
+
+	auto systemContentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
+	const auto& surfaceShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("surface.glsl");
 
 	Gorc::Cog::Verbs::VerbTable VerbTable;
 	Gorc::Cog::Compiler Compiler(VerbTable);
@@ -155,7 +170,7 @@ int main(int argc, char** argv) {
 	Gorc::Game::Screen::Action::ActionView ActionView;
 
 	Gorc::Game::World::Nothing::NothingView NothingView;
-	Gorc::Game::World::Level::LevelView LevelView;
+	Gorc::Game::World::Level::LevelView LevelView(surfaceShader);
 
 	Gorc::Game::Components Components(Report, EventBus, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
@@ -199,7 +214,7 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("04escapehouse.jkl", Compiler);
+	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
 	WorldPlaceController.GoTo(Gorc::Game::World::Level::LevelPlace(contentManager, lev));
 
 	ScreenPlaceController.GoTo(Gorc::Game::Screen::Action::ActionPlace());

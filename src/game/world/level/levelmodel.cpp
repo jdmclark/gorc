@@ -202,6 +202,7 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 	camera_thing.RigidBody->setSleepingThresholds(0, 0);
 
 	camera_thing.ObjectData.ThingId = CameraThingId;
+	camera_thing.ObjectData.SectorId = camera_thing.Sector;
 	camera_thing.RigidBody->setUserPointer(&camera_thing.ObjectData);
 
 	FlagSet<PhysicsCollideClass> CameraCollideType {PhysicsCollideClass::Player, PhysicsCollideClass::Thing};
@@ -277,6 +278,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		// Associate thing info structure.
 		new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
+		new_thing.ObjectData.SectorId = sector_num;
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
 		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
@@ -334,6 +336,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		// Associate thing info structure.
 		new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
+		new_thing.ObjectData.SectorId = sector_num;
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
 		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {

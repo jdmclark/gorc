@@ -195,7 +195,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 					*(jt + 0) = Math::Get<0>(color);
 					*(jt + 1) = Math::Get<1>(color);
 					*(jt + 2) = Math::Get<2>(color);
-					*(jt + 2) = 255;
+					*(jt + 3) = 255;
 				}
 
 				light->LoadFromPixels(dataheader.SizeX, dataheader.SizeY, &col_buffer[0]);
