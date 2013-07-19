@@ -26,7 +26,7 @@
 
 #include <iostream>
 
-const double gameplayTick = (1.0 / 60.0);
+const double gameplayTick = (1.0 / 120.0);
 
 void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Components& components) {
 	// Anim / Cel verbs
@@ -132,6 +132,7 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 
 int main(int argc, char** argv) {
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
+	Window.UseVerticalSync(true);
 	const sf::Input& Input = Window.GetInput();
 
 	Gorc::Diagnostics::StreamReport Report(std::cout);

@@ -29,8 +29,9 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	// Update camera position
 	Thing& camera = model->Things[model->CameraThingId];
 
-	camera.RigidBody->applyCentralForce(BtVec(model->CameraVelocity * 800.0f));
-	camera.RigidBody->setDamping(0.999f, 1.0f);
+	camera.RigidBody->applyCentralImpulse(BtVec(model->CameraVelocity * 12.0f));
+	camera.RigidBody->setDamping(0.99999f, 1.0f);
+	camera.RigidBody->setAngularFactor(btVector3(0,0,0));
 
 	// Update things
 	btTransform trans;
@@ -169,7 +170,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 }
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateSimulation(double dt) {
-	model->DynamicsWorld.stepSimulation(dt, 20);
+	model->DynamicsWorld.stepSimulation(dt, 10, 1.0f / 120.0f);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateCameraAmbientSound() {

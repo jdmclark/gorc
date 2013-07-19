@@ -43,10 +43,33 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 				Get<X>(CamLookPoint), Get<Y>(CamLookPoint), Get<Z>(CamLookPoint),
 				Get<X>(currentModel->CameraUp), Get<Y>(currentModel->CameraUp), Get<Z>(currentModel->CameraUp));
 
-		DrawLevel();
+		std::array<double, 16> proj_matrix;
+		std::array<double, 16> view_matrix;
+		std::array<int, 4> viewport;
+
+		glGetDoublev(GL_PROJECTION_MATRIX, proj_matrix.data());
+		glGetDoublev(GL_MODELVIEW_MATRIX, view_matrix.data());
+		glGetIntegerv(GL_VIEWPORT, viewport.data());
+
+		unsigned int current_camera_sector = currentModel->Things[currentModel->CameraThingId].Sector;
+		Math::Box<2, double> adj_bbox(Math::Vec<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
+				Math::Vec<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
+						static_cast<double>(std::get<1>(viewport) + std::get<3>(viewport))));
+
+
+		sector_visited_scratch.clear();
+		sector_vis_scratch.clear();
+		sector_vis_scratch.emplace(current_camera_sector);
+		DoSectorVis(current_camera_sector, proj_matrix, view_matrix, viewport, adj_bbox, cameraThing.Position, currentModel->CameraLook);
+
+		DrawLevel(CamPosition);
 
 		for(const auto& thing : currentModel->Things) {
 			DrawThing(thing);
+		}
+
+		for(auto surf_tuple : translucent_surfaces_scratch) {
+			DrawSurfaceTranslucent(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)]);
 		}
 
 		currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
@@ -55,7 +78,7 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 }
 
 void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
-	if(!thing.Model3d) {
+	if(!thing.Model3d || sector_vis_scratch.count(thing.Sector) == 0) {
 		return;
 	}
 
@@ -127,11 +150,214 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 	glPopMatrix();
 }
 
-void Gorc::Game::World::Level::LevelView::DrawLevel() {
+void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector) {
+	const auto& surface = currentModel->Surfaces[surf_num];
+	const auto& lev = currentModel->Level;
+
+	if(surface.Material >= 0) {
+		const auto& material_entry = currentModel->Level.Materials[surface.Material];
+		const auto& material = std::get<0>(material_entry);
+
+		float alpha = 1.0f;
+
+		Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
+				1.0f / static_cast<float>(material->Height));
+
+		int surfaceCelNumber = surface.CelNumber;
+		if(surfaceCelNumber >= 0) {
+			material->Cels[surfaceCelNumber % material->Cels.size()].Diffuse->Bind();
+		}
+		else {
+			material->Cels[currentModel->MaterialCelNumber[surface.Material] % material->Cels.size()].Diffuse->Bind();
+		}
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glBegin(GL_TRIANGLES);
+
+		Vector<3> first_geo = lev.Vertices[std::get<0>(surface.Vertices[0])];
+		Vector<2> first_tex = lev.TextureVertices[std::get<1>(surface.Vertices[0])];
+		float first_intensity = std::get<2>(surface.Vertices[0]) + sector.ExtraLight + surface.ExtraLight;
+
+		for(size_t i = 2; i < surface.Vertices.size(); ++i) {
+			Vector<3> second_geo = lev.Vertices[std::get<0>(surface.Vertices[i - 1])];
+			Vector<2> second_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i - 1])];
+			float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.ExtraLight + surface.ExtraLight;
+
+			Vector<3> third_geo = lev.Vertices[std::get<0>(surface.Vertices[i])];
+			Vector<2> third_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i])];
+			float third_intensity = std::get<2>(surface.Vertices[i]) + sector.ExtraLight + surface.ExtraLight;
+
+			glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
+			glColor4f(first_intensity, first_intensity, first_intensity, alpha);
+			glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
+
+			glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
+			glColor4f(second_intensity, second_intensity, second_intensity, alpha);
+			glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
+
+			glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
+			glColor4f(third_intensity, third_intensity, third_intensity, alpha);
+			glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
+		}
+
+		glEnd();
+	}
+}
+
+void Gorc::Game::World::Level::LevelView::DrawSurfaceTranslucent(unsigned int surf_num, const Content::Assets::LevelSector& sector) {
+	const auto& surface = currentModel->Surfaces[surf_num];
+	const auto& lev = currentModel->Level;
+
+	if(surface.Material >= 0) {
+		const auto& material_entry = currentModel->Level.Materials[surface.Material];
+		const auto& material = std::get<0>(material_entry);
+
+		float alpha = 0.5f;
+
+		Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
+				1.0f / static_cast<float>(material->Height));
+
+		int surfaceCelNumber = surface.CelNumber;
+		if(surfaceCelNumber >= 0) {
+			material->Cels[surfaceCelNumber % material->Cels.size()].Diffuse->Bind();
+		}
+		else {
+			material->Cels[currentModel->MaterialCelNumber[surface.Material] % material->Cels.size()].Diffuse->Bind();
+		}
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glBegin(GL_TRIANGLES);
+
+		Vector<3> first_geo = lev.Vertices[std::get<0>(surface.Vertices[0])];
+		Vector<2> first_tex = lev.TextureVertices[std::get<1>(surface.Vertices[0])];
+		float first_intensity = std::get<2>(surface.Vertices[0]) + sector.ExtraLight + surface.ExtraLight;
+
+		for(size_t i = 2; i < surface.Vertices.size(); ++i) {
+			Vector<3> second_geo = lev.Vertices[std::get<0>(surface.Vertices[i - 1])];
+			Vector<2> second_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i - 1])];
+			float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.ExtraLight + surface.ExtraLight;
+
+			Vector<3> third_geo = lev.Vertices[std::get<0>(surface.Vertices[i])];
+			Vector<2> third_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i])];
+			float third_intensity = std::get<2>(surface.Vertices[i]) + sector.ExtraLight + surface.ExtraLight;
+
+			glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
+			glColor4f(first_intensity, first_intensity, first_intensity, alpha);
+			glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
+
+			glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
+			glColor4f(second_intensity, second_intensity, second_intensity, alpha);
+			glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
+
+			glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
+			glColor4f(third_intensity, third_intensity, third_intensity, alpha);
+			glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
+		}
+
+		glEnd();
+	}
+}
+
+void Gorc::Game::World::Level::LevelView::DrawSector(unsigned int sec_num) {
+	const Content::Assets::LevelSector& sector = currentModel->Sectors[sec_num];
 	const Content::Assets::Level& lev = currentModel->Level;
+
+	for(size_t i = sector.FirstSurface; i < sector.SurfaceCount + sector.FirstSurface; ++i) {
+		const auto& surface = currentModel->Surfaces[i];
+
+		if(surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) {
+			translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, i, 0.0f));
+		}
+		else {
+			DrawSurface(i, sector);
+		}
+	}
+}
+
+void Gorc::Game::World::Level::LevelView::DoSectorVis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
+		const std::array<int, 4>& viewport, const Math::Box<2, double>& adj_bbox, const Math::Vector<3>& cam_pos, const Math::Vector<3>& cam_look) {
+	sector_visited_scratch.emplace(sec_num);
+
+	const auto& sector = currentModel->Sectors[sec_num];
+	for(unsigned int i = 0; i < sector.SurfaceCount; ++i) {
+		const auto& surface = currentModel->Surfaces[sector.FirstSurface + i];
+
+		const Math::Vector<3>& surf_vx_pos = currentModel->Level.Vertices[std::get<0>(surface.Vertices.front())];
+
+		if(surface.Adjoin < 0 || sector_visited_scratch.count(surface.AdjoinedSector) > 0) {
+			continue;
+		}
+
+		float dist = Math::Dot(surface.Normal, cam_pos - surf_vx_pos);
+		if(dist < 0.0f) {
+			continue;
+		}
+
+		double min_x = std::numeric_limits<double>::max();
+		double min_y = std::numeric_limits<double>::max();
+		double max_x = std::numeric_limits<double>::lowest();
+		double max_y = std::numeric_limits<double>::lowest();
+
+		bool failed = false;
+		bool culled = true;
+		for(const auto& vx : surface.Vertices) {
+			auto vx_pos = currentModel->Level.Vertices[std::get<0>(vx)];
+
+			if(Math::Dot(cam_look, vx_pos - cam_pos) < 0.0f) {
+				// Vertex behind camera.
+				failed = true;
+				continue;
+			}
+
+			culled = false;
+
+			double x_out, y_out, z_out;
+
+			gluProject(Math::Get<0>(vx_pos), Math::Get<1>(vx_pos), Math::Get<2>(vx_pos),
+					view_mat.data(), proj_mat.data(), viewport.data(),
+					&x_out, &y_out, &z_out);
+
+			min_x = std::min(min_x, x_out);
+			max_x = std::max(max_x, x_out);
+			min_y = std::min(min_y, y_out);
+			max_y = std::max(max_y, y_out);
+		}
+
+		if(culled) {
+			continue;
+		}
+
+		if(failed) {
+			sector_vis_scratch.emplace(surface.AdjoinedSector);
+			DoSectorVis(surface.AdjoinedSector, proj_mat, view_mat, viewport, adj_bbox, cam_pos, cam_look);
+			continue;
+		}
+
+		Math::Box<2, double> new_adj_bbox(Math::Vec(min_x, min_y), Math::Vec(max_x, max_y));
+		if(Math::BoxesOverlap(adj_bbox, new_adj_bbox)) {
+			sector_vis_scratch.emplace(surface.AdjoinedSector);
+			DoSectorVis(surface.AdjoinedSector, proj_mat, view_mat, viewport,
+					Math::Intersect(adj_bbox, new_adj_bbox), cam_pos, cam_look);
+		}
+	}
+
+	sector_visited_scratch.erase(sec_num);
+}
+
+void Gorc::Game::World::Level::LevelView::DrawLevel(const Math::Vector<3>& cam_pos) {
+	translucent_surfaces_scratch.clear();
 
 	glDisable(GL_STENCIL_TEST);
 	glDisable(GL_ALPHA_TEST);
+	//glDisable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glCullFace(GL_BACK);
@@ -144,64 +370,22 @@ void Gorc::Game::World::Level::LevelView::DrawLevel() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	for(const auto& sector : currentModel->Sectors) {
-		for(size_t i = sector.FirstSurface; i < sector.SurfaceCount + sector.FirstSurface; ++i) {
-			const auto& surface = currentModel->Surfaces[i];
-			if(surface.Material >= 0) {
-
-				const auto& material_entry = lev.Materials[surface.Material];
-				const auto& material = std::get<0>(material_entry);
-
-				float alpha = (surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f;
-
-				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
-						1.0f / static_cast<float>(material->Height));
-
-				int surfaceCelNumber = surface.CelNumber;
-				if(surfaceCelNumber >= 0) {
-					material->Cels[surfaceCelNumber % material->Cels.size()].Diffuse->Bind();
-				}
-				else {
-					material->Cels[currentModel->MaterialCelNumber[surface.Material] % material->Cels.size()].Diffuse->Bind();
-				}
-
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-				glBegin(GL_TRIANGLES);
-
-				Vector<3> first_geo = lev.Vertices[std::get<0>(surface.Vertices[0])];
-				Vector<2> first_tex = lev.TextureVertices[std::get<1>(surface.Vertices[0])];
-				float first_intensity = std::get<2>(surface.Vertices[0]) + sector.ExtraLight + surface.ExtraLight;
-
-				for(size_t i = 2; i < surface.Vertices.size(); ++i) {
-					Vector<3> second_geo = lev.Vertices[std::get<0>(surface.Vertices[i - 1])];
-					Vector<2> second_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i - 1])];
-					float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.ExtraLight + surface.ExtraLight;
-
-					Vector<3> third_geo = lev.Vertices[std::get<0>(surface.Vertices[i])];
-					Vector<2> third_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i])];
-					float third_intensity = std::get<2>(surface.Vertices[i]) + sector.ExtraLight + surface.ExtraLight;
-
-					glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
-					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-					glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
-
-					glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
-					glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-					glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
-
-					glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
-					glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-					glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
-				}
-
-				glEnd();
-			}
-		}
+	for(auto sec_num : sector_vis_scratch) {
+		DrawSector(sec_num);
 	}
+
+	// Compute distances to translucent surfaces.
+	for(auto& surf_tuple : translucent_surfaces_scratch) {
+		unsigned int surf_id = std::get<1>(surf_tuple);
+		const auto& surf = currentModel->Surfaces[surf_id];
+		auto vx_pos = currentModel->Level.Vertices[std::get<0>(surf.Vertices.front())];
+		std::get<2>(surf_tuple) = Math::Dot(surf.Normal, cam_pos - vx_pos);
+	}
+
+	std::sort(translucent_surfaces_scratch.begin(), translucent_surfaces_scratch.end(),
+			[](const std::tuple<unsigned int, unsigned int, float>& a, const std::tuple<unsigned int, unsigned int, float>& b) {
+		return std::get<2>(a) > std::get<2>(b);
+	});
 }
 
 void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {

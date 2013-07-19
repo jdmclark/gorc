@@ -171,7 +171,13 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::SoundClassLoader::
 
 			tok.SetReportEOL(true);
 
-			subclass.sound = manager.LoadId<Assets::Sound>(tok.GetSpaceDelimitedString());
+			try {
+				subclass.sound = manager.LoadId<Assets::Sound>(tok.GetSpaceDelimitedString());
+			}
+			catch(...) {
+				// Sound file not loaded. Set to invalid value.
+				subclass.sound = -1;
+			}
 
 			tok.GetToken(t);
 			if(t.Type != Text::TokenType::EndOfLine) {

@@ -174,6 +174,8 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 		SurfaceRigidBodies[i]->setUserPointer(&SurfaceObjectData[i]);
 	}
 
+	CameraShape = std::unique_ptr<btSphereShape>(new btSphereShape(CameraRadius));
+
 	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
 	for(const auto& thing : Level.Things) {
 		CreateThing(thing, thing.Sector, thing.Position, thing.Orientation);
@@ -184,8 +186,6 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 	auto camera_thing_tuple = Things.Create();
 	auto& camera_thing = *std::get<0>(camera_thing_tuple);
 	CameraThingId = std::get<1>(camera_thing_tuple);
-
-	CameraShape = std::unique_ptr<btSphereShape>(new btSphereShape(CameraRadius));
 
 	camera_thing.Type = Content::Assets::ThingType::Player;
 	camera_thing.Sector = SpawnPoints[CurrentSpawnPoint]->Sector;
@@ -238,13 +238,60 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		return std::get<1>(new_thing_tuple);
 	}
 	else if(tpl.Type == Content::Assets::ThingType::Actor) {
-		// TODO: Add actual enemy thing.
-		// For now, insert ghost thing to fill ID.
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
+		new_thing = tpl;
+
+		new_thing.Sector = sector_num;
 		new_thing.Position = pos;
 		new_thing.Orientation = orient;
-		new_thing.Type = Content::Assets::ThingType::Ghost;
+
+		static const float deg2rad = 0.0174532925f;
+		btQuaternion orientation(0.0f, 0.0f, 0.0f, 1.0f);
+		orientation *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(orient)); // Yaw
+		orientation *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(orient)); // Pitch
+		orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
+
+		float thing_mass = 0.0f;
+		if(new_thing.Move == Content::Assets::MoveType::Physics && new_thing.Collide != Content::Assets::CollideType::None) {
+			thing_mass = new_thing.Mass;
+		}
+
+		btCollisionShape* thingShape = CameraShape.get();
+
+		btVector3 thing_inertia(0,0,0);
+		thingShape->calculateLocalInertia(thing_mass, thing_inertia);
+
+		new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
+				btTransform(orientation, Math::BtVec(pos))));
+		new_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(
+				btRigidBody::btRigidBodyConstructionInfo(thing_mass, new_thing.MotionState.get(),
+						thingShape, thing_inertia)));
+
+		FlagSet<PhysicsCollideClass> CollideType {PhysicsCollideClass::Thing};
+		FlagSet<PhysicsCollideClass> CollideWith;
+
+		if(new_thing.Collide != Content::Assets::CollideType::None) {
+			CollideWith = {PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing};
+		}
+
+		// Associate thing info structure.
+		new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
+		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
+
+		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
+			new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
+		}
+		else {
+			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
+		}
+
+		new_thing.RigidBody->setAngularFactor(btVector3(0,0,0));
+
+		DynamicsWorld.addRigidBody(new_thing.RigidBody.get(), static_cast<unsigned int>(CollideType),
+				static_cast<unsigned int>(CollideWith));
+
 		return std::get<1>(new_thing_tuple);
 	}
 	else if(tpl.Model3d) {

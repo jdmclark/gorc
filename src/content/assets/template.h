@@ -31,11 +31,13 @@ public:
 	MoveType Move = MoveType::None;
 	CollideType Collide = CollideType::None;
 	FlagSet<ThingFlag> Flags;
+	Math::Vector<3> EyeOffset;
 
 	std::vector<std::tuple<Math::Vector<3>, Math::Vector<3>>> Frames;
 
 	float Mass = 2.0f;
-	float Radius = 0.05f;
+	float Size = 0.05f;
+	float MoveSize = 0.05f;
 
 	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Colormap& cmp, Diagnostics::Report& report);
 };

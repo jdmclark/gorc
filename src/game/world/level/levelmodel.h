@@ -54,7 +54,7 @@ public:
 	btDefaultMotionState SurfaceMotionState;
 	std::vector<SurfaceObjectData> SurfaceObjectData;
 
-	std::unique_ptr<btSphereShape> CameraShape;
+	std::unique_ptr<btCollisionShape> CameraShape;
 	unsigned int CameraThingId;
 
 	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level);

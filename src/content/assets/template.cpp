@@ -85,6 +85,16 @@ template <typename T> void TemplateParameterFlagMapper(FlagSet<T>& value, const 
 	}
 }
 
+void TemplateParameterVectorMapper(Math::Vector<3>& value, Text::Tokenizer& tok) {
+	tok.AssertPunctuator("(");
+	Math::Get<0>(value) = tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	Math::Get<1>(value) = tok.GetNumber<float>();
+	tok.AssertPunctuator("/");
+	Math::Get<2>(value) = tok.GetNumber<float>();
+	tok.AssertPunctuator(")");
+}
+
 void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
@@ -140,6 +150,12 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 		TemplateParameterValueMapper(MoveTypeMap, tpl.Move, MoveType::None, tok, report); }},
 	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
 		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
+	{ "movesize", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+		TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
+	{ "size", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+			TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
+	{ "eyeoffset", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report&) {
+		TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
 	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
 		TemplateParameterEnumMapper(tpl.Collide, CollideType::None, tok, report); }},
 	{ "thingflags", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {

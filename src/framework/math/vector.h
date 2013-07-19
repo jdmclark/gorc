@@ -36,9 +36,36 @@ private:
 	std::array<F, n> data;
 
 public:
-	static Vector MakeZero() {
+	using iterator = decltype(data.begin());
+	using const_iterator = decltype(data.cbegin());
+
+	iterator begin() {
+		return data.begin();
+	}
+
+	const_iterator begin() const {
+		return data.begin();
+	}
+
+	const_iterator cbegin() const {
+		return data.begin();
+	}
+
+	iterator end() {
+		return data.end();
+	}
+
+	const_iterator end() const {
+		return data.end();
+	}
+
+	const_iterator cend() const {
+		return data.end();
+	}
+
+	static Vector MakeValue(F value = 0) {
 		Vector rv;
-		std::fill(rv.data.begin(), rv.data.end(), 0);
+		std::fill(rv.data.begin(), rv.data.end(), value);
 		return rv;
 	}
 
@@ -145,8 +172,8 @@ const size_t Y = 1;
 const size_t Z = 2;
 const size_t W = 3;
 
-template <size_t n, typename F = float> Vector<n, F> Zero() {
-	return Vector<n, F>();
+template <size_t n, typename F = float> Vector<n, F> Zero(F value = 0) {
+	return Vector<n, F>::MakeValue(value);
 }
 
 template <typename T, typename... F> Vector<sizeof...(F) + 1, T> Vec(T v1, F... vN) {
