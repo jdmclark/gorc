@@ -14,13 +14,11 @@ uniform vec4 sector_tint;
 uniform vec2 screen_size;
 uniform vec3 horizon_sky_offset;
 
-void horizon_sky_texture_coordinates(in vec3 vScreenPos, out vec2 tex_coords) {
-	vec2 vNormalizedScreenPos = vScreenPos / screen_size;
-	vec2 vTexCoord = vNormalizedScreenPos + (0.5 / screen_size);
-
+void horizon_sky_texture_coordinates(in vec4 vScreenPos, out vec2 tex_coords) {
+	vec2 vTexCoord = vScreenPos * horizon_sky_offset.z / screen_size.x;
+	
 	vTexCoord.x += horizon_sky_offset.x;
 	vTexCoord.y += horizon_sky_offset.y;
-	vTexCoord /= horizon_sky_offset.z;
 
 	tex_coords = vTexCoord;
 }

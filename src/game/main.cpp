@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
+	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("06abarons.jkl", Compiler);
 	WorldPlaceController.GoTo(Gorc::Game::World::Level::LevelPlace(contentManager, lev));
 
 	ScreenPlaceController.GoTo(Gorc::Game::Screen::Action::ActionPlace());

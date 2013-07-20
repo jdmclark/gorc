@@ -126,7 +126,7 @@ void Gorc::Game::World::Level::LevelModel::AddCogInstance(const Cog::Script& scr
 }
 
 Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler, const Gorc::Content::Assets::Level& Level)
-	: Level(Level), Adjoins(Level.Adjoins), Surfaces(Level.Surfaces), Sectors(Level.Sectors), MaterialCelNumber(Level.Materials.size(), 0),
+	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Surfaces(Level.Surfaces), Sectors(Level.Sectors), MaterialCelNumber(Level.Materials.size(), 0),
 	  Animations(OnAnimationDestroy),  Dispatcher(&CollisionConfiguration), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
 	  SurfaceMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))), SurfaceObjectData(Level.Surfaces.size()) {
 	DynamicsWorld.setGravity(btVector3(0, 0, -Level.Header.WorldGravity));

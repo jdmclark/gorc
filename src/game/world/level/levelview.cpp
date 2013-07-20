@@ -171,7 +171,18 @@ void Gorc::Game::World::Level::LevelView::ActivateHorizonShader(const Math::Box<
 
 	std::array<float, 2> ssz { static_cast<float>(screen_size.Size<X>()), static_cast<float>(screen_size.Size<Y>()) };
 
-	std::array<float, 3> offset = { 0.0f, 0.0f, 128.0f / currentModel->Level.Header.HorizonDistance };
+	auto horizon_start_offset = currentModel->Header.HorizonSkyOffset / 256.0f;
+	float horizons_per_rev = std::ceil(currentModel->Header.HorizonPixelsPerRev / 256.0f);
+	const auto& camera_look = currentModel->CameraLook;
+	float horizon_scale = 128.0f / currentModel->Header.HorizonDistance;
+
+	float yaw_revs = std::atan2(Get<X>(camera_look), Get<Y>(camera_look)) / 6.28318f;
+	Get<X>(horizon_start_offset) += yaw_revs * horizons_per_rev;
+
+	float pitch_revs = std::acos(Dot(camera_look, Vec(0.0f, 0.0f, 1.0f))) * 0.5f + 1.0f;
+	Get<Y>(horizon_start_offset) -= pitch_revs;
+
+	std::array<float, 3> offset = { Get<0>(horizon_start_offset), Get<1>(horizon_start_offset), horizon_scale };
 
 	auto diffuse_ul = glGetUniformLocation(horizonShader.program, "diffuse");
 	glUniform1i(diffuse_ul, 0);

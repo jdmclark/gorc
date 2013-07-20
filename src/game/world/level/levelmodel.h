@@ -24,6 +24,7 @@ private:
 
 public:
 	const Content::Assets::Level& Level;
+	Content::Assets::LevelHeader Header;
 	std::vector<Content::Assets::LevelAdjoin> Adjoins;
 	std::vector<Content::Assets::LevelSurface> Surfaces;
 	std::vector<Content::Assets::LevelSector> Sectors;
