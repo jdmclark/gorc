@@ -12,8 +12,9 @@
 using namespace Gorc::Math;
 
 Gorc::Game::World::Level::LevelView::LevelView(const Content::Assets::Shader& surfaceShader,
-		const Content::Assets::Shader& horizonShader)
-	: surfaceShader(surfaceShader), horizonShader(horizonShader), currentPresenter(nullptr), currentModel(nullptr) {
+		const Content::Assets::Shader& horizonShader, const Content::Assets::Shader& ceilingShader)
+	: surfaceShader(surfaceShader), horizonShader(horizonShader), ceilingShader(ceilingShader),
+	  currentPresenter(nullptr), currentModel(nullptr) {
 	return;
 }
 
@@ -196,6 +197,32 @@ void Gorc::Game::World::Level::LevelView::ActivateHorizonShader(const Math::Box<
 	glUniform3fv(offset_ul, 1, offset.data());
 }
 
+void Gorc::Game::World::Level::LevelView::ActivateCeilingShader() {
+	glUseProgram(ceilingShader.program);
+
+	unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
+	const auto& current_camera_sector = currentModel->Sectors[current_camera_sector_id];
+
+	std::array<float, 4> tint_color;
+	const auto& current_sector_tint = current_camera_sector.Tint;
+	std::get<0>(tint_color) = Math::Get<0>(current_sector_tint);
+	std::get<1>(tint_color) = Math::Get<1>(current_sector_tint);
+	std::get<2>(tint_color) = Math::Get<2>(current_sector_tint);
+	std::get<3>(tint_color) = Math::Length(current_sector_tint);
+
+	std::array<float, 3> offset = { Get<0>(currentModel->Header.CeilingSkyOffset), Get<1>(currentModel->Header.CeilingSkyOffset),
+			currentModel->Header.CeilingSkyZ };
+
+	auto diffuse_ul = glGetUniformLocation(ceilingShader.program, "diffuse");
+	glUniform1i(diffuse_ul, 0);
+	auto light_ul = glGetUniformLocation(ceilingShader.program, "light");
+	glUniform1i(light_ul, 1);
+	auto sector_tint_ul = glGetUniformLocation(ceilingShader.program, "sector_tint");
+	glUniform4fv(sector_tint_ul, 1, tint_color.data());
+	auto offset_ul = glGetUniformLocation(ceilingShader.program, "ceiling_sky_offset");
+	glUniform3fv(offset_ul, 1, offset.data());
+}
+
 void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 	const Content::Assets::Level& lev = currentModel->Level;
 
@@ -263,6 +290,14 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box
 		ActivateHorizonShader(view_size);
 
 		for(auto surf_tuple : horizon_sky_surfaces_scratch) {
+			DrawSurface(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)], 1.0f);
+		}
+	}
+
+	if(!ceiling_sky_surfaces_scratch.empty()) {
+		ActivateCeilingShader();
+
+		for(auto surf_tuple : ceiling_sky_surfaces_scratch) {
 			DrawSurface(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)], 1.0f);
 		}
 	}

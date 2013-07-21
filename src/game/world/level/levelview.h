@@ -36,6 +36,7 @@ class LevelView : public View {
 private:
 	const Content::Assets::Shader& surfaceShader;
 	const Content::Assets::Shader& horizonShader;
+	const Content::Assets::Shader& ceilingShader;
 
 	LevelPresenter* currentPresenter = nullptr;
 	LevelModel* currentModel = nullptr;
@@ -60,6 +61,7 @@ private:
 			const std::array<int, 4>& viewport, const Math::Box<2, double>& adj_bbox, const Math::Vector<3>& cam_pos, const Math::Vector<3>& cam_look);
 	void ActivateSurfaceShader();
 	void ActivateHorizonShader(const Math::Box<2, unsigned int>& screen_size);
+	void ActivateCeilingShader();
 	void DrawVisibleDiffuseSurfaces();
 	void DrawVisibleThings();
 	void DrawVisibleTranslucentSurfaces();
@@ -69,7 +71,7 @@ private:
 	void DrawThing(const Thing& thing);
 
 public:
-	LevelView(const Content::Assets::Shader& surfaceShader, const Content::Assets::Shader& horizonShader);
+	LevelView(const Content::Assets::Shader& surfaceShader, const Content::Assets::Shader& horizonShader, const Content::Assets::Shader& ceilingShader);
 
 	inline void SetPresenter(LevelPresenter* presenter) {
 		currentPresenter = presenter;

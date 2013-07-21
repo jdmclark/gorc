@@ -155,6 +155,7 @@ int main(int argc, char** argv) {
 	auto systemContentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
 	const auto& surfaceShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("surface.glsl");
 	const auto& horizonShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("horizon.glsl");
+	const auto& ceilingShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("ceiling.glsl");
 
 	Gorc::Cog::Verbs::VerbTable VerbTable;
 	Gorc::Cog::Compiler Compiler(VerbTable);
@@ -171,7 +172,7 @@ int main(int argc, char** argv) {
 	Gorc::Game::Screen::Action::ActionView ActionView;
 
 	Gorc::Game::World::Nothing::NothingView NothingView;
-	Gorc::Game::World::Level::LevelView LevelView(surfaceShader, horizonShader);
+	Gorc::Game::World::Level::LevelView LevelView(surfaceShader, horizonShader, ceilingShader);
 
 	Gorc::Game::Components Components(Report, EventBus, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
@@ -215,7 +216,7 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("06abarons.jkl", Compiler);
+	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
 	WorldPlaceController.GoTo(Gorc::Game::World::Level::LevelPlace(contentManager, lev));
 
 	ScreenPlaceController.GoTo(Gorc::Game::Screen::Action::ActionPlace());
