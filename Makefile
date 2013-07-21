@@ -12,7 +12,7 @@ TEST_MODULES = frameworktest cogtest contenttest
 BIN_MODULES = game ungob
 
 framework_LIBRARIES = boost_filesystem boost_system
-content_LIBRARIES = GLEW sfml-audio sfml-graphics sfml-window sfml-system BulletDynamics BulletCollision LinearMath
+content_LIBRARIES = GLEW GL sfml-audio sfml-graphics sfml-window sfml-system BulletDynamics BulletCollision LinearMath
 content_DEPENDENCIES = cog framework
 
 cog_DEPENDENCIES = framework

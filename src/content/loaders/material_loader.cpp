@@ -69,6 +69,27 @@ struct MaterialColorRecordHeader {
 	uint32_t Unknown4;
 };
 
+GLuint LoadMaterialFromMemory(unsigned int width, unsigned int height, const uint8_t* data) {
+	GLuint texture_id;
+
+	glGenTextures(1, &texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	GLfloat largest_supported_anisotropy;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest_supported_anisotropy);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest_supported_anisotropy);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+	return texture_id;
+}
+
 }
 }
 }
@@ -127,10 +148,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 				buf_idx[3] = 255;
 			}
 
-			std::unique_ptr<sf::Image> diffuse(new sf::Image());
-			if(!diffuse->LoadFromPixels(16, 16, buffer)) {
-				report.AddCriticalError("MaterialLoader::Deserialize", "could not load diffuse color from pixels");
-			}
+			auto diffuse = LoadMaterialFromMemory(16, 16, buffer);
 
 			for(uint8_t* buf_idx = buffer; buf_idx < buffer + bufsz; buf_idx += 4) {
 				buf_idx[0] = Math::Get<0>(lightcolor);
@@ -139,10 +157,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 				buf_idx[3] = 255;
 			}
 
-			std::unique_ptr<sf::Image> light(new sf::Image());
-			if(!light->LoadFromPixels(16, 16, buffer)) {
-				report.AddCriticalError("MaterialLoader::Deserialize", "could not load emissive color from pixels");
-			}
+			auto light = LoadMaterialFromMemory(16, 16, buffer);
 
 			mat->Cels.emplace_back(diffuse, light);
 		}
@@ -163,9 +178,6 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 
 			mat->Width = dataheader.SizeX;
 			mat->Height = dataheader.SizeY;
-
-			std::unique_ptr<sf::Image> diffuse(new sf::Image());
-			std::unique_ptr<sf::Image> light(new sf::Image());
 
 			if(header.BitDepth == 8) {
 				// Process 8-bit texture with extra light information.
@@ -188,7 +200,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 					}
 				}
 
-				diffuse->LoadFromPixels(dataheader.SizeX, dataheader.SizeY, &col_buffer[0]);
+				auto diffuse = LoadMaterialFromMemory(dataheader.SizeX, dataheader.SizeY, col_buffer.data());
 
 				for(auto it = orig_buffer.begin(), jt = col_buffer.begin(); it != orig_buffer.end() && jt != col_buffer.end(); ++it, jt += 4) {
 					auto color = Colormap.GetExtra(*it);
@@ -198,7 +210,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::MaterialLoader::De
 					*(jt + 3) = 255;
 				}
 
-				light->LoadFromPixels(dataheader.SizeX, dataheader.SizeY, &col_buffer[0]);
+				auto light = LoadMaterialFromMemory(dataheader.SizeX, dataheader.SizeY, col_buffer.data());
 
 				mat->Cels.emplace_back(diffuse, light);
 

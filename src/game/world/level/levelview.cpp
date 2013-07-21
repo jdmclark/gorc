@@ -374,20 +374,10 @@ void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, con
 		}
 
 		glActiveTexture(GL_TEXTURE0);
-		material->Cels[actualSurfaceCelNumber].Diffuse->Bind();
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glBindTexture(GL_TEXTURE_2D, material->Cels[actualSurfaceCelNumber].Diffuse);
 
 		glActiveTexture(GL_TEXTURE1);
-		material->Cels[actualSurfaceCelNumber].Light->Bind();
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glBindTexture(GL_TEXTURE_2D, material->Cels[actualSurfaceCelNumber].Light);
 
 		glBegin(GL_TRIANGLES);
 
@@ -454,20 +444,10 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 						1.0f / static_cast<float>(material->Height));
 
 				glActiveTexture(GL_TEXTURE0);
-				material->Cels[0].Diffuse->Bind();
-
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, material->Cels[0].Diffuse);
 
 				glActiveTexture(GL_TEXTURE1);
-				material->Cels[0].Light->Bind();
-
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glBindTexture(GL_TEXTURE_2D, material->Cels[0].Light);
 
 				glBegin(GL_TRIANGLES);
 

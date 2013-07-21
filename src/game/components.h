@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GL/glew.h>
+
 #include "framework/diagnostics/report.h"
 #include "framework/event/eventbus.h"
 #include "framework/place/placecontroller.h"

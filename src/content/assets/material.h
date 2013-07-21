@@ -1,7 +1,7 @@
 #pragma once
 
-#include "content/loaders/material_loader.h"
 #include "material_cel.h"
+#include "content/loaders/material_loader.h"
 #include <vector>
 
 namespace Gorc {

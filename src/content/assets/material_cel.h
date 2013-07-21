@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include <GL/glew.h>
 #include <memory>
 
 namespace Gorc {
@@ -9,11 +9,13 @@ namespace Assets {
 
 class MaterialCel {
 public:
-	std::unique_ptr<sf::Image> Diffuse;
-	std::unique_ptr<sf::Image> Light;
+	GLuint Diffuse;
+	GLuint Light;
 
-	MaterialCel() = default;
-	MaterialCel(std::unique_ptr<sf::Image>& diffuse, std::unique_ptr<sf::Image>& light);
+	MaterialCel(GLuint Diffuse, GLuint Light);
+	MaterialCel(const MaterialCel&) = delete;
+	MaterialCel(MaterialCel&&);
+	~MaterialCel();
 };
 
 }
