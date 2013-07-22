@@ -1,5 +1,8 @@
 #pragma once
 
+#include "physicscollideclass.h"
+#include "framework/flagset.h"
+
 namespace Gorc {
 namespace Game {
 namespace World {
@@ -10,6 +13,7 @@ public:
 	virtual ~PhysicsObjectData();
 
 	unsigned int SectorId;
+	FlagSet<PhysicsCollideClass> CollisionGroup, CollisionMask;
 };
 
 class SurfaceObjectData : public PhysicsObjectData {

@@ -382,16 +382,16 @@ void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, con
 		glBegin(GL_TRIANGLES);
 
 		Vector<3> first_geo = lev.Vertices[std::get<0>(surface.Vertices[0])];
-		Vector<2> first_tex = lev.TextureVertices[std::get<1>(surface.Vertices[0])];
+		Vector<2> first_tex = lev.TextureVertices[std::get<1>(surface.Vertices[0])] + surface.TextureOffset;
 		float first_intensity = std::get<2>(surface.Vertices[0]) + sector.ExtraLight + surface.ExtraLight;
 
 		for(size_t i = 2; i < surface.Vertices.size(); ++i) {
 			Vector<3> second_geo = lev.Vertices[std::get<0>(surface.Vertices[i - 1])];
-			Vector<2> second_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i - 1])];
+			Vector<2> second_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i - 1])] + surface.TextureOffset;
 			float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.ExtraLight + surface.ExtraLight;
 
 			Vector<3> third_geo = lev.Vertices[std::get<0>(surface.Vertices[i])];
-			Vector<2> third_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i])];
+			Vector<2> third_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i])] + surface.TextureOffset;
 			float third_intensity = std::get<2>(surface.Vertices[i]) + sector.ExtraLight + surface.ExtraLight;
 
 			glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));

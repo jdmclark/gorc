@@ -32,18 +32,31 @@ const double gameplayTick = (1.0 / 120.0);
 
 void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Components& components) {
 	// Anim / Cel verbs
-	verbTable.AddVerb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
-		return components.CurrentLevelPresenter->SurfaceAnim(surface, rate, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAnimationFlag>(flags));
-	});
-
 	verbTable.AddVerb<int, 1>("getsurfaceanim", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceAnim(surface); });
-	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) { components.CurrentLevelPresenter->StopAnim(anim); });
 	verbTable.AddVerb<void, 1>("stopsurfaceanim", [&components](int surface) {
 		components.CurrentLevelPresenter->StopAnim(components.CurrentLevelPresenter->GetSurfaceAnim(surface));
 	});
 
 	verbTable.AddVerb<int, 1>("getwallcel", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceCel(surface); });
 	verbTable.AddVerb<int, 2>("setwallcel", [&components](int surface, int cel) { components.CurrentLevelPresenter->SetSurfaceCel(surface, cel); return 1; });
+
+	verbTable.AddVerb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
+		return components.CurrentLevelPresenter->SurfaceAnim(surface, rate, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAnimationFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 2>("slideceilingsky", [&components](float u_speed, float v_speed) {
+		return components.CurrentLevelPresenter->SlideCeilingSky(u_speed, v_speed);
+	});
+
+	verbTable.AddVerb<int, 3>("slidesurface", [&components](int surface, Gorc::Math::Vector<3> direction, float speed) {
+		return components.CurrentLevelPresenter->SlideSurface(surface, Gorc::Math::Normalize(direction) * speed);
+	});
+
+	verbTable.AddVerb<int, 3>("slidewall", [&components](int surface, Gorc::Math::Vector<3> direction, float speed) {
+		return components.CurrentLevelPresenter->SlideSurface(surface, Gorc::Math::Normalize(direction) * speed);
+	});
+
+	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) { components.CurrentLevelPresenter->StopAnim(anim); });
 
 	// Frame verbs
 	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) { return components.CurrentLevelPresenter->GetCurFrame(thing); });
@@ -77,6 +90,18 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	});
 
 	// Sector verbs
+	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
+		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	});
+
+	verbTable.AddVerb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
+		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	});
+
+	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Gorc::Math::Vector<3> thrust_vec, float thrust_speed) {
+			components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
+		});
+
 	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
 		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
 	});
@@ -85,12 +110,8 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
 	});
 
-	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
-		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
-	});
-
-	verbTable.AddVerb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
-		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Gorc::Math::Vector<3> thrust_vec, float thrust_speed) {
+		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
 	});
 
 	// Sound verbs
@@ -117,12 +138,20 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
+	verbTable.AddVerb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
+		components.CurrentLevelPresenter->SetAdjoinFlags(surface, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAdjoinFlag>(flags));
+	});
+
 	// System verbs
 	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
 
 	// Thing action verbs
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
 		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
+	});
+
+	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
+		return components.CurrentLevelPresenter->GetThingPos(thing_id);
 	});
 
 	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });

@@ -36,6 +36,14 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		components.CurrentLevelPresenter->Activate();
 	}
 
+	if(z_key_down && !components.Input.IsKeyDown(sf::Key::Z)) {
+		z_key_down = false;
+	}
+	else if(!z_key_down && components.Input.IsKeyDown(sf::Key::Z)) {
+		z_key_down = true;
+		components.CurrentLevelPresenter->Damage();
+	}
+
 	Vector<3> Translate = Zero<3>();
 	if(components.Input.IsKeyDown(sf::Key::W)) {
 		Translate += Vec(0.0f, 1.0f, 0.0f);

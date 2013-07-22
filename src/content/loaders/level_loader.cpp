@@ -395,12 +395,23 @@ void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager
 						values.push_back(tok.GetNumber<float>());
 						break;
 
+					case Cog::Symbols::SymbolType::Vector: {
+						tok.AssertPunctuator("(");
+						float x = tok.GetNumber<float>();
+						tok.AssertPunctuator("/");
+						float y = tok.GetNumber<float>();
+						tok.AssertPunctuator("/");
+						float z = tok.GetNumber<float>();
+						tok.AssertPunctuator(")");
+						values.push_back(Math::Vec(x, y, z));
+					}
+					break;
+
 					case Cog::Symbols::SymbolType::Message:
 						// Ignore
 						break;
 
 					default:
-					case Cog::Symbols::SymbolType::Vector:
 						report.AddWarning("LevelLoader::ParseCogsSection", "unhandled symbol type", t.Location);
 						continue;
 					}

@@ -138,29 +138,8 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 		SurfaceRigidBodies.emplace_back(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(
 				0, &SurfaceMotionState, const_cast<btConvexHullShape*>(Level.SurfaceShapes[i].get()), btVector3(0,0,0))));
 
-		FlagSet<PhysicsCollideClass> CollideType;
-		if(surf.Adjoin >= 0) {
-			CollideType += PhysicsCollideClass::Adjoin;
-		}
-		else {
-			CollideType += PhysicsCollideClass::Wall;
-		}
-
-		FlagSet<PhysicsCollideClass> CollidesWith;
-		if(surf.Adjoin < 0 || (surf.Flags & Content::Assets::SurfaceFlag::Impassable) ||
-				!(Level.Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement)) {
-			CollidesWith += PhysicsCollideClass::Thing;
-		}
-
-		if(surf.Adjoin >= 0 && (Level.Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowAiOnly)) {
-			CollidesWith += PhysicsCollideClass::Player;
-		}
-
-		if(surf.Adjoin >= 0 && (Level.Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowPlayerOnly)) {
-			CollidesWith += PhysicsCollideClass::Enemy;
-		}
-
-		DynamicsWorld.addRigidBody(SurfaceRigidBodies.back().get(), static_cast<unsigned int>(CollideType), static_cast<unsigned int>(CollidesWith));
+		DynamicsWorld.addRigidBody(SurfaceRigidBodies.back().get());
+		UpdateSurfacePhysicsProperties(i, true);
 	}
 
 	for(const auto& sec : Level.Sectors) {
@@ -203,13 +182,11 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 
 	camera_thing.ObjectData.ThingId = CameraThingId;
 	camera_thing.ObjectData.SectorId = camera_thing.Sector;
+	camera_thing.ObjectData.CollisionGroup = { PhysicsCollideClass::Player, PhysicsCollideClass::Thing };
+	camera_thing.ObjectData.CollisionMask = { PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing };
 	camera_thing.RigidBody->setUserPointer(&camera_thing.ObjectData);
 
-	FlagSet<PhysicsCollideClass> CameraCollideType {PhysicsCollideClass::Player, PhysicsCollideClass::Thing};
-	FlagSet<PhysicsCollideClass> CameraCollideWith {PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing};
-
-	DynamicsWorld.addRigidBody(camera_thing.RigidBody.get(), static_cast<unsigned int>(CameraCollideType),
-			static_cast<unsigned int>(CameraCollideWith));
+	DynamicsWorld.addRigidBody(camera_thing.RigidBody.get());
 
 	//Broadphase.optimize();
 
@@ -279,6 +256,8 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		// Associate thing info structure.
 		new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
 		new_thing.ObjectData.SectorId = sector_num;
+		new_thing.ObjectData.CollisionGroup = CollideType;
+		new_thing.ObjectData.CollisionMask = CollideWith;
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
 		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
@@ -291,8 +270,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		new_thing.RigidBody->setAngularFactor(btVector3(0,0,0));
 
-		DynamicsWorld.addRigidBody(new_thing.RigidBody.get(), static_cast<unsigned int>(CollideType),
-				static_cast<unsigned int>(CollideWith));
+		DynamicsWorld.addRigidBody(new_thing.RigidBody.get());
 
 		return std::get<1>(new_thing_tuple);
 	}
@@ -337,6 +315,9 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		// Associate thing info structure.
 		new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
 		new_thing.ObjectData.SectorId = sector_num;
+		new_thing.ObjectData.CollisionGroup = CollideType;
+		new_thing.ObjectData.CollisionMask = CollideWith;
+
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
 		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
@@ -347,8 +328,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
 		}
 
-		DynamicsWorld.addRigidBody(new_thing.RigidBody.get(), static_cast<unsigned int>(CollideType),
-				static_cast<unsigned int>(CollideWith));
+		DynamicsWorld.addRigidBody(new_thing.RigidBody.get());
 		return std::get<1>(new_thing_tuple);
 	}
 	else {
@@ -379,5 +359,46 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const std::string
 	else {
 		// TODO: Template not found. Report error.
 		return -1;
+	}
+}
+
+void Gorc::Game::World::Level::LevelModel::UpdateSurfacePhysicsProperties(int surface, bool initial) {
+	auto& surf = Surfaces[surface];
+	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement)) {
+		// I guess, apparently, if you set the passable flag for an adjoin, the game
+		// automatically clears the impassable flag on the surface?
+		surf.Flags -= Content::Assets::SurfaceFlag::Impassable;
+	}
+
+	FlagSet<PhysicsCollideClass> CollideType;
+	if(surf.Adjoin >= 0) {
+		CollideType += PhysicsCollideClass::Adjoin;
+	}
+	else {
+		CollideType += PhysicsCollideClass::Wall;
+	}
+
+	FlagSet<PhysicsCollideClass> CollidesWith;
+	if(surf.Adjoin < 0 || (surf.Flags & Content::Assets::SurfaceFlag::Impassable) ||
+			!(Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement)) {
+		CollidesWith += PhysicsCollideClass::Thing;
+	}
+
+	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowAiOnly)) {
+		CollidesWith += PhysicsCollideClass::Player;
+	}
+
+	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowPlayerOnly)) {
+		CollidesWith += PhysicsCollideClass::Enemy;
+	}
+
+	auto& physics_data = SurfaceObjectData[surface];
+	physics_data.CollisionGroup = CollideType;
+	physics_data.CollisionMask = CollidesWith;
+
+	if(!initial) {
+		// TODO: Just remove relevant manifolds.
+		DynamicsWorld.removeRigidBody(SurfaceRigidBodies[surface].get());
+		DynamicsWorld.addRigidBody(SurfaceRigidBodies[surface].get());
 	}
 }

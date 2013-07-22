@@ -185,6 +185,16 @@ void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colo
 		model.Materials.push_back(&manager.Load<Assets::Material>(mat_name, colormap));
 	}
 
+	// Some color faces have invalid texture coordinates.
+	// Ensure each mesh has at least one texture vertex.
+	for(auto& geoset : model.GeoSets) {
+		for(auto& mesh : geoset.Meshes) {
+			if(mesh.TextureVertices.empty()) {
+				mesh.TextureVertices.push_back(Math::Vec(0.0f, 0.0f));
+			}
+		}
+	}
+
 	// Generate mesh shapes
 	model.Shape = std::unique_ptr<btCompoundShape>(new btCompoundShape());
 	for(auto& mesh : model.GeoSets[0].Meshes) {

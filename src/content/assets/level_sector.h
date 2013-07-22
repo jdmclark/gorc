@@ -26,6 +26,7 @@ public:
 	std::vector<size_t> Vertices;
 	size_t FirstSurface;
 	size_t SurfaceCount;
+	Math::Vector<3> Thrust;
 };
 
 }

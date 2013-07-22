@@ -52,6 +52,9 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 			if(thing.PathMoving) {
 				UpdateThingPathMoving(it.GetIndex(), thing, dt);
 			}
+
+			const auto& thing_sector = model->Sectors[thing.Sector];
+			thing.RigidBody->applyCentralForce(BtVec(thing_sector.Thrust * RateFactor / dt));
 		}
 	}
 
@@ -408,7 +411,7 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 
 	for(int i = 0; i < model->Surfaces.size(); ++i) {
 		const Content::Assets::LevelSurface& surf = model->Surfaces[i];
-		if(surf.Adjoin >= 0 || !(surf.Flags & Content::Assets::SurfaceFlag::Impassable)
+		if((surf.Adjoin >= 0 && (model->Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement))
 				|| !(surf.Flags & Content::Assets::SurfaceFlag::CogLinked)
 				|| Math::Dot(surf.Normal, model->CameraLook) >= 0.0f) {
 			continue;
@@ -451,6 +454,63 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	}
 }
 
+void Gorc::Game::World::Level::LevelPresenter::Damage() {
+	// TODO: Temporary copy of hack activate code from above.
+	// Sends damaged message to surfaces and things for debugging.
+
+	Math::Vector<3> camera_position = model->Things[model->CameraThingId].Position;
+
+	int best_surf_candidate = -1;
+	float best_surf_dist = 0.25f;
+
+	int best_thing_candidate = -1;
+	float best_thing_dist = 0.25f;
+
+	for(int i = 0; i < model->Surfaces.size(); ++i) {
+		const Content::Assets::LevelSurface& surf = model->Surfaces[i];
+		if((surf.Adjoin >= 0 && (model->Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement))
+				|| !(surf.Flags & Content::Assets::SurfaceFlag::CogLinked)
+				|| Math::Dot(surf.Normal, model->CameraLook) >= 0.0f) {
+			continue;
+		}
+
+		for(const auto& vx : surf.Vertices) {
+			float new_dist = Math::Length(camera_position - model->Level.Vertices[std::get<0>(vx)]);
+			if(new_dist < best_surf_dist) {
+				best_surf_candidate = i;
+				best_surf_dist = new_dist;
+				break;
+			}
+		}
+	}
+
+	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
+		auto dir_vec = it->Position - camera_position;
+		if(!(it->Flags & Content::Assets::ThingFlag::CogLinked)
+				|| Math::Dot(dir_vec, model->CameraLook) <= 0.0f) {
+			continue;
+		}
+
+		float dir_len = Math::Length(dir_vec);
+		if(dir_len >= best_thing_dist) {
+			continue;
+		}
+
+		best_thing_candidate = it.GetIndex();
+		best_thing_dist = dir_len;
+	}
+
+	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
+		SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Content::Assets::MessageType::Surface,
+				model->CameraThingId, Content::Assets::MessageType::Thing, 1000, static_cast<int>(Content::Assets::DamageFlag::Saber));
+	}
+	else if(best_thing_candidate >= 0) {
+		SendMessageToLinked(Cog::MessageId::Damaged, best_thing_candidate, Content::Assets::MessageType::Thing,
+				model->CameraThingId, Content::Assets::MessageType::Thing, 1000, static_cast<int>(Content::Assets::DamageFlag::Saber));
+		PlaySoundClass(best_thing_candidate, Content::Assets::SoundSubclassType::HurtSpecial);
+	}
+}
+
 // Anim / Cel verbs
 int Gorc::Game::World::Level::LevelPresenter::SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags) {
 	auto ent_tuple = model->Animations.Create();
@@ -472,6 +532,18 @@ int Gorc::Game::World::Level::LevelPresenter::GetSurfaceCel(int surface) {
 
 void Gorc::Game::World::Level::LevelPresenter::SetSurfaceCel(int surface, int cel) {
 	model->Surfaces[surface].CelNumber = cel;
+}
+
+int Gorc::Game::World::Level::LevelPresenter::SlideSurface(int surface_id, const Math::Vector<3>& direction) {
+	auto ent_tuple = model->Animations.Create();
+	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SlideSurfaceAnimation(*model, surface_id, direction));
+	return std::get<1>(ent_tuple);
+}
+
+int Gorc::Game::World::Level::LevelPresenter::SlideCeilingSky(float u_speed, float v_speed) {
+	auto ent_tuple = model->Animations.Create();
+	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new CeilingSkyAnimation(*model, Vec(u_speed, v_speed)));
+	return std::get<1>(ent_tuple);
 }
 
 // Frame verbs
@@ -627,6 +699,11 @@ void Gorc::Game::World::Level::LevelPresenter::SetSectorLight(int sector_id, flo
 	sector.ExtraLight = value;
 }
 
+void Gorc::Game::World::Level::LevelPresenter::SetSectorThrust(int sector_id, const Math::Vector<3>& thrust) {
+	Content::Assets::LevelSector& sector = model->Sectors[sector_id];
+	sector.Thrust = thrust;
+}
+
 // Surface verbs
 Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter(int surface) {
 	auto vec = Math::Zero<3>();
@@ -638,10 +715,24 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter
 	return vec;
 }
 
+void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags) {
+	Content::Assets::LevelSurface& surf = model->Surfaces[surface];
+	if(surf.Adjoin >= 0) {
+		Content::Assets::LevelAdjoin& adj = model->Adjoins[surf.Adjoin];
+		adj.Flags += flags;
+		model->UpdateSurfacePhysicsProperties(surface);
+	}
+}
+
 // Thing action verbs
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
 	return static_cast<int>(model->CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
+}
+
+Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int thing_id) {
+	Thing& referenced_thing = model->Things[thing_id];
+	return referenced_thing.Position;
 }
 
 bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {

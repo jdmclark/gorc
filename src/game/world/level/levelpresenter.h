@@ -24,6 +24,10 @@ class Thing;
 
 class LevelPresenter : public Gorc::Place::Presenter {
 private:
+	// In-data constants seem to be roughly 8 times greater than they should be.
+	// Use RateFactor to scale all rates from input data.
+	static constexpr double RateFactor = 1.0 / 8.0;
+
 	Components& components;
 	LevelPlace place;
 	std::unique_ptr<LevelModel> model;
@@ -70,6 +74,7 @@ public:
 	void PitchCamera(double amt);
 	void Respawn();
 	void Activate();
+	void Damage();
 
 	// Anim / Cel verbs
 	int SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags);
@@ -79,6 +84,9 @@ public:
 
 	int GetSurfaceCel(int surface);
 	void SetSurfaceCel(int surface, int cel);
+
+	int SlideCeilingSky(float u_speed, float v_speed);
+	int SlideSurface(int surface_id, const Math::Vector<3>& direction);
 
 	// Frame verbs
 	int GetCurFrame(int thing_id);
@@ -102,6 +110,7 @@ public:
 	// Sector verbs
 	void SetSectorAdjoins(int sector_id, bool state);
 	void SetSectorLight(int sector_id, float value, float delay);
+	void SetSectorThrust(int sector_id, const Math::Vector<3>& thrust);
 
 	// Sound verbs
 	void PlaySong(int start, int end, int loopto);
@@ -113,9 +122,11 @@ public:
 
 	// Surface verbs
 	Math::Vector<3> GetSurfaceCenter(int surface);
+	void SetAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags);
 
 	// Thing action verbs
 	int CreateThingAtThing(int tpl_id, int thing_id);
+	Math::Vector<3> GetThingPos(int thing_id);
 	bool IsThingMoving(int thing_id);
 
 	// Thing property verbs

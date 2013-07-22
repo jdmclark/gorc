@@ -47,12 +47,6 @@ bool Gorc::Game::World::Level::SectorBroadphaseFilter::computeSectorCover(unsign
 }
 
 bool Gorc::Game::World::Level::SectorBroadphaseFilter::needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const {
-	bool maskCollides = (proxy0->m_collisionFilterGroup & proxy1->m_collisionFilterMask) != 0;
-	maskCollides = maskCollides && (proxy1->m_collisionFilterGroup & proxy0->m_collisionFilterMask) != 0;
-	if(!maskCollides) {
-		return false;
-	}
-
 	btCollisionObject* object0 = reinterpret_cast<btCollisionObject*>(proxy0->m_clientObject);
 	PhysicsObjectData* userData0 = reinterpret_cast<PhysicsObjectData*>(object0->getUserPointer());
 	Math::Box<3> box0 = Math::Box<3>(Math::VecBt(proxy0->m_aabbMin), Math::VecBt(proxy0->m_aabbMax));
@@ -60,6 +54,12 @@ bool Gorc::Game::World::Level::SectorBroadphaseFilter::needBroadphaseCollision(b
 	btCollisionObject* object1 = reinterpret_cast<btCollisionObject*>(proxy1->m_clientObject);
 	PhysicsObjectData* userData1 = reinterpret_cast<PhysicsObjectData*>(object1->getUserPointer());
 	Math::Box<3> box1 = Math::Box<3>(Math::VecBt(proxy1->m_aabbMin), Math::VecBt(proxy1->m_aabbMax));
+
+	bool maskCollides = (userData0->CollisionGroup & userData1->CollisionMask) != 0;
+	maskCollides = maskCollides && (userData1->CollisionGroup & userData0->CollisionMask) != 0;
+	if(!maskCollides) {
+		return false;
+	}
 
 	std::array<unsigned int, sector_scratch_sz> scratch0, scratch1;
 	size_t sector_amt0 = 0, sector_amt1 = 0;
