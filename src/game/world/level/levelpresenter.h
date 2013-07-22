@@ -5,6 +5,7 @@
 #include "levelplace.h"
 #include "cogtimerstate.h"
 #include "cogcontinuation.h"
+#include "sectorbroadphasefilter.h"
 #include "cog/vm/virtualmachine.h"
 #include "music.h"
 
@@ -26,6 +27,7 @@ private:
 	Components& components;
 	LevelPlace place;
 	std::unique_ptr<LevelModel> model;
+	std::unique_ptr<SectorBroadphaseFilter> BroadphaseFilter;
 	sf::Sound AmbientSound;
 	Music AmbientMusic;
 	Cog::VM::VirtualMachine VirtualMachine;
@@ -48,8 +50,8 @@ private:
 			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
 	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-				int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
-				int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
+			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
+			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
 	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Content::Assets::MessageType SenderType,
 			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);

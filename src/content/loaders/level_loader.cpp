@@ -575,6 +575,24 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 
 		lev.SurfaceShapes.back()->setMargin(0);
 	}
+
+	// Calculate axis-aligned bounding box for each sector;
+	for(auto& sec : lev.Sectors) {
+		Math::Vector<3> min_aabb = Math::Zero<3>(std::numeric_limits<float>::max());
+		Math::Vector<3> max_aabb = Math::Zero<3>(std::numeric_limits<float>::lowest());
+
+		for(auto& vx_id : sec.Vertices) {
+			auto& vx = lev.Vertices[vx_id];
+
+			for(auto vx_it = vx.begin(), min_it = min_aabb.begin(), max_it = max_aabb.begin();
+					vx_it != vx.end(); ++vx_it, ++min_it, ++max_it) {
+				*min_it = std::min(*min_it, *vx_it);
+				*max_it = std::max(*max_it, *vx_it);
+			}
+		}
+
+		sec.BoundingBox = Math::Box<3>(min_aabb, max_aabb);
+	}
 }
 
 }

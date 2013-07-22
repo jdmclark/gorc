@@ -67,6 +67,17 @@ public:
 
 		return rv;
 	}
+
+	Box<d, F> operator+(const Box<d, F>& box) const {
+		Box<d, F> rv;
+		auto rv_it = rv.begin();
+		for(auto it = begin(), jt = box.begin(); it != end(); ++rv_it, ++it, ++jt) {
+			*rv_it = std::make_tuple(std::min(std::get<0>(*it), std::get<0>(*jt)),
+					std::max(std::get<1>(*it), std::get<1>(*jt)));
+		}
+
+		return rv;
+	}
 };
 
 template <size_t d, typename F> bool BoxesOverlap(const Box<d, F>& a, const Box<d, F>& b) {

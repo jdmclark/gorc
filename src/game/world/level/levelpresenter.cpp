@@ -10,6 +10,8 @@ Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components,
 
 void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
 	model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level));
+	BroadphaseFilter = std::unique_ptr<SectorBroadphaseFilter>(new SectorBroadphaseFilter(*model));
+	model->DynamicsWorld.getPairCache()->setOverlapFilterCallback(BroadphaseFilter.get());
 
 	components.LevelView.SetPresenter(this);
 	components.LevelView.SetLevelModel(model.get());
@@ -264,6 +266,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 		for(unsigned int i = 1; i < path.size() - 1; ++i) {
 			unsigned int sec_id = std::get<0>(path[i]);
 			thing.Sector = sec_id;
+			thing.ObjectData.SectorId = sec_id;
 			if(model->Sectors[sec_id].Flags & Content::Assets::SectorFlag::CogLinked) {
 				SendMessageToLinked(Cog::MessageId::Entered, sec_id, Content::Assets::MessageType::Sector,
 						thing_id, Content::Assets::MessageType::Thing);
@@ -278,6 +281,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 
 		unsigned int last_sector = std::get<0>(path.back());
 		thing.Sector = last_sector;
+		thing.ObjectData.SectorId = last_sector;
 		if(model->Sectors[last_sector].Flags & Content::Assets::SectorFlag::CogLinked) {
 			SendMessageToLinked(Cog::MessageId::Entered, last_sector, Content::Assets::MessageType::Sector,
 					thing_id, Content::Assets::MessageType::Thing);
@@ -386,6 +390,7 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 
 	Thing& cameraThing = model->Things[model->CameraThingId];
 	cameraThing.Sector = model->SpawnPoints[model->CurrentSpawnPoint]->Sector;
+	cameraThing.ObjectData.SectorId = model->SpawnPoints[model->CurrentSpawnPoint]->Sector;
 	cameraThing.Position = model->SpawnPoints[model->CurrentSpawnPoint]->Position;
 	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position)));
 }
