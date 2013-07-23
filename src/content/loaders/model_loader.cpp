@@ -180,6 +180,44 @@ void ParseGeometryDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager
 	}
 }
 
+void ParseHierarchyDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+	tok.AssertIdentifier("hierarchy");
+	tok.AssertIdentifier("nodes");
+
+	int nodes = tok.GetNumber<int>();
+	model.HierarchyNodes.resize(nodes);
+
+	for(int i = 0; i < nodes; ++i) {
+		auto& node = model.HierarchyNodes[i];
+
+		tok.GetNumber<int>();
+		tok.AssertPunctuator(":");
+
+		tok.GetNumber<int>();
+
+		node.Type = FlagSet<Content::Assets::MeshNodeType>(tok.GetNumber<unsigned int>());
+		node.Mesh = tok.GetNumber<int>();
+		node.Parent = tok.GetNumber<int>();
+		node.Child = tok.GetNumber<int>();
+		node.Sibling = tok.GetNumber<int>();
+		node.NumChildren = tok.GetNumber<int>();
+
+		Math::Get<0>(node.Offset) = tok.GetNumber<float>();
+		Math::Get<1>(node.Offset) = tok.GetNumber<float>();
+		Math::Get<2>(node.Offset) = tok.GetNumber<float>();
+
+		Math::Get<0>(node.Rotation) = tok.GetNumber<float>();
+		Math::Get<1>(node.Rotation) = tok.GetNumber<float>();
+		Math::Get<2>(node.Rotation) = tok.GetNumber<float>();
+
+		Math::Get<0>(node.Pivot) = tok.GetNumber<float>();
+		Math::Get<1>(node.Pivot) = tok.GetNumber<float>();
+		Math::Get<2>(node.Pivot) = tok.GetNumber<float>();
+
+		node.Name = tok.GetSpaceDelimitedString();
+	}
+}
+
 void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colormap& colormap, Diagnostics::Report& report) {
 	for(const auto& mat_name : model.MaterialEntries) {
 		model.Materials.push_back(&manager.Load<Assets::Material>(mat_name, colormap));
@@ -227,7 +265,8 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ModelLoader::Parse
 	std::vector<std::tuple<std::string, sec_fn>> sectionmap {
 		std::make_tuple("header", ParseModelHeaderSection),
 		std::make_tuple("modelresource", ParseModelResourceSection),
-		std::make_tuple("geometrydef", ParseGeometryDefSection)
+		std::make_tuple("geometrydef", ParseGeometryDefSection),
+		std::make_tuple("hierarchydef", ParseHierarchyDefSection)
 	};
 
 	Text::Token t;

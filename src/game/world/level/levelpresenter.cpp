@@ -10,8 +10,6 @@ Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components,
 
 void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
 	model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level));
-	BroadphaseFilter = std::unique_ptr<SectorBroadphaseFilter>(new SectorBroadphaseFilter(*model));
-	model->DynamicsWorld.getPairCache()->setOverlapFilterCallback(BroadphaseFilter.get());
 
 	components.LevelView.SetPresenter(this);
 	components.LevelView.SetLevelModel(model.get());
@@ -30,13 +28,6 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	// Update world simulation
 	model->DynamicsWorld.stepSimulation(dt, 1, 1.0f / 120.0f);
-
-	// Update camera position
-	Thing& camera = model->Things[model->CameraThingId];
-
-	camera.RigidBody->applyCentralImpulse(BtVec(model->CameraVelocity * 12.0f));
-	camera.RigidBody->setDamping(0.99999f, 1.0f);
-	camera.RigidBody->setAngularFactor(btVector3(0,0,0));
 
 	// Update things
 	btTransform trans;
@@ -57,6 +48,25 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 			thing.RigidBody->applyCentralForce(BtVec(thing_sector.Thrust * RateFactor / dt));
 		}
 	}
+
+	// Update camera position
+	Thing& camera = model->Things[model->CameraThingId];
+	model->CameraPosition = camera.Position;
+
+	btRigidBody& cam_body = *camera.RigidBody;
+	cam_body.setAngularFactor(btVector3(0,0,0));
+
+	auto oldLinearVelocity = VecBt(cam_body.getLinearVelocity());
+	Get<2>(model->CameraVelocity) += Get<2>(oldLinearVelocity);
+
+	auto planeCameraLinearVelocity = Vec(Get<X>(model->CameraVelocity), Get<Y>(model->CameraVelocity));
+	float t = std::min(1.0f, Length(planeCameraLinearVelocity));
+
+	auto new_camera_vel = t * model->CameraVelocity + (1.0f - t) * oldLinearVelocity;
+	Get<Z>(new_camera_vel) = Get<Z>(model->CameraVelocity);
+	cam_body.setLinearVelocity(BtVec(new_camera_vel));
+
+	model->CameraVelocity = Zero<3>();
 
 	// Update listener
 	auto listener_target = camera.Position + model->CameraLook;
@@ -148,8 +158,9 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 	// Use a magic multiple to correct it.
 	const float magic_number = 1.0f / 8.0f;
-	float alpha = magic_number * dt * thing.PathMoveSpeed / Math::Length(targetPosition - currentPosition);
-	if(alpha >= 1.0f) {
+	float dist_len = Math::Length(targetPosition - currentPosition);
+	float alpha = magic_number * dt * thing.PathMoveSpeed / dist_len;
+	if(alpha >= 1.0f || dist_len == 0.0f) {
 		btTransform targetWorldTransform(targetOrientQuat, BtVec(targetPosition));
 		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
 
@@ -171,9 +182,16 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 		}
 	}
 	else {
-		btTransform targetWorldTransform(currentWorldTransform.getRotation().slerp(targetOrientQuat, alpha),
-				currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
-		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
+		auto currentQuat = currentWorldTransform.getRotation();
+		if(currentQuat.angle(targetOrientQuat) < std::numeric_limits<float>::epsilon()) {
+			btTransform targetWorldTransform(targetOrientQuat, currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
+			thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
+		}
+		else {
+			btTransform targetWorldTransform(currentWorldTransform.getRotation(), //.slerp(targetOrientQuat, alpha),
+					currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
+			thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
+		}
 	}
 }
 
@@ -354,10 +372,15 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessageToLinked(Cog::MessageI
 }
 
 void Gorc::Game::World::Level::LevelPresenter::TranslateCamera(const Vector<3>& amt) {
-	model->CameraVelocity = Zero<3>();
-	model->CameraVelocity += Get<X>(amt) * Cross(model->CameraLook, model->CameraUp);
-	model->CameraVelocity += Get<Z>(amt) * model->CameraUp;
-	model->CameraVelocity += Get<Y>(amt) * model->CameraLook;
+	Vector<3> cam_vel = Zero<3>();
+	cam_vel = Zero<3>();
+	cam_vel += Get<X>(amt) * Cross(model->CameraLook, model->CameraUp);
+	cam_vel += Get<Z>(amt) * model->CameraUp;
+	cam_vel += Get<Y>(amt) * model->CameraLook;
+	cam_vel *= 0.75f;
+
+	Get<0>(model->CameraVelocity) = Get<0>(cam_vel);
+	Get<1>(model->CameraVelocity) = Get<1>(cam_vel);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::YawCamera(double amt) {
@@ -396,6 +419,10 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 	cameraThing.ObjectData.SectorId = model->SpawnPoints[model->CurrentSpawnPoint]->Sector;
 	cameraThing.Position = model->SpawnPoints[model->CurrentSpawnPoint]->Position;
 	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position)));
+}
+
+void Gorc::Game::World::Level::LevelPresenter::Jump() {
+	Get<2>(model->CameraVelocity) = 1.6f;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Activate() {
@@ -505,9 +532,7 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 				model->CameraThingId, Content::Assets::MessageType::Thing, 1000, static_cast<int>(Content::Assets::DamageFlag::Saber));
 	}
 	else if(best_thing_candidate >= 0) {
-		SendMessageToLinked(Cog::MessageId::Damaged, best_thing_candidate, Content::Assets::MessageType::Thing,
-				model->CameraThingId, Content::Assets::MessageType::Thing, 1000, static_cast<int>(Content::Assets::DamageFlag::Saber));
-		PlaySoundClass(best_thing_candidate, Content::Assets::SoundSubclassType::HurtSpecial);
+		DamageThing(best_thing_candidate, 50.0f, { Content::Assets::DamageFlag::Saber }, model->CameraThingId);
 	}
 }
 
@@ -704,7 +729,21 @@ void Gorc::Game::World::Level::LevelPresenter::SetSectorThrust(int sector_id, co
 	sector.Thrust = thrust;
 }
 
+void Gorc::Game::World::Level::LevelPresenter::SetSectorTint(int sector_id, const Math::Vector<3>& color) {
+	Content::Assets::LevelSector& sector = model->Sectors[sector_id];
+	sector.Tint = color;
+}
+
 // Surface verbs
+void Gorc::Game::World::Level::LevelPresenter::ClearAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags) {
+	Content::Assets::LevelSurface& surf = model->Surfaces[surface];
+	if(surf.Adjoin >= 0) {
+		Content::Assets::LevelAdjoin& adj = model->Adjoins[surf.Adjoin];
+		adj.Flags -= flags;
+		model->UpdateSurfacePhysicsProperties(surface);
+	}
+}
+
 Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter(int surface) {
 	auto vec = Math::Zero<3>();
 	for(const auto& vx : model->Level.Surfaces[surface].Vertices) {
@@ -728,6 +767,35 @@ void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagS
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
 	return static_cast<int>(model->CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
+}
+
+float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Content::Assets::DamageFlag> flags, int damager_id) {
+	SendMessageToLinked(Cog::MessageId::Damaged, thing_id, Content::Assets::MessageType::Thing,
+			damager_id, Content::Assets::MessageType::Thing, damage, static_cast<int>(flags));
+
+	Thing& referencedThing = model->Things[thing_id];
+	if(referencedThing.Health > 0.0f) {
+		referencedThing.Health -= damage;
+
+		if(referencedThing.Health <= 0.0f) {
+			PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::Death1);
+			SendMessageToLinked(Cog::MessageId::Killed, thing_id, Content::Assets::MessageType::Thing,
+					damager_id, Content::Assets::MessageType::Thing);
+			// TODO: Thing is dead. Replace destroy code with corpse creation code.
+			if(referencedThing.RigidBody) {
+				model->DynamicsWorld.removeRigidBody(referencedThing.RigidBody.get());
+			}
+
+			referencedThing.Flags += Content::Assets::ThingFlag::Invisible;
+		}
+		else {
+			PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::HurtSpecial);
+		}
+	}
+
+	// TODO: Return actual 'undamaged' value as computed by thing cog with ReturnEx.
+
+	return 0.0f;
 }
 
 Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int thing_id) {

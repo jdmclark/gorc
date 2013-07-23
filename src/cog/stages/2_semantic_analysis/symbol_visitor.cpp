@@ -18,6 +18,38 @@ SymbolVisitor::SymbolVisitor(Symbols::SymbolTable& symbolTable,
 void SymbolVisitor::VisitSymbol(Symbol& symbol) {
 	Symbols::SymbolType type = GetType(symbol);
 
+	VM::Value defaultValue;
+
+	switch(type) {
+	case Symbols::SymbolType::Flex:
+	case Symbols::SymbolType::Float:
+		defaultValue = 0.0f;
+		break;
+
+	case Symbols::SymbolType::Int:
+		defaultValue = 0;
+		break;
+
+	case Symbols::SymbolType::Vector:
+		defaultValue = Math::Zero<3>();
+		break;
+
+	default:
+	case Symbols::SymbolType::Ai:
+	case Symbols::SymbolType::Keyframe:
+	case Symbols::SymbolType::Material:
+	case Symbols::SymbolType::Model:
+	case Symbols::SymbolType::Sound:
+	case Symbols::SymbolType::Template:
+	case Symbols::SymbolType::Cog:
+	case Symbols::SymbolType::Message:
+	case Symbols::SymbolType::Sector:
+	case Symbols::SymbolType::Surface:
+	case Symbols::SymbolType::String:
+	case Symbols::SymbolType::Thing:
+		break;
+	}
+
 	// Convert symbol name to lowercase for processing.
 	std::transform(symbol.Name.begin(), symbol.Name.end(), symbol.Name.begin(), tolower);
 
@@ -29,10 +61,10 @@ void SymbolVisitor::VisitSymbol(Symbol& symbol) {
 
 	if(SymbolTable.IsSymbolDefined(symbol.Name)) {
 		Diagnostics::Helper::SymbolRedefinition(Report, VisitorName, symbol.Name, symbol.Location);
-		SymbolTable.ReplaceSymbol(type, symbol.Name, w.local, w.desc, w.mask, w.linkid, w.nolink);
+		SymbolTable.ReplaceSymbol(type, symbol.Name, defaultValue, w.local, w.desc, w.mask, w.linkid, w.nolink);
 	}
 	else {
-		SymbolTable.AddSymbol(type, symbol.Name, w.local, w.desc, w.mask, w.linkid, w.nolink);
+		SymbolTable.AddSymbol(type, symbol.Name, defaultValue, w.local, w.desc, w.mask, w.linkid, w.nolink);
 
 		if(type == Symbols::SymbolType::Message) {
 			if(SeenLabels.find(symbol.Name) == SeenLabels.end()) {

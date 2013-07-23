@@ -610,7 +610,7 @@ Case(jk_02_cratepuzzle_a) {
 Case(jk_04_britta) {
 	VfsSingleton::SetEpisode("The Force Within");
 	ParseFile("cog/04_britta.cog");
-	AssertResult(1, 0);
+	AssertResult(0, 1);
 }
 
 Case(jk_04_britta2) {
@@ -670,7 +670,7 @@ Case(jk_14_endit) {
 Case(jk_16a_timer) {
 	VfsSingleton::SetEpisode("The Force Within");
 	ParseFile("cog/16a_timer.cog");
-	AssertResult(1, 1);
+	AssertResult(0, 2);
 }
 
 Case(jk_18_finalthrust1) {
@@ -742,13 +742,13 @@ Case(jk_c1_ctfcallback) {
 Case(jk_c2_dualforcefield) {
 	VfsSingleton::SetEpisode("Jedi Capture the Flag");
 	ParseFile("cog/c2_dualforcefield.cog");
-	AssertResult(1, 0);
+	AssertResult(0, 1);
 }
 
 Case(jk_c2_simpleforcefield) {
 	VfsSingleton::SetEpisode("Jedi Capture the Flag");
 	ParseFile("cog/c2_simpleforcefield.cog");
-	AssertResult(1, 1);
+	AssertResult(0, 2);
 }
 
 Case(jk_c3_fanspuzzle) {

@@ -29,7 +29,7 @@ static const std::unordered_map<std::string, MoveType> MoveTypeMap {
 	{ "path", MoveType::Path }
 };
 
-using TemplateParameterParser = std::function<void(Template&, Text::Tokenizer&, Content::Manager&, const Colormap&, Diagnostics::Report&)>;
+using TemplateParameterParser = std::function<void(Template&, Text::Tokenizer&, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&)>;
 
 template <typename T> void TemplateParameterValueMapper(const std::unordered_map<std::string, T>& map, T& value,
 		const T& defaultValue, Text::Tokenizer& tok, Diagnostics::Report& report) {
@@ -95,23 +95,48 @@ void TemplateParameterVectorMapper(Math::Vector<3>& value, Text::Tokenizer& tok)
 	tok.AssertPunctuator(")");
 }
 
-void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, Diagnostics::Report& report) {
+void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, const Cog::Compiler&, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
 		tpl.Model3d = nullptr;
 	}
 	else {
-		tpl.Model3d = &manager.Load<Model>(fn, cmp);
+		try {
+			tpl.Model3d = &manager.Load<Model>(fn, cmp);
+		}
+		catch(...) {
+			tpl.Model3d = nullptr;
+		}
 	}
 }
 
-void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, Diagnostics::Report& report) {
+void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
 		tpl.SoundClass = nullptr;
 	}
 	else {
-		tpl.SoundClass = &manager.Load<SoundClass>(fn);
+		try {
+			tpl.SoundClass = &manager.Load<SoundClass>(fn);
+		}
+		catch(...) {
+			tpl.SoundClass = nullptr;
+		}
+	}
+}
+
+void TemplateCogParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, const Cog::Compiler& compiler, Diagnostics::Report& report) {
+	std::string fn = tok.GetSpaceDelimitedString();
+	if(boost::iequals(fn, "none")) {
+		tpl.Cog = nullptr;
+	}
+	else {
+		try {
+			tpl.Cog = &manager.Load<Script>(fn, compiler);
+		}
+		catch(...) {
+			tpl.Cog = nullptr;
+		}
 	}
 }
 
@@ -144,33 +169,41 @@ void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "model3d", &TemplateModel3DParser },
 	{ "soundclass", &TemplateSoundClassParser },
-	{ "type", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "cog", &TemplateCogParser },
+	{ "type", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, ThingType::Free, tok, report); }},
-	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterValueMapper(MoveTypeMap, tpl.Move, MoveType::None, tok, report); }},
-	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
-	{ "movesize", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "movesize", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
-	{ "size", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "size", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 			TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
-	{ "eyeoffset", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report&) {
+	{ "eyeoffset", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
 		TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
-	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterEnumMapper(tpl.Collide, CollideType::None, tok, report); }},
-	{ "thingflags", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report& report) {
+	{ "thingflags", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterFlagMapper(tpl.Flags, FlagSet<ThingFlag>(), tok, report); }},
-	{ "numframes", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report&) {
+	{ "numframes", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
 		/* Silently consume numframes */ tok.GetNumber<int>(); }},
-	{ "frame", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, Diagnostics::Report&) {
-		TemplateAddFrame(tpl, tok); }}
+	{ "frame", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
+		TemplateAddFrame(tpl, tok); }},
+	{ "health", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
+		TemplateParameterNumberMapper(tpl.Health, 100.0f, tok, report); }},
+	{ "maxhealth", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
+		TemplateParameterNumberMapper(tpl.MaxHealth, 100.0f, tok, report); }},
+	{ "height", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
+		TemplateParameterNumberMapper(tpl.Height, 0.18f, tok, report); }}
 };
 
 }
 }
 }
 
-void Gorc::Content::Assets::Template::ParseArgs(Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, Diagnostics::Report& report) {
+void Gorc::Content::Assets::Template::ParseArgs(Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp,
+		const Cog::Compiler& compiler, Diagnostics::Report& report) {
 	bool oldReportEOL = tok.GetReportEOL();
 	tok.SetReportEOL(true);
 
@@ -191,7 +224,7 @@ void Gorc::Content::Assets::Template::ParseArgs(Text::Tokenizer& tok, Content::M
 				tok.GetSpaceDelimitedString();
 			}
 			else {
-				it->second(*this, tok, manager, cmp, report);
+				it->second(*this, tok, manager, cmp, compiler, report);
 			}
 		}
 	}

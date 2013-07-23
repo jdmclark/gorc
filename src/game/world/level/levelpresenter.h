@@ -31,7 +31,6 @@ private:
 	Components& components;
 	LevelPlace place;
 	std::unique_ptr<LevelModel> model;
-	std::unique_ptr<SectorBroadphaseFilter> BroadphaseFilter;
 	sf::Sound AmbientSound;
 	Music AmbientMusic;
 	Cog::VM::VirtualMachine VirtualMachine;
@@ -73,6 +72,7 @@ public:
 	void YawCamera(double amt);
 	void PitchCamera(double amt);
 	void Respawn();
+	void Jump();
 	void Activate();
 	void Damage();
 
@@ -111,6 +111,7 @@ public:
 	void SetSectorAdjoins(int sector_id, bool state);
 	void SetSectorLight(int sector_id, float value, float delay);
 	void SetSectorThrust(int sector_id, const Math::Vector<3>& thrust);
+	void SetSectorTint(int sector_id, const Math::Vector<3>& color);
 
 	// Sound verbs
 	void PlaySong(int start, int end, int loopto);
@@ -121,11 +122,13 @@ public:
 	void SetMusicVol(float volume);
 
 	// Surface verbs
+	void ClearAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags);
 	Math::Vector<3> GetSurfaceCenter(int surface);
 	void SetAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags);
 
 	// Thing action verbs
 	int CreateThingAtThing(int tpl_id, int thing_id);
+	float DamageThing(int thing_id, float damage, FlagSet<Content::Assets::DamageFlag> flags, int damager_id);
 	Math::Vector<3> GetThingPos(int thing_id);
 	bool IsThingMoving(int thing_id);
 

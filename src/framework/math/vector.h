@@ -225,5 +225,18 @@ template <typename F> Vector<3, F> Cross(const Vector<3, F>& v, const Vector<3, 
 			Get<X>(v) * Get<Y>(w) - Get<Y>(v) * Get<X>(w));
 }
 
+template <size_t n, typename F> std::ostream& operator<<(std::ostream& os, const Vector<n, F>& vec) {
+	os << "(";
+	auto it = vec.begin();
+	if(it != vec.end()) {
+		os << *(it++);
+		while(it != vec.end()) {
+			os << ", " << *(it++);
+		}
+	}
+	os << ")";
+	return os;
+}
+
 }
 }

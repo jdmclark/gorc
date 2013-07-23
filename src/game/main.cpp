@@ -89,6 +89,16 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		std::cout << message << std::endl;
 	});
 
+	verbTable.AddVerb<void, 1>("print", [&components](const char* message) {
+		// TODO: Add actual print.
+		std::cout << message << std::endl;
+	});
+
+	verbTable.AddVerb<void, 1>("printint", [&components](int value) {
+		// TOOD: Add actual printint.
+		std::cout << value << std::endl;
+	});
+
 	// Sector verbs
 	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
 		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
@@ -99,11 +109,19 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	});
 
 	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Gorc::Math::Vector<3> thrust_vec, float thrust_speed) {
-			components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
-		});
+		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
+	});
+
+	verbTable.AddVerb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
+		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
+	});
 
 	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
 		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	});
+
+	verbTable.AddVerb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
+		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
 	});
 
 	verbTable.AddVerb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
@@ -112,6 +130,10 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 
 	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Gorc::Math::Vector<3> thrust_vec, float thrust_speed) {
 		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
+	});
+
+	verbTable.AddVerb<void, 2>("setsectortint", [&components](int sector_id, Gorc::Math::Vector<3> tint) {
+		components.CurrentLevelPresenter->SetSectorTint(sector_id, tint);
 	});
 
 	// Sound verbs
@@ -134,12 +156,20 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) { components.CurrentLevelPresenter->SetMusicVol(vol); });
 
 	// Surface verbs
-	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
+	verbTable.AddVerb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
+		components.CurrentLevelPresenter->ClearAdjoinFlags(surface, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAdjoinFlag>(flags));
+	});
+
+	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("getsurfacecenter", [&components](int surface) {
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
 	verbTable.AddVerb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
 		components.CurrentLevelPresenter->SetAdjoinFlags(surface, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAdjoinFlag>(flags));
+	});
+
+	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
+		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
 	// System verbs
@@ -148,6 +178,10 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	// Thing action verbs
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
 		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
+	});
+
+	verbTable.AddVerb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
+		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, Gorc::FlagSet<Gorc::Content::Assets::DamageFlag>(flags), damager_id);
 	});
 
 	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {

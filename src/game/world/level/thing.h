@@ -24,6 +24,8 @@ public:
 
 	int CurrentFoleyLoopChannel = -1;
 
+	std::unique_ptr<btCollisionShape> ActorCollideShape;
+
 	Thing() = default;
 	Thing(const Content::Assets::Template& tpl);
 

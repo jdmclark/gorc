@@ -3,7 +3,7 @@
 Gorc::Game::World::Level::CogContinuation::CogContinuation(unsigned int InstanceId,
 		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 		int SourceRef, Content::Assets::MessageType SourceType,
-		int Param0, int Param1, int Param2, int Param3,
+		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3,
 		unsigned int ProgramCounter)
 	: InstanceId(InstanceId),
 	  SenderId(SenderId), SenderRef(SenderRef), SenderType(SenderType),

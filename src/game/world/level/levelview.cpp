@@ -26,6 +26,7 @@ void Gorc::Game::World::Level::LevelView::Update(double dt) {
 
 void Gorc::Game::World::Level::LevelView::SetUpViewProjectionMatrices(const Box<2, unsigned int>& view_size) {
 	double aspect = static_cast<double>(view_size.Size<X>()) / static_cast<double>(view_size.Size<Y>());
+	const auto& camera_thing = currentModel->Things[currentModel->CameraThingId];
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -34,10 +35,7 @@ void Gorc::Game::World::Level::LevelView::SetUpViewProjectionMatrices(const Box<
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	btTransform trns;
-	currentModel->Things[currentModel->CameraThingId].RigidBody->getMotionState()->getWorldTransform(trns);
-
-	Vector<3> CamPosition = Math::VecBt(trns.getOrigin());
+	const Vector<3>& CamPosition = currentModel->CameraPosition;
 	Vector<3> CamLookPoint = CamPosition + currentModel->CameraLook;
 	gluLookAt(Get<X>(CamPosition), Get<Y>(CamPosition), Get<Z>(CamPosition),
 			Get<X>(CamLookPoint), Get<Y>(CamLookPoint), Get<Z>(CamLookPoint),
@@ -46,7 +44,7 @@ void Gorc::Game::World::Level::LevelView::SetUpViewProjectionMatrices(const Box<
 
 void Gorc::Game::World::Level::LevelView::ComputeVisibleSectors(const Box<2, unsigned int>& view_size) {
 	unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
-	const auto& camera_pos = currentModel->Things[currentModel->CameraThingId].Position;
+	const auto& camera_pos = currentModel->CameraPosition;
 
 	std::array<double, 16> proj_matrix;
 	std::array<double, 16> view_matrix;
@@ -251,7 +249,7 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 
 void Gorc::Game::World::Level::LevelView::DrawVisibleThings() {
 	for(const auto& thing : currentModel->Things) {
-		if(sector_vis_scratch.count(thing.Sector) == 0) {
+		if((thing.Flags & Content::Assets::ThingFlag::Invisible) || sector_vis_scratch.count(thing.Sector) == 0) {
 			continue;
 		}
 
@@ -260,7 +258,7 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleThings() {
 }
 
 void Gorc::Game::World::Level::LevelView::DrawVisibleTranslucentSurfaces() {
-	const auto& cam_pos = currentModel->Things[currentModel->CameraThingId].Position;
+	const auto& cam_pos = currentModel->CameraPosition;
 
 	// Compute distances to translucent surfaces
 	for(auto& surf_tuple : translucent_surfaces_scratch) {
@@ -350,6 +348,9 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		ActivateSurfaceShader();
 		glEnable(GL_BLEND);
 		DrawVisibleTranslucentSurfaces();
+
+		//currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
+		//currentModel->DynamicsWorld.debugDrawWorld();
 	}
 }
 
@@ -411,29 +412,22 @@ void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, con
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
-	if(!thing.Model3d || sector_vis_scratch.count(thing.Sector) == 0) {
+void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Content::Assets::Model& model, int mesh_id, float sector_light) {
+	if(mesh_id < 0) {
 		return;
 	}
 
-	float sector_light = currentModel->Sectors[thing.Sector].AmbientLight
-			+ currentModel->Sectors[thing.Sector].ExtraLight;
+	const Content::Assets::ModelNode& node = model.HierarchyNodes[mesh_id];
 
-	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
+	glTranslatef(Math::Get<0>(node.Offset), Math::Get<1>(node.Offset), Math::Get<2>(node.Offset));
+	glRotatef(Math::Get<0>(node.Rotation), 1.0f, 0.0f, 0.0f);
+	glRotatef(Math::Get<1>(node.Rotation), 0.0f, 0.0f, 1.0f);
+	glRotatef(Math::Get<2>(node.Rotation), 0.0f, 1.0f, 0.0f);
+	glTranslatef(Math::Get<0>(node.Pivot), Math::Get<1>(node.Pivot), Math::Get<2>(node.Pivot));
 
-	btTransform trns;
-	thing.RigidBody->getMotionState()->getWorldTransform(trns);
-
-	float mat[16];
-	trns.getOpenGLMatrix(mat);
-
-	glMultMatrixf(mat);
-
-	const Content::Assets::Model& model = *thing.Model3d;
-
-	const Content::Assets::ModelGeoSet& geoset = model.GeoSets[0];
-	for(const auto& mesh : geoset.Meshes) {
+	if(node.Mesh >= 0) {
+		const Content::Assets::ModelMesh& mesh = model.GeoSets.front().Meshes[node.Mesh];
 		for(const auto& face : mesh.Faces) {
 			if(face.Material >= 0) {
 				const auto& material = model.Materials[face.Material];
@@ -481,6 +475,36 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 			}
 		}
 	}
+
+	glTranslatef(-Math::Get<0>(node.Pivot), -Math::Get<1>(node.Pivot), -Math::Get<2>(node.Pivot));
+
+	DrawMeshNode(model, node.Child, sector_light);
+	glPopMatrix();
+
+	DrawMeshNode(model, node.Sibling, sector_light);
+}
+
+void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
+	if(!thing.Model3d || sector_vis_scratch.count(thing.Sector) == 0) {
+		return;
+	}
+
+	float sector_light = currentModel->Sectors[thing.Sector].AmbientLight
+			+ currentModel->Sectors[thing.Sector].ExtraLight;
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+
+	btTransform trns;
+	thing.RigidBody->getMotionState()->getWorldTransform(trns);
+
+	float mat[16];
+	trns.getOpenGLMatrix(mat);
+
+	glMultMatrixf(mat);
+
+	const Content::Assets::Model& model = *thing.Model3d;
+	DrawMeshNode(model, 0, sector_light);
 
 	glPopMatrix();
 }

@@ -4,6 +4,7 @@
 #include "content/loaders/model_loader.h"
 
 #include "model_geoset.h"
+#include "model_node.h"
 #include "material.h"
 
 #include <btBulletDynamicsCommon.h>
@@ -24,6 +25,7 @@ public:
 	Math::Vector<3> InsertOffset;
 
 	std::vector<ModelGeoSet> GeoSets;
+	std::vector<ModelNode> HierarchyNodes;
 
 	std::unique_ptr<btCompoundShape> Shape;
 };

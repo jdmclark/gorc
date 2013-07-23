@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cog/vm/value.h"
 #include "content/assets/flags.h"
 #include <array>
 
@@ -17,7 +18,7 @@ public:
 	Content::Assets::MessageType SenderType;
 	int SourceRef;
 	Content::Assets::MessageType SourceType;
-	std::array<int, 4> Params;
+	std::array<Cog::VM::Value, 4> Params;
 
 	unsigned int ProgramCounter;
 
@@ -25,7 +26,7 @@ public:
 	CogContinuation(unsigned int InstanceId,
 			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
 			int SourceRef, Content::Assets::MessageType SourceType,
-			int Param0, int Param1, int Param2, int Param3,
+			Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3,
 			unsigned int ProgramCounter = 0);
 };
 

@@ -110,7 +110,7 @@ void LabelRedefinition(Report& report, const std::string& visitorname, const std
 }
 
 void MissingExport(Report& report, const std::string& visitorname, const std::string& labelname, const ErrorLocation& location) {
-	report.AddError(visitorname, boost::str(boost::format("message \'%s\' exported but label not defined") % labelname), location);
+	report.AddWarning(visitorname, boost::str(boost::format("message \'%s\' exported but label not defined") % labelname), location);
 }
 
 void AssignToRValue(Report& report, const std::string& visitorname, const ErrorLocation& location) {

@@ -126,22 +126,15 @@ void Gorc::Game::World::Level::LevelModel::AddCogInstance(const Cog::Script& scr
 }
 
 Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler, const Gorc::Content::Assets::Level& Level)
-	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Surfaces(Level.Surfaces), Sectors(Level.Sectors), MaterialCelNumber(Level.Materials.size(), 0),
-	  Animations(OnAnimationDestroy),  Dispatcher(&CollisionConfiguration), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
+	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Surfaces(Level.Surfaces), Sectors(Level.Sectors),
+	  MaterialCelNumber(Level.Materials.size(), 0), Animations(OnAnimationDestroy),  Dispatcher(&CollisionConfiguration),
+	  DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
 	  SurfaceMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))), SurfaceObjectData(Level.Surfaces.size()) {
+	BroadphaseFilter = std::unique_ptr<SectorBroadphaseFilter>(new SectorBroadphaseFilter(*this));
+	DynamicsWorld.getPairCache()->setOverlapFilterCallback(BroadphaseFilter.get());
 	DynamicsWorld.setGravity(btVector3(0, 0, -Level.Header.WorldGravity));
 
 	// Construct surface rigid bodies.
-	for(size_t i = 0; i < Level.Surfaces.size(); ++i) {
-		const auto& surf = Level.Surfaces[i];
-
-		SurfaceRigidBodies.emplace_back(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(
-				0, &SurfaceMotionState, const_cast<btConvexHullShape*>(Level.SurfaceShapes[i].get()), btVector3(0,0,0))));
-
-		DynamicsWorld.addRigidBody(SurfaceRigidBodies.back().get());
-		UpdateSurfacePhysicsProperties(i, true);
-	}
-
 	for(const auto& sec : Level.Sectors) {
 		for(size_t i = sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
 			SurfaceObjectData[i].SurfaceId = i;
@@ -150,45 +143,44 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 	}
 
 	for(size_t i = 0; i < Level.Surfaces.size(); ++i) {
-		SurfaceRigidBodies[i]->setUserPointer(&SurfaceObjectData[i]);
-	}
+		const auto& surf = Level.Surfaces[i];
 
-	CameraShape = std::unique_ptr<btSphereShape>(new btSphereShape(CameraRadius));
+		btRigidBody::btRigidBodyConstructionInfo surf_ci(0, &SurfaceMotionState,
+				const_cast<btConvexHullShape*>(Level.SurfaceShapes[i].get()),
+				btVector3(0,0,0));
+		if(!(surf.Flags & Content::Assets::SurfaceFlag::Floor)) {
+			surf_ci.m_friction = 0.0f;
+		}
+
+		SurfaceRigidBodies.emplace_back(new btRigidBody(surf_ci));
+		SurfaceRigidBodies[i]->setUserPointer(&SurfaceObjectData[i]);
+
+		DynamicsWorld.addRigidBody(SurfaceRigidBodies.back().get());
+		UpdateSurfacePhysicsProperties(i, true);
+	}
 
 	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
 	for(const auto& thing : Level.Things) {
-		CreateThing(thing, thing.Sector, thing.Position, thing.Orientation);
+		if(thing.Type == Content::Assets::ThingType::Player) {
+			// Add player spawn point and create ghost thing to fill ID.
+			SpawnPoints.push_back(&thing);
+			CreateThing("none", thing.Sector, thing.Position, thing.Orientation);
+		}
+		else {
+			CreateThing(thing, thing.Sector, thing.Position, thing.Orientation);
+		}
 	}
 
 	// HACK: Spawn camera thing
 	CurrentSpawnPoint = 0;
-	auto camera_thing_tuple = Things.Create();
-	auto& camera_thing = *std::get<0>(camera_thing_tuple);
-	CameraThingId = std::get<1>(camera_thing_tuple);
+	CameraThingId = CreateThing(*SpawnPoints[CurrentSpawnPoint], SpawnPoints[CurrentSpawnPoint]->Sector,
+			SpawnPoints[CurrentSpawnPoint]->Position, SpawnPoints[CurrentSpawnPoint]->Orientation);
+	auto& camera_thing = Things[CameraThingId];
+	camera_thing.Flags += Content::Assets::ThingFlag::Invisible;
+	camera_thing.RigidBody->setSleepingThresholds(0.0f, 0.0f);
+	camera_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
 
-	camera_thing.Type = Content::Assets::ThingType::Player;
-	camera_thing.Sector = SpawnPoints[CurrentSpawnPoint]->Sector;
-	camera_thing.Position = SpawnPoints[CurrentSpawnPoint]->Position;
-
-	btScalar cameraMass = SpawnPoints[CurrentSpawnPoint]->Mass;
-	btVector3 cameraFallInertia(0,0,0);
-	CameraShape->calculateLocalInertia(cameraMass, cameraFallInertia);
-
-	camera_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1), BtVec(camera_thing.Position))));
-	camera_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(cameraMass,
-			camera_thing.MotionState.get(), CameraShape.get(), cameraFallInertia)));
-	camera_thing.RigidBody->setFlags(BT_DISABLE_WORLD_GRAVITY);
-	camera_thing.RigidBody->setSleepingThresholds(0, 0);
-
-	camera_thing.ObjectData.ThingId = CameraThingId;
-	camera_thing.ObjectData.SectorId = camera_thing.Sector;
-	camera_thing.ObjectData.CollisionGroup = { PhysicsCollideClass::Player, PhysicsCollideClass::Thing };
-	camera_thing.ObjectData.CollisionMask = { PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing };
-	camera_thing.RigidBody->setUserPointer(&camera_thing.ObjectData);
-
-	DynamicsWorld.addRigidBody(camera_thing.RigidBody.get());
-
-	//Broadphase.optimize();
+	CameraPosition = camera_thing.Position;
 
 	// Create COG script instances.
 	for(const auto& cog : Level.Cogs) {
@@ -203,10 +195,8 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 
 unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
-	if(tpl.Type == Content::Assets::ThingType::Player) {
-		// Add spawn point to spawn point list.
-		SpawnPoints.push_back(&tpl);
-
+	if(tpl.Flags & Content::Assets::ThingFlag::NotInEasy) {
+		// TODO: Temporarily force the game to easy mode.
 		// Insert ghost thing to fill ID.
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
@@ -215,7 +205,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		new_thing.Type = Content::Assets::ThingType::Ghost;
 		return std::get<1>(new_thing_tuple);
 	}
-	else if(tpl.Type == Content::Assets::ThingType::Actor) {
+	else if(tpl.Type == Content::Assets::ThingType::Actor || tpl.Type == Content::Assets::ThingType::Player) {
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
 		new_thing = tpl;
@@ -235,18 +225,38 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 			thing_mass = new_thing.Mass;
 		}
 
-		btCollisionShape* thingShape = CameraShape.get();
+		btVector3 positions[] {
+			btVector3(0.0f, 0.0f, 0.0f),
+			btVector3(0.0f, 0.0f, -0.02f -new_thing.Height * 0.5f)
+		};
+
+		btScalar radii[] {
+			0.04f, 0.02f
+		};
+
+		new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btMultiSphereShape(positions, radii, 2));
+		btCollisionShape* thingShape = new_thing.ActorCollideShape.get();
 
 		btVector3 thing_inertia(0,0,0);
 		thingShape->calculateLocalInertia(thing_mass, thing_inertia);
 
 		new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
 				btTransform(orientation, Math::BtVec(pos))));
-		new_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(
-				btRigidBody::btRigidBodyConstructionInfo(thing_mass, new_thing.MotionState.get(),
-						thingShape, thing_inertia)));
+
+		btRigidBody::btRigidBodyConstructionInfo actor_ci(thing_mass, new_thing.MotionState.get(),
+				thingShape, thing_inertia);
+		actor_ci.m_friction = 2.0f;
+		new_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(actor_ci));
 
 		FlagSet<PhysicsCollideClass> CollideType {PhysicsCollideClass::Thing};
+
+		if(tpl.Type == Content::Assets::ThingType::Player) {
+			CollideType += PhysicsCollideClass::Player;
+		}
+		else {
+			CollideType += PhysicsCollideClass::Enemy;
+		}
+
 		FlagSet<PhysicsCollideClass> CollideWith;
 
 		if(new_thing.Collide != Content::Assets::CollideType::None) {
@@ -294,7 +304,16 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 			thing_mass = new_thing.Mass;
 		}
 
-		btCollisionShape* thingShape = new_thing.Model3d->Shape.get();
+		btCollisionShape* thingShape;
+		if(tpl.Flags & FlagSet<Content::Assets::ThingFlag>{
+			Content::Assets::ThingFlag::PartOfWorldGeometry,
+			Content::Assets::ThingFlag::CanStandOn }) {
+			thingShape = new_thing.Model3d->Shape.get();
+		}
+		else {
+			new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(tpl.Size * 0.5f));
+			thingShape = new_thing.ActorCollideShape.get();
+		}
 
 		btVector3 thing_inertia(0,0,0);
 		thingShape->calculateLocalInertia(thing_mass, thing_inertia);

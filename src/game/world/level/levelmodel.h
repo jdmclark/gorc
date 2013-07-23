@@ -8,6 +8,7 @@
 #include "sound.h"
 #include "cogtimerstate.h"
 #include "cogcontinuation.h"
+#include "sectorbroadphasefilter.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -23,6 +24,7 @@ private:
 			const std::vector<Cog::VM::Value>& values);
 
 public:
+	std::unique_ptr<SectorBroadphaseFilter> BroadphaseFilter;
 	const Content::Assets::Level& Level;
 	Content::Assets::LevelHeader Header;
 	std::vector<Content::Assets::LevelAdjoin> Adjoins;
@@ -37,9 +39,10 @@ public:
 	std::vector<std::tuple<std::unique_ptr<Cog::Instance>, CogTimerState>> Cogs;
 	Pool<std::tuple<double, CogContinuation>, 8> SleepingCogs;
 
+	unsigned int CameraThingId;
+	Vector<3> CameraPosition;
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 	Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);
-	static constexpr float CameraRadius = 0.06f;
 	Vector<3> CameraVelocity = Zero<3>();
 
 	std::vector<Content::Assets::Template const*> SpawnPoints;
@@ -54,9 +57,6 @@ public:
 	std::vector<std::unique_ptr<btRigidBody>> SurfaceRigidBodies;
 	btDefaultMotionState SurfaceMotionState;
 	std::vector<SurfaceObjectData> SurfaceObjectData;
-
-	std::unique_ptr<btCollisionShape> CameraShape;
-	unsigned int CameraThingId;
 
 	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level);
 

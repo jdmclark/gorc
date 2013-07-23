@@ -33,7 +33,7 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 	}
 	else if(!space_key_down && components.Input.IsKeyDown(sf::Key::Space)) {
 		space_key_down = true;
-		components.CurrentLevelPresenter->Activate();
+		components.CurrentLevelPresenter->Jump();
 	}
 
 	if(z_key_down && !components.Input.IsKeyDown(sf::Key::Z)) {
@@ -42,6 +42,14 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 	else if(!z_key_down && components.Input.IsKeyDown(sf::Key::Z)) {
 		z_key_down = true;
 		components.CurrentLevelPresenter->Damage();
+	}
+
+	if(x_key_down && !components.Input.IsKeyDown(sf::Key::X)) {
+		x_key_down = false;
+	}
+	else if(!x_key_down && components.Input.IsKeyDown(sf::Key::X)) {
+		x_key_down = true;
+		components.CurrentLevelPresenter->Activate();
 	}
 
 	Vector<3> Translate = Zero<3>();

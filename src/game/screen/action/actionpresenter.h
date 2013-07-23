@@ -17,6 +17,7 @@ private:
 	bool r_key_down = false;
 	bool space_key_down = false;
 	bool z_key_down = false;
+	bool x_key_down = false;
 
 public:
 	ActionPresenter(Components& components, const ActionPlace& place);

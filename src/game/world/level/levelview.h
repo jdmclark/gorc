@@ -18,6 +18,7 @@ namespace Assets {
 class Template;
 class LevelSector;
 class Shader;
+class Model;
 }
 }
 
@@ -68,6 +69,7 @@ private:
 	void DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& screen_size);
 
 	void DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector, float alpha);
+	void DrawMeshNode(const Content::Assets::Model& model, int node_id, float sector_light);
 	void DrawThing(const Thing& thing);
 
 public:
