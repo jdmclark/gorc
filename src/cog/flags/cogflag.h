@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstdint>
+
 namespace Gorc {
-namespace Cog {
+namespace Flags {
 
 enum class CogFlag : unsigned int {
 	Local = 0x40,

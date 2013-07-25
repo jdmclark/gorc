@@ -3,7 +3,7 @@
 #include "cog/symbols/table.h"
 #include "cog/vm/jumptable.h"
 #include "cog/vm/codebuffer.h"
-#include "cog/flags.h"
+#include "cog/flags/cogflag.h"
 #include "framework/flagset.h"
 #include <memory>
 
@@ -14,7 +14,7 @@ class Script {
 public:
 	Script();
 
-	FlagSet<CogFlag> Flags;
+	FlagSet<Flags::CogFlag> Flags;
 	Symbols::SymbolTable SymbolTable;
 	VM::JumpTable JumpTable;
 	VM::CodeBuffer Code;

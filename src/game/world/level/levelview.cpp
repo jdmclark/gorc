@@ -230,14 +230,14 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 		for(size_t i = sector.FirstSurface; i < sector.FirstSurface + sector.SurfaceCount; ++i) {
 			const auto& surface = currentModel->Surfaces[i];
 
-			if(surface.Adjoin < 0 && (surface.Flags & Content::Assets::SurfaceFlag::HorizonSky)) {
+			if(surface.Adjoin < 0 && (surface.Flags & Flags::SurfaceFlag::HorizonSky)) {
 				horizon_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
 			}
-			else if(surface.Adjoin < 0 && (surface.Flags & Content::Assets::SurfaceFlag::CeilingSky)) {
+			else if(surface.Adjoin < 0 && (surface.Flags & Flags::SurfaceFlag::CeilingSky)) {
 				ceiling_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
 			}
-			else if((surface.FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ||
-					(surface.Adjoin >= 0 && surface.GeometryMode != Content::Assets::GeometryMode::NotDrawn)) {
+			else if((surface.FaceTypeFlags & Flags::FaceFlag::Translucent) ||
+					(surface.Adjoin >= 0 && surface.GeometryMode != Flags::GeometryMode::NotDrawn)) {
 				translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, i, 0.0f));
 			}
 			else {
@@ -249,7 +249,7 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 
 void Gorc::Game::World::Level::LevelView::DrawVisibleThings() {
 	for(const auto& thing : currentModel->Things) {
-		if((thing.Flags & Content::Assets::ThingFlag::Invisible) || sector_vis_scratch.count(thing.Sector) == 0) {
+		if((thing.Flags & Flags::ThingFlag::Invisible) || sector_vis_scratch.count(thing.Sector) == 0) {
 			continue;
 		}
 
@@ -279,7 +279,7 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleTranslucentSurfaces() {
 	// Draw translucent surfaces
 	for(auto& surf_tuple : translucent_surfaces_scratch) {
 		DrawSurface(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)],
-				(currentModel->Surfaces[std::get<1>(surf_tuple)].FaceTypeFlags & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f);
+				(currentModel->Surfaces[std::get<1>(surf_tuple)].FaceTypeFlags & Flags::FaceFlag::Translucent) ? 0.5f : 1.0f);
 	}
 }
 
@@ -432,7 +432,7 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Content::Assets::Mo
 			if(face.Material >= 0) {
 				const auto& material = model.Materials[face.Material];
 
-				float alpha = (face.Type & Content::Assets::FaceTypeFlag::Translucent) ? 0.5f : 1.0f;
+				float alpha = (face.Type & Flags::FaceFlag::Translucent) ? 0.5f : 1.0f;
 
 				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
 						1.0f / static_cast<float>(material->Height));

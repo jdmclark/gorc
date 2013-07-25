@@ -19,8 +19,8 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 	UpdateCameraAmbientSound();
 
 	// Send startup and loading messages
-	SendMessageToAll(Cog::MessageId::Startup, -1, -1, Content::Assets::MessageType::Nothing);
-	SendMessageToAll(Cog::MessageId::Loading, -1, -1, Content::Assets::MessageType::Nothing);
+	SendMessageToAll(Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
+	SendMessageToAll(Cog::MessageId::Loading, -1, -1, Flags::MessageType::Nothing);
 
 	return;
 }
@@ -109,7 +109,7 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 			timer_state.TimerRemainingTime -= dt;
 			if(timer_state.TimerRemainingTime <= 0.0) {
 				timer_state.TimerRemainingTime = 0.0;
-				SendMessage(i, Cog::MessageId::Timer, -1, -1, Content::Assets::MessageType::Nothing);
+				SendMessage(i, Cog::MessageId::Timer, -1, -1, Flags::MessageType::Nothing);
 			}
 		}
 
@@ -117,7 +117,7 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 			timer_state.PulseRemainingTime -= dt;
 			if(timer_state.PulseRemainingTime <= 0.0) {
 				timer_state.PulseRemainingTime = timer_state.PulseTime;
-				SendMessage(i, Cog::MessageId::Pulse, -1, -1, Content::Assets::MessageType::Nothing);
+				SendMessage(i, Cog::MessageId::Pulse, -1, -1, Flags::MessageType::Nothing);
 			}
 		}
 	}
@@ -169,10 +169,10 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 		if(thing.CurrentFrame == thing.GoalFrame) {
 			thing.PathMoving = false;
 			thing.PathMoveSpeed = 0.0f;
-			SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Content::Assets::MessageType::Thing);
+			SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Flags::MessageType::Thing);
 			thing.RigidBody->setActivationState(0);
 			StopFoleyLoop(thing_id);
-			PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::StopMove);
+			PlaySoundClass(thing_id, Flags::SoundSubclassType::StopMove);
 		}
 		else if(thing.CurrentFrame < thing.GoalFrame) {
 			thing.NextFrame = thing.CurrentFrame + 1;
@@ -253,7 +253,7 @@ bool Gorc::Game::World::Level::LevelPresenter::InnerUpdateThingSector(Thing& thi
 
 	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.SurfaceCount; ++sec_surf_id) {
 		const Content::Assets::LevelSurface& surf = model->Surfaces[sec_surf_id + sector.FirstSurface];
-		if(surf.Adjoin >= 0 && !(surf.Flags & Content::Assets::SurfaceFlag::Impassable)
+		if(surf.Adjoin >= 0 && !(surf.Flags & Flags::SurfaceFlag::Impassable)
 				&& ThingPathPassesThroughAdjoin(thing, oldThingPosition, sector, surf)) {
 			path.emplace_back(sector.Number, sec_surf_id + sector.FirstSurface);
 
@@ -279,33 +279,33 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 	if(InnerUpdateThingSector(thing, oldThingPosition, model->Sectors[thing.Sector], path)) {
 		// Fire messages along path
 		unsigned int first_adjoin = std::get<1>(path.front());
-		if(model->Surfaces[first_adjoin].Flags & Content::Assets::SurfaceFlag::CogLinked) {
-			SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Content::Assets::MessageType::Surface,
-					thing_id, Content::Assets::MessageType::Thing);
+		if(model->Surfaces[first_adjoin].Flags & Flags::SurfaceFlag::CogLinked) {
+			SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Flags::MessageType::Surface,
+					thing_id, Flags::MessageType::Thing);
 		}
 
 		for(unsigned int i = 1; i < path.size() - 1; ++i) {
 			unsigned int sec_id = std::get<0>(path[i]);
 			thing.Sector = sec_id;
 			thing.ObjectData.SectorId = sec_id;
-			if(model->Sectors[sec_id].Flags & Content::Assets::SectorFlag::CogLinked) {
-				SendMessageToLinked(Cog::MessageId::Entered, sec_id, Content::Assets::MessageType::Sector,
-						thing_id, Content::Assets::MessageType::Thing);
+			if(model->Sectors[sec_id].Flags & Flags::SectorFlag::CogLinked) {
+				SendMessageToLinked(Cog::MessageId::Entered, sec_id, Flags::MessageType::Sector,
+						thing_id, Flags::MessageType::Thing);
 			}
 
 			unsigned int surf_id = std::get<1>(path[i]);
-			if(model->Surfaces[surf_id].Flags & Content::Assets::SurfaceFlag::CogLinked) {
-				SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Content::Assets::MessageType::Surface,
-						thing_id, Content::Assets::MessageType::Thing);
+			if(model->Surfaces[surf_id].Flags & Flags::SurfaceFlag::CogLinked) {
+				SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Flags::MessageType::Surface,
+						thing_id, Flags::MessageType::Thing);
 			}
 		}
 
 		unsigned int last_sector = std::get<0>(path.back());
 		thing.Sector = last_sector;
 		thing.ObjectData.SectorId = last_sector;
-		if(model->Sectors[last_sector].Flags & Content::Assets::SectorFlag::CogLinked) {
-			SendMessageToLinked(Cog::MessageId::Entered, last_sector, Content::Assets::MessageType::Sector,
-					thing_id, Content::Assets::MessageType::Thing);
+		if(model->Sectors[last_sector].Flags & Flags::SectorFlag::CogLinked) {
+			SendMessageToLinked(Cog::MessageId::Entered, last_sector, Flags::MessageType::Sector,
+					thing_id, Flags::MessageType::Thing);
 		}
 	}
 	else {
@@ -315,8 +315,8 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 }
 
 void Gorc::Game::World::Level::LevelPresenter::SendMessage(unsigned int InstanceId, Cog::MessageId message,
-		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-		int SourceRef, Content::Assets::MessageType SourceType,
+		int SenderId, int SenderRef, Flags::MessageType SenderType,
+		int SourceRef, Flags::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
 	RunningCogState.emplace(InstanceId, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
 
@@ -326,8 +326,8 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessage(unsigned int Instance
 }
 
 void Gorc::Game::World::Level::LevelPresenter::SendMessageToAll(Cog::MessageId message,
-		int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-		int SourceRef, Content::Assets::MessageType SourceType,
+		int SenderId, int SenderRef, Flags::MessageType SenderType,
+		int SourceRef, Flags::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
 	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
 		SendMessage(i, message, SenderId, SenderRef, SenderType,
@@ -336,21 +336,21 @@ void Gorc::Game::World::Level::LevelPresenter::SendMessageToAll(Cog::MessageId m
 }
 
 void Gorc::Game::World::Level::LevelPresenter::SendMessageToLinked(Cog::MessageId message,
-		int SenderRef, Content::Assets::MessageType SenderType,
-		int SourceRef, Content::Assets::MessageType SourceType,
+		int SenderRef, Flags::MessageType SenderType,
+		int SourceRef, Flags::MessageType SourceType,
 		int Param0, int Param1, int Param2, int Param3) {
 	Cog::Symbols::SymbolType expectedSymbolType;
 
 	switch(SenderType) {
-	case Content::Assets::MessageType::Sector:
+	case Flags::MessageType::Sector:
 		expectedSymbolType = Cog::Symbols::SymbolType::Sector;
 		break;
 
-	case Content::Assets::MessageType::Surface:
+	case Flags::MessageType::Surface:
 		expectedSymbolType = Cog::Symbols::SymbolType::Surface;
 		break;
 
-	case Content::Assets::MessageType::Thing:
+	case Flags::MessageType::Thing:
 		expectedSymbolType = Cog::Symbols::SymbolType::Thing;
 		break;
 	}
@@ -438,8 +438,8 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 
 	for(int i = 0; i < model->Surfaces.size(); ++i) {
 		const Content::Assets::LevelSurface& surf = model->Surfaces[i];
-		if((surf.Adjoin >= 0 && (model->Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement))
-				|| !(surf.Flags & Content::Assets::SurfaceFlag::CogLinked)
+		if((surf.Adjoin >= 0 && (model->Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowMovement))
+				|| !(surf.Flags & Flags::SurfaceFlag::CogLinked)
 				|| Math::Dot(surf.Normal, model->CameraLook) >= 0.0f) {
 			continue;
 		}
@@ -456,7 +456,7 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 
 	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
 		auto dir_vec = it->Position - camera_position;
-		if(!(it->Flags & Content::Assets::ThingFlag::CogLinked)
+		if(!(it->Flags & Flags::ThingFlag::CogLinked)
 				|| Math::Dot(dir_vec, model->CameraLook) <= 0.0f) {
 			continue;
 		}
@@ -471,13 +471,13 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	}
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Content::Assets::MessageType::Surface,
-				model->CameraThingId, Content::Assets::MessageType::Thing);
+		SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Flags::MessageType::Surface,
+				model->CameraThingId, Flags::MessageType::Thing);
 	}
 	else if(best_thing_candidate >= 0) {
-		SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Content::Assets::MessageType::Thing,
-				model->CameraThingId, Content::Assets::MessageType::Thing);
-		PlaySoundClass(best_thing_candidate, Content::Assets::SoundSubclassType::Activate);
+		SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Flags::MessageType::Thing,
+				model->CameraThingId, Flags::MessageType::Thing);
+		PlaySoundClass(best_thing_candidate, Flags::SoundSubclassType::Activate);
 	}
 }
 
@@ -495,8 +495,8 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 
 	for(int i = 0; i < model->Surfaces.size(); ++i) {
 		const Content::Assets::LevelSurface& surf = model->Surfaces[i];
-		if((surf.Adjoin >= 0 && (model->Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement))
-				|| !(surf.Flags & Content::Assets::SurfaceFlag::CogLinked)
+		if((surf.Adjoin >= 0 && (model->Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowMovement))
+				|| !(surf.Flags & Flags::SurfaceFlag::CogLinked)
 				|| Math::Dot(surf.Normal, model->CameraLook) >= 0.0f) {
 			continue;
 		}
@@ -513,7 +513,7 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 
 	for(auto it = model->Things.begin(); it != model->Things.end(); ++it) {
 		auto dir_vec = it->Position - camera_position;
-		if(!(it->Flags & Content::Assets::ThingFlag::CogLinked)
+		if(!(it->Flags & Flags::ThingFlag::CogLinked)
 				|| Math::Dot(dir_vec, model->CameraLook) <= 0.0f) {
 			continue;
 		}
@@ -528,16 +528,16 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	}
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Content::Assets::MessageType::Surface,
-				model->CameraThingId, Content::Assets::MessageType::Thing, 1000, static_cast<int>(Content::Assets::DamageFlag::Saber));
+		SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Flags::MessageType::Surface,
+				model->CameraThingId, Flags::MessageType::Thing, 1000, static_cast<int>(Flags::DamageFlag::Saber));
 	}
 	else if(best_thing_candidate >= 0) {
-		DamageThing(best_thing_candidate, 50.0f, { Content::Assets::DamageFlag::Saber }, model->CameraThingId);
+		DamageThing(best_thing_candidate, 50.0f, { Flags::DamageFlag::Saber }, model->CameraThingId);
 	}
 }
 
 // Anim / Cel verbs
-int Gorc::Game::World::Level::LevelPresenter::SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags) {
+int Gorc::Game::World::Level::LevelPresenter::SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags) {
 	auto ent_tuple = model->Animations.Create();
 	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SurfaceAnimation(*model, surface, rate, flags, std::get<1>(ent_tuple)));
 	return std::get<1>(ent_tuple);
@@ -592,8 +592,8 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int fra
 
 	referenced_thing.PathMoveSpeed = speed;
 	referenced_thing.PathMoving = true;
-	PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::StartMove);
-	PlayFoleyLoopClass(thing_id, Content::Assets::SoundSubclassType::Moving);
+	PlaySoundClass(thing_id, Flags::SoundSubclassType::StartMove);
+	PlayFoleyLoopClass(thing_id, Flags::SoundSubclassType::Moving);
 
 	if(referenced_thing.RigidBody) {
 		referenced_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
@@ -633,20 +633,20 @@ void Gorc::Game::World::Level::LevelPresenter::PlaySong(int start, int end, int 
 	AmbientMusic.PlaySong(start, end, loopto);
 }
 
-int Gorc::Game::World::Level::LevelPresenter::PlaySoundClass(int thing, Content::Assets::SoundSubclassType subclass_type) {
+int Gorc::Game::World::Level::LevelPresenter::PlaySoundClass(int thing, Flags::SoundSubclassType subclass_type) {
 	Thing& referenced_thing = model->Things[thing];
 	if(referenced_thing.SoundClass) {
 		const Content::Assets::SoundSubclass& subclass = referenced_thing.SoundClass->Get(subclass_type);
 		if(subclass.sound >= 0) {
 			return PlaySoundThing(subclass.sound, thing, subclass.max_volume, subclass.min_radius, subclass.max_radius,
-					subclass.flags + Content::Assets::SoundFlag::ThingOriginMovesWithThing);
+					subclass.flags + Flags::SoundFlag::ThingOriginMovesWithThing);
 		}
 	}
 
 	return -1;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::PlayFoleyLoopClass(int thing, Content::Assets::SoundSubclassType subclass_type) {
+void Gorc::Game::World::Level::LevelPresenter::PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass_type) {
 	Thing& referenced_thing = model->Things[thing];
 
 	if(referenced_thing.CurrentFoleyLoopChannel >= 0) {
@@ -667,7 +667,7 @@ void Gorc::Game::World::Level::LevelPresenter::StopFoleyLoop(int thing) {
 	}
 }
 
-int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags) {
+int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
 	auto snd_tuple = model->Sounds.Create();
 
 	Sound& snd = *std::get<0>(snd_tuple);
@@ -677,7 +677,7 @@ int Gorc::Game::World::Level::LevelPresenter::PlaySoundLocal(int wav, float volu
 }
 
 int Gorc::Game::World::Level::LevelPresenter::PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad,
-		FlagSet<Content::Assets::SoundFlag> flags) {
+		FlagSet<Flags::SoundFlag> flags) {
 	auto snd_tuple = model->Sounds.Create();
 
 	Sound& snd = *std::get<0>(snd_tuple);
@@ -687,7 +687,7 @@ int Gorc::Game::World::Level::LevelPresenter::PlaySoundPos(int wav, Math::Vector
 }
 
 int Gorc::Game::World::Level::LevelPresenter::PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad,
-		FlagSet<Content::Assets::SoundFlag> flags) {
+		FlagSet<Flags::SoundFlag> flags) {
 	auto snd_tuple = model->Sounds.Create();
 
 	Sound& snd = *std::get<0>(snd_tuple);
@@ -709,10 +709,10 @@ void Gorc::Game::World::Level::LevelPresenter::SetSectorAdjoins(int sector_id, b
 			Content::Assets::LevelAdjoin& adjoin = model->Adjoins[surface.Adjoin];
 
 			if(state) {
-				adjoin.Flags += Content::Assets::SurfaceAdjoinFlag::Visible;
+				adjoin.Flags += Flags::AdjoinFlag::Visible;
 			}
 			else {
-				adjoin.Flags -= Content::Assets::SurfaceAdjoinFlag::Visible;
+				adjoin.Flags -= Flags::AdjoinFlag::Visible;
 			}
 		}
 	}
@@ -735,7 +735,7 @@ void Gorc::Game::World::Level::LevelPresenter::SetSectorTint(int sector_id, cons
 }
 
 // Surface verbs
-void Gorc::Game::World::Level::LevelPresenter::ClearAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags) {
+void Gorc::Game::World::Level::LevelPresenter::ClearAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags) {
 	Content::Assets::LevelSurface& surf = model->Surfaces[surface];
 	if(surf.Adjoin >= 0) {
 		Content::Assets::LevelAdjoin& adj = model->Adjoins[surf.Adjoin];
@@ -754,7 +754,7 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter
 	return vec;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags) {
+void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags) {
 	Content::Assets::LevelSurface& surf = model->Surfaces[surface];
 	if(surf.Adjoin >= 0) {
 		Content::Assets::LevelAdjoin& adj = model->Adjoins[surf.Adjoin];
@@ -769,27 +769,27 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int
 	return static_cast<int>(model->CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation));
 }
 
-float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Content::Assets::DamageFlag> flags, int damager_id) {
-	SendMessageToLinked(Cog::MessageId::Damaged, thing_id, Content::Assets::MessageType::Thing,
-			damager_id, Content::Assets::MessageType::Thing, damage, static_cast<int>(flags));
+float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id) {
+	SendMessageToLinked(Cog::MessageId::Damaged, thing_id, Flags::MessageType::Thing,
+			damager_id, Flags::MessageType::Thing, damage, static_cast<int>(flags));
 
 	Thing& referencedThing = model->Things[thing_id];
 	if(referencedThing.Health > 0.0f) {
 		referencedThing.Health -= damage;
 
 		if(referencedThing.Health <= 0.0f) {
-			PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::Death1);
-			SendMessageToLinked(Cog::MessageId::Killed, thing_id, Content::Assets::MessageType::Thing,
-					damager_id, Content::Assets::MessageType::Thing);
+			PlaySoundClass(thing_id, Flags::SoundSubclassType::Death1);
+			SendMessageToLinked(Cog::MessageId::Killed, thing_id, Flags::MessageType::Thing,
+					damager_id, Flags::MessageType::Thing);
 			// TODO: Thing is dead. Replace destroy code with corpse creation code.
 			if(referencedThing.RigidBody) {
 				model->DynamicsWorld.removeRigidBody(referencedThing.RigidBody.get());
 			}
 
-			referencedThing.Flags += Content::Assets::ThingFlag::Invisible;
+			referencedThing.Flags += Flags::ThingFlag::Invisible;
 		}
 		else {
-			PlaySoundClass(thing_id, Content::Assets::SoundSubclassType::HurtSpecial);
+			PlaySoundClass(thing_id, Flags::SoundSubclassType::HurtSpecial);
 		}
 	}
 
@@ -806,7 +806,7 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int 
 bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
 	switch(referencedThing.Move) {
-	case Content::Assets::MoveType::Physics:
+	case Flags::MoveType::Physics:
 		if(referencedThing.RigidBody) {
 			return referencedThing.RigidBody->getLinearVelocity().length2() > 0.0f;
 		}
@@ -814,7 +814,7 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 			return false;
 		}
 
-	case Content::Assets::MoveType::Path:
+	case Flags::MoveType::Path:
 	default:
 		return false;
 	}

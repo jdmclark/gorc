@@ -183,7 +183,7 @@ void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& 
 
 		Assets::LevelAdjoin adj;
 
-		adj.Flags = FlagSet<Assets::SurfaceAdjoinFlag>(tok.GetNumber<uint32_t>());
+		adj.Flags = FlagSet<Flags::AdjoinFlag>(tok.GetNumber<uint32_t>());
 		adj.Mirror = tok.GetNumber<size_t>();
 		adj.Distance = tok.GetNumber<float>();
 
@@ -203,11 +203,11 @@ void ParseGeoresourceSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& 
 		tok.AssertPunctuator(":");
 
 		surf.Material = tok.GetNumber<int>();
-		surf.Flags = FlagSet<Assets::SurfaceFlag>(tok.GetNumber<uint32_t>());
-		surf.FaceTypeFlags = FlagSet<Assets::FaceTypeFlag>(tok.GetNumber<uint32_t>());
-		surf.GeometryMode = static_cast<Assets::GeometryMode>(tok.GetNumber<uint32_t>());
-		surf.LightMode = static_cast<Assets::LightMode>(tok.GetNumber<uint32_t>());
-		surf.TextureMode = static_cast<Assets::TextureMode>(tok.GetNumber<uint32_t>());
+		surf.Flags = FlagSet<Flags::SurfaceFlag>(tok.GetNumber<uint32_t>());
+		surf.FaceTypeFlags = FlagSet<Flags::FaceFlag>(tok.GetNumber<uint32_t>());
+		surf.GeometryMode = static_cast<Flags::GeometryMode>(tok.GetNumber<uint32_t>());
+		surf.LightMode = static_cast<Flags::LightMode>(tok.GetNumber<uint32_t>());
+		surf.TextureMode = static_cast<Flags::TextureMode>(tok.GetNumber<uint32_t>());
 		surf.Adjoin = tok.GetNumber<int>();
 		surf.ExtraLight = tok.GetNumber<float>();
 
@@ -261,7 +261,7 @@ void ParseSectorsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& mana
 				sec.Number = tok.GetNumber<size_t>();
 			}
 			else if(boost::iequals(t.Value, "flags")) {
-				sec.Flags = FlagSet<Assets::SectorFlag>(tok.GetNumber<uint32_t>());
+				sec.Flags = FlagSet<Flags::SectorFlag>(tok.GetNumber<uint32_t>());
 			}
 			else if(boost::iequals(t.Value, "ambient")) {
 				tok.AssertIdentifier("light");

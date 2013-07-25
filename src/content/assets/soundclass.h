@@ -15,7 +15,7 @@ public:
 
 	std::array<SoundSubclass, 128> Subclasses;
 
-	inline const SoundSubclass& Get(SoundSubclassType type) const {
+	inline const SoundSubclass& Get(Flags::SoundSubclassType type) const {
 		return Subclasses[static_cast<int>(type)];
 	}
 };

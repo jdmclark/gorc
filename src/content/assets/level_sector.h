@@ -3,7 +3,7 @@
 #include "framework/math/vector.h"
 #include "framework/math/box.h"
 #include "sound.h"
-#include "flags.h"
+#include "content/flags/sectorflag.h"
 
 namespace Gorc {
 namespace Content {
@@ -12,7 +12,7 @@ namespace Assets {
 class LevelSector {
 public:
 	size_t Number;
-	FlagSet<SectorFlag> Flags;
+	FlagSet<Flags::SectorFlag> Flags;
 	float AmbientLight;
 	float ExtraLight;
 	size_t ColorMap;

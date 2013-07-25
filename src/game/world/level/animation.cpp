@@ -10,7 +10,7 @@ void Gorc::Game::World::Level::Animation::Stop() {
 }
 
 Gorc::Game::World::Level::SurfaceAnimation::SurfaceAnimation(LevelModel& model, unsigned int surface, double framerate,
-		FlagSet<Content::Assets::SurfaceAnimationFlag> flag, int anim_num)
+		FlagSet<Flags::AnimFlag> flag, int anim_num)
 	: model(model), surface(surface), framerate(1.0 / framerate), flag(flag), framerate_accumulator(0.0) {
 
 	int surface_material = model.Level.Surfaces[surface].Material;
@@ -22,10 +22,10 @@ Gorc::Game::World::Level::SurfaceAnimation::SurfaceAnimation(LevelModel& model, 
 
 	num_cels = std::get<0>(model.Level.Materials[surface_material])->Cels.size();
 
-	if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstTwoFrames) {
+	if(flag & Flags::AnimFlag::SkipFirstTwoFrames) {
 		model.Surfaces[surface].CelNumber = 2 % num_cels;
 	}
-	else if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstFrame) {
+	else if(flag & Flags::AnimFlag::SkipFirstFrame) {
 		model.Surfaces[surface].CelNumber = 1 % num_cels;
 	}
 	else {
@@ -43,10 +43,10 @@ void Gorc::Game::World::Level::SurfaceAnimation::Update(double dt) {
 
 		int next_cel = model.Surfaces[surface].CelNumber + 1;
 		if(next_cel >= num_cels) {
-			if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstTwoFrames) {
+			if(flag & Flags::AnimFlag::SkipFirstTwoFrames) {
 				next_cel = 2 % num_cels;
 			}
-			else if(flag & Content::Assets::SurfaceAnimationFlag::SkipFirstFrame) {
+			else if(flag & Flags::AnimFlag::SkipFirstFrame) {
 				next_cel = 1 % num_cels;
 			}
 			else {

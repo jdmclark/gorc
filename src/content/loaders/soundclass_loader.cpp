@@ -13,133 +13,133 @@ namespace Gorc {
 namespace Content {
 namespace Loaders {
 
-const std::unordered_map<std::string, Assets::SoundSubclassType> SubclassMap {
-	{ "reserved", Assets::SoundSubclassType::Reserved },
+const std::unordered_map<std::string, Flags::SoundSubclassType> SubclassMap {
+	{ "reserved", Flags::SoundSubclassType::Reserved },
 
-	{ "create", Assets::SoundSubclassType::Create },
-	{ "activate", Assets::SoundSubclassType::Activate },
+	{ "create", Flags::SoundSubclassType::Create },
+	{ "activate", Flags::SoundSubclassType::Activate },
 
-	{ "startmove", Assets::SoundSubclassType::StartMove },
-	{ "stopmove", Assets::SoundSubclassType::StopMove },
-	{ "moving", Assets::SoundSubclassType::Moving },
+	{ "startmove", Flags::SoundSubclassType::StartMove },
+	{ "stopmove", Flags::SoundSubclassType::StopMove },
+	{ "moving", Flags::SoundSubclassType::Moving },
 
-	{ "lwalkhard", Assets::SoundSubclassType::LWalkHard },
-	{ "rwalkhard", Assets::SoundSubclassType::RWalkHard },
+	{ "lwalkhard", Flags::SoundSubclassType::LWalkHard },
+	{ "rwalkhard", Flags::SoundSubclassType::RWalkHard },
 
-	{ "lrunhard", Assets::SoundSubclassType::LRunHard },
-	{ "rrunhard", Assets::SoundSubclassType::RRunHard },
+	{ "lrunhard", Flags::SoundSubclassType::LRunHard },
+	{ "rrunhard", Flags::SoundSubclassType::RRunHard },
 
-	{ "lwalkmetal", Assets::SoundSubclassType::LWalkMetal },
-	{ "rwalkmetal", Assets::SoundSubclassType::RWalkMetal },
+	{ "lwalkmetal", Flags::SoundSubclassType::LWalkMetal },
+	{ "rwalkmetal", Flags::SoundSubclassType::RWalkMetal },
 
-	{ "lrunmetal", Assets::SoundSubclassType::LRunMetal },
-	{ "rrunmetal", Assets::SoundSubclassType::RRunMetal },
+	{ "lrunmetal", Flags::SoundSubclassType::LRunMetal },
+	{ "rrunmetal", Flags::SoundSubclassType::RRunMetal },
 
-	{ "lwalkwater", Assets::SoundSubclassType::LWalkWater },
-	{ "rwalkwater", Assets::SoundSubclassType::RWalkWater },
+	{ "lwalkwater", Flags::SoundSubclassType::LWalkWater },
+	{ "rwalkwater", Flags::SoundSubclassType::RWalkWater },
 
-	{ "lrunwater", Assets::SoundSubclassType::LRunWater },
-	{ "rrunwater", Assets::SoundSubclassType::RRunWater },
+	{ "lrunwater", Flags::SoundSubclassType::LRunWater },
+	{ "rrunwater", Flags::SoundSubclassType::RRunWater },
 
-	{ "lwalkpuddle", Assets::SoundSubclassType::LWalkPuddle },
-	{ "rwalkpuddle", Assets::SoundSubclassType::RWalkPuddle },
+	{ "lwalkpuddle", Flags::SoundSubclassType::LWalkPuddle },
+	{ "rwalkpuddle", Flags::SoundSubclassType::RWalkPuddle },
 
-	{ "lrunpuddle", Assets::SoundSubclassType::LRunPuddle },
-	{ "rrunpuddle", Assets::SoundSubclassType::RRunPuddle },
+	{ "lrunpuddle", Flags::SoundSubclassType::LRunPuddle },
+	{ "rrunpuddle", Flags::SoundSubclassType::RRunPuddle },
 
-	{ "lwalkearth", Assets::SoundSubclassType::LWalkEarth },
-	{ "rwalkearth", Assets::SoundSubclassType::RWalkEarth },
+	{ "lwalkearth", Flags::SoundSubclassType::LWalkEarth },
+	{ "rwalkearth", Flags::SoundSubclassType::RWalkEarth },
 
-	{ "lrunearth", Assets::SoundSubclassType::LRunEarth },
-	{ "rrunearth", Assets::SoundSubclassType::RRunEarth },
+	{ "lrunearth", Flags::SoundSubclassType::LRunEarth },
+	{ "rrunearth", Flags::SoundSubclassType::RRunEarth },
 
-	{ "enterwater", Assets::SoundSubclassType::EnterWater },
-	{ "enterwaterslow", Assets::SoundSubclassType::EnterWaterSlow },
-	{ "exitwater", Assets::SoundSubclassType::ExitWater },
-	{ "exitwaterslow", Assets::SoundSubclassType::ExitWaterSlow },
+	{ "enterwater", Flags::SoundSubclassType::EnterWater },
+	{ "enterwaterslow", Flags::SoundSubclassType::EnterWaterSlow },
+	{ "exitwater", Flags::SoundSubclassType::ExitWater },
+	{ "exitwaterslow", Flags::SoundSubclassType::ExitWaterSlow },
 
-	{ "lswimsurface", Assets::SoundSubclassType::LSwimSurface },
-	{ "rswimsurface", Assets::SoundSubclassType::RSwimSurface },
+	{ "lswimsurface", Flags::SoundSubclassType::LSwimSurface },
+	{ "rswimsurface", Flags::SoundSubclassType::RSwimSurface },
 
-	{ "treadsurface", Assets::SoundSubclassType::TreadSurface },
+	{ "treadsurface", Flags::SoundSubclassType::TreadSurface },
 
-	{ "lswimunder", Assets::SoundSubclassType::LSwimUnder },
-	{ "rswimunder", Assets::SoundSubclassType::RSwimUnder },
+	{ "lswimunder", Flags::SoundSubclassType::LSwimUnder },
+	{ "rswimunder", Flags::SoundSubclassType::RSwimUnder },
 
-	{ "treadunder", Assets::SoundSubclassType::TreadUnder },
+	{ "treadunder", Flags::SoundSubclassType::TreadUnder },
 
-	{ "jump", Assets::SoundSubclassType::Jump },
-	{ "jumpmetal", Assets::SoundSubclassType::JumpMetal },
-	{ "jumpearth", Assets::SoundSubclassType::JumpEarth },
-	{ "jumpwater", Assets::SoundSubclassType::JumpWater },
+	{ "jump", Flags::SoundSubclassType::Jump },
+	{ "jumpmetal", Flags::SoundSubclassType::JumpMetal },
+	{ "jumpearth", Flags::SoundSubclassType::JumpEarth },
+	{ "jumpwater", Flags::SoundSubclassType::JumpWater },
 
-	{ "landhard", Assets::SoundSubclassType::LandHard },
-	{ "landmetal", Assets::SoundSubclassType::LandMetal },
-	{ "landwater", Assets::SoundSubclassType::LandWater },
-	{ "landpuddle", Assets::SoundSubclassType::LandPuddle },
-	{ "landearth", Assets::SoundSubclassType::LandEarth },
-	{ "landhurt", Assets::SoundSubclassType::LandHurt },
+	{ "landhard", Flags::SoundSubclassType::LandHard },
+	{ "landmetal", Flags::SoundSubclassType::LandMetal },
+	{ "landwater", Flags::SoundSubclassType::LandWater },
+	{ "landpuddle", Flags::SoundSubclassType::LandPuddle },
+	{ "landearth", Flags::SoundSubclassType::LandEarth },
+	{ "landhurt", Flags::SoundSubclassType::LandHurt },
 
-	{ "hithard", Assets::SoundSubclassType::HitHard },
-	{ "hitmetal", Assets::SoundSubclassType::HitMetal },
-	{ "hitearth", Assets::SoundSubclassType::HitEarth },
+	{ "hithard", Flags::SoundSubclassType::HitHard },
+	{ "hitmetal", Flags::SoundSubclassType::HitMetal },
+	{ "hitearth", Flags::SoundSubclassType::HitEarth },
 
-	{ "deflected", Assets::SoundSubclassType::Deflected },
+	{ "deflected", Flags::SoundSubclassType::Deflected },
 
-	{ "scrapehard", Assets::SoundSubclassType::ScrapeHard },
-	{ "scrapemetal", Assets::SoundSubclassType::ScrapeMetal },
-	{ "scrapeearth", Assets::SoundSubclassType::ScrapeEarth },
+	{ "scrapehard", Flags::SoundSubclassType::ScrapeHard },
+	{ "scrapemetal", Flags::SoundSubclassType::ScrapeMetal },
+	{ "scrapeearth", Flags::SoundSubclassType::ScrapeEarth },
 
-	{ "hitdamaged", Assets::SoundSubclassType::HitDamaged },
+	{ "hitdamaged", Flags::SoundSubclassType::HitDamaged },
 
-	{ "falling", Assets::SoundSubclassType::Falling },
+	{ "falling", Flags::SoundSubclassType::Falling },
 
-	{ "corpsehit", Assets::SoundSubclassType::CorpseHit },
+	{ "corpsehit", Flags::SoundSubclassType::CorpseHit },
 
-	{ "hurtimpact", Assets::SoundSubclassType::HurtImpact },
-	{ "hurtenergy", Assets::SoundSubclassType::HurtEnergy },
-	{ "hurtfire", Assets::SoundSubclassType::HurtFire },
-	{ "hurtmagic", Assets::SoundSubclassType::HurtMagic },
-	{ "hurtspecial", Assets::SoundSubclassType::HurtSpecial },
-	{ "drowning", Assets::SoundSubclassType::Drowning },
-	{ "choking", Assets::SoundSubclassType::Choking },
-	{ "death1", Assets::SoundSubclassType::Death1 },
-	{ "death2", Assets::SoundSubclassType::Death2 },
-	{ "deathunder", Assets::SoundSubclassType::DeathUnder },
-	{ "drowned", Assets::SoundSubclassType::Drowned },
-	{ "splattered", Assets::SoundSubclassType::Splattered },
+	{ "hurtimpact", Flags::SoundSubclassType::HurtImpact },
+	{ "hurtenergy", Flags::SoundSubclassType::HurtEnergy },
+	{ "hurtfire", Flags::SoundSubclassType::HurtFire },
+	{ "hurtmagic", Flags::SoundSubclassType::HurtMagic },
+	{ "hurtspecial", Flags::SoundSubclassType::HurtSpecial },
+	{ "drowning", Flags::SoundSubclassType::Drowning },
+	{ "choking", Flags::SoundSubclassType::Choking },
+	{ "death1", Flags::SoundSubclassType::Death1 },
+	{ "death2", Flags::SoundSubclassType::Death2 },
+	{ "deathunder", Flags::SoundSubclassType::DeathUnder },
+	{ "drowned", Flags::SoundSubclassType::Drowned },
+	{ "splattered", Flags::SoundSubclassType::Splattered },
 
-	{ "pant", Assets::SoundSubclassType::Pant },
-	{ "breath", Assets::SoundSubclassType::Breath },
-	{ "gasp", Assets::SoundSubclassType::Gasp },
+	{ "pant", Flags::SoundSubclassType::Pant },
+	{ "breath", Flags::SoundSubclassType::Breath },
+	{ "gasp", Flags::SoundSubclassType::Gasp },
 
-	{ "fire1", Assets::SoundSubclassType::Fire1 },
-	{ "fire2", Assets::SoundSubclassType::Fire2 },
-	{ "fire3", Assets::SoundSubclassType::Fire3 },
-	{ "fire4", Assets::SoundSubclassType::Fire4 },
+	{ "fire1", Flags::SoundSubclassType::Fire1 },
+	{ "fire2", Flags::SoundSubclassType::Fire2 },
+	{ "fire3", Flags::SoundSubclassType::Fire3 },
+	{ "fire4", Flags::SoundSubclassType::Fire4 },
 
-	{ "curious", Assets::SoundSubclassType::Curious },
-	{ "alert", Assets::SoundSubclassType::Alert },
-	{ "idle", Assets::SoundSubclassType::Idle },
-	{ "gloat", Assets::SoundSubclassType::Gloat },
-	{ "fear", Assets::SoundSubclassType::Fear },
-	{ "boast", Assets::SoundSubclassType::Boast },
-	{ "happy", Assets::SoundSubclassType::Happy },
-	{ "victory", Assets::SoundSubclassType::Victory },
-	{ "help", Assets::SoundSubclassType::Help },
-	{ "flee", Assets::SoundSubclassType::Flee },
-	{ "search", Assets::SoundSubclassType::Search },
-	{ "calm", Assets::SoundSubclassType::Calm },
-	{ "surprise", Assets::SoundSubclassType::Surprise },
+	{ "curious", Flags::SoundSubclassType::Curious },
+	{ "alert", Flags::SoundSubclassType::Alert },
+	{ "idle", Flags::SoundSubclassType::Idle },
+	{ "gloat", Flags::SoundSubclassType::Gloat },
+	{ "fear", Flags::SoundSubclassType::Fear },
+	{ "boast", Flags::SoundSubclassType::Boast },
+	{ "happy", Flags::SoundSubclassType::Happy },
+	{ "victory", Flags::SoundSubclassType::Victory },
+	{ "help", Flags::SoundSubclassType::Help },
+	{ "flee", Flags::SoundSubclassType::Flee },
+	{ "search", Flags::SoundSubclassType::Search },
+	{ "calm", Flags::SoundSubclassType::Calm },
+	{ "surprise", Flags::SoundSubclassType::Surprise },
 
-	{ "reserved1", Assets::SoundSubclassType::Reserved1 },
-	{ "reserved2", Assets::SoundSubclassType::Reserved2 },
-	{ "reserved3", Assets::SoundSubclassType::Reserved3 },
-	{ "reserved4", Assets::SoundSubclassType::Reserved4 },
-	{ "reserved5", Assets::SoundSubclassType::Reserved5 },
-	{ "reserved6", Assets::SoundSubclassType::Reserved6 },
-	{ "reserved7", Assets::SoundSubclassType::Reserved7 },
-	{ "reserved8", Assets::SoundSubclassType::Reserved8 }
+	{ "reserved1", Flags::SoundSubclassType::Reserved1 },
+	{ "reserved2", Flags::SoundSubclassType::Reserved2 },
+	{ "reserved3", Flags::SoundSubclassType::Reserved3 },
+	{ "reserved4", Flags::SoundSubclassType::Reserved4 },
+	{ "reserved5", Flags::SoundSubclassType::Reserved5 },
+	{ "reserved6", Flags::SoundSubclassType::Reserved6 },
+	{ "reserved7", Flags::SoundSubclassType::Reserved7 },
+	{ "reserved8", Flags::SoundSubclassType::Reserved8 }
 };
 
 }
@@ -166,7 +166,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::SoundClassLoader::
 				continue;
 			}
 
-			Assets::SoundSubclassType st = it->second;
+			Flags::SoundSubclassType st = it->second;
 			Assets::SoundSubclass& subclass = snd->Subclasses[static_cast<int>(st)];
 
 			tok.SetReportEOL(true);
@@ -181,7 +181,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::SoundClassLoader::
 
 			tok.GetToken(t);
 			if(t.Type != Text::TokenType::EndOfLine) {
-				subclass.flags = FlagSet<Assets::SoundFlag>(t.GetNumericValue<int>());
+				subclass.flags = FlagSet<Flags::SoundFlag>(t.GetNumericValue<int>());
 			}
 			else {
 				tok.SetReportEOL(false);

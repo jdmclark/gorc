@@ -95,7 +95,7 @@ void Gorc::Game::World::Level::LevelModel::AddCogInstance(const Cog::Script& scr
 		case Cog::Symbols::SymbolType::Sector: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				Sectors[index].Flags += Content::Assets::SectorFlag::CogLinked;
+				Sectors[index].Flags += Flags::SectorFlag::CogLinked;
 			}
 		}
 		break;
@@ -103,7 +103,7 @@ void Gorc::Game::World::Level::LevelModel::AddCogInstance(const Cog::Script& scr
 		case Cog::Symbols::SymbolType::Surface: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				Surfaces[index].Flags += Content::Assets::SurfaceFlag::CogLinked;
+				Surfaces[index].Flags += Flags::SurfaceFlag::CogLinked;
 			}
 		}
 		break;
@@ -111,7 +111,7 @@ void Gorc::Game::World::Level::LevelModel::AddCogInstance(const Cog::Script& scr
 		case Cog::Symbols::SymbolType::Thing: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				Things[index].Flags += Content::Assets::ThingFlag::CogLinked;
+				Things[index].Flags += Flags::ThingFlag::CogLinked;
 			}
 		}
 		break;
@@ -148,7 +148,7 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 		btRigidBody::btRigidBodyConstructionInfo surf_ci(0, &SurfaceMotionState,
 				const_cast<btConvexHullShape*>(Level.SurfaceShapes[i].get()),
 				btVector3(0,0,0));
-		if(!(surf.Flags & Content::Assets::SurfaceFlag::Floor)) {
+		if(!(surf.Flags & Flags::SurfaceFlag::Floor)) {
 			surf_ci.m_friction = 0.0f;
 		}
 
@@ -161,7 +161,7 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 
 	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
 	for(const auto& thing : Level.Things) {
-		if(thing.Type == Content::Assets::ThingType::Player) {
+		if(thing.Type == Flags::ThingType::Player) {
 			// Add player spawn point and create ghost thing to fill ID.
 			SpawnPoints.push_back(&thing);
 			CreateThing("none", thing.Sector, thing.Position, thing.Orientation);
@@ -176,7 +176,7 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 	CameraThingId = CreateThing(*SpawnPoints[CurrentSpawnPoint], SpawnPoints[CurrentSpawnPoint]->Sector,
 			SpawnPoints[CurrentSpawnPoint]->Position, SpawnPoints[CurrentSpawnPoint]->Orientation);
 	auto& camera_thing = Things[CameraThingId];
-	camera_thing.Flags += Content::Assets::ThingFlag::Invisible;
+	camera_thing.Flags += Flags::ThingFlag::Invisible;
 	camera_thing.RigidBody->setSleepingThresholds(0.0f, 0.0f);
 	camera_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
 
@@ -195,17 +195,17 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 
 unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
-	if(tpl.Flags & Content::Assets::ThingFlag::NotInEasy) {
+	if(tpl.Flags & Flags::ThingFlag::NotInEasy) {
 		// TODO: Temporarily force the game to easy mode.
 		// Insert ghost thing to fill ID.
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
 		new_thing.Position = pos;
 		new_thing.Orientation = orient;
-		new_thing.Type = Content::Assets::ThingType::Ghost;
+		new_thing.Type = Flags::ThingType::Ghost;
 		return std::get<1>(new_thing_tuple);
 	}
-	else if(tpl.Type == Content::Assets::ThingType::Actor || tpl.Type == Content::Assets::ThingType::Player) {
+	else if(tpl.Type == Flags::ThingType::Actor || tpl.Type == Flags::ThingType::Player) {
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
 		new_thing = tpl;
@@ -221,7 +221,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
 
 		float thing_mass = 0.0f;
-		if(new_thing.Move == Content::Assets::MoveType::Physics && new_thing.Collide != Content::Assets::CollideType::None) {
+		if(new_thing.Move == Flags::MoveType::Physics && new_thing.Collide != Flags::CollideType::None) {
 			thing_mass = new_thing.Mass;
 		}
 
@@ -250,7 +250,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		FlagSet<PhysicsCollideClass> CollideType {PhysicsCollideClass::Thing};
 
-		if(tpl.Type == Content::Assets::ThingType::Player) {
+		if(tpl.Type == Flags::ThingType::Player) {
 			CollideType += PhysicsCollideClass::Player;
 		}
 		else {
@@ -259,7 +259,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		FlagSet<PhysicsCollideClass> CollideWith;
 
-		if(new_thing.Collide != Content::Assets::CollideType::None) {
+		if(new_thing.Collide != Flags::CollideType::None) {
 			CollideWith = {PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing};
 		}
 
@@ -270,7 +270,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		new_thing.ObjectData.CollisionMask = CollideWith;
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
-		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
+		if(new_thing.Move == Flags::MoveType::Path && new_thing.Frames.size() > 0) {
 			new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
 		}
@@ -300,14 +300,14 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
 
 		float thing_mass = 0.0f;
-		if(new_thing.Move == Content::Assets::MoveType::Physics && new_thing.Collide != Content::Assets::CollideType::None) {
+		if(new_thing.Move == Flags::MoveType::Physics && new_thing.Collide != Flags::CollideType::None) {
 			thing_mass = new_thing.Mass;
 		}
 
 		btCollisionShape* thingShape;
-		if(tpl.Flags & FlagSet<Content::Assets::ThingFlag>{
-			Content::Assets::ThingFlag::PartOfWorldGeometry,
-			Content::Assets::ThingFlag::CanStandOn }) {
+		if(tpl.Flags & FlagSet<Flags::ThingFlag>{
+			Flags::ThingFlag::PartOfWorldGeometry,
+			Flags::ThingFlag::CanStandOn }) {
 			thingShape = new_thing.Model3d->Shape.get();
 		}
 		else {
@@ -327,7 +327,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		FlagSet<PhysicsCollideClass> CollideType {PhysicsCollideClass::Thing};
 		FlagSet<PhysicsCollideClass> CollideWith;
 
-		if(new_thing.Collide != Content::Assets::CollideType::None) {
+		if(new_thing.Collide != Flags::CollideType::None) {
 			CollideWith = {PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing};
 		}
 
@@ -339,7 +339,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
-		if(new_thing.Move == Content::Assets::MoveType::Path && new_thing.Frames.size() > 0) {
+		if(new_thing.Move == Flags::MoveType::Path && new_thing.Frames.size() > 0) {
 			new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 			new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
 		}
@@ -355,7 +355,7 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 		// For now, insert empty thing to fill ID.
 		auto new_thing_tuple = Things.Create();
 		auto& new_thing = *std::get<0>(new_thing_tuple);
-		new_thing.Type = Content::Assets::ThingType::Ghost;
+		new_thing.Type = Flags::ThingType::Ghost;
 		new_thing.Position = pos;
 		new_thing.Orientation = orient;
 		return std::get<1>(new_thing_tuple);
@@ -383,10 +383,10 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const std::string
 
 void Gorc::Game::World::Level::LevelModel::UpdateSurfacePhysicsProperties(int surface, bool initial) {
 	auto& surf = Surfaces[surface];
-	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement)) {
+	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowMovement)) {
 		// I guess, apparently, if you set the passable flag for an adjoin, the game
 		// automatically clears the impassable flag on the surface?
-		surf.Flags -= Content::Assets::SurfaceFlag::Impassable;
+		surf.Flags -= Flags::SurfaceFlag::Impassable;
 	}
 
 	FlagSet<PhysicsCollideClass> CollideType;
@@ -398,16 +398,16 @@ void Gorc::Game::World::Level::LevelModel::UpdateSurfacePhysicsProperties(int su
 	}
 
 	FlagSet<PhysicsCollideClass> CollidesWith;
-	if(surf.Adjoin < 0 || (surf.Flags & Content::Assets::SurfaceFlag::Impassable) ||
-			!(Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowMovement)) {
+	if(surf.Adjoin < 0 || (surf.Flags & Flags::SurfaceFlag::Impassable) ||
+			!(Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowMovement)) {
 		CollidesWith += PhysicsCollideClass::Thing;
 	}
 
-	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowAiOnly)) {
+	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowAiOnly)) {
 		CollidesWith += PhysicsCollideClass::Player;
 	}
 
-	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Content::Assets::SurfaceAdjoinFlag::AllowPlayerOnly)) {
+	if(surf.Adjoin >= 0 && (Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowPlayerOnly)) {
 		CollidesWith += PhysicsCollideClass::Enemy;
 	}
 

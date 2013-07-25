@@ -1,6 +1,10 @@
 #pragma once
 
-#include "flags.h"
+#include "content/flags/surfaceflag.h"
+#include "content/flags/faceflag.h"
+#include "content/flags/geometrymode.h"
+#include "content/flags/lightmode.h"
+#include "content/flags/texturemode.h"
 #include "framework/math/vector.h"
 #include <memory>
 
@@ -11,11 +15,11 @@ namespace Assets {
 class LevelSurface {
 public:
 	int Material;
-	FlagSet<SurfaceFlag> Flags;
-	FlagSet<FaceTypeFlag> FaceTypeFlags;
-	GeometryMode GeometryMode;
-	LightMode LightMode;
-	TextureMode TextureMode;
+	FlagSet<Flags::SurfaceFlag> Flags;
+	FlagSet<Flags::FaceFlag> FaceTypeFlags;
+	Flags::GeometryMode GeometryMode;
+	Flags::LightMode LightMode;
+	Flags::TextureMode TextureMode;
 	int Adjoin;
 	int AdjoinedSector;
 	float ExtraLight;

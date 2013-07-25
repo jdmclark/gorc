@@ -28,11 +28,10 @@ void main() {
 	horizon_sky_texture_coordinates(gl_FragCoord, tex_coords);
 
 	vec4 diffuse = texture2D(diffuse, tex_coords);
-	vec4 emissive = vec4(texture2D(light, tex_coords).rgb, 0.0);
 	vec4 diffuse_color = diffuse;
 	vec4 diffuse_color_tint = diffuse_color * sector_tint;
 	vec4 diffuse_color_tint_mix = mix(diffuse_color, diffuse_color_tint, sector_tint.a);
-	gl_FragColor = emissive + diffuse_color_tint_mix;
+	gl_FragColor = diffuse_color_tint_mix;
 	gl_FragColor.a = diffuse_color.a;
 }
 

@@ -8,6 +8,9 @@
 #include "sectorbroadphasefilter.h"
 #include "cog/vm/virtualmachine.h"
 #include "music.h"
+#include "content/flags/animflag.h"
+#include "content/flags/damageflag.h"
+#include "game/flags/difficultymode.h"
 
 #include <SFML/Audio.hpp>
 
@@ -49,17 +52,17 @@ private:
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 
 	void SendMessage(unsigned int InstanceId, Cog::MessageId message,
-			int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
+			int SenderId, int SenderRef, Flags::MessageType SenderType,
+			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
-	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Content::Assets::MessageType SenderType,
-			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
+	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Flags::MessageType SenderType,
+			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
-	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Content::Assets::MessageType SenderType,
-			int SourceRef = -1, Content::Assets::MessageType SourceType = Content::Assets::MessageType::Nothing,
+	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Flags::MessageType SenderType,
+			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
 			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
 
-	void PlayFoleyLoopClass(int thing, Content::Assets::SoundSubclassType subclass);
+	void PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass);
 	void StopFoleyLoop(int thing);
 
 public:
@@ -77,7 +80,7 @@ public:
 	void Damage();
 
 	// Anim / Cel verbs
-	int SurfaceAnim(int surface, float rate, FlagSet<Content::Assets::SurfaceAnimationFlag> flags);
+	int SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags);
 	int GetSurfaceAnim(int surface);
 
 	void StopAnim(int anim);
@@ -115,20 +118,20 @@ public:
 
 	// Sound verbs
 	void PlaySong(int start, int end, int loopto);
-	int PlaySoundClass(int thing, Content::Assets::SoundSubclassType subclass);
-	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Content::Assets::SoundFlag> flags);
-	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
-	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Content::Assets::SoundFlag> flags);
+	int PlaySoundClass(int thing, Flags::SoundSubclassType subclass);
+	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
+	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
+	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
 	void SetMusicVol(float volume);
 
 	// Surface verbs
-	void ClearAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags);
+	void ClearAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags);
 	Math::Vector<3> GetSurfaceCenter(int surface);
-	void SetAdjoinFlags(int surface, FlagSet<Content::Assets::SurfaceAdjoinFlag> flags);
+	void SetAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags);
 
 	// Thing action verbs
 	int CreateThingAtThing(int tpl_id, int thing_id);
-	float DamageThing(int thing_id, float damage, FlagSet<Content::Assets::DamageFlag> flags, int damager_id);
+	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
 	Math::Vector<3> GetThingPos(int thing_id);
 	bool IsThingMoving(int thing_id);
 

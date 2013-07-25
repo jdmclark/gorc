@@ -14,9 +14,9 @@ public:
 	unsigned int Index;
 	std::string Name;
 	float Radius;
-	GeometryMode Geo;
-	LightMode Light;
-	TextureMode Tex;
+	Flags::GeometryMode Geo;
+	Flags::LightMode Light;
+	Flags::TextureMode Tex;
 
 	std::vector<Math::Vector<3>> Vertices;
 	std::vector<Math::Vector<3>> VertexNormals;

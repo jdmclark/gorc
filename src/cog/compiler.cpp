@@ -94,5 +94,5 @@ void Gorc::Cog::Compiler::Compile(IO::ReadOnlyFile& file, Script& output, Diagno
 		throw IO::FileCorruptException();
 	}
 
-	output.Flags = FlagSet<CogFlag> { ast->Flags };
+	output.Flags = FlagSet<Flags::CogFlag> { ast->Flags };
 }

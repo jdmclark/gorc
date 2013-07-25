@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flags.h"
+#include "content/flags/adjoinflag.h"
 
 namespace Gorc {
 namespace Content {
@@ -8,7 +8,7 @@ namespace Assets {
 
 class LevelAdjoin {
 public:
-	FlagSet<SurfaceAdjoinFlag> Flags;
+	FlagSet<Flags::AdjoinFlag> Flags;
 	size_t Mirror;
 	float Distance;
 };

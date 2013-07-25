@@ -10,23 +10,23 @@ namespace Gorc {
 namespace Content {
 namespace Assets {
 
-static const std::unordered_map<std::string, ThingType> TemplateTypeMap {
-	{ "actor", ThingType::Actor },
-	{ "weapon", ThingType::Weapon },
-	{ "debris", ThingType::Debris },
-	{ "item", ThingType::Item },
-	{ "explosion", ThingType::Explosion },
-	{ "cog", ThingType::Cog },
-	{ "ghost", ThingType::Ghost },
-	{ "corpse", ThingType::Corpse },
-	{ "player", ThingType::Player },
-	{ "particle", ThingType::Particle }
+static const std::unordered_map<std::string, Flags::ThingType> TemplateTypeMap {
+	{ "actor", Flags::ThingType::Actor },
+	{ "weapon", Flags::ThingType::Weapon },
+	{ "debris", Flags::ThingType::Debris },
+	{ "item", Flags::ThingType::Item },
+	{ "explosion", Flags::ThingType::Explosion },
+	{ "cog", Flags::ThingType::Cog },
+	{ "ghost", Flags::ThingType::Ghost },
+	{ "corpse", Flags::ThingType::Corpse },
+	{ "player", Flags::ThingType::Player },
+	{ "particle", Flags::ThingType::Particle }
 };
 
-static const std::unordered_map<std::string, MoveType> MoveTypeMap {
-	{ "none", MoveType::None },
-	{ "physics", MoveType::Physics },
-	{ "path", MoveType::Path }
+static const std::unordered_map<std::string, Flags::MoveType> MoveTypeMap {
+	{ "none", Flags::MoveType::None },
+	{ "physics", Flags::MoveType::Physics },
+	{ "path", Flags::MoveType::Path }
 };
 
 using TemplateParameterParser = std::function<void(Template&, Text::Tokenizer&, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&)>;
@@ -171,9 +171,9 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "soundclass", &TemplateSoundClassParser },
 	{ "cog", &TemplateCogParser },
 	{ "type", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, ThingType::Free, tok, report); }},
+		TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }},
 	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterValueMapper(MoveTypeMap, tpl.Move, MoveType::None, tok, report); }},
+		TemplateParameterValueMapper(MoveTypeMap, tpl.Move, Flags::MoveType::None, tok, report); }},
 	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
 	{ "movesize", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
@@ -183,9 +183,9 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "eyeoffset", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
 		TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
 	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterEnumMapper(tpl.Collide, CollideType::None, tok, report); }},
+		TemplateParameterEnumMapper(tpl.Collide, Flags::CollideType::None, tok, report); }},
 	{ "thingflags", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterFlagMapper(tpl.Flags, FlagSet<ThingFlag>(), tok, report); }},
+		TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
 	{ "numframes", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
 		/* Silently consume numframes */ tok.GetNumber<int>(); }},
 	{ "frame", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {

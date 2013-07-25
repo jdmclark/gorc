@@ -1,6 +1,6 @@
 #pragma once
 
-#include "flags.h"
+#include "content/flags/meshnodetype.h"
 #include "framework/flagset.h"
 #include "framework/math/vector.h"
 #include <string>
@@ -11,7 +11,7 @@ namespace Assets {
 
 class ModelNode {
 public:
-	FlagSet<MeshNodeType> Type;
+	FlagSet<Flags::MeshNodeType> Type;
 	int Mesh;
 	int Parent;
 	int Child;

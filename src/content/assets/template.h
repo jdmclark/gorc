@@ -3,8 +3,12 @@
 #include "framework/math/vector.h"
 #include "framework/flagset.h"
 #include "framework/text/tokenizer.h"
+#include "framework/flagset.h"
 #include "cog/compiler.h"
-#include "flags.h"
+#include "content/flags/thingtype.h"
+#include "content/flags/movetype.h"
+#include "content/flags/collidetype.h"
+#include "content/flags/thingflag.h"
 #include "model.h"
 #include "soundclass.h"
 #include "colormap.h"
@@ -30,10 +34,10 @@ public:
 	SoundClass const* SoundClass = nullptr;
 	Script const* Cog = nullptr;
 
-	ThingType Type = ThingType::Ghost;
-	MoveType Move = MoveType::None;
-	CollideType Collide = CollideType::None;
-	FlagSet<ThingFlag> Flags;
+	Flags::ThingType Type = Flags::ThingType::Ghost;
+	Flags::MoveType Move = Flags::MoveType::None;
+	Flags::CollideType Collide = Flags::CollideType::None;
+	FlagSet<Flags::ThingFlag> Flags;
 	Math::Vector<3> EyeOffset;
 
 	float Health = 100.0f;

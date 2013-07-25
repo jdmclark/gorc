@@ -90,13 +90,13 @@ void ParseGeometryDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager
 			mesh.Radius = tok.GetNumber<float>();
 
 			tok.AssertIdentifier("GEOMETRYMODE");
-			mesh.Geo = static_cast<Assets::GeometryMode>(tok.GetNumber<uint32_t>());
+			mesh.Geo = static_cast<Flags::GeometryMode>(tok.GetNumber<uint32_t>());
 
 			tok.AssertIdentifier("LIGHTINGMODE");
-			mesh.Light = static_cast<Assets::LightMode>(tok.GetNumber<uint32_t>());
+			mesh.Light = static_cast<Flags::LightMode>(tok.GetNumber<uint32_t>());
 
 			tok.AssertIdentifier("TEXTUREMODE");
-			mesh.Tex = static_cast<Assets::TextureMode>(tok.GetNumber<uint32_t>());
+			mesh.Tex = static_cast<Flags::TextureMode>(tok.GetNumber<uint32_t>());
 
 			tok.AssertIdentifier("VERTICES");
 			unsigned int num_vertices = tok.GetNumber<unsigned int>();
@@ -148,10 +148,10 @@ void ParseGeometryDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager
 				tok.AssertPunctuator(":");
 
 				face.Material = tok.GetNumber<int>();
-				face.Type = FlagSet<Assets::FaceTypeFlag>(tok.GetNumber<uint32_t>());
-				face.Geo = static_cast<Assets::GeometryMode>(tok.GetNumber<uint32_t>());
-				face.Light = static_cast<Assets::LightMode>(tok.GetNumber<uint32_t>());
-				face.Tex = static_cast<Assets::TextureMode>(tok.GetNumber<uint32_t>());
+				face.Type = FlagSet<Flags::FaceFlag>(tok.GetNumber<uint32_t>());
+				face.Geo = static_cast<Flags::GeometryMode>(tok.GetNumber<uint32_t>());
+				face.Light = static_cast<Flags::LightMode>(tok.GetNumber<uint32_t>());
+				face.Tex = static_cast<Flags::TextureMode>(tok.GetNumber<uint32_t>());
 				face.ExtraLight = tok.GetNumber<float>();
 
 				unsigned int num_face_verts = tok.GetNumber<unsigned int>();
@@ -195,7 +195,7 @@ void ParseHierarchyDefSection(Assets::Model& model, Text::Tokenizer& tok, Manage
 
 		tok.GetNumber<int>();
 
-		node.Type = FlagSet<Content::Assets::MeshNodeType>(tok.GetNumber<unsigned int>());
+		node.Type = FlagSet<Flags::MeshNodeType>(tok.GetNumber<unsigned int>());
 		node.Mesh = tok.GetNumber<int>();
 		node.Parent = tok.GetNumber<int>();
 		node.Child = tok.GetNumber<int>();
@@ -254,20 +254,20 @@ void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colo
 	return;
 }
 
+using ModelLoaderSectionFn = std::function<void(Assets::Model&, Text::Tokenizer&, Manager&, Diagnostics::Report&)>;
+const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMap {
+	{ "header", ParseModelHeaderSection },
+	{ "modelresource", ParseModelResourceSection },
+	{ "geometrydef", ParseGeometryDefSection },
+	{ "hierarchydef", ParseHierarchyDefSection }
+};
+
 }
 }
 }
 
 std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ModelLoader::Parse(Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
 	std::unique_ptr<Assets::Model> lev(new Assets::Model());
-
-	using sec_fn = std::function<void(Assets::Model&, Text::Tokenizer&, Manager&, Diagnostics::Report&)>;
-	std::vector<std::tuple<std::string, sec_fn>> sectionmap {
-		std::make_tuple("header", ParseModelHeaderSection),
-		std::make_tuple("modelresource", ParseModelResourceSection),
-		std::make_tuple("geometrydef", ParseGeometryDefSection),
-		std::make_tuple("hierarchydef", ParseHierarchyDefSection)
-	};
 
 	Text::Token t;
 	while(true) {
@@ -278,13 +278,13 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ModelLoader::Parse
 			break;
 		}
 		else {
-			auto it = std::find_if(sectionmap.begin(), sectionmap.end(),
-					[&t](const std::tuple<std::string, sec_fn>& key){ return boost::iequals(t.Value, std::get<0>(key)); });
-			if(it == sectionmap.end()) {
+			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
+			auto it = ModelLoaderSectionMap.find(t.Value);
+			if(it == ModelLoaderSectionMap.end()) {
 				report.AddWarning("LevelLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
 			}
 			else {
-				std::get<1>(*it)(*lev, tok, manager, report);
+				it->second(*lev, tok, manager, report);
 			}
 		}
 	}

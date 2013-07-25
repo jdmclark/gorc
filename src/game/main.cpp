@@ -31,7 +31,9 @@
 
 const double gameplayTick = (1.0 / 120.0);
 
-void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Components& components) {
+using namespace Gorc;
+
+void RegisterLevelVerbs(Cog::Verbs::VerbTable& verbTable, Game::Components& components) {
 	// Anim / Cel verbs
 	verbTable.AddVerb<int, 1>("getsurfaceanim", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceAnim(surface); });
 	verbTable.AddVerb<void, 1>("stopsurfaceanim", [&components](int surface) {
@@ -42,19 +44,19 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	verbTable.AddVerb<int, 2>("setwallcel", [&components](int surface, int cel) { components.CurrentLevelPresenter->SetSurfaceCel(surface, cel); return 1; });
 
 	verbTable.AddVerb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
-		return components.CurrentLevelPresenter->SurfaceAnim(surface, rate, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAnimationFlag>(flags));
+		return components.CurrentLevelPresenter->SurfaceAnim(surface, rate, FlagSet<Flags::AnimFlag>(flags));
 	});
 
 	verbTable.AddVerb<int, 2>("slideceilingsky", [&components](float u_speed, float v_speed) {
 		return components.CurrentLevelPresenter->SlideCeilingSky(u_speed, v_speed);
 	});
 
-	verbTable.AddVerb<int, 3>("slidesurface", [&components](int surface, Gorc::Math::Vector<3> direction, float speed) {
-		return components.CurrentLevelPresenter->SlideSurface(surface, Gorc::Math::Normalize(direction) * speed);
+	verbTable.AddVerb<int, 3>("slidesurface", [&components](int surface, Math::Vector<3> direction, float speed) {
+		return components.CurrentLevelPresenter->SlideSurface(surface, Math::Normalize(direction) * speed);
 	});
 
-	verbTable.AddVerb<int, 3>("slidewall", [&components](int surface, Gorc::Math::Vector<3> direction, float speed) {
-		return components.CurrentLevelPresenter->SlideSurface(surface, Gorc::Math::Normalize(direction) * speed);
+	verbTable.AddVerb<int, 3>("slidewall", [&components](int surface, Math::Vector<3> direction, float speed) {
+		return components.CurrentLevelPresenter->SlideSurface(surface, Math::Normalize(direction) * speed);
 	});
 
 	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) { components.CurrentLevelPresenter->StopAnim(anim); });
@@ -78,7 +80,7 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	// Options verbs
 	verbTable.AddVerb<int, 0>("getdifficulty", [&components] {
 		// TODO: Add actual difficulty setting.
-		return static_cast<int>(Gorc::Content::Assets::Difficulty::Medium);
+		return static_cast<int>(Flags::DifficultyMode::Medium);
 	});
 
 	// Player verbs
@@ -109,8 +111,8 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
 	});
 
-	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Gorc::Math::Vector<3> thrust_vec, float thrust_speed) {
-		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
+	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
+		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
 	});
 
 	verbTable.AddVerb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
@@ -129,11 +131,11 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
 	});
 
-	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Gorc::Math::Vector<3> thrust_vec, float thrust_speed) {
-		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Gorc::Math::Normalize(thrust_vec) * thrust_speed);
+	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
+		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
 	});
 
-	verbTable.AddVerb<void, 2>("setsectortint", [&components](int sector_id, Gorc::Math::Vector<3> tint) {
+	verbTable.AddVerb<void, 2>("setsectortint", [&components](int sector_id, Math::Vector<3> tint) {
 		components.CurrentLevelPresenter->SetSectorTint(sector_id, tint);
 	});
 
@@ -143,33 +145,33 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	});
 
 	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
-		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
+		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, FlagSet<Flags::SoundFlag>(flags));
 	});
 
-	verbTable.AddVerb<int, 6>("playsoundpos", [&components](int wav, Gorc::Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
-		return components.CurrentLevelPresenter->PlaySoundPos(wav, pos, volume, min_rad, max_rad, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
+	verbTable.AddVerb<int, 6>("playsoundpos", [&components](int wav, Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundPos(wav, pos, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
 	});
 
 	verbTable.AddVerb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
-		return components.CurrentLevelPresenter->PlaySoundThing(wav, thing, volume, min_rad, max_rad, Gorc::FlagSet<Gorc::Content::Assets::SoundFlag>(flags));
+		return components.CurrentLevelPresenter->PlaySoundThing(wav, thing, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
 	});
 
 	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) { components.CurrentLevelPresenter->SetMusicVol(vol); });
 
 	// Surface verbs
 	verbTable.AddVerb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->ClearAdjoinFlags(surface, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAdjoinFlag>(flags));
+		components.CurrentLevelPresenter->ClearAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
 	});
 
-	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("getsurfacecenter", [&components](int surface) {
+	verbTable.AddVerb<Math::Vector<3>, 1>("getsurfacecenter", [&components](int surface) {
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
 	verbTable.AddVerb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->SetAdjoinFlags(surface, Gorc::FlagSet<Gorc::Content::Assets::SurfaceAdjoinFlag>(flags));
+		components.CurrentLevelPresenter->SetAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
 	});
 
-	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
+	verbTable.AddVerb<Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
@@ -182,10 +184,10 @@ void RegisterLevelVerbs(Gorc::Cog::Verbs::VerbTable& verbTable, Gorc::Game::Comp
 	});
 
 	verbTable.AddVerb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
-		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, Gorc::FlagSet<Gorc::Content::Assets::DamageFlag>(flags), damager_id);
+		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
 	});
 
-	verbTable.AddVerb<Gorc::Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
+	verbTable.AddVerb<Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
 		return components.CurrentLevelPresenter->GetThingPos(thing_id);
 	});
 
@@ -211,34 +213,34 @@ int main(int argc, char** argv) {
 
 	const sf::Input& Input = Window.GetInput();
 
-	Gorc::Diagnostics::StreamReport Report(std::cout);
-	Gorc::Event::EventBus EventBus;
-	Gorc::Content::VFS::VirtualFileSystem FileSystem("game/restricted",
+	Diagnostics::StreamReport Report(std::cout);
+	Event::EventBus EventBus;
+	Content::VFS::VirtualFileSystem FileSystem("game/restricted",
 			"game/resource", "game/episode", Report);
 
-	auto systemContentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
-	const auto& surfaceShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("surface.glsl");
-	const auto& horizonShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("horizon.glsl");
-	const auto& ceilingShader = systemContentManager->Load<Gorc::Content::Assets::Shader>("ceiling.glsl");
+	auto systemContentManager = std::make_shared<Content::Manager>(Report, FileSystem);
+	const auto& surfaceShader = systemContentManager->Load<Content::Assets::Shader>("surface.glsl");
+	const auto& horizonShader = systemContentManager->Load<Content::Assets::Shader>("horizon.glsl");
+	const auto& ceilingShader = systemContentManager->Load<Content::Assets::Shader>("ceiling.glsl");
 
-	Gorc::Cog::Verbs::VerbTable VerbTable;
-	Gorc::Cog::Compiler Compiler(VerbTable);
+	Cog::Verbs::VerbTable VerbTable;
+	Cog::Compiler Compiler(VerbTable);
 
-	Gorc::Game::Screen::PresenterMapper ScreenPresenterMapper;
-	Gorc::Place::PlaceController<Gorc::Game::Screen::Place> ScreenPlaceController(EventBus, ScreenPresenterMapper);
+	Game::Screen::PresenterMapper ScreenPresenterMapper;
+	Place::PlaceController<Game::Screen::Place> ScreenPlaceController(EventBus, ScreenPresenterMapper);
 
-	Gorc::Game::World::PresenterMapper WorldPresenterMapper;
-	Gorc::Place::PlaceController<Gorc::Game::World::Place> WorldPlaceController(EventBus, WorldPresenterMapper);
+	Game::World::PresenterMapper WorldPresenterMapper;
+	Place::PlaceController<Game::World::Place> WorldPlaceController(EventBus, WorldPresenterMapper);
 
-	Gorc::Game::ViewFrame ScreenViewFrame(Window);
-	Gorc::Game::ViewFrame WorldViewFrame(Window);
+	Game::ViewFrame ScreenViewFrame(Window);
+	Game::ViewFrame WorldViewFrame(Window);
 
-	Gorc::Game::Screen::Action::ActionView ActionView;
+	Game::Screen::Action::ActionView ActionView;
 
-	Gorc::Game::World::Nothing::NothingView NothingView;
-	Gorc::Game::World::Level::LevelView LevelView(surfaceShader, horizonShader, ceilingShader);
+	Game::World::Nothing::NothingView NothingView;
+	Game::World::Level::LevelView LevelView(surfaceShader, horizonShader, ceilingShader);
 
-	Gorc::Game::Components Components(Report, EventBus, Window, Input, FileSystem, VerbTable, Compiler,
+	Game::Components Components(Report, EventBus, Window, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
 			ActionView, NothingView, LevelView);
 
@@ -250,14 +252,14 @@ int main(int argc, char** argv) {
 	bool running = true;
 
 	// Register core event handlers
-	EventBus.AddHandler<Gorc::Events::PrintEvent>([](Gorc::Events::PrintEvent& e) {
+	EventBus.AddHandler<Events::PrintEvent>([](Events::PrintEvent& e) {
 		std::cout << e.message << std::endl;
 	});
 
-	EventBus.AddHandler<Gorc::Events::ExitEvent>([&EventBus, &running](Gorc::Events::ExitEvent& e) {
+	EventBus.AddHandler<Events::ExitEvent>([&EventBus, &running](Events::ExitEvent& e) {
 		// A component has requested an application exit.
 		// Check if components can quit.
-		Gorc::Events::ExitingEvent exitingEvent;
+		Events::ExitingEvent exitingEvent;
 		EventBus.FireEvent(exitingEvent);
 
 		if(exitingEvent.Cancel) {
@@ -265,7 +267,7 @@ int main(int argc, char** argv) {
 		}
 
 		// All components can quit. Request shutdown.
-		Gorc::Events::ShutdownEvent shutdownEvent;
+		Events::ShutdownEvent shutdownEvent;
 		EventBus.FireEvent(shutdownEvent);
 
 		running = false;
@@ -279,11 +281,11 @@ int main(int argc, char** argv) {
 	}
 
 	// HACK: Set current level to 01narshadda.jkl.
-	auto contentManager = std::make_shared<Gorc::Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
-	WorldPlaceController.GoTo(Gorc::Game::World::Level::LevelPlace(contentManager, lev));
+	auto contentManager = std::make_shared<Content::Manager>(Report, FileSystem);
+	const auto& lev = contentManager->Load<Content::Assets::Level>("06abarons.jkl", Compiler);
+	WorldPlaceController.GoTo(Game::World::Level::LevelPlace(contentManager, lev));
 
-	ScreenPlaceController.GoTo(Gorc::Game::Screen::Action::ActionPlace());
+	ScreenPlaceController.GoTo(Game::Screen::Action::ActionPlace());
 	// END HACK
 
 	// Game loop:
@@ -296,7 +298,7 @@ int main(int argc, char** argv) {
 		while(Window.GetEvent(event)) {
 			switch(event.Type) {
 			case sf::Event::Closed: {
-				Gorc::Events::ExitEvent exitEvent;
+				Events::ExitEvent exitEvent;
 				EventBus.FireEvent(exitEvent);
 			}
 			break;
@@ -306,13 +308,13 @@ int main(int argc, char** argv) {
 				break;
 
 			case sf::Event::LostFocus: {
-				Gorc::Game::Events::WindowFocusEvent focusEvent(false);
+				Game::Events::WindowFocusEvent focusEvent(false);
 				EventBus.FireEvent(focusEvent);
 			}
 			break;
 
 			case sf::Event::GainedFocus: {
-				Gorc::Game::Events::WindowFocusEvent focusEvent(true);
+				Game::Events::WindowFocusEvent focusEvent(true);
 				EventBus.FireEvent(focusEvent);
 			}
 			break;
