@@ -8,6 +8,7 @@
 #include "physics/sectorbroadphasefilter.h"
 #include "game/world/level/animations/animationmodel.h"
 #include "game/world/level/scripts/scriptmodel.h"
+#include "game/world/level/sounds/soundmodel.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -28,11 +29,12 @@ public:
 
 	Animations::AnimationModel AnimationModel;
 	Scripts::ScriptModel ScriptModel;
+	Sounds::SoundModel SoundModel;
 
 	Pool<Thing> Things;
-	Pool<Sound, 8> Sounds;
 
 	unsigned int CameraThingId;
+	unsigned int CameraSector;
 	Vector<3> CameraPosition;
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
 	Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);

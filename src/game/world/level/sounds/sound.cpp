@@ -1,7 +1,7 @@
 #include "sound.h"
 #include "game/world/level/levelmodel.h"
 
-void Gorc::Game::World::Level::Sound::PlayAmbient(const Content::Assets::Sound& buffer, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
+void Gorc::Game::World::Level::Sounds::Sound::PlayAmbient(const Content::Assets::Sound& buffer, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
 	expired = false;
 	update_position = false;
 
@@ -13,7 +13,7 @@ void Gorc::Game::World::Level::Sound::PlayAmbient(const Content::Assets::Sound& 
 	sound.Play();
 }
 
-void Gorc::Game::World::Level::Sound::PlayVoice(const Content::Assets::Sound& buffer, float volume, FlagSet<Flags::SoundFlag> flags) {
+void Gorc::Game::World::Level::Sounds::Sound::PlayVoice(const Content::Assets::Sound& buffer, float volume, FlagSet<Flags::SoundFlag> flags) {
 	expired = false;
 	update_position = false;
 
@@ -25,7 +25,7 @@ void Gorc::Game::World::Level::Sound::PlayVoice(const Content::Assets::Sound& bu
 	sound.Play();
 }
 
-void Gorc::Game::World::Level::Sound::PlayPositional(const Content::Assets::Sound& buffer, const Math::Vector<3>& position,
+void Gorc::Game::World::Level::Sounds::Sound::PlayPositional(const Content::Assets::Sound& buffer, const Math::Vector<3>& position,
 		float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
 	expired = false;
 
@@ -44,7 +44,7 @@ void Gorc::Game::World::Level::Sound::PlayPositional(const Content::Assets::Soun
 	sound.Play();
 }
 
-void Gorc::Game::World::Level::Sound::PlaySoundLocal(const Content::Assets::Sound& sound, float volume, float panning,
+void Gorc::Game::World::Level::Sounds::Sound::PlaySoundLocal(const Content::Assets::Sound& sound, float volume, float panning,
 		FlagSet<Flags::SoundFlag> flags) {
 	if(flags & Flags::SoundFlag::Voice) {
 		PlayVoice(sound, volume, flags);
@@ -54,13 +54,13 @@ void Gorc::Game::World::Level::Sound::PlaySoundLocal(const Content::Assets::Soun
 	}
 }
 
-void Gorc::Game::World::Level::Sound::PlaySoundPos(const Content::Assets::Sound& sound, const Math::Vector<3>& pos, float volume,
+void Gorc::Game::World::Level::Sounds::Sound::PlaySoundPos(const Content::Assets::Sound& sound, const Math::Vector<3>& pos, float volume,
 		float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
 	update_position = false;
 	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
 }
 
-void Gorc::Game::World::Level::Sound::PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, unsigned int thing, float volume,
+void Gorc::Game::World::Level::Sounds::Sound::PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, unsigned int thing, float volume,
 		float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
 	this->thing = thing;
 	update_position = (flags & Flags::SoundFlag::ThingOriginMovesWithThing);
@@ -69,11 +69,11 @@ void Gorc::Game::World::Level::Sound::PlaySoundThing(const LevelModel& model, co
 	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
 }
 
-void Gorc::Game::World::Level::Sound::Stop() {
+void Gorc::Game::World::Level::Sounds::Sound::Stop() {
 	sound.Stop();
 }
 
-void Gorc::Game::World::Level::Sound::Update(double dt, const LevelModel& model) {
+void Gorc::Game::World::Level::Sounds::Sound::Update(double dt, const LevelModel& model) {
 	if(update_position) {
 		Math::Vector<3> pos = model.Things[thing].Position;
 		sound.SetPosition(Math::Get<0>(pos), Math::Get<1>(pos), Math::Get<2>(pos));

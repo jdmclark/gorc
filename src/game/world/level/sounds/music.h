@@ -6,6 +6,7 @@ namespace Gorc {
 namespace Game {
 namespace World {
 namespace Level {
+namespace Sounds {
 
 class Music {
 private:
@@ -30,6 +31,7 @@ public:
 	void Update(double dt);
 };
 
+}
 }
 }
 }

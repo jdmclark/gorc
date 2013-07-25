@@ -10,8 +10,7 @@
 #include "game/flags/difficultymode.h"
 #include "game/world/level/animations/animationpresenter.h"
 #include "game/world/level/scripts/scriptpresenter.h"
-
-#include <SFML/Audio.hpp>
+#include "game/world/level/sounds/soundpresenter.h"
 
 #include <memory>
 #include <stack>
@@ -33,12 +32,8 @@ private:
 	Components& components;
 	LevelPlace place;
 	std::unique_ptr<LevelModel> model;
-	sf::Sound AmbientSound;
-	Music AmbientMusic;
 
 	void InitializeWorld();
-
-	void UpdateCameraAmbientSound();
 
 	void UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt);
 
@@ -49,12 +44,10 @@ private:
 			std::vector<std::tuple<unsigned int, unsigned int>>& path);
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 
-	void PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass);
-	void StopFoleyLoop(int thing);
-
 public:
 	Animations::AnimationPresenter AnimationPresenter;
 	Scripts::ScriptPresenter ScriptPresenter;
+	Sounds::SoundPresenter SoundPresenter;
 
 	LevelPresenter(Components& components, const LevelPlace& place);
 
@@ -81,14 +74,6 @@ public:
 	void SetSectorLight(int sector_id, float value, float delay);
 	void SetSectorThrust(int sector_id, const Math::Vector<3>& thrust);
 	void SetSectorTint(int sector_id, const Math::Vector<3>& color);
-
-	// Sound verbs
-	void PlaySong(int start, int end, int loopto);
-	int PlaySoundClass(int thing, Flags::SoundSubclassType subclass);
-	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
-	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	void SetMusicVol(float volume);
 
 	// Surface verbs
 	void ClearAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags);

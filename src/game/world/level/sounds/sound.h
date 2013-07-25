@@ -13,6 +13,8 @@ namespace Level {
 
 class LevelModel;
 
+namespace Sounds {
+
 class Sound {
 private:
 	sf::Sound sound;
@@ -42,6 +44,7 @@ public:
 	}
 };
 
+}
 }
 }
 }
