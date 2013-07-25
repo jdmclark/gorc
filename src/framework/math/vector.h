@@ -108,6 +108,15 @@ public:
 		return *this;
 	}
 
+	Vector operator-() const {
+		Vector rv;
+		for(size_t i = 0; i < n; ++i) {
+			rv.data[i] = -data[i];
+		}
+
+		return rv;
+	}
+
 	Vector operator*(F c) const {
 		Vector rv;
 		for(size_t i = 0; i < n; ++i) {

@@ -1,5 +1,6 @@
 #include "actionpresenter.h"
 #include "framework/events/exitevent.h"
+#include "game/events/windowfocusevent.h"
 
 using namespace Gorc::Math;
 
@@ -9,12 +10,20 @@ Gorc::Game::Screen::Action::ActionPresenter::ActionPresenter(Components& compone
 }
 
 void Gorc::Game::Screen::Action::ActionPresenter::Start(Event::EventBus& eventBus) {
+	eventBus.AddHandler<Game::Events::WindowFocusEvent>([this](Game::Events::WindowFocusEvent& evt) {
+		window_has_focus = evt.HasFocus;
+	});
+
 	components.ActionView.SetPresenter(this);
 	components.ScreenViewFrame.SetView(components.ActionView);
+
+	components.Window.ShowMouseCursor(false);
+	components.Window.SetCursorPosition(components.Window.GetWidth() / 2, components.Window.GetHeight() / 2);
 	return;
 }
 
 void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
+	// General controls
 	if(components.Input.IsKeyDown(sf::Key::Escape)) {
 		Gorc::Events::ExitEvent evt;
 		components.EventBus.FireEvent(evt);
@@ -36,22 +45,36 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		components.CurrentLevelPresenter->Jump();
 	}
 
-	if(z_key_down && !components.Input.IsKeyDown(sf::Key::Z)) {
+	if(z_key_down && !components.Input.IsMouseButtonDown(sf::Mouse::Left)) {
 		z_key_down = false;
 	}
-	else if(!z_key_down && components.Input.IsKeyDown(sf::Key::Z)) {
+	else if(!z_key_down && components.Input.IsMouseButtonDown(sf::Mouse::Left)) {
 		z_key_down = true;
 		components.CurrentLevelPresenter->Damage();
 	}
 
-	if(x_key_down && !components.Input.IsKeyDown(sf::Key::X)) {
+	if(x_key_down && !components.Input.IsKeyDown(sf::Key::E)) {
 		x_key_down = false;
 	}
-	else if(!x_key_down && components.Input.IsKeyDown(sf::Key::X)) {
+	else if(!x_key_down && components.Input.IsKeyDown(sf::Key::E)) {
 		x_key_down = true;
 		components.CurrentLevelPresenter->Activate();
 	}
 
+	// Camera rotate
+	if(window_has_focus) {
+		Vector<2, double> ScreenCenter = Vec(static_cast<double>(components.Window.GetWidth()) / 2.0, static_cast<double>(components.Window.GetHeight()) / 2.0);
+		Vector<2, double> CursorPos = (Vec(static_cast<double>(components.Input.GetMouseX()),
+				static_cast<double>(components.Input.GetMouseY())) - ScreenCenter) / Get<X>(ScreenCenter);
+		components.Window.SetCursorPosition(components.Window.GetWidth() / 2, components.Window.GetHeight() / 2);
+
+		auto CameraRotation = -CursorPos * 180.0 * dt;
+
+		components.CurrentLevelPresenter->YawCamera(Get<X>(CameraRotation));
+		components.CurrentLevelPresenter->PitchCamera(Get<Y>(CameraRotation));
+	}
+
+	// Camera translate
 	Vector<3> Translate = Zero<3>();
 	if(components.Input.IsKeyDown(sf::Key::W)) {
 		Translate += Vec(0.0f, 1.0f, 0.0f);
@@ -67,22 +90,6 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 
 	if(components.Input.IsKeyDown(sf::Key::D)) {
 		Translate += Vec(1.0f, 0.0f, 0.0f);
-	}
-
-	if(components.Input.IsKeyDown(sf::Key::Q)) {
-		components.CurrentLevelPresenter->YawCamera(dt * 3.0f);
-	}
-
-	if(components.Input.IsKeyDown(sf::Key::E)) {
-		components.CurrentLevelPresenter->YawCamera(-dt * 3.0f);
-	}
-
-	if(components.Input.IsKeyDown(sf::Key::PageUp)) {
-		components.CurrentLevelPresenter->PitchCamera(-dt * 1.5f);
-	}
-
-	if(components.Input.IsKeyDown(sf::Key::PageDown)) {
-		components.CurrentLevelPresenter->PitchCamera(dt * 1.5f);
 	}
 
 	if(Length2(Translate) > std::numeric_limits<float>::epsilon()) {

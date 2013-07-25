@@ -6,6 +6,7 @@
 #include "framework/events/exitingevent.h"
 #include "framework/events/exitevent.h"
 #include "framework/events/shutdownevent.h"
+#include "game/events/windowfocusevent.h"
 #include "framework/place/placecontroller.h"
 
 #include "game/screen/presentermapper.h"
@@ -237,7 +238,7 @@ int main(int argc, char** argv) {
 	Gorc::Game::World::Nothing::NothingView NothingView;
 	Gorc::Game::World::Level::LevelView LevelView(surfaceShader, horizonShader, ceilingShader);
 
-	Gorc::Game::Components Components(Report, EventBus, Input, FileSystem, VerbTable, Compiler,
+	Gorc::Game::Components Components(Report, EventBus, Window, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
 			ActionView, NothingView, LevelView);
 
@@ -293,12 +294,31 @@ int main(int argc, char** argv) {
 	sf::Event event;
 	while(running) {
 		while(Window.GetEvent(event)) {
-			if(event.Type == sf::Event::Closed) {
+			switch(event.Type) {
+			case sf::Event::Closed: {
 				Gorc::Events::ExitEvent exitEvent;
 				EventBus.FireEvent(exitEvent);
 			}
-			else if(event.Type == sf::Event::Resized) {
+			break;
+
+			case sf::Event::Resized:
 				glViewport(0, 0, event.Size.Width, event.Size.Height);
+				break;
+
+			case sf::Event::LostFocus: {
+				Gorc::Game::Events::WindowFocusEvent focusEvent(false);
+				EventBus.FireEvent(focusEvent);
+			}
+			break;
+
+			case sf::Event::GainedFocus: {
+				Gorc::Game::Events::WindowFocusEvent focusEvent(true);
+				EventBus.FireEvent(focusEvent);
+			}
+			break;
+
+			default:
+				break;
 			}
 		}
 

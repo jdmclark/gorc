@@ -31,6 +31,7 @@ class Components {
 public:
 	Diagnostics::Report& Report;
 	Event::EventBus& EventBus;
+	sf::Window& Window;
 	const sf::Input& Input;
 
 	Content::VFS::VirtualFileSystem& FileSystem;
@@ -51,8 +52,8 @@ public:
 
 	World::Level::LevelPresenter* CurrentLevelPresenter = nullptr;
 
-	Components(Diagnostics::Report& Report, Event::EventBus& EventBus, const sf::Input& Input, Content::VFS::VirtualFileSystem& FileSystem,
-			Cog::Verbs::VerbTable& VerbTable, Cog::Compiler& Compiler,
+	Components(Diagnostics::Report& Report, Event::EventBus& EventBus, sf::Window& Window, const sf::Input& Input,
+			Content::VFS::VirtualFileSystem& FileSystem, Cog::Verbs::VerbTable& VerbTable, Cog::Compiler& Compiler,
 			Place::PlaceController<Screen::Place>& ScreenPlaceController, Place::PlaceController<World::Place>& WorldPlaceController,
 			ViewFrame& ScreenViewFrame, ViewFrame& WorldViewFrame,
 			Screen::Action::ActionView& ActionView,

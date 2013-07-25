@@ -14,6 +14,7 @@ private:
 	Components& components;
 	ActionPlace place;
 
+	bool window_has_focus = true;
 	bool r_key_down = false;
 	bool space_key_down = false;
 	bool z_key_down = false;
