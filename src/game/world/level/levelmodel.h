@@ -4,11 +4,10 @@
 #include "cog/instance.h"
 #include "framework/pool.h"
 #include "thing.h"
-#include "animation.h"
-#include "sound.h"
-#include "cogtimerstate.h"
-#include "cogcontinuation.h"
-#include "sectorbroadphasefilter.h"
+#include "sounds/sound.h"
+#include "physics/sectorbroadphasefilter.h"
+#include "game/world/level/animations/animationmodel.h"
+#include "game/world/level/scripts/scriptmodel.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -19,10 +18,6 @@ namespace World {
 namespace Level {
 
 class LevelModel {
-private:
-	void AddCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
-			const std::vector<Cog::VM::Value>& values);
-
 public:
 	std::unique_ptr<SectorBroadphaseFilter> BroadphaseFilter;
 	const Content::Assets::Level& Level;
@@ -31,13 +26,11 @@ public:
 	std::vector<Content::Assets::LevelSurface> Surfaces;
 	std::vector<Content::Assets::LevelSector> Sectors;
 
-	std::vector<int> MaterialCelNumber;
-	Pool<Thing> Things;
-	Pool<std::unique_ptr<Animation>> Animations;
-	Pool<Sound, 8> Sounds;
+	Animations::AnimationModel AnimationModel;
+	Scripts::ScriptModel ScriptModel;
 
-	std::vector<std::tuple<std::unique_ptr<Cog::Instance>, CogTimerState>> Cogs;
-	Pool<std::tuple<double, CogContinuation>, 8> SleepingCogs;
+	Pool<Thing> Things;
+	Pool<Sound, 8> Sounds;
 
 	unsigned int CameraThingId;
 	Vector<3> CameraPosition;

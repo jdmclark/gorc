@@ -1,6 +1,6 @@
-#include "cogcontinuation.h"
+#include "scriptcontinuation.h"
 
-Gorc::Game::World::Level::CogContinuation::CogContinuation(unsigned int InstanceId,
+Gorc::Game::World::Level::Scripts::ScriptContinuation::ScriptContinuation(unsigned int InstanceId,
 		int SenderId, int SenderRef, Flags::MessageType SenderType,
 		int SourceRef, Flags::MessageType SourceType,
 		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3,

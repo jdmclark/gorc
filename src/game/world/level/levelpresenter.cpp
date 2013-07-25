@@ -4,28 +4,70 @@
 using namespace Gorc::Math;
 
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
-	: components(components), place(place) {
+	: components(components), place(place), ScriptPresenter(components) {
 	return;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
 	model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level));
 
+	AnimationPresenter.Start(*model, model->AnimationModel);
+	ScriptPresenter.Start(*model, model->ScriptModel);
+
+	InitializeWorld();
+
 	components.LevelView.SetPresenter(this);
 	components.LevelView.SetLevelModel(model.get());
 	components.WorldViewFrame.SetView(components.LevelView);
 	components.CurrentLevelPresenter = this;
 
+
 	UpdateCameraAmbientSound();
 
 	// Send startup and loading messages
-	SendMessageToAll(Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
-	SendMessageToAll(Cog::MessageId::Loading, -1, -1, Flags::MessageType::Nothing);
+	ScriptPresenter.SendMessageToAll(Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
+	ScriptPresenter.SendMessageToAll(Cog::MessageId::Loading, -1, -1, Flags::MessageType::Nothing);
 
 	return;
 }
 
+void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
+	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
+	for(const auto& thing : model->Level.Things) {
+		if(thing.Type == Flags::ThingType::Player) {
+			// Add player spawn point and create ghost thing to fill ID.
+			model->SpawnPoints.push_back(&thing);
+			model->CreateThing("none", thing.Sector, thing.Position, thing.Orientation);
+		}
+		else {
+			model->CreateThing(thing, thing.Sector, thing.Position, thing.Orientation);
+		}
+	}
+
+	// HACK: Spawn camera thing
+	model->CurrentSpawnPoint = 0;
+	model->CameraThingId = model->CreateThing(*model->SpawnPoints[model->CurrentSpawnPoint], model->SpawnPoints[model->CurrentSpawnPoint]->Sector,
+			model->SpawnPoints[model->CurrentSpawnPoint]->Position, model->SpawnPoints[model->CurrentSpawnPoint]->Orientation);
+	auto& camera_thing = model->Things[model->CameraThingId];
+	camera_thing.Flags += Flags::ThingFlag::Invisible;
+	camera_thing.RigidBody->setSleepingThresholds(0.0f, 0.0f);
+	camera_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
+
+	model->CameraPosition = camera_thing.Position;
+
+	// Create COG script instances.
+	for(const auto& cog : model->Level.Cogs) {
+		Content::Assets::Script const* script = std::get<0>(cog);
+		const std::vector<Cog::VM::Value>& values = std::get<1>(cog);
+
+		ScriptPresenter.CreateLevelCogInstance(script->Script, *place.ContentManager, components.Compiler, values);
+	}
+}
+
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
+	AnimationPresenter.Update(dt);
+	ScriptPresenter.Update(dt);
+
 	// Update world simulation
 	model->DynamicsWorld.stepSimulation(dt, 1, 1.0f / 120.0f);
 
@@ -87,56 +129,6 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	}
 
 	AmbientMusic.Update(dt);
-
-	// Update animations
-	for(auto& entity : model->Animations) {
-		entity->Update(dt);
-	}
-
-	for(auto it = model->Animations.begin(); it != model->Animations.end(); ++it) {
-		if((*it)->Expired) {
-			model->Animations.Destroy(it.GetIndex());
-		}
-	}
-
-	// Update cogs
-	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
-		auto& cog = model->Cogs[i];
-		Cog::Instance& inst = *std::get<0>(cog);
-		CogTimerState& timer_state = std::get<1>(cog);
-
-		if(timer_state.TimerRemainingTime > 0.0) {
-			timer_state.TimerRemainingTime -= dt;
-			if(timer_state.TimerRemainingTime <= 0.0) {
-				timer_state.TimerRemainingTime = 0.0;
-				SendMessage(i, Cog::MessageId::Timer, -1, -1, Flags::MessageType::Nothing);
-			}
-		}
-
-		if(timer_state.PulseTime > 0.0) {
-			timer_state.PulseRemainingTime -= dt;
-			if(timer_state.PulseRemainingTime <= 0.0) {
-				timer_state.PulseRemainingTime = timer_state.PulseTime;
-				SendMessage(i, Cog::MessageId::Pulse, -1, -1, Flags::MessageType::Nothing);
-			}
-		}
-	}
-
-	// Enqueue sleeping cogs
-	for(auto it = model->SleepingCogs.begin(); it != model->SleepingCogs.end(); ++it) {
-		std::get<0>(*it) -= dt;
-		if(std::get<0>(*it) <= 0.0) {
-			RunningCogState.push(std::get<1>(*it));
-			model->SleepingCogs.Destroy(it.GetIndex());
-		}
-	}
-
-	// Run sleeping cogs
-	while(!RunningCogState.empty()) {
-		Cog::Instance& inst = *std::get<0>(model->Cogs[RunningCogState.top().InstanceId]);
-		VirtualMachine.Execute(inst.Heap, inst.Script.Code, RunningCogState.top().ProgramCounter, components.VerbTable);
-		RunningCogState.pop();
-	}
 }
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt) {
@@ -169,7 +161,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 		if(thing.CurrentFrame == thing.GoalFrame) {
 			thing.PathMoving = false;
 			thing.PathMoveSpeed = 0.0f;
-			SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Flags::MessageType::Thing);
+			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Flags::MessageType::Thing);
 			thing.RigidBody->setActivationState(0);
 			StopFoleyLoop(thing_id);
 			PlaySoundClass(thing_id, Flags::SoundSubclassType::StopMove);
@@ -280,7 +272,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 		// Fire messages along path
 		unsigned int first_adjoin = std::get<1>(path.front());
 		if(model->Surfaces[first_adjoin].Flags & Flags::SurfaceFlag::CogLinked) {
-			SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Flags::MessageType::Surface,
+			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Flags::MessageType::Surface,
 					thing_id, Flags::MessageType::Thing);
 		}
 
@@ -289,13 +281,13 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 			thing.Sector = sec_id;
 			thing.ObjectData.SectorId = sec_id;
 			if(model->Sectors[sec_id].Flags & Flags::SectorFlag::CogLinked) {
-				SendMessageToLinked(Cog::MessageId::Entered, sec_id, Flags::MessageType::Sector,
+				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Entered, sec_id, Flags::MessageType::Sector,
 						thing_id, Flags::MessageType::Thing);
 			}
 
 			unsigned int surf_id = std::get<1>(path[i]);
 			if(model->Surfaces[surf_id].Flags & Flags::SurfaceFlag::CogLinked) {
-				SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Flags::MessageType::Surface,
+				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Flags::MessageType::Surface,
 						thing_id, Flags::MessageType::Thing);
 			}
 		}
@@ -304,70 +296,13 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 		thing.Sector = last_sector;
 		thing.ObjectData.SectorId = last_sector;
 		if(model->Sectors[last_sector].Flags & Flags::SectorFlag::CogLinked) {
-			SendMessageToLinked(Cog::MessageId::Entered, last_sector, Flags::MessageType::Sector,
+			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Entered, last_sector, Flags::MessageType::Sector,
 					thing_id, Flags::MessageType::Thing);
 		}
 	}
 	else {
 		// Thing hasn't moved.
 		// Need to run a backup random walk here.
-	}
-}
-
-void Gorc::Game::World::Level::LevelPresenter::SendMessage(unsigned int InstanceId, Cog::MessageId message,
-		int SenderId, int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		int Param0, int Param1, int Param2, int Param3) {
-	RunningCogState.emplace(InstanceId, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
-
-	std::get<0>(model->Cogs[InstanceId])->Call(components.VerbTable, VirtualMachine, message);
-
-	RunningCogState.pop();
-}
-
-void Gorc::Game::World::Level::LevelPresenter::SendMessageToAll(Cog::MessageId message,
-		int SenderId, int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		int Param0, int Param1, int Param2, int Param3) {
-	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
-		SendMessage(i, message, SenderId, SenderRef, SenderType,
-				SourceRef, SourceType, Param0, Param1, Param2, Param3);
-	}
-}
-
-void Gorc::Game::World::Level::LevelPresenter::SendMessageToLinked(Cog::MessageId message,
-		int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		int Param0, int Param1, int Param2, int Param3) {
-	Cog::Symbols::SymbolType expectedSymbolType;
-
-	switch(SenderType) {
-	case Flags::MessageType::Sector:
-		expectedSymbolType = Cog::Symbols::SymbolType::Sector;
-		break;
-
-	case Flags::MessageType::Surface:
-		expectedSymbolType = Cog::Symbols::SymbolType::Surface;
-		break;
-
-	case Flags::MessageType::Thing:
-		expectedSymbolType = Cog::Symbols::SymbolType::Thing;
-		break;
-	}
-
-	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
-		Cog::Instance& inst = *std::get<0>(model->Cogs[i]);
-
-		auto it = inst.Script.SymbolTable.begin();
-		auto jt = inst.Heap.begin();
-
-		for(; it != inst.Script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-			if(it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef) {
-				SendMessage(i, message,
-						it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
-						Param0, Param1, Param2, Param3);
-			}
-		}
 	}
 }
 
@@ -471,11 +406,11 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	}
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Flags::MessageType::Surface,
+		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Flags::MessageType::Surface,
 				model->CameraThingId, Flags::MessageType::Thing);
 	}
 	else if(best_thing_candidate >= 0) {
-		SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Flags::MessageType::Thing,
+		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Flags::MessageType::Thing,
 				model->CameraThingId, Flags::MessageType::Thing);
 		PlaySoundClass(best_thing_candidate, Flags::SoundSubclassType::Activate);
 	}
@@ -528,47 +463,12 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	}
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Flags::MessageType::Surface,
+		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Flags::MessageType::Surface,
 				model->CameraThingId, Flags::MessageType::Thing, 1000, static_cast<int>(Flags::DamageFlag::Saber));
 	}
 	else if(best_thing_candidate >= 0) {
 		DamageThing(best_thing_candidate, 50.0f, { Flags::DamageFlag::Saber }, model->CameraThingId);
 	}
-}
-
-// Anim / Cel verbs
-int Gorc::Game::World::Level::LevelPresenter::SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags) {
-	auto ent_tuple = model->Animations.Create();
-	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SurfaceAnimation(*model, surface, rate, flags, std::get<1>(ent_tuple)));
-	return std::get<1>(ent_tuple);
-}
-
-int Gorc::Game::World::Level::LevelPresenter::GetSurfaceAnim(int surface) {
-	return model->Surfaces[surface].AnimNumber;
-}
-
-void Gorc::Game::World::Level::LevelPresenter::StopAnim(int anim) {
-	model->Animations.Destroy(anim);
-}
-
-int Gorc::Game::World::Level::LevelPresenter::GetSurfaceCel(int surface) {
-	return model->Surfaces[surface].CelNumber;
-}
-
-void Gorc::Game::World::Level::LevelPresenter::SetSurfaceCel(int surface, int cel) {
-	model->Surfaces[surface].CelNumber = cel;
-}
-
-int Gorc::Game::World::Level::LevelPresenter::SlideSurface(int surface_id, const Math::Vector<3>& direction) {
-	auto ent_tuple = model->Animations.Create();
-	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SlideSurfaceAnimation(*model, surface_id, direction));
-	return std::get<1>(ent_tuple);
-}
-
-int Gorc::Game::World::Level::LevelPresenter::SlideCeilingSky(float u_speed, float v_speed) {
-	auto ent_tuple = model->Animations.Create();
-	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new CeilingSkyAnimation(*model, Vec(u_speed, v_speed)));
-	return std::get<1>(ent_tuple);
 }
 
 // Frame verbs
@@ -598,29 +498,6 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int fra
 	if(referenced_thing.RigidBody) {
 		referenced_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
 	}
-}
-
-// Message verbs
-void Gorc::Game::World::Level::LevelPresenter::SetPulse(float time) {
-	CogTimerState& state = std::get<1>(model->Cogs[RunningCogState.top().InstanceId]);
-	state.PulseTime = time;
-	state.PulseRemainingTime = time;
-}
-
-void Gorc::Game::World::Level::LevelPresenter::SetTimer(float time) {
-	std::get<1>(model->Cogs[RunningCogState.top().InstanceId]).TimerRemainingTime = time;
-}
-
-void Gorc::Game::World::Level::LevelPresenter::Sleep(float time) {
-	CogContinuation continuation = RunningCogState.top();
-
-	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
-
-	auto& sleep_tuple = *std::get<0>(model->SleepingCogs.Create());
-	std::get<0>(sleep_tuple) = time;
-	std::get<1>(sleep_tuple) = continuation;
-
-	VirtualMachine.Abort();
 }
 
 // Player verbs
@@ -770,7 +647,7 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int
 }
 
 float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id) {
-	SendMessageToLinked(Cog::MessageId::Damaged, thing_id, Flags::MessageType::Thing,
+	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, thing_id, Flags::MessageType::Thing,
 			damager_id, Flags::MessageType::Thing, damage, static_cast<int>(flags));
 
 	Thing& referencedThing = model->Things[thing_id];
@@ -779,7 +656,7 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float 
 
 		if(referencedThing.Health <= 0.0f) {
 			PlaySoundClass(thing_id, Flags::SoundSubclassType::Death1);
-			SendMessageToLinked(Cog::MessageId::Killed, thing_id, Flags::MessageType::Thing,
+			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Killed, thing_id, Flags::MessageType::Thing,
 					damager_id, Flags::MessageType::Thing);
 			// TODO: Thing is dead. Replace destroy code with corpse creation code.
 			if(referencedThing.RigidBody) {
@@ -823,4 +700,134 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 // Thing property verbs
 int Gorc::Game::World::Level::LevelPresenter::GetThingSector(int thing_id) {
 	return model->Things[thing_id].Sector;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
+	Animations::AnimationPresenter::RegisterVerbs(verbTable, components);
+	Scripts::ScriptPresenter::RegisterVerbs(verbTable, components);
+
+	// Frame verbs
+	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) { return components.CurrentLevelPresenter->GetCurFrame(thing); });
+	verbTable.AddVerb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
+		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed); });
+
+	// Options verbs
+	verbTable.AddVerb<int, 0>("getdifficulty", [&components] {
+		// TODO: Add actual difficulty setting.
+		return static_cast<int>(Flags::DifficultyMode::Medium);
+	});
+
+	// Player verbs
+	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] { return components.CurrentLevelPresenter->GetLocalPlayerThing(); });
+
+	// Print verbs
+	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, const char* message) {
+		// TODO: Add actual jkPrintUniString once localization is implemented.
+		std::cout << message << std::endl;
+	});
+
+	verbTable.AddVerb<void, 1>("print", [&components](const char* message) {
+		// TODO: Add actual print.
+		std::cout << message << std::endl;
+	});
+
+	verbTable.AddVerb<void, 1>("printint", [&components](int value) {
+		// TOOD: Add actual printint.
+		std::cout << value << std::endl;
+	});
+
+	// Sector verbs
+	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
+		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	});
+
+	verbTable.AddVerb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
+		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	});
+
+	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
+		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
+	});
+
+	verbTable.AddVerb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
+		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
+	});
+
+	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
+		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	});
+
+	verbTable.AddVerb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
+		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
+	});
+
+	verbTable.AddVerb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
+		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	});
+
+	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
+		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
+	});
+
+	verbTable.AddVerb<void, 2>("setsectortint", [&components](int sector_id, Math::Vector<3> tint) {
+		components.CurrentLevelPresenter->SetSectorTint(sector_id, tint);
+	});
+
+	// Sound verbs
+	verbTable.AddVerb<void, 3>("playsong", [&components](int start, int end, int loopto) {
+		components.CurrentLevelPresenter->PlaySong(start, end, loopto);
+	});
+
+	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, FlagSet<Flags::SoundFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 6>("playsoundpos", [&components](int wav, Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundPos(wav, pos, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
+		return components.CurrentLevelPresenter->PlaySoundThing(wav, thing, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
+	});
+
+	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) { components.CurrentLevelPresenter->SetMusicVol(vol); });
+
+	// Surface verbs
+	verbTable.AddVerb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
+		components.CurrentLevelPresenter->ClearAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
+	});
+
+	verbTable.AddVerb<Math::Vector<3>, 1>("getsurfacecenter", [&components](int surface) {
+		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
+	});
+
+	verbTable.AddVerb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
+		components.CurrentLevelPresenter->SetAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
+	});
+
+	verbTable.AddVerb<Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
+		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
+	});
+
+	// System verbs
+	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
+
+	// Thing action verbs
+	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
+		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
+	});
+
+	verbTable.AddVerb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
+		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
+	});
+
+	verbTable.AddVerb<Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
+		return components.CurrentLevelPresenter->GetThingPos(thing_id);
+	});
+
+	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
+	verbTable.AddVerb<bool, 1>("ismoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
+
+	// Thing property verbs
+	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) { return components.CurrentLevelPresenter->GetThingSector(thing_id); });
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "content/assets/template.h"
-#include "physicsobjectdata.h"
+#include "physics/physicsobjectdata.h"
 #include <btBulletDynamicsCommon.h>
 #include <memory>
 

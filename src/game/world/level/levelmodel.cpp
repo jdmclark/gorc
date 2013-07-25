@@ -1,134 +1,11 @@
 #include "levelmodel.h"
-#include "physicscollideclass.h"
+#include "game/world/level/physics/physicscollideclass.h"
 #include "framework/flagset.h"
 #include "content/manager.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-
-void OnAnimationDestroy(Pool<std::unique_ptr<Animation>>& pool, unsigned int index, std::unique_ptr<Animation>& anim) {
-	anim->Stop();
-}
-
-}
-}
-}
-}
-
-void Gorc::Game::World::Level::LevelModel::AddCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
-		const std::vector<Cog::VM::Value>& values) {
-	Cogs.emplace_back(std::unique_ptr<Cog::Instance>(new Cog::Instance(script)), CogTimerState());
-	Cog::Instance& inst = *std::get<0>(Cogs.back());
-
-	inst.Heap.resize(script.SymbolTable.size());
-
-	auto it = script.SymbolTable.begin();
-	auto jt = inst.Heap.begin();
-	auto kt = values.begin();
-
-	for( ; it != script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		if(kt != values.end() && !it->Local && it->Type != Cog::Symbols::SymbolType::Message) {
-			(*jt) = *kt;
-			++kt;
-		}
-		else {
-			(*jt) = it->DefaultValue;
-		}
-	}
-
-	// Load instance resources and set flags
-	it = script.SymbolTable.begin();
-	jt = inst.Heap.begin();
-
-	for( ; it != script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		switch(it->Type) {
-		case Cog::Symbols::SymbolType::Cog:
-			try {
-				(*jt) = manager.LoadId<Content::Assets::Script>(static_cast<const char*>(*jt), compiler);
-			}
-			catch(...) {
-				(*jt) = nullptr;
-			}
-			break;
-
-		case Cog::Symbols::SymbolType::Material:
-			try {
-				(*jt) = manager.LoadId<Content::Assets::Material>(static_cast<const char*>(*jt), *Level.MasterColormap);
-			}
-			catch(...) {
-				(*jt) = nullptr;
-			}
-			break;
-
-		case Cog::Symbols::SymbolType::Model:
-			try {
-				(*jt) = manager.LoadId<Content::Assets::Model>(static_cast<const char*>(*jt), *Level.MasterColormap);
-			}
-			catch(...) {
-				(*jt) = nullptr;
-			}
-			break;
-
-		case Cog::Symbols::SymbolType::Sound:
-			try {
-				(*jt) = manager.LoadId<Content::Assets::Sound>(static_cast<const char*>(*jt));
-			}
-			catch(...) {
-				(*jt) = nullptr;
-			}
-			break;
-
-		case Cog::Symbols::SymbolType::Template: {
-			auto it = Level.TemplateMap.find(static_cast<const char*>(*jt));
-			if(it == Level.TemplateMap.end()) {
-				// TODO: Template not found, report error.
-				(*jt) = -1;
-			}
-			else {
-				(*jt) = it->second;
-			}
-		}
-		break;
-
-		case Cog::Symbols::SymbolType::Sector: {
-			int index = static_cast<int>(*jt);
-			if(index >= 0) {
-				Sectors[index].Flags += Flags::SectorFlag::CogLinked;
-			}
-		}
-		break;
-
-		case Cog::Symbols::SymbolType::Surface: {
-			int index = static_cast<int>(*jt);
-			if(index >= 0) {
-				Surfaces[index].Flags += Flags::SurfaceFlag::CogLinked;
-			}
-		}
-		break;
-
-		case Cog::Symbols::SymbolType::Thing: {
-			int index = static_cast<int>(*jt);
-			if(index >= 0) {
-				Things[index].Flags += Flags::ThingFlag::CogLinked;
-			}
-		}
-		break;
-
-		case Cog::Symbols::SymbolType::Ai:
-		case Cog::Symbols::SymbolType::Keyframe:
-			// TODO: Handle AI and keyframe loading.
-		default:
-			break;
-		}
-	}
-}
-
 Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler, const Gorc::Content::Assets::Level& Level)
 	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Surfaces(Level.Surfaces), Sectors(Level.Sectors),
-	  MaterialCelNumber(Level.Materials.size(), 0), Animations(OnAnimationDestroy),  Dispatcher(&CollisionConfiguration),
-	  DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
+	  Dispatcher(&CollisionConfiguration), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
 	  SurfaceMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))), SurfaceObjectData(Level.Surfaces.size()) {
 	BroadphaseFilter = std::unique_ptr<SectorBroadphaseFilter>(new SectorBroadphaseFilter(*this));
 	DynamicsWorld.getPairCache()->setOverlapFilterCallback(BroadphaseFilter.get());
@@ -157,37 +34,6 @@ Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& Content
 
 		DynamicsWorld.addRigidBody(SurfaceRigidBodies.back().get());
 		UpdateSurfacePhysicsProperties(i, true);
-	}
-
-	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
-	for(const auto& thing : Level.Things) {
-		if(thing.Type == Flags::ThingType::Player) {
-			// Add player spawn point and create ghost thing to fill ID.
-			SpawnPoints.push_back(&thing);
-			CreateThing("none", thing.Sector, thing.Position, thing.Orientation);
-		}
-		else {
-			CreateThing(thing, thing.Sector, thing.Position, thing.Orientation);
-		}
-	}
-
-	// HACK: Spawn camera thing
-	CurrentSpawnPoint = 0;
-	CameraThingId = CreateThing(*SpawnPoints[CurrentSpawnPoint], SpawnPoints[CurrentSpawnPoint]->Sector,
-			SpawnPoints[CurrentSpawnPoint]->Position, SpawnPoints[CurrentSpawnPoint]->Orientation);
-	auto& camera_thing = Things[CameraThingId];
-	camera_thing.Flags += Flags::ThingFlag::Invisible;
-	camera_thing.RigidBody->setSleepingThresholds(0.0f, 0.0f);
-	camera_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
-
-	CameraPosition = camera_thing.Position;
-
-	// Create COG script instances.
-	for(const auto& cog : Level.Cogs) {
-		Content::Assets::Script const* script = std::get<0>(cog);
-		const std::vector<Cog::VM::Value>& values = std::get<1>(cog);
-
-		AddCogInstance(script->Script, ContentManager, CogCompiler, values);
 	}
 
 	return;

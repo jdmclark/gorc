@@ -5,7 +5,7 @@ namespace Game {
 namespace World {
 namespace Level {
 
-class CogTimerState {
+class ScriptTimerState {
 public:
 	double TimerRemainingTime = 0.0;
 	double PulseTime = 0.0;

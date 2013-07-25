@@ -1,16 +1,8 @@
-#include "animation.h"
-#include "levelmodel.h"
+#include "surfacematerialanimation.h"
+#include "game/world/level/levelmodel.h"
 
-Gorc::Game::World::Level::Animation::~Animation() {
-	return;
-}
-
-void Gorc::Game::World::Level::Animation::Stop() {
-	return;
-}
-
-Gorc::Game::World::Level::SurfaceAnimation::SurfaceAnimation(LevelModel& model, unsigned int surface, double framerate,
-		FlagSet<Flags::AnimFlag> flag, int anim_num)
+Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::SurfaceMaterialAnimation(LevelModel& model, unsigned int surface,
+		double framerate, FlagSet<Flags::AnimFlag> flag, int anim_num)
 	: model(model), surface(surface), framerate(1.0 / framerate), flag(flag), framerate_accumulator(0.0) {
 
 	int surface_material = model.Level.Surfaces[surface].Material;
@@ -35,7 +27,7 @@ Gorc::Game::World::Level::SurfaceAnimation::SurfaceAnimation(LevelModel& model, 
 	model.Surfaces[surface].AnimNumber = anim_num;
 }
 
-void Gorc::Game::World::Level::SurfaceAnimation::Update(double dt) {
+void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Update(double dt) {
 	framerate_accumulator += dt;
 
 	while(framerate_accumulator >= framerate) {
@@ -58,24 +50,6 @@ void Gorc::Game::World::Level::SurfaceAnimation::Update(double dt) {
 	}
 }
 
-void Gorc::Game::World::Level::SurfaceAnimation::Stop() {
+void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Stop() {
 	model.Surfaces[surface].AnimNumber = -1;
-}
-
-Gorc::Game::World::Level::SlideSurfaceAnimation::SlideSurfaceAnimation(LevelModel& model, unsigned int surface, const Math::Vector<3>& direction)
-	: model(model), surface(surface), direction(direction) {
-	return;
-}
-
-void Gorc::Game::World::Level::SlideSurfaceAnimation::Update(double dt) {
-	model.Surfaces[surface].TextureOffset += Math::Vec(Math::Get<0>(direction), Math::Get<1>(direction)) * dt;
-}
-
-Gorc::Game::World::Level::CeilingSkyAnimation::CeilingSkyAnimation(LevelModel& model, const Math::Vector<2>& speed)
-	: model(model), speed(speed) {
-	return;
-}
-
-void Gorc::Game::World::Level::CeilingSkyAnimation::Update(double dt) {
-	model.Header.CeilingSkyOffset += speed * dt;
 }

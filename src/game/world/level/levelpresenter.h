@@ -3,14 +3,13 @@
 #include "framework/place/presenter.h"
 #include "game/components.h"
 #include "levelplace.h"
-#include "cogtimerstate.h"
-#include "cogcontinuation.h"
-#include "sectorbroadphasefilter.h"
 #include "cog/vm/virtualmachine.h"
-#include "music.h"
+#include "sounds/music.h"
 #include "content/flags/animflag.h"
 #include "content/flags/damageflag.h"
 #include "game/flags/difficultymode.h"
+#include "game/world/level/animations/animationpresenter.h"
+#include "game/world/level/scripts/scriptpresenter.h"
 
 #include <SFML/Audio.hpp>
 
@@ -36,9 +35,8 @@ private:
 	std::unique_ptr<LevelModel> model;
 	sf::Sound AmbientSound;
 	Music AmbientMusic;
-	Cog::VM::VirtualMachine VirtualMachine;
 
-	std::stack<CogContinuation> RunningCogState;
+	void InitializeWorld();
 
 	void UpdateCameraAmbientSound();
 
@@ -51,21 +49,13 @@ private:
 			std::vector<std::tuple<unsigned int, unsigned int>>& path);
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 
-	void SendMessage(unsigned int InstanceId, Cog::MessageId message,
-			int SenderId, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
-			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
-	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
-			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
-	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
-			int Param0 = 0, int Param1 = 0, int Param2 = 0, int Param3 = 0);
-
 	void PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass);
 	void StopFoleyLoop(int thing);
 
 public:
+	Animations::AnimationPresenter AnimationPresenter;
+	Scripts::ScriptPresenter ScriptPresenter;
+
 	LevelPresenter(Components& components, const LevelPlace& place);
 
 	void Start(Event::EventBus& eventBus);
@@ -79,33 +69,9 @@ public:
 	void Activate();
 	void Damage();
 
-	// Anim / Cel verbs
-	int SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags);
-	int GetSurfaceAnim(int surface);
-
-	void StopAnim(int anim);
-
-	int GetSurfaceCel(int surface);
-	void SetSurfaceCel(int surface, int cel);
-
-	int SlideCeilingSky(float u_speed, float v_speed);
-	int SlideSurface(int surface_id, const Math::Vector<3>& direction);
-
 	// Frame verbs
 	int GetCurFrame(int thing_id);
 	void MoveToFrame(int thing_id, int frame, float speed);
-
-	// Message verbs
-	inline int GetParam(int param_num) { return RunningCogState.top().Params[param_num % 4]; }
-	inline int GetSenderId() { return RunningCogState.top().SenderId; }
-	inline int GetSenderRef() {	return RunningCogState.top().SenderRef; }
-	inline int GetSenderType() { return static_cast<int>(RunningCogState.top().SenderType); }
-	inline int GetSourceRef() { return RunningCogState.top().SourceRef; }
-	inline int GetSourceType() { return static_cast<int>(RunningCogState.top().SourceType); }
-
-	void SetPulse(float time);
-	void SetTimer(float time);
-	void Sleep(float time);
 
 	// Player verbs
 	int GetLocalPlayerThing();
@@ -137,6 +103,8 @@ public:
 
 	// Thing property verbs
 	int GetThingSector(int thing_id);
+
+	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };
 
 }

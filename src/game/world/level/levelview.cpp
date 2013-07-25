@@ -371,7 +371,9 @@ void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, con
 			actualSurfaceCelNumber = surfaceCelNumber % material->Cels.size();
 		}
 		else {
-			actualSurfaceCelNumber = currentModel->MaterialCelNumber[surface.Material] % material->Cels.size();
+			// TODO: Add MaterialAnim.
+			actualSurfaceCelNumber = 0;
+			//actualSurfaceCelNumber = currentModel->MaterialCelNumber[surface.Material] % material->Cels.size();
 		}
 
 		glActiveTexture(GL_TEXTURE0);

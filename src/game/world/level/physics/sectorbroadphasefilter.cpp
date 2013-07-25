@@ -1,5 +1,5 @@
 #include "sectorbroadphasefilter.h"
-#include "levelmodel.h"
+#include "game/world/level/levelmodel.h"
 #include "physicsobjectdata.h"
 #include "framework/math/box.h"
 

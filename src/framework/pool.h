@@ -3,6 +3,7 @@
 #include <array>
 #include <vector>
 #include <functional>
+#include <memory>
 #include <boost/integer/static_log2.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 

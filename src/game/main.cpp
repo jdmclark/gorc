@@ -33,171 +33,6 @@ const double gameplayTick = (1.0 / 120.0);
 
 using namespace Gorc;
 
-void RegisterLevelVerbs(Cog::Verbs::VerbTable& verbTable, Game::Components& components) {
-	// Anim / Cel verbs
-	verbTable.AddVerb<int, 1>("getsurfaceanim", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceAnim(surface); });
-	verbTable.AddVerb<void, 1>("stopsurfaceanim", [&components](int surface) {
-		components.CurrentLevelPresenter->StopAnim(components.CurrentLevelPresenter->GetSurfaceAnim(surface));
-	});
-
-	verbTable.AddVerb<int, 1>("getwallcel", [&components](int surface) { return components.CurrentLevelPresenter->GetSurfaceCel(surface); });
-	verbTable.AddVerb<int, 2>("setwallcel", [&components](int surface, int cel) { components.CurrentLevelPresenter->SetSurfaceCel(surface, cel); return 1; });
-
-	verbTable.AddVerb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
-		return components.CurrentLevelPresenter->SurfaceAnim(surface, rate, FlagSet<Flags::AnimFlag>(flags));
-	});
-
-	verbTable.AddVerb<int, 2>("slideceilingsky", [&components](float u_speed, float v_speed) {
-		return components.CurrentLevelPresenter->SlideCeilingSky(u_speed, v_speed);
-	});
-
-	verbTable.AddVerb<int, 3>("slidesurface", [&components](int surface, Math::Vector<3> direction, float speed) {
-		return components.CurrentLevelPresenter->SlideSurface(surface, Math::Normalize(direction) * speed);
-	});
-
-	verbTable.AddVerb<int, 3>("slidewall", [&components](int surface, Math::Vector<3> direction, float speed) {
-		return components.CurrentLevelPresenter->SlideSurface(surface, Math::Normalize(direction) * speed);
-	});
-
-	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) { components.CurrentLevelPresenter->StopAnim(anim); });
-
-	// Frame verbs
-	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) { return components.CurrentLevelPresenter->GetCurFrame(thing); });
-	verbTable.AddVerb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
-		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed); });
-
-	// Message verbs
-	verbTable.AddVerb<int, 1>("getparam", [&components](int param_num) { return components.CurrentLevelPresenter->GetParam(param_num); });
-	verbTable.AddVerb<int, 0>("getsenderid", [&components]{ return components.CurrentLevelPresenter->GetSenderId(); });
-	verbTable.AddVerb<int, 0>("getsenderref", [&components]{ return components.CurrentLevelPresenter->GetSenderRef(); });
-	verbTable.AddVerb<int, 0>("getsendertype", [&components]{ return components.CurrentLevelPresenter->GetSenderType(); });
-	verbTable.AddVerb<int, 0>("getsourceref", [&components]{ return components.CurrentLevelPresenter->GetSourceRef(); });
-	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{ return components.CurrentLevelPresenter->GetSourceType(); });
-	verbTable.AddVerb<void, 1>("setpulse", [&components](float time) { components.CurrentLevelPresenter->SetPulse(time); });
-	verbTable.AddVerb<void, 1>("settimer", [&components](float time) { components.CurrentLevelPresenter->SetTimer(time); });
-	verbTable.AddVerb<void, 1>("sleep", [&components](float time) { components.CurrentLevelPresenter->Sleep(time); });
-
-	// Options verbs
-	verbTable.AddVerb<int, 0>("getdifficulty", [&components] {
-		// TODO: Add actual difficulty setting.
-		return static_cast<int>(Flags::DifficultyMode::Medium);
-	});
-
-	// Player verbs
-	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] { return components.CurrentLevelPresenter->GetLocalPlayerThing(); });
-
-	// Print verbs
-	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, const char* message) {
-		// TODO: Add actual jkPrintUniString once localization is implemented.
-		std::cout << message << std::endl;
-	});
-
-	verbTable.AddVerb<void, 1>("print", [&components](const char* message) {
-		// TODO: Add actual print.
-		std::cout << message << std::endl;
-	});
-
-	verbTable.AddVerb<void, 1>("printint", [&components](int value) {
-		// TOOD: Add actual printint.
-		std::cout << value << std::endl;
-	});
-
-	// Sector verbs
-	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
-		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
-	});
-
-	verbTable.AddVerb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
-		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
-	});
-
-	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
-		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
-	});
-
-	verbTable.AddVerb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
-		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
-	});
-
-	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
-		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
-	});
-
-	verbTable.AddVerb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
-		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
-	});
-
-	verbTable.AddVerb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
-		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
-	});
-
-	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
-		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
-	});
-
-	verbTable.AddVerb<void, 2>("setsectortint", [&components](int sector_id, Math::Vector<3> tint) {
-		components.CurrentLevelPresenter->SetSectorTint(sector_id, tint);
-	});
-
-	// Sound verbs
-	verbTable.AddVerb<void, 3>("playsong", [&components](int start, int end, int loopto) {
-		components.CurrentLevelPresenter->PlaySong(start, end, loopto);
-	});
-
-	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
-		return components.CurrentLevelPresenter->PlaySoundLocal(wav, volume, panning, FlagSet<Flags::SoundFlag>(flags));
-	});
-
-	verbTable.AddVerb<int, 6>("playsoundpos", [&components](int wav, Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
-		return components.CurrentLevelPresenter->PlaySoundPos(wav, pos, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
-	});
-
-	verbTable.AddVerb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
-		return components.CurrentLevelPresenter->PlaySoundThing(wav, thing, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
-	});
-
-	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) { components.CurrentLevelPresenter->SetMusicVol(vol); });
-
-	// Surface verbs
-	verbTable.AddVerb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->ClearAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
-	});
-
-	verbTable.AddVerb<Math::Vector<3>, 1>("getsurfacecenter", [&components](int surface) {
-		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
-	});
-
-	verbTable.AddVerb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->SetAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
-	});
-
-	verbTable.AddVerb<Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
-		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
-	});
-
-	// System verbs
-	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
-
-	// Thing action verbs
-	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
-		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
-	});
-
-	verbTable.AddVerb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
-		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
-	});
-
-	verbTable.AddVerb<Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->GetThingPos(thing_id);
-	});
-
-	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
-	verbTable.AddVerb<bool, 1>("ismoving", [&components](int thing_id) { return components.CurrentLevelPresenter->IsThingMoving(thing_id); });
-
-	// Thing property verbs
-	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) { return components.CurrentLevelPresenter->GetThingSector(thing_id); });
-}
-
 int main(int argc, char** argv) {
 	// Create window and OpenGL context.
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
@@ -247,7 +82,8 @@ int main(int argc, char** argv) {
 	ScreenPresenterMapper.SetComponents(Components);
 	WorldPresenterMapper.SetComponents(Components);
 
-	RegisterLevelVerbs(VerbTable, Components);
+	// Register verbs
+	Game::World::Level::LevelPresenter::RegisterVerbs(VerbTable, Components);
 
 	bool running = true;
 
@@ -282,7 +118,7 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentManager = std::make_shared<Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Content::Assets::Level>("06abarons.jkl", Compiler);
+	const auto& lev = contentManager->Load<Content::Assets::Level>("01narshadda.jkl", Compiler);
 	WorldPlaceController.GoTo(Game::World::Level::LevelPlace(contentManager, lev));
 
 	ScreenPlaceController.GoTo(Game::Screen::Action::ActionPlace());
