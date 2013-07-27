@@ -33,6 +33,7 @@ void main() {
 	vec4 diffuse_color_tint_mix = mix(diffuse_color, diffuse_color_tint, sector_tint.a);
 	gl_FragColor = diffuse_color_tint_mix;
 	gl_FragColor.a = diffuse_color.a;
+	gl_FragDepth = gl_DepthRange.far - 0.000002;
 }
 
 #endif

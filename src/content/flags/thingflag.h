@@ -12,6 +12,7 @@ enum class ThingFlag : uint32_t {
 	PartOfWorldGeometry				= 0x8,
 	Invisible						= 0x10,
 	CanStandOn						= 0x40,
+	Sighted							= 0x200,	// NOTE: Unknown value.
 	CogLinked						= 0x400,
 	NoCrush							= 0x800,
 	NotInEasy						= 0x1000,

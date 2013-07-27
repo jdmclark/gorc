@@ -25,8 +25,7 @@ public:
 	int CurrentFoleyLoopChannel = -1;
 
 	// HACK: Play idle animation
-	Content::Assets::Animation const* CurrentPlayingAnimation;
-	double CurrentAnimationTime = 0.0;
+	int AttachedKeyMix = -1;
 
 	std::unique_ptr<btCollisionShape> ActorCollideShape;
 

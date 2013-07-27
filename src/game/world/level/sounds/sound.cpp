@@ -69,7 +69,22 @@ void Gorc::Game::World::Level::Sounds::Sound::PlaySoundThing(const LevelModel& m
 	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
 }
 
+void Gorc::Game::World::Level::Sounds::Sound::SetPitch(float pitch, float delay) {
+	// TODO: Implement delay
+	sound.SetPitch(pitch);
+}
+
+void Gorc::Game::World::Level::Sounds::Sound::SetVolume(float volume, float delay) {
+	// TODO: Implement delay
+	sound.SetVolume(volume * 100.0f);
+}
+
 void Gorc::Game::World::Level::Sounds::Sound::Stop() {
+	sound.Stop();
+}
+
+void Gorc::Game::World::Level::Sounds::Sound::Stop(float delay) {
+	// TODO: Implement delay
 	sound.Stop();
 }
 

@@ -35,7 +35,10 @@ public:
 	void PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, unsigned int thing, float volume,
 			float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
 
+	void SetPitch(float pitch, float delay);
+	void SetVolume(float volume, float delay);
 	void Stop();
+	void Stop(float delay);
 
 	void Update(double dt, const LevelModel& model);
 

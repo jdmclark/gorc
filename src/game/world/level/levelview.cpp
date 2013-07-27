@@ -248,8 +248,19 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 }
 
 void Gorc::Game::World::Level::LevelView::DrawVisibleThings() {
-	for(const auto& thing : currentModel->Things) {
-		if((thing.Flags & Flags::ThingFlag::Invisible) || sector_vis_scratch.count(thing.Sector) == 0) {
+	for(auto it = currentModel->Things.begin(); it != currentModel->Things.end(); ++it) {
+		const auto& thing = *it;
+
+		if(sector_vis_scratch.count(thing.Sector) == 0) {
+			continue;
+		}
+
+		if(!(thing.Flags & Flags::ThingFlag::Sighted)) {
+			// Thing has been sighted for first time. Fire sighted event.
+			currentPresenter->ThingSighted(it.GetIndex());
+		}
+
+		if(thing.Flags & Flags::ThingFlag::Invisible) {
 			continue;
 		}
 
@@ -303,11 +314,6 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box
 
 void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
 	if(currentModel) {
-		// HACK: Update animation times
-		for(auto& thing : currentModel->Things) {
-			thing.CurrentAnimationTime += dt;
-		}
-
 		glDisable(GL_STENCIL_TEST);
 		glDisable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
@@ -432,8 +438,15 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const
 	Math::Vector<3> anim_translate = Math::Zero<3>();
 	Math::Vector<3> anim_rotate = Math::Zero<3>();
 
-	if(thing.CurrentPlayingAnimation) {
-		std::tie(anim_translate, anim_rotate) = GetNodeFrame(*thing.CurrentPlayingAnimation, mesh_id, thing.CurrentAnimationTime);
+	if(thing.AttachedKeyMix >= 0) {
+		Keys::KeyMix& mix = currentModel->KeyModel.Mixes[thing.AttachedKeyMix];
+		if(mix.Animation && mix.Playing) {
+			std::tie(anim_translate, anim_rotate) = GetNodeFrame(*mix.Animation, mesh_id, mix.AnimationTime);
+		}
+		else {
+			anim_translate += node.Offset;
+			anim_rotate += node.Rotation;
+		}
 	}
 	else {
 		anim_translate += node.Offset;
@@ -539,7 +552,7 @@ std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Leve
 	}
 
 	// Convert anim_time into a frame number
-	double frame = std::fmod(anim.FrameRate * anim_time, anim.FrameCount);
+	double frame = anim.FrameRate * anim_time; //std::fmod(anim.FrameRate * anim_time, anim.FrameCount);
 	int actual_frame = static_cast<int>(std::floor(frame));
 
 	auto comp_fn = [](int tgt_fr, const Content::Assets::AnimationFrame& fr) {

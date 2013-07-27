@@ -359,7 +359,8 @@ void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager
 				script = &manager.Load<Assets::Script>(tok.GetSpaceDelimitedString(), compiler);
 			}
 			catch(...) {
-				// Failed to load script. Advance to next entry.
+				// Failed to load script. Add empty entry and advance to next entry.
+				lev.Cogs.emplace_back(nullptr, std::vector<Cog::VM::Value>());
 				tok.SkipToNextLine();
 				continue;
 			}
@@ -373,7 +374,6 @@ void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager
 					switch(symbol.Type) {
 					case Cog::Symbols::SymbolType::Ai:
 					case Cog::Symbols::SymbolType::Keyframe:
-					case Cog::Symbols::SymbolType::Cog:
 					case Cog::Symbols::SymbolType::Material:
 					case Cog::Symbols::SymbolType::Model:
 					case Cog::Symbols::SymbolType::Sound:
@@ -383,6 +383,7 @@ void ParseCogsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manager
 						values.push_back(lev.CogStrings.back()->data());
 						break;
 
+					case Cog::Symbols::SymbolType::Cog:
 					case Cog::Symbols::SymbolType::Sector:
 					case Cog::Symbols::SymbolType::Surface:
 					case Cog::Symbols::SymbolType::Thing:

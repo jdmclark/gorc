@@ -11,6 +11,7 @@
 #include "game/world/level/animations/animationpresenter.h"
 #include "game/world/level/scripts/scriptpresenter.h"
 #include "game/world/level/sounds/soundpresenter.h"
+#include "game/world/level/keys/keypresenter.h"
 
 #include <memory>
 #include <stack>
@@ -48,6 +49,7 @@ public:
 	Animations::AnimationPresenter AnimationPresenter;
 	Scripts::ScriptPresenter ScriptPresenter;
 	Sounds::SoundPresenter SoundPresenter;
+	Keys::KeyPresenter KeyPresenter;
 
 	LevelPresenter(Components& components, const LevelPlace& place);
 
@@ -61,6 +63,7 @@ public:
 	void Jump();
 	void Activate();
 	void Damage();
+	void ThingSighted(int thing_id);
 
 	// Frame verbs
 	int GetCurFrame(int thing_id);
@@ -79,10 +82,15 @@ public:
 	void ClearAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags);
 	Math::Vector<3> GetSurfaceCenter(int surface);
 	void SetAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags);
+	void SetFaceGeoMode(int surface, Flags::GeometryMode mode);
+
+	// System verbs
+	int LoadSound(const char* sound);
 
 	// Thing action verbs
 	int CreateThingAtThing(int tpl_id, int thing_id);
 	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
+	void DestroyThing(int thing_id);
 	Math::Vector<3> GetThingPos(int thing_id);
 	bool IsThingMoving(int thing_id);
 

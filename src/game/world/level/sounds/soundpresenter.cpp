@@ -56,6 +56,18 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::SetAmbientSound(Content::
 	}
 }
 
+// Verbs:
+
+void Gorc::Game::World::Level::Sounds::SoundPresenter::ChangeSoundPitch(int channel, float pitch, float delay) {
+	Sound& sound = model->Sounds[channel];
+	sound.SetPitch(pitch, delay);
+}
+
+void Gorc::Game::World::Level::Sounds::SoundPresenter::ChangeSoundVol(int channel, float volume, float delay) {
+	Sound& sound = model->Sounds[channel];
+	sound.SetVolume(volume, delay);
+}
+
 void Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySong(int start, int end, int loopto) {
 	model->AmbientMusic.PlaySong(start, end, loopto);
 }
@@ -127,7 +139,20 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::SetMusicVol(float volume)
 	model->AmbientMusic.SetVolume(volume);
 }
 
+void Gorc::Game::World::Level::Sounds::SoundPresenter::StopSound(int channel, float delay) {
+	Sound& sound = model->Sounds[channel];
+	sound.Stop(delay);
+}
+
 void Gorc::Game::World::Level::Sounds::SoundPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
+	verbTable.AddVerb<void, 3>("changesoundpitch", [&components](int channel, float pitch, float delay) {
+		components.CurrentLevelPresenter->SoundPresenter.ChangeSoundPitch(channel, pitch, delay);
+	});
+
+	verbTable.AddVerb<void, 3>("changesoundvol", [&components](int channel, float volume, float delay) {
+		components.CurrentLevelPresenter->SoundPresenter.ChangeSoundVol(channel, volume, delay);
+	});
+
 	verbTable.AddVerb<void, 3>("playsong", [&components](int start, int end, int loopto) {
 		components.CurrentLevelPresenter->SoundPresenter.PlaySong(start, end, loopto);
 	});
@@ -146,5 +171,9 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::RegisterVerbs(Cog::Verbs:
 
 	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) {
 		components.CurrentLevelPresenter->SoundPresenter.SetMusicVol(vol);
+	});
+
+	verbTable.AddVerb<void, 2>("stopsound", [&components](int channel, float delay) {
+		components.CurrentLevelPresenter->SoundPresenter.StopSound(channel, delay);
 	});
 }

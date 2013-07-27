@@ -30,7 +30,7 @@ void ceiling_sky_texture_coordinates(out vec2 tex_coords) {
 	tex_coords = vec2(dot(out_intersection, ceiling_sky_u), dot(out_intersection, ceiling_sky_v));
 }
 
-void main() {
+void main() {	
 	vec2 tex_coords;
 	ceiling_sky_texture_coordinates(tex_coords);
 	tex_coords += ceiling_sky_offset.xy / 8.0;
@@ -42,6 +42,7 @@ void main() {
 	vec4 diffuse_color_tint_mix = mix(diffuse_color, diffuse_color_tint, sector_tint.a);
 	gl_FragColor = diffuse_color_tint_mix;
 	gl_FragColor.a = diffuse_color.a;
+	gl_FragDepth = gl_DepthRange.far - 0.000002;
 }
 
 #endif

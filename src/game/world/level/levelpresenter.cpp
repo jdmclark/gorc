@@ -4,7 +4,8 @@
 using namespace Gorc::Math;
 
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
-	: components(components), place(place), ScriptPresenter(components), SoundPresenter(*place.ContentManager) {
+	: components(components), place(place), ScriptPresenter(components), SoundPresenter(*place.ContentManager),
+	  KeyPresenter(*place.ContentManager) {
 	return;
 }
 
@@ -14,6 +15,7 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 	AnimationPresenter.Start(*model, model->AnimationModel);
 	ScriptPresenter.Start(*model, model->ScriptModel);
 	SoundPresenter.Start(*model, model->SoundModel);
+	KeyPresenter.Start(*model, model->KeyModel);
 
 	InitializeWorld();
 
@@ -59,7 +61,12 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 		Content::Assets::Script const* script = std::get<0>(cog);
 		const std::vector<Cog::VM::Value>& values = std::get<1>(cog);
 
-		ScriptPresenter.CreateLevelCogInstance(script->Script, *place.ContentManager, components.Compiler, values);
+		if(script) {
+			ScriptPresenter.CreateLevelCogInstance(script->Script, *place.ContentManager, components.Compiler, values);
+		}
+		else {
+			ScriptPresenter.CreateLevelDummyInstance();
+		}
 	}
 }
 
@@ -67,6 +74,7 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	AnimationPresenter.Update(dt);
 	ScriptPresenter.Update(dt);
 	SoundPresenter.Update(dt);
+	KeyPresenter.Update(dt);
 
 	// Update world simulation
 	model->DynamicsWorld.stepSimulation(dt, 1, 1.0f / 120.0f);
@@ -433,6 +441,11 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	}
 }
 
+void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
+	model->Things[thing_id].Flags += Flags::ThingFlag::Sighted;
+	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, thing_id, Flags::MessageType::Thing);
+}
+
 // Frame verbs
 int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(int thing_id) {
 	return model->Things[thing_id].CurrentFrame;
@@ -530,6 +543,15 @@ void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagS
 	}
 }
 
+void Gorc::Game::World::Level::LevelPresenter::SetFaceGeoMode(int surface, Flags::GeometryMode geo_mode) {
+	model->Surfaces[surface].GeometryMode = geo_mode;
+}
+
+// System verbs
+int Gorc::Game::World::Level::LevelPresenter::LoadSound(const char* fn) {
+	return place.ContentManager->LoadId<Content::Assets::Sound>(fn);
+}
+
 // Thing action verbs
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = model->Things[thing_id];
@@ -565,6 +587,11 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float 
 	return 0.0f;
 }
 
+void Gorc::Game::World::Level::LevelPresenter::DestroyThing(int thing_id) {
+	// TODO: Clean up components owned by thing (animations, key mixes, sounds).
+	model->Things.Destroy(thing_id);
+}
+
 Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int thing_id) {
 	Thing& referenced_thing = model->Things[thing_id];
 	return referenced_thing.Position;
@@ -596,6 +623,7 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 	Animations::AnimationPresenter::RegisterVerbs(verbTable, components);
 	Scripts::ScriptPresenter::RegisterVerbs(verbTable, components);
 	Sounds::SoundPresenter::RegisterVerbs(verbTable, components);
+	Keys::KeyPresenter::RegisterVerbs(verbTable, components);
 
 	// Frame verbs
 	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) { return components.CurrentLevelPresenter->GetCurFrame(thing); });
@@ -610,6 +638,7 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 
 	// Player verbs
 	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] { return components.CurrentLevelPresenter->GetLocalPlayerThing(); });
+	verbTable.AddVerb<int, 0>("jkgetlocalplayer", [&components] { return components.CurrentLevelPresenter->GetLocalPlayerThing(); });
 
 	// Print verbs
 	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, const char* message) {
@@ -677,11 +706,19 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		components.CurrentLevelPresenter->SetAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
 	});
 
+	verbTable.AddVerb<void, 2>("setfacegeomode", [&components](int surface, int mode) {
+		components.CurrentLevelPresenter->SetFaceGeoMode(surface, static_cast<Flags::GeometryMode>(mode));
+	});
+
 	verbTable.AddVerb<Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
 	// System verbs
+	verbTable.AddVerb<int, 1>("loadsound", [&components](const char* fn) {
+		return components.CurrentLevelPresenter->LoadSound(fn);
+	});
+
 	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
 
 	// Thing action verbs
@@ -693,6 +730,14 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
 	});
 
+	verbTable.AddVerb<void, 1>("destroything", [&components](int thing_id) {
+		components.CurrentLevelPresenter->DestroyThing(thing_id);
+	});
+
+	verbTable.AddVerb<void, 1>("detachthing", [&components](int thing_id) {
+		// TODO: Implement
+	});
+
 	verbTable.AddVerb<Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
 		return components.CurrentLevelPresenter->GetThingPos(thing_id);
 	});
@@ -702,4 +747,11 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 
 	// Thing property verbs
 	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) { return components.CurrentLevelPresenter->GetThingSector(thing_id); });
+	verbTable.AddVerb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {
+		// TODO: Implement
+	});
+
+	verbTable.AddVerb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
+		// TODO: Implement
+	});
 }

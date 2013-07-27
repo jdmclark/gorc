@@ -121,10 +121,11 @@ std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::f
 std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::Open(const boost::filesystem::path& path) const {
 	std::string generic_string = path.generic_string();
 	std::transform(generic_string.begin(), generic_string.end(), generic_string.begin(), tolower);
+	boost::filesystem::path npath(generic_string);
 
 	// Restricted files have the highest priority.
 	// These assets are internal to the engine recreation and should not be replaced.
-	auto restrictedFile = findInGobs(path, RestrictedPath, generic_string, RestrictedFileMap);
+	auto restrictedFile = findInGobs(npath, RestrictedPath, generic_string, RestrictedFileMap);
 	if(restrictedFile) {
 		return restrictedFile;
 	}
@@ -139,14 +140,14 @@ std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::O
 
 	// Try from mod files.
 	if(hasGamePath) {
-		auto gameFile = findInGobs(path, GamePath, generic_string, GameFileMap);
+		auto gameFile = findInGobs(npath, GamePath, generic_string, GameFileMap);
 		if(gameFile) {
 			return gameFile;
 		}
 	}
 
 	// Try from resource files.
-	auto resourceFile = findInGobs(path, ResourcePath, generic_string, ResourceFileMap);
+	auto resourceFile = findInGobs(npath, ResourcePath, generic_string, ResourceFileMap);
 	if(resourceFile) {
 		return resourceFile;
 	}

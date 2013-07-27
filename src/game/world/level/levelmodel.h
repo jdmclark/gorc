@@ -9,6 +9,7 @@
 #include "game/world/level/animations/animationmodel.h"
 #include "game/world/level/scripts/scriptmodel.h"
 #include "game/world/level/sounds/soundmodel.h"
+#include "game/world/level/keys/keymodel.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -30,6 +31,7 @@ public:
 	Animations::AnimationModel AnimationModel;
 	Scripts::ScriptModel ScriptModel;
 	Sounds::SoundModel SoundModel;
+	Keys::KeyModel KeyModel;
 
 	Pool<Thing> Things;
 
