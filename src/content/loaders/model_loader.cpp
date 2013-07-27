@@ -281,7 +281,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ModelLoader::Parse
 			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
 			auto it = ModelLoaderSectionMap.find(t.Value);
 			if(it == ModelLoaderSectionMap.end()) {
-				report.AddWarning("LevelLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
+				report.AddWarning("ModelLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
 			}
 			else {
 				it->second(*lev, tok, manager, report);

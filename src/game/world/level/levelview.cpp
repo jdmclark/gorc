@@ -303,6 +303,11 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box
 
 void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
 	if(currentModel) {
+		// HACK: Update animation times
+		for(auto& thing : currentModel->Things) {
+			thing.CurrentAnimationTime += dt;
+		}
+
 		glDisable(GL_STENCIL_TEST);
 		glDisable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
@@ -414,7 +419,8 @@ void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, con
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Content::Assets::Model& model, int mesh_id, float sector_light) {
+void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const Content::Assets::Model& model,
+		int mesh_id, float sector_light) {
 	if(mesh_id < 0) {
 		return;
 	}
@@ -422,10 +428,22 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Content::Assets::Mo
 	const Content::Assets::ModelNode& node = model.HierarchyNodes[mesh_id];
 
 	glPushMatrix();
-	glTranslatef(Math::Get<0>(node.Offset), Math::Get<1>(node.Offset), Math::Get<2>(node.Offset));
-	glRotatef(Math::Get<0>(node.Rotation), 1.0f, 0.0f, 0.0f);
-	glRotatef(Math::Get<1>(node.Rotation), 0.0f, 0.0f, 1.0f);
-	glRotatef(Math::Get<2>(node.Rotation), 0.0f, 1.0f, 0.0f);
+
+	Math::Vector<3> anim_translate = Math::Zero<3>();
+	Math::Vector<3> anim_rotate = Math::Zero<3>();
+
+	if(thing.CurrentPlayingAnimation) {
+		std::tie(anim_translate, anim_rotate) = GetNodeFrame(*thing.CurrentPlayingAnimation, mesh_id, thing.CurrentAnimationTime);
+	}
+	else {
+		anim_translate += node.Offset;
+		anim_rotate += node.Rotation;
+	}
+
+	glTranslatef(Math::Get<0>(anim_translate), Math::Get<1>(anim_translate), Math::Get<2>(anim_translate));
+	glRotatef(Math::Get<0>(anim_rotate), 1.0f, 0.0f, 0.0f);
+	glRotatef(Math::Get<1>(anim_rotate), 0.0f, 0.0f, 1.0f);
+	glRotatef(Math::Get<2>(anim_rotate), 0.0f, 1.0f, 0.0f);
 	glTranslatef(Math::Get<0>(node.Pivot), Math::Get<1>(node.Pivot), Math::Get<2>(node.Pivot));
 
 	if(node.Mesh >= 0) {
@@ -480,10 +498,10 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Content::Assets::Mo
 
 	glTranslatef(-Math::Get<0>(node.Pivot), -Math::Get<1>(node.Pivot), -Math::Get<2>(node.Pivot));
 
-	DrawMeshNode(model, node.Child, sector_light);
+	DrawMeshNode(thing, model, node.Child, sector_light);
 	glPopMatrix();
 
-	DrawMeshNode(model, node.Sibling, sector_light);
+	DrawMeshNode(thing, model, node.Sibling, sector_light);
 }
 
 void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
@@ -506,9 +524,43 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 	glMultMatrixf(mat);
 
 	const Content::Assets::Model& model = *thing.Model3d;
-	DrawMeshNode(model, 0, sector_light);
+	DrawMeshNode(thing, model, 0, sector_light);
 
 	glPopMatrix();
+}
+
+std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::LevelView::GetNodeFrame(const Content::Assets::Animation& anim,
+		int mesh, double anim_time) {
+	const Content::Assets::AnimationNode& anim_node = anim.Nodes[mesh];
+
+	if(anim_node.Frames.empty()) {
+		// Abort if there are no frames to interpolate.
+		return std::make_tuple(Math::Zero<3>(), Math::Zero<3>());
+	}
+
+	// Convert anim_time into a frame number
+	double frame = std::fmod(anim.FrameRate * anim_time, anim.FrameCount);
+	int actual_frame = static_cast<int>(std::floor(frame));
+
+	auto comp_fn = [](int tgt_fr, const Content::Assets::AnimationFrame& fr) {
+		return fr.Frame > tgt_fr;
+	};
+
+	// Find frame immediately after desired frame, then back off.
+	auto it = std::upper_bound(anim_node.Frames.begin(), anim_node.Frames.end(), actual_frame, comp_fn);
+	if(it == anim_node.Frames.begin()) {
+		it = anim_node.Frames.end() - 1;
+	}
+	else {
+		--it;
+	}
+
+	float remaining_frame_time = static_cast<float>(frame) - static_cast<float>(it->Frame);
+
+	auto position = it->Position + remaining_frame_time * it->DeltaPosition;
+	auto orientation = it->Orientation + remaining_frame_time * it->DeltaOrientation;
+
+	return std::make_tuple(position, orientation);
 }
 
 void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {

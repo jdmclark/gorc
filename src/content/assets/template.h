@@ -13,6 +13,7 @@
 #include "soundclass.h"
 #include "colormap.h"
 #include "script.h"
+#include "puppet.h"
 #include <string>
 #include <memory>
 
@@ -33,6 +34,7 @@ public:
 	Model const* Model3d = nullptr;
 	SoundClass const* SoundClass = nullptr;
 	Script const* Cog = nullptr;
+	Puppet const* Puppet = nullptr;
 
 	Flags::ThingType Type = Flags::ThingType::Ghost;
 	Flags::MoveType Move = Flags::MoveType::None;

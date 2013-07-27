@@ -140,6 +140,21 @@ void TemplateCogParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& ma
 	}
 }
 
+void TemplatePuppetParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, const Cog::Compiler& compiler, Diagnostics::Report& report) {
+	std::string fn = tok.GetSpaceDelimitedString();
+	if(boost::iequals(fn, "none")) {
+		tpl.Puppet = nullptr;
+	}
+	else {
+		try {
+			tpl.Puppet = &manager.Load<Puppet>(fn);
+		}
+		catch(...) {
+			tpl.Puppet = nullptr;
+		}
+	}
+}
+
 void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 	tok.AssertPunctuator("(");
 	float x = tok.GetNumber<float>();
@@ -170,6 +185,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "model3d", &TemplateModel3DParser },
 	{ "soundclass", &TemplateSoundClassParser },
 	{ "cog", &TemplateCogParser },
+	{ "puppet", &TemplatePuppetParser },
 	{ "type", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
 		TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }},
 	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {

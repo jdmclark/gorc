@@ -128,6 +128,15 @@ unsigned int Gorc::Game::World::Level::LevelModel::CreateThing(const Content::As
 
 		DynamicsWorld.addRigidBody(new_thing.RigidBody.get());
 
+		// HACK: Set running animation as the currently playing animation if the actor has a pup.
+		if(new_thing.Puppet) {
+			const Content::Assets::PuppetSubmode& run_mode =
+					new_thing.Puppet->GetMode(Flags::PuppetModeType::Default).GetSubmode(Flags::PuppetSubmodeType::Stand);
+			if(run_mode.Animation) {
+				new_thing.CurrentPlayingAnimation = run_mode.Animation;
+			}
+		}
+
 		return std::get<1>(new_thing_tuple);
 	}
 	else if(tpl.Model3d) {

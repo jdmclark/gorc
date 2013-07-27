@@ -19,6 +19,7 @@ class Template;
 class LevelSector;
 class Shader;
 class Model;
+class Animation;
 }
 }
 
@@ -69,8 +70,9 @@ private:
 	void DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& screen_size);
 
 	void DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector, float alpha);
-	void DrawMeshNode(const Content::Assets::Model& model, int node_id, float sector_light);
+	void DrawMeshNode(const Thing& thing, const Content::Assets::Model& model, int node_id, float sector_light);
 	void DrawThing(const Thing& thing);
+	std::tuple<Math::Vector<3>, Math::Vector<3>> GetNodeFrame(const Content::Assets::Animation& anim, int mesh, double frame);
 
 public:
 	LevelView(const Content::Assets::Shader& surfaceShader, const Content::Assets::Shader& horizonShader, const Content::Assets::Shader& ceilingShader);
