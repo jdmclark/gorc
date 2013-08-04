@@ -100,24 +100,7 @@ void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
 	}
 
 	// Update camera position
-	Thing& camera = model->Things[model->CameraThingId];
-	model->CameraPosition = camera.Position;
-	model->CameraSector = camera.Sector;
-
-	btRigidBody& cam_body = *camera.RigidBody;
-	cam_body.setAngularFactor(btVector3(0,0,0));
-
-	auto oldLinearVelocity = VecBt(cam_body.getLinearVelocity());
-	Get<2>(model->CameraVelocity) += Get<2>(oldLinearVelocity);
-
-	auto planeCameraLinearVelocity = Vec(Get<X>(model->CameraVelocity), Get<Y>(model->CameraVelocity));
-	float t = std::min(1.0f, Length(planeCameraLinearVelocity));
-
-	auto new_camera_vel = t * model->CameraVelocity + (1.0f - t) * oldLinearVelocity;
-	Get<Z>(new_camera_vel) = Get<Z>(model->CameraVelocity);
-	cam_body.setLinearVelocity(BtVec(new_camera_vel));
-
-	model->CameraVelocity = Zero<3>();
+	UpdateCamera();
 }
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt) {
@@ -176,12 +159,12 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingPathMoving(unsigned in
 	}
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::ThingInsideSector(Thing& thing, const Gorc::Content::Assets::LevelSector& sec) {
+bool Gorc::Game::World::Level::LevelPresenter::PointInsideSector(const Math::Vector<3>& position, const Gorc::Content::Assets::LevelSector& sec) {
 	for(size_t i =  sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
 		const auto& surf = model->Level.Surfaces[i];
 		const auto& p = model->Level.Vertices[std::get<0>(surf.Vertices[0])];
 
-		if(Dot(surf.Normal, thing.Position - p) < 0.0f) {
+		if(Dot(surf.Normal, position - p) < 0.0f) {
 			return false;
 		}
 	}
@@ -189,14 +172,14 @@ bool Gorc::Game::World::Level::LevelPresenter::ThingInsideSector(Thing& thing, c
 	return true;
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::ThingPathPassesThroughAdjoin(Thing& thing, const Vector<3>& oldThingPosition,
-		const Gorc::Content::Assets::LevelSector& sec, const Gorc::Content::Assets::LevelSurface& surf) {
-	if(Dot(thing.Position - oldThingPosition, surf.Normal) > 0.0f) {
+bool Gorc::Game::World::Level::LevelPresenter::PointPathPassesThroughAdjoin(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
+		const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf) {
+	if(Dot(p1 - p0, surf.Normal) > 0.0f) {
 		return false;
 	}
 
 	auto p = model->Level.Vertices[std::get<0>(surf.Vertices[0])];
-	auto u = Dot(surf.Normal, p - oldThingPosition) / Dot(surf.Normal, thing.Position - oldThingPosition);
+	auto u = Dot(surf.Normal, p - p0) / Dot(surf.Normal, p1 - p0);
 	if(u < 0.0f || u > 1.0f) {
 		return false;
 	}
@@ -206,9 +189,9 @@ bool Gorc::Game::World::Level::LevelPresenter::ThingPathPassesThroughAdjoin(Thin
 	return true;
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::InnerUpdateThingSector(Thing& thing, const Vector<3>& oldThingPosition,
+bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Vector<3>& p0, const Vector<3>& p1,
 		const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
-	if(ThingInsideSector(thing, sector)) {
+	if(PointInsideSector(p1, sector)) {
 		path.emplace_back(sector.Number, -1);
 		return true;
 	}
@@ -216,10 +199,10 @@ bool Gorc::Game::World::Level::LevelPresenter::InnerUpdateThingSector(Thing& thi
 	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.SurfaceCount; ++sec_surf_id) {
 		const Content::Assets::LevelSurface& surf = model->Surfaces[sec_surf_id + sector.FirstSurface];
 		if(surf.Adjoin >= 0 && !(surf.Flags & Flags::SurfaceFlag::Impassable)
-				&& ThingPathPassesThroughAdjoin(thing, oldThingPosition, sector, surf)) {
+				&& PointPathPassesThroughAdjoin(p0, p1, sector, surf)) {
 			path.emplace_back(sector.Number, sec_surf_id + sector.FirstSurface);
 
-			if(InnerUpdateThingSector(thing, oldThingPosition, model->Sectors[surf.AdjoinedSector], path)) {
+			if(UpdatePathSector(p0, p1, model->Sectors[surf.AdjoinedSector], path)) {
 				return true;
 			}
 
@@ -232,22 +215,22 @@ bool Gorc::Game::World::Level::LevelPresenter::InnerUpdateThingSector(Thing& thi
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, Thing& thing,
 		const Vector<3>& oldThingPosition) {
-	if(ThingInsideSector(thing, model->Sectors[thing.Sector])) {
+	if(PointInsideSector(thing.Position, model->Sectors[thing.Sector])) {
 		// Thing hasn't moved to a different sector.
 		return;
 	}
 
-	std::vector<std::tuple<unsigned int, unsigned int>> path;
-	if(InnerUpdateThingSector(thing, oldThingPosition, model->Sectors[thing.Sector], path)) {
+	UpdatePathSectorScratch.clear();
+	if(UpdatePathSector(oldThingPosition, thing.Position, model->Sectors[thing.Sector], UpdatePathSectorScratch)) {
 		// Fire messages along path
-		unsigned int first_adjoin = std::get<1>(path.front());
+		unsigned int first_adjoin = std::get<1>(UpdatePathSectorScratch.front());
 		if(model->Surfaces[first_adjoin].Flags & Flags::SurfaceFlag::CogLinked) {
 			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Flags::MessageType::Surface,
 					thing_id, Flags::MessageType::Thing);
 		}
 
-		for(unsigned int i = 1; i < path.size() - 1; ++i) {
-			unsigned int sec_id = std::get<0>(path[i]);
+		for(unsigned int i = 1; i < UpdatePathSectorScratch.size() - 1; ++i) {
+			unsigned int sec_id = std::get<0>(UpdatePathSectorScratch[i]);
 			thing.Sector = sec_id;
 			thing.ObjectData.SectorId = sec_id;
 			if(model->Sectors[sec_id].Flags & Flags::SectorFlag::CogLinked) {
@@ -255,14 +238,14 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 						thing_id, Flags::MessageType::Thing);
 			}
 
-			unsigned int surf_id = std::get<1>(path[i]);
+			unsigned int surf_id = std::get<1>(UpdatePathSectorScratch[i]);
 			if(model->Surfaces[surf_id].Flags & Flags::SurfaceFlag::CogLinked) {
 				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Flags::MessageType::Surface,
 						thing_id, Flags::MessageType::Thing);
 			}
 		}
 
-		unsigned int last_sector = std::get<0>(path.back());
+		unsigned int last_sector = std::get<0>(UpdatePathSectorScratch.back());
 		thing.Sector = last_sector;
 		thing.ObjectData.SectorId = last_sector;
 		if(model->Sectors[last_sector].Flags & Flags::SectorFlag::CogLinked) {
@@ -272,8 +255,47 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 	}
 	else {
 		// Thing hasn't moved.
-		// Need to run a backup random walk here.
+		// TODO: Need to run a backup random walk here.
 	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::UpdateCamera() {
+	Thing& camera = model->Things[model->CameraThingId];
+
+	btRigidBody& cam_body = *camera.RigidBody;
+	cam_body.setAngularFactor(btVector3(0,0,0));
+
+	auto oldLinearVelocity = VecBt(cam_body.getLinearVelocity());
+	Get<2>(model->CameraVelocity) += Get<2>(oldLinearVelocity);
+
+	auto planeCameraLinearVelocity = Vec(Get<X>(model->CameraVelocity), Get<Y>(model->CameraVelocity));
+	float t = std::min(1.0f, Length(planeCameraLinearVelocity));
+
+	auto new_camera_vel = t * model->CameraVelocity + (1.0f - t) * oldLinearVelocity;
+	Get<Z>(new_camera_vel) = Get<Z>(model->CameraVelocity);
+	cam_body.setLinearVelocity(BtVec(new_camera_vel));
+
+	model->CameraVelocity = Zero<3>();
+
+	// Update camera with eye offset
+	auto p0 = camera.Position;
+	auto p1 = camera.Position + camera.EyeOffset;
+	if(PointInsideSector(p1, model->Sectors[camera.Sector])) {
+		// Eye offset doesn't change camera sector.
+		model->CameraSector = camera.Sector;
+	}
+	else {
+		UpdatePathSectorScratch.clear();
+		if(UpdatePathSector(p0, p1, model->Sectors[camera.Sector], UpdatePathSectorScratch)) {
+			model->CameraSector = std::get<0>(UpdatePathSectorScratch.back());
+		}
+		else {
+			// TODO: Back-up random walk
+			model->CameraSector = camera.Sector;
+		}
+	}
+
+	model->CameraPosition = p1;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::TranslateCamera(const Vector<3>& amt) {

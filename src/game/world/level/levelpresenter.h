@@ -30,6 +30,9 @@ private:
 	// Use RateFactor to scale all rates from input data.
 	static constexpr double RateFactor = 1.0 / 8.0;
 
+	// Scratch space
+	std::vector<std::tuple<unsigned int, unsigned int>> UpdatePathSectorScratch;
+
 	Components& components;
 	LevelPlace place;
 	std::unique_ptr<LevelModel> model;
@@ -38,12 +41,14 @@ private:
 
 	void UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt);
 
-	bool ThingInsideSector(Thing& thing, const Content::Assets::LevelSector& sec);
-	bool ThingPathPassesThroughAdjoin(Thing& thing, const Math::Vector<3>& oldThingPosition,
+	bool PointInsideSector(const Math::Vector<3>& position, const Content::Assets::LevelSector& sec);
+	bool PointPathPassesThroughAdjoin(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
 			const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf);
-	bool InnerUpdateThingSector(Thing& thing, const Math::Vector<3>& oldThingPosition, const Content::Assets::LevelSector& sector,
-			std::vector<std::tuple<unsigned int, unsigned int>>& path);
+	bool UpdatePathSector(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
+			const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path);
+
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
+	void UpdateCamera();
 
 public:
 	Animations::AnimationPresenter AnimationPresenter;

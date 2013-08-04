@@ -26,7 +26,6 @@ void Gorc::Game::World::Level::LevelView::Update(double dt) {
 
 void Gorc::Game::World::Level::LevelView::SetUpViewProjectionMatrices(const Box<2, unsigned int>& view_size) {
 	double aspect = static_cast<double>(view_size.Size<X>()) / static_cast<double>(view_size.Size<Y>());
-	const auto& camera_thing = currentModel->Things[currentModel->CameraThingId];
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -43,7 +42,7 @@ void Gorc::Game::World::Level::LevelView::SetUpViewProjectionMatrices(const Box<
 }
 
 void Gorc::Game::World::Level::LevelView::ComputeVisibleSectors(const Box<2, unsigned int>& view_size) {
-	unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
+	unsigned int current_camera_sector_id = currentModel->CameraSector;
 	const auto& camera_pos = currentModel->CameraPosition;
 
 	std::array<double, 16> proj_matrix;
@@ -137,7 +136,7 @@ void Gorc::Game::World::Level::LevelView::DoSectorVis(unsigned int sec_num, cons
 void Gorc::Game::World::Level::LevelView::ActivateSurfaceShader() {
 	glUseProgram(surfaceShader.program);
 
-	unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
+	unsigned int current_camera_sector_id = currentModel->CameraSector;
 	const auto& current_camera_sector = currentModel->Sectors[current_camera_sector_id];
 
 	std::array<float, 4> tint_color;
@@ -158,7 +157,7 @@ void Gorc::Game::World::Level::LevelView::ActivateSurfaceShader() {
 void Gorc::Game::World::Level::LevelView::ActivateHorizonShader(const Math::Box<2, unsigned int>& screen_size) {
 	glUseProgram(horizonShader.program);
 
-	unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
+	unsigned int current_camera_sector_id = currentModel->CameraSector;
 	const auto& current_camera_sector = currentModel->Sectors[current_camera_sector_id];
 
 	std::array<float, 4> tint_color;
@@ -198,7 +197,7 @@ void Gorc::Game::World::Level::LevelView::ActivateHorizonShader(const Math::Box<
 void Gorc::Game::World::Level::LevelView::ActivateCeilingShader() {
 	glUseProgram(ceilingShader.program);
 
-	unsigned int current_camera_sector_id = currentModel->Things[currentModel->CameraThingId].Sector;
+	unsigned int current_camera_sector_id = currentModel->CameraSector;
 	const auto& current_camera_sector = currentModel->Sectors[current_camera_sector_id];
 
 	std::array<float, 4> tint_color;
