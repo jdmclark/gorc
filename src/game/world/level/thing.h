@@ -2,6 +2,7 @@
 
 #include "content/assets/template.h"
 #include "physics/physicsobjectdata.h"
+#include "gameplay/thingcontroller.h"
 #include <btBulletDynamicsCommon.h>
 #include <memory>
 
@@ -12,6 +13,7 @@ namespace Level {
 
 class Thing : public Content::Assets::Template {
 public:
+	Gameplay::ThingController* Controller;
 	ThingObjectData ObjectData;
 	std::unique_ptr<btDefaultMotionState> MotionState;
 	std::unique_ptr<btRigidBody> RigidBody;

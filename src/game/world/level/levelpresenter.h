@@ -12,6 +12,11 @@
 #include "game/world/level/scripts/scriptpresenter.h"
 #include "game/world/level/sounds/soundpresenter.h"
 #include "game/world/level/keys/keypresenter.h"
+#include "game/world/level/gameplay/actorcontroller.h"
+#include "game/world/level/gameplay/playercontroller.h"
+#include "game/world/level/gameplay/cogcontroller.h"
+#include "game/world/level/gameplay/ghostcontroller.h"
+#include "game/world/level/gameplay/itemcontroller.h"
 
 #include <memory>
 #include <stack>
@@ -35,11 +40,9 @@ private:
 
 	Components& components;
 	LevelPlace place;
-	std::unique_ptr<LevelModel> model;
 
 	void InitializeWorld();
-
-	void UpdateThingPathMoving(unsigned int thing_id, Thing& thing, double dt);
+	void PhysicsTickUpdate(double dt);
 
 	bool PointInsideSector(const Math::Vector<3>& position, const Content::Assets::LevelSector& sec);
 	bool PointPathPassesThroughAdjoin(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
@@ -51,10 +54,18 @@ private:
 	void UpdateCamera();
 
 public:
+	std::unique_ptr<LevelModel> Model;
+
 	Animations::AnimationPresenter AnimationPresenter;
 	Scripts::ScriptPresenter ScriptPresenter;
 	Sounds::SoundPresenter SoundPresenter;
 	Keys::KeyPresenter KeyPresenter;
+
+	Gameplay::ActorController ActorController;
+	Gameplay::PlayerController PlayerController;
+	Gameplay::CogController CogController;
+	Gameplay::GhostController GhostController;
+	Gameplay::ItemController ItemController;
 
 	LevelPresenter(Components& components, const LevelPlace& place);
 
@@ -93,6 +104,10 @@ public:
 	int LoadSound(const char* sound);
 
 	// Thing action verbs
+	unsigned int CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+	unsigned int CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+	unsigned int CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+
 	int CreateThingAtThing(int tpl_id, int thing_id);
 	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
 	void DestroyThing(int thing_id);
