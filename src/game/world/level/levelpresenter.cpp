@@ -207,6 +207,10 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 }
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateCamera() {
+	if(need_respawn) {
+		DoRespawn();
+	}
+
 	Thing& camera = Model->Things[Model->CameraThingId];
 	camera.Thrust = Model->CameraVelocity;
 	Model->CameraVelocity = Zero<3>();
@@ -271,7 +275,9 @@ void Gorc::Game::World::Level::LevelPresenter::PitchCamera(double amt) {
 	Model->CameraLook = Normalize(NewLook);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Respawn() {
+void Gorc::Game::World::Level::LevelPresenter::DoRespawn() {
+	need_respawn = false;
+
 	++Model->CurrentSpawnPoint;
 	Model->CurrentSpawnPoint = Model->CurrentSpawnPoint % Model->SpawnPoints.size();
 
@@ -280,7 +286,12 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 	cameraThing.ObjectData.SectorId = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
 	cameraThing.Position = Model->SpawnPoints[Model->CurrentSpawnPoint]->Position;
 	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position)));
+	cameraThing.RigidBody->setGravity(btVector3(0.0f, 0.0f, -Model->Header.WorldGravity));
 	cameraThing.AttachFlags = FlagSet<Flags::AttachFlag>();
+}
+
+void Gorc::Game::World::Level::LevelPresenter::Respawn() {
+	need_respawn = true;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Jump() {
@@ -549,6 +560,14 @@ unsigned int Gorc::Game::World::Level::LevelPresenter::CreateThing(const std::st
 		// TODO: Template not found. Report error.
 		return -1;
 	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::AdjustThingPosition(unsigned int thing_id, const Math::Vector<3>& new_pos) {
+	Thing& thing = Model->Things[thing_id];
+	auto oldPosition = thing.Position;
+	thing.Position = new_pos;
+	thing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(new_pos)));
+	UpdateThingSector(thing_id, thing, oldPosition);
 }
 
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {

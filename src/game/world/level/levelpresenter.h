@@ -53,6 +53,9 @@ private:
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 	void UpdateCamera();
 
+	bool need_respawn = false;
+	void DoRespawn();
+
 public:
 	std::unique_ptr<LevelModel> Model;
 
@@ -107,6 +110,8 @@ public:
 	unsigned int CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 	unsigned int CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 	unsigned int CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+
+	void AdjustThingPosition(unsigned int thing_id, const Math::Vector<3>& new_pos);
 
 	int CreateThingAtThing(int tpl_id, int thing_id);
 	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
