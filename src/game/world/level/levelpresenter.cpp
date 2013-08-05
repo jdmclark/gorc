@@ -88,7 +88,6 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 	btTransform trans;
 	for(auto it = Model->Things.begin(); it != Model->Things.end(); ++it) {
 		Thing& thing = *it;
-		thing.Controller->Update(it.GetIndex(), dt);
 
 		if(thing.RigidBody) {
 			auto oldThingPosition = thing.Position;
@@ -99,6 +98,8 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 			const auto& thing_sector = Model->Sectors[thing.Sector];
 			thing.RigidBody->applyCentralForce(BtVec(thing_sector.Thrust * RateFactor / dt));
 		}
+
+		thing.Controller->Update(it.GetIndex(), dt);
 	}
 
 	// Update camera position
@@ -207,20 +208,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 
 void Gorc::Game::World::Level::LevelPresenter::UpdateCamera() {
 	Thing& camera = Model->Things[Model->CameraThingId];
-
-	btRigidBody& cam_body = *camera.RigidBody;
-	cam_body.setAngularFactor(btVector3(0,0,0));
-
-	auto oldLinearVelocity = VecBt(cam_body.getLinearVelocity());
-	Get<2>(Model->CameraVelocity) += Get<2>(oldLinearVelocity);
-
-	auto planeCameraLinearVelocity = Vec(Get<X>(Model->CameraVelocity), Get<Y>(Model->CameraVelocity));
-	float t = std::min(1.0f, Length(planeCameraLinearVelocity));
-
-	auto new_camera_vel = t * Model->CameraVelocity + (1.0f - t) * oldLinearVelocity;
-	Get<Z>(new_camera_vel) = Get<Z>(Model->CameraVelocity);
-	cam_body.setLinearVelocity(BtVec(new_camera_vel));
-
+	camera.Thrust = Model->CameraVelocity;
 	Model->CameraVelocity = Zero<3>();
 
 	// Update camera with eye offset
@@ -292,6 +280,7 @@ void Gorc::Game::World::Level::LevelPresenter::Respawn() {
 	cameraThing.ObjectData.SectorId = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
 	cameraThing.Position = Model->SpawnPoints[Model->CurrentSpawnPoint]->Position;
 	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position)));
+	cameraThing.AttachFlags = FlagSet<Flags::AttachFlag>();
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Jump() {

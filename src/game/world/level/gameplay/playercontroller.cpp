@@ -8,3 +8,12 @@ unsigned int Gorc::Game::World::Level::Gameplay::PlayerController::Create(const 
 	presenter.Model->Things[thing_id].Controller = this;
 	return thing_id;
 }
+
+void Gorc::Game::World::Level::Gameplay::PlayerController::Update(unsigned int thing_id, double dt) {
+	CharacterController::Update(thing_id, dt);
+
+	Thing& thing = presenter.Model->Things[thing_id];
+	if(thing.AttachFlags & FlagSet<Flags::AttachFlag> { Flags::AttachFlag::AttachedToWorldSurface, Flags::AttachFlag::AttachedToThingFace }) {
+		// Move in the direction of the attached face
+	}
+}

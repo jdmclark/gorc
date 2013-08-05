@@ -26,6 +26,10 @@ public:
 
 	int CurrentFoleyLoopChannel = -1;
 
+	unsigned int AttachedSurface = -1;
+	unsigned int AttachedThing = -1;
+	Math::Vector<3> PrevAttachedThingPosition;
+
 	// HACK: Play idle animation
 	int AttachedKeyMix = -1;
 

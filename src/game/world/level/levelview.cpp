@@ -539,8 +539,8 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 	else {
 		// Fall back to p/y/r orientation when physics is not used.
 		glTranslatef(Math::Get<0>(thing.Position), Math::Get<1>(thing.Position), Math::Get<2>(thing.Position));
-		glRotatef(Math::Get<0>(thing.Orientation), 1.0f, 0.0f, 0.0f);
 		glRotatef(Math::Get<1>(thing.Orientation), 0.0f, 0.0f, 1.0f);
+		glRotatef(Math::Get<0>(thing.Orientation), 1.0f, 0.0f, 0.0f);
 		glRotatef(Math::Get<2>(thing.Orientation), 0.0f, 1.0f, 0.0f);
 	}
 

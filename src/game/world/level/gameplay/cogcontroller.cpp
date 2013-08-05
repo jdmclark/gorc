@@ -89,11 +89,17 @@ unsigned int Gorc::Game::World::Level::Gameplay::CogController::Create(const Con
 		thing_mass = new_thing.Mass;
 	}
 
+	FlagSet<PhysicsCollideClass> CollideType { PhysicsCollideClass::Thing };
+	FlagSet<PhysicsCollideClass> CollideWith;
+
+	if(new_thing.Collide != Flags::CollideType::None) {
+		CollideWith = { PhysicsCollideClass::Thing };
+	}
+
 	btCollisionShape* thingShape;
-	if(tpl.Flags & FlagSet<Flags::ThingFlag>{
-		Flags::ThingFlag::PartOfWorldGeometry,
-		Flags::ThingFlag::CanStandOn }) {
+	if(tpl.Flags & FlagSet<Flags::ThingFlag>{ Flags::ThingFlag::PartOfWorldGeometry, Flags::ThingFlag::CanStandOn }) {
 		thingShape = new_thing.Model3d->Shape.get();
+		CollideType += PhysicsCollideClass::Floor;
 	}
 	else {
 		new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(tpl.Size * 0.5f));
@@ -108,13 +114,6 @@ unsigned int Gorc::Game::World::Level::Gameplay::CogController::Create(const Con
 	new_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(
 			btRigidBody::btRigidBodyConstructionInfo(thing_mass, new_thing.MotionState.get(),
 					thingShape, thing_inertia)));
-
-	FlagSet<PhysicsCollideClass> CollideType {PhysicsCollideClass::Thing};
-	FlagSet<PhysicsCollideClass> CollideWith;
-
-	if(new_thing.Collide != Flags::CollideType::None) {
-		CollideWith = {PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing};
-	}
 
 	// Associate thing info structure.
 	new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);

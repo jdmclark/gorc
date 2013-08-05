@@ -51,6 +51,10 @@ void Gorc::Game::World::Level::LevelModel::UpdateSurfacePhysicsProperties(int su
 	if(surf.Adjoin >= 0) {
 		CollideType += PhysicsCollideClass::Adjoin;
 	}
+	else if(surf.Flags & Flags::SurfaceFlag::Floor) {
+		CollideType += PhysicsCollideClass::Floor;
+		CollideType += PhysicsCollideClass::Wall;
+	}
 	else {
 		CollideType += PhysicsCollideClass::Wall;
 	}

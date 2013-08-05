@@ -9,6 +9,7 @@
 #include "content/flags/movetype.h"
 #include "content/flags/collidetype.h"
 #include "content/flags/thingflag.h"
+#include "content/flags/attachflag.h"
 #include "model.h"
 #include "soundclass.h"
 #include "colormap.h"
@@ -30,6 +31,7 @@ public:
 	unsigned int Sector;
 	Math::Vector<3> Position;
 	Math::Vector<3> Orientation;
+	Math::Vector<3> Thrust;
 
 	Model const* Model3d = nullptr;
 	SoundClass const* SoundClass = nullptr;
@@ -40,6 +42,7 @@ public:
 	Flags::MoveType Move = Flags::MoveType::None;
 	Flags::CollideType Collide = Flags::CollideType::None;
 	FlagSet<Flags::ThingFlag> Flags;
+	FlagSet<Flags::AttachFlag> AttachFlags;
 	Math::Vector<3> EyeOffset;
 
 	float Health = 100.0f;
