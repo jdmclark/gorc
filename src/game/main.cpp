@@ -1,5 +1,5 @@
+#include "constants.h"
 #include "content/assets/shader.h"
-
 #include "components.h"
 
 #include "framework/events/printevent.h"
@@ -28,8 +28,6 @@
 #include "cog/compiler.h"
 
 #include <iostream>
-
-const double gameplayTick = (1.0 / 120.0);
 
 using namespace Gorc;
 
@@ -168,12 +166,12 @@ int main(int argc, char** argv) {
 		gameplayElapsedTime += currentTime;
 		gameplayAccumulator += currentTime;
 
-		while(gameplayAccumulator >= gameplayTick) {
-			gameplayAccumulator -= gameplayTick;
+		while(gameplayAccumulator >= Game::GameplayTick) {
+			gameplayAccumulator -= Game::GameplayTick;
 
 			// Update simulation.
-			WorldViewFrame.Update(gameplayTick);
-			ScreenViewFrame.Update(gameplayTick);
+			WorldViewFrame.Update(Game::GameplayTick);
+			ScreenViewFrame.Update(Game::GameplayTick);
 		}
 
 		// TODO: Render here

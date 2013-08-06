@@ -26,6 +26,7 @@ public:
 	std::vector<std::tuple<int, int, float>> Vertices;
 	Math::Vector<3> Normal;
 	Math::Vector<2> TextureOffset;
+	Math::Vector<3> Thrust;
 	int CelNumber = -1;
 	int AnimNumber = -1;
 };

@@ -18,6 +18,9 @@ private:
 	unsigned int surface;
 	Math::Vector<3> direction;
 
+	Math::Vector<3> sb0, sb1;
+	Math::Vector<2> tb0, tb1;
+
 public:
 	SlideSurfaceAnimation(LevelModel& model, unsigned int surface, const Math::Vector<3>& direction);
 

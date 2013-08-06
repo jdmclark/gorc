@@ -10,6 +10,7 @@ void Gorc::Game::World::Level::Sounds::Sound::PlayAmbient(const Content::Assets:
 	sound.SetRelativeToListener(true);
 	sound.SetVolume(volume * 100.0f);
 	sound.SetLoop(flags & Flags::SoundFlag::Loops);
+	sound.SetPitch(1.0f);
 	sound.Play();
 }
 
@@ -22,6 +23,7 @@ void Gorc::Game::World::Level::Sounds::Sound::PlayVoice(const Content::Assets::S
 	sound.SetRelativeToListener(true);
 	sound.SetVolume(volume * 100.0f);
 	sound.SetLoop(flags & Flags::SoundFlag::Loops);
+	sound.SetPitch(1.0f);
 	sound.Play();
 }
 
@@ -41,6 +43,7 @@ void Gorc::Game::World::Level::Sounds::Sound::PlayPositional(const Content::Asse
 	sound.SetLoop(flags & Flags::SoundFlag::Loops);
 	sound.SetMinDistance(actual_min_rad);
 	sound.SetAttenuation(2.5f);
+	sound.SetPitch(1.0f);
 	sound.Play();
 }
 

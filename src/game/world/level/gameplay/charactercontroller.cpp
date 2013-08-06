@@ -136,6 +136,11 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 			// Accelerate body along surface
 			Math::Vector<3> hit_normal = Math::VecBt(rrcb.m_hitNormalWorld);
 			Math::Vector<3> new_vel = thing.Thrust - hit_normal * Math::Dot(thing.Thrust, hit_normal);
+
+			if(surfaceUserData) {
+				new_vel += presenter.Model->Surfaces[surfaceUserData->SurfaceId].Thrust / 8.0f;
+			}
+
 			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
 		}
 	}
