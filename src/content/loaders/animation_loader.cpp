@@ -45,6 +45,16 @@ void ParseAnimationHeaderSection(Assets::Animation& anim, Text::Tokenizer& tok, 
 	tok.GetNumber<unsigned int>();
 }
 
+void ParseMarkersSection(Assets::Animation& anim, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
+	tok.AssertIdentifier("MARKERS");
+	unsigned int num_markers = tok.GetNumber<unsigned int>();
+
+	for(unsigned int i = 0; i < num_markers; ++i) {
+		double frame = tok.GetNumber<double>();
+		anim.Markers.emplace_back(frame, static_cast<Flags::KeyMarkerType>(tok.GetNumber<uint32_t>()));
+	}
+}
+
 void ParseKeyframeNodesSection(Assets::Animation& anim, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
 	tok.AssertIdentifier("NODES");
 
@@ -104,6 +114,7 @@ void ParseKeyframeNodesSection(Assets::Animation& anim, Text::Tokenizer& tok, Ma
 using AnimationLoaderSectionFn = std::function<void(Assets::Animation&, Text::Tokenizer&, Manager&, Diagnostics::Report&)>;
 const std::unordered_map<std::string, AnimationLoaderSectionFn> AnimationLoaderSectionMap {
 	{ "header", ParseAnimationHeaderSection },
+	{ "markers", ParseMarkersSection },
 	{ "keyframe", ParseKeyframeNodesSection }
 };
 

@@ -12,7 +12,8 @@ enum class Type : uint8_t {
 	Float,
 	Boolean,
 	String,
-	Vector
+	Vector,
+	Dynamic
 };
 
 }

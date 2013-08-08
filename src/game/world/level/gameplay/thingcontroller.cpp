@@ -8,3 +8,7 @@ Gorc::Game::World::Level::Gameplay::ThingController::ThingController(LevelPresen
 Gorc::Game::World::Level::Gameplay::ThingController::~ThingController() {
 	return;
 }
+
+void Gorc::Game::World::Level::Gameplay::ThingController::HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker) {
+	return;
+}

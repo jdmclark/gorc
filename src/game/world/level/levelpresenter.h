@@ -17,6 +17,7 @@
 #include "game/world/level/gameplay/cogcontroller.h"
 #include "game/world/level/gameplay/ghostcontroller.h"
 #include "game/world/level/gameplay/itemcontroller.h"
+#include "game/world/level/gameplay/corpsecontroller.h"
 
 #include <memory>
 #include <stack>
@@ -53,6 +54,8 @@ private:
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 	void UpdateCamera();
 
+	Gameplay::ThingController& GetThingController(Flags::ThingType type);
+
 	bool need_respawn = false;
 	void DoRespawn();
 
@@ -69,6 +72,7 @@ public:
 	Gameplay::CogController CogController;
 	Gameplay::GhostController GhostController;
 	Gameplay::ItemController ItemController;
+	Gameplay::CorpseController CorpseController;
 
 	LevelPresenter(Components& components, const LevelPlace& place);
 
@@ -102,6 +106,7 @@ public:
 	Math::Vector<3> GetSurfaceCenter(int surface);
 	void SetAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags);
 	void SetFaceGeoMode(int surface, Flags::GeometryMode mode);
+	void SetSurfaceFlags(int surface, FlagSet<Flags::SurfaceFlag> flags);
 
 	// System verbs
 	int LoadSound(const char* sound);
@@ -121,6 +126,7 @@ public:
 
 	// Thing property verbs
 	int GetThingSector(int thing_id);
+	void SetThingType(int thing_id, Flags::ThingType type);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };

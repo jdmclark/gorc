@@ -39,6 +39,7 @@ private:
 	LevelModel* levelModel;
 	ScriptModel* model;
 	Cog::VM::VirtualMachine VirtualMachine;
+	int master_cog = -1;
 
 public:
 	ScriptPresenter(Components& components);
@@ -50,7 +51,7 @@ public:
 	void CreateLevelCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
 			const std::vector<Cog::VM::Value>& values);
 
-	void SendMessage(unsigned int InstanceId, Cog::MessageId message,
+	Cog::VM::Value SendMessage(int InstanceId, Cog::MessageId message,
 			int SenderId, int SenderRef, Flags::MessageType SenderType,
 			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
 			Cog::VM::Value Param0 = 0, Cog::VM::Value Param1 = 0, Cog::VM::Value Param2 = 0, Cog::VM::Value Param3 = 0);
@@ -60,6 +61,8 @@ public:
 	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Flags::MessageType SenderType,
 			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
 			Cog::VM::Value Param0 = 0, Cog::VM::Value Param1 = 0, Cog::VM::Value Param2 = 0, Cog::VM::Value Param3 = 0);
+
+	void ResumeWaitForStop(int wait_thing);
 
 	// COG run-time verbs
 	inline int GetParam(int param_num) { return model->RunningCogState.top().Params[param_num % 4]; }
@@ -73,6 +76,15 @@ public:
 	void SetTimer(float time);
 	void SetTimerEx(float delay, int id, Cog::VM::Value param0, Cog::VM::Value param1);
 	void Sleep(float time);
+	void WaitForStop(int thing);
+
+	inline int GetMasterCog() const {
+		return master_cog;
+	}
+
+	inline void SetMasterCog(int cog) {
+		master_cog = cog;
+	}
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };

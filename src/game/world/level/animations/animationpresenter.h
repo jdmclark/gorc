@@ -46,6 +46,8 @@ public:
 	int SlideCeilingSky(float u_speed, float v_speed);
 	int SlideSurface(int surface_id, const Math::Vector<3>& direction);
 
+	int SurfaceLightAnim(int surface_id, float start_light, float end_light, float change_time);
+
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };
 

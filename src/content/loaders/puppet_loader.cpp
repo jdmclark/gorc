@@ -110,7 +110,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::PuppetLoader::Pars
 			else {
 				Assets::PuppetSubmode& submode = mode->Submodes[static_cast<unsigned int>(it->second)];
 				submode.Animation = &manager.Load<Assets::Animation>(tok.GetSpaceDelimitedString());
-				submode.Flags = tok.GetNumber<unsigned int>();
+				submode.Flags = FlagSet<Flags::KeyFlag>(tok.GetNumber<unsigned int>());
 				submode.LoPriority = tok.GetNumber<unsigned int>();
 				submode.HiPriority = tok.GetNumber<unsigned int>();
 			}

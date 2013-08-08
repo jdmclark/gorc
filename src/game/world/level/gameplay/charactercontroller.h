@@ -11,10 +11,25 @@ class Thing;
 
 namespace Gameplay {
 
+enum class StandingMaterial {
+	None,
+	Hard,
+	Dirt,
+	Metal,
+	ShallowWater,
+	DeepWater,
+	VeryDeepWater
+};
+
 class FilteredClosestRayResultCallback;
 
 class CharacterController : public ThingController {
 private:
+	StandingMaterial GetStandingMaterial(Thing& thing);
+
+	void PlayRunningAnimation(unsigned int thing_id, Thing& thing, double speed);
+	void PlayStandingAnimation(unsigned int thing_id, Thing& thing);
+
 	void RunFallingSweep(unsigned int thing_id, Thing& thing, double dt, FilteredClosestRayResultCallback& rrcb);
 	void RunWalkingSweep(unsigned int thing_id, Thing& thing, double dt, FilteredClosestRayResultCallback& rrcb);
 	void UpdateFalling(unsigned int thing_id, Thing& thing, double dt);
@@ -32,8 +47,12 @@ public:
 	using ThingController::ThingController;
 
 	virtual void Update(unsigned int thing_id, double dt) override;
-	virtual unsigned int Create(const Content::Assets::Template& tpl, unsigned int sector_id,
-				const Math::Vector<3>& pos, const Math::Vector<3>& orient) override;
+	virtual void RemoveControllerData(unsigned int thing_id) override;
+	virtual void CreateControllerData(unsigned int thing_id) override;
+	virtual void HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker) override;
+
+	void PlayLeftRunFootstep(unsigned int thing_id);
+	void PlayRightRunFootstep(unsigned int thing_id);
 };
 
 }

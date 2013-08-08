@@ -34,6 +34,74 @@ public:
 }
 }
 
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRunningAnimation(unsigned int thing_id, Thing& thing, double speed) {
+	if(thing.ActorWalkAnimation > 0) {
+		Keys::KeyState& keyState = presenter.Model->KeyModel.Keys[thing.ActorWalkAnimation];
+		const Content::Assets::PuppetSubmode& submode = thing.Puppet->GetMode(Flags::PuppetModeType::Default).GetSubmode(Flags::PuppetSubmodeType::Run);
+		if(keyState.Animation != submode.Animation) {
+			keyState.AnimationTime = 0.0;
+		}
+
+		keyState.Animation = submode.Animation;
+		keyState.HighPriority = submode.HiPriority;
+		keyState.LowPriority = submode.LoPriority;
+		keyState.Flags = FlagSet<Flags::KeyFlag>();
+		keyState.Speed = speed;
+	}
+}
+
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayStandingAnimation(unsigned int thing_id, Thing& thing) {
+	if(thing.ActorWalkAnimation > 0) {
+		Keys::KeyState& keyState = presenter.Model->KeyModel.Keys[thing.ActorWalkAnimation];
+		const Content::Assets::PuppetSubmode& submode = thing.Puppet->GetMode(Flags::PuppetModeType::Default).GetSubmode(Flags::PuppetSubmodeType::Stand);
+		keyState.Speed = 1.0;
+		keyState.Animation = submode.Animation;
+		keyState.HighPriority = submode.HiPriority;
+		keyState.LowPriority = submode.LoPriority;
+		keyState.Flags = FlagSet<Flags::KeyFlag>();
+	}
+}
+
+Gorc::Game::World::Level::Gameplay::StandingMaterial Gorc::Game::World::Level::Gameplay::CharacterController::GetStandingMaterial(Thing& thing) {
+	if(thing.AttachFlags & Flags::AttachFlag::AttachedToThingFace) {
+		auto& floor_thing = presenter.Model->Things[thing.AttachedThing];
+		if(floor_thing.Flags & Flags::ThingFlag::Metal) {
+			return StandingMaterial::Metal;
+		}
+		else if(floor_thing.Flags & Flags::ThingFlag::Dirt) {
+			return StandingMaterial::Dirt;
+		}
+		else {
+			return StandingMaterial::Hard;
+		}
+	}
+	else if(thing.AttachFlags & Flags::AttachFlag::AttachedToWorldSurface) {
+		auto& floor_surf = presenter.Model->Surfaces[thing.AttachedSurface];
+
+		if(floor_surf.Flags & Flags::SurfaceFlag::Metal) {
+			return StandingMaterial::Metal;
+		}
+		else if(floor_surf.Flags & Flags::SurfaceFlag::Dirt) {
+			return StandingMaterial::Dirt;
+		}
+		else if(floor_surf.Flags & Flags::SurfaceFlag::ShallowWater) {
+			return StandingMaterial::ShallowWater;
+		}
+		else if(floor_surf.Flags & Flags::SurfaceFlag::DeepWater) {
+			return StandingMaterial::DeepWater;
+		}
+		else if(floor_surf.Flags & Flags::SurfaceFlag::VeryDeepWater) {
+			return StandingMaterial::VeryDeepWater;
+		}
+		else {
+			return StandingMaterial::Hard;
+		}
+	}
+	else {
+		return StandingMaterial::None;
+	}
+}
+
 void Gorc::Game::World::Level::Gameplay::CharacterController::RunFallingSweep(unsigned int thing_id, Thing& thing,
 		double dt, FilteredClosestRayResultCallback& rrcb) {
 	// Test for collision between legs and ground
@@ -89,6 +157,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateFalling(unsi
 	RunFallingSweep(thing_id, thing, dt, rrcb);
 
 	thing.RigidBody->applyCentralImpulse(btVector3(Math::Get<0>(thing.Thrust), Math::Get<1>(thing.Thrust), 0.0f));
+	PlayStandingAnimation(thing_id, thing);
 
 	if(rrcb.hasHit() && thing.RigidBody->getLinearVelocity().getZ() < 0.0f) {
 		// Check if attached surface/thing has changed.
@@ -142,6 +211,15 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 			}
 
 			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
+
+			// Update idle animation
+			float new_vel_len = Math::Length(new_vel);
+			if(new_vel_len > 0.0f) {
+				PlayRunningAnimation(thing_id, thing, new_vel_len * 30.0f);
+			}
+			else {
+				PlayStandingAnimation(thing_id, thing);
+			}
 		}
 	}
 }
@@ -176,7 +254,8 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 		else {
 			// Accelerate body along surface
 			Math::Vector<3> hit_normal = Math::VecBt(rrcb.m_hitNormalWorld);
-			Math::Vector<3> new_vel = thing.Thrust - hit_normal * Math::Dot(thing.Thrust, hit_normal);
+			Math::Vector<3> player_new_vel = thing.Thrust - hit_normal * Math::Dot(thing.Thrust, hit_normal);
+			Math::Vector<3> new_vel = player_new_vel;
 
 			if(thingUserData) {
 				new_vel += (presenter.Model->Things[thingUserData->ThingId].Position - thing.PrevAttachedThingPosition) / dt;
@@ -184,6 +263,15 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 			}
 
 			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
+
+			// Update idle animation
+			float player_new_vel_len = Math::Length(player_new_vel);
+			if(player_new_vel_len > 0.0f) {
+				PlayRunningAnimation(thing_id, thing, player_new_vel_len * 30.0f);
+			}
+			else {
+				PlayStandingAnimation(thing_id, thing);
+			}
 		}
 	}
 }
@@ -321,18 +409,16 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::Update(unsigned in
 	}
 }
 
-unsigned int Gorc::Game::World::Level::Gameplay::CharacterController::Create(const Content::Assets::Template& tpl,
-		unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
-	auto new_thing_tuple = presenter.Model->Things.Create();
-	auto& new_thing = *std::get<0>(new_thing_tuple);
-	new_thing = tpl;
+void Gorc::Game::World::Level::Gameplay::CharacterController::RemoveControllerData(unsigned int thing_id) {
+	auto& thing = presenter.Model->Things[thing_id];
+	presenter.Model->DynamicsWorld.removeRigidBody(thing.RigidBody.get());
+}
 
-	new_thing.Sector = sector_num;
-	new_thing.Position = pos;
-	new_thing.Orientation = orient;
+void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerData(unsigned int thing_id) {
+	auto& new_thing = presenter.Model->Things[thing_id];
 
 	static const float deg2rad = 0.0174532925f;
-	btQuaternion orientation(btVector3(0,0,1), deg2rad * Math::Get<1>(orient));
+	btQuaternion orientation(btVector3(0,0,1), deg2rad * Math::Get<1>(new_thing.Orientation));
 
 	float thing_mass = new_thing.Mass;
 	new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(0.04f));
@@ -342,7 +428,7 @@ unsigned int Gorc::Game::World::Level::Gameplay::CharacterController::Create(con
 	thingShape->calculateLocalInertia(thing_mass, thing_inertia);
 
 	new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
-			btTransform(orientation, Math::BtVec(pos))));
+			btTransform(orientation, Math::BtVec(new_thing.Position))));
 
 	btRigidBody::btRigidBodyConstructionInfo actor_ci(thing_mass, new_thing.MotionState.get(),
 			thingShape, thing_inertia);
@@ -350,7 +436,7 @@ unsigned int Gorc::Game::World::Level::Gameplay::CharacterController::Create(con
 
 	FlagSet<PhysicsCollideClass> CollideType {PhysicsCollideClass::Thing};
 
-	if(tpl.Type == Flags::ThingType::Player) {
+	if(new_thing.Type == Flags::ThingType::Player) {
 		CollideType += PhysicsCollideClass::Player;
 	}
 	else {
@@ -360,8 +446,8 @@ unsigned int Gorc::Game::World::Level::Gameplay::CharacterController::Create(con
 	FlagSet<PhysicsCollideClass> CollideWith { PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing };
 
 	// Associate thing info structure.
-	new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
-	new_thing.ObjectData.SectorId = sector_num;
+	new_thing.ObjectData.ThingId = thing_id;
+	new_thing.ObjectData.SectorId = new_thing.Sector;
 	new_thing.ObjectData.CollisionGroup = CollideType;
 	new_thing.ObjectData.CollisionMask = CollideWith;
 	new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
@@ -371,5 +457,89 @@ unsigned int Gorc::Game::World::Level::Gameplay::CharacterController::Create(con
 
 	presenter.Model->DynamicsWorld.addRigidBody(new_thing.RigidBody.get());
 
-	return std::get<1>(new_thing_tuple);
+	// HACK: Initialize actor walk animation
+	if(new_thing.Puppet) {
+		new_thing.ActorWalkAnimation = presenter.KeyPresenter.PlayPuppetKey(thing_id, Flags::PuppetModeType::Default, Flags::PuppetSubmodeType::Stand);
+		Keys::KeyState& keyState = presenter.Model->KeyModel.Keys[new_thing.ActorWalkAnimation];
+		keyState.Flags = FlagSet<Flags::KeyFlag>();
+	}
+	else {
+		new_thing.ActorWalkAnimation = -1;
+	}
+}
+
+void Gorc::Game::World::Level::Gameplay::CharacterController::HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker) {
+	switch(marker) {
+	case Flags::KeyMarkerType::LeftRunFootstep:
+		PlayLeftRunFootstep(thing_id);
+		break;
+
+	case Flags::KeyMarkerType::RightRunFootstep:
+		PlayRightRunFootstep(thing_id);
+		break;
+	}
+}
+
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayLeftRunFootstep(unsigned int thing_id) {
+	auto& thing = presenter.Model->Things[thing_id];
+	StandingMaterial mat = GetStandingMaterial(thing);
+
+	switch(mat) {
+	case StandingMaterial::Metal:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::LRunMetal);
+		break;
+
+	case StandingMaterial::Dirt:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::LRunEarth);
+		break;
+
+	case StandingMaterial::ShallowWater:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::LRunPuddle);
+		break;
+
+	case StandingMaterial::DeepWater:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::LRunWater);
+		break;
+
+	case StandingMaterial::VeryDeepWater:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::LRunWater);
+		break;
+
+	default:
+	case StandingMaterial::Hard:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::LRunHard);
+		break;
+	}
+}
+
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRightRunFootstep(unsigned int thing_id) {
+	auto& thing = presenter.Model->Things[thing_id];
+	StandingMaterial mat = GetStandingMaterial(thing);
+
+	switch(mat) {
+	case StandingMaterial::Metal:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::RRunMetal);
+		break;
+
+	case StandingMaterial::Dirt:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::RRunEarth);
+		break;
+
+	case StandingMaterial::ShallowWater:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::RRunPuddle);
+		break;
+
+	case StandingMaterial::DeepWater:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::RRunWater);
+		break;
+
+	case StandingMaterial::VeryDeepWater:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::RRunWater);
+		break;
+
+	default:
+	case StandingMaterial::Hard:
+		presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::RRunHard);
+		break;
+	}
 }

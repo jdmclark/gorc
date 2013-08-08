@@ -6,7 +6,8 @@ using namespace Gorc::Math;
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
 	: components(components), place(place), ScriptPresenter(components), SoundPresenter(*place.ContentManager),
 	  KeyPresenter(*place.ContentManager),
-	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this), ItemController(*this) {
+	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
+	  ItemController(*this), CorpseController(*this) {
 	return;
 }
 
@@ -104,6 +105,29 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 
 	// Update camera position
 	UpdateCamera();
+}
+
+Gorc::Game::World::Level::Gameplay::ThingController& Gorc::Game::World::Level::LevelPresenter::GetThingController(Flags::ThingType type) {
+	switch(type) {
+	case Flags::ThingType::Actor:
+		return ActorController;
+
+	case Flags::ThingType::Cog:
+		return CogController;
+
+	case Flags::ThingType::Player:
+		return PlayerController;
+
+	case Flags::ThingType::Corpse:
+		return CorpseController;
+
+	case Flags::ThingType::Item:
+		return ItemController;
+
+	default:
+	case Flags::ThingType::Ghost:
+		return GhostController;
+	}
 }
 
 bool Gorc::Game::World::Level::LevelPresenter::PointInsideSector(const Math::Vector<3>& position, const Gorc::Content::Assets::LevelSector& sec) {
@@ -515,6 +539,12 @@ void Gorc::Game::World::Level::LevelPresenter::SetFaceGeoMode(int surface, Flags
 	Model->Surfaces[surface].GeometryMode = geo_mode;
 }
 
+void Gorc::Game::World::Level::LevelPresenter::SetSurfaceFlags(int surface, FlagSet<Flags::SurfaceFlag> flags) {
+	Content::Assets::LevelSurface& surf = Model->Surfaces[surface];
+	surf.Flags += flags;
+	Model->UpdateSurfacePhysicsProperties(surface);
+}
+
 // System verbs
 int Gorc::Game::World::Level::LevelPresenter::LoadSound(const char* fn) {
 	return place.ContentManager->LoadId<Content::Assets::Sound>(fn);
@@ -524,23 +554,19 @@ int Gorc::Game::World::Level::LevelPresenter::LoadSound(const char* fn) {
 
 unsigned int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
-	switch(tpl.Type) {
-	case Flags::ThingType::Actor:
-		return ActorController.Create(tpl, sector_num, pos, orient);
+	// Initialize thing properties
+	auto thing_tpl = Model->Things.Create();
+	auto& thing = *std::get<0>(thing_tpl);
 
-	case Flags::ThingType::Cog:
-		return CogController.Create(tpl, sector_num, pos, orient);
+	thing = tpl;
+	thing.Sector = sector_num;
+	thing.Position = pos;
+	thing.Orientation = orient;
+	thing.Controller = &GetThingController(thing.Type);
 
-	case Flags::ThingType::Player:
-		return PlayerController.Create(tpl, sector_num, pos, orient);
+	thing.Controller->CreateControllerData(std::get<1>(thing_tpl));
 
-	case Flags::ThingType::Item:
-		return ItemController.Create(tpl, sector_num, pos, orient);
-
-	default:
-	case Flags::ThingType::Ghost:
-		return GhostController.Create(tpl, sector_num, pos, orient);
-	}
+	return std::get<1>(thing_tpl);
 }
 
 unsigned int Gorc::Game::World::Level::LevelPresenter::CreateThing(int tpl_id, unsigned int sector_num,
@@ -566,7 +592,9 @@ void Gorc::Game::World::Level::LevelPresenter::AdjustThingPosition(unsigned int 
 	Thing& thing = Model->Things[thing_id];
 	auto oldPosition = thing.Position;
 	thing.Position = new_pos;
-	thing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(new_pos)));
+	if(thing.RigidBody) {
+		thing.RigidBody->proceedToTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos)));
+	}
 	UpdateThingSector(thing_id, thing, oldPosition);
 }
 
@@ -587,15 +615,17 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float 
 			SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::Death1);
 			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Killed, thing_id, Flags::MessageType::Thing,
 					damager_id, Flags::MessageType::Thing);
-			// TODO: Thing is dead. Replace destroy code with corpse creation code.
-			if(referencedThing.RigidBody) {
-				Model->DynamicsWorld.removeRigidBody(referencedThing.RigidBody.get());
+			// TODO: Thing is dead. Reset to corpse
+			SetThingType(thing_id, Flags::ThingType::Corpse);
+			if(referencedThing.Puppet) {
+				KeyPresenter.PlayPuppetKey(thing_id, Flags::PuppetModeType::Default, Flags::PuppetSubmodeType::Death);
 			}
-
-			referencedThing.Flags += Flags::ThingFlag::Invisible;
 		}
 		else {
 			SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::HurtSpecial);
+			if(referencedThing.Puppet) {
+				KeyPresenter.PlayPuppetKey(thing_id, Flags::PuppetModeType::Default, Flags::PuppetSubmodeType::Hit);
+			}
 		}
 	}
 
@@ -606,6 +636,7 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float 
 
 void Gorc::Game::World::Level::LevelPresenter::DestroyThing(int thing_id) {
 	// TODO: Clean up components owned by thing (animations, key mixes, sounds).
+	Model->Things[thing_id].Controller->RemoveControllerData(thing_id);
 	Model->Things.Destroy(thing_id);
 }
 
@@ -634,6 +665,18 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 // Thing property verbs
 int Gorc::Game::World::Level::LevelPresenter::GetThingSector(int thing_id) {
 	return Model->Things[thing_id].Sector;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::SetThingType(int thing_id, Flags::ThingType type) {
+	// Clean up type physics.
+	auto& thing = Model->Things[thing_id];
+	thing.Controller->RemoveControllerData(thing_id);
+
+	thing.Type = type;
+
+	// Install new controller
+	thing.Controller = &GetThingController(thing.Type);
+	thing.Controller->CreateControllerData(thing_id);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
@@ -727,11 +770,19 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		components.CurrentLevelPresenter->SetFaceGeoMode(surface, static_cast<Flags::GeometryMode>(mode));
 	});
 
+	verbTable.AddVerb<void, 2>("setsurfaceflags", [&components](int surface, int flags) {
+		components.CurrentLevelPresenter->SetSurfaceFlags(surface, FlagSet<Flags::SurfaceFlag>(flags));
+	});
+
 	verbTable.AddVerb<Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
 		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
 	});
 
 	// System verbs
+	verbTable.AddVerb<int, 2>("bittest", [](int flag1, int flag2) {
+		return flag1 & flag2;
+	});
+
 	verbTable.AddVerb<int, 1>("loadsound", [&components](const char* fn) {
 		return components.CurrentLevelPresenter->LoadSound(fn);
 	});

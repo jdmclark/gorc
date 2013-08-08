@@ -8,13 +8,14 @@ namespace World {
 namespace Level {
 namespace Gameplay {
 
-class ItemController : public ThingController {
+class CorpseController : public ThingController {
 public:
 	using ThingController::ThingController;
 
 	virtual void Update(unsigned int thing_id, double dt) override;
 	virtual void RemoveControllerData(unsigned int thing_id) override;
 	virtual void CreateControllerData(unsigned int thing_id) override;
+	virtual void HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker) override;
 };
 
 }

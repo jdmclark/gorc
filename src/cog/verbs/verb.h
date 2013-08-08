@@ -34,6 +34,10 @@ template <> struct helper_get_vm_type<Math::Vector<3>> {
 	static const VM::Type Type = VM::Type::Vector;
 };
 
+template <> struct helper_get_vm_type<VM::Value> {
+	static const VM::Type Type = VM::Type::Dynamic;
+};
+
 class BaseVerb {
 private:
 	const size_t parameterCount;

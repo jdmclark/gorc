@@ -107,6 +107,10 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::StopFoleyLoop(int thing) 
 }
 
 int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
+	if(wav < 0) {
+		return -1;
+	}
+
 	auto snd_tuple = model->Sounds.Create();
 
 	Sound& snd = *std::get<0>(snd_tuple);
@@ -117,6 +121,10 @@ int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundLocal(int wav, fl
 
 int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad,
 		FlagSet<Flags::SoundFlag> flags) {
+	if(wav < 0) {
+		return -1;
+	}
+
 	auto snd_tuple = model->Sounds.Create();
 
 	Sound& snd = *std::get<0>(snd_tuple);
@@ -127,6 +135,10 @@ int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundPos(int wav, Math
 
 int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad,
 		FlagSet<Flags::SoundFlag> flags) {
+	if(wav < 0) {
+		return -1;
+	}
+
 	auto snd_tuple = model->Sounds.Create();
 
 	Sound& snd = *std::get<0>(snd_tuple);
@@ -140,8 +152,10 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::SetMusicVol(float volume)
 }
 
 void Gorc::Game::World::Level::Sounds::SoundPresenter::StopSound(int channel, float delay) {
-	Sound& sound = model->Sounds[channel];
-	sound.Stop(delay);
+	if(channel >= 0) {
+		Sound& sound = model->Sounds[channel];
+		sound.Stop(delay);
+	}
 }
 
 void Gorc::Game::World::Level::Sounds::SoundPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {

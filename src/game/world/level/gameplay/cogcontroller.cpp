@@ -42,10 +42,13 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(un
 		if(thing.CurrentFrame == thing.GoalFrame) {
 			thing.PathMoving = false;
 			thing.PathMoveSpeed = 0.0f;
-			presenter.ScriptPresenter.SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Flags::MessageType::Thing);
 			thing.RigidBody->setActivationState(0);
 			presenter.SoundPresenter.StopFoleyLoop(thing_id);
 			presenter.SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::StopMove);
+
+			// Dispatch cog messages and resume cogs which are waiting for stop.
+			presenter.ScriptPresenter.SendMessageToLinked(Cog::MessageId::Arrived, thing_id, Flags::MessageType::Thing);
+			presenter.ScriptPresenter.ResumeWaitForStop(thing_id);
 		}
 		else if(thing.CurrentFrame < thing.GoalFrame) {
 			thing.NextFrame = thing.CurrentFrame + 1;
@@ -68,21 +71,19 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(un
 	}
 }
 
-unsigned int Gorc::Game::World::Level::Gameplay::CogController::Create(const Content::Assets::Template& tpl,
-		unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
-	auto new_thing_tuple = presenter.Model->Things.Create();
-	auto& new_thing = *std::get<0>(new_thing_tuple);
-	new_thing = tpl;
+void Gorc::Game::World::Level::Gameplay::CogController::RemoveControllerData(unsigned int thing_id) {
+	auto& thing = presenter.Model->Things[thing_id];
+	presenter.Model->DynamicsWorld.removeRigidBody(thing.RigidBody.get());
+}
 
-	new_thing.Sector = sector_num;
-	new_thing.Position = pos;
-	new_thing.Orientation = orient;
+void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(unsigned int thing_id) {
+	auto& new_thing = presenter.Model->Things[thing_id];
 
 	static const float deg2rad = 0.0174532925f;
 	btQuaternion orientation(0.0f, 0.0f, 0.0f, 1.0f);
-	orientation *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(orient)); // Yaw
-	orientation *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(orient)); // Pitch
-	orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
+	orientation *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(new_thing.Orientation)); // Yaw
+	orientation *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(new_thing.Orientation)); // Pitch
+	orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(new_thing.Orientation)); // Roll
 
 	float thing_mass = 0.0f;
 	if(new_thing.Move == Flags::MoveType::Physics && new_thing.Collide != Flags::CollideType::None) {
@@ -97,12 +98,12 @@ unsigned int Gorc::Game::World::Level::Gameplay::CogController::Create(const Con
 	}
 
 	btCollisionShape* thingShape;
-	if(tpl.Flags & FlagSet<Flags::ThingFlag>{ Flags::ThingFlag::PartOfWorldGeometry, Flags::ThingFlag::CanStandOn }) {
+	if(new_thing.Flags & FlagSet<Flags::ThingFlag>{ Flags::ThingFlag::PartOfWorldGeometry, Flags::ThingFlag::CanStandOn }) {
 		thingShape = new_thing.Model3d->Shape.get();
 		CollideType += PhysicsCollideClass::Floor;
 	}
 	else {
-		new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(tpl.Size * 0.5f));
+		new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(new_thing.Size * 0.5f));
 		thingShape = new_thing.ActorCollideShape.get();
 	}
 
@@ -110,14 +111,14 @@ unsigned int Gorc::Game::World::Level::Gameplay::CogController::Create(const Con
 	thingShape->calculateLocalInertia(thing_mass, thing_inertia);
 
 	new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
-			btTransform(orientation, Math::BtVec(pos))));
+			btTransform(orientation, Math::BtVec(new_thing.Position))));
 	new_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(
 			btRigidBody::btRigidBodyConstructionInfo(thing_mass, new_thing.MotionState.get(),
 					thingShape, thing_inertia)));
 
 	// Associate thing info structure.
-	new_thing.ObjectData.ThingId = std::get<1>(new_thing_tuple);
-	new_thing.ObjectData.SectorId = sector_num;
+	new_thing.ObjectData.ThingId = thing_id;
+	new_thing.ObjectData.SectorId = new_thing.Sector;
 	new_thing.ObjectData.CollisionGroup = CollideType;
 	new_thing.ObjectData.CollisionMask = CollideWith;
 
@@ -132,6 +133,4 @@ unsigned int Gorc::Game::World::Level::Gameplay::CogController::Create(const Con
 	}
 
 	presenter.Model->DynamicsWorld.addRigidBody(new_thing.RigidBody.get());
-	new_thing.Controller = this;
-	return std::get<1>(new_thing_tuple);
 }

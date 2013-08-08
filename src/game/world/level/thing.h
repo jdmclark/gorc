@@ -32,6 +32,7 @@ public:
 
 	// HACK: Play idle animation
 	int AttachedKeyMix = -1;
+	int ActorWalkAnimation = -1;
 
 	std::unique_ptr<btCollisionShape> ActorCollideShape;
 

@@ -9,7 +9,7 @@ namespace Assets {
 class PuppetSubmode {
 public:
 	Animation const* Animation;
-	unsigned int Flags;
+	FlagSet<Flags::KeyFlag> Flags;
 	unsigned int LoPriority;
 	unsigned int HiPriority;
 };

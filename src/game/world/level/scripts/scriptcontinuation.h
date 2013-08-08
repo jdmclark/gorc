@@ -20,6 +20,7 @@ public:
 	int SourceRef;
 	Flags::MessageType SourceType;
 	std::array<Cog::VM::Value, 4> Params;
+	Cog::VM::Value ReturnExValue;
 
 	unsigned int ProgramCounter;
 

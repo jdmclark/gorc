@@ -6,6 +6,7 @@
 #include "slideceilingskyanimation.h"
 #include "slidesurfaceanimation.h"
 #include "surfacematerialanimation.h"
+#include "surfacelightanimation.h"
 
 void Gorc::Game::World::Level::Animations::AnimationPresenter::Start(LevelModel& levelModel, AnimationModel& model) {
 	this->levelModel = &levelModel;
@@ -59,6 +60,12 @@ int Gorc::Game::World::Level::Animations::AnimationPresenter::SlideCeilingSky(fl
 	return std::get<1>(ent_tuple);
 }
 
+int Gorc::Game::World::Level::Animations::AnimationPresenter::SurfaceLightAnim(int surface, float start_light, float end_light, float change_time) {
+	auto ent_tuple = model->Animations.Create();
+	*std::get<0>(ent_tuple) = std::unique_ptr<Animation>(new SurfaceLightAnimation(*levelModel, surface, start_light, end_light, change_time));
+	return std::get<1>(ent_tuple);
+}
+
 void Gorc::Game::World::Level::Animations::AnimationPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
 	verbTable.AddVerb<int, 1>("getsurfaceanim", [&components](int surface) {
 		return components.CurrentLevelPresenter->AnimationPresenter.GetSurfaceAnim(surface);
@@ -96,5 +103,9 @@ void Gorc::Game::World::Level::Animations::AnimationPresenter::RegisterVerbs(Cog
 
 	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) {
 		components.CurrentLevelPresenter->AnimationPresenter.StopAnim(anim);
+	});
+
+	verbTable.AddVerb<void, 4>("surfacelightanim", [&components](int surface, float start_light, float end_light, float change_time) {
+		return components.CurrentLevelPresenter->AnimationPresenter.SurfaceLightAnim(surface, start_light, end_light, change_time);
 	});
 }

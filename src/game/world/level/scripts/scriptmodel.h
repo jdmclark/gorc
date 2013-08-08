@@ -19,6 +19,7 @@ class ScriptModel {
 public:
 	std::vector<std::tuple<std::unique_ptr<Cog::Instance>, ScriptTimerState>> Cogs;
 	Pool<std::tuple<double, ScriptContinuation>, 8> SleepingCogs;
+	Pool<std::tuple<int, ScriptContinuation>, 8> WaitForStopCogs;
 	std::stack<ScriptContinuation> RunningCogState;
 	Pool<ScriptTimer> Timers;
 };

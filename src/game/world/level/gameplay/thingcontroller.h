@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/math/vector.h"
+#include "content/flags/keymarkertype.h"
 
 namespace Gorc {
 
@@ -27,8 +28,9 @@ public:
 	virtual ~ThingController();
 
 	virtual void Update(unsigned int thing_id, double dt) = 0;
-	virtual unsigned int Create(const Content::Assets::Template& tpl, unsigned int sector_id,
-			const Math::Vector<3>& pos, const Math::Vector<3>& orient) = 0;
+	virtual void RemoveControllerData(unsigned int thing_id) = 0;
+	virtual void CreateControllerData(unsigned int thing_id) = 0;
+	virtual void HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker);
 };
 
 }

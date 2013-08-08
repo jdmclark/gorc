@@ -43,6 +43,10 @@ void TextPrinter::writeValue(const VM::Value& value) {
 	case VM::Type::Void:
 		stream << "void()";
 		break;
+
+	case VM::Type::Dynamic:
+		stream << "dynamic(?)";
+		break;
 	}
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/assets/animation.h"
+#include "keymixlevelstate.h"
 
 namespace Gorc {
 namespace Game {
@@ -10,9 +10,8 @@ namespace Keys {
 
 class KeyMix {
 public:
-	bool Playing = false;
-	Content::Assets::Animation const* Animation = nullptr;
-	double AnimationTime = 0.0f;
+	int AttachedThing;
+	KeyMixLevelState High, Low, Body;
 };
 
 }

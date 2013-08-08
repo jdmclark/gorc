@@ -229,14 +229,17 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 		for(size_t i = sector.FirstSurface; i < sector.FirstSurface + sector.SurfaceCount; ++i) {
 			const auto& surface = currentModel->Surfaces[i];
 
+			if(surface.GeometryMode == Flags::GeometryMode::NotDrawn) {
+				continue;
+			}
+
 			if(surface.Adjoin < 0 && (surface.Flags & Flags::SurfaceFlag::HorizonSky)) {
 				horizon_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
 			}
 			else if(surface.Adjoin < 0 && (surface.Flags & Flags::SurfaceFlag::CeilingSky)) {
 				ceiling_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
 			}
-			else if((surface.FaceTypeFlags & Flags::FaceFlag::Translucent) ||
-					(surface.Adjoin >= 0 && surface.GeometryMode != Flags::GeometryMode::NotDrawn)) {
+			else if(surface.Adjoin >= 0) {
 				translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, i, 0.0f));
 			}
 			else {
@@ -438,14 +441,7 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const
 	Math::Vector<3> anim_rotate = Math::Zero<3>();
 
 	if(thing.AttachedKeyMix >= 0) {
-		Keys::KeyMix& mix = currentModel->KeyModel.Mixes[thing.AttachedKeyMix];
-		if(mix.Animation && mix.Playing) {
-			std::tie(anim_translate, anim_rotate) = GetNodeFrame(*mix.Animation, mesh_id, mix.AnimationTime);
-		}
-		else {
-			anim_translate += node.Offset;
-			anim_rotate += node.Rotation;
-		}
+		std::tie(anim_translate, anim_rotate) = currentPresenter->KeyPresenter.GetNodeFrame(thing.AttachedKeyMix, mesh_id, node.Type);
 	}
 	else {
 		anim_translate += node.Offset;
@@ -548,40 +544,6 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 	DrawMeshNode(thing, model, 0, sector_light);
 
 	glPopMatrix();
-}
-
-std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::LevelView::GetNodeFrame(const Content::Assets::Animation& anim,
-		int mesh, double anim_time) {
-	const Content::Assets::AnimationNode& anim_node = anim.Nodes[mesh];
-
-	if(anim_node.Frames.empty()) {
-		// Abort if there are no frames to interpolate.
-		return std::make_tuple(Math::Zero<3>(), Math::Zero<3>());
-	}
-
-	// Convert anim_time into a frame number
-	double frame = anim.FrameRate * anim_time; //std::fmod(anim.FrameRate * anim_time, anim.FrameCount);
-	int actual_frame = static_cast<int>(std::floor(frame));
-
-	auto comp_fn = [](int tgt_fr, const Content::Assets::AnimationFrame& fr) {
-		return fr.Frame > tgt_fr;
-	};
-
-	// Find frame immediately after desired frame, then back off.
-	auto it = std::upper_bound(anim_node.Frames.begin(), anim_node.Frames.end(), actual_frame, comp_fn);
-	if(it == anim_node.Frames.begin()) {
-		it = anim_node.Frames.end() - 1;
-	}
-	else {
-		--it;
-	}
-
-	float remaining_frame_time = static_cast<float>(frame) - static_cast<float>(it->Frame);
-
-	auto position = it->Position + remaining_frame_time * it->DeltaPosition;
-	auto orientation = it->Orientation + remaining_frame_time * it->DeltaOrientation;
-
-	return std::make_tuple(position, orientation);
 }
 
 void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {

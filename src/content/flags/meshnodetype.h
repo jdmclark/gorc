@@ -6,6 +6,9 @@ namespace Gorc {
 namespace Flags {
 
 enum class MeshNodeType : unsigned int {
+	LowerBody		= 0x000F0,
+	UpperBody		= 0x0000F,
+
 	Torso 			= 0x00001,
 	LeftArm 		= 0x00002,
 	RightArm		= 0x00004,
