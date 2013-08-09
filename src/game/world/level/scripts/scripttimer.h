@@ -1,6 +1,8 @@
 #pragma once
 
 #include "cog/vm/value.h"
+#include "scriptinstance.h"
+#include "framework/id.h"
 
 namespace Gorc {
 namespace Game {
@@ -11,7 +13,7 @@ namespace Scripts {
 class ScriptTimer {
 public:
 	double Delay;
-	unsigned int InstanceId;
+	int InstanceId;
 	Cog::VM::Value Id, Param0, Param1;
 };
 

@@ -63,7 +63,7 @@ void Gorc::Game::World::Level::Sounds::Sound::PlaySoundPos(const Content::Assets
 	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, unsigned int thing, float volume,
+void Gorc::Game::World::Level::Sounds::Sound::PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, Id<Thing> thing, float volume,
 		float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
 	this->thing = thing;
 	update_position = (flags & Flags::SoundFlag::ThingOriginMovesWithThing);

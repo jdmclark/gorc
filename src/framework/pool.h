@@ -6,8 +6,30 @@
 #include <memory>
 #include <boost/integer/static_log2.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include "id.h"
 
 namespace Gorc {
+
+template <typename T> class PoolPtr {
+public:
+	std::unique_ptr<T> Value;
+
+	inline T& operator*() {
+		return *Value;
+	}
+
+	inline const T& operator*() const {
+		return *Value;
+	}
+
+	inline T* operator->() {
+		return Value.get();
+	}
+
+	inline T const* operator->() const {
+		return Value.get();
+	}
+};
 
 template <typename T, size_t PageSize = 128> class Pool {
 	static_assert(PageSize > 0 && (PageSize & (PageSize - 1)) == 0, "PageSize must be a power of 2");
@@ -15,65 +37,83 @@ template <typename T, size_t PageSize = 128> class Pool {
 	static const size_t PageOffsetMask = PageSize - 1;
 	friend class Iterator;
 
-	class PoolObject {
+public:
+	class Element : public T {
+		friend class Pool;
+		Element* pool_next_free = nullptr;
+		Id<T> pool_element_id;
+
 	public:
-		T value;
-		unsigned int number;
-		PoolObject* next_free = nullptr;
+		inline Id<T> GetId() const {
+			return pool_element_id;
+		}
+
+		Element() = default;
+
+		Element(const T& value) {
+			*this = value;
+		}
+
+		template <typename U> auto operator=(const U& value) -> decltype(T::operator=(value)) {
+			return T::operator=(value);
+		}
 	};
 
-	std::function<void(Pool&, unsigned int, T&)> del_cb;
-	PoolObject* first_free = nullptr;
-	std::vector<std::unique_ptr<std::array<PoolObject, PageSize>>> pages;
+private:
+	std::function<void(Pool&, Element&)> del_cb;
+	Element* first_free = nullptr;
+	std::vector<std::unique_ptr<std::array<Element, PageSize>>> pages;
 
 	void AddPage() {
-		unsigned int page_base = (pages.size() << PageNumberShift) | PageOffsetMask;
+		int page_base = (pages.size() << PageNumberShift) | PageOffsetMask;
 
-		pages.emplace_back(new std::array<PoolObject, PageSize>());
+		pages.emplace_back(new std::array<Element, PageSize>());
 
-		PoolObject* next_free = nullptr;
+		Element* next_free = nullptr;
 		for(auto& obj : *pages.back() | boost::adaptors::reversed) {
-			obj.next_free = next_free;
-			obj.number = page_base--;
+			obj.pool_next_free = next_free;
+			obj.pool_element_id = Id<T>(page_base--);
 			next_free = &obj;
 		}
 
 		first_free = next_free;
 	}
 
-	PoolObject& GetPoolObject(unsigned int index) {
+	Element& GetPoolObject(Id<T> id) {
+		int index = static_cast<int>(id);
 		unsigned int page_num = index >> PageNumberShift;
 		unsigned int item_num = index & PageOffsetMask;
 
 		return (*pages[page_num])[item_num];
 	}
 
-	const PoolObject& GetPoolObject(unsigned int index) const {
+	const Element& GetPoolObject(Id<T> id) const {
+		int index = static_cast<int>(id);
 		unsigned int page_num = index >> PageNumberShift;
 		unsigned int item_num = index & PageOffsetMask;
 
 		return (*pages[page_num])[item_num];
 	}
 
-	static void DefaultDestroyCallback(Pool& pool, unsigned int index, T& value) {
+	static void DefaultDestroyCallback(Pool& pool, Element& value) {
 		return;
 	}
 
-	unsigned int GetIndexUpperBound() const {
+	int GetIndexUpperBound() const {
 		return ((pages.size() - 1) << PageNumberShift) | PageOffsetMask;
 	}
 
 public:
 	class Iterator {
 	private:
-		unsigned int index;
+		int index;
 		Pool* pool;
 
 		void Advance() {
-			unsigned int upper_bound = pool->GetIndexUpperBound();
+			int upper_bound = pool->GetIndexUpperBound();
 			++index;
 			while(index < upper_bound) {
-				if(!pool->GetPoolObject(index).next_free) {
+				if(!pool->GetPoolObject(Id<T>(index)).pool_next_free) {
 					return;
 				}
 				++index;
@@ -89,9 +129,9 @@ public:
 			return;
 		}
 
-		Iterator(unsigned int index, Pool* pool)
-			: index(index), pool(pool) {
-			if(pool->GetPoolObject(index).next_free) {
+		Iterator(Id<T> index, Pool* pool)
+			: index(static_cast<int>(index)), pool(pool) {
+			if(pool->GetPoolObject(Id<T>(index)).pool_next_free) {
 				Advance();
 			}
 			return;
@@ -105,12 +145,12 @@ public:
 			return pool != it.pool || index != it.index;
 		}
 
-		T& operator*() {
-			return (*pool)[index];
+		Element& operator*() {
+			return (*pool)[Id<T>(index)];
 		}
 
-		T* operator->() {
-			return &(*pool)[index];
+		Element* operator->() {
+			return &(*pool)[Id<T>(index)];
 		}
 
 		Iterator& operator++() {
@@ -123,32 +163,28 @@ public:
 			Advance();
 			return cpy;
 		}
-
-		unsigned int GetIndex() const {
-			return index;
-		}
 	};
 
-	Pool(std::function<void(Pool&, unsigned int, T&)> delete_callback = DefaultDestroyCallback)
+	Pool(std::function<void(Pool&, Element&)> delete_callback = DefaultDestroyCallback)
 		: del_cb(delete_callback), first_free(nullptr) {
 		AddPage();
 		return;
 	}
 
-	T& operator[](unsigned int index) {
-		return GetPoolObject(index).value;
+	Element& operator[](Id<T> index) {
+		return GetPoolObject(index);
 	}
 
-	const T& operator[](unsigned int index) const {
-		return GetPoolObject(index).value;
+	const Element& operator[](Id<T> index) const {
+		return GetPoolObject(index);
 	}
 
-	std::tuple<T*, unsigned int> Create() {
+	Element& Create() {
 		if(first_free) {
-			PoolObject* obj = first_free;
-			first_free = obj->next_free;
-			obj->next_free = nullptr;
-			return std::make_tuple(&obj->value, obj->number);
+			Element* obj = first_free;
+			first_free = obj->pool_next_free;
+			obj->pool_next_free = nullptr;
+			return *obj;
 		}
 		else {
 			AddPage();
@@ -156,15 +192,19 @@ public:
 		}
 	}
 
-	void Destroy(unsigned int index) {
+	void Destroy(Element& em) {
+		em.pool_next_free = first_free;
+		first_free = &em;
+		del_cb(*this, em);
+	}
+
+	void Destroy(Id<T> index) {
 		auto& obj = GetPoolObject(index);
-		obj.next_free = first_free;
-		first_free = &obj;
-		del_cb(*this, index, obj.value);
+		Destroy(obj);
 	}
 
 	Iterator begin() {
-		return Iterator(0, this);
+		return Iterator(Id<T>(0), this);
 	}
 
 	Iterator end() {

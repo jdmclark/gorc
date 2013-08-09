@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/math/vector.h"
+#include "framework/id.h"
 #include "content/flags/keymarkertype.h"
 
 namespace Gorc {
@@ -16,6 +17,7 @@ namespace World {
 namespace Level {
 
 class LevelPresenter;
+class Thing;
 
 namespace Gameplay {
 
@@ -27,10 +29,10 @@ public:
 	ThingController(LevelPresenter& presenter);
 	virtual ~ThingController();
 
-	virtual void Update(unsigned int thing_id, double dt) = 0;
-	virtual void RemoveControllerData(unsigned int thing_id) = 0;
-	virtual void CreateControllerData(unsigned int thing_id) = 0;
-	virtual void HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker);
+	virtual void Update(Id<Thing> thing_id, double dt) = 0;
+	virtual void RemoveControllerData(Id<Thing> thing_id) = 0;
+	virtual void CreateControllerData(Id<Thing> thing_id) = 0;
+	virtual void HandleAnimationMarker(Id<Thing> thing_id, Flags::KeyMarkerType marker);
 };
 
 }

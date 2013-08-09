@@ -4,6 +4,7 @@
 #include "cog/instance.h"
 #include "framework/pool.h"
 #include "thing.h"
+#include "surface.h"
 #include "sounds/sound.h"
 #include "physics/sectorbroadphasefilter.h"
 #include "game/world/level/animations/animationmodel.h"
@@ -25,7 +26,7 @@ public:
 	const Content::Assets::Level& Level;
 	Content::Assets::LevelHeader Header;
 	std::vector<Content::Assets::LevelAdjoin> Adjoins;
-	std::vector<Content::Assets::LevelSurface> Surfaces;
+	std::vector<Surface> Surfaces;
 	std::vector<Content::Assets::LevelSector> Sectors;
 
 	Animations::AnimationModel AnimationModel;
@@ -35,7 +36,7 @@ public:
 
 	Pool<Thing> Things;
 
-	unsigned int CameraThingId;
+	Id<Thing> CameraThingId;
 	unsigned int CameraSector;
 	Vector<3> CameraPosition;
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);

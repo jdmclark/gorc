@@ -12,9 +12,9 @@ class GhostController : public ThingController {
 public:
 	using ThingController::ThingController;
 
-	virtual void Update(unsigned int thing_id, double dt) override;
-	virtual void RemoveControllerData(unsigned int thing_id) override;
-	virtual void CreateControllerData(unsigned int thing_id) override;
+	virtual void Update(Id<Thing> thing_id, double dt) override;
+	virtual void RemoveControllerData(Id<Thing> thing_id) override;
+	virtual void CreateControllerData(Id<Thing> thing_id) override;
 };
 
 }

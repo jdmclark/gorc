@@ -4,6 +4,7 @@
 #include "content/assets/sound.h"
 #include "framework/flagset.h"
 #include "framework/math/vector.h"
+#include "framework/id.h"
 #include <SFML/Audio.hpp>
 
 namespace Gorc {
@@ -12,6 +13,7 @@ namespace World {
 namespace Level {
 
 class LevelModel;
+class Thing;
 
 namespace Sounds {
 
@@ -20,7 +22,7 @@ private:
 	sf::Sound sound;
 	bool expired;
 
-	unsigned int thing;
+	Id<Thing> thing;
 	bool update_position;
 
 	void PlayAmbient(const Content::Assets::Sound& sound, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
@@ -32,7 +34,7 @@ public:
 	void PlaySoundLocal(const Content::Assets::Sound& sound, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
 	void PlaySoundPos(const Content::Assets::Sound& sound, const Math::Vector<3>& pos, float volume,
 			float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	void PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, unsigned int thing, float volume,
+	void PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, Id<Thing> thing, float volume,
 			float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
 
 	void SetPitch(float pitch, float delay);

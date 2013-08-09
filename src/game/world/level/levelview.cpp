@@ -250,16 +250,14 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 }
 
 void Gorc::Game::World::Level::LevelView::DrawVisibleThings() {
-	for(auto it = currentModel->Things.begin(); it != currentModel->Things.end(); ++it) {
-		const auto& thing = *it;
-
+	for(const auto& thing : currentModel->Things) {
 		if(sector_vis_scratch.count(thing.Sector) == 0) {
 			continue;
 		}
 
 		if(!(thing.Flags & Flags::ThingFlag::Sighted)) {
 			// Thing has been sighted for first time. Fire sighted event.
-			currentPresenter->ThingSighted(it.GetIndex());
+			currentPresenter->ThingSighted(thing.GetId());
 		}
 
 		if(thing.Flags & Flags::ThingFlag::Invisible) {
@@ -440,7 +438,7 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const
 	Math::Vector<3> anim_translate = Math::Zero<3>();
 	Math::Vector<3> anim_rotate = Math::Zero<3>();
 
-	if(thing.AttachedKeyMix >= 0) {
+	if(thing.AttachedKeyMix.IsValid()) {
 		std::tie(anim_translate, anim_rotate) = currentPresenter->KeyPresenter.GetNodeFrame(thing.AttachedKeyMix, mesh_id, node.Type);
 	}
 	else {

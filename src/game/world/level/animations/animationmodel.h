@@ -13,10 +13,10 @@ namespace Animations {
 
 class AnimationModel {
 private:
-	static void OnAnimationDestroy(Pool<std::unique_ptr<Animation>>&, unsigned int, std::unique_ptr<Animation>& anim);
+	static void OnAnimationDestroy(Pool<PoolPtr<Animation>>&, Pool<PoolPtr<Animation>>::Element&);
 
 public:
-	Pool<std::unique_ptr<Animation>> Animations;
+	Pool<PoolPtr<Animation>> Animations;
 
 	AnimationModel();
 };

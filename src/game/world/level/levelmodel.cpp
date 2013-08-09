@@ -4,9 +4,11 @@
 #include "content/manager.h"
 
 Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler, const Gorc::Content::Assets::Level& Level)
-	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Surfaces(Level.Surfaces), Sectors(Level.Sectors),
+	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Sectors(Level.Sectors),
 	  Dispatcher(&CollisionConfiguration), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
 	  SurfaceMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))), SurfaceObjectData(Level.Surfaces.size()) {
+	std::copy(Level.Surfaces.begin(), Level.Surfaces.end(), std::back_inserter(Surfaces));
+
 	BroadphaseFilter = std::unique_ptr<SectorBroadphaseFilter>(new SectorBroadphaseFilter(*this));
 	DynamicsWorld.getPairCache()->setOverlapFilterCallback(BroadphaseFilter.get());
 	DynamicsWorld.setGravity(btVector3(0, 0, -Level.Header.WorldGravity));

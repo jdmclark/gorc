@@ -8,9 +8,11 @@ namespace World {
 namespace Level {
 namespace Keys {
 
+class KeyMix;
+
 class KeyState {
 public:
-	unsigned int MixId;
+	Id<KeyMix> MixId;
 	Content::Assets::Animation const* Animation = nullptr;
 	double AnimationTime;
 	double CurrentFrame;

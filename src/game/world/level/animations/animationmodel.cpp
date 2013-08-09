@@ -5,7 +5,7 @@ Gorc::Game::World::Level::Animations::AnimationModel::AnimationModel()
 	return;
 }
 
-void Gorc::Game::World::Level::Animations::AnimationModel::OnAnimationDestroy(Pool<std::unique_ptr<Animation>>& pool,
-		unsigned int index, std::unique_ptr<Animation>& anim) {
+void Gorc::Game::World::Level::Animations::AnimationModel::OnAnimationDestroy(Pool<PoolPtr<Animation>>& pool,
+		Pool<PoolPtr<Animation>>::Element& anim) {
 	anim->Stop();
 }

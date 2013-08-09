@@ -51,7 +51,7 @@ private:
 	bool UpdatePathSector(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
 			const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path);
 
-	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
+	void UpdateThingSector(Id<Thing> thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 	void UpdateCamera();
 
 	Gameplay::ThingController& GetThingController(Flags::ThingType type);
@@ -86,14 +86,14 @@ public:
 	void Jump();
 	void Activate();
 	void Damage();
-	void ThingSighted(int thing_id);
+	void ThingSighted(Id<Thing> thing_id);
 
 	// Frame verbs
-	int GetCurFrame(int thing_id);
-	void MoveToFrame(int thing_id, int frame, float speed);
+	int GetCurFrame(Id<Thing> thing_id);
+	void MoveToFrame(Id<Thing> thing_id, int frame, float speed);
 
 	// Player verbs
-	int GetLocalPlayerThing();
+	Id<Thing> GetLocalPlayerThing();
 
 	// Sector verbs
 	void SetSectorAdjoins(int sector_id, bool state);
@@ -112,21 +112,21 @@ public:
 	int LoadSound(const char* sound);
 
 	// Thing action verbs
-	unsigned int CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
-	unsigned int CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
-	unsigned int CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+	Id<Thing> CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+	Id<Thing> CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
+	Id<Thing> CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 
-	void AdjustThingPosition(unsigned int thing_id, const Math::Vector<3>& new_pos);
+	void AdjustThingPosition(Id<Thing> thing_id, const Math::Vector<3>& new_pos);
 
-	int CreateThingAtThing(int tpl_id, int thing_id);
-	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
-	void DestroyThing(int thing_id);
-	Math::Vector<3> GetThingPos(int thing_id);
-	bool IsThingMoving(int thing_id);
+	Id<Thing> CreateThingAtThing(int tpl_id, Id<Thing> thing_id);
+	float DamageThing(Id<Thing> thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
+	void DestroyThing(Id<Thing> thing_id);
+	Math::Vector<3> GetThingPos(Id<Thing> thing_id);
+	bool IsThingMoving(Id<Thing> thing_id);
 
 	// Thing property verbs
-	int GetThingSector(int thing_id);
-	void SetThingType(int thing_id, Flags::ThingType type);
+	int GetThingSector(Id<Thing> thing_id);
+	void SetThingType(Id<Thing> thing_id, Flags::ThingType type);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };

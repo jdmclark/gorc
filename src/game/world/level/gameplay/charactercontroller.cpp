@@ -34,8 +34,8 @@ public:
 }
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRunningAnimation(unsigned int thing_id, Thing& thing, double speed) {
-	if(thing.ActorWalkAnimation > 0) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRunningAnimation(Id<Thing> thing_id, Thing& thing, double speed) {
+	if(thing.ActorWalkAnimation.IsValid()) {
 		Keys::KeyState& keyState = presenter.Model->KeyModel.Keys[thing.ActorWalkAnimation];
 		const Content::Assets::PuppetSubmode& submode = thing.Puppet->GetMode(Flags::PuppetModeType::Default).GetSubmode(Flags::PuppetSubmodeType::Run);
 		if(keyState.Animation != submode.Animation) {
@@ -50,8 +50,8 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRunningAnimati
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::PlayStandingAnimation(unsigned int thing_id, Thing& thing) {
-	if(thing.ActorWalkAnimation > 0) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayStandingAnimation(Id<Thing> thing_id, Thing& thing) {
+	if(thing.ActorWalkAnimation.IsValid()) {
 		Keys::KeyState& keyState = presenter.Model->KeyModel.Keys[thing.ActorWalkAnimation];
 		const Content::Assets::PuppetSubmode& submode = thing.Puppet->GetMode(Flags::PuppetModeType::Default).GetSubmode(Flags::PuppetSubmodeType::Stand);
 		keyState.Speed = 1.0;
@@ -102,7 +102,7 @@ Gorc::Game::World::Level::Gameplay::StandingMaterial Gorc::Game::World::Level::G
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::RunFallingSweep(unsigned int thing_id, Thing& thing,
+void Gorc::Game::World::Level::Gameplay::CharacterController::RunFallingSweep(Id<Thing> thing_id, Thing& thing,
 		double dt, FilteredClosestRayResultCallback& rrcb) {
 	// Test for collision between legs and ground
 	Math::Vector<3> leg_height = thing.Model3d->InsertOffset;
@@ -127,7 +127,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::RunFallingSweep(un
 	presenter.Model->DynamicsWorld.rayTest(Math::BtVec(thing.Position), Math::BtVec(leg_bottom), rrcb);
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::RunWalkingSweep(unsigned int thing_id, Thing& thing,
+void Gorc::Game::World::Level::Gameplay::CharacterController::RunWalkingSweep(Id<Thing> thing_id, Thing& thing,
 		double dt, FilteredClosestRayResultCallback& rrcb) {
 	// Test for collision between legs and ground
 	Math::Vector<3> leg_height = thing.Model3d->InsertOffset * 1.50f;
@@ -152,7 +152,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::RunWalkingSweep(un
 	presenter.Model->DynamicsWorld.rayTest(Math::BtVec(thing.Position), Math::BtVec(leg_bottom), rrcb);
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateFalling(unsigned int thing_id, Thing& thing, double dt) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateFalling(Id<Thing> thing_id, Thing& thing, double dt) {
 	FilteredClosestRayResultCallback rrcb(btVector3(0,0,0), btVector3(0,0,0));
 	RunFallingSweep(thing_id, thing, dt, rrcb);
 
@@ -174,7 +174,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateFalling(unsi
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSurface(unsigned int thing_id, Thing& thing, double dt) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSurface(Id<Thing> thing_id, Thing& thing, double dt) {
 	FilteredClosestRayResultCallback rrcb(btVector3(0,0,0), btVector3(0,0,0));
 	RunWalkingSweep(thing_id, thing, dt, rrcb);
 
@@ -224,7 +224,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnThing(unsigned int thing_id, Thing& thing, double dt) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnThing(Id<Thing> thing_id, Thing& thing, double dt) {
 	FilteredClosestRayResultCallback rrcb(btVector3(0,0,0), btVector3(0,0,0));
 	RunWalkingSweep(thing_id, thing, dt, rrcb);
 
@@ -276,7 +276,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnSurface(unsigned int thing_id, Thing& thing, unsigned int surf_id,
+void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnSurface(Id<Thing> thing_id, Thing& thing, unsigned int surf_id,
 		const FilteredClosestRayResultCallback& rrcb) {
 	thing.AttachFlags = FlagSet<Flags::AttachFlag> { Flags::AttachFlag::AttachedToWorldSurface };
 	thing.AttachedSurface = surf_id;
@@ -286,7 +286,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnSurface(unsi
 	thing.RigidBody->setGravity(btVector3(0,0,0));
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnThing(unsigned int thing_id, Thing& thing, unsigned int land_thing_id,
+void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnThing(Id<Thing> thing_id, Thing& thing, Id<Thing> land_thing_id,
 		const FilteredClosestRayResultCallback& rrcb) {
 	thing.AttachFlags = FlagSet<Flags::AttachFlag> { Flags::AttachFlag::AttachedToThingFace };
 	thing.AttachedThing = land_thing_id;
@@ -297,7 +297,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnThing(unsign
 	thing.RigidBody->setGravity(btVector3(0,0,0));
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::LandOnSurface(unsigned int thing_id, Thing& thing, unsigned int surf_id,
+void Gorc::Game::World::Level::Gameplay::CharacterController::LandOnSurface(Id<Thing> thing_id, Thing& thing, unsigned int surf_id,
 		const FilteredClosestRayResultCallback& rrcb) {
 	StepOnSurface(thing_id, thing, surf_id, rrcb);
 
@@ -323,7 +323,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::LandOnSurface(unsi
 	presenter.SoundPresenter.PlaySoundClass(thing_id, subclass);
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::LandOnThing(unsigned int thing_id, Thing& thing, unsigned int land_thing_id,
+void Gorc::Game::World::Level::Gameplay::CharacterController::LandOnThing(Id<Thing> thing_id, Thing& thing, Id<Thing> land_thing_id,
 		const FilteredClosestRayResultCallback& rrcb) {
 	StepOnThing(thing_id, thing, land_thing_id, rrcb);
 
@@ -340,7 +340,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::LandOnThing(unsign
 	presenter.SoundPresenter.PlaySoundClass(thing_id, subclass);
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::Jump(unsigned int thing_id, Thing& thing) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::Jump(Id<Thing> thing_id, Thing& thing) {
 	if(thing.AttachFlags & Flags::AttachFlag::AttachedToWorldSurface) {
 		JumpFromSurface(thing_id, thing, thing.AttachedSurface);
 	}
@@ -349,7 +349,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::Jump(unsigned int 
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromSurface(unsigned int thing_id, Thing& thing, unsigned int surf_id) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromSurface(Id<Thing> thing_id, Thing& thing, unsigned int surf_id) {
 	thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity));
 	thing.AttachFlags = FlagSet<Flags::AttachFlag>();
 	thing.RigidBody->setLinearVelocity(BtVec(thing.Thrust));
@@ -376,7 +376,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromSurface(un
 	presenter.SoundPresenter.PlaySoundClass(thing_id, subclass);
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromThing(unsigned int thing_id, Thing& thing, unsigned int jump_thing_id) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromThing(Id<Thing> thing_id, Thing& thing, Id<Thing> jump_thing_id) {
 	thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity));
 	thing.AttachFlags = FlagSet<Flags::AttachFlag>();
 	thing.RigidBody->setLinearVelocity(BtVec(thing.Thrust));
@@ -394,7 +394,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromThing(unsi
 	presenter.SoundPresenter.PlaySoundClass(thing_id, subclass);
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::Update(unsigned int thing_id, double dt) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::Update(Id<Thing> thing_id, double dt) {
 	Thing& thing = presenter.Model->Things[thing_id];
 
 	// Update actor state
@@ -409,12 +409,12 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::Update(unsigned in
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::RemoveControllerData(unsigned int thing_id) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::RemoveControllerData(Id<Thing> thing_id) {
 	auto& thing = presenter.Model->Things[thing_id];
 	presenter.Model->DynamicsWorld.removeRigidBody(thing.RigidBody.get());
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerData(unsigned int thing_id) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerData(Id<Thing> thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
 
 	static const float deg2rad = 0.0174532925f;
@@ -464,11 +464,11 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerDa
 		keyState.Flags = FlagSet<Flags::KeyFlag>();
 	}
 	else {
-		new_thing.ActorWalkAnimation = -1;
+		new_thing.ActorWalkAnimation = Id<Keys::KeyState>();
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::HandleAnimationMarker(unsigned int thing_id, Flags::KeyMarkerType marker) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::HandleAnimationMarker(Id<Thing> thing_id, Flags::KeyMarkerType marker) {
 	switch(marker) {
 	case Flags::KeyMarkerType::LeftRunFootstep:
 		PlayLeftRunFootstep(thing_id);
@@ -480,7 +480,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::HandleAnimationMar
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::PlayLeftRunFootstep(unsigned int thing_id) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayLeftRunFootstep(Id<Thing> thing_id) {
 	auto& thing = presenter.Model->Things[thing_id];
 	StandingMaterial mat = GetStandingMaterial(thing);
 
@@ -512,7 +512,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::PlayLeftRunFootste
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRightRunFootstep(unsigned int thing_id) {
+void Gorc::Game::World::Level::Gameplay::CharacterController::PlayRightRunFootstep(Id<Thing> thing_id) {
 	auto& thing = presenter.Model->Things[thing_id];
 	StandingMaterial mat = GetStandingMaterial(thing);
 

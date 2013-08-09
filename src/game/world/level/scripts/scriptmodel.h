@@ -1,9 +1,8 @@
 #pragma once
 
+#include "scriptinstance.h"
 #include "scriptcontinuation.h"
-#include "scripttimerstate.h"
 #include "scripttimer.h"
-#include "cog/instance.h"
 #include "framework/pool.h"
 #include <memory>
 #include <vector>
@@ -13,13 +12,16 @@ namespace Gorc {
 namespace Game {
 namespace World {
 namespace Level {
+
+class Thing;
+
 namespace Scripts {
 
 class ScriptModel {
 public:
-	std::vector<std::tuple<std::unique_ptr<Cog::Instance>, ScriptTimerState>> Cogs;
+	std::vector<ScriptInstance> Cogs;
 	Pool<std::tuple<double, ScriptContinuation>, 8> SleepingCogs;
-	Pool<std::tuple<int, ScriptContinuation>, 8> WaitForStopCogs;
+	Pool<std::tuple<Id<Thing>, ScriptContinuation>, 8> WaitForStopCogs;
 	std::stack<ScriptContinuation> RunningCogState;
 	Pool<ScriptTimer> Timers;
 };

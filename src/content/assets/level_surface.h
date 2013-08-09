@@ -6,7 +6,10 @@
 #include "content/flags/lightmode.h"
 #include "content/flags/texturemode.h"
 #include "framework/math/vector.h"
+#include "framework/flagset.h"
 #include <memory>
+#include <vector>
+#include <tuple>
 
 namespace Gorc {
 namespace Content {
@@ -27,8 +30,6 @@ public:
 	Math::Vector<3> Normal;
 	Math::Vector<2> TextureOffset;
 	Math::Vector<3> Thrust;
-	int CelNumber = -1;
-	int AnimNumber = -1;
 };
 
 }

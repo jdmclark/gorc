@@ -38,41 +38,46 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::Update(double dt) {
 	}
 
 	// Enqueue sleeping cogs
-	for(auto it = model->SleepingCogs.begin(); it != model->SleepingCogs.end(); ++it) {
-		std::get<0>(*it) -= dt;
-		if(std::get<0>(*it) <= 0.0) {
-			model->RunningCogState.push(std::get<1>(*it));
-			model->SleepingCogs.Destroy(it.GetIndex());
+	for(auto& cog : model->SleepingCogs) {
+		std::get<0>(cog) -= dt;
+		if(std::get<0>(cog) <= 0.0) {
+			model->RunningCogState.push(std::get<1>(cog));
+			model->SleepingCogs.Destroy(cog);
 		}
 	}
 
 	// Run sleeping cogs
+	RunWaitingCogs();
+
+	// Update timers
+	for(auto& timer : model->Timers) {
+		timer.Delay -= dt;
+		if(timer.Delay <= 0.0) {
+			SendMessage(timer.InstanceId, Cog::MessageId::Timer, timer.Id, 0, Flags::MessageType::Nothing,
+					0, Flags::MessageType::Nothing, timer.Param0, timer.Param1);
+			model->Timers.Destroy(timer.GetId());
+		}
+	}
+}
+
+void Gorc::Game::World::Level::Scripts::ScriptPresenter::RunWaitingCogs() {
 	while(!model->RunningCogState.empty()) {
 		Cog::Instance& inst = *std::get<0>(model->Cogs[model->RunningCogState.top().InstanceId]);
 		VirtualMachine.Execute(inst.Heap, inst.Script.Code, model->RunningCogState.top().ProgramCounter, components.VerbTable);
 		model->RunningCogState.pop();
 	}
-
-	// Update timers
-	for(auto it = model->Timers.begin(); it != model->Timers.end(); ++it) {
-		ScriptTimer& timer = *it;
-		timer.Delay -= dt;
-		if(timer.Delay <= 0.0) {
-			SendMessage(timer.InstanceId, Cog::MessageId::Timer, timer.Id, 0, Flags::MessageType::Nothing,
-					0, Flags::MessageType::Nothing, timer.Param0, timer.Param1);
-			model->Timers.Destroy(it.GetIndex());
-		}
-	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::ResumeWaitForStop(int wait_thing) {
+void Gorc::Game::World::Level::Scripts::ScriptPresenter::ResumeWaitForStop(Id<Thing> wait_thing) {
 	// Enqueue waiting cogs
-	for(auto it = model->WaitForStopCogs.begin(); it != model->WaitForStopCogs.end(); ++it) {
-		if(std::get<0>(*it) == wait_thing) {
-			model->RunningCogState.push(std::get<1>(*it));
-			model->WaitForStopCogs.Destroy(it.GetIndex());
+	for(auto& wait_cog : model->WaitForStopCogs) {
+		if(std::get<0>(wait_cog) == wait_thing) {
+			model->RunningCogState.push(std::get<1>(wait_cog));
+			model->WaitForStopCogs.Destroy(wait_cog);
 		}
 	}
+
+	RunWaitingCogs();
 }
 
 void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelDummyInstance() {
@@ -177,8 +182,8 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(
 		break;
 
 		case Cog::Symbols::SymbolType::Thing: {
-			int index = static_cast<int>(*jt);
-			if(index >= 0) {
+			Id<Thing> index(static_cast<int>(*jt));
+			if(index.IsValid()) {
 				levelModel->Things[index].Flags += Flags::ThingFlag::CogLinked;
 			}
 		}
@@ -221,8 +226,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToAll(Cog::M
 		int SourceRef, Flags::MessageType SourceType,
 		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3) {
 	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
-		SendMessage(i, message, SenderId, SenderRef, SenderType,
-				SourceRef, SourceType, Param0, Param1, Param2, Param3);
+		SendMessage(i, message, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
 	}
 }
 
@@ -278,7 +282,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SetTimer(float time) {
 }
 
 void Gorc::Game::World::Level::Scripts::ScriptPresenter::SetTimerEx(float time, int id, Cog::VM::Value param0, Cog::VM::Value param1) {
-	ScriptTimer& timer = *std::get<0>(model->Timers.Create());
+	ScriptTimer& timer = model->Timers.Create();
 	timer.InstanceId = model->RunningCogState.top().InstanceId;
 	timer.Delay = time;
 	timer.Id = id;
@@ -291,19 +295,19 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::Sleep(float time) {
 
 	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
 
-	auto& sleep_tuple = *std::get<0>(model->SleepingCogs.Create());
+	auto& sleep_tuple = model->SleepingCogs.Create();
 	std::get<0>(sleep_tuple) = time;
 	std::get<1>(sleep_tuple) = continuation;
 
 	VirtualMachine.Abort();
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::WaitForStop(int thing) {
+void Gorc::Game::World::Level::Scripts::ScriptPresenter::WaitForStop(Id<Thing> thing) {
 	ScriptContinuation continuation = model->RunningCogState.top();
 
 	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
 
-	auto& sleep_tuple = *std::get<0>(model->WaitForStopCogs.Create());
+	auto& sleep_tuple = model->WaitForStopCogs.Create();
 	std::get<0>(sleep_tuple) = thing;
 	std::get<1>(sleep_tuple) = continuation;
 
@@ -342,14 +346,14 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::RegisterVerbs(Cog::Verb
 	verbTable.AddVerb<void, 2>("sendmessage", [&components](int cog_id, int message) {
 		components.CurrentLevelPresenter->ScriptPresenter.SendMessage(cog_id, static_cast<Cog::MessageId>(message),
 				-1, components.CurrentLevelPresenter->ScriptPresenter.model->RunningCogState.top().InstanceId, Flags::MessageType::Cog,
-				components.CurrentLevelPresenter->GetLocalPlayerThing(), Flags::MessageType::Thing);
+				static_cast<int>(components.CurrentLevelPresenter->GetLocalPlayerThing()), Flags::MessageType::Thing);
 	});
 
 	verbTable.AddVerb<Cog::VM::Value, 6>("sendmessageex", [&components](int cog_id, int message,
 			Cog::VM::Value param0, Cog::VM::Value param1, Cog::VM::Value param2, Cog::VM::Value param3) {
 		return components.CurrentLevelPresenter->ScriptPresenter.SendMessage(cog_id, static_cast<Cog::MessageId>(message),
 				-1, components.CurrentLevelPresenter->ScriptPresenter.model->RunningCogState.top().InstanceId, Flags::MessageType::Cog,
-				components.CurrentLevelPresenter->GetLocalPlayerThing(), Flags::MessageType::Thing,
+				static_cast<int>(components.CurrentLevelPresenter->GetLocalPlayerThing()), Flags::MessageType::Thing,
 				param0, param1, param2, param3);
 	});
 
@@ -370,7 +374,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::RegisterVerbs(Cog::Verb
 	});
 
 	verbTable.AddVerb<void, 1>("waitforstop", [&components](int thing_id) {
-		components.CurrentLevelPresenter->ScriptPresenter.WaitForStop(thing_id);
+		components.CurrentLevelPresenter->ScriptPresenter.WaitForStop(Id<Thing>(thing_id));
 	});
 
 	verbTable.AddVerb<int, 0>("getmastercog", [&components] {

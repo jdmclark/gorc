@@ -2,11 +2,14 @@
 
 #include "physicscollideclass.h"
 #include "framework/flagset.h"
+#include "framework/id.h"
 
 namespace Gorc {
 namespace Game {
 namespace World {
 namespace Level {
+
+class Thing;
 
 class PhysicsObjectData {
 public:
@@ -23,7 +26,7 @@ public:
 
 class ThingObjectData : public PhysicsObjectData {
 public:
-	unsigned int ThingId;
+	Id<Thing> ThingId;
 };
 
 }

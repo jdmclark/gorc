@@ -28,6 +28,8 @@ class LevelModel;
 namespace Keys {
 
 class KeyModel;
+class KeyState;
+class KeyMix;
 
 class KeyPresenter {
 private:
@@ -35,10 +37,10 @@ private:
 	LevelModel* levelModel;
 	KeyModel* model;
 
-	unsigned int GetThingMixId(int thing_id);
-	void DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
+	Id<KeyMix> GetThingMixId(Id<Thing> thing_id);
+	void DispatchAllMarkers(Id<Thing> thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
 			double begin, double end, bool wraps, double frame_ct);
-	void DispatchMarker(int thing_id, Flags::KeyMarkerType marker);
+	void DispatchMarker(Id<Thing> thing_id, Flags::KeyMarkerType marker);
 
 public:
 	KeyPresenter(Content::Manager& contentManager);
@@ -46,10 +48,10 @@ public:
 	void Start(LevelModel& levelModel, KeyModel& model);
 	void Update(double dt);
 
-	std::tuple<Math::Vector<3>, Math::Vector<3>> GetNodeFrame(int mix_id, int node_id, FlagSet<Flags::MeshNodeType> node_type) const;
+	std::tuple<Math::Vector<3>, Math::Vector<3>> GetNodeFrame(Id<KeyMix> mix_id, int node_id, FlagSet<Flags::MeshNodeType> node_type) const;
 
-	int PlayKey(int thing_id, int key, int priority, FlagSet<Flags::KeyFlag> flags);
-	int PlayPuppetKey(int thing_id, Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode);
+	Id<KeyState> PlayKey(Id<Thing> thing_id, int key, int priority, FlagSet<Flags::KeyFlag> flags);
+	Id<KeyState> PlayPuppetKey(Id<Thing> thing_id, Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };

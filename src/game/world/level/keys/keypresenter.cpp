@@ -16,7 +16,7 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::Start(LevelModel& levelModel,
 	this->model = &model;
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
+void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(Id<Thing> thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
 		double begin, double end, bool wraps, double frame_ct) {
 	if(wraps) {
 		begin = std::fmod(begin, frame_ct);
@@ -41,17 +41,17 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(int thing_
 	}
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchMarker(int thing_id, Flags::KeyMarkerType marker) {
+void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchMarker(Id<Thing> thing_id, Flags::KeyMarkerType marker) {
 	auto& thing = levelModel->Things[thing_id];
 	thing.Controller->HandleAnimationMarker(thing_id, marker);
 }
 
-unsigned int Gorc::Game::World::Level::Keys::KeyPresenter::GetThingMixId(int thing_id) {
+Gorc::Id<Gorc::Game::World::Level::Keys::KeyMix> Gorc::Game::World::Level::Keys::KeyPresenter::GetThingMixId(Id<Thing> thing_id) {
 	auto& thing = levelModel->Things[thing_id];
-	if(thing.AttachedKeyMix < 0) {
-		auto mix_tuple = model->Mixes.Create();
-		std::get<0>(mix_tuple)->AttachedThing = thing_id;
-		thing.AttachedKeyMix = std::get<1>(mix_tuple);
+	if(!thing.AttachedKeyMix.IsValid()) {
+		auto& mix = model->Mixes.Create();
+		mix.AttachedThing = thing_id;
+		thing.AttachedKeyMix = mix.GetId();
 	}
 
 	return thing.AttachedKeyMix;
@@ -64,8 +64,7 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::Update(double dt) {
 	}
 
 	// Update animation frames
-	for(auto it = model->Keys.begin(); it != model->Keys.end(); ++it) {
-		auto& key = *it;
+	for(auto& key : model->Keys) {
 		auto& mix = model->Mixes[key.MixId];
 
 		// Update anim time and compute frame number
@@ -100,7 +99,7 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::Update(double dt) {
 
 			if((key.Flags & Flags::KeyFlag::EndSmoothly) && frame >= anim.FrameCount) {
 				// End smoothly, continue into next animation.
-				model->Keys.Destroy(it.GetIndex());
+				model->Keys.Destroy(key);
 				continue;
 			}
 		}
@@ -126,7 +125,7 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::Update(double dt) {
 	}
 }
 
-std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::Keys::KeyPresenter::GetNodeFrame(int mix_id,
+std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::Keys::KeyPresenter::GetNodeFrame(Id<KeyMix> mix_id,
 		int node_id, FlagSet<Flags::MeshNodeType> node_type) const {
 	const KeyMix& mix = model->Mixes[mix_id];
 
@@ -174,11 +173,11 @@ std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Leve
 	return std::make_tuple(position, orientation);
 }
 
-int Gorc::Game::World::Level::Keys::KeyPresenter::PlayKey(int thing_id, int key, int priority, FlagSet<Flags::KeyFlag> flags) {
-	unsigned int mix_id = GetThingMixId(thing_id);
+Gorc::Id<Gorc::Game::World::Level::Keys::KeyState> Gorc::Game::World::Level::Keys::KeyPresenter::PlayKey(Id<Thing> thing_id, int key,
+		int priority, FlagSet<Flags::KeyFlag> flags) {
+	Id<KeyMix> mix_id = GetThingMixId(thing_id);
 
-	auto key_tuple = model->Keys.Create();
-	KeyState& state = *std::get<0>(key_tuple);
+	auto& state = model->Keys.Create();
 
 	state.Animation = &contentManager.GetAsset<Content::Assets::Animation>(key);
 	state.HighPriority = state.LowPriority = state.HighPriority = priority;
@@ -188,15 +187,15 @@ int Gorc::Game::World::Level::Keys::KeyPresenter::PlayKey(int thing_id, int key,
 	state.Flags = flags;
 	state.Speed = 1.0;
 
-	return std::get<1>(key_tuple);
+	return state.GetId();
 }
 
-int Gorc::Game::World::Level::Keys::KeyPresenter::PlayPuppetKey(int thing_id, Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode) {
-	unsigned int mix_id = GetThingMixId(thing_id);
+Gorc::Id<Gorc::Game::World::Level::Keys::KeyState> Gorc::Game::World::Level::Keys::KeyPresenter::PlayPuppetKey(Id<Thing> thing_id,
+		Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode) {
+	Id<KeyMix> mix_id = GetThingMixId(thing_id);
 	auto& thing = levelModel->Things[thing_id];
 
-	auto key_tuple = model->Keys.Create();
-	KeyState& state = *std::get<0>(key_tuple);
+	auto& state = model->Keys.Create();
 
 	const Content::Assets::PuppetSubmode& submode = thing.Puppet->GetMode(major_mode).GetSubmode(minor_mode);
 
@@ -210,11 +209,11 @@ int Gorc::Game::World::Level::Keys::KeyPresenter::PlayPuppetKey(int thing_id, Fl
 	state.Flags = submode.Flags;
 	state.Speed = 1.0;
 
-	return std::get<1>(key_tuple);
+	return state.GetId();
 }
 
 void Gorc::Game::World::Level::Keys::KeyPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
 	verbTable.AddVerb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
-		return components.CurrentLevelPresenter->KeyPresenter.PlayKey(thing, key, priority, FlagSet<Flags::KeyFlag>(flags));
+		return static_cast<int>(components.CurrentLevelPresenter->KeyPresenter.PlayKey(Id<Thing>(thing), key, priority, FlagSet<Flags::KeyFlag>(flags)));
 	});
 }

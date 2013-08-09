@@ -2,6 +2,8 @@
 
 #include "cog/vm/value.h"
 #include "game/flags/messagetype.h"
+#include "scriptinstance.h"
+#include "framework/id.h"
 #include <array>
 
 namespace Gorc {
@@ -12,7 +14,7 @@ namespace Scripts {
 
 class ScriptContinuation {
 public:
-	unsigned int InstanceId;
+	int InstanceId;
 
 	int SenderId;
 	int SenderRef;
@@ -25,7 +27,7 @@ public:
 	unsigned int ProgramCounter;
 
 	ScriptContinuation() = default;
-	ScriptContinuation(unsigned int InstanceId,
+	ScriptContinuation(int InstanceId,
 			int SenderId, int SenderRef, Flags::MessageType SenderType,
 			int SourceRef, Flags::MessageType SourceType,
 			Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3,

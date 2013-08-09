@@ -1,5 +1,8 @@
 #pragma once
 
+#include "framework/id.h"
+#include <memory>
+
 namespace Gorc {
 namespace Game {
 namespace World {

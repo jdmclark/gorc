@@ -11,6 +11,15 @@ namespace Game {
 namespace World {
 namespace Level {
 
+namespace Sounds {
+class Sound;
+}
+
+namespace Keys {
+class KeyMix;
+class KeyState;
+}
+
 class Thing : public Content::Assets::Template {
 public:
 	Gameplay::ThingController* Controller;
@@ -24,15 +33,15 @@ public:
 	int GoalFrame = 0;
 	float PathMoveSpeed = 0.0f;
 
-	int CurrentFoleyLoopChannel = -1;
+	Id<Sounds::Sound> CurrentFoleyLoopChannel;
 
 	unsigned int AttachedSurface = -1;
-	unsigned int AttachedThing = -1;
+	Id<Thing> AttachedThing;
 	Math::Vector<3> PrevAttachedThingPosition;
 
 	// HACK: Play idle animation
-	int AttachedKeyMix = -1;
-	int ActorWalkAnimation = -1;
+	Id<Keys::KeyMix> AttachedKeyMix;
+	Id<Keys::KeyState> ActorWalkAnimation;
 
 	std::unique_ptr<btCollisionShape> ActorCollideShape;
 
