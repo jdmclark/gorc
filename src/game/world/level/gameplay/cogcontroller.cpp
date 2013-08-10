@@ -5,14 +5,14 @@
 
 using namespace Gorc::Math;
 
-void Gorc::Game::World::Level::Gameplay::CogController::Update(Id<Thing> thing_id, double dt) {
+void Gorc::Game::World::Level::Gameplay::CogController::Update(int thing_id, double dt) {
 	Thing& thing = presenter.Model->Things[thing_id];
 	if(thing.PathMoving) {
 		UpdateThingPathMoving(thing_id, thing, dt);
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(Id<Thing> thing_id, Thing& thing, double dt) {
+void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(int thing_id, Thing& thing, double dt) {
 	auto target_position_tuple = thing.Frames[thing.NextFrame];
 	Vector<3> targetPosition = std::get<0>(target_position_tuple);
 	Vector<3> orient = std::get<1>(target_position_tuple);
@@ -71,12 +71,12 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(Id
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CogController::RemoveControllerData(Id<Thing> thing_id) {
+void Gorc::Game::World::Level::Gameplay::CogController::RemoveControllerData(int thing_id) {
 	auto& thing = presenter.Model->Things[thing_id];
 	presenter.Model->DynamicsWorld.removeRigidBody(thing.RigidBody.get());
 }
 
-void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(Id<Thing> thing_id) {
+void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
 
 	static const float deg2rad = 0.0174532925f;

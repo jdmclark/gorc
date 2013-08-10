@@ -6,7 +6,6 @@
 #include <memory>
 #include <boost/integer/static_log2.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-#include "id.h"
 
 namespace Gorc {
 
@@ -41,10 +40,10 @@ public:
 	class Element : public T {
 		friend class Pool;
 		Element* pool_next_free = nullptr;
-		Id<T> pool_element_id;
+		int pool_element_id;
 
 	public:
-		inline Id<T> GetId() const {
+		inline int GetId() const {
 			return pool_element_id;
 		}
 
@@ -72,23 +71,21 @@ private:
 		Element* next_free = nullptr;
 		for(auto& obj : *pages.back() | boost::adaptors::reversed) {
 			obj.pool_next_free = next_free;
-			obj.pool_element_id = Id<T>(page_base--);
+			obj.pool_element_id = page_base--;
 			next_free = &obj;
 		}
 
 		first_free = next_free;
 	}
 
-	Element& GetPoolObject(Id<T> id) {
-		int index = static_cast<int>(id);
+	Element& GetPoolObject(int index) {
 		unsigned int page_num = index >> PageNumberShift;
 		unsigned int item_num = index & PageOffsetMask;
 
 		return (*pages[page_num])[item_num];
 	}
 
-	const Element& GetPoolObject(Id<T> id) const {
-		int index = static_cast<int>(id);
+	const Element& GetPoolObject(int index) const {
 		unsigned int page_num = index >> PageNumberShift;
 		unsigned int item_num = index & PageOffsetMask;
 
@@ -113,7 +110,7 @@ public:
 			int upper_bound = pool->GetIndexUpperBound();
 			++index;
 			while(index < upper_bound) {
-				if(!pool->GetPoolObject(Id<T>(index)).pool_next_free) {
+				if(!pool->GetPoolObject(index).pool_next_free) {
 					return;
 				}
 				++index;
@@ -129,9 +126,9 @@ public:
 			return;
 		}
 
-		Iterator(Id<T> index, Pool* pool)
-			: index(static_cast<int>(index)), pool(pool) {
-			if(pool->GetPoolObject(Id<T>(index)).pool_next_free) {
+		Iterator(int index, Pool* pool)
+			: index(index), pool(pool) {
+			if(pool->GetPoolObject(index).pool_next_free) {
 				Advance();
 			}
 			return;
@@ -146,11 +143,11 @@ public:
 		}
 
 		Element& operator*() {
-			return (*pool)[Id<T>(index)];
+			return (*pool)[index];
 		}
 
 		Element* operator->() {
-			return &(*pool)[Id<T>(index)];
+			return &(*pool)[index];
 		}
 
 		Iterator& operator++() {
@@ -171,11 +168,11 @@ public:
 		return;
 	}
 
-	Element& operator[](Id<T> index) {
+	Element& operator[](int index) {
 		return GetPoolObject(index);
 	}
 
-	const Element& operator[](Id<T> index) const {
+	const Element& operator[](int index) const {
 		return GetPoolObject(index);
 	}
 
@@ -198,13 +195,13 @@ public:
 		del_cb(*this, em);
 	}
 
-	void Destroy(Id<T> index) {
+	void Destroy(int index) {
 		auto& obj = GetPoolObject(index);
 		Destroy(obj);
 	}
 
 	Iterator begin() {
-		return Iterator(Id<T>(0), this);
+		return Iterator(0, this);
 	}
 
 	Iterator end() {

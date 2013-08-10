@@ -5,7 +5,6 @@
 #include "content/flags/soundsubclasstype.h"
 #include "framework/flagset.h"
 #include "framework/math/vector.h"
-#include "framework/id.h"
 
 namespace Gorc {
 namespace Content {
@@ -43,19 +42,19 @@ public:
 	void Update(double dt);
 
 	void SetAmbientSound(Content::Assets::Sound const* sound, float volume);
-	void PlayFoleyLoopClass(Id<Thing> thing, Flags::SoundSubclassType subclass);
-	void StopFoleyLoop(Id<Thing> thing);
+	void PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass);
+	void StopFoleyLoop(int thing);
 
 	// Sound verbs
-	void ChangeSoundPitch(Id<Sound> channel, float pitch, float delay);
-	void ChangeSoundVol(Id<Sound> channel, float volume, float delay);
+	void ChangeSoundPitch(int channel, float pitch, float delay);
+	void ChangeSoundVol(int channel, float volume, float delay);
 	void PlaySong(int start, int end, int loopto);
-	Id<Sound> PlaySoundClass(Id<Thing> thing, Flags::SoundSubclassType subclass);
-	Id<Sound> PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
-	Id<Sound> PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	Id<Sound> PlaySoundThing(int wav, Id<Thing> thing, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
+	int PlaySoundClass(int thing, Flags::SoundSubclassType subclass);
+	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
+	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
+	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
 	void SetMusicVol(float volume);
-	void StopSound(Id<Sound> channel, float delay);
+	void StopSound(int channel, float delay);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };

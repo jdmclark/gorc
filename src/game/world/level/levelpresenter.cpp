@@ -4,17 +4,17 @@
 using namespace Gorc::Math;
 
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
-	: components(components), place(place), ScriptPresenter(components), SoundPresenter(*place.ContentManager),
-	  KeyPresenter(*place.ContentManager),
+	: components(components), place(place), Inventory(place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler)),
+	  ScriptPresenter(components), SoundPresenter(*place.ContentManager),  KeyPresenter(*place.ContentManager),
 	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
 	  ItemController(*this), CorpseController(*this) {
-
-	Inventory = place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler);
 
 	return;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
+	components.CurrentLevelPresenter = this;
+
 	Model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level));
 	Model->DynamicsWorld.setInternalTickCallback([](btDynamicsWorld* world, btScalar timeStep) {
 		reinterpret_cast<LevelPresenter*>(world->getWorldUserInfo())->PhysicsTickUpdate(timeStep);
@@ -30,10 +30,8 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 	components.LevelView.SetPresenter(this);
 	components.LevelView.SetLevelModel(Model.get());
 	components.WorldViewFrame.SetView(components.LevelView);
-	components.CurrentLevelPresenter = this;
 
 	// Send startup and loading messages
-	ScriptPresenter.SendMessageToAll(Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
 	ScriptPresenter.SendMessageToAll(Cog::MessageId::Loading, -1, -1, Flags::MessageType::Nothing);
 
 	return;
@@ -74,6 +72,14 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 		}
 		else {
 			ScriptPresenter.CreateLevelDummyInstance();
+		}
+	}
+
+	// Create bin script instances.
+	for(const auto& bin : Inventory.Bins) {
+		Content::Assets::Script const* script = bin.second.Cog;
+		if(script) {
+			ScriptPresenter.CreateGlobalCogInstance(script->Script, *place.ContentManager, components.Compiler);
 		}
 	}
 }
@@ -186,7 +192,7 @@ bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Vector<3>&
 	return false;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(Id<Thing> thing_id, Thing& thing,
+void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, Thing& thing,
 		const Vector<3>& oldThingPosition) {
 	if(PointInsideSector(thing.Position, Model->Sectors[thing.Sector])) {
 		// Thing hasn't moved to a different sector.
@@ -332,7 +338,7 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	int best_surf_candidate = -1;
 	float best_surf_dist = 0.25f;
 
-	Id<Thing> best_thing_candidate;
+	int best_thing_candidate = -1;
 	float best_thing_dist = 0.25f;
 
 	for(int i = 0; i < Model->Surfaces.size(); ++i) {
@@ -370,11 +376,11 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
 		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Flags::MessageType::Surface,
-				static_cast<int>(Model->CameraThingId), Flags::MessageType::Thing);
+				Model->CameraThingId, Flags::MessageType::Thing);
 	}
-	else if(best_thing_candidate.IsValid()) {
-		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, static_cast<int>(best_thing_candidate), Flags::MessageType::Thing,
-				static_cast<int>(Model->CameraThingId), Flags::MessageType::Thing);
+	else if(best_thing_candidate >= 0) {
+		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Flags::MessageType::Thing,
+				Model->CameraThingId, Flags::MessageType::Thing);
 		SoundPresenter.PlaySoundClass(best_thing_candidate, Flags::SoundSubclassType::Activate);
 	}
 }
@@ -388,7 +394,7 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	int best_surf_candidate = -1;
 	float best_surf_dist = 0.25f;
 
-	Id<Thing> best_thing_candidate;
+	int best_thing_candidate = -1;
 	float best_thing_dist = 0.25f;
 
 	for(int i = 0; i < Model->Surfaces.size(); ++i) {
@@ -426,24 +432,24 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
 		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Flags::MessageType::Surface,
-				static_cast<int>(Model->CameraThingId), Flags::MessageType::Thing, 1000, static_cast<int>(Flags::DamageFlag::Saber));
+				Model->CameraThingId, Flags::MessageType::Thing, 1000, static_cast<int>(Flags::DamageFlag::Saber));
 	}
-	else if(best_thing_candidate.IsValid()) {
-		DamageThing(best_thing_candidate, 50.0f, { Flags::DamageFlag::Saber }, static_cast<int>(Model->CameraThingId));
+	else if(best_thing_candidate >= 0) {
+		DamageThing(best_thing_candidate, 50.0f, { Flags::DamageFlag::Saber }, Model->CameraThingId);
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::ThingSighted(Id<Thing> thing_id) {
+void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
 	Model->Things[thing_id].Flags += Flags::ThingFlag::Sighted;
-	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, static_cast<int>(thing_id), Flags::MessageType::Thing);
+	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, thing_id, Flags::MessageType::Thing);
 }
 
 // Frame verbs
-int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(Id<Thing> thing_id) {
+int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(int thing_id) {
 	return Model->Things[thing_id].CurrentFrame;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(Id<Thing> thing_id, int frame, float speed) {
+void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int frame, float speed) {
 	Thing& referenced_thing = Model->Things[thing_id];
 
 	referenced_thing.GoalFrame = frame;
@@ -468,7 +474,7 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(Id<Thing> thing_id, i
 }
 
 // Player verbs
-Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
+int Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
 	return Model->CameraThingId;
 }
 
@@ -552,7 +558,7 @@ int Gorc::Game::World::Level::LevelPresenter::LoadSound(const char* fn) {
 
 // Thing action verbs
 
-Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num,
+int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
 	// Initialize thing properties
 	auto& thing = Model->Things.Create();
@@ -567,15 +573,19 @@ Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresent
 
 	thing.Controller->CreateControllerData(thing.GetId());
 
+	if(thing.Cog) {
+		ScriptPresenter.CreateGlobalCogInstance(thing.Cog->Script, *place.ContentManager, components.Compiler);
+	}
+
 	return thing.GetId();
 }
 
-Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresenter::CreateThing(int tpl_id, unsigned int sector_num,
+int Gorc::Game::World::Level::LevelPresenter::CreateThing(int tpl_id, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orientation) {
 	return CreateThing(Model->Level.Templates[tpl_id], sector_num, pos, orientation);
 }
 
-Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresenter::CreateThing(const std::string& tpl_name, unsigned int sector_num,
+int Gorc::Game::World::Level::LevelPresenter::CreateThing(const std::string& tpl_name, unsigned int sector_num,
 		const Math::Vector<3>& pos, const Math::Vector<3>& orientation) {
 	std::string temp;
 	std::transform(tpl_name.begin(), tpl_name.end(), std::back_inserter(temp), tolower);
@@ -585,11 +595,11 @@ Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresent
 	}
 	else {
 		// TODO: Template not found. Report error.
-		return Id<Thing>();
+		return -1;
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::AdjustThingPosition(Id<Thing> thing_id, const Math::Vector<3>& new_pos) {
+void Gorc::Game::World::Level::LevelPresenter::AdjustThingPosition(int thing_id, const Math::Vector<3>& new_pos) {
 	Thing& thing = Model->Things[thing_id];
 	auto oldPosition = thing.Position;
 	thing.Position = new_pos;
@@ -599,12 +609,12 @@ void Gorc::Game::World::Level::LevelPresenter::AdjustThingPosition(Id<Thing> thi
 	UpdateThingSector(thing_id, thing, oldPosition);
 }
 
-Gorc::Id<Gorc::Game::World::Level::Thing> Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, Id<Thing> thing_id) {
+int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = Model->Things[thing_id];
 	return CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation);
 }
 
-float Gorc::Game::World::Level::LevelPresenter::DamageThing(Id<Thing> thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id) {
+float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id) {
 	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, static_cast<int>(thing_id), Flags::MessageType::Thing,
 			damager_id, Flags::MessageType::Thing, damage, static_cast<int>(flags));
 
@@ -635,18 +645,22 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(Id<Thing> thing_id, 
 	return 0.0f;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::DestroyThing(Id<Thing> thing_id) {
+void Gorc::Game::World::Level::LevelPresenter::DestroyThing(int thing_id) {
 	// TODO: Clean up components owned by thing (animations, key mixes, sounds).
 	Model->Things[thing_id].Controller->RemoveControllerData(thing_id);
 	Model->Things.Destroy(thing_id);
 }
 
-Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(Id<Thing> thing_id) {
+void Gorc::Game::World::Level::LevelPresenter::DetachThing(int thing_id) {
+	Model->Things[thing_id].AttachFlags = FlagSet<Flags::AttachFlag>();
+}
+
+Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int thing_id) {
 	Thing& referenced_thing = Model->Things[thing_id];
 	return referenced_thing.Position;
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(Id<Thing> thing_id) {
+bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 	Thing& referencedThing = Model->Things[thing_id];
 	switch(referencedThing.Move) {
 	case Flags::MoveType::Physics:
@@ -664,11 +678,11 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(Id<Thing> thing_id)
 }
 
 // Thing property verbs
-int Gorc::Game::World::Level::LevelPresenter::GetThingSector(Id<Thing> thing_id) {
+int Gorc::Game::World::Level::LevelPresenter::GetThingSector(int thing_id) {
 	return Model->Things[thing_id].Sector;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetThingType(Id<Thing> thing_id, Flags::ThingType type) {
+void Gorc::Game::World::Level::LevelPresenter::SetThingType(int thing_id, Flags::ThingType type) {
 	// Clean up type physics.
 	auto& thing = Model->Things[thing_id];
 	thing.Controller->RemoveControllerData(thing_id);
@@ -688,11 +702,11 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 
 	// Frame verbs
 	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) {
-		return components.CurrentLevelPresenter->GetCurFrame(Id<Thing>(thing));
+		return components.CurrentLevelPresenter->GetCurFrame(thing);
 	});
 
 	verbTable.AddVerb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
-		return components.CurrentLevelPresenter->MoveToFrame(Id<Thing>(thing), frame, speed);
+		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed);
 	});
 
 	// Options verbs
@@ -703,11 +717,11 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 
 	// Player verbs
 	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] {
-		return static_cast<int>(components.CurrentLevelPresenter->GetLocalPlayerThing());
+		return components.CurrentLevelPresenter->GetLocalPlayerThing();
 	});
 
 	verbTable.AddVerb<int, 0>("jkgetlocalplayer", [&components] {
-		return static_cast<int>(components.CurrentLevelPresenter->GetLocalPlayerThing());
+		return components.CurrentLevelPresenter->GetLocalPlayerThing();
 	});
 
 	// Print verbs
@@ -801,36 +815,36 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 
 	// Thing action verbs
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
-		return static_cast<int>(components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, Id<Thing>(thing_pos)));
+		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
 	});
 
 	verbTable.AddVerb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
-		return components.CurrentLevelPresenter->DamageThing(Id<Thing>(thing_id), damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
+		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
 	});
 
 	verbTable.AddVerb<void, 1>("destroything", [&components](int thing_id) {
-		components.CurrentLevelPresenter->DestroyThing(Id<Thing>(thing_id));
+		components.CurrentLevelPresenter->DestroyThing(thing_id);
 	});
 
 	verbTable.AddVerb<void, 1>("detachthing", [&components](int thing_id) {
-		// TODO: Implement
+		components.CurrentLevelPresenter->DetachThing(thing_id);
 	});
 
 	verbTable.AddVerb<Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->GetThingPos(Id<Thing>(thing_id));
+		return components.CurrentLevelPresenter->GetThingPos(thing_id);
 	});
 
 	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->IsThingMoving(Id<Thing>(thing_id));
+		return components.CurrentLevelPresenter->IsThingMoving(thing_id);
 	});
 
 	verbTable.AddVerb<bool, 1>("ismoving", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->IsThingMoving(Id<Thing>(thing_id));
+		return components.CurrentLevelPresenter->IsThingMoving(thing_id);
 	});
 
 	// Thing property verbs
 	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->GetThingSector(Id<Thing>(thing_id));
+		return components.CurrentLevelPresenter->GetThingSector(thing_id);
 	});
 
 	verbTable.AddVerb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {

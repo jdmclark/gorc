@@ -12,7 +12,7 @@ class PlayerController : public CharacterController {
 public:
 	using CharacterController::CharacterController;
 
-	virtual void Update(Id<Thing> thing_id, double dt) override;
+	virtual void Update(int thing_id, double dt) override;
 };
 
 }

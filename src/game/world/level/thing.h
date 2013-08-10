@@ -33,15 +33,14 @@ public:
 	int GoalFrame = 0;
 	float PathMoveSpeed = 0.0f;
 
-	Id<Sounds::Sound> CurrentFoleyLoopChannel;
+	int CurrentFoleyLoopChannel;
 
-	unsigned int AttachedSurface = -1;
-	Id<Thing> AttachedThing;
+	int AttachedSurface = -1;
+	int AttachedThing = -1;
 	Math::Vector<3> PrevAttachedThingPosition;
 
-	// HACK: Play idle animation
-	Id<Keys::KeyMix> AttachedKeyMix;
-	Id<Keys::KeyState> ActorWalkAnimation;
+	int AttachedKeyMix = -1;
+	int ActorWalkAnimation = -1;
 
 	std::unique_ptr<btCollisionShape> ActorCollideShape;
 

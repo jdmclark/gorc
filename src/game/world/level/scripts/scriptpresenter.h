@@ -52,6 +52,9 @@ public:
 	void CreateLevelDummyInstance();
 	void CreateLevelCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
 			const std::vector<Cog::VM::Value>& values);
+	void CreateGlobalCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler);
+
+	int GetGlobalCogInstance(Cog::Script const* script) const;
 
 	Cog::VM::Value SendMessage(int InstanceId, Cog::MessageId message,
 			int SenderId, int SenderRef, Flags::MessageType SenderType,
@@ -64,7 +67,7 @@ public:
 			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
 			Cog::VM::Value Param0 = 0, Cog::VM::Value Param1 = 0, Cog::VM::Value Param2 = 0, Cog::VM::Value Param3 = 0);
 
-	void ResumeWaitForStop(Id<Thing> wait_thing);
+	void ResumeWaitForStop(int wait_thing);
 
 	// COG run-time verbs
 	inline int GetParam(int param_num) { return model->RunningCogState.top().Params[param_num % 4]; }
@@ -78,7 +81,7 @@ public:
 	void SetTimer(float time);
 	void SetTimerEx(float delay, int id, Cog::VM::Value param0, Cog::VM::Value param1);
 	void Sleep(float time);
-	void WaitForStop(Id<Thing> thing);
+	void WaitForStop(int thing);
 
 	inline int GetMasterCog() const {
 		return master_cog;

@@ -3,7 +3,6 @@
 #include "cog/vm/value.h"
 #include "game/flags/messagetype.h"
 #include "scriptinstance.h"
-#include "framework/id.h"
 #include <array>
 
 namespace Gorc {

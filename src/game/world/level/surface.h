@@ -12,7 +12,7 @@ namespace Level {
 class Surface : public Content::Assets::LevelSurface {
 public:
 	int CelNumber = -1;
-	Id<PoolPtr<Animations::Animation>> AnimNumber;
+	int AnimNumber;
 
 	Surface(const Content::Assets::LevelSurface& surf);
 	const Content::Assets::LevelSurface& operator=(const Content::Assets::LevelSurface& surf);

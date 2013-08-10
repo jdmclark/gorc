@@ -1,7 +1,6 @@
 #pragma once
 
 #include "keymixlevelstate.h"
-#include "framework/id.h"
 
 namespace Gorc {
 namespace Game {
@@ -14,7 +13,7 @@ namespace Keys {
 
 class KeyMix {
 public:
-	Id<Thing> AttachedThing;
+	int AttachedThing;
 	KeyMixLevelState High, Low, Body;
 };
 

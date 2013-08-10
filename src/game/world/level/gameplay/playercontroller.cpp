@@ -2,7 +2,7 @@
 #include "game/world/level/levelpresenter.h"
 #include "game/world/level/levelmodel.h"
 
-void Gorc::Game::World::Level::Gameplay::PlayerController::Update(Id<Thing> thing_id, double dt) {
+void Gorc::Game::World::Level::Gameplay::PlayerController::Update(int thing_id, double dt) {
 	CharacterController::Update(thing_id, dt);
 
 	Thing& thing = presenter.Model->Things[thing_id];

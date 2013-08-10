@@ -1,7 +1,6 @@
 #pragma once
 
 #include "framework/math/vector.h"
-#include "framework/id.h"
 #include "content/flags/keymarkertype.h"
 
 namespace Gorc {
@@ -29,10 +28,10 @@ public:
 	ThingController(LevelPresenter& presenter);
 	virtual ~ThingController();
 
-	virtual void Update(Id<Thing> thing_id, double dt) = 0;
-	virtual void RemoveControllerData(Id<Thing> thing_id) = 0;
-	virtual void CreateControllerData(Id<Thing> thing_id) = 0;
-	virtual void HandleAnimationMarker(Id<Thing> thing_id, Flags::KeyMarkerType marker);
+	virtual void Update(int thing_id, double dt) = 0;
+	virtual void RemoveControllerData(int thing_id) = 0;
+	virtual void CreateControllerData(int thing_id) = 0;
+	virtual void HandleAnimationMarker(int thing_id, Flags::KeyMarkerType marker);
 };
 
 }

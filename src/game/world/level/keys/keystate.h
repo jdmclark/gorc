@@ -12,7 +12,7 @@ class KeyMix;
 
 class KeyState {
 public:
-	Id<KeyMix> MixId;
+	int MixId;
 	Content::Assets::Animation const* Animation = nullptr;
 	double AnimationTime;
 	double CurrentFrame;

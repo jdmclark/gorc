@@ -438,7 +438,7 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const
 	Math::Vector<3> anim_translate = Math::Zero<3>();
 	Math::Vector<3> anim_rotate = Math::Zero<3>();
 
-	if(thing.AttachedKeyMix.IsValid()) {
+	if(thing.AttachedKeyMix >= 0) {
 		std::tie(anim_translate, anim_rotate) = currentPresenter->KeyPresenter.GetNodeFrame(thing.AttachedKeyMix, mesh_id, node.Type);
 	}
 	else {

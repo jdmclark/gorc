@@ -28,17 +28,17 @@ void AnimationPresenter::Update(double dt) {
 }
 
 // Anim / Cel verbs
-Gorc::Id<Gorc::PoolPtr<Animation>> AnimationPresenter::SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags) {
+int AnimationPresenter::SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags) {
 	auto& ent = model->Animations.Create();
 	ent.Value = std::unique_ptr<Animation>(new SurfaceMaterialAnimation(*levelModel, surface, rate, flags, ent.GetId()));
 	return ent.GetId();
 }
 
-Gorc::Id<Gorc::PoolPtr<Animation>> AnimationPresenter::GetSurfaceAnim(int surface) {
+int AnimationPresenter::GetSurfaceAnim(int surface) {
 	return levelModel->Surfaces[surface].AnimNumber;
 }
 
-void AnimationPresenter::StopAnim(Gorc::Id<Gorc::PoolPtr<Animation>> anim) {
+void AnimationPresenter::StopAnim(int anim) {
 	model->Animations.Destroy(anim);
 }
 
@@ -50,19 +50,19 @@ void AnimationPresenter::SetSurfaceCel(int surface, int cel) {
 	levelModel->Surfaces[surface].CelNumber = cel;
 }
 
-Gorc::Id<Gorc::PoolPtr<Animation>> AnimationPresenter::SlideSurface(int surface_id, const Math::Vector<3>& direction) {
+int AnimationPresenter::SlideSurface(int surface_id, const Math::Vector<3>& direction) {
 	auto& ent = model->Animations.Create();
 	ent.Value = std::unique_ptr<Animation>(new SlideSurfaceAnimation(*levelModel, surface_id, direction));
 	return ent.GetId();
 }
 
-Gorc::Id<Gorc::PoolPtr<Animation>> AnimationPresenter::SlideCeilingSky(float u_speed, float v_speed) {
+int AnimationPresenter::SlideCeilingSky(float u_speed, float v_speed) {
 	auto& ent = model->Animations.Create();
 	ent.Value = std::unique_ptr<Animation>(new SlideCeilingSkyAnimation(*levelModel, Vec(u_speed, v_speed)));
 	return ent.GetId();
 }
 
-Gorc::Id<Gorc::PoolPtr<Animation>> AnimationPresenter::SurfaceLightAnim(int surface, float start_light, float end_light, float change_time) {
+int AnimationPresenter::SurfaceLightAnim(int surface, float start_light, float end_light, float change_time) {
 	auto& ent = model->Animations.Create();
 	ent.Value = std::unique_ptr<Animation>(new SurfaceLightAnimation(*levelModel, surface, start_light, end_light, change_time));
 	return ent.GetId();
@@ -104,7 +104,7 @@ void Gorc::Game::World::Level::Animations::AnimationPresenter::RegisterVerbs(Cog
 	});
 
 	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) {
-		components.CurrentLevelPresenter->AnimationPresenter.StopAnim(Id<PoolPtr<Animation>>(anim));
+		components.CurrentLevelPresenter->AnimationPresenter.StopAnim(anim);
 	});
 
 	verbTable.AddVerb<int, 4>("surfacelightanim", [&components](int surface, float start_light, float end_light, float change_time) {

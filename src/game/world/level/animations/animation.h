@@ -1,6 +1,5 @@
 #pragma once
 
-#include "framework/id.h"
 #include <memory>
 
 namespace Gorc {

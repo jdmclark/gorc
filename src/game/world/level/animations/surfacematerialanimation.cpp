@@ -2,7 +2,7 @@
 #include "game/world/level/levelmodel.h"
 
 Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::SurfaceMaterialAnimation(LevelModel& model, unsigned int surface,
-		double framerate, FlagSet<Flags::AnimFlag> flag, Id<PoolPtr<Animation>> anim_num)
+		double framerate, FlagSet<Flags::AnimFlag> flag, int anim_num)
 	: model(model), surface(surface), framerate(1.0 / framerate), flag(flag), framerate_accumulator(0.0) {
 
 	int surface_material = model.Level.Surfaces[surface].Material;
@@ -51,5 +51,5 @@ void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Update(doub
 }
 
 void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Stop() {
-	model.Surfaces[surface].AnimNumber = Id<PoolPtr<Animation>>();
+	model.Surfaces[surface].AnimNumber = -1;
 }

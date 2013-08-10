@@ -36,7 +36,7 @@ public:
 
 	Pool<Thing> Things;
 
-	Id<Thing> CameraThingId;
+	int CameraThingId;
 	unsigned int CameraSector;
 	Vector<3> CameraPosition;
 	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);

@@ -16,7 +16,7 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::Start(LevelModel& levelModel,
 	this->model = &model;
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(Id<Thing> thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
+void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
 		double begin, double end, bool wraps, double frame_ct) {
 	if(wraps) {
 		begin = std::fmod(begin, frame_ct);
@@ -41,14 +41,14 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(Id<Thing> 
 	}
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchMarker(Id<Thing> thing_id, Flags::KeyMarkerType marker) {
+void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchMarker(int thing_id, Flags::KeyMarkerType marker) {
 	auto& thing = levelModel->Things[thing_id];
 	thing.Controller->HandleAnimationMarker(thing_id, marker);
 }
 
-Gorc::Id<Gorc::Game::World::Level::Keys::KeyMix> Gorc::Game::World::Level::Keys::KeyPresenter::GetThingMixId(Id<Thing> thing_id) {
+int Gorc::Game::World::Level::Keys::KeyPresenter::GetThingMixId(int thing_id) {
 	auto& thing = levelModel->Things[thing_id];
-	if(!thing.AttachedKeyMix.IsValid()) {
+	if(thing.AttachedKeyMix < 0) {
 		auto& mix = model->Mixes.Create();
 		mix.AttachedThing = thing_id;
 		thing.AttachedKeyMix = mix.GetId();
@@ -125,7 +125,7 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::Update(double dt) {
 	}
 }
 
-std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::Keys::KeyPresenter::GetNodeFrame(Id<KeyMix> mix_id,
+std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::Keys::KeyPresenter::GetNodeFrame(int mix_id,
 		int node_id, FlagSet<Flags::MeshNodeType> node_type) const {
 	const KeyMix& mix = model->Mixes[mix_id];
 
@@ -173,9 +173,9 @@ std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Leve
 	return std::make_tuple(position, orientation);
 }
 
-Gorc::Id<Gorc::Game::World::Level::Keys::KeyState> Gorc::Game::World::Level::Keys::KeyPresenter::PlayKey(Id<Thing> thing_id, int key,
+int Gorc::Game::World::Level::Keys::KeyPresenter::PlayKey(int thing_id, int key,
 		int priority, FlagSet<Flags::KeyFlag> flags) {
-	Id<KeyMix> mix_id = GetThingMixId(thing_id);
+	int mix_id = GetThingMixId(thing_id);
 
 	auto& state = model->Keys.Create();
 
@@ -190,9 +190,9 @@ Gorc::Id<Gorc::Game::World::Level::Keys::KeyState> Gorc::Game::World::Level::Key
 	return state.GetId();
 }
 
-Gorc::Id<Gorc::Game::World::Level::Keys::KeyState> Gorc::Game::World::Level::Keys::KeyPresenter::PlayPuppetKey(Id<Thing> thing_id,
+int Gorc::Game::World::Level::Keys::KeyPresenter::PlayPuppetKey(int thing_id,
 		Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode) {
-	Id<KeyMix> mix_id = GetThingMixId(thing_id);
+	int mix_id = GetThingMixId(thing_id);
 	auto& thing = levelModel->Things[thing_id];
 
 	auto& state = model->Keys.Create();
@@ -214,6 +214,6 @@ Gorc::Id<Gorc::Game::World::Level::Keys::KeyState> Gorc::Game::World::Level::Key
 
 void Gorc::Game::World::Level::Keys::KeyPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
 	verbTable.AddVerb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
-		return static_cast<int>(components.CurrentLevelPresenter->KeyPresenter.PlayKey(Id<Thing>(thing), key, priority, FlagSet<Flags::KeyFlag>(flags)));
+		return static_cast<int>(components.CurrentLevelPresenter->KeyPresenter.PlayKey(thing, key, priority, FlagSet<Flags::KeyFlag>(flags)));
 	});
 }

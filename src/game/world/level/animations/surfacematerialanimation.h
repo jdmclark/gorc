@@ -1,7 +1,6 @@
 #pragma once
 
 #include "animation.h"
-#include "framework/id.h"
 #include "framework/pool.h"
 #include "content/flags/animflag.h"
 #include "framework/flagset.h"
@@ -25,7 +24,7 @@ private:
 	int num_cels;
 
 public:
-	SurfaceMaterialAnimation(LevelModel& model, unsigned int surface, double framerate, FlagSet<Flags::AnimFlag> flag, Id<PoolPtr<Animation>> anim_num);
+	SurfaceMaterialAnimation(LevelModel& model, unsigned int surface, double framerate, FlagSet<Flags::AnimFlag> flag, int anim_num);
 
 	void Update(double dt);
 	void Stop();

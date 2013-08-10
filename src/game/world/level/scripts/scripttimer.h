@@ -2,7 +2,6 @@
 
 #include "cog/vm/value.h"
 #include "scriptinstance.h"
-#include "framework/id.h"
 
 namespace Gorc {
 namespace Game {

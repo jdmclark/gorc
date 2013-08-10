@@ -37,18 +37,18 @@ public:
 	void Start(LevelModel& levelModel, AnimationModel& model);
 	void Update(double dt);
 
-	Id<PoolPtr<Animation>> SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags);
-	Id<PoolPtr<Animation>> GetSurfaceAnim(int surface);
+	int SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags);
+	int GetSurfaceAnim(int surface);
 
-	void StopAnim(Id<PoolPtr<Animation>> anim);
+	void StopAnim(int anim);
 
 	int GetSurfaceCel(int surface);
 	void SetSurfaceCel(int surface, int cel);
 
-	Id<PoolPtr<Animation>> SlideCeilingSky(float u_speed, float v_speed);
-	Id<PoolPtr<Animation>> SlideSurface(int surface_id, const Math::Vector<3>& direction);
+	int SlideCeilingSky(float u_speed, float v_speed);
+	int SlideSurface(int surface_id, const Math::Vector<3>& direction);
 
-	Id<PoolPtr<Animation>> SurfaceLightAnim(int surface_id, float start_light, float end_light, float change_time);
+	int SurfaceLightAnim(int surface_id, float start_light, float end_light, float change_time);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };
