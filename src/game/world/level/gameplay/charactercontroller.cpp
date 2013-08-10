@@ -203,19 +203,26 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 		}
 		else {
 			// Accelerate body along surface
+			Math::Vector<3> hit_world = Math::VecBt(rrcb.m_hitPointWorld);
 			Math::Vector<3> hit_normal = Math::VecBt(rrcb.m_hitNormalWorld);
-			Math::Vector<3> new_vel = thing.Thrust - hit_normal * Math::Dot(thing.Thrust, hit_normal);
+			Math::Vector<3> player_new_vel = thing.Thrust - hit_normal * Math::Dot(thing.Thrust, hit_normal);
+			Math::Vector<3> new_vel = player_new_vel;
 
 			if(surfaceUserData) {
 				new_vel += presenter.Model->Surfaces[surfaceUserData->SurfaceId].Thrust / 8.0f;
 			}
 
+			// Accelerate body toward standing position
+			float model_height = Math::Get<2>(thing.Model3d->InsertOffset);
+			float dist = Math::Dot(hit_normal, thing.Position - hit_world);
+			new_vel += hit_normal * (model_height - dist) * 20.0f;
+
 			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
 
 			// Update idle animation
-			float new_vel_len = Math::Length(new_vel);
-			if(new_vel_len > 0.0f) {
-				PlayRunningAnimation(thing_id, thing, new_vel_len * 30.0f);
+			float player_new_vel_len = Math::Length(player_new_vel);
+			if(player_new_vel_len > 0.0f) {
+				PlayRunningAnimation(thing_id, thing, player_new_vel_len * 30.0f);
 			}
 			else {
 				PlayStandingAnimation(thing_id, thing);
@@ -253,6 +260,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 		}
 		else {
 			// Accelerate body along surface
+			Math::Vector<3> hit_world = Math::VecBt(rrcb.m_hitPointWorld);
 			Math::Vector<3> hit_normal = Math::VecBt(rrcb.m_hitNormalWorld);
 			Math::Vector<3> player_new_vel = thing.Thrust - hit_normal * Math::Dot(thing.Thrust, hit_normal);
 			Math::Vector<3> new_vel = player_new_vel;
@@ -261,6 +269,11 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 				new_vel += (presenter.Model->Things[thingUserData->ThingId].Position - thing.PrevAttachedThingPosition) / dt;
 				thing.PrevAttachedThingPosition = presenter.Model->Things[thingUserData->ThingId].Position;
 			}
+
+			// Accelerate body toward standing position
+			float model_height = Math::Get<2>(thing.Model3d->InsertOffset);
+			float dist = Math::Dot(hit_normal, thing.Position - hit_world);
+			new_vel += hit_normal * (model_height - dist) * 20.0f;
 
 			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
 
@@ -282,7 +295,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnSurface(Id<T
 	thing.AttachedSurface = surf_id;
 
 	// Player has landed.
-	presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
+	//presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 	thing.RigidBody->setGravity(btVector3(0,0,0));
 }
 
@@ -293,7 +306,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::StepOnThing(Id<Thi
 	thing.PrevAttachedThingPosition = presenter.Model->Things[land_thing_id].Position;
 
 	// Player has landed.
-	presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
+	//presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 	thing.RigidBody->setGravity(btVector3(0,0,0));
 }
 
