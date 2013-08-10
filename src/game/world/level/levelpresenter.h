@@ -7,6 +7,7 @@
 #include "sounds/music.h"
 #include "content/flags/animflag.h"
 #include "content/flags/damageflag.h"
+#include "content/assets/inventory.h"
 #include "game/flags/difficultymode.h"
 #include "game/world/level/animations/animationpresenter.h"
 #include "game/world/level/scripts/scriptpresenter.h"
@@ -61,6 +62,8 @@ private:
 
 public:
 	std::unique_ptr<LevelModel> Model;
+
+	Content::Assets::Inventory Inventory;
 
 	Animations::AnimationPresenter AnimationPresenter;
 	Scripts::ScriptPresenter ScriptPresenter;

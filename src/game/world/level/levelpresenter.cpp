@@ -8,6 +8,9 @@ Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components,
 	  KeyPresenter(*place.ContentManager),
 	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
 	  ItemController(*this), CorpseController(*this) {
+
+	Inventory = place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler);
+
 	return;
 }
 
