@@ -1,7 +1,11 @@
 #ifdef VERTEXPROGRAM
 
+uniform mat4 projection_matrix;
+uniform mat4 view_matrix;
+uniform mat4 model_matrix;
+
 void main() {
-	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	gl_Position = projection_matrix * view_matrix * model_matrix * gl_Vertex;
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	gl_FrontColor = gl_Color;
 }

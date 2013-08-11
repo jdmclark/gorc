@@ -55,6 +55,11 @@ public:
 	float MoveSize = 0.05f;
 	float Height = 0.18f;
 
+	float Light = 0.0f;
+	float MaxLight = 1.0f;
+	float LightIntensity = 0.0f;
+	Math::Vector<3> LightOffset;
+
 	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Colormap& cmp, const Cog::Compiler& compiler, Diagnostics::Report& report);
 };
 

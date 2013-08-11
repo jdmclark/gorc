@@ -3,9 +3,11 @@
 
 using namespace Gorc::Math;
 
-Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::SlideSurfaceAnimation(LevelModel& model, unsigned int surface, const Math::Vector<3>& direction)
+Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::SlideSurfaceAnimation(LevelModel& model, unsigned int surface,
+		const Math::Vector<3>& direction, int anim_num)
 	: model(model), surface(surface), direction(direction) {
 	auto& surf = model.Surfaces[surface];
+	surf.AnimNumber = anim_num;
 
 	// Compute texture basis.
 	sb0 = Normalize(model.Level.Vertices[std::get<0>(surf.Vertices[1])] - model.Level.Vertices[std::get<0>(surf.Vertices[0])]);
@@ -41,4 +43,9 @@ void Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::Update(double 
 	auto plane_dir = tb0 * Dot(direction, sb0) + tb1 * Dot(direction, sb1);
 
 	surf.TextureOffset += plane_dir / 8.0f;
+}
+
+void Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::Stop() {
+	auto& surf = model.Surfaces[surface];
+	surf.AnimNumber = -1;
 }

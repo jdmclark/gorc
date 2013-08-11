@@ -22,9 +22,10 @@ private:
 	Math::Vector<2> tb0, tb1;
 
 public:
-	SlideSurfaceAnimation(LevelModel& model, unsigned int surface, const Math::Vector<3>& direction);
+	SlideSurfaceAnimation(LevelModel& model, unsigned int surface, const Math::Vector<3>& direction, int anim_num);
 
 	void Update(double dt);
+	void Stop();
 };
 
 }

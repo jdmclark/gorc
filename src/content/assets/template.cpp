@@ -181,38 +181,33 @@ void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 	}
 }
 
+#define TPP_ARGS Template& tpl, Text::Tokenizer& tok, Content::Manager& content, const Colormap& colormap, const Cog::Compiler& compiler, Diagnostics::Report& report
+
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "model3d", &TemplateModel3DParser },
 	{ "soundclass", &TemplateSoundClassParser },
 	{ "cog", &TemplateCogParser },
 	{ "puppet", &TemplatePuppetParser },
-	{ "type", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }},
-	{ "move", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterValueMapper(MoveTypeMap, tpl.Move, Flags::MoveType::None, tok, report); }},
-	{ "mass", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
-	{ "movesize", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
-	{ "size", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-			TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
-	{ "eyeoffset", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
-		TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
-	{ "collide", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterEnumMapper(tpl.Collide, Flags::CollideType::None, tok, report); }},
-	{ "thingflags", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
-	{ "numframes", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
-		/* Silently consume numframes */ tok.GetNumber<int>(); }},
-	{ "frame", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&) {
-		TemplateAddFrame(tpl, tok); }},
-	{ "health", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterNumberMapper(tpl.Health, 100.0f, tok, report); }},
-	{ "maxhealth", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterNumberMapper(tpl.MaxHealth, 100.0f, tok, report); }},
-	{ "height", [](Template& tpl, Text::Tokenizer& tok, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
-		TemplateParameterNumberMapper(tpl.Height, 0.18f, tok, report); }}
+	{ "type", [](TPP_ARGS) { TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }},
+	{ "move", [](TPP_ARGS) { TemplateParameterValueMapper(MoveTypeMap, tpl.Move, Flags::MoveType::None, tok, report); }},
+	{ "mass", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
+	{ "movesize", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
+	{ "size", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
+	{ "eyeoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
+	{ "collide", [](TPP_ARGS) { TemplateParameterEnumMapper(tpl.Collide, Flags::CollideType::None, tok, report); }},
+	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
+	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.GetNumber<int>(); }},
+	{ "frame", [](TPP_ARGS) { TemplateAddFrame(tpl, tok); }},
+	{ "health", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Health, 100.0f, tok, report); }},
+	{ "maxhealth", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MaxHealth, 100.0f, tok, report); }},
+	{ "height", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Height, 0.18f, tok, report); }},
+	{ "light", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Light, 0.0f, tok, report); }},
+	{ "maxlight", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Light, 1.0f, tok, report); }},
+	{ "lightintensity", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.LightIntensity, 0.0f, tok, report); }},
+	{ "lightoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.LightOffset, tok); }}
 };
+
+#undef TPP_ARGS
 
 }
 }

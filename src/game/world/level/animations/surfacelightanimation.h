@@ -19,9 +19,10 @@ private:
 	float start_light, end_light, change_time, anim_time;
 
 public:
-	SurfaceLightAnimation(LevelModel& model, unsigned int surface, float start_light, float end_light, float change_time);
+	SurfaceLightAnimation(LevelModel& model, unsigned int surface, float start_light, float end_light, float change_time, int anim_num);
 
 	void Update(double dt);
+	void Stop();
 };
 
 }

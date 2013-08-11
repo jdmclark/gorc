@@ -39,7 +39,9 @@ int AnimationPresenter::GetSurfaceAnim(int surface) {
 }
 
 void AnimationPresenter::StopAnim(int anim) {
-	model->Animations.Destroy(anim);
+	if(anim >= 0) {
+		model->Animations.Destroy(anim);
+	}
 }
 
 int AnimationPresenter::GetSurfaceCel(int surface) {
@@ -52,7 +54,7 @@ void AnimationPresenter::SetSurfaceCel(int surface, int cel) {
 
 int AnimationPresenter::SlideSurface(int surface_id, const Math::Vector<3>& direction) {
 	auto& ent = model->Animations.Create();
-	ent.Value = std::unique_ptr<Animation>(new SlideSurfaceAnimation(*levelModel, surface_id, direction));
+	ent.Value = std::unique_ptr<Animation>(new SlideSurfaceAnimation(*levelModel, surface_id, direction, ent.GetId()));
 	return ent.GetId();
 }
 
@@ -64,7 +66,7 @@ int AnimationPresenter::SlideCeilingSky(float u_speed, float v_speed) {
 
 int AnimationPresenter::SurfaceLightAnim(int surface, float start_light, float end_light, float change_time) {
 	auto& ent = model->Animations.Create();
-	ent.Value = std::unique_ptr<Animation>(new SurfaceLightAnimation(*levelModel, surface, start_light, end_light, change_time));
+	ent.Value = std::unique_ptr<Animation>(new SurfaceLightAnimation(*levelModel, surface, start_light, end_light, change_time, ent.GetId()));
 	return ent.GetId();
 }
 

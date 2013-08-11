@@ -52,9 +52,6 @@ int main(int argc, char** argv) {
 			"game/resource", "game/episode", Report);
 
 	auto systemContentManager = std::make_shared<Content::Manager>(Report, FileSystem);
-	const auto& surfaceShader = systemContentManager->Load<Content::Assets::Shader>("surface.glsl");
-	const auto& horizonShader = systemContentManager->Load<Content::Assets::Shader>("horizon.glsl");
-	const auto& ceilingShader = systemContentManager->Load<Content::Assets::Shader>("ceiling.glsl");
 
 	Cog::Verbs::VerbTable VerbTable;
 	Cog::Compiler Compiler(VerbTable);
@@ -71,7 +68,7 @@ int main(int argc, char** argv) {
 	Game::Screen::Action::ActionView ActionView;
 
 	Game::World::Nothing::NothingView NothingView;
-	Game::World::Level::LevelView LevelView(surfaceShader, horizonShader, ceilingShader);
+	Game::World::Level::LevelView LevelView(*systemContentManager);
 
 	Game::Components Components(Report, EventBus, Window, Input, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
