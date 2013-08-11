@@ -439,6 +439,18 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	}
 }
 
+void Gorc::Game::World::Level::LevelPresenter::ToggleFieldLight() {
+	auto& thing = Model->Things[Model->CameraThingId];
+	if(thing.Light != 1.0f) {
+		thing.Light = 1.0f;
+		SoundPresenter.PlaySoundClass(Model->CameraThingId, Flags::SoundSubclassType::HurtImpact);
+	}
+	else {
+		thing.Light = 0.05f;
+		SoundPresenter.PlaySoundClass(Model->CameraThingId, Flags::SoundSubclassType::HurtEnergy);
+	}
+}
+
 void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
 	Model->Things[thing_id].Flags += Flags::ThingFlag::Sighted;
 	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, thing_id, Flags::MessageType::Thing);
@@ -447,6 +459,12 @@ void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
 // Frame verbs
 int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(int thing_id) {
 	return Model->Things[thing_id].CurrentFrame;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::JumpToFrame(int thing_id, int frame, int sector) {
+	Thing& referenced_thing = Model->Things[thing_id];
+	auto& referenced_frame = referenced_thing.Frames[frame];
+	SetThingPos(thing_id, std::get<0>(referenced_frame), std::get<1>(referenced_frame), sector);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int frame, float speed) {
@@ -562,6 +580,7 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets:
 		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
 	// Initialize thing properties
 	auto& thing = Model->Things.Create();
+	thing.Reset();
 
 	Content::Assets::Template* new_tpl = &thing;
 	*new_tpl = tpl;
@@ -599,19 +618,56 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThing(const std::string& tpl
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::AdjustThingPosition(int thing_id, const Math::Vector<3>& new_pos) {
-	Thing& thing = Model->Things[thing_id];
-	auto oldPosition = thing.Position;
+void Gorc::Game::World::Level::LevelPresenter::AdjustThingPos(int thing_id, const Math::Vector<3>& new_pos) {
+	auto& thing = Model->Things[thing_id];
+	auto old_pos = thing.Position;
 	thing.Position = new_pos;
 	if(thing.RigidBody) {
+		thing.RigidBody->getMotionState()->setWorldTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos)));
 		thing.RigidBody->proceedToTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos)));
 	}
-	UpdateThingSector(thing_id, thing, oldPosition);
+	UpdateThingSector(thing_id, thing, old_pos);
+}
+
+void Gorc::Game::World::Level::LevelPresenter::SetThingPos(int thing_id, const Math::Vector<3>& new_pos, const Math::Vector<3>& new_orient, int new_sector) {
+	Thing& thing = Model->Things[thing_id];
+	thing.Position = new_pos;
+	thing.Orientation = new_orient;
+	thing.Sector = new_sector;
+
+	if(thing.RigidBody) {
+		btQuaternion quat(0,0,0,1);
+		static const float deg2rad = 0.0174532925f;
+		quat *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(new_orient)); // Yaw
+		quat *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(new_orient)); // Pitch
+		quat *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(new_orient)); // Roll
+		thing.RigidBody->proceedToTransform(btTransform(quat, Math::BtVec(new_pos)));
+	}
 }
 
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
 	Thing& referencedThing = Model->Things[thing_id];
-	return CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation);
+	int new_thing_id = CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation);
+	Thing& new_thing = Model->Things[new_thing_id];
+
+	new_thing.PathMoving = false;
+
+	if(new_thing.Model3d) {
+		AdjustThingPos(new_thing_id, new_thing.Position + new_thing.Model3d->InsertOffset);
+	}
+
+	// CreateThingAtThing really does copy frames.
+	std::transform(referencedThing.Frames.begin(), referencedThing.Frames.end(), std::back_inserter(new_thing.Frames),
+			[&new_thing](const std::tuple<Vector<3>, Vector<3>>& frame) -> std::tuple<Vector<3>, Vector<3>> {
+		if(new_thing.Model3d) {
+			return std::make_tuple(std::get<0>(frame) + new_thing.Model3d->InsertOffset, std::get<1>(frame));
+		}
+		else {
+			return frame;
+		}
+	});
+
+	return new_thing_id;
 }
 
 float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id) {
@@ -677,9 +733,22 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 	}
 }
 
+// Thing flags verbs
+void Gorc::Game::World::Level::LevelPresenter::ClearThingFlags(int thing_id, FlagSet<Flags::ThingFlag> flags) {
+	Model->Things[thing_id].Flags -= flags;
+}
+
 // Thing property verbs
+int Gorc::Game::World::Level::LevelPresenter::GetThingParent(int thing_id) {
+	return Model->Things[thing_id].AttachedThing;
+}
+
 int Gorc::Game::World::Level::LevelPresenter::GetThingSector(int thing_id) {
 	return Model->Things[thing_id].Sector;
+}
+
+Gorc::Flags::ThingType Gorc::Game::World::Level::LevelPresenter::GetThingType(int thing_id) {
+	return Model->Things[thing_id].Type;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::SetThingType(int thing_id, Flags::ThingType type) {
@@ -705,14 +774,23 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		return components.CurrentLevelPresenter->GetCurFrame(thing);
 	});
 
+	verbTable.AddVerb<void, 3>("jumptoframe", [&components](int thing, int frame, int sector) {
+		return components.CurrentLevelPresenter->JumpToFrame(thing, frame, sector);
+	});
+
 	verbTable.AddVerb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
 		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed);
 	});
 
 	// Options verbs
-	verbTable.AddVerb<int, 0>("getdifficulty", [&components] {
+	verbTable.AddVerb<int, 0>("getdifficulty", [] {
 		// TODO: Add actual difficulty setting.
 		return static_cast<int>(Flags::DifficultyMode::Medium);
+	});
+
+	verbTable.AddVerb<int, 0>("ismulti", [] {
+		// TODO: Return actual multiplayer state.
+		return 0;
 	});
 
 	// Player verbs
@@ -814,6 +892,10 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
 
 	// Thing action verbs
+	verbTable.AddVerb<void, 2>("attachthingtothing", [&components](int attach_thing, int base_thing) {
+		// TODO
+	});
+
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
 		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
 	});
@@ -842,9 +924,22 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		return components.CurrentLevelPresenter->IsThingMoving(thing_id);
 	});
 
+	// Thing flags verbs
+	verbTable.AddVerb<void, 2>("clearthingflags", [&components](int thing_id, int flags) {
+		components.CurrentLevelPresenter->ClearThingFlags(thing_id, FlagSet<Flags::ThingFlag>(flags));
+	});
+
 	// Thing property verbs
+	verbTable.AddVerb<int, 1>("getthingparent", [&components](int thing_id) {
+		return components.CurrentLevelPresenter->GetThingParent(thing_id);
+	});
+
 	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) {
 		return components.CurrentLevelPresenter->GetThingSector(thing_id);
+	});
+
+	verbTable.AddVerb<int, 1>("getthingtype", [&components](int thing_id) {
+		return static_cast<int>(components.CurrentLevelPresenter->GetThingType(thing_id));
 	});
 
 	verbTable.AddVerb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {

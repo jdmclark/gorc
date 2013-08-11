@@ -31,6 +31,7 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::Update(double dt) {
 
 	for(auto& sound : model->Sounds) {
 		if(sound.GetExpired()) {
+			sound.Stop();
 			model->Sounds.Destroy(sound);
 		}
 	}
@@ -153,6 +154,7 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::StopSound(int channel, fl
 	if(channel >= 0) {
 		Sound& sound = model->Sounds[channel];
 		sound.Stop(delay);
+		model->Sounds.Destroy(channel);
 	}
 }
 

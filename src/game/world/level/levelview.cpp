@@ -336,6 +336,7 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 
 		glDepthMask(GL_TRUE);
 
+		glDisable(GL_DEPTH_TEST);
 		//currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
 		//currentModel->DynamicsWorld.debugDrawWorld();
 	}

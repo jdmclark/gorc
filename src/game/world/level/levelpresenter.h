@@ -88,10 +88,13 @@ public:
 	void Jump();
 	void Activate();
 	void Damage();
+	void ToggleFieldLight();
+
 	void ThingSighted(int thing_id);
 
 	// Frame verbs
 	int GetCurFrame(int thing_id);
+	void JumpToFrame(int thing_id, int frame, int sector);
 	void MoveToFrame(int thing_id, int frame, float speed);
 
 	// Player verbs
@@ -118,8 +121,6 @@ public:
 	int CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 	int CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 
-	void AdjustThingPosition(int thing_id, const Math::Vector<3>& new_pos);
-
 	int CreateThingAtThing(int tpl_id, int thing_id);
 	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
 	void DestroyThing(int thing_id);
@@ -127,8 +128,16 @@ public:
 	Math::Vector<3> GetThingPos(int thing_id);
 	bool IsThingMoving(int thing_id);
 
+	void AdjustThingPos(int thing_id, const Math::Vector<3>& new_pos);
+	void SetThingPos(int thing_id, const Math::Vector<3>& new_pos, const Math::Vector<3>& new_orient, int new_sector);
+
+	// Thing flag verbs
+	void ClearThingFlags(int thing_id, FlagSet<Flags::ThingFlag> flags);
+
 	// Thing property verbs
+	int GetThingParent(int thing_id);
 	int GetThingSector(int thing_id);
+	Flags::ThingType GetThingType(int thing_id);
 	void SetThingType(int thing_id, Flags::ThingType type);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);

@@ -362,6 +362,9 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3) {
 	Cog::Symbols::SymbolType expectedSymbolType;
 
+	int capture_cog = -1;
+	int class_cog = -1;
+
 	switch(SenderType) {
 	case Flags::MessageType::Sector:
 		expectedSymbolType = Cog::Symbols::SymbolType::Sector;
@@ -371,12 +374,35 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 		expectedSymbolType = Cog::Symbols::SymbolType::Surface;
 		break;
 
-	case Flags::MessageType::Thing:
-		expectedSymbolType = Cog::Symbols::SymbolType::Thing;
+	case Flags::MessageType::Thing: {
+			expectedSymbolType = Cog::Symbols::SymbolType::Thing;
+
+			// Dispatch to capture cog
+			Thing& thing = levelModel->Things[SenderRef];
+			if(thing.CaptureCog >= 0) {
+				capture_cog = thing.CaptureCog;
+				SendMessage(capture_cog, message, -1, SenderRef, SenderType,
+						SourceRef, SourceType, Param0, Param1, Param2, Param3);
+			}
+
+			// Dispatch to class cog
+			if(thing.Cog) {
+				auto it = model->GlobalScriptInstances.find(&thing.Cog->Script);
+				if(it != model->GlobalScriptInstances.end()) {
+					class_cog = it->second;
+					SendMessage(it->second, message, -1, SenderRef, SenderType,
+							SourceRef, SourceType, Param0, Param1, Param2, Param3);
+				}
+			}
+		}
 		break;
 	}
 
-	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
+	for(int i = 0; i < model->Cogs.size(); ++i) {
+		if(i == class_cog || i == capture_cog) {
+			continue;
+		}
+
 		auto& inst_ptr = std::get<0>(model->Cogs[i]);
 		if(!inst_ptr) {
 			continue;
@@ -388,7 +414,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 		auto jt = inst.Heap.begin();
 
 		for(; it != inst.Script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-			if(it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef) {
+			if(!it->Nolink && it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef) {
 				SendMessage(i, message,
 						it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
 						Param0, Param1, Param2, Param3);
@@ -438,6 +464,10 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::WaitForStop(int thing) 
 	std::get<1>(sleep_tuple) = continuation;
 
 	VirtualMachine.Abort();
+}
+
+void Gorc::Game::World::Level::Scripts::ScriptPresenter::CaptureThing(int thing_id) {
+	levelModel->Things[thing_id].CaptureCog = model->RunningCogState.top().InstanceId;
 }
 
 void Gorc::Game::World::Level::Scripts::ScriptPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
@@ -501,6 +531,10 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::RegisterVerbs(Cog::Verb
 
 	verbTable.AddVerb<void, 1>("waitforstop", [&components](int thing_id) {
 		components.CurrentLevelPresenter->ScriptPresenter.WaitForStop(thing_id);
+	});
+
+	verbTable.AddVerb<void, 1>("capturething", [&components](int thing_id) {
+		components.CurrentLevelPresenter->ScriptPresenter.CaptureThing(thing_id);
 	});
 
 	verbTable.AddVerb<int, 0>("getmastercog", [&components] {

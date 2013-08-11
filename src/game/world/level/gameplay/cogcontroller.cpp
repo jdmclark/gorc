@@ -124,7 +124,7 @@ void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int
 
 	new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
-	if(new_thing.Move == Flags::MoveType::Path && new_thing.Frames.size() > 0) {
+	if(new_thing.Move == Flags::MoveType::Path) {
 		new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 		new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
 	}

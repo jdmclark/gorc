@@ -61,6 +61,14 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		components.CurrentLevelPresenter->Activate();
 	}
 
+	if(f1_key_down && !components.Input.IsKeyDown(sf::Key::F1)) {
+		f1_key_down = false;
+	}
+	else if(!f1_key_down && components.Input.IsKeyDown(sf::Key::F1)) {
+		f1_key_down = true;
+		components.CurrentLevelPresenter->ToggleFieldLight();
+	}
+
 	// Camera rotate
 	if(window_has_focus) {
 		Vector<2, double> ScreenCenter = Vec(static_cast<double>(components.Window.GetWidth()) / 2.0, static_cast<double>(components.Window.GetHeight()) / 2.0);

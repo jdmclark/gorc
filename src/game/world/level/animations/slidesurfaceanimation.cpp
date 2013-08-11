@@ -48,4 +48,5 @@ void Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::Update(double 
 void Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::Stop() {
 	auto& surf = model.Surfaces[surface];
 	surf.AnimNumber = -1;
+	surf.Thrust = Math::Zero<3>();
 }

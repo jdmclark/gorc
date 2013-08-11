@@ -82,6 +82,7 @@ public:
 	void SetTimerEx(float delay, int id, Cog::VM::Value param0, Cog::VM::Value param1);
 	void Sleep(float time);
 	void WaitForStop(int thing);
+	void CaptureThing(int thing);
 
 	inline int GetMasterCog() const {
 		return master_cog;
