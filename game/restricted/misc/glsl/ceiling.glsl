@@ -35,10 +35,10 @@ void ceiling_sky_texture_coordinates(out vec2 tex_coords) {
 	tex_coords = vec2(dot(out_intersection, ceiling_sky_u), dot(out_intersection, ceiling_sky_v));
 }
 
-void main() {	
+void main() {
 	vec2 tex_coords;
 	ceiling_sky_texture_coordinates(tex_coords);
-	tex_coords += ceiling_sky_offset.xy / 8.0;
+	tex_coords += ceiling_sky_offset.xy;
 	tex_coords *= 16.0 / textureSize2D(diffuse, 0);
 	
 	vec4 diffuse = texture2D(diffuse, tex_coords);

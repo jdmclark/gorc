@@ -7,7 +7,10 @@ namespace Game {
 const double GameplayTick = (1.0 / 120.0);
 
 // Constant multiple to convert per-frame rate parameters.
-const double RateFactor = (1.0 / 8.0);
+const double RateFactor = 1.0 / 10.0;
+
+// Constant factor to convert degrees to radians.
+const double Deg2Rad = 0.0174532925;
 
 }
 }

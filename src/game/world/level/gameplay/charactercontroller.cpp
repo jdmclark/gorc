@@ -2,6 +2,7 @@
 #include "game/world/level/levelpresenter.h"
 #include "game/world/level/levelmodel.h"
 #include "game/world/level/physics/physicsobjectdata.h"
+#include "game/constants.h"
 
 namespace Gorc {
 namespace Game {
@@ -209,7 +210,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 			Math::Vector<3> new_vel = player_new_vel;
 
 			if(surfaceUserData) {
-				new_vel += presenter.Model->Surfaces[surfaceUserData->SurfaceId].Thrust / 8.0f;
+				new_vel += presenter.Model->Surfaces[surfaceUserData->SurfaceId].Thrust;
 			}
 
 			// Accelerate body toward standing position
@@ -430,8 +431,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::RemoveControllerDa
 void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
 
-	static const float deg2rad = 0.0174532925f;
-	btQuaternion orientation(btVector3(0,0,1), deg2rad * Math::Get<1>(new_thing.Orientation));
+	btQuaternion orientation(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_thing.Orientation));
 
 	float thing_mass = new_thing.Mass;
 	new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(0.04f));

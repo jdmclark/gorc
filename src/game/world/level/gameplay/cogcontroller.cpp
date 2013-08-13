@@ -2,6 +2,7 @@
 #include "game/world/level/levelpresenter.h"
 #include "game/world/level/thing.h"
 #include "game/world/level/levelmodel.h"
+#include "game/constants.h"
 
 using namespace Gorc::Math;
 
@@ -17,11 +18,10 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(in
 	Vector<3> targetPosition = std::get<0>(target_position_tuple);
 	Vector<3> orient = std::get<1>(target_position_tuple);
 
-	static const float deg2rad = 0.0174532925f;
 	btQuaternion targetOrientQuat(0.0f, 0.0f, 0.0f, 1.0f);
-	targetOrientQuat *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(orient)); // Yaw
-	targetOrientQuat *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(orient)); // Pitch
-	targetOrientQuat *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(orient)); // Roll
+	targetOrientQuat *= btQuaternion(btVector3(0,0,1), Deg2Rad * Math::Get<1>(orient)); // Yaw
+	targetOrientQuat *= btQuaternion(btVector3(1,0,0), Deg2Rad * Math::Get<0>(orient)); // Pitch
+	targetOrientQuat *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(orient)); // Roll
 
 	btTransform currentWorldTransform;
 	thing.RigidBody->getMotionState()->getWorldTransform(currentWorldTransform);
@@ -30,9 +30,8 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(in
 
 	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 	// Use a magic multiple to correct it.
-	const float magic_number = 1.0f / 8.0f;
 	float dist_len = Math::Length(targetPosition - currentPosition);
-	float alpha = magic_number * dt * thing.PathMoveSpeed / dist_len;
+	float alpha = RateFactor * dt * thing.PathMoveSpeed / dist_len;
 	if(alpha >= 1.0f || dist_len == 0.0f) {
 		btTransform targetWorldTransform(targetOrientQuat, BtVec(targetPosition));
 		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
@@ -79,11 +78,10 @@ void Gorc::Game::World::Level::Gameplay::CogController::RemoveControllerData(int
 void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
 
-	static const float deg2rad = 0.0174532925f;
 	btQuaternion orientation(0.0f, 0.0f, 0.0f, 1.0f);
-	orientation *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(new_thing.Orientation)); // Yaw
-	orientation *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(new_thing.Orientation)); // Pitch
-	orientation *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(new_thing.Orientation)); // Roll
+	orientation *= btQuaternion(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_thing.Orientation)); // Yaw
+	orientation *= btQuaternion(btVector3(1,0,0), Deg2Rad * Math::Get<0>(new_thing.Orientation)); // Pitch
+	orientation *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(new_thing.Orientation)); // Roll
 
 	float thing_mass = 0.0f;
 	if(new_thing.Move == Flags::MoveType::Physics && new_thing.Collide != Flags::CollideType::None) {

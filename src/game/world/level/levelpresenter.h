@@ -33,10 +33,6 @@ class Thing;
 
 class LevelPresenter : public Gorc::Place::Presenter {
 private:
-	// In-data constants seem to be roughly 8 times greater than they should be.
-	// Use RateFactor to scale all rates from input data.
-	static constexpr double RateFactor = 1.0 / 8.0;
-
 	// Scratch space
 	std::vector<std::tuple<unsigned int, unsigned int>> UpdatePathSectorScratch;
 
@@ -121,6 +117,7 @@ public:
 	int CreateThing(const std::string& tpl_name, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 	int CreateThing(int tpl_id, unsigned int sector_num, const Math::Vector<3>& pos, const Math::Vector<3>& orientation);
 
+	void AttachThingToThing(int thing_id, int base_id);
 	int CreateThingAtThing(int tpl_id, int thing_id);
 	float DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id);
 	void DestroyThing(int thing_id);

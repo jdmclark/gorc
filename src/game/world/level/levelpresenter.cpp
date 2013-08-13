@@ -1,5 +1,6 @@
 #include "levelpresenter.h"
 #include "levelmodel.h"
+#include "game/constants.h"
 
 using namespace Gorc::Math;
 
@@ -103,9 +104,6 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 			thing.RigidBody->getMotionState()->getWorldTransform(trans);
 			thing.Position = VecBt(trans.getOrigin());
 			UpdateThingSector(thing.GetId(), thing, oldThingPosition);
-
-			const auto& thing_sector = Model->Sectors[thing.Sector];
-			thing.RigidBody->applyCentralForce(BtVec(thing_sector.Thrust * RateFactor / dt));
 		}
 
 		thing.Controller->Update(thing.GetId(), dt);
@@ -522,7 +520,7 @@ void Gorc::Game::World::Level::LevelPresenter::SetSectorLight(int sector_id, flo
 
 void Gorc::Game::World::Level::LevelPresenter::SetSectorThrust(int sector_id, const Math::Vector<3>& thrust) {
 	Content::Assets::LevelSector& sector = Model->Sectors[sector_id];
-	sector.Thrust = thrust;
+	sector.Thrust = thrust * RateFactor;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::SetSectorTint(int sector_id, const Math::Vector<3>& color) {
@@ -637,12 +635,20 @@ void Gorc::Game::World::Level::LevelPresenter::SetThingPos(int thing_id, const M
 
 	if(thing.RigidBody) {
 		btQuaternion quat(0,0,0,1);
-		static const float deg2rad = 0.0174532925f;
-		quat *= btQuaternion(btVector3(0,0,1), deg2rad * Math::Get<1>(new_orient)); // Yaw
-		quat *= btQuaternion(btVector3(1,0,0), deg2rad * Math::Get<0>(new_orient)); // Pitch
-		quat *= btQuaternion(btVector3(0,1,0), deg2rad * Math::Get<2>(new_orient)); // Roll
+		quat *= btQuaternion(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_orient)); // Yaw
+		quat *= btQuaternion(btVector3(1,0,0), Deg2Rad * Math::Get<0>(new_orient)); // Pitch
+		quat *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(new_orient)); // Roll
 		thing.RigidBody->proceedToTransform(btTransform(quat, Math::BtVec(new_pos)));
 	}
+}
+
+void Gorc::Game::World::Level::LevelPresenter::AttachThingToThing(int thing_id, int base_id) {
+	auto& thing = Model->Things[thing_id];
+	auto& base = Model->Things[base_id];
+
+	thing.AttachFlags = FlagSet<Flags::AttachFlag> { Flags::AttachFlag::AttachedToThing };
+	thing.AttachedThing = base_id;
+	thing.PrevAttachedThingPosition = base.Position;
 }
 
 int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
@@ -893,7 +899,7 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 
 	// Thing action verbs
 	verbTable.AddVerb<void, 2>("attachthingtothing", [&components](int attach_thing, int base_thing) {
-		// TODO
+		components.CurrentLevelPresenter->AttachThingToThing(attach_thing, base_thing);
 	});
 
 	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
