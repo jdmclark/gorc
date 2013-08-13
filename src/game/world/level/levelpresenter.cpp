@@ -5,7 +5,7 @@
 using namespace Gorc::Math;
 
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
-	: components(components), place(place), Inventory(place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler)),
+	: components(components), place(place),
 	  ScriptPresenter(components), SoundPresenter(*place.ContentManager),  KeyPresenter(*place.ContentManager),
 	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
 	  ItemController(*this), CorpseController(*this) {
@@ -16,7 +16,8 @@ Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components,
 void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
 	components.CurrentLevelPresenter = this;
 
-	Model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level));
+	Model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level,
+			place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler)));
 	Model->DynamicsWorld.setInternalTickCallback([](btDynamicsWorld* world, btScalar timeStep) {
 		reinterpret_cast<LevelPresenter*>(world->getWorldUserInfo())->PhysicsTickUpdate(timeStep);
 	}, this);
@@ -25,6 +26,7 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 	ScriptPresenter.Start(*Model, Model->ScriptModel);
 	SoundPresenter.Start(*Model, Model->SoundModel);
 	KeyPresenter.Start(*Model, Model->KeyModel);
+	InventoryPresenter.Start(*Model, Model->InventoryModel);
 
 	InitializeWorld();
 
@@ -75,14 +77,6 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 			ScriptPresenter.CreateLevelDummyInstance();
 		}
 	}
-
-	// Create bin script instances.
-	for(const auto& bin : Inventory.Bins) {
-		Content::Assets::Script const* script = bin.second.Cog;
-		if(script) {
-			ScriptPresenter.CreateGlobalCogInstance(script->Script, *place.ContentManager, components.Compiler);
-		}
-	}
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
@@ -94,6 +88,7 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 	ScriptPresenter.Update(dt);
 	SoundPresenter.Update(dt);
 	KeyPresenter.Update(dt);
+	InventoryPresenter.Update(dt);
 
 	// Update things
 	btTransform trans;
@@ -454,6 +449,20 @@ void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
 	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, thing_id, Flags::MessageType::Thing);
 }
 
+// Color verbs
+void Gorc::Game::World::Level::LevelPresenter::AddDynamicTint(int player_id, const Math::Vector<3>& tint) {
+	Model->DynamicTint += tint;
+
+	// Clamp dynamic tint
+	auto dynamic_tint = Model->DynamicTint;
+	Math::Get<0>(Model->DynamicTint) = std::max(Math::Get<0>(dynamic_tint), 0.0f);
+	Math::Get<1>(Model->DynamicTint) = std::max(Math::Get<1>(dynamic_tint), 0.0f);
+	Math::Get<2>(Model->DynamicTint) = std::max(Math::Get<2>(dynamic_tint), 0.0f);
+	Math::Get<0>(Model->DynamicTint) = std::min(Math::Get<0>(dynamic_tint), 1.0f);
+	Math::Get<1>(Model->DynamicTint) = std::min(Math::Get<1>(dynamic_tint), 1.0f);
+	Math::Get<2>(Model->DynamicTint) = std::min(Math::Get<2>(dynamic_tint), 1.0f);
+}
+
 // Frame verbs
 int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(int thing_id) {
 	return Model->Things[thing_id].CurrentFrame;
@@ -740,8 +749,20 @@ bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
 }
 
 // Thing flags verbs
+void Gorc::Game::World::Level::LevelPresenter::ClearActorFlags(int thing_id, FlagSet<Flags::ActorFlag> flags) {
+	Model->Things[thing_id].ActorFlags -= flags;
+}
+
 void Gorc::Game::World::Level::LevelPresenter::ClearThingFlags(int thing_id, FlagSet<Flags::ThingFlag> flags) {
 	Model->Things[thing_id].Flags -= flags;
+}
+
+Gorc::FlagSet<Gorc::Flags::ActorFlag> Gorc::Game::World::Level::LevelPresenter::GetActorFlags(int thing_id) {
+	return Model->Things[thing_id].ActorFlags;
+}
+
+void Gorc::Game::World::Level::LevelPresenter::SetActorFlags(int thing_id, FlagSet<Flags::ActorFlag> flags) {
+	Model->Things[thing_id].ActorFlags += flags;
 }
 
 // Thing property verbs
@@ -774,6 +795,12 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 	Scripts::ScriptPresenter::RegisterVerbs(verbTable, components);
 	Sounds::SoundPresenter::RegisterVerbs(verbTable, components);
 	Keys::KeyPresenter::RegisterVerbs(verbTable, components);
+	Gameplay::InventoryPresenter::RegisterVerbs(verbTable, components);
+
+	// Color verbs
+	verbTable.AddVerb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {
+		components.CurrentLevelPresenter->AddDynamicTint(player_id, Math::Vec(r, g, b));
+	});
 
 	// Frame verbs
 	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) {
@@ -931,8 +958,20 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 	});
 
 	// Thing flags verbs
+	verbTable.AddVerb<void, 2>("clearactorflags", [&components](int thing_id, int flags) {
+		components.CurrentLevelPresenter->ClearActorFlags(thing_id, FlagSet<Flags::ActorFlag>(flags));
+	});
+
 	verbTable.AddVerb<void, 2>("clearthingflags", [&components](int thing_id, int flags) {
 		components.CurrentLevelPresenter->ClearThingFlags(thing_id, FlagSet<Flags::ThingFlag>(flags));
+	});
+
+	verbTable.AddVerb<int, 1>("getactorflags", [&components](int thing_id) {
+		return static_cast<int>(components.CurrentLevelPresenter->GetActorFlags(thing_id));
+	});
+
+	verbTable.AddVerb<void, 2>("setactorflags", [&components](int thing_id, int flags) {
+		components.CurrentLevelPresenter->SetActorFlags(thing_id, FlagSet<Flags::ActorFlag>(flags));
 	});
 
 	// Thing property verbs

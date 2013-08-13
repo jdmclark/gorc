@@ -10,6 +10,7 @@
 #include "content/flags/collidetype.h"
 #include "content/flags/thingflag.h"
 #include "content/flags/attachflag.h"
+#include "content/flags/actorflag.h"
 #include "model.h"
 #include "soundclass.h"
 #include "colormap.h"
@@ -44,6 +45,8 @@ public:
 	FlagSet<Flags::ThingFlag> Flags;
 	FlagSet<Flags::AttachFlag> AttachFlags;
 	Math::Vector<3> EyeOffset;
+
+	FlagSet<Flags::ActorFlag> ActorFlags;
 
 	float Health = 100.0f;
 	float MaxHealth = 100.0f;

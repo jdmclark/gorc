@@ -30,6 +30,15 @@ public:
 
 		throw std::exception();
 	}
+
+	inline const InventoryBin& GetBin(int id) const {
+		auto it = Bins.find(id);
+		if(it != Bins.end()) {
+			return it->second;
+		}
+
+		throw std::exception();
+	}
 };
 
 }

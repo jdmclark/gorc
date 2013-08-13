@@ -11,6 +11,7 @@
 #include "game/world/level/scripts/scriptmodel.h"
 #include "game/world/level/sounds/soundmodel.h"
 #include "game/world/level/keys/keymodel.h"
+#include "game/world/level/gameplay/inventorymodel.h"
 #include <vector>
 
 using namespace Gorc::Math;
@@ -33,6 +34,7 @@ public:
 	Scripts::ScriptModel ScriptModel;
 	Sounds::SoundModel SoundModel;
 	Keys::KeyModel KeyModel;
+	Gameplay::InventoryModel InventoryModel;
 
 	Pool<Thing> Things;
 
@@ -56,7 +58,9 @@ public:
 	btDefaultMotionState SurfaceMotionState;
 	std::vector<SurfaceObjectData> SurfaceObjectData;
 
-	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level);
+	Math::Vector<3> DynamicTint = Math::Zero<3>();
+
+	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level, const Content::Assets::Inventory& inv);
 
 	void UpdateSurfacePhysicsProperties(int surface, bool initial = false);
 };

@@ -184,6 +184,7 @@ void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 #define TPP_ARGS Template& tpl, Text::Tokenizer& tok, Content::Manager& content, const Colormap& colormap, const Cog::Compiler& compiler, Diagnostics::Report& report
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
+	{ "actorflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.ActorFlags, FlagSet<Flags::ActorFlag>(), tok, report); }},
 	{ "model3d", &TemplateModel3DParser },
 	{ "soundclass", &TemplateSoundClassParser },
 	{ "cog", &TemplateCogParser },

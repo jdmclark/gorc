@@ -13,6 +13,7 @@
 #include "game/world/level/scripts/scriptpresenter.h"
 #include "game/world/level/sounds/soundpresenter.h"
 #include "game/world/level/keys/keypresenter.h"
+#include "game/world/level/gameplay/inventorypresenter.h"
 #include "game/world/level/gameplay/actorcontroller.h"
 #include "game/world/level/gameplay/playercontroller.h"
 #include "game/world/level/gameplay/cogcontroller.h"
@@ -38,7 +39,6 @@ private:
 
 	Components& components;
 	LevelPlace place;
-	const Content::Assets::Inventory& Inventory;
 
 	void InitializeWorld();
 	void PhysicsTickUpdate(double dt);
@@ -64,6 +64,7 @@ public:
 	Scripts::ScriptPresenter ScriptPresenter;
 	Sounds::SoundPresenter SoundPresenter;
 	Keys::KeyPresenter KeyPresenter;
+	Gameplay::InventoryPresenter InventoryPresenter;
 
 	Gameplay::ActorController ActorController;
 	Gameplay::PlayerController PlayerController;
@@ -87,6 +88,9 @@ public:
 	void ToggleFieldLight();
 
 	void ThingSighted(int thing_id);
+
+	// Color verbs
+	void AddDynamicTint(int player_id, const Math::Vector<3>& tint);
 
 	// Frame verbs
 	int GetCurFrame(int thing_id);
@@ -129,7 +133,12 @@ public:
 	void SetThingPos(int thing_id, const Math::Vector<3>& new_pos, const Math::Vector<3>& new_orient, int new_sector);
 
 	// Thing flag verbs
+	void ClearActorFlags(int thing_id, FlagSet<Flags::ActorFlag> flags);
 	void ClearThingFlags(int thing_id, FlagSet<Flags::ThingFlag> flags);
+
+	FlagSet<Flags::ActorFlag> GetActorFlags(int thing_id);
+
+	void SetActorFlags(int thing_id, FlagSet<Flags::ActorFlag> flags);
 
 	// Thing property verbs
 	int GetThingParent(int thing_id);
