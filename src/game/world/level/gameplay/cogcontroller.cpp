@@ -3,6 +3,7 @@
 #include "game/world/level/thing.h"
 #include "game/world/level/levelmodel.h"
 #include "game/constants.h"
+#include <iostream>
 
 using namespace Gorc::Math;
 
@@ -10,6 +11,24 @@ void Gorc::Game::World::Level::Gameplay::CogController::Update(int thing_id, dou
 	Thing& thing = presenter.Model->Things[thing_id];
 	if(thing.PathMoving) {
 		UpdateThingPathMoving(thing_id, thing, dt);
+	}
+
+	// Update thing attachment motion
+	if(thing.AttachFlags & Flags::AttachFlag::AttachedToThing) {
+		Thing& attached_thing = presenter.Model->Things[thing.AttachedThing];
+		Vector<3> deltaPosition = attached_thing.Position - thing.PrevAttachedThingPosition;
+
+		if(Math::Length2(deltaPosition) > 0.0f) {
+			thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
+			btTransform currentWorldTransform;
+			thing.RigidBody->getMotionState()->getWorldTransform(currentWorldTransform);
+			Vector<3> targetPosition = VecBt(currentWorldTransform.getOrigin()) + deltaPosition;
+			thing.RigidBody->getMotionState()->setWorldTransform(btTransform(currentWorldTransform.getRotation(), BtVec(targetPosition)));
+			thing.PrevAttachedThingPosition = attached_thing.Position;
+		}
+		else {
+			thing.RigidBody->setActivationState(0);
+		}
 	}
 }
 
@@ -84,9 +103,6 @@ void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int
 	orientation *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(new_thing.Orientation)); // Roll
 
 	float thing_mass = 0.0f;
-	if(new_thing.Move == Flags::MoveType::Physics && new_thing.Collide != Flags::CollideType::None) {
-		thing_mass = new_thing.Mass;
-	}
 
 	FlagSet<PhysicsCollideClass> CollideType { PhysicsCollideClass::Thing };
 	FlagSet<PhysicsCollideClass> CollideWith;
@@ -122,13 +138,8 @@ void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int
 
 	new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);
 
-	if(new_thing.Move == Flags::MoveType::Path) {
-		new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-		new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
-	}
-	else {
-		new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
-	}
+	new_thing.RigidBody->setCollisionFlags(new_thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	new_thing.RigidBody->setActivationState(ISLAND_SLEEPING);
 
 	presenter.Model->DynamicsWorld.addRigidBody(new_thing.RigidBody.get());
 }
