@@ -46,10 +46,11 @@ public:
 
 class InventoryModel {
 private:
-	const Content::Assets::Inventory& BaseInventory;
 	std::unordered_map<int, PlayerInventoryModel> player_inventories;
 
 public:
+	const Content::Assets::Inventory& BaseInventory;
+
 	InventoryModel(const Content::Assets::Inventory& BaseInventory);
 
 	PlayerInventoryModel& GetInventory(int player_id);

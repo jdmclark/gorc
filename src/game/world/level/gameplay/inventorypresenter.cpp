@@ -22,6 +22,14 @@ int Gorc::Game::World::Level::Gameplay::InventoryPresenter::GetInv(int player, i
 	return model->GetInventory(player).GetBinValue(bin);
 }
 
+int Gorc::Game::World::Level::Gameplay::InventoryPresenter::GetInvMax(int player, int bin) {
+	return model->BaseInventory.GetBin(bin).MaxValue;
+}
+
+int Gorc::Game::World::Level::Gameplay::InventoryPresenter::GetInvMin(int player, int bin) {
+	return model->BaseInventory.GetBin(bin).MinValue;
+}
+
 bool Gorc::Game::World::Level::Gameplay::InventoryPresenter::IsInvActivated(int player, int bin) {
 	return model->GetInventory(player).IsBinActivated(bin);
 }
@@ -53,6 +61,14 @@ void Gorc::Game::World::Level::Gameplay::InventoryPresenter::RegisterVerbs(Cog::
 
 	verbTable.AddVerb<int, 2>("getinv", [&components](int player, int bin) {
 		return components.CurrentLevelPresenter->InventoryPresenter.GetInv(player, bin);
+	});
+
+	verbTable.AddVerb<int, 2>("getinvmax", [&components](int player, int bin) {
+		return components.CurrentLevelPresenter->InventoryPresenter.GetInvMax(player, bin);
+	});
+
+	verbTable.AddVerb<int, 2>("getinvmin", [&components](int player, int bin) {
+		return components.CurrentLevelPresenter->InventoryPresenter.GetInvMin(player, bin);
 	});
 
 	verbTable.AddVerb<bool, 2>("isinvactivated", [&components](int player, int bin) {

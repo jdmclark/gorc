@@ -6,10 +6,10 @@ void Gorc::Game::World::Level::Gameplay::GhostController::Update(int thing_id, d
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::GhostController::RemoveControllerData(int thing_id) {
+void Gorc::Game::World::Level::Gameplay::GhostController::CreateControllerData(int thing_id) {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::GhostController::CreateControllerData(int thing_id) {
+void Gorc::Game::World::Level::Gameplay::GhostController::RemoveControllerData(int thing_id) {
 	return;
 }

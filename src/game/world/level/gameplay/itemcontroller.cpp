@@ -6,10 +6,24 @@ void Gorc::Game::World::Level::Gameplay::ItemController::Update(int thing_id, do
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ItemController::RemoveControllerData(int thing_id) {
+void Gorc::Game::World::Level::Gameplay::ItemController::CreateControllerData(int thing_id) {
+	ThingController::CreateControllerData(thing_id);
+
+	auto& thing = presenter.Model->Things[thing_id];
+	thing.ObjectData.CollisionGroup = FlagSet<PhysicsCollideClass> { PhysicsCollideClass::Thing };
+	thing.ObjectData.CollisionMask = FlagSet<PhysicsCollideClass> {	PhysicsCollideClass::Player };
+
+	// Disable collision for this object (but keep testing for intersection with player).
+	thing.RigidBody->setCollisionFlags(thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ItemController::CreateControllerData(int thing_id) {
-	return;
+void Gorc::Game::World::Level::Gameplay::ItemController::Taken(int thing_id, int player_id) {
+	presenter.ScriptPresenter.SendMessageToLinked(Cog::MessageId::Taken,
+			thing_id, Flags::MessageType::Thing,
+			player_id, Flags::MessageType::Thing);
+
+	// TODO: Don't destroy the thing. Flag it for respawn.
+	presenter.DestroyThing(thing_id);
 }

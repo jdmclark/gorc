@@ -41,6 +41,8 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 }
 
 void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
+	ScriptPresenter.CreateLevelDummyInstances(Model->Level.Cogs.size());
+
 	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
 	for(const auto& thing : Model->Level.Things) {
 		if(thing.Type == Flags::ThingType::Player) {
@@ -66,21 +68,19 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 	Model->CameraSector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
 
 	// Create COG script instances.
-	for(const auto& cog : Model->Level.Cogs) {
+	for(unsigned int i = 0; i < Model->Level.Cogs.size(); ++i) {
+		const auto& cog = Model->Level.Cogs[i];
 		Content::Assets::Script const* script = std::get<0>(cog);
 		const std::vector<Cog::VM::Value>& values = std::get<1>(cog);
 
 		if(script) {
-			ScriptPresenter.CreateLevelCogInstance(script->Script, *place.ContentManager, components.Compiler, values);
-		}
-		else {
-			ScriptPresenter.CreateLevelDummyInstance();
+			ScriptPresenter.CreateLevelCogInstance(i, script->Script, *place.ContentManager, components.Compiler, values);
 		}
 	}
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
-	Model->DynamicsWorld.stepSimulation(dt, 1, 1.0f / 120.0f);
+	Model->DynamicsWorld.stepSimulation(dt, 1, GameplayTick);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
@@ -93,7 +93,6 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 	// Update things
 	btTransform trans;
 	for(auto& thing : Model->Things) {
-
 		if(thing.RigidBody) {
 			auto oldThingPosition = thing.Position;
 			thing.RigidBody->getMotionState()->getWorldTransform(trans);
@@ -104,8 +103,50 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 		thing.Controller->Update(thing.GetId(), dt);
 	}
 
+	// Perform object-object collision test and message dispatch
+	int num_manifolds = Model->DynamicsWorld.getDispatcher()->getNumManifolds();
+	for(int i = 0; i < num_manifolds; ++i) {
+		btPersistentManifold* contactManifold = Model->DynamicsWorld.getDispatcher()->getManifoldByIndexInternal(i);
+
+		if(contactManifold->getNumContacts() > 0) {
+			PhysicsObjectData* obj_a = reinterpret_cast<PhysicsObjectData*>(
+					static_cast<btCollisionObject*>(contactManifold->getBody0())->getUserPointer());
+			PhysicsObjectData* obj_b = reinterpret_cast<PhysicsObjectData*>(
+					static_cast<btCollisionObject*>(contactManifold->getBody1())->getUserPointer());
+
+			ThingObjectData* thing_a;
+			ThingObjectData* thing_b;
+			SurfaceObjectData* surf;
+
+			if(MatchObjectPair(obj_a, obj_b, &thing_a, &surf)) {
+				// Thing colliding with surface.
+				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
+						surf->SurfaceId, Flags::MessageType::Surface,
+						thing_a->ThingId, Flags::MessageType::Thing);
+			}
+			else if(MatchObjectPair(obj_a, obj_b, &thing_a, &thing_b)) {
+				// Thing colliding with thing.
+				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
+						thing_a->ThingId, Flags::MessageType::Thing,
+						thing_b->ThingId, Flags::MessageType::Thing);
+				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
+						thing_b->ThingId, Flags::MessageType::Thing,
+						thing_a->ThingId, Flags::MessageType::Thing);
+			}
+		}
+	}
+
 	// Update camera position
 	UpdateCamera();
+
+	// Update dynamic tint, game time.
+	Model->GameTime += dt;
+	Model->LevelTime += dt;
+
+	Model->DynamicTint = Model->DynamicTint * (1.0 - dt);
+	Math::Get<0>(Model->DynamicTint) = std::max(Math::Get<0>(Model->DynamicTint), 0.0f);
+	Math::Get<1>(Model->DynamicTint) = std::max(Math::Get<1>(Model->DynamicTint), 0.0f);
+	Math::Get<2>(Model->DynamicTint) = std::max(Math::Get<2>(Model->DynamicTint), 0.0f);
 }
 
 Gorc::Game::World::Level::Gameplay::ThingController& Gorc::Game::World::Level::LevelPresenter::GetThingController(Flags::ThingType type) {
@@ -498,6 +539,21 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int fra
 	}
 }
 
+// Level verbs
+float Gorc::Game::World::Level::LevelPresenter::GetGameTime() {
+	return Model->GameTime;
+}
+
+float Gorc::Game::World::Level::LevelPresenter::GetLevelTime() {
+	return Model->LevelTime;
+}
+
+// Misc verbs
+void Gorc::Game::World::Level::LevelPresenter::TakeItem(int thing_id, int player_id) {
+	auto& thing = Model->Things[thing_id];
+	thing.Controller->Taken(thing_id, player_id);
+}
+
 // Player verbs
 int Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
 	return Model->CameraThingId;
@@ -594,6 +650,8 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets:
 
 	thing.Sector = sector_num;
 	thing.Position = pos;
+	thing.ObjectData.ThingId = thing.GetId();
+	thing.ObjectData.SectorId = sector_num;
 	thing.Orientation = orient;
 	thing.Controller = &GetThingController(thing.Type);
 
@@ -815,6 +873,20 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed);
 	});
 
+	// Level verbs
+	verbTable.AddVerb<float, 0>("getgametime", [&components] {
+		return components.CurrentLevelPresenter->GetGameTime();
+	});
+
+	verbTable.AddVerb<float, 0>("getleveltime", [&components] {
+		return components.CurrentLevelPresenter->GetLevelTime();
+	});
+
+	// Misc verbs
+	verbTable.AddVerb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
+		components.CurrentLevelPresenter->TakeItem(thing_id, player_id);
+	});
+
 	// Options verbs
 	verbTable.AddVerb<int, 0>("getdifficulty", [] {
 		// TODO: Add actual difficulty setting.
@@ -836,9 +908,9 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 	});
 
 	// Print verbs
-	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, const char* message) {
+	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, int message_num) {
 		// TODO: Add actual jkPrintUniString once localization is implemented.
-		std::cout << message << std::endl;
+		std::cout << "COG_" << message_num << std::endl;
 	});
 
 	verbTable.AddVerb<void, 1>("print", [&components](const char* message) {

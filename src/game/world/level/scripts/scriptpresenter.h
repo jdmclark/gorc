@@ -49,8 +49,8 @@ public:
 
 	void RunWaitingCogs();
 
-	void CreateLevelDummyInstance();
-	void CreateLevelCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
+	void CreateLevelDummyInstances(int count);
+	void CreateLevelCogInstance(int index, const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
 			const std::vector<Cog::VM::Value>& values);
 	void CreateGlobalCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler);
 

@@ -80,15 +80,20 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::ResumeWaitForStop(int w
 	RunWaitingCogs();
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelDummyInstance() {
-	// Create an empty, non-functional COG instance for padding out the list of level instances.
-	model->Cogs.emplace_back(std::unique_ptr<Cog::Instance>(nullptr), ScriptTimerState());
+void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelDummyInstances(int count) {
+	// Create empty, non-functional COG instances for padding out the list of level instances.
+	for(int i = 0; i < count; ++i) {
+		model->Cogs.emplace_back(std::unique_ptr<Cog::Instance>(nullptr), ScriptTimerState());
+	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(const Cog::Script& script, Content::Manager& manager,
+void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(int index, const Cog::Script& script, Content::Manager& manager,
 		Cog::Compiler& compiler, const std::vector<Cog::VM::Value>& values) {
-	model->Cogs.emplace_back(std::unique_ptr<Cog::Instance>(new Cog::Instance(script)), ScriptTimerState());
-	Cog::Instance& inst = *std::get<0>(model->Cogs.back());
+	auto& cog_inst_pair = model->Cogs[index];
+	std::get<0>(cog_inst_pair) = std::unique_ptr<Cog::Instance>(new Cog::Instance(script));
+	std::get<1>(cog_inst_pair) = ScriptTimerState();
+
+	Cog::Instance& inst = *std::get<0>(cog_inst_pair);
 
 	inst.Heap.resize(script.SymbolTable.size());
 
@@ -197,7 +202,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(
 	}
 
 	// Send startup message
-	SendMessage(model->Cogs.size() - 1, Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
+	SendMessage(index, Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
 }
 
 void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateGlobalCogInstance(const Cog::Script& script,
@@ -366,12 +371,24 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 	int class_cog = -1;
 
 	switch(SenderType) {
-	case Flags::MessageType::Sector:
-		expectedSymbolType = Cog::Symbols::SymbolType::Sector;
+	case Flags::MessageType::Sector: {
+			expectedSymbolType = Cog::Symbols::SymbolType::Sector;
+
+			auto& sec = levelModel->Sectors[SenderRef];
+			if(!(sec.Flags & Flags::SectorFlag::CogLinked)) {
+				return;
+			}
+		}
 		break;
 
-	case Flags::MessageType::Surface:
-		expectedSymbolType = Cog::Symbols::SymbolType::Surface;
+	case Flags::MessageType::Surface: {
+			expectedSymbolType = Cog::Symbols::SymbolType::Surface;
+
+			auto& surf = levelModel->Surfaces[SenderRef];
+			if(!(surf.Flags & Flags::SurfaceFlag::CogLinked)) {
+				return;
+			}
+		}
 		break;
 
 	case Flags::MessageType::Thing: {
@@ -393,6 +410,10 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 					SendMessage(it->second, message, -1, SenderRef, SenderType,
 							SourceRef, SourceType, Param0, Param1, Param2, Param3);
 				}
+			}
+
+			if(!(thing.Flags & Flags::ThingFlag::CogLinked)) {
+				return;
 			}
 		}
 		break;
@@ -418,6 +439,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 				SendMessage(i, message,
 						it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
 						Param0, Param1, Param2, Param3);
+				break;
 			}
 		}
 	}

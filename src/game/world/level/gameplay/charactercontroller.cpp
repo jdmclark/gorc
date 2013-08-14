@@ -423,11 +423,6 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::Update(int thing_i
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CharacterController::RemoveControllerData(int thing_id) {
-	auto& thing = presenter.Model->Things[thing_id];
-	presenter.Model->DynamicsWorld.removeRigidBody(thing.RigidBody.get());
-}
-
 void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
 
@@ -459,8 +454,6 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerDa
 	FlagSet<PhysicsCollideClass> CollideWith { PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin, PhysicsCollideClass::Thing };
 
 	// Associate thing info structure.
-	new_thing.ObjectData.ThingId = thing_id;
-	new_thing.ObjectData.SectorId = new_thing.Sector;
 	new_thing.ObjectData.CollisionGroup = CollideType;
 	new_thing.ObjectData.CollisionMask = CollideWith;
 	new_thing.RigidBody->setUserPointer(&new_thing.ObjectData);

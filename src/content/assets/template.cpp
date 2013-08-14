@@ -185,27 +185,28 @@ void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "actorflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.ActorFlags, FlagSet<Flags::ActorFlag>(), tok, report); }},
-	{ "model3d", &TemplateModel3DParser },
-	{ "soundclass", &TemplateSoundClassParser },
 	{ "cog", &TemplateCogParser },
-	{ "puppet", &TemplatePuppetParser },
-	{ "type", [](TPP_ARGS) { TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }},
-	{ "move", [](TPP_ARGS) { TemplateParameterValueMapper(MoveTypeMap, tpl.Move, Flags::MoveType::None, tok, report); }},
-	{ "mass", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
-	{ "movesize", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
-	{ "size", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
-	{ "eyeoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
 	{ "collide", [](TPP_ARGS) { TemplateParameterEnumMapper(tpl.Collide, Flags::CollideType::None, tok, report); }},
-	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
-	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.GetNumber<int>(); }},
+	{ "eyeoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
 	{ "frame", [](TPP_ARGS) { TemplateAddFrame(tpl, tok); }},
 	{ "health", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Health, 100.0f, tok, report); }},
-	{ "maxhealth", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MaxHealth, 100.0f, tok, report); }},
 	{ "height", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Height, 0.18f, tok, report); }},
 	{ "light", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Light, 0.0f, tok, report); }},
-	{ "maxlight", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Light, 1.0f, tok, report); }},
 	{ "lightintensity", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.LightIntensity, 0.0f, tok, report); }},
-	{ "lightoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.LightOffset, tok); }}
+	{ "lightoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.LightOffset, tok); }},
+	{ "mass", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
+	{ "maxhealth", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MaxHealth, 100.0f, tok, report); }},
+	{ "maxlight", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Light, 1.0f, tok, report); }},
+	{ "model3d", &TemplateModel3DParser },
+	{ "move", [](TPP_ARGS) { TemplateParameterValueMapper(MoveTypeMap, tpl.Move, Flags::MoveType::None, tok, report); }},
+	{ "movesize", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
+	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.GetNumber<int>(); }},
+	{ "physflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.PhysicsFlags, FlagSet<Flags::PhysicsFlag>(), tok, report); }},
+	{ "puppet", &TemplatePuppetParser },
+	{ "size", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
+	{ "soundclass", &TemplateSoundClassParser },
+	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
+	{ "type", [](TPP_ARGS) { TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }}
 };
 
 #undef TPP_ARGS

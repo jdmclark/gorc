@@ -97,6 +97,13 @@ public:
 	void JumpToFrame(int thing_id, int frame, int sector);
 	void MoveToFrame(int thing_id, int frame, float speed);
 
+	// Level verbs
+	float GetGameTime();
+	float GetLevelTime();
+
+	// Misc verbs
+	void TakeItem(int thing_id, int player_id);
+
 	// Player verbs
 	int GetLocalPlayerThing();
 

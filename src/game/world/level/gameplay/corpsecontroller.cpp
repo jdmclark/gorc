@@ -6,11 +6,11 @@ void Gorc::Game::World::Level::Gameplay::CorpseController::Update(int thing_id, 
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::CorpseController::RemoveControllerData(int thing_id) {
+void Gorc::Game::World::Level::Gameplay::CorpseController::CreateControllerData(int thing_id) {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::CorpseController::CreateControllerData(int thing_id) {
+void Gorc::Game::World::Level::Gameplay::CorpseController::RemoveControllerData(int thing_id) {
 	return;
 }
 

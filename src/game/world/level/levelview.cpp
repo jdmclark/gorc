@@ -207,11 +207,11 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& view_size) {
+void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& view_size, const Math::Vector<3>& sector_tint) {
 	glDepthMask(GL_TRUE);
 
 	if(!horizon_sky_surfaces_scratch.empty()) {
-		SetCurrentShader(horizonShader, currentModel->Sectors[currentModel->CameraSector].Tint,
+		SetCurrentShader(horizonShader, sector_tint,
 				currentModel->Header.HorizonSkyOffset, currentModel->Header.HorizonPixelsPerRev,
 				currentModel->Header.HorizonDistance, view_size, currentModel->CameraLook);
 
@@ -221,7 +221,7 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box
 	}
 
 	if(!ceiling_sky_surfaces_scratch.empty()) {
-		SetCurrentShader(ceilingShader, currentModel->Sectors[currentModel->CameraSector].Tint,
+		SetCurrentShader(ceilingShader, sector_tint,
 				currentModel->Header.CeilingSkyOffset, currentModel->Header.CeilingSkyZ);
 
 		for(auto surf_tuple : ceiling_sky_surfaces_scratch) {
@@ -302,7 +302,10 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		RecordVisibleThings();
 
 		// Prepare for rendering ordinary surfaces
-		SetCurrentShader(surfaceShader, currentModel->Sectors[currentModel->CameraSector].Tint);
+		auto sector_tint = currentModel->Sectors[currentModel->CameraSector].Tint;
+		sector_tint = (sector_tint * Math::Length(sector_tint)) + (currentModel->DynamicTint * (1.0f - Math::Length(sector_tint)));
+
+		SetCurrentShader(surfaceShader, sector_tint);
 
 		glDisable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
@@ -311,11 +314,11 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		DrawVisibleDiffuseSurfaces();
 
 		// Render skies
-		DrawVisibleSkySurfaces(view_size);
+		DrawVisibleSkySurfaces(view_size, sector_tint);
 
 		// Interleave rendering things and translucent surfaces.
 		glEnable(GL_BLEND);
-		SetCurrentShader(surfaceShader, currentModel->Sectors[currentModel->CameraSector].Tint);
+		SetCurrentShader(surfaceShader, sector_tint);
 
 		DrawVisibleTranslucentSurfacesAndThings();
 

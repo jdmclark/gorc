@@ -89,11 +89,6 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(in
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::CogController::RemoveControllerData(int thing_id) {
-	auto& thing = presenter.Model->Things[thing_id];
-	presenter.Model->DynamicsWorld.removeRigidBody(thing.RigidBody.get());
-}
-
 void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
 
@@ -131,8 +126,6 @@ void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int
 					thingShape, thing_inertia)));
 
 	// Associate thing info structure.
-	new_thing.ObjectData.ThingId = thing_id;
-	new_thing.ObjectData.SectorId = new_thing.Sector;
 	new_thing.ObjectData.CollisionGroup = CollideType;
 	new_thing.ObjectData.CollisionMask = CollideWith;
 

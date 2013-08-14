@@ -11,6 +11,7 @@
 #include "content/flags/thingflag.h"
 #include "content/flags/attachflag.h"
 #include "content/flags/actorflag.h"
+#include "content/flags/physicsflag.h"
 #include "model.h"
 #include "soundclass.h"
 #include "colormap.h"
@@ -44,6 +45,7 @@ public:
 	Flags::CollideType Collide = Flags::CollideType::None;
 	FlagSet<Flags::ThingFlag> Flags;
 	FlagSet<Flags::AttachFlag> AttachFlags;
+	FlagSet<Flags::PhysicsFlag> PhysicsFlags;
 	Math::Vector<3> EyeOffset;
 
 	FlagSet<Flags::ActorFlag> ActorFlags;

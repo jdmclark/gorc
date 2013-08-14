@@ -29,6 +29,8 @@ public:
 
 	void ChangeInv(int player, int bin, int amount);
 	int GetInv(int player, int bin);
+	int GetInvMax(int player, int bin);
+	int GetInvMin(int player, int bin);
 	bool IsInvActivated(int player, int bin);
 	bool IsInvAvailable(int player, int bin);
 	void SetBinWait(int player, int bin, float delay);

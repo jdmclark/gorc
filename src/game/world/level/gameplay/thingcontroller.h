@@ -26,12 +26,14 @@ protected:
 
 public:
 	ThingController(LevelPresenter& presenter);
-	virtual ~ThingController();
+	virtual ~ThingController() = 0;
 
 	virtual void Update(int thing_id, double dt) = 0;
-	virtual void RemoveControllerData(int thing_id) = 0;
-	virtual void CreateControllerData(int thing_id) = 0;
+	virtual void RemoveControllerData(int thing_id);
+	virtual void CreateControllerData(int thing_id);
 	virtual void HandleAnimationMarker(int thing_id, Flags::KeyMarkerType marker);
+
+	virtual void Taken(int thing_id, int player_id);
 };
 
 }

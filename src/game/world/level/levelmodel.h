@@ -58,6 +58,8 @@ public:
 	btDefaultMotionState SurfaceMotionState;
 	std::vector<SurfaceObjectData> SurfaceObjectData;
 
+	double LevelTime = 0.0;
+	double GameTime = 0.0;
 	Math::Vector<3> DynamicTint = Math::Zero<3>();
 
 	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level, const Content::Assets::Inventory& inv);

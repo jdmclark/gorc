@@ -102,7 +102,7 @@ private:
 	void DoSectorVis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
 			const std::array<int, 4>& viewport, const Math::Box<2, double>& adj_bbox, const Math::Vector<3>& cam_pos, const Math::Vector<3>& cam_look);
 	void DrawVisibleDiffuseSurfaces();
-	void DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& screen_size);
+	void DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& screen_size, const Math::Vector<3>& sector_tint);
 	void DrawVisibleTranslucentSurfacesAndThings();
 
 	void DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector, float alpha);
