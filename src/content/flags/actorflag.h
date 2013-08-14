@@ -7,7 +7,7 @@ namespace Flags {
 
 enum class ActorFlag : uint32_t {
 	PitchingChangesHeadPitch 		= 0x1,
-	PlayersFieldlight				= 0x4,
+	HasFieldlight					= 0x4,
 	Invulnerability					= 0x8,
 	PlayersHeadCentered				= 0x10,
 	ExplodesWhenKilled				= 0x20,

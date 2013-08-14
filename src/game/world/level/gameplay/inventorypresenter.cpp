@@ -3,6 +3,12 @@
 #include "inventorymodel.h"
 #include "cog/verbs/table.h"
 #include "game/components.h"
+#include "game/world/level/levelpresenter.h"
+
+Gorc::Game::World::Level::Gameplay::InventoryPresenter::InventoryPresenter(LevelPresenter& presenter)
+	: presenter(presenter) {
+	return;
+}
 
 void Gorc::Game::World::Level::Gameplay::InventoryPresenter::Start(LevelModel& levelModel, InventoryModel& model) {
 	this->model = &model;
@@ -20,6 +26,16 @@ void Gorc::Game::World::Level::Gameplay::InventoryPresenter::ChangeInv(int playe
 
 int Gorc::Game::World::Level::Gameplay::InventoryPresenter::GetInv(int player, int bin) {
 	return model->GetInventory(player).GetBinValue(bin);
+}
+
+int Gorc::Game::World::Level::Gameplay::InventoryPresenter::GetInvCog(int player, int bin) {
+	const Content::Assets::InventoryBin& inv_bin = model->BaseInventory.GetBin(bin);
+	if(inv_bin.Cog) {
+		return presenter.ScriptPresenter.GetGlobalCogInstance(&inv_bin.Cog->Script);
+	}
+	else {
+		return -1;
+	}
 }
 
 int Gorc::Game::World::Level::Gameplay::InventoryPresenter::GetInvMax(int player, int bin) {
@@ -52,6 +68,20 @@ void Gorc::Game::World::Level::Gameplay::InventoryPresenter::SetInvActivated(int
 
 void Gorc::Game::World::Level::Gameplay::InventoryPresenter::SetInvAvailable(int player, int bin, bool value) {
 	model->GetInventory(player).SetBinAvailable(bin, value);
+}
+
+void Gorc::Game::World::Level::Gameplay::InventoryPresenter::OnItemHotkeyPressed(int player, int bin) {
+	// TODO: If weapon, change 'bin' to 0 for primary, 1 for secondary fire.
+	presenter.ScriptPresenter.SendMessage(GetInvCog(player, bin), Cog::MessageId::Activated,
+			-1, bin, Flags::MessageType::System,
+			player, Flags::MessageType::Thing);
+}
+
+void Gorc::Game::World::Level::Gameplay::InventoryPresenter::OnItemHotkeyReleased(int player, int bin) {
+	// TODO: If weapon, change 'bin' to 0 for primary, 1 for secondary fire.
+	presenter.ScriptPresenter.SendMessage(GetInvCog(player, bin), Cog::MessageId::Deactivated,
+			-1, bin, Flags::MessageType::System,
+			player, Flags::MessageType::Thing);
 }
 
 void Gorc::Game::World::Level::Gameplay::InventoryPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {

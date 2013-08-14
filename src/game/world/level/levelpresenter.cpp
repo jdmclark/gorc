@@ -7,6 +7,7 @@ using namespace Gorc::Math;
 Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
 	: components(components), place(place),
 	  ScriptPresenter(components), SoundPresenter(*place.ContentManager),  KeyPresenter(*place.ContentManager),
+	  InventoryPresenter(*this),
 	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
 	  ItemController(*this), CorpseController(*this) {
 
@@ -66,6 +67,15 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 
 	Model->CameraPosition = camera_thing.Position;
 	Model->CameraSector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
+
+	// Create bin script instances.
+	for(const auto& bin_tuple : Model->InventoryModel.BaseInventory) {
+		const auto& bin = std::get<1>(bin_tuple);
+
+		if(bin.Cog) {
+			ScriptPresenter.CreateGlobalCogInstance(bin.Cog->Script, *place.ContentManager, components.Compiler);
+		}
+	}
 
 	// Create COG script instances.
 	for(unsigned int i = 0; i < Model->Level.Cogs.size(); ++i) {
@@ -473,18 +483,6 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::ToggleFieldLight() {
-	auto& thing = Model->Things[Model->CameraThingId];
-	if(thing.Light != 1.0f) {
-		thing.Light = 1.0f;
-		SoundPresenter.PlaySoundClass(Model->CameraThingId, Flags::SoundSubclassType::HurtImpact);
-	}
-	else {
-		thing.Light = 0.05f;
-		SoundPresenter.PlaySoundClass(Model->CameraThingId, Flags::SoundSubclassType::HurtEnergy);
-	}
-}
-
 void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
 	Model->Things[thing_id].Flags += Flags::ThingFlag::Sighted;
 	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, thing_id, Flags::MessageType::Thing);
@@ -848,6 +846,12 @@ void Gorc::Game::World::Level::LevelPresenter::SetThingType(int thing_id, Flags:
 	thing.Controller->CreateControllerData(thing_id);
 }
 
+void Gorc::Game::World::Level::LevelPresenter::SetThingLight(int thing_id, float light, float fade_time) {
+	// TODO: Implement fade_time
+	auto& thing = Model->Things[thing_id];
+	thing.Light = light;
+}
+
 void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
 	Animations::AnimationPresenter::RegisterVerbs(verbTable, components);
 	Scripts::ScriptPresenter::RegisterVerbs(verbTable, components);
@@ -1060,10 +1064,10 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 	});
 
 	verbTable.AddVerb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {
-		// TODO: Implement
+		components.CurrentLevelPresenter->SetThingLight(thing_id, light, fade_time);
 	});
 
 	verbTable.AddVerb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
-		// TODO: Implement
+		components.CurrentLevelPresenter->SetThingLight(thing_id, light, fade_time);
 	});
 }

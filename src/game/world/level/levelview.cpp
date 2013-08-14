@@ -327,11 +327,14 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		glEnable(GL_BLEND);
 		for(const auto& light_thing : visible_thing_scratch) {
 			const auto& thing = currentModel->Things[std::get<0>(light_thing)];
-			if(thing.Light <= 0.0f) {
+
+			float light = thing.Light + ((thing.ActorFlags & Flags::ActorFlag::HasFieldlight) ? thing.LightIntensity : 0.0f);
+
+			if(light <= 0.0f) {
 				continue;
 			}
 
-			SetCurrentShader(lightShader, thing.Position + thing.LightOffset, currentModel->CameraPosition, thing.LightIntensity, thing.Light);
+			SetCurrentShader(lightShader, thing.Position + thing.LightOffset, currentModel->CameraPosition, light, light);
 
 			DrawVisibleDiffuseSurfaces();
 			DrawVisibleTranslucentSurfacesAndThings();

@@ -85,7 +85,6 @@ public:
 	void Jump();
 	void Activate();
 	void Damage();
-	void ToggleFieldLight();
 
 	void ThingSighted(int thing_id);
 
@@ -152,6 +151,7 @@ public:
 	int GetThingSector(int thing_id);
 	Flags::ThingType GetThingType(int thing_id);
 	void SetThingType(int thing_id, Flags::ThingType type);
+	void SetThingLight(int thing_id, float light, float fade_time);
 
 	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
 };

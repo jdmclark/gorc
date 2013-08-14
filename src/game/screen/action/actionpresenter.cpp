@@ -61,12 +61,14 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 		components.CurrentLevelPresenter->Activate();
 	}
 
+	int player = components.CurrentLevelPresenter->GetLocalPlayerThing();
 	if(f1_key_down && !components.Input.IsKeyDown(sf::Key::F1)) {
 		f1_key_down = false;
+		components.CurrentLevelPresenter->InventoryPresenter.OnItemHotkeyReleased(player, 42);
 	}
 	else if(!f1_key_down && components.Input.IsKeyDown(sf::Key::F1)) {
 		f1_key_down = true;
-		components.CurrentLevelPresenter->ToggleFieldLight();
+		components.CurrentLevelPresenter->InventoryPresenter.OnItemHotkeyPressed(player, 42);
 	}
 
 	// Camera rotate

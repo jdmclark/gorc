@@ -39,6 +39,14 @@ public:
 
 		throw std::exception();
 	}
+
+	inline auto begin() const -> decltype(Bins.begin()) {
+		return Bins.begin();
+	}
+
+	inline auto end() const -> decltype(Bins.end()) {
+		return Bins.end();
+	}
 };
 
 }
