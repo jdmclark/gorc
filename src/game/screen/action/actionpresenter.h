@@ -20,6 +20,7 @@ private:
 	bool z_key_down = false;
 	bool x_key_down = false;
 	bool f1_key_down = false;
+	bool g_key_down = false;
 
 public:
 	ActionPresenter(Components& components, const ActionPlace& place);

@@ -1,4 +1,5 @@
 #include "actionpresenter.h"
+#include "game/world/level/levelmodel.h"
 #include "framework/events/exitevent.h"
 #include "game/events/windowfocusevent.h"
 
@@ -69,6 +70,17 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 	else if(!f1_key_down && components.Input.IsKeyDown(sf::Key::F1)) {
 		f1_key_down = true;
 		components.CurrentLevelPresenter->InventoryPresenter.OnItemHotkeyPressed(player, 42);
+	}
+
+	if(g_key_down && !components.Input.IsKeyDown(sf::Key::G)) {
+		g_key_down = false;
+	}
+	else if(!g_key_down && components.Input.IsKeyDown(sf::Key::G)) {
+		g_key_down = true;
+		// Give all items
+		for(const auto& bin : components.CurrentLevelPresenter->Model->InventoryModel.BaseInventory) {
+			components.CurrentLevelPresenter->InventoryPresenter.SetInv(player, bin.first, bin.second.MaxValue);
+		}
 	}
 
 	// Camera rotate

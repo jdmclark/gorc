@@ -106,10 +106,11 @@ Gorc::Game::World::Level::Gameplay::StandingMaterial Gorc::Game::World::Level::G
 void Gorc::Game::World::Level::Gameplay::CharacterController::RunFallingSweep(int thing_id, Thing& thing,
 		double dt, FilteredClosestRayResultCallback& rrcb) {
 	// Test for collision between legs and ground
-	Math::Vector<3> leg_height = thing.Model3d->InsertOffset;
-	Math::Vector<3> leg_bottom = thing.Position - leg_height;
+	Math::Vector<3> thing_position = thing.Position * PhysicsWorldScale;
+	Math::Vector<3> leg_height = thing.Model3d->InsertOffset * PhysicsWorldScale;
+	Math::Vector<3> leg_bottom = thing_position - leg_height;
 
-	rrcb = FilteredClosestRayResultCallback(Math::BtVec(thing.Position), Math::BtVec(leg_bottom));
+	rrcb = FilteredClosestRayResultCallback(Math::BtVec(thing_position), Math::BtVec(leg_bottom));
 	FlagSet<PhysicsCollideClass> CollideClass { PhysicsCollideClass::Thing };
 	switch(thing.Type) {
 	case Flags::ThingType::Player:
@@ -125,16 +126,21 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::RunFallingSweep(in
 	rrcb.m_collisionFilterGroup = static_cast<unsigned int>(CollideClass);
 	rrcb.m_collisionFilterMask = static_cast<unsigned int>(PhysicsCollideClass::Floor);
 
-	presenter.Model->DynamicsWorld.rayTest(Math::BtVec(thing.Position), Math::BtVec(leg_bottom), rrcb);
+	presenter.Model->DynamicsWorld.rayTest(Math::BtVec(thing_position), Math::BtVec(leg_bottom), rrcb);
+
+	if(rrcb.hasHit()) {
+		rrcb.m_hitPointWorld *= PhysicsInvWorldScale;
+	}
 }
 
 void Gorc::Game::World::Level::Gameplay::CharacterController::RunWalkingSweep(int thing_id, Thing& thing,
 		double dt, FilteredClosestRayResultCallback& rrcb) {
 	// Test for collision between legs and ground
-	Math::Vector<3> leg_height = thing.Model3d->InsertOffset * 1.50f;
-	Math::Vector<3> leg_bottom = thing.Position - leg_height;
+	Math::Vector<3> thing_position = thing.Position * PhysicsWorldScale;
+	Math::Vector<3> leg_height = thing.Model3d->InsertOffset * PhysicsWorldScale * 1.50f;
+	Math::Vector<3> leg_bottom = thing_position - leg_height;
 
-	rrcb = FilteredClosestRayResultCallback(Math::BtVec(thing.Position), Math::BtVec(leg_bottom));
+	rrcb = FilteredClosestRayResultCallback(Math::BtVec(thing_position), Math::BtVec(leg_bottom));
 	FlagSet<PhysicsCollideClass> CollideClass { PhysicsCollideClass::Thing };
 	switch(thing.Type) {
 	case Flags::ThingType::Player:
@@ -150,14 +156,18 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::RunWalkingSweep(in
 	rrcb.m_collisionFilterGroup = static_cast<unsigned int>(CollideClass);
 	rrcb.m_collisionFilterMask = static_cast<unsigned int>(PhysicsCollideClass::Floor);
 
-	presenter.Model->DynamicsWorld.rayTest(Math::BtVec(thing.Position), Math::BtVec(leg_bottom), rrcb);
+	presenter.Model->DynamicsWorld.rayTest(Math::BtVec(thing_position), Math::BtVec(leg_bottom), rrcb);
+
+	if(rrcb.hasHit()) {
+		rrcb.m_hitPointWorld *= PhysicsInvWorldScale;
+	}
 }
 
 void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateFalling(int thing_id, Thing& thing, double dt) {
 	FilteredClosestRayResultCallback rrcb(btVector3(0,0,0), btVector3(0,0,0));
 	RunFallingSweep(thing_id, thing, dt, rrcb);
 
-	thing.RigidBody->applyCentralImpulse(btVector3(Math::Get<0>(thing.Thrust), Math::Get<1>(thing.Thrust), 0.0f));
+	thing.RigidBody->applyCentralImpulse(btVector3(Math::Get<0>(thing.Thrust), Math::Get<1>(thing.Thrust), 0.0f) * PhysicsWorldScale);
 	PlayStandingAnimation(thing_id, thing);
 
 	if(rrcb.hasHit() && thing.RigidBody->getLinearVelocity().getZ() < 0.0f) {
@@ -181,7 +191,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 
 	if(!rrcb.hasHit()) {
 		// Player is falling again.
-		thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity));
+		thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity * PhysicsWorldScale));
 		thing.AttachFlags = FlagSet<Flags::AttachFlag>();
 	}
 	else {
@@ -218,7 +228,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 			float dist = Math::Dot(hit_normal, thing.Position - hit_world);
 			new_vel += hit_normal * (model_height - dist) * 20.0f;
 
-			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
+			thing.RigidBody->setLinearVelocity(BtVec(new_vel) * PhysicsWorldScale);
 
 			// Update idle animation
 			float player_new_vel_len = Math::Length(player_new_vel);
@@ -238,7 +248,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 
 	if(!rrcb.hasHit()) {
 		// Player is falling again.
-		thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity));
+		thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity * PhysicsWorldScale));
 		thing.AttachFlags = FlagSet<Flags::AttachFlag>();
 	}
 	else {
@@ -276,7 +286,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 			float dist = Math::Dot(hit_normal, thing.Position - hit_world);
 			new_vel += hit_normal * (model_height - dist) * 20.0f;
 
-			thing.RigidBody->setLinearVelocity(BtVec(new_vel));
+			thing.RigidBody->setLinearVelocity(BtVec(new_vel) * PhysicsWorldScale);
 
 			// Update idle animation
 			float player_new_vel_len = Math::Length(player_new_vel);
@@ -364,9 +374,9 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::Jump(int thing_id,
 }
 
 void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromSurface(int thing_id, Thing& thing, unsigned int surf_id) {
-	thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity));
+	thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity * PhysicsWorldScale));
 	thing.AttachFlags = FlagSet<Flags::AttachFlag>();
-	thing.RigidBody->setLinearVelocity(BtVec(thing.Thrust));
+	thing.RigidBody->setLinearVelocity(BtVec(thing.Thrust) * PhysicsWorldScale);
 
 	const Content::Assets::LevelSurface& surf = presenter.Model->Surfaces[surf_id];
 
@@ -391,9 +401,9 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromSurface(in
 }
 
 void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromThing(int thing_id, Thing& thing, int jump_thing_id) {
-	thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity));
+	thing.RigidBody->setGravity(btVector3(0,0,-presenter.Model->Header.WorldGravity * PhysicsWorldScale));
 	thing.AttachFlags = FlagSet<Flags::AttachFlag>();
-	thing.RigidBody->setLinearVelocity(BtVec(thing.Thrust));
+	thing.RigidBody->setLinearVelocity(BtVec(thing.Thrust) * PhysicsWorldScale);
 
 	FlagSet<Flags::ThingFlag> flags = presenter.Model->Things[jump_thing_id].Flags;
 
@@ -429,14 +439,14 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerDa
 	btQuaternion orientation(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_thing.Orientation));
 
 	float thing_mass = new_thing.Mass;
-	new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(0.04f));
+	new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(0.04f * PhysicsWorldScale));
 	btCollisionShape* thingShape = new_thing.ActorCollideShape.get();
 
 	btVector3 thing_inertia(0,0,0);
 	thingShape->calculateLocalInertia(thing_mass, thing_inertia);
 
 	new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
-			btTransform(orientation, Math::BtVec(new_thing.Position))));
+			btTransform(orientation, Math::BtVec(new_thing.Position) * PhysicsWorldScale)));
 
 	btRigidBody::btRigidBodyConstructionInfo actor_ci(thing_mass, new_thing.MotionState.get(),
 			thingShape, thing_inertia);

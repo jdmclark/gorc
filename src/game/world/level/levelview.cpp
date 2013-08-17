@@ -4,6 +4,7 @@
 #include "game/components.h"
 #include "levelmodel.h"
 #include "content/assets/model.h"
+#include "content/constants.h"
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -343,8 +344,15 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		glDepthMask(GL_TRUE);
 
 		glDisable(GL_DEPTH_TEST);
-		//currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
-		//currentModel->DynamicsWorld.debugDrawWorld();
+
+		/*
+		// Enable debug drawing for physics.
+		ViewMatrix = Matrix<float>::MakeLookMatrix(currentModel->CameraPosition * PhysicsWorldScale,
+				currentModel->CameraLook, currentModel->CameraUp);
+		SetCurrentShader(surfaceShader, sector_tint);
+		currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
+		currentModel->DynamicsWorld.debugDrawWorld();
+		*/
 	}
 }
 
@@ -522,6 +530,7 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 	if(thing.RigidBody) {
 		btTransform trns;
 		thing.RigidBody->getMotionState()->getWorldTransform(trns);
+		trns.setOrigin(trns.getOrigin() * PhysicsInvWorldScale);
 
 		Math::Matrix<float> mat;
 		trns.getOpenGLMatrix(mat.GetOpenGLMatrix());

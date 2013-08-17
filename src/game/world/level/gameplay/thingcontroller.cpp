@@ -26,14 +26,14 @@ void Gorc::Game::World::Level::Gameplay::ThingController::CreateControllerData(i
 		thing_mass = new_thing.Mass;
 	}
 
-	new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(new_thing.Size));
+	new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(new_thing.Size * PhysicsWorldScale));
 	btCollisionShape* thingShape = new_thing.ActorCollideShape.get();
 
 	btVector3 thing_inertia(0,0,0);
 	thingShape->calculateLocalInertia(thing_mass, thing_inertia);
 
 	new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
-			btTransform(orientation, Math::BtVec(new_thing.Position))));
+			btTransform(orientation, Math::BtVec(new_thing.Position) * PhysicsWorldScale)));
 
 	btRigidBody::btRigidBodyConstructionInfo actor_ci(thing_mass, new_thing.MotionState.get(),
 			thingShape, thing_inertia);

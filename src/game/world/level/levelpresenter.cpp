@@ -106,7 +106,7 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 		if(thing.RigidBody) {
 			auto oldThingPosition = thing.Position;
 			thing.RigidBody->getMotionState()->getWorldTransform(trans);
-			thing.Position = VecBt(trans.getOrigin());
+			thing.Position = VecBt(trans.getOrigin() * PhysicsInvWorldScale);
 			UpdateThingSector(thing.GetId(), thing, oldThingPosition);
 		}
 
@@ -361,8 +361,8 @@ void Gorc::Game::World::Level::LevelPresenter::DoRespawn() {
 	cameraThing.Sector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
 	cameraThing.ObjectData.SectorId = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
 	cameraThing.Position = Model->SpawnPoints[Model->CurrentSpawnPoint]->Position;
-	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position)));
-	cameraThing.RigidBody->setGravity(btVector3(0.0f, 0.0f, -Model->Header.WorldGravity));
+	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position) * PhysicsWorldScale));
+	cameraThing.RigidBody->setGravity(btVector3(0.0f, 0.0f, -Model->Header.WorldGravity * PhysicsWorldScale));
 	cameraThing.AttachFlags = FlagSet<Flags::AttachFlag>();
 }
 
@@ -686,8 +686,8 @@ void Gorc::Game::World::Level::LevelPresenter::AdjustThingPos(int thing_id, cons
 	auto old_pos = thing.Position;
 	thing.Position = new_pos;
 	if(thing.RigidBody) {
-		thing.RigidBody->getMotionState()->setWorldTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos)));
-		thing.RigidBody->proceedToTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos)));
+		thing.RigidBody->getMotionState()->setWorldTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos) * PhysicsWorldScale));
+		thing.RigidBody->proceedToTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos) * PhysicsWorldScale));
 	}
 	UpdateThingSector(thing_id, thing, old_pos);
 }
@@ -703,7 +703,7 @@ void Gorc::Game::World::Level::LevelPresenter::SetThingPos(int thing_id, const M
 		quat *= btQuaternion(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_orient)); // Yaw
 		quat *= btQuaternion(btVector3(1,0,0), Deg2Rad * Math::Get<0>(new_orient)); // Pitch
 		quat *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(new_orient)); // Roll
-		thing.RigidBody->proceedToTransform(btTransform(quat, Math::BtVec(new_pos)));
+		thing.RigidBody->proceedToTransform(btTransform(quat, Math::BtVec(new_pos) * PhysicsWorldScale));
 	}
 }
 

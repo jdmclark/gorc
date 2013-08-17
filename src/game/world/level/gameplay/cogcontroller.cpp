@@ -22,8 +22,9 @@ void Gorc::Game::World::Level::Gameplay::CogController::Update(int thing_id, dou
 			thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
 			btTransform currentWorldTransform;
 			thing.RigidBody->getMotionState()->getWorldTransform(currentWorldTransform);
-			Vector<3> targetPosition = VecBt(currentWorldTransform.getOrigin()) + deltaPosition;
-			thing.RigidBody->getMotionState()->setWorldTransform(btTransform(currentWorldTransform.getRotation(), BtVec(targetPosition)));
+			Vector<3> targetPosition = VecBt(currentWorldTransform.getOrigin()) * PhysicsInvWorldScale + deltaPosition;
+			thing.RigidBody->getMotionState()->setWorldTransform(btTransform(currentWorldTransform.getRotation(),
+					BtVec(targetPosition) * PhysicsWorldScale));
 			thing.PrevAttachedThingPosition = attached_thing.Position;
 		}
 		else {
@@ -45,14 +46,14 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(in
 	btTransform currentWorldTransform;
 	thing.RigidBody->getMotionState()->getWorldTransform(currentWorldTransform);
 
-	Vector<3> currentPosition = VecBt(currentWorldTransform.getOrigin());
+	Vector<3> currentPosition = VecBt(currentWorldTransform.getOrigin() * PhysicsInvWorldScale);
 
 	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 	// Use a magic multiple to correct it.
 	float dist_len = Math::Length(targetPosition - currentPosition);
 	float alpha = RateFactor * dt * thing.PathMoveSpeed / dist_len;
 	if(alpha >= 1.0f || dist_len == 0.0f) {
-		btTransform targetWorldTransform(targetOrientQuat, BtVec(targetPosition));
+		btTransform targetWorldTransform(targetOrientQuat, BtVec(targetPosition) * PhysicsWorldScale);
 		thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
 
 		// Arrived at next frame. Advance to next.
@@ -78,12 +79,13 @@ void Gorc::Game::World::Level::Gameplay::CogController::UpdateThingPathMoving(in
 	else {
 		auto currentQuat = currentWorldTransform.getRotation();
 		if(currentQuat.angle(targetOrientQuat) < std::numeric_limits<float>::epsilon()) {
-			btTransform targetWorldTransform(targetOrientQuat, currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
+			btTransform targetWorldTransform(targetOrientQuat,
+					currentWorldTransform.getOrigin().lerp(BtVec(targetPosition) * PhysicsWorldScale, alpha));
 			thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
 		}
 		else {
-			btTransform targetWorldTransform(currentWorldTransform.getRotation(), //.slerp(targetOrientQuat, alpha),
-					currentWorldTransform.getOrigin().lerp(BtVec(targetPosition), alpha));
+			btTransform targetWorldTransform(currentWorldTransform.getRotation(),
+					currentWorldTransform.getOrigin().lerp(BtVec(targetPosition) * PhysicsWorldScale, alpha));
 			thing.RigidBody->getMotionState()->setWorldTransform(targetWorldTransform);
 		}
 	}
@@ -112,7 +114,7 @@ void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int
 		CollideType += PhysicsCollideClass::Floor;
 	}
 	else {
-		new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(new_thing.Size * 0.5f));
+		new_thing.ActorCollideShape = std::unique_ptr<btCollisionShape>(new btSphereShape(new_thing.Size * 0.5f * PhysicsWorldScale));
 		thingShape = new_thing.ActorCollideShape.get();
 	}
 
@@ -120,7 +122,7 @@ void Gorc::Game::World::Level::Gameplay::CogController::CreateControllerData(int
 	thingShape->calculateLocalInertia(thing_mass, thing_inertia);
 
 	new_thing.MotionState = std::unique_ptr<btDefaultMotionState>(new btDefaultMotionState(
-			btTransform(orientation, Math::BtVec(new_thing.Position))));
+			btTransform(orientation, Math::BtVec(new_thing.Position) * PhysicsWorldScale)));
 	new_thing.RigidBody = std::unique_ptr<btRigidBody>(new btRigidBody(
 			btRigidBody::btRigidBodyConstructionInfo(thing_mass, new_thing.MotionState.get(),
 					thingShape, thing_inertia)));

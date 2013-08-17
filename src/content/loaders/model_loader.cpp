@@ -7,6 +7,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include "content/constants.h"
 
 const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ModelLoader::AssetRootPath = { "3do" };
 
@@ -241,7 +242,7 @@ void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colo
 		for(auto& face : mesh.Faces) {
 			face.Shape = std::unique_ptr<btConvexHullShape>(new btConvexHullShape());
 			for(auto& vertex : face.Vertices) {
-				face.Shape->addPoint(Math::BtVec(mesh.Vertices[std::get<0>(vertex)]));
+				face.Shape->addPoint(Math::BtVec(mesh.Vertices[std::get<0>(vertex)]) * PhysicsWorldScale);
 			}
 
 			face.Shape->setMargin(0);

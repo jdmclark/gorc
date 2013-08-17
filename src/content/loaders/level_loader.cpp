@@ -1,6 +1,7 @@
 #include "level_loader.h"
 #include "content/assets/level.h"
 #include "content/manager.h"
+#include "content/constants.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>
@@ -582,7 +583,7 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 		lev.SurfaceShapes.emplace_back(new btConvexHullShape());
 
 		for(const auto& pt : surf.Vertices) {
-			lev.SurfaceShapes.back()->addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]));
+			lev.SurfaceShapes.back()->addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]) * PhysicsWorldScale);
 		}
 
 		lev.SurfaceShapes.back()->setMargin(0);

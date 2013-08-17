@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentManager = std::make_shared<Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Content::Assets::Level>("01narshadda.jkl", Compiler);
+	const auto& lev = contentManager->Load<Content::Assets::Level>("02narshadda.jkl", Compiler);
 	WorldPlaceController.GoTo(Game::World::Level::LevelPlace(contentManager, lev));
 
 	ScreenPlaceController.GoTo(Game::Screen::Action::ActionPlace());
@@ -163,12 +163,12 @@ int main(int argc, char** argv) {
 		gameplayElapsedTime += currentTime;
 		gameplayAccumulator += currentTime;
 
-		while(gameplayAccumulator >= Game::GameplayTick) {
-			gameplayAccumulator -= Game::GameplayTick;
+		while(gameplayAccumulator >= GameplayTick) {
+			gameplayAccumulator -= GameplayTick;
 
 			// Update simulation.
-			WorldViewFrame.Update(Game::GameplayTick);
-			ScreenViewFrame.Update(Game::GameplayTick);
+			WorldViewFrame.Update(GameplayTick);
+			ScreenViewFrame.Update(GameplayTick);
 		}
 
 		// TODO: Render here
