@@ -5,7 +5,7 @@
 namespace Gorc {
 
 // Number of times per second the game state is updated.
-const double GameplayTick = (1.0 / 120.0);
+const double GameplayTick = (1.0 / 60.0);
 
 // Constant multiple to convert per-frame rate parameters.
 const double RateFactor = 1.0 / 10.0;

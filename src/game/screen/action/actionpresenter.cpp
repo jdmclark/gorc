@@ -77,10 +77,8 @@ void Gorc::Game::Screen::Action::ActionPresenter::Update(double dt) {
 	}
 	else if(!g_key_down && components.Input.IsKeyDown(sf::Key::G)) {
 		g_key_down = true;
-		// Give all items
-		for(const auto& bin : components.CurrentLevelPresenter->Model->InventoryModel.BaseInventory) {
-			components.CurrentLevelPresenter->InventoryPresenter.SetInv(player, bin.first, bin.second.MaxValue);
-		}
+		// Give batteries
+		components.CurrentLevelPresenter->InventoryPresenter.SetInv(player, 13, 200);
 	}
 
 	// Camera rotate

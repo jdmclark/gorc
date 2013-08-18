@@ -20,6 +20,7 @@
 #include "game/world/level/gameplay/ghostcontroller.h"
 #include "game/world/level/gameplay/itemcontroller.h"
 #include "game/world/level/gameplay/corpsecontroller.h"
+#include "game/world/level/gameplay/weaponcontroller.h"
 
 #include <memory>
 #include <stack>
@@ -72,6 +73,7 @@ public:
 	Gameplay::GhostController GhostController;
 	Gameplay::ItemController ItemController;
 	Gameplay::CorpseController CorpseController;
+	Gameplay::WeaponController WeaponController;
 
 	LevelPresenter(Components& components, const LevelPlace& place);
 

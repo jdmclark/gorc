@@ -233,7 +233,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnSu
 			// Update idle animation
 			float player_new_vel_len = Math::Length(player_new_vel);
 			if(player_new_vel_len > 0.0f) {
-				PlayRunningAnimation(thing_id, thing, player_new_vel_len * 30.0f);
+				PlayRunningAnimation(thing_id, thing, player_new_vel_len * 20.0f);
 			}
 			else {
 				PlayStandingAnimation(thing_id, thing);
@@ -291,7 +291,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::UpdateStandingOnTh
 			// Update idle animation
 			float player_new_vel_len = Math::Length(player_new_vel);
 			if(player_new_vel_len > 0.0f) {
-				PlayRunningAnimation(thing_id, thing, player_new_vel_len * 30.0f);
+				PlayRunningAnimation(thing_id, thing, player_new_vel_len * 20.0f);
 			}
 			else {
 				PlayStandingAnimation(thing_id, thing);
@@ -419,6 +419,8 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::JumpFromThing(int 
 }
 
 void Gorc::Game::World::Level::Gameplay::CharacterController::Update(int thing_id, double dt) {
+	ThingController::Update(thing_id, dt);
+
 	Thing& thing = presenter.Model->Things[thing_id];
 
 	// Update actor state
@@ -470,7 +472,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerDa
 	new_thing.RigidBody->setAngularFactor(btVector3(0,0,0));
 	new_thing.RigidBody->setSleepingThresholds(0.0f, 0.0f);
 	new_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
-	new_thing.RigidBody->setCcdMotionThreshold(0.0005f);
+	new_thing.RigidBody->setCcdMotionThreshold(1e-10f);
 	new_thing.RigidBody->setCcdSweptSphereRadius(0.01f * PhysicsWorldScale);
 
 	presenter.Model->DynamicsWorld.addRigidBody(new_thing.RigidBody.get());

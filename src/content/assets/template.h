@@ -35,37 +35,36 @@ public:
 	Math::Vector<3> Orientation;
 	Math::Vector<3> Thrust;
 
-	Model const* Model3d = nullptr;
-	SoundClass const* SoundClass = nullptr;
-	Script const* Cog = nullptr;
-	Puppet const* Puppet = nullptr;
-
-	Flags::ThingType Type = Flags::ThingType::Ghost;
-	Flags::MoveType Move = Flags::MoveType::None;
-	Flags::CollideType Collide = Flags::CollideType::None;
-	FlagSet<Flags::ThingFlag> Flags;
-	FlagSet<Flags::AttachFlag> AttachFlags;
-	FlagSet<Flags::PhysicsFlag> PhysicsFlags;
-	Math::Vector<3> EyeOffset;
-
 	FlagSet<Flags::ActorFlag> ActorFlags;
-
-	float Health = 100.0f;
-	float MaxHealth = 100.0f;
-
+	FlagSet<Flags::AttachFlag> AttachFlags;
+	Script const* Cog = nullptr;
+	Flags::CollideType Collide = Flags::CollideType::None;
+	int CreateThing = 0;
+	int Explode = 0;
+	Math::Vector<3> EyeOffset;
+	FlagSet<Flags::ThingFlag> Flags;
+	int FleshHit = 0;
 	std::vector<std::tuple<Math::Vector<3>, Math::Vector<3>>> Frames;
-
-	float Mass = 2.0f;
-	float Size = 0.05f;
-	float MoveSize = 0.05f;
+	float Health = 100.0f;
 	float Height = 0.18f;
-
 	float Light = 0.0f;
-	float MaxLight = 1.0f;
 	float LightIntensity = 0.0f;
 	Math::Vector<3> LightOffset;
+	float Mass = 2.0f;
+	float MaxHealth = 100.0f;
+	float MaxLight = 1.0f;
+	Model const* Model3d = nullptr;
+	Flags::MoveType Move = Flags::MoveType::None;
+	float MoveSize = 0.05f;
+	FlagSet<Flags::PhysicsFlag> PhysicsFlags;
+	Puppet const* Puppet = nullptr;
+	float Size = 0.05f;
+	SoundClass const* SoundClass = nullptr;
+	float Timer = 0.0f;
+	Flags::ThingType Type = Flags::ThingType::Ghost;
 
-	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Colormap& cmp, const Cog::Compiler& compiler, Diagnostics::Report& report);
+	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Colormap& cmp, const Cog::Compiler& compiler,
+			const std::unordered_map<std::string, int>& templates, Diagnostics::Report& report);
 };
 
 }

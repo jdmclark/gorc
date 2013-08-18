@@ -11,8 +11,6 @@ namespace Gameplay {
 class PlayerController : public CharacterController {
 public:
 	using CharacterController::CharacterController;
-
-	virtual void Update(int thing_id, double dt) override;
 };
 
 }

@@ -8,12 +8,14 @@ namespace World {
 namespace Level {
 namespace Gameplay {
 
-class GhostController : public ThingController {
+class WeaponController : public ThingController {
 public:
 	using ThingController::ThingController;
 
 	virtual void CreateControllerData(int thing_id) override;
-	virtual void RemoveControllerData(int thing_id) override;
+
+	virtual void TouchedThing(int thing_id, int touched_thing_id) override;
+	virtual void TouchedSurface(int thing_id, int touched_surface_id) override;
 };
 
 }

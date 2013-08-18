@@ -8,6 +8,8 @@
 using namespace Gorc::Math;
 
 void Gorc::Game::World::Level::Gameplay::CogController::Update(int thing_id, double dt) {
+	ThingController::Update(thing_id, dt);
+
 	Thing& thing = presenter.Model->Things[thing_id];
 	if(thing.PathMoving) {
 		UpdateThingPathMoving(thing_id, thing, dt);

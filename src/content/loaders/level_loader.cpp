@@ -471,7 +471,7 @@ void ParseTemplatesSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& ma
 			}
 
 			lev.Templates.push_back(lev.Templates[base_it->second]);
-			lev.Templates.back().ParseArgs(tok, manager, *lev.MasterColormap, compiler, report);
+			lev.Templates.back().ParseArgs(tok, manager, *lev.MasterColormap, compiler, lev.TemplateMap, report);
 		}
 		else {
 			report.AddError("LevelLoader::ParseTemplatesSection", "expected template name", tok.GetInternalTokenLocation());
@@ -527,7 +527,7 @@ void ParseThingsSection(Assets::Level& lev, Text::Tokenizer& tok, Manager& manag
 			lev.Things.back().Sector = sector;
 			lev.Things.back().Position = Math::Vec(x, y, z);
 			lev.Things.back().Orientation = Math::Vec(pitch, yaw, roll);
-			lev.Things.back().ParseArgs(tok, manager, *lev.MasterColormap, compiler, report);
+			lev.Things.back().ParseArgs(tok, manager, *lev.MasterColormap, compiler, lev.TemplateMap, report);
 		}
 	}
 

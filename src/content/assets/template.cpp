@@ -29,8 +29,6 @@ static const std::unordered_map<std::string, Flags::MoveType> MoveTypeMap {
 	{ "path", Flags::MoveType::Path }
 };
 
-using TemplateParameterParser = std::function<void(Template&, Text::Tokenizer&, Content::Manager&, const Colormap&, const Cog::Compiler&, Diagnostics::Report&)>;
-
 template <typename T> void TemplateParameterValueMapper(const std::unordered_map<std::string, T>& map, T& value,
 		const T& defaultValue, Text::Tokenizer& tok, Diagnostics::Report& report) {
 	std::string key = tok.GetSpaceDelimitedString();
@@ -95,7 +93,23 @@ void TemplateParameterVectorMapper(Math::Vector<3>& value, Text::Tokenizer& tok)
 	tok.AssertPunctuator(")");
 }
 
-void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp, const Cog::Compiler&, Diagnostics::Report& report) {
+void TemplateParameterTemplateMapper(int& value, int defaultValue, const std::unordered_map<std::string, int>& templates,
+		Text::Tokenizer& tok, Diagnostics::Report& report) {
+	std::string tpl_name = tok.GetSpaceDelimitedString();
+	std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
+
+	auto tpl_it = templates.find(tpl_name);
+	if(tpl_it == templates.end()) {
+		report.AddWarning("Template::ParseArgs::TemplateParameterTemplateMapper", "expected template name", tok.GetInternalTokenLocation());
+		value = 0;
+	}
+	else {
+		value = tpl_it->second;
+	}
+}
+
+void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp,
+		const Cog::Compiler&, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
 		tpl.Model3d = nullptr;
@@ -110,7 +124,8 @@ void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager
 	}
 }
 
-void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, const Cog::Compiler&, Diagnostics::Report& report) {
+void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&,
+		const Cog::Compiler&, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
 		tpl.SoundClass = nullptr;
@@ -125,7 +140,8 @@ void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Mana
 	}
 }
 
-void TemplateCogParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, const Cog::Compiler& compiler, Diagnostics::Report& report) {
+void TemplateCogParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&,
+		const Cog::Compiler& compiler, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
 		tpl.Cog = nullptr;
@@ -140,7 +156,8 @@ void TemplateCogParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& ma
 	}
 }
 
-void TemplatePuppetParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&, const Cog::Compiler& compiler, Diagnostics::Report& report) {
+void TemplatePuppetParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&,
+		const Cog::Compiler& compiler, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
 		tpl.Puppet = nullptr;
@@ -181,13 +198,19 @@ void TemplateAddFrame(Template& tpl, Text::Tokenizer& tok) {
 	}
 }
 
-#define TPP_ARGS Template& tpl, Text::Tokenizer& tok, Content::Manager& content, const Colormap& colormap, const Cog::Compiler& compiler, Diagnostics::Report& report
+#define TPP_ARGS Template& tpl, Text::Tokenizer& tok, Content::Manager& content, const Colormap& colormap, const Cog::Compiler& compiler, const std::unordered_map<std::string, int>& templates, Diagnostics::Report& report
+
+using TemplateParameterParser = std::function<void(Template&, Text::Tokenizer&, Content::Manager&, const Colormap&,
+		const Cog::Compiler&, const std::unordered_map<std::string, int>& templates, Diagnostics::Report&)>;
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "actorflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.ActorFlags, FlagSet<Flags::ActorFlag>(), tok, report); }},
 	{ "cog", &TemplateCogParser },
 	{ "collide", [](TPP_ARGS) { TemplateParameterEnumMapper(tpl.Collide, Flags::CollideType::None, tok, report); }},
+	{ "creatething", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.CreateThing, 0, templates, tok, report); }},
+	{ "explode", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.Explode, 0, templates, tok, report); }},
 	{ "eyeoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.EyeOffset, tok); }},
+	{ "fleshhit", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.FleshHit, 0, templates, tok, report); }},
 	{ "frame", [](TPP_ARGS) { TemplateAddFrame(tpl, tok); }},
 	{ "health", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Health, 100.0f, tok, report); }},
 	{ "height", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Height, 0.18f, tok, report); }},
@@ -206,6 +229,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "size", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
 	{ "soundclass", &TemplateSoundClassParser },
 	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
+	{ "timer", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Timer, 0.0f, tok, report); }},
 	{ "type", [](TPP_ARGS) { TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }}
 };
 
@@ -216,7 +240,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 }
 
 void Gorc::Content::Assets::Template::ParseArgs(Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp,
-		const Cog::Compiler& compiler, Diagnostics::Report& report) {
+		const Cog::Compiler& compiler, const std::unordered_map<std::string, int>& templates, Diagnostics::Report& report) {
 	bool oldReportEOL = tok.GetReportEOL();
 	tok.SetReportEOL(true);
 
@@ -237,7 +261,7 @@ void Gorc::Content::Assets::Template::ParseArgs(Text::Tokenizer& tok, Content::M
 				tok.GetSpaceDelimitedString();
 			}
 			else {
-				it->second(*this, tok, manager, cmp, compiler, report);
+				it->second(*this, tok, manager, cmp, compiler, templates, report);
 			}
 		}
 	}

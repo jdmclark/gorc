@@ -9,7 +9,7 @@ Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components,
 	  ScriptPresenter(components), SoundPresenter(*place.ContentManager),  KeyPresenter(*place.ContentManager),
 	  InventoryPresenter(*this),
 	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
-	  ItemController(*this), CorpseController(*this) {
+	  ItemController(*this), CorpseController(*this), WeaponController(*this) {
 
 	return;
 }
@@ -130,18 +130,18 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 
 			if(MatchObjectPair(obj_a, obj_b, &thing_a, &surf)) {
 				// Thing colliding with surface.
+				auto& thing_a_thing = Model->Things[thing_a->ThingId];
 				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
 						surf->SurfaceId, Flags::MessageType::Surface,
 						thing_a->ThingId, Flags::MessageType::Thing);
+				thing_a_thing.Controller->TouchedSurface(thing_a->ThingId, surf->SurfaceId);
 			}
 			else if(MatchObjectPair(obj_a, obj_b, &thing_a, &thing_b)) {
 				// Thing colliding with thing.
-				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
-						thing_a->ThingId, Flags::MessageType::Thing,
-						thing_b->ThingId, Flags::MessageType::Thing);
-				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
-						thing_b->ThingId, Flags::MessageType::Thing,
-						thing_a->ThingId, Flags::MessageType::Thing);
+				auto& thing_a_thing = Model->Things[thing_a->ThingId];
+				auto& thing_b_thing = Model->Things[thing_b->ThingId];
+				thing_a_thing.Controller->TouchedThing(thing_a->ThingId, thing_b->ThingId);
+				thing_b_thing.Controller->TouchedThing(thing_b->ThingId, thing_a->ThingId);
 			}
 		}
 	}
@@ -175,6 +175,9 @@ Gorc::Game::World::Level::Gameplay::ThingController& Gorc::Game::World::Level::L
 
 	case Flags::ThingType::Item:
 		return ItemController;
+
+	case Flags::ThingType::Weapon:
+		return WeaponController;
 
 	default:
 	case Flags::ThingType::Ghost:
@@ -318,7 +321,7 @@ void Gorc::Game::World::Level::LevelPresenter::TranslateCamera(const Vector<3>& 
 	cam_vel += Get<X>(amt) * Cross(Model->CameraLook, Model->CameraUp);
 	cam_vel += Get<Z>(amt) * Model->CameraUp;
 	cam_vel += Get<Y>(amt) * Model->CameraLook;
-	cam_vel *= 0.75f;
+	cam_vel *= 1.2f;
 
 	Get<0>(Model->CameraVelocity) = Get<0>(cam_vel);
 	Get<1>(Model->CameraVelocity) = Get<1>(cam_vel);
@@ -434,61 +437,21 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Damage() {
-	// TODO: Temporary copy of hack activate code from above.
-	// Sends damaged message to surfaces and things for debugging.
+	// TODO: Temporary code to fire a bryar bolt.
 
-	Math::Vector<3> camera_position = Model->CameraPosition;
+	// Calculate orientation from camera look.
+	float bolt_yaw = std::atan2(Math::Get<1>(Model->CameraLook), Math::Get<0>(Model->CameraLook)) / Deg2Rad;
+	float bolt_pitch = std::acos(Math::Dot(Math::Vec(0.0f, 0.0f, 1.0f), Model->CameraLook)) / Deg2Rad;
 
-	int best_surf_candidate = -1;
-	float best_surf_dist = 0.25f;
+	Math::Vector<3> bolt_offset = Model->CameraPosition + Model->CameraLook * 0.09f - Model->CameraUp * 0.01f;
+	UpdatePathSectorScratch.clear();
+	UpdatePathSector(Model->CameraPosition, bolt_offset, Model->Sectors[Model->CameraSector], UpdatePathSectorScratch);
+	int bolt_sector = std::get<0>(UpdatePathSectorScratch.back());
+	int bolt_thing = CreateThing("+bryarbolt", bolt_sector, bolt_offset, Math::Vec(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
 
-	int best_thing_candidate = -1;
-	float best_thing_dist = 0.25f;
-
-	for(int i = 0; i < Model->Surfaces.size(); ++i) {
-		const Content::Assets::LevelSurface& surf = Model->Surfaces[i];
-		if((surf.Adjoin >= 0 && (Model->Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowMovement))
-				|| !(surf.Flags & Flags::SurfaceFlag::CogLinked)
-				|| Math::Dot(surf.Normal, Model->CameraLook) >= 0.0f) {
-			continue;
-		}
-
-		for(const auto& vx : surf.Vertices) {
-			float new_dist = Math::Length(camera_position - Model->Level.Vertices[std::get<0>(vx)]);
-			if(new_dist < best_surf_dist) {
-				best_surf_candidate = i;
-				best_surf_dist = new_dist;
-				break;
-			}
-		}
-	}
-
-	for(auto& thing : Model->Things) {
-		if(thing.GetId() == Model->CameraThingId) {
-			continue;
-		}
-
-		auto dir_vec = thing.Position - camera_position;
-		if(!(thing.Flags & Flags::ThingFlag::CogLinked) || Math::Dot(dir_vec, Model->CameraLook) <= 0.0f) {
-			continue;
-		}
-
-		float dir_len = Math::Length(dir_vec);
-		if(dir_len >= best_thing_dist) {
-			continue;
-		}
-
-		best_thing_candidate = thing.GetId();
-		best_thing_dist = dir_len;
-	}
-
-	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, best_surf_candidate, Flags::MessageType::Surface,
-				Model->CameraThingId, Flags::MessageType::Thing, 1000, static_cast<int>(Flags::DamageFlag::Saber));
-	}
-	else if(best_thing_candidate >= 0) {
-		DamageThing(best_thing_candidate, 50.0f, { Flags::DamageFlag::Saber }, Model->CameraThingId);
-	}
+	auto& thing = Model->Things[bolt_thing];
+	thing.RigidBody->setLinearVelocity(4.0f * PhysicsWorldScale * Math::BtVec(Model->CameraLook));
+	thing.RigidBody->setActivationState(ACTIVE_TAG);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
@@ -667,6 +630,8 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets:
 		ScriptPresenter.CreateGlobalCogInstance(thing.Cog->Script, *place.ContentManager, components.Compiler);
 	}
 
+	SoundPresenter.PlaySoundClass(thing.GetId(), Flags::SoundSubclassType::Create);
+
 	return thing.GetId();
 }
 
@@ -757,7 +722,7 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float 
 	if(referencedThing.Health > 0.0f) {
 		referencedThing.Health -= damage;
 
-		if(referencedThing.Health <= 0.0f) {
+		if(referencedThing.Health <= 0.0f && (referencedThing.Type == Flags::ThingType::Actor || referencedThing.Type == Flags::ThingType::Player)) {
 			SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::Death1);
 			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Killed, static_cast<int>(thing_id), Flags::MessageType::Thing,
 					damager_id, Flags::MessageType::Thing);
