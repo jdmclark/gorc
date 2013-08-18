@@ -377,7 +377,7 @@ void Gorc::Game::World::Level::LevelPresenter::Jump() {
 void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	// TODO: Implement actual surface and thing activation
 
-	Math::Vector<3> camera_position = Model->Things[Model->CameraThingId].Position;
+	Math::Vector<3> camera_position = Model->CameraPosition;
 
 	int best_surf_candidate = -1;
 	float best_surf_dist = 0.25f;
@@ -404,6 +404,10 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	}
 
 	for(auto& thing : Model->Things) {
+		if(thing.GetId() == Model->CameraThingId) {
+			continue;
+		}
+
 		auto dir_vec = thing.Position - camera_position;
 		if(!(thing.Flags & Flags::ThingFlag::CogLinked) || Math::Dot(dir_vec, Model->CameraLook) <= 0.0f) {
 			continue;
@@ -433,7 +437,7 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	// TODO: Temporary copy of hack activate code from above.
 	// Sends damaged message to surfaces and things for debugging.
 
-	Math::Vector<3> camera_position = Model->Things[Model->CameraThingId].Position;
+	Math::Vector<3> camera_position = Model->CameraPosition;
 
 	int best_surf_candidate = -1;
 	float best_surf_dist = 0.25f;
@@ -460,6 +464,10 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	}
 
 	for(auto& thing : Model->Things) {
+		if(thing.GetId() == Model->CameraThingId) {
+			continue;
+		}
+
 		auto dir_vec = thing.Position - camera_position;
 		if(!(thing.Flags & Flags::ThingFlag::CogLinked) || Math::Dot(dir_vec, Model->CameraLook) <= 0.0f) {
 			continue;

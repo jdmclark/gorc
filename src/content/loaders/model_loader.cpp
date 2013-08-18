@@ -245,12 +245,15 @@ void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colo
 				face.Shape->addPoint(Math::BtVec(mesh.Vertices[std::get<0>(vertex)]) * PhysicsWorldScale);
 			}
 
-			face.Shape->setMargin(0);
+			face.Shape->setMargin(PhysicsMeshMargin);
 			mesh.Shape->addChildShape(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0)), face.Shape.get());
 		}
 
+		mesh.Shape->setMargin(PhysicsMeshMargin);
 		model.Shape->addChildShape(btTransform(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f), btVector3(0.0f, 0.0f, 0.0f)), mesh.Shape.get());
 	}
+
+	model.Shape->setMargin(PhysicsMeshMargin);
 
 	return;
 }

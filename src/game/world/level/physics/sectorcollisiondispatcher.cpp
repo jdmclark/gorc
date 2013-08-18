@@ -3,6 +3,7 @@
 #include "physicsobjectdata.h"
 #include "framework/math/box.h"
 #include "game/constants.h"
+#include <iostream>
 
 bool Gorc::Game::World::Level::SectorCollisionDispatcher::ComputeSectorCover(unsigned int source_sector, unsigned int dest_sector,
 		const Math::Box<3>& bbox, SectorScratchArray<>& sector_scratch) const {
@@ -50,8 +51,8 @@ Gorc::Math::Box<3> Gorc::Game::World::Level::SectorCollisionDispatcher::GetTempo
 
 	body->getCollisionShape()->calculateTemporalAabb(worldTrans, body->getLinearVelocity(), body->getAngularVelocity(),
 			GameplayTick, aabb_min, aabb_max);
-	const Math::Vector<3> margin = Math::Zero<3>(1.0f);
-	return Math::Box<3>(Math::VecBt(aabb_min) - margin, Math::VecBt(aabb_max) + margin);
+	const Math::Vector<3> margin = Math::Zero<3>(0.1f);
+	return Math::Box<3>(Math::VecBt(aabb_min) * PhysicsInvWorldScale - margin, Math::VecBt(aabb_max) * PhysicsInvWorldScale + margin);
 }
 
 Gorc::Game::World::Level::SectorCollisionDispatcher::SectorCollisionDispatcher(btCollisionConfiguration* collisionConfiguration,

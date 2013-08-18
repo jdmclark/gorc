@@ -586,7 +586,7 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 			lev.SurfaceShapes.back()->addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]) * PhysicsWorldScale);
 		}
 
-		lev.SurfaceShapes.back()->setMargin(0);
+		lev.SurfaceShapes.back()->setMargin(PhysicsMeshMargin);
 	}
 
 	// Calculate axis-aligned bounding box for each sector;

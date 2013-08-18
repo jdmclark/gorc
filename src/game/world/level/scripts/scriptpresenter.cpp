@@ -419,7 +419,7 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 		break;
 	}
 
-	for(int i = 0; i < model->Cogs.size(); ++i) {
+	for(int i = 0; i < levelModel->Level.Cogs.size(); ++i) {
 		if(i == class_cog || i == capture_cog) {
 			continue;
 		}
