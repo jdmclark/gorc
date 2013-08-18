@@ -13,7 +13,7 @@ Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::SlideSurfaceAnimati
 	// Compute texture basis.
 	auto dnsb0 = model.Level.Vertices[std::get<0>(surf.Vertices[1])] - model.Level.Vertices[std::get<0>(surf.Vertices[0])];
 
-	sb0 = Normalize(dnsb0);
+	sb0 = dnsb0 / Length2(dnsb0);
 	sb1 = Cross(surf.Normal, sb0);
 
 	unsigned int noncol_vert;
@@ -24,21 +24,16 @@ Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::SlideSurfaceAnimati
 		}
 	}
 
-	auto dnvb0 = model.Level.TextureVertices[std::get<1>(surf.Vertices[1])] - model.Level.TextureVertices[std::get<1>(surf.Vertices[0])];
-	auto vb0 = Normalize(dnvb0);
+	auto vb0 = model.Level.TextureVertices[std::get<1>(surf.Vertices[1])] - model.Level.TextureVertices[std::get<1>(surf.Vertices[0])];
 	auto vb1 = Vec(Get<1>(vb0), -Get<0>(vb0));
 
+	float sgn = 1.0f;
 	if(Dot(vb1, model.Level.TextureVertices[std::get<1>(surf.Vertices[noncol_vert])] - model.Level.TextureVertices[std::get<1>(surf.Vertices[0])]) < 0.0f) {
-		vb1 = -vb1;
+		sgn = -1.0f;
 	}
 
-	float det = -1.0f / (Get<0>(vb0) * Get<1>(vb1) - Get<0>(vb1) * Get<1>(vb0));
-	tb0 = det * Vec(Get<1>(vb1), -Get<0>(vb1));
-	tb1 = det * Vec(-Get<1>(vb0), Get<0>(vb0));
-
-	float fac = (Length(dnvb0) / Length(dnsb0));
-	tb0 = tb0 * fac;
-	tb1 = tb1 * fac;
+	tb0 = -vb0;
+	tb1 = -sgn * vb1;
 
 	return;
 }
