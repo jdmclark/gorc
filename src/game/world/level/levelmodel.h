@@ -6,7 +6,7 @@
 #include "thing.h"
 #include "surface.h"
 #include "sounds/sound.h"
-#include "physics/sectorbroadphasefilter.h"
+#include "physics/sectorcollisiondispatcher.h"
 #include "game/world/level/animations/animationmodel.h"
 #include "game/world/level/scripts/scriptmodel.h"
 #include "game/world/level/sounds/soundmodel.h"
@@ -23,7 +23,6 @@ namespace Level {
 
 class LevelModel {
 public:
-	std::unique_ptr<SectorBroadphaseFilter> BroadphaseFilter;
 	const Content::Assets::Level& Level;
 	Content::Assets::LevelHeader Header;
 	std::vector<Content::Assets::LevelAdjoin> Adjoins;
@@ -50,7 +49,7 @@ public:
 
 	btDbvtBroadphase Broadphase;
 	btDefaultCollisionConfiguration CollisionConfiguration;
-	btCollisionDispatcher Dispatcher;
+	SectorCollisionDispatcher Dispatcher;
 	btSequentialImpulseConstraintSolver ConstraintSolver;
 	btDiscreteDynamicsWorld DynamicsWorld;
 

@@ -2,17 +2,16 @@
 #include "game/world/level/physics/physicscollideclass.h"
 #include "framework/flagset.h"
 #include "content/manager.h"
+#include "game/constants.h"
 
 Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler,
 		const Gorc::Content::Assets::Level& Level, const Content::Assets::Inventory& inv)
 	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Sectors(Level.Sectors), InventoryModel(inv),
-	  Dispatcher(&CollisionConfiguration), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
+	  Dispatcher(&CollisionConfiguration, *this), DynamicsWorld(&Dispatcher, &Broadphase, &ConstraintSolver, &CollisionConfiguration),
 	  SurfaceMotionState(btTransform(btQuaternion(0,0,0,1), btVector3(0,0,0))), SurfaceObjectData(Level.Surfaces.size()) {
 	std::copy(Level.Surfaces.begin(), Level.Surfaces.end(), std::back_inserter(Surfaces));
 
-	BroadphaseFilter = std::unique_ptr<SectorBroadphaseFilter>(new SectorBroadphaseFilter(*this));
-	DynamicsWorld.getPairCache()->setOverlapFilterCallback(BroadphaseFilter.get());
-	DynamicsWorld.setGravity(btVector3(0, 0, -Level.Header.WorldGravity));
+	DynamicsWorld.setGravity(btVector3(0, 0, -Level.Header.WorldGravity * PhysicsWorldScale));
 
 	// Construct surface rigid bodies.
 	for(const auto& sec : Level.Sectors) {
