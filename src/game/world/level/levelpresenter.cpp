@@ -447,6 +447,7 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	UpdatePathSectorScratch.clear();
 	UpdatePathSector(Model->CameraPosition, bolt_offset, Model->Sectors[Model->CameraSector], UpdatePathSectorScratch);
 	int bolt_sector = std::get<0>(UpdatePathSectorScratch.back());
+
 	int bolt_thing = CreateThing("+bryarbolt", bolt_sector, bolt_offset, Math::Vec(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
 
 	auto& thing = Model->Things[bolt_thing];

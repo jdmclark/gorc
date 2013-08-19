@@ -14,14 +14,11 @@ Gorc::Game::World::Level::Gameplay::ThingController::~ThingController() {
 
 void Gorc::Game::World::Level::Gameplay::ThingController::Update(int thing_id, double dt) {
 	auto& thing = presenter.Model->Things[thing_id];
-	if(thing.Timer > 0.0f) {
-		thing.Timer -= dt;
-		if(thing.Timer <= 0.0f) {
-			presenter.DestroyThing(thing_id);
-		}
-	}
-
 	thing.TimeAlive += dt;
+
+	if(thing.Timer && thing.TimeAlive >= thing.Timer) {
+		presenter.DestroyThing(thing_id);
+	}
 }
 
 void Gorc::Game::World::Level::Gameplay::ThingController::HandleAnimationMarker(int thing_id, Flags::KeyMarkerType marker) {

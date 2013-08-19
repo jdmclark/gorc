@@ -540,8 +540,11 @@ void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const C
 
 		UpdateShaderModelMatrix();
 
-		// TODO: Get actual frame and framerate values.
-		int current_frame = static_cast<int>(std::floor(thing.TimeAlive * 10.0f)) % sprite.Material->Cels.size();
+		// TODO: Currently plays animation over duration of timer. Behavior should be verified.
+		int current_frame = 0;
+		if(thing.Timer) {
+			current_frame = static_cast<int>(std::floor(sprite.Material->Cels.size() * thing.TimeAlive / thing.Timer)) % sprite.Material->Cels.size();
+		}
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, sprite.Material->Cels[current_frame].Diffuse);
