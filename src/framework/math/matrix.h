@@ -30,6 +30,14 @@ public:
 		return &data[0][0];
 	}
 
+	F GetValue(int i, int j) const {
+		return data[j][i];
+	}
+
+	void SetValue(int i, int j, F value) {
+		data[j][i] = value;
+	}
+
 	static Matrix MakeIdentityMatrix() {
 		Matrix rv;
 		for(int i = 0; i < 4; ++i) {

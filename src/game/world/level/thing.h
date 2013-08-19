@@ -43,6 +43,7 @@ public:
 	int ActorWalkAnimation = -1;
 
 	int CaptureCog = -1;
+	float TimeAlive = 0.0f;
 
 	std::unique_ptr<btCollisionShape> ActorCollideShape;
 

@@ -20,6 +20,8 @@ void Gorc::Game::World::Level::Gameplay::ThingController::Update(int thing_id, d
 			presenter.DestroyThing(thing_id);
 		}
 	}
+
+	thing.TimeAlive += dt;
 }
 
 void Gorc::Game::World::Level::Gameplay::ThingController::HandleAnimationMarker(int thing_id, Flags::KeyMarkerType marker) {
@@ -28,6 +30,7 @@ void Gorc::Game::World::Level::Gameplay::ThingController::HandleAnimationMarker(
 
 void Gorc::Game::World::Level::Gameplay::ThingController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
+	new_thing.TimeAlive = 0.0f;
 
 	btQuaternion orientation(0.0f, 0.0f, 0.0f, 1.0f);
 	orientation *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(new_thing.Orientation)); // Roll

@@ -27,6 +27,7 @@ class LevelSector;
 class Shader;
 class Model;
 class Animation;
+class Sprite;
 }
 }
 
@@ -107,6 +108,7 @@ private:
 
 	void DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector, float alpha);
 	void DrawMeshNode(const Thing& thing, const Content::Assets::Model& model, int node_id, float sector_light);
+	void DrawSprite(const Thing& thing, const Content::Assets::Sprite& sprite, float sector_light);
 	void DrawThing(const Thing& thing);
 
 public:

@@ -4,6 +4,7 @@
 #include "game/components.h"
 #include "levelmodel.h"
 #include "content/assets/model.h"
+#include "content/assets/sprite.h"
 #include "content/constants.h"
 
 #include <SFML/System.hpp>
@@ -517,41 +518,115 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const
 	DrawMeshNode(thing, model, node.Sibling, sector_light);
 }
 
+void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const Content::Assets::Sprite& sprite, float sector_light) {
+	if(sprite.Material) {
+		float light = sector_light + sprite.ExtraLight;
+		if(sprite.LightMode == Flags::LightMode::FullyLit) {
+			light = 1.0f;
+		}
+
+		ConcatenateMatrix(Matrix<float>::MakeTranslationMatrix(thing.Position));
+
+		Matrix<float> new_model = Matrix<float>::MakeIdentityMatrix();
+		for(int i = 0; i < 3; ++i) {
+			for(int j = 0; j < 3; ++j) {
+				new_model.SetValue(i, j, ViewMatrix.GetValue(j, i));
+			}
+		}
+
+		ConcatenateMatrix(new_model);
+		UpdateShaderModelMatrix();
+
+		// TODO: Get actual frame and framerate values.
+		int current_frame = static_cast<int>(std::floor(thing.TimeAlive * 10.0f)) % sprite.Material->Cels.size();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, sprite.Material->Cels[current_frame].Diffuse);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, sprite.Material->Cels[current_frame].Light);
+
+		Vector<3> sprite_middle = sprite.Offset;
+		Vector<3> horiz_off = Math::Vec(1.0f,0.0f,0.0f) * sprite.Width * 0.5f;
+		Vector<3> vert_off = Math::Vec(0.0f,1.0f,0.0f) * sprite.Height * 0.5f;
+
+		Vector<3> sprite_vx1 = sprite_middle + horiz_off + vert_off;
+		Vector<3> sprite_vx2 = sprite_middle + horiz_off - vert_off;
+		Vector<3> sprite_vx3 = sprite_middle - horiz_off - vert_off;
+		Vector<3> sprite_vx4 = sprite_middle - horiz_off + vert_off;
+
+		Vector<3> sprite_normal = Math::Vec(0.0f, 1.0f, 0.0f);
+
+		glDisable(GL_DEPTH_TEST);
+		glBegin(GL_QUADS);
+
+		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glTexCoord2f(1,1);
+		glColor4f(light,light,light,1.0f);
+		glVertex3f(Get<X>(sprite_vx1), Get<Y>(sprite_vx1), Get<Z>(sprite_vx1));
+
+		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glTexCoord2f(1,0);
+		glColor4f(light,light,light,1.0f);
+		glVertex3f(Get<X>(sprite_vx2), Get<Y>(sprite_vx2), Get<Z>(sprite_vx2));
+
+		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glTexCoord2f(0,0);
+		glColor4f(light,light,light,1.0f);
+		glVertex3f(Get<X>(sprite_vx3), Get<Y>(sprite_vx3), Get<Z>(sprite_vx3));
+
+		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glTexCoord2f(0,1);
+		glColor4f(light,light,light,1.0f);
+		glVertex3f(Get<X>(sprite_vx4), Get<Y>(sprite_vx4), Get<Z>(sprite_vx4));
+
+		glEnd();
+		glEnable(GL_DEPTH_TEST);
+	}
+}
+
 void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
-	if(!thing.Model3d || (thing.Flags & Flags::ThingFlag::Invisible)) {
+	if(thing.Flags & Flags::ThingFlag::Invisible) {
 		return;
 	}
 
 	float sector_light = currentModel->Sectors[thing.Sector].AmbientLight
 			+ currentModel->Sectors[thing.Sector].ExtraLight;
 
-	PushMatrix();
+	if(thing.Model3d) {
+		PushMatrix();
 
-	if(thing.RigidBody) {
-		btTransform trns;
-		thing.RigidBody->getMotionState()->getWorldTransform(trns);
-		trns.setOrigin(trns.getOrigin() * PhysicsInvWorldScale);
+		if(thing.RigidBody) {
+			btTransform trns;
+			thing.RigidBody->getMotionState()->getWorldTransform(trns);
+			trns.setOrigin(trns.getOrigin() * PhysicsInvWorldScale);
 
-		Math::Matrix<float> mat;
-		trns.getOpenGLMatrix(mat.GetOpenGLMatrix());
+			Math::Matrix<float> mat;
+			trns.getOpenGLMatrix(mat.GetOpenGLMatrix());
 
-		ConcatenateMatrix(mat);
+			ConcatenateMatrix(mat);
+		}
+		else {
+			// Fall back to p/y/r orientation when physics is not used.
+			ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(thing.Position));
+			ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<1>(thing.Orientation), Math::Vec(0.0f, 0.0f, 1.0f)));
+			ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<0>(thing.Orientation), Math::Vec(1.0f, 0.0f, 0.0f)));
+			ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<2>(thing.Orientation), Math::Vec(0.0f, 1.0f, 0.0f)));
+		}
+
+		UpdateShaderModelMatrix();
+
+		DrawMeshNode(thing, *thing.Model3d, 0, sector_light);
+
+		PopMatrix();
+		UpdateShaderModelMatrix();
 	}
-	else {
-		// Fall back to p/y/r orientation when physics is not used.
-		ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(thing.Position));
-		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<1>(thing.Orientation), Math::Vec(0.0f, 0.0f, 1.0f)));
-		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<0>(thing.Orientation), Math::Vec(1.0f, 0.0f, 0.0f)));
-		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<2>(thing.Orientation), Math::Vec(0.0f, 1.0f, 0.0f)));
+	else if(thing.Sprite) {
+		PushMatrix();
+		DrawSprite(thing, *thing.Sprite, sector_light);
+		PopMatrix();
+		UpdateShaderModelMatrix();
 	}
-
-	UpdateShaderModelMatrix();
-
-	const Content::Assets::Model& model = *thing.Model3d;
-	DrawMeshNode(thing, model, 0, sector_light);
-
-	PopMatrix();
-	UpdateShaderModelMatrix();
 }
 
 void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {

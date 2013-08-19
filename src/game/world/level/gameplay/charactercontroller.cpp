@@ -437,6 +437,7 @@ void Gorc::Game::World::Level::Gameplay::CharacterController::Update(int thing_i
 
 void Gorc::Game::World::Level::Gameplay::CharacterController::CreateControllerData(int thing_id) {
 	auto& new_thing = presenter.Model->Things[thing_id];
+	new_thing.TimeAlive = 0.0f;
 
 	btQuaternion orientation(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_thing.Orientation));
 

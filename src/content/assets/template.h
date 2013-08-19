@@ -17,6 +17,7 @@
 #include "colormap.h"
 #include "script.h"
 #include "puppet.h"
+#include "sprite.h"
 #include <string>
 #include <memory>
 
@@ -60,6 +61,7 @@ public:
 	Puppet const* Puppet = nullptr;
 	float Size = 0.05f;
 	SoundClass const* SoundClass = nullptr;
+	Sprite const* Sprite = nullptr;
 	float Timer = 0.0f;
 	Flags::ThingType Type = Flags::ThingType::Ghost;
 

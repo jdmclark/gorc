@@ -108,66 +108,17 @@ void TemplateParameterTemplateMapper(int& value, int defaultValue, const std::un
 	}
 }
 
-void TemplateModel3DParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap& cmp,
-		const Cog::Compiler&, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
+template <typename T, typename... U> void TemplateAssetLoader(T const*& value, Text::Tokenizer& tok, Content::Manager& manager, U... args) {
 	std::string fn = tok.GetSpaceDelimitedString();
 	if(boost::iequals(fn, "none")) {
-		tpl.Model3d = nullptr;
+		value = nullptr;
 	}
 	else {
 		try {
-			tpl.Model3d = &manager.Load<Model>(fn, cmp);
+			value = &manager.Load<T>(fn, args...);
 		}
 		catch(...) {
-			tpl.Model3d = nullptr;
-		}
-	}
-}
-
-void TemplateSoundClassParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&,
-		const Cog::Compiler&, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
-	std::string fn = tok.GetSpaceDelimitedString();
-	if(boost::iequals(fn, "none")) {
-		tpl.SoundClass = nullptr;
-	}
-	else {
-		try {
-			tpl.SoundClass = &manager.Load<SoundClass>(fn);
-		}
-		catch(...) {
-			tpl.SoundClass = nullptr;
-		}
-	}
-}
-
-void TemplateCogParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&,
-		const Cog::Compiler& compiler, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
-	std::string fn = tok.GetSpaceDelimitedString();
-	if(boost::iequals(fn, "none")) {
-		tpl.Cog = nullptr;
-	}
-	else {
-		try {
-			tpl.Cog = &manager.Load<Script>(fn, compiler);
-		}
-		catch(...) {
-			tpl.Cog = nullptr;
-		}
-	}
-}
-
-void TemplatePuppetParser(Template& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Colormap&,
-		const Cog::Compiler& compiler, const std::unordered_map<std::string, int>&, Diagnostics::Report& report) {
-	std::string fn = tok.GetSpaceDelimitedString();
-	if(boost::iequals(fn, "none")) {
-		tpl.Puppet = nullptr;
-	}
-	else {
-		try {
-			tpl.Puppet = &manager.Load<Puppet>(fn);
-		}
-		catch(...) {
-			tpl.Puppet = nullptr;
+			value = nullptr;
 		}
 	}
 }
@@ -205,7 +156,7 @@ using TemplateParameterParser = std::function<void(Template&, Text::Tokenizer&, 
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "actorflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.ActorFlags, FlagSet<Flags::ActorFlag>(), tok, report); }},
-	{ "cog", &TemplateCogParser },
+	{ "cog", [](TPP_ARGS) { TemplateAssetLoader(tpl.Cog, tok, content, compiler); }},
 	{ "collide", [](TPP_ARGS) { TemplateParameterEnumMapper(tpl.Collide, Flags::CollideType::None, tok, report); }},
 	{ "creatething", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.CreateThing, 0, templates, tok, report); }},
 	{ "explode", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.Explode, 0, templates, tok, report); }},
@@ -220,14 +171,15 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "mass", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Mass, 2.0f, tok, report); }},
 	{ "maxhealth", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MaxHealth, 100.0f, tok, report); }},
 	{ "maxlight", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Light, 1.0f, tok, report); }},
-	{ "model3d", &TemplateModel3DParser },
+	{ "model3d", [](TPP_ARGS) { TemplateAssetLoader(tpl.Model3d, tok, content, colormap); }},
 	{ "move", [](TPP_ARGS) { TemplateParameterValueMapper(MoveTypeMap, tpl.Move, Flags::MoveType::None, tok, report); }},
 	{ "movesize", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.MoveSize, 0.05f, tok, report); }},
 	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.GetNumber<int>(); }},
 	{ "physflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.PhysicsFlags, FlagSet<Flags::PhysicsFlag>(), tok, report); }},
-	{ "puppet", &TemplatePuppetParser },
+	{ "puppet", [](TPP_ARGS) { TemplateAssetLoader(tpl.Puppet, tok, content); }},
 	{ "size", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Size, 0.05f, tok, report); }},
-	{ "soundclass", &TemplateSoundClassParser },
+	{ "soundclass", [](TPP_ARGS) { TemplateAssetLoader(tpl.SoundClass, tok, content); }},
+	{ "sprite", [](TPP_ARGS) { TemplateAssetLoader(tpl.Sprite, tok, content, colormap); }},
 	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.Flags, FlagSet<Flags::ThingFlag>(), tok, report); }},
 	{ "timer", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.Timer, 0.0f, tok, report); }},
 	{ "type", [](TPP_ARGS) { TemplateParameterValueMapper(TemplateTypeMap, tpl.Type, Flags::ThingType::Free, tok, report); }}
