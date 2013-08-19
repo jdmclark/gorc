@@ -525,7 +525,10 @@ void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const C
 			light = 1.0f;
 		}
 
-		ConcatenateMatrix(Matrix<float>::MakeTranslationMatrix(thing.Position));
+		Vector<3> offset = Cross(currentModel->CameraLook, currentModel->CameraUp) * Get<X>(sprite.Offset) +
+				currentModel->CameraLook * Get<Y>(sprite.Offset) +
+				currentModel->CameraUp * Get<Z>(sprite.Offset);
+		ConcatenateMatrix(Matrix<float>::MakeTranslationMatrix(thing.Position + offset));
 
 		Matrix<float> new_model = Matrix<float>::MakeIdentityMatrix();
 		for(int i = 0; i < 3; ++i) {
@@ -533,8 +536,8 @@ void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const C
 				new_model.SetValue(i, j, ViewMatrix.GetValue(j, i));
 			}
 		}
-
 		ConcatenateMatrix(new_model);
+
 		UpdateShaderModelMatrix();
 
 		// TODO: Get actual frame and framerate values.
@@ -546,7 +549,7 @@ void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const C
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, sprite.Material->Cels[current_frame].Light);
 
-		Vector<3> sprite_middle = sprite.Offset;
+		Vector<3> sprite_middle = Zero<3>();//sprite.Offset;
 		Vector<3> horiz_off = Math::Vec(1.0f,0.0f,0.0f) * sprite.Width * 0.5f;
 		Vector<3> vert_off = Math::Vec(0.0f,1.0f,0.0f) * sprite.Height * 0.5f;
 
@@ -557,31 +560,34 @@ void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const C
 
 		Vector<3> sprite_normal = Math::Vec(0.0f, 1.0f, 0.0f);
 
-		glDisable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0f, 1.0f);
 		glBegin(GL_QUADS);
-
-		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
-		glTexCoord2f(1,1);
-		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx1), Get<Y>(sprite_vx1), Get<Z>(sprite_vx1));
 
 		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
 		glTexCoord2f(1,0);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx2), Get<Y>(sprite_vx2), Get<Z>(sprite_vx2));
+		glVertex3f(Get<X>(sprite_vx1), Get<Y>(sprite_vx1), Get<Z>(sprite_vx1));
 
 		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
-		glTexCoord2f(0,0);
+		glTexCoord2f(1,1);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx3), Get<Y>(sprite_vx3), Get<Z>(sprite_vx3));
+		glVertex3f(Get<X>(sprite_vx2), Get<Y>(sprite_vx2), Get<Z>(sprite_vx2));
 
 		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
 		glTexCoord2f(0,1);
 		glColor4f(light,light,light,1.0f);
+		glVertex3f(Get<X>(sprite_vx3), Get<Y>(sprite_vx3), Get<Z>(sprite_vx3));
+
+		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glTexCoord2f(0,0);
+		glColor4f(light,light,light,1.0f);
 		glVertex3f(Get<X>(sprite_vx4), Get<Y>(sprite_vx4), Get<Z>(sprite_vx4));
 
 		glEnd();
-		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+		glDisable(GL_POLYGON_OFFSET_FILL);
 	}
 }
 

@@ -370,6 +370,12 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 	int capture_cog = -1;
 	int class_cog = -1;
 
+	int source_mask = 0;
+	if(SourceType == Flags::MessageType::Thing) {
+		const auto& sender_thing = levelModel->Things[SourceRef];
+		source_mask = 1 << static_cast<int>(sender_thing.Type);
+	}
+
 	switch(SenderType) {
 	case Flags::MessageType::Sector: {
 			expectedSymbolType = Cog::Symbols::SymbolType::Sector;
@@ -435,7 +441,8 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 		auto jt = inst.Heap.begin();
 
 		for(; it != inst.Script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-			if(!it->Nolink && it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef) {
+			if(!it->Nolink && it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef
+					&& (!source_mask || (it->Mask & source_mask))) {
 				SendMessage(i, message,
 						it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
 						Param0, Param1, Param2, Param3);
