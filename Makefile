@@ -12,7 +12,7 @@ TEST_MODULES = frameworktest cogtest contenttest
 BIN_MODULES = game ungob
 
 framework_LIBRARIES = boost_filesystem boost_system
-content_LIBRARIES = GLEW GL sfml-audio sfml-graphics sfml-window sfml-system BulletDynamics BulletCollision LinearMath
+content_LIBRARIES = GLEW GL sfml-audio sfml-graphics sfml-window sfml-system
 content_DEPENDENCIES = cog framework
 
 cog_DEPENDENCIES = framework
@@ -39,7 +39,7 @@ SRC_PATH = $(BASE_PATH)/src
 OBJ_PATH = $(BASE_PATH)/obj
 BIN_PATH = $(BASE_PATH)/bin
 
-CPPFLAGS = -I$(SRC_PATH) -I/usr/include/bullet
+CPPFLAGS = -I$(SRC_PATH)
 CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -ggdb
 
 MODULES = $(LIB_MODULES) $(TEST_MODULES) $(BIN_MODULES)

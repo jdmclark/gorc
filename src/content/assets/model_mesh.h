@@ -1,7 +1,6 @@
 #pragma once
 
 #include "model_face.h"
-#include <btBulletDynamicsCommon.h>
 #include <memory>
 #include <vector>
 
@@ -25,7 +24,6 @@ public:
 	std::vector<ModelFace> Faces;
 
 	std::vector<int> MeshIndexBuffer;
-	std::unique_ptr<btCompoundShape> Shape;
 };
 
 }

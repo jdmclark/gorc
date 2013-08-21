@@ -605,23 +605,10 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 	if(thing.Model3d) {
 		PushMatrix();
 
-		if(thing.RigidBody) {
-			btTransform trns;
-			thing.RigidBody->getMotionState()->getWorldTransform(trns);
-			trns.setOrigin(trns.getOrigin() * PhysicsInvWorldScale);
-
-			Math::Matrix<float> mat;
-			trns.getOpenGLMatrix(mat.GetOpenGLMatrix());
-
-			ConcatenateMatrix(mat);
-		}
-		else {
-			// Fall back to p/y/r orientation when physics is not used.
-			ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(thing.Position));
-			ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<1>(thing.Orientation), Math::Vec(0.0f, 0.0f, 1.0f)));
-			ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<0>(thing.Orientation), Math::Vec(1.0f, 0.0f, 0.0f)));
-			ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<2>(thing.Orientation), Math::Vec(0.0f, 1.0f, 0.0f)));
-		}
+		ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(thing.Position));
+		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<1>(thing.Orientation), Math::Vec(0.0f, 0.0f, 1.0f)));
+		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<0>(thing.Orientation), Math::Vec(1.0f, 0.0f, 0.0f)));
+		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<2>(thing.Orientation), Math::Vec(0.0f, 1.0f, 0.0f)));
 
 		UpdateShaderModelMatrix();
 
@@ -636,40 +623,4 @@ void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
 		PopMatrix();
 		UpdateShaderModelMatrix();
 	}
-}
-
-void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color) {
-	glDisable(GL_TEXTURE_2D);
-
-	glBegin(GL_LINES);
-
-	glColor3fv(color.m_floats);
-	glVertex3fv(from.m_floats);
-
-	glColor3fv(color.m_floats);
-	glVertex3fv(to.m_floats);
-
-	glEnd();
-	return;
-}
-
-void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB,
-		btScalar distance, int lifeTime, const btVector3& color) {
-	return;
-}
-
-void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::reportErrorWarning(const char* warningString) {
-	return;
-}
-
-void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::draw3dText(const btVector3& location, const char* textString) {
-	return;
-}
-
-void Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::setDebugMode(int debugMode) {
-	return;
-}
-
-int Gorc::Game::World::Level::LevelView::PhysicsDebugDraw::getDebugMode() const {
-	return DBG_DrawWireframe | DBG_DrawContactPoints;
 }

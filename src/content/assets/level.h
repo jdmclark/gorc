@@ -13,7 +13,6 @@
 #include "template.h"
 
 #include <unordered_map>
-#include <btBulletDynamicsCommon.h>
 
 namespace Gorc {
 namespace Content {
@@ -43,8 +42,6 @@ public:
 	std::vector<Template> Templates;
 	std::unordered_map<std::string, int> TemplateMap;
 	std::vector<Template> Things;
-
-	std::vector<std::unique_ptr<btConvexHullShape>> SurfaceShapes;
 };
 
 }

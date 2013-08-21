@@ -5,15 +5,6 @@
 void Gorc::Game::World::Level::Gameplay::WeaponController::CreateControllerData(int thing_id) {
 	ThingController::CreateControllerData(thing_id);
 
-	auto& thing = presenter.Model->Things[thing_id];
-	thing.ObjectData.CollisionGroup = FlagSet<PhysicsCollideClass> { PhysicsCollideClass::Thing };
-	thing.ObjectData.CollisionMask = FlagSet<PhysicsCollideClass> {
-		PhysicsCollideClass::Thing, PhysicsCollideClass::Wall, PhysicsCollideClass::Adjoin
-	};
-
-	// Disable collision for this object (but keep testing for intersection with player).
-	//thing.RigidBody->setCollisionFlags(thing.RigidBody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-
 	return;
 }
 

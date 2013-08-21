@@ -7,8 +7,6 @@
 
 #include <iostream>
 
-#include <LinearMath/btVector3.h>
-
 namespace Gorc {
 namespace Math {
 
@@ -187,14 +185,6 @@ template <size_t n, typename F = float> Vector<n, F> Zero(F value = 0) {
 
 template <typename T, typename... F> Vector<sizeof...(F) + 1, T> Vec(T v1, F... vN) {
 	return Vector<sizeof...(F) + 1, T>::MakeVector(v1, vN...);
-}
-
-inline Vector<3, float> VecBt(const btVector3& v) {
-	return Vec(v.getX(), v.getY(), v.getZ());
-}
-
-inline btVector3 BtVec(const Vector<3, float>& v) {
-	return btVector3(Get<X>(v), Get<Y>(v), Get<Z>(v));
 }
 
 template <size_t I, size_t n, typename F> F& Get(Vector<n, F>& vec) {

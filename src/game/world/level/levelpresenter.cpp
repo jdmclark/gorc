@@ -19,9 +19,6 @@ void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) 
 
 	Model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level,
 			place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler)));
-	Model->DynamicsWorld.setInternalTickCallback([](btDynamicsWorld* world, btScalar timeStep) {
-		reinterpret_cast<LevelPresenter*>(world->getWorldUserInfo())->PhysicsTickUpdate(timeStep);
-	}, this);
 
 	AnimationPresenter.Start(*Model, Model->AnimationModel);
 	ScriptPresenter.Start(*Model, Model->ScriptModel);
@@ -62,8 +59,6 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 			Model->SpawnPoints[Model->CurrentSpawnPoint]->Position, Model->SpawnPoints[Model->CurrentSpawnPoint]->Orientation);
 	auto& camera_thing = Model->Things[Model->CameraThingId];
 	camera_thing.Flags += Flags::ThingFlag::Invisible;
-	camera_thing.RigidBody->setSleepingThresholds(0.0f, 0.0f);
-	camera_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
 
 	Model->CameraPosition = camera_thing.Position;
 	Model->CameraSector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
@@ -90,10 +85,6 @@ void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
 }
 
 void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
-	Model->DynamicsWorld.stepSimulation(dt, 1, GameplayTick);
-}
-
-void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 	AnimationPresenter.Update(dt);
 	ScriptPresenter.Update(dt);
 	SoundPresenter.Update(dt);
@@ -101,49 +92,8 @@ void Gorc::Game::World::Level::LevelPresenter::PhysicsTickUpdate(double dt) {
 	InventoryPresenter.Update(dt);
 
 	// Update things
-	btTransform trans;
 	for(auto& thing : Model->Things) {
-		if(thing.RigidBody) {
-			auto oldThingPosition = thing.Position;
-			thing.RigidBody->getMotionState()->getWorldTransform(trans);
-			thing.Position = VecBt(trans.getOrigin() * PhysicsInvWorldScale);
-			UpdateThingSector(thing.GetId(), thing, oldThingPosition);
-		}
-
 		thing.Controller->Update(thing.GetId(), dt);
-	}
-
-	// Perform object-object collision test and message dispatch
-	int num_manifolds = Model->DynamicsWorld.getDispatcher()->getNumManifolds();
-	for(int i = 0; i < num_manifolds; ++i) {
-		btPersistentManifold* contactManifold = Model->DynamicsWorld.getDispatcher()->getManifoldByIndexInternal(i);
-
-		if(contactManifold->getNumContacts() > 0) {
-			PhysicsObjectData* obj_a = reinterpret_cast<PhysicsObjectData*>(
-					static_cast<btCollisionObject*>(contactManifold->getBody0())->getUserPointer());
-			PhysicsObjectData* obj_b = reinterpret_cast<PhysicsObjectData*>(
-					static_cast<btCollisionObject*>(contactManifold->getBody1())->getUserPointer());
-
-			ThingObjectData* thing_a;
-			ThingObjectData* thing_b;
-			SurfaceObjectData* surf;
-
-			if(MatchObjectPair(obj_a, obj_b, &thing_a, &surf)) {
-				// Thing colliding with surface.
-				auto& thing_a_thing = Model->Things[thing_a->ThingId];
-				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
-						surf->SurfaceId, Flags::MessageType::Surface,
-						thing_a->ThingId, Flags::MessageType::Thing);
-				thing_a_thing.Controller->TouchedSurface(thing_a->ThingId, surf->SurfaceId);
-			}
-			else if(MatchObjectPair(obj_a, obj_b, &thing_a, &thing_b)) {
-				// Thing colliding with thing.
-				auto& thing_a_thing = Model->Things[thing_a->ThingId];
-				auto& thing_b_thing = Model->Things[thing_b->ThingId];
-				thing_a_thing.Controller->TouchedThing(thing_a->ThingId, thing_b->ThingId);
-				thing_b_thing.Controller->TouchedThing(thing_b->ThingId, thing_a->ThingId);
-			}
-		}
 	}
 
 	// Update camera position
@@ -258,7 +208,6 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 		for(unsigned int i = 1; i < UpdatePathSectorScratch.size() - 1; ++i) {
 			unsigned int sec_id = std::get<0>(UpdatePathSectorScratch[i]);
 			thing.Sector = sec_id;
-			thing.ObjectData.SectorId = sec_id;
 			if(Model->Sectors[sec_id].Flags & Flags::SectorFlag::CogLinked) {
 				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Entered, sec_id, Flags::MessageType::Sector,
 						static_cast<int>(thing_id), Flags::MessageType::Thing);
@@ -273,7 +222,6 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 
 		unsigned int last_sector = std::get<0>(UpdatePathSectorScratch.back());
 		thing.Sector = last_sector;
-		thing.ObjectData.SectorId = last_sector;
 		if(Model->Sectors[last_sector].Flags & Flags::SectorFlag::CogLinked) {
 			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Entered, last_sector, Flags::MessageType::Sector,
 					static_cast<int>(thing_id), Flags::MessageType::Thing);
@@ -362,10 +310,7 @@ void Gorc::Game::World::Level::LevelPresenter::DoRespawn() {
 
 	Thing& cameraThing = Model->Things[Model->CameraThingId];
 	cameraThing.Sector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
-	cameraThing.ObjectData.SectorId = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
 	cameraThing.Position = Model->SpawnPoints[Model->CurrentSpawnPoint]->Position;
-	cameraThing.RigidBody->proceedToTransform(btTransform(btQuaternion(0,0,0,1), Math::BtVec(cameraThing.Position) * PhysicsWorldScale));
-	cameraThing.RigidBody->setGravity(btVector3(0.0f, 0.0f, -Model->Header.WorldGravity * PhysicsWorldScale));
 	cameraThing.AttachFlags = FlagSet<Flags::AttachFlag>();
 }
 
@@ -451,8 +396,6 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 	int bolt_thing = CreateThing("+bryarbolt", bolt_sector, bolt_offset, Math::Vec(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
 
 	auto& thing = Model->Things[bolt_thing];
-	thing.RigidBody->setLinearVelocity(4.0f * PhysicsWorldScale * Math::BtVec(Model->CameraLook));
-	thing.RigidBody->setActivationState(ACTIVE_TAG);
 }
 
 void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
@@ -503,10 +446,6 @@ void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int fra
 	referenced_thing.PathMoving = true;
 	SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::StartMove);
 	SoundPresenter.PlayFoleyLoopClass(thing_id, Flags::SoundSubclassType::Moving);
-
-	if(referenced_thing.RigidBody) {
-		referenced_thing.RigidBody->setActivationState(DISABLE_DEACTIVATION);
-	}
 }
 
 // Level verbs
@@ -569,7 +508,6 @@ void Gorc::Game::World::Level::LevelPresenter::ClearAdjoinFlags(int surface, Fla
 	if(surf.Adjoin >= 0) {
 		Content::Assets::LevelAdjoin& adj = Model->Adjoins[surf.Adjoin];
 		adj.Flags -= flags;
-		Model->UpdateSurfacePhysicsProperties(surface);
 	}
 }
 
@@ -588,7 +526,6 @@ void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagS
 	if(surf.Adjoin >= 0) {
 		Content::Assets::LevelAdjoin& adj = Model->Adjoins[surf.Adjoin];
 		adj.Flags += flags;
-		Model->UpdateSurfacePhysicsProperties(surface);
 	}
 }
 
@@ -599,7 +536,6 @@ void Gorc::Game::World::Level::LevelPresenter::SetFaceGeoMode(int surface, Flags
 void Gorc::Game::World::Level::LevelPresenter::SetSurfaceFlags(int surface, FlagSet<Flags::SurfaceFlag> flags) {
 	Content::Assets::LevelSurface& surf = Model->Surfaces[surface];
 	surf.Flags += flags;
-	Model->UpdateSurfacePhysicsProperties(surface);
 }
 
 // System verbs
@@ -620,8 +556,6 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets:
 
 	thing.Sector = sector_num;
 	thing.Position = pos;
-	thing.ObjectData.ThingId = thing.GetId();
-	thing.ObjectData.SectorId = sector_num;
 	thing.Orientation = orient;
 	thing.Controller = &GetThingController(thing.Type);
 
@@ -659,10 +593,6 @@ void Gorc::Game::World::Level::LevelPresenter::AdjustThingPos(int thing_id, cons
 	auto& thing = Model->Things[thing_id];
 	auto old_pos = thing.Position;
 	thing.Position = new_pos;
-	if(thing.RigidBody) {
-		thing.RigidBody->getMotionState()->setWorldTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos) * PhysicsWorldScale));
-		thing.RigidBody->proceedToTransform(btTransform(thing.RigidBody->getOrientation(), Math::BtVec(new_pos) * PhysicsWorldScale));
-	}
 	UpdateThingSector(thing_id, thing, old_pos);
 }
 
@@ -671,14 +601,6 @@ void Gorc::Game::World::Level::LevelPresenter::SetThingPos(int thing_id, const M
 	thing.Position = new_pos;
 	thing.Orientation = new_orient;
 	thing.Sector = new_sector;
-
-	if(thing.RigidBody) {
-		btQuaternion quat(0,0,0,1);
-		quat *= btQuaternion(btVector3(0,0,1), Deg2Rad * Math::Get<1>(new_orient)); // Yaw
-		quat *= btQuaternion(btVector3(1,0,0), Deg2Rad * Math::Get<0>(new_orient)); // Pitch
-		quat *= btQuaternion(btVector3(0,1,0), Deg2Rad * Math::Get<2>(new_orient)); // Roll
-		thing.RigidBody->proceedToTransform(btTransform(quat, Math::BtVec(new_pos) * PhysicsWorldScale));
-	}
 }
 
 void Gorc::Game::World::Level::LevelPresenter::AttachThingToThing(int thing_id, int base_id) {
@@ -762,15 +684,11 @@ Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int 
 }
 
 bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
+	// TODO: Temporary hack implementation pending new physics implementation.
 	Thing& referencedThing = Model->Things[thing_id];
 	switch(referencedThing.Move) {
 	case Flags::MoveType::Physics:
-		if(referencedThing.RigidBody) {
-			return referencedThing.RigidBody->getLinearVelocity().length2() > 0.0f;
-		}
-		else {
-			return false;
-		}
+		return true;
 
 	case Flags::MoveType::Path:
 	default:

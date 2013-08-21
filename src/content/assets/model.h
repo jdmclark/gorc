@@ -7,7 +7,6 @@
 #include "model_node.h"
 #include "material.h"
 
-#include <btBulletDynamicsCommon.h>
 #include <memory>
 
 namespace Gorc {
@@ -26,8 +25,6 @@ public:
 
 	std::vector<ModelGeoSet> GeoSets;
 	std::vector<ModelNode> HierarchyNodes;
-
-	std::unique_ptr<btCompoundShape> Shape;
 };
 
 }

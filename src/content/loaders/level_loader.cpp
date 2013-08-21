@@ -577,18 +577,6 @@ void PostprocessLevel(Assets::Level& lev, Manager& manager, Cog::Compiler& compi
 		}
 	}
 
-	// Construct surface collide shapes.
-	size_t i = 0;
-	for(auto& surf : lev.Surfaces) {
-		lev.SurfaceShapes.emplace_back(new btConvexHullShape());
-
-		for(const auto& pt : surf.Vertices) {
-			lev.SurfaceShapes.back()->addPoint(Math::BtVec(lev.Vertices[std::get<0>(pt)]) * PhysicsWorldScale);
-		}
-
-		lev.SurfaceShapes.back()->setMargin(PhysicsMeshMargin);
-	}
-
 	// Calculate axis-aligned bounding box for each sector;
 	for(auto& sec : lev.Sectors) {
 		Math::Vector<3> min_aabb = Math::Zero<3>(std::numeric_limits<float>::max());

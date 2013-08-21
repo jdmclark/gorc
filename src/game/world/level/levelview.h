@@ -8,7 +8,6 @@
 #include "levelshader.h"
 #include <stack>
 #include <unordered_set>
-#include <btBulletDynamicsCommon.h>
 
 namespace Gorc {
 
@@ -88,15 +87,6 @@ private:
 	std::vector<std::tuple<unsigned int, unsigned int, float>> translucent_surfaces_scratch;
 	std::vector<std::tuple<int, float>> visible_thing_scratch;
 
-	class PhysicsDebugDraw : public btIDebugDraw {
-		virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
-		virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color);
-		virtual void reportErrorWarning(const char* warningString);
-		virtual void draw3dText(const btVector3& location, const char* textString);
-		virtual void setDebugMode(int debugMode);
-		virtual int getDebugMode() const;
-	} physicsDebugDraw;
-
 	void ComputeVisibleSectors(const Math::Box<2, unsigned int>& view_size);
 	void RecordVisibleSpecialSurfaces();
 	void RecordVisibleThings();
@@ -120,10 +110,6 @@ public:
 
 	inline void SetLevelModel(LevelModel* levelModel) {
 		currentModel = levelModel;
-	}
-
-	inline btIDebugDraw* GetPhysicsDebugDrawer() {
-		return &physicsDebugDraw;
 	}
 
 	void Update(double dt);

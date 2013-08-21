@@ -6,7 +6,6 @@
 #include "thing.h"
 #include "surface.h"
 #include "sounds/sound.h"
-#include "physics/sectorcollisiondispatcher.h"
 #include "game/world/level/animations/animationmodel.h"
 #include "game/world/level/scripts/scriptmodel.h"
 #include "game/world/level/sounds/soundmodel.h"
@@ -47,23 +46,11 @@ public:
 	std::vector<Content::Assets::Template const*> SpawnPoints;
 	unsigned int CurrentSpawnPoint = 0;
 
-	btDbvtBroadphase Broadphase;
-	btDefaultCollisionConfiguration CollisionConfiguration;
-	SectorCollisionDispatcher Dispatcher;
-	btSequentialImpulseConstraintSolver ConstraintSolver;
-	btDiscreteDynamicsWorld DynamicsWorld;
-
-	std::vector<std::unique_ptr<btRigidBody>> SurfaceRigidBodies;
-	btDefaultMotionState SurfaceMotionState;
-	std::vector<SurfaceObjectData> SurfaceObjectData;
-
 	double LevelTime = 0.0;
 	double GameTime = 0.0;
 	Math::Vector<3> DynamicTint = Math::Zero<3>();
 
 	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level, const Content::Assets::Inventory& inv);
-
-	void UpdateSurfacePhysicsProperties(int surface, bool initial = false);
 };
 
 }

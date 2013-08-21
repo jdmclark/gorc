@@ -1,9 +1,7 @@
 #pragma once
 
 #include "content/assets/template.h"
-#include "physics/physicsobjectdata.h"
 #include "gameplay/thingcontroller.h"
-#include <btBulletDynamicsCommon.h>
 #include <memory>
 
 namespace Gorc {
@@ -23,9 +21,6 @@ class KeyState;
 class Thing : public Content::Assets::Template {
 public:
 	Gameplay::ThingController* Controller;
-	ThingObjectData ObjectData;
-	std::unique_ptr<btDefaultMotionState> MotionState;
-	std::unique_ptr<btRigidBody> RigidBody;
 
 	bool PathMoving = false;
 	int CurrentFrame = 0;
@@ -45,15 +40,11 @@ public:
 	int CaptureCog = -1;
 	float TimeAlive = 0.0f;
 
-	std::unique_ptr<btCollisionShape> ActorCollideShape;
-
 	Thing() = default;
 	Thing(const Content::Assets::Template& tpl);
 
 	inline void Reset() {
 		Controller = nullptr;
-		MotionState = nullptr;
-		RigidBody = nullptr;
 
 		PathMoving = false;
 		CurrentFrame = 0;
@@ -71,8 +62,6 @@ public:
 		ActorWalkAnimation = -1;
 
 		CaptureCog = -1;
-
-		ActorCollideShape = nullptr;
 	}
 
 	const Content::Assets::Template& operator=(const Content::Assets::Template& tpl);
