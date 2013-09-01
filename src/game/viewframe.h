@@ -16,7 +16,7 @@ public:
 	ViewFrame(sf::Window& Window);
 
 	inline Math::Box<2, unsigned int> GetSize() const {
-		return Math::Box<2, unsigned int>(Math::Zero<2, unsigned int>(), Math::Vec(Window.GetWidth(), Window.GetHeight()));
+		return Math::Box<2, unsigned int>(Math::Zero<2, unsigned int>(), Math::Vec(Window.getSize().x, Window.getSize().y));
 	}
 
 	inline void SetView(View& v) {

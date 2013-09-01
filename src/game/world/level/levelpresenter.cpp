@@ -1,6 +1,7 @@
 #include "levelpresenter.h"
 #include "levelmodel.h"
 #include "game/constants.h"
+#include "physics/query.h"
 
 using namespace Gorc::Math;
 
@@ -148,26 +149,19 @@ bool Gorc::Game::World::Level::LevelPresenter::PointInsideSector(const Math::Vec
 	return true;
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::PointPathPassesThroughAdjoin(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
+bool Gorc::Game::World::Level::LevelPresenter::PointPathPassesThroughAdjoin(const Physics::Segment& segment,
 		const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf) {
-	if(Dot(p1 - p0, surf.Normal) > 0.0f) {
+	// Early elimination of back faces.
+	if(Dot(std::get<1>(segment) - std::get<0>(segment), surf.Normal) > 0.0f) {
 		return false;
 	}
 
-	auto p = Model->Level.Vertices[std::get<0>(surf.Vertices[0])];
-	auto u = Dot(surf.Normal, p - p0) / Dot(surf.Normal, p1 - p0);
-	if(u < 0.0f || u > 1.0f) {
-		return false;
-	}
-
-	// TODO: Check for thing path passing through adjoin polygon
-
-	return true;
+	return Physics::SegmentSurfaceIntersection(segment, Model->Level, surf);
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Vector<3>& p0, const Vector<3>& p1,
+bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Physics::Segment& segment,
 		const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
-	if(PointInsideSector(p1, sector)) {
+	if(PointInsideSector(std::get<1>(segment), sector)) {
 		path.emplace_back(sector.Number, -1);
 		return true;
 	}
@@ -175,10 +169,10 @@ bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Vector<3>&
 	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.SurfaceCount; ++sec_surf_id) {
 		const Content::Assets::LevelSurface& surf = Model->Surfaces[sec_surf_id + sector.FirstSurface];
 		if(surf.Adjoin >= 0 && !(surf.Flags & Flags::SurfaceFlag::Impassable)
-				&& PointPathPassesThroughAdjoin(p0, p1, sector, surf)) {
+				&& PointPathPassesThroughAdjoin(segment, sector, surf)) {
 			path.emplace_back(sector.Number, sec_surf_id + sector.FirstSurface);
 
-			if(UpdatePathSector(p0, p1, Model->Sectors[surf.AdjoinedSector], path)) {
+			if(UpdatePathSector(segment, Model->Sectors[surf.AdjoinedSector], path)) {
 				return true;
 			}
 
@@ -196,8 +190,9 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, T
 		return;
 	}
 
+	Physics::Segment segment(oldThingPosition, thing.Position);
 	UpdatePathSectorScratch.clear();
-	if(UpdatePathSector(oldThingPosition, thing.Position, Model->Sectors[thing.Sector], UpdatePathSectorScratch)) {
+	if(UpdatePathSector(segment, Model->Sectors[thing.Sector], UpdatePathSectorScratch)) {
 		// Fire messages along path
 		unsigned int first_adjoin = std::get<1>(UpdatePathSectorScratch.front());
 		if(Model->Surfaces[first_adjoin].Flags & Flags::SurfaceFlag::CogLinked) {
@@ -251,7 +246,7 @@ void Gorc::Game::World::Level::LevelPresenter::UpdateCamera() {
 	}
 	else {
 		UpdatePathSectorScratch.clear();
-		if(UpdatePathSector(p0, p1, Model->Sectors[camera.Sector], UpdatePathSectorScratch)) {
+		if(UpdatePathSector(Physics::Segment(p0, p1), Model->Sectors[camera.Sector], UpdatePathSectorScratch)) {
 			Model->CameraSector = std::get<0>(UpdatePathSectorScratch.back());
 		}
 		else {
@@ -271,8 +266,7 @@ void Gorc::Game::World::Level::LevelPresenter::TranslateCamera(const Vector<3>& 
 	cam_vel += Get<Y>(amt) * Model->CameraLook;
 	cam_vel *= 1.2f;
 
-	Get<0>(Model->CameraVelocity) = Get<0>(cam_vel);
-	Get<1>(Model->CameraVelocity) = Get<1>(cam_vel);
+	Model->CameraVelocity = cam_vel;
 }
 
 void Gorc::Game::World::Level::LevelPresenter::YawCamera(double amt) {
@@ -390,7 +384,7 @@ void Gorc::Game::World::Level::LevelPresenter::Damage() {
 
 	Math::Vector<3> bolt_offset = Model->CameraPosition + Model->CameraLook * 0.09f - Model->CameraUp * 0.01f;
 	UpdatePathSectorScratch.clear();
-	UpdatePathSector(Model->CameraPosition, bolt_offset, Model->Sectors[Model->CameraSector], UpdatePathSectorScratch);
+	UpdatePathSector(Physics::Segment(Model->CameraPosition, bolt_offset), Model->Sectors[Model->CameraSector], UpdatePathSectorScratch);
 	int bolt_sector = std::get<0>(UpdatePathSectorScratch.back());
 
 	int bolt_thing = CreateThing("+bryarbolt", bolt_sector, bolt_offset, Math::Vec(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
@@ -549,11 +543,9 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets:
 		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
 	// Initialize thing properties
 	auto& thing = Model->Things.Create();
-	thing.Reset();
+	thing = Thing(tpl);
 
-	Content::Assets::Template* new_tpl = &thing;
-	*new_tpl = tpl;
-
+	thing.ObjectData.ThingId = thing.GetId();
 	thing.Sector = sector_num;
 	thing.Position = pos;
 	thing.Orientation = orient;
@@ -890,7 +882,7 @@ void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTab
 		return components.CurrentLevelPresenter->LoadSound(fn);
 	});
 
-	verbTable.AddVerb<float, 0>("rand", []{ return sf::Randomizer::Random(0.0f, 1.0f); });
+	verbTable.AddVerb<float, 0>("rand", [&components]{ return static_cast<float>(static_cast<double>(components.Randomizer)); });
 
 	// Thing action verbs
 	verbTable.AddVerb<void, 2>("attachthingtothing", [&components](int attach_thing, int base_thing) {

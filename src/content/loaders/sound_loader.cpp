@@ -14,7 +14,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::SoundLoader::Deser
 	std::vector<char> wav_buf(wav_sz);
 	file.Read(&wav_buf[0], wav_sz);
 
-	wav->Buffer.LoadFromMemory(&wav_buf[0], wav_sz);
+	wav->Buffer.loadFromMemory(&wav_buf[0], wav_sz);
 
 	return std::unique_ptr<Asset>(std::move(wav));
 }

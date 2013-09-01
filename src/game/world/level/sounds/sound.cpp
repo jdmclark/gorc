@@ -5,26 +5,26 @@ void Gorc::Game::World::Level::Sounds::Sound::PlayAmbient(const Content::Assets:
 	expired = false;
 	update_position = false;
 
-	sound.SetBuffer(buffer.Buffer);
-	sound.SetPosition(panning, 0.0f, 0.0f);
-	sound.SetRelativeToListener(true);
-	sound.SetVolume(volume * 100.0f);
-	sound.SetLoop(flags & Flags::SoundFlag::Loops);
-	sound.SetPitch(1.0f);
-	sound.Play();
+	sound.setBuffer(buffer.Buffer);
+	sound.setPosition(panning, 0.0f, 0.0f);
+	sound.setRelativeToListener(true);
+	sound.setVolume(volume * 100.0f);
+	sound.setLoop(flags & Flags::SoundFlag::Loops);
+	sound.setPitch(1.0f);
+	sound.play();
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::PlayVoice(const Content::Assets::Sound& buffer, float volume, FlagSet<Flags::SoundFlag> flags) {
 	expired = false;
 	update_position = false;
 
-	sound.SetBuffer(buffer.Buffer);
-	sound.SetPosition(0.0f, 0.0f, 1.0f);
-	sound.SetRelativeToListener(true);
-	sound.SetVolume(volume * 100.0f);
-	sound.SetLoop(flags & Flags::SoundFlag::Loops);
-	sound.SetPitch(1.0f);
-	sound.Play();
+	sound.setBuffer(buffer.Buffer);
+	sound.setPosition(0.0f, 0.0f, 1.0f);
+	sound.setRelativeToListener(true);
+	sound.setVolume(volume * 100.0f);
+	sound.setLoop(flags & Flags::SoundFlag::Loops);
+	sound.setPitch(1.0f);
+	sound.play();
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::PlayPositional(const Content::Assets::Sound& buffer, const Math::Vector<3>& position,
@@ -36,15 +36,15 @@ void Gorc::Game::World::Level::Sounds::Sound::PlayPositional(const Content::Asse
 	float actual_min_rad = std::min(minrad, maxrad);
 	float actual_max_rad = std::max(minrad, maxrad);
 
-	sound.SetBuffer(buffer.Buffer);
-	sound.SetPosition(Math::Get<0>(position), Math::Get<1>(position), Math::Get<2>(position));
-	sound.SetRelativeToListener(false);
-	sound.SetVolume(volume * 100.0f);
-	sound.SetLoop(flags & Flags::SoundFlag::Loops);
-	sound.SetMinDistance(actual_min_rad);
-	sound.SetAttenuation(2.5f);
-	sound.SetPitch(1.0f);
-	sound.Play();
+	sound.setBuffer(buffer.Buffer);
+	sound.setPosition(Math::Get<0>(position), Math::Get<1>(position), Math::Get<2>(position));
+	sound.setRelativeToListener(false);
+	sound.setVolume(volume * 100.0f);
+	sound.setLoop(flags & Flags::SoundFlag::Loops);
+	sound.setMinDistance(actual_min_rad);
+	sound.setAttenuation(2.5f);
+	sound.setPitch(1.0f);
+	sound.play();
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::PlaySoundLocal(const Content::Assets::Sound& sound, float volume, float panning,
@@ -74,28 +74,28 @@ void Gorc::Game::World::Level::Sounds::Sound::PlaySoundThing(const LevelModel& m
 
 void Gorc::Game::World::Level::Sounds::Sound::SetPitch(float pitch, float delay) {
 	// TODO: Implement delay
-	sound.SetPitch(pitch);
+	sound.setPitch(pitch);
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::SetVolume(float volume, float delay) {
 	// TODO: Implement delay
-	sound.SetVolume(volume * 100.0f);
+	sound.setVolume(volume * 100.0f);
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::Stop() {
-	sound.Stop();
+	sound.stop();
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::Stop(float delay) {
 	// TODO: Implement delay
-	sound.Stop();
+	sound.stop();
 }
 
 void Gorc::Game::World::Level::Sounds::Sound::Update(double dt, const LevelModel& model) {
 	if(update_position) {
 		Math::Vector<3> pos = model.Things[thing].Position;
-		sound.SetPosition(Math::Get<0>(pos), Math::Get<1>(pos), Math::Get<2>(pos));
+		sound.setPosition(Math::Get<0>(pos), Math::Get<1>(pos), Math::Get<2>(pos));
 	}
 
-	expired = (sound.GetStatus() != sf::Sound::Playing);
+	expired = (sound.getStatus() != sf::Sound::Playing);
 }

@@ -8,6 +8,7 @@
 #include "content/flags/animflag.h"
 #include "content/flags/damageflag.h"
 #include "content/assets/inventory.h"
+#include "physics/shape.h"
 #include "game/flags/difficultymode.h"
 #include "game/world/level/animations/animationpresenter.h"
 #include "game/world/level/scripts/scriptpresenter.h"
@@ -45,10 +46,10 @@ private:
 	void PhysicsTickUpdate(double dt);
 
 	bool PointInsideSector(const Math::Vector<3>& position, const Content::Assets::LevelSector& sec);
-	bool PointPathPassesThroughAdjoin(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
+	bool PointPathPassesThroughAdjoin(const Physics::Segment& segment,
 			const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf);
-	bool UpdatePathSector(const Math::Vector<3>& p0, const Math::Vector<3>& p1,
-			const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path);
+	bool UpdatePathSector(const Physics::Segment& segment, const Content::Assets::LevelSector& sector,
+			std::vector<std::tuple<unsigned int, unsigned int>>& path);
 
 	void UpdateThingSector(int thing_id, Thing& thing, const Math::Vector<3>& oldThingPosition);
 	void UpdateCamera();

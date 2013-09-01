@@ -34,8 +34,8 @@ using namespace Gorc;
 int main(int argc, char** argv) {
 	// Create window and OpenGL context.
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
-	Window.UseVerticalSync(true);
-	Window.SetActive();
+	Window.setVerticalSyncEnabled(true);
+	Window.setActive();
 
 	// Initialize GLEW.
 	GLenum err = glewInit();
@@ -43,8 +43,6 @@ int main(int argc, char** argv) {
 		// TODO: Print error.
 		return 1;
 	}
-
-	const sf::Input& Input = Window.GetInput();
 
 	Diagnostics::StreamReport Report(std::cout);
 	Event::EventBus EventBus;
@@ -70,7 +68,7 @@ int main(int argc, char** argv) {
 	Game::World::Nothing::NothingView NothingView;
 	Game::World::Level::LevelView LevelView(*systemContentManager);
 
-	Game::Components Components(Report, EventBus, Window, Input, FileSystem, VerbTable, Compiler,
+	Game::Components Components(Report, EventBus, Window, FileSystem, VerbTable, Compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
 			ActionView, NothingView, LevelView);
 
@@ -126,8 +124,8 @@ int main(int argc, char** argv) {
 
 	sf::Event event;
 	while(running) {
-		while(Window.GetEvent(event)) {
-			switch(event.Type) {
+		while(Window.pollEvent(event)) {
+			switch(event.type) {
 			case sf::Event::Closed: {
 				Events::ExitEvent exitEvent;
 				EventBus.FireEvent(exitEvent);
@@ -135,7 +133,7 @@ int main(int argc, char** argv) {
 			break;
 
 			case sf::Event::Resized:
-				glViewport(0, 0, event.Size.Width, event.Size.Height);
+				glViewport(0, 0, event.size.width, event.size.height);
 				break;
 
 			case sf::Event::LostFocus: {
@@ -155,10 +153,10 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		Window.SetActive();
+		Window.setActive();
 
-		double currentTime = clock.GetElapsedTime();
-		clock.Reset();
+		double currentTime = clock.getElapsedTime().asSeconds();
+		clock.restart();
 
 		gameplayElapsedTime += currentTime;
 		gameplayAccumulator += currentTime;
@@ -179,7 +177,7 @@ int main(int argc, char** argv) {
 		WorldViewFrame.Draw(currentTime);
 		ScreenViewFrame.Draw(currentTime);
 
-		Window.Display();
+		Window.display();
 	}
 
 	return 0;

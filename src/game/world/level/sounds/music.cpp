@@ -5,11 +5,11 @@
 void Gorc::Game::World::Level::Sounds::Music::InternalPlaySong(int song) {
 	boost::filesystem::path music_file_path = boost::filesystem::path("game/restricted/music/1") /
 			boost::str(boost::format("%1%.ogg") % (song + 1));
-	music.OpenFromFile(music_file_path.native());
-	music.SetLoop(false);
-	music.SetRelativeToListener(false);
-	music.SetPosition(0,0,0);
-	music.Play();
+	music.openFromFile(music_file_path.native());
+	music.setLoop(false);
+	music.setRelativeToListener(false);
+	music.setPosition(0,0,0);
+	music.play();
 	current = song;
 }
 
@@ -20,16 +20,16 @@ void Gorc::Game::World::Level::Sounds::Music::PlaySong(int start, int end, int l
 	this->loopto = (loopto - 2) % num_tracks;
 	play = true;
 
-	music.SetVolume(100.0f);
+	music.setVolume(100.0f);
 	InternalPlaySong(this->start);
 }
 
 void Gorc::Game::World::Level::Sounds::Music::SetVolume(float volume) {
-	music.SetVolume(100.0f * volume);
+	music.setVolume(100.0f * volume);
 }
 
 void Gorc::Game::World::Level::Sounds::Music::Update(double dt) {
-	if(play && (music.GetStatus() != sf::Music::Playing)) {
+	if(play && (music.getStatus() != sf::Music::Playing)) {
 		// Advance to next song.
 		if(current == end) {
 			InternalPlaySong(loopto);

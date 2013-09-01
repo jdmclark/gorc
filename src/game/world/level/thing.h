@@ -2,6 +2,7 @@
 
 #include "content/assets/template.h"
 #include "gameplay/thingcontroller.h"
+#include "physics/objectdata.h"
 #include <memory>
 
 namespace Gorc {
@@ -21,6 +22,7 @@ class KeyState;
 class Thing : public Content::Assets::Template {
 public:
 	Gameplay::ThingController* Controller;
+	Physics::ThingObjectData ObjectData;
 
 	bool PathMoving = false;
 	int CurrentFrame = 0;
@@ -42,29 +44,6 @@ public:
 
 	Thing() = default;
 	Thing(const Content::Assets::Template& tpl);
-
-	inline void Reset() {
-		Controller = nullptr;
-
-		PathMoving = false;
-		CurrentFrame = 0;
-		NextFrame = 0;
-		GoalFrame = 0;
-		PathMoveSpeed = 0.0f;
-
-		CurrentFoleyLoopChannel = -1;
-
-		AttachedSurface = -1;
-		AttachedThing = -1;
-		PrevAttachedThingPosition = Math::Zero<3>();
-
-		AttachedKeyMix = -1;
-		ActorWalkAnimation = -1;
-
-		CaptureCog = -1;
-	}
-
-	const Content::Assets::Template& operator=(const Content::Assets::Template& tpl);
 };
 
 }

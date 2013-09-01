@@ -18,9 +18,9 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::Update(double dt) {
 	// Update listener
 	auto camera_position = levelModel->CameraPosition;
 	auto listener_target = camera_position + levelModel->CameraLook;
-	sf::Listener::SetTarget(Math::Get<0>(listener_target), Math::Get<1>(listener_target), Math::Get<2>(listener_target));
-	sf::Listener::SetPosition(Math::Get<0>(camera_position), Math::Get<1>(camera_position), Math::Get<2>(camera_position));
-	// TODO: Handle camera orientation (not currently properly implemented in SFML).
+	sf::Listener::setDirection(Math::Get<0>(listener_target), Math::Get<1>(listener_target), Math::Get<2>(listener_target));
+	sf::Listener::setPosition(Math::Get<0>(camera_position), Math::Get<1>(camera_position), Math::Get<2>(camera_position));
+	// TODO: Handle camera orientation (not properly implemented in SFML).
 	const auto& player_sec = levelModel->Sectors[levelModel->CameraSector];
 	SetAmbientSound(player_sec.AmbientSound, player_sec.AmbientSoundVolume);
 
@@ -40,20 +40,20 @@ void Gorc::Game::World::Level::Sounds::SoundPresenter::Update(double dt) {
 }
 
 void Gorc::Game::World::Level::Sounds::SoundPresenter::SetAmbientSound(Content::Assets::Sound const* sound, float volume) {
-	if(&sound->Buffer == model->AmbientSound.GetBuffer() && model->AmbientSound.GetStatus() != sf::Sound::Stopped) {
-		model->AmbientSound.SetVolume(volume * 100.0f);
+	if(&sound->Buffer == model->AmbientSound.getBuffer() && model->AmbientSound.getStatus() != sf::Sound::Stopped) {
+		model->AmbientSound.setVolume(volume * 100.0f);
 	}
 	else if(sound != nullptr) {
-		model->AmbientSound.SetBuffer(sound->Buffer);
-		model->AmbientSound.SetLoop(true);
-		model->AmbientSound.SetVolume(volume * 100.0f);
-		model->AmbientSound.SetPosition(0,0,0);
-		model->AmbientSound.SetRelativeToListener(true);
-		model->AmbientSound.SetAttenuation(0.0f);
-		model->AmbientSound.Play();
+		model->AmbientSound.setBuffer(sound->Buffer);
+		model->AmbientSound.setLoop(true);
+		model->AmbientSound.setVolume(volume * 100.0f);
+		model->AmbientSound.setPosition(0,0,0);
+		model->AmbientSound.setRelativeToListener(true);
+		model->AmbientSound.setAttenuation(0.0f);
+		model->AmbientSound.play();
 	}
 	else {
-		model->AmbientSound.Stop();
+		model->AmbientSound.stop();
 	}
 }
 

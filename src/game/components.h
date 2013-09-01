@@ -5,6 +5,7 @@
 #include "framework/diagnostics/report.h"
 #include "framework/event/eventbus.h"
 #include "framework/place/placecontroller.h"
+#include "framework/randomizer.h"
 
 #include "content/vfs/virtualfilesystem.h"
 
@@ -32,7 +33,7 @@ public:
 	Diagnostics::Report& Report;
 	Event::EventBus& EventBus;
 	sf::Window& Window;
-	const sf::Input& Input;
+	Randomizer Randomizer;
 
 	Content::VFS::VirtualFileSystem& FileSystem;
 
@@ -52,7 +53,7 @@ public:
 
 	World::Level::LevelPresenter* CurrentLevelPresenter = nullptr;
 
-	Components(Diagnostics::Report& Report, Event::EventBus& EventBus, sf::Window& Window, const sf::Input& Input,
+	Components(Diagnostics::Report& Report, Event::EventBus& EventBus, sf::Window& Window,
 			Content::VFS::VirtualFileSystem& FileSystem, Cog::Verbs::VerbTable& VerbTable, Cog::Compiler& Compiler,
 			Place::PlaceController<Screen::Place>& ScreenPlaceController, Place::PlaceController<World::Place>& WorldPlaceController,
 			ViewFrame& ScreenViewFrame, ViewFrame& WorldViewFrame,
