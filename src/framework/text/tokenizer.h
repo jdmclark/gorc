@@ -6,7 +6,7 @@
 #include "source.h"
 #include "token.h"
 #include "framework/diagnostics/report.h"
-#include "framework/diagnostics/errorlocation.h"
+#include "framework/diagnostics/error_location.h"
 
 namespace Gorc {
 namespace Text {

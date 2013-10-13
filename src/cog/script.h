@@ -1,10 +1,10 @@
 #pragma once
 
 #include "cog/symbols/table.h"
-#include "cog/vm/jumptable.h"
-#include "cog/vm/codebuffer.h"
-#include "cog/flags/cogflag.h"
-#include "framework/flagset.h"
+#include "cog/vm/jump_table.h"
+#include "cog/vm/code_buffer.h"
+#include "cog/flags/cog_flag.h"
+#include "framework/flag_set.h"
 #include <memory>
 
 namespace Gorc {

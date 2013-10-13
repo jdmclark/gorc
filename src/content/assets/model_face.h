@@ -1,10 +1,10 @@
 #pragma once
 
-#include "framework/flagset.h"
-#include "content/flags/faceflag.h"
-#include "content/flags/geometrymode.h"
-#include "content/flags/lightmode.h"
-#include "content/flags/texturemode.h"
+#include "framework/flag_set.h"
+#include "content/flags/face_flag.h"
+#include "content/flags/geometry_mode.h"
+#include "content/flags/light_mode.h"
+#include "content/flags/texture_mode.h"
 
 #include <vector>
 #include <tuple>

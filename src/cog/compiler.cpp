@@ -2,7 +2,7 @@
 #include "framework/text/source.h"
 #include "cog/stages/stages.h"
 #include "cog/ast/factory.h"
-#include "cog/ir/codeprinter.h"
+#include "cog/ir/code_printer.h"
 #include "framework/io/exception.h"
 
 void Gorc::Cog::Compiler::AddMessageId(const std::string& name, MessageId value) {

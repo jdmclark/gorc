@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entrytype.h"
+#include "entry_type.h"
 #include <boost/filesystem/path.hpp>
 
 namespace Gorc {

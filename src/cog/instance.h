@@ -1,8 +1,8 @@
 #pragma once
 
 #include "cog/vm/value.h"
-#include "cog/vm/virtualmachine.h"
-#include "cog/messageid.h"
+#include "cog/vm/virtual_machine.h"
+#include "cog/message_id.h"
 #include <vector>
 
 namespace Gorc {

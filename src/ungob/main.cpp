@@ -1,5 +1,5 @@
-#include "framework/diagnostics/streamreport.h"
-#include "content/vfs/virtualfilesystem.h"
+#include "framework/diagnostics/stream_report.h"
+#include "content/vfs/virtual_filesystem.h"
 #include <iostream>
 #include <string>
 #include <boost/algorithm/string/predicate.hpp>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "framework/diagnostics/report.h"
-#include "framework/io/readonlyfile.h"
+#include "framework/io/read_only_file.h"
 #include "asset.h"
 #include <memory>
 

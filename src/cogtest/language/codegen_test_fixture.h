@@ -5,7 +5,7 @@
 #include "cog/symbols/table.h"
 #include "cog/verbs/table.h"
 #include "cog/script.h"
-#include "cog/messageid.h"
+#include "cog/message_id.h"
 
 #include <string>
 #include <unordered_map>

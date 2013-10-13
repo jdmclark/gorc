@@ -1,9 +1,9 @@
 #pragma once
 
 #include "sound.h"
-#include "content/flags/soundflag.h"
-#include "content/flags/soundsubclasstype.h"
-#include "framework/flagset.h"
+#include "content/flags/sound_flag.h"
+#include "content/flags/sound_subclass_type.h"
+#include "framework/flag_set.h"
 
 namespace Gorc {
 namespace Content {

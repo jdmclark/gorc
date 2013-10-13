@@ -1,6 +1,6 @@
 #pragma once
 
-#include "objectdata.h"
+#include "object_data.h"
 #include "framework/math/vector.h"
 
 namespace Gorc {

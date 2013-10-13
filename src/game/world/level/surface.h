@@ -3,7 +3,7 @@
 #include "content/assets/level_surface.h"
 #include "animations/animation.h"
 #include "framework/pool.h"
-#include "physics/objectdata.h"
+#include "physics/object_data.h"
 
 namespace Gorc {
 namespace Game {

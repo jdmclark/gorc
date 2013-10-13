@@ -1,6 +1,6 @@
 #include <nullunit/nullunit.h>
-#include "cog/vm/codebufferwritestream.h"
-#include "cog/vm/codebufferreadstream.h"
+#include "cog/vm/code_buffer_write_stream.h"
+#include "cog/vm/code_buffer_read_stream.h"
 
 BeginSuite(CodeBufferWriteStreamTests);
 

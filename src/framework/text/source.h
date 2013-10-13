@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "framework/io/readonlyfile.h"
+#include "framework/io/read_only_file.h"
 
 namespace Gorc {
 namespace Text {

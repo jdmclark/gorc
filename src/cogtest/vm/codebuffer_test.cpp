@@ -1,5 +1,5 @@
 #include <nullunit/nullunit.h>
-#include "cog/vm/codebuffer.h"
+#include "cog/vm/code_buffer.h"
 #include "cog/vm/exception.h"
 
 #include <string>

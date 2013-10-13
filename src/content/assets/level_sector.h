@@ -3,7 +3,7 @@
 #include "framework/math/vector.h"
 #include "framework/math/box.h"
 #include "sound.h"
-#include "content/flags/sectorflag.h"
+#include "content/flags/sector_flag.h"
 
 namespace Gorc {
 namespace Content {

@@ -2,7 +2,7 @@
 
 #include "cog/vm/type.h"
 #include "cog/vm/value.h"
-#include "verbbinder.h"
+#include "verb_binder.h"
 #include <stack>
 #include <functional>
 #include <boost/function_types/result_type.hpp>

@@ -2,18 +2,18 @@
 #include "content/assets/shader.h"
 #include "components.h"
 
-#include "framework/events/printevent.h"
-#include "framework/events/exitingevent.h"
-#include "framework/events/exitevent.h"
-#include "framework/events/shutdownevent.h"
-#include "game/events/windowfocusevent.h"
-#include "framework/place/placecontroller.h"
+#include "framework/events/print_event.h"
+#include "framework/events/exiting_event.h"
+#include "framework/events/exit_event.h"
+#include "framework/events/shutdown_event.h"
+#include "game/events/window_focus_event.h"
+#include "framework/place/place_controller.h"
 
-#include "game/screen/presentermapper.h"
-#include "game/world/presentermapper.h"
+#include "game/screen/presenter_mapper.h"
+#include "game/world/presenter_mapper.h"
 
-#include "game/screen/action/actionplace.h"
-#include "game/world/level/levelplace.h"
+#include "game/screen/action/action_place.h"
+#include "game/world/level/level_place.h"
 
 #include <iostream>
 #include <cmath>
@@ -22,7 +22,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "framework/diagnostics/streamreport.h"
+#include "framework/diagnostics/stream_report.h"
 #include "content/manager.h"
 #include "content/assets/level.h"
 #include "cog/compiler.h"

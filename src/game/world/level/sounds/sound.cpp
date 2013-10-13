@@ -1,5 +1,5 @@
 #include "sound.h"
-#include "game/world/level/levelmodel.h"
+#include "game/world/level/level_model.h"
 
 void Gorc::Game::World::Level::Sounds::Sound::PlayAmbient(const Content::Assets::Sound& buffer, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
 	expired = false;

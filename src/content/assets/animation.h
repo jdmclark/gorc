@@ -2,9 +2,9 @@
 
 #include "content/asset.h"
 #include "content/loaders/animation_loader.h"
-#include "content/flags/keyflag.h"
-#include "content/flags/keymarkertype.h"
-#include "framework/flagset.h"
+#include "content/flags/key_flag.h"
+#include "content/flags/key_marker_type.h"
+#include "framework/flag_set.h"
 #include "animation_node.h"
 #include <vector>
 

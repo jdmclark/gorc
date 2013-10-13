@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/flags/puppetsubmodetype.h"
+#include "content/flags/puppet_submode_type.h"
 #include "puppet_submode.h"
 #include <unordered_map>
 #include <array>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "content/flags/meshnodetype.h"
-#include "framework/flagset.h"
+#include "content/flags/mesh_node_type.h"
+#include "framework/flag_set.h"
 #include "framework/math/vector.h"
 #include <string>
 

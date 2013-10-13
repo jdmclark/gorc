@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "content/filesystem.h"
-#include "content/nativefilesystem.h"
-#include "framework/diagnostics/storedreport.h"
+#include "content/native_filesystem.h"
+#include "framework/diagnostics/stored_report.h"
 #include "content/manager.h"
 #include "cog/compiler.h"
 

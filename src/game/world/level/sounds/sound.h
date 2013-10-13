@@ -1,8 +1,8 @@
 #pragma once
 
-#include "content/flags/soundflag.h"
+#include "content/flags/sound_flag.h"
 #include "content/assets/sound.h"
-#include "framework/flagset.h"
+#include "framework/flag_set.h"
 #include "framework/math/vector.h"
 #include <SFML/Audio.hpp>
 

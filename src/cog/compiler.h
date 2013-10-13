@@ -6,8 +6,8 @@
 #include "cog/script.h"
 #include "cog/verbs/table.h"
 #include "cog/vm/value.h"
-#include "cog/messageid.h"
-#include "framework/io/readonlyfile.h"
+#include "cog/message_id.h"
+#include "framework/io/read_only_file.h"
 #include "framework/diagnostics/report.h"
 
 namespace Gorc {

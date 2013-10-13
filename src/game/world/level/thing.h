@@ -1,8 +1,8 @@
 #pragma once
 
 #include "content/assets/template.h"
-#include "gameplay/thingcontroller.h"
-#include "physics/objectdata.h"
+#include "gameplay/thing_controller.h"
+#include "physics/object_data.h"
 #include <memory>
 
 namespace Gorc {

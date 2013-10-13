@@ -1,6 +1,6 @@
 #pragma once
 
-#include "readonlyfile.h"
+#include "read_only_file.h"
 
 namespace Gorc {
 namespace IO {

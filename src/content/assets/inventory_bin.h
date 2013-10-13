@@ -1,11 +1,11 @@
 #pragma once
 
 #include "framework/math/vector.h"
-#include "framework/flagset.h"
+#include "framework/flag_set.h"
 #include "framework/text/tokenizer.h"
-#include "framework/flagset.h"
+#include "framework/flag_set.h"
 #include "cog/compiler.h"
-#include "content/flags/inventoryflag.h"
+#include "content/flags/inventory_flag.h"
 #include "script.h"
 #include <string>
 #include <memory>

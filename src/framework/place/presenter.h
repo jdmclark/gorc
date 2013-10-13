@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/event/eventbus.h"
+#include "framework/event/event_bus.h"
 
 namespace Gorc {
 namespace Place {

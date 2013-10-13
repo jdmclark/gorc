@@ -12,8 +12,8 @@
 #include "cog/vm/value.h"
 #include "verb.h"
 #include "exception.h"
-#include "verbbinder.h"
-#include "verbid.h"
+#include "verb_binder.h"
+#include "verb_id.h"
 
 namespace Gorc {
 namespace Cog {

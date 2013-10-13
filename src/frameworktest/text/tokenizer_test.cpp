@@ -1,7 +1,7 @@
 #include "framework/text/tokenizer.h"
 #include "framework/text/source.h"
-#include "framework/diagnostics/storedreport.h"
-#include "framework/diagnostics/streamreport.h"
+#include "framework/diagnostics/stored_report.h"
+#include "framework/diagnostics/stream_report.h"
 #include <nullunit/nullunit.h>
 
 using namespace Gorc;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/diagnostics/errorlocation.h"
+#include "framework/diagnostics/error_location.h"
 
 namespace Gorc {
 namespace Text {

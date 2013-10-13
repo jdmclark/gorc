@@ -1,9 +1,9 @@
 #include "codegen_test_fixture.h"
 #include "cog/stages/stages.h"
-#include "framework/io/nativefile.h"
-#include "cog/vm/virtualmachine.h"
+#include "framework/io/native_file.h"
+#include "cog/vm/virtual_machine.h"
 #include "cog/vm/exception.h"
-#include "cog/ir/codeprinter.h"
+#include "cog/ir/code_printer.h"
 #include "cog/instance.h"
 #include <fstream>
 

@@ -3,24 +3,24 @@
 #include <GL/glew.h>
 
 #include "framework/diagnostics/report.h"
-#include "framework/event/eventbus.h"
-#include "framework/place/placecontroller.h"
+#include "framework/event/event_bus.h"
+#include "framework/place/place_controller.h"
 #include "framework/randomizer.h"
 
-#include "content/vfs/virtualfilesystem.h"
+#include "content/vfs/virtual_filesystem.h"
 
 #include "cog/verbs/table.h"
 #include "cog/compiler.h"
 
-#include "game/viewframe.h"
+#include "game/view_frame.h"
 
 #include "game/screen/place.h"
-#include "game/screen/action/actionview.h"
+#include "game/screen/action/action_view.h"
 
 #include "game/world/place.h"
-#include "game/world/nothing/nothingview.h"
-#include "game/world/level/levelview.h"
-#include "game/world/level/levelpresenter.h"
+#include "game/world/nothing/nothing_view.h"
+#include "game/world/level/level_view.h"
+#include "game/world/level/level_presenter.h"
 
 #include <SFML/Window.hpp>
 #include <memory>

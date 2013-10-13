@@ -1,7 +1,7 @@
 #pragma once
 
-#include "errorlevel.h"
-#include "errorlocation.h"
+#include "error_level.h"
+#include "error_location.h"
 
 #include <string>
 

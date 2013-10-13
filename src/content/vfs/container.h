@@ -1,6 +1,6 @@
 #pragma once
 
-#include "virtualfile.h"
+#include "virtual_file.h"
 #include <boost/filesystem/path.hpp>
 
 namespace Gorc {

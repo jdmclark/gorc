@@ -1,7 +1,7 @@
 #include <nullunit/nullunit.h>
 #include "content/vfs/episode/episode.h"
-#include "framework/io/nativefile.h"
-#include "framework/diagnostics/storedreport.h"
+#include "framework/io/native_file.h"
+#include "framework/diagnostics/stored_report.h"
 #include "content/vfs/episode/exception.h"
 #include "content/vfs/container.h"
 #include "framework/io/exception.h"

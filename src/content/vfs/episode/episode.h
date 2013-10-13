@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/io/readonlyfile.h"
+#include "framework/io/read_only_file.h"
 #include "framework/diagnostics/report.h"
 #include "entry.h"
-#include "episodetype.h"
+#include "episode_type.h"
 #include "content/vfs/container.h"
 #include <string>
 #include <unordered_map>

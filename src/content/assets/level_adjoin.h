@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/flags/adjoinflag.h"
+#include "content/flags/adjoin_flag.h"
 
 namespace Gorc {
 namespace Content {

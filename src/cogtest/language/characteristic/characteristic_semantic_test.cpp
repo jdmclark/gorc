@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "cogtest/language/semantic_test_fixture.h"
-#include "cog/messageid.h"
+#include "cog/message_id.h"
 #include "vfssingleton.h"
 
 class CharacteristicSemanticTestFixture : public SemanticTestFixture {

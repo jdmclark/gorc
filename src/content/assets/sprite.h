@@ -2,9 +2,9 @@
 
 #include "content/asset.h"
 #include "content/loaders/sprite_loader.h"
-#include "content/flags/geometrymode.h"
-#include "content/flags/lightmode.h"
-#include "content/flags/texturemode.h"
+#include "content/flags/geometry_mode.h"
+#include "content/flags/light_mode.h"
+#include "content/flags/texture_mode.h"
 #include "framework/math/vector.h"
 
 #include "material.h"
