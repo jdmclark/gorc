@@ -2,20 +2,20 @@
 
 #include "thing_controller.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Gameplay {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace gameplay {
 
-class WeaponController : public ThingController {
+class weapon_controller : public thing_controller {
 public:
-	using ThingController::ThingController;
+	using thing_controller::thing_controller;
 
-	virtual void CreateControllerData(int thing_id) override;
+	virtual void create_controller_data(int thing_id) override;
 
-	virtual void TouchedThing(int thing_id, int touched_thing_id) override;
-	virtual void TouchedSurface(int thing_id, int touched_surface_id) override;
+	virtual void touched_thing(int thing_id, int touched_thing_id) override;
+	virtual void touched_surface(int thing_id, int touched_surface_id) override;
 };
 
 }

@@ -1,5 +1,5 @@
 #include "object_data.h"
 
-Gorc::Game::World::Level::Physics::ObjectData::~ObjectData() {
+gorc::game::world::level::physics::object_data::~object_data() {
 	return;
 }

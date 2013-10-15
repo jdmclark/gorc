@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class ActorFlag : uint32_t {
+enum class actor_flag : uint32_t {
 	PitchingChangesHeadPitch 		= 0x1,
 	HasFieldlight					= 0x4,
 	Invulnerability					= 0x8,

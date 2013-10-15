@@ -3,19 +3,19 @@
 #include <GL/glew.h>
 #include <memory>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class MaterialCel {
+class material_cel {
 public:
-	GLuint Diffuse;
-	GLuint Light;
+	GLuint diffuse;
+	GLuint light;
 
-	MaterialCel(GLuint Diffuse, GLuint Light);
-	MaterialCel(const MaterialCel&) = delete;
-	MaterialCel(MaterialCel&&);
-	~MaterialCel();
+	material_cel(GLuint diffuse, GLuint Light);
+	material_cel(const material_cel&) = delete;
+	material_cel(material_cel&&);
+	~material_cel();
 };
 
 }

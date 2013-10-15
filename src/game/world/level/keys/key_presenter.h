@@ -4,56 +4,56 @@
 #include "framework/flag_set.h"
 #include "framework/math/vector.h"
 
-namespace Gorc {
+namespace gorc {
 
-namespace Cog {
-namespace Verbs {
-class VerbTable;
+namespace cog {
+namespace verbs {
+class verb_table;
 }
 }
 
-namespace Content {
-class Manager;
+namespace content {
+class manager;
 }
 
-namespace Game {
+namespace game {
 
-class Components;
+class components;
 
-namespace World {
-namespace Level {
+namespace world {
+namespace level {
 
-class LevelModel;
+class level_model;
 
-namespace Keys {
+namespace keys {
 
-class KeyModel;
-class KeyState;
-class KeyMix;
+class key_model;
+class key_state;
+class key_mix;
 
-class KeyPresenter {
+class key_presenter {
 private:
-	Content::Manager& contentManager;
-	LevelModel* levelModel;
-	KeyModel* model;
+	content::manager& contentmanager;
+	level_model* levelModel;
+	key_model* model;
 
 	int GetThingMixId(int thing_id);
-	void DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
+	void DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
 			double begin, double end, bool wraps, double frame_ct);
-	void DispatchMarker(int thing_id, Flags::KeyMarkerType marker);
+	void DispatchMarker(int thing_id, flags::key_marker_type marker);
 
 public:
-	KeyPresenter(Content::Manager& contentManager);
+	key_presenter(content::manager& contentmanager);
 
-	void Start(LevelModel& levelModel, KeyModel& model);
-	void Update(double dt);
+	void start(level_model& levelModel, key_model& model);
+	void update(double dt);
 
-	std::tuple<Math::Vector<3>, Math::Vector<3>> GetNodeFrame(int mix_id, int node_id, FlagSet<Flags::MeshNodeType> node_type) const;
+	std::tuple<vector<3>, vector<3>> get_node_frame(int mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
 
-	int PlayKey(int thing_id, int key, int priority, FlagSet<Flags::KeyFlag> flags);
-	int PlayPuppetKey(int thing_id, Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode);
+	int play_key(int thing_id, int key, int priority, flag_set<flags::key_flag> flags);
+	int play_puppet_key(int thing_id, flags::puppet_mode_type major_mode, flags::puppet_submode_type minor_mode);
 
-	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
+	static void register_verbs(cog::verbs::verb_table&, components&);
 };
 
 }

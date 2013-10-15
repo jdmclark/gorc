@@ -8,17 +8,17 @@
 #include "framework/diagnostics/report.h"
 #include "framework/diagnostics/error_location.h"
 
-namespace Gorc {
-namespace Text {
+namespace gorc {
+namespace text {
 
-class Tokenizer {
+class tokenizer {
 private:
-	Diagnostics::Report& ErrorReport;
+	diagnostics::report& ErrorReport;
 	char current, next;
-	Source& buffer;
-	Diagnostics::ErrorLocation loc;
+	source& buffer;
+	diagnostics::error_location loc;
 	int line, col;
-	Token internalToken;
+	token internalToken;
 	bool report_eol;
 
 	inline void scan();
@@ -29,45 +29,45 @@ private:
 	inline bool isIdentifierLead(char c);
 	inline bool isIdentifierChar(char c);
 
-	void readNumericLiteralHexPart(Token& out);
-	void readNumericLiteralIntegerPart(Token& out);
-	void readNumericLiteral(Token& out);
-	void readIdentifier(Token& out);
-	void readStringLiteral(Token& out);
+	void readNumericLiteralHexPart(token& out);
+	void readNumericLiteralIntegerPart(token& out);
+	void readNumericLiteral(token& out);
+	void readIdentifier(token& out);
+	void readStringLiteral(token& out);
 
 public:
-	Tokenizer(Source& stream, Diagnostics::Report& errorReport);
+	tokenizer(source& stream, diagnostics::report& errorReport);
 
-	void SkipToNextLine();
+	void skip_to_next_line();
 
-	inline void SetReportEOL(bool val) {
+	inline void set_report_eol(bool val) {
 		report_eol = val;
 	}
 
-	inline bool GetReportEOL() const {
+	inline bool get_report_eol() const {
 		return report_eol;
 	}
 
-	void GetToken(Token& out);
-	void GetDelimitedString(Token& out, const std::function<bool(char)>& match_delim);
+	void get_token(token& out);
+	void get_delimited_string(token& out, const std::function<bool(char)>& match_delim);
 
-	template <typename T> T GetNumber() {
-		GetToken(internalToken);
-		return internalToken.GetNumericValue<T>();
+	template <typename T> T get_number() {
+		get_token(internalToken);
+		return internalToken.get_numeric_value<T>();
 	}
 
-	std::string& GetIdentifier();
-	std::string& GetStringLiteral();
-	std::string& GetSpaceDelimitedString();
+	std::string& get_identifier();
+	std::string& get_string_literal();
+	std::string& get_space_delimited_string();
 
-	void AssertIdentifier(const std::string& id);
-	void AssertPunctuator(const std::string& punc);
-	void AssertLabel(const std::string& label);
+	void assert_identifier(const std::string& id);
+	void assert_punctuator(const std::string& punc);
+	void assert_label(const std::string& label);
 
-	void AssertEndOfFile();
+	void assert_end_of_file();
 
-	inline const Text::Location& GetInternalTokenLocation() const {
-		return internalToken.Location;
+	inline const text::location& get_internal_token_location() const {
+		return internalToken.location;
 	}
 };
 

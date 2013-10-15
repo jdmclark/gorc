@@ -1,30 +1,30 @@
 #include "level_shader.h"
 
-using namespace Gorc::Math;
+using namespace gorc::math;
 
-Gorc::Game::World::Level::LevelShader::LevelShader(GLuint program, GLint model_mat_ul, GLint view_mat_ul, GLint proj_mat_ul)
+gorc::game::world::level::level_shader::level_shader(GLuint program, GLint model_mat_ul, GLint view_mat_ul, GLint proj_mat_ul)
 	: program(program), model_mat_ul(model_mat_ul), view_mat_ul(view_mat_ul), proj_mat_ul(proj_mat_ul) {
 	return;
 }
 
-Gorc::Game::World::Level::LevelShader::~LevelShader() {
+gorc::game::world::level::level_shader::~level_shader() {
 	return;
 }
 
-void Gorc::Game::World::Level::LevelShader::SetViewMatrix(const Math::Matrix<float>& matrix) {
-	glUniformMatrix4fv(view_mat_ul, 1, GL_FALSE, matrix.GetOpenGLMatrix());
+void gorc::game::world::level::level_shader::set_view_matrix(const math::matrix<float>& matrix) {
+	glUniformMatrix4fv(view_mat_ul, 1, GL_FALSE, matrix.get_opengl_matrix());
 }
 
-void Gorc::Game::World::Level::LevelShader::SetProjectionMatrix(const Math::Matrix<float>& matrix) {
-	glUniformMatrix4fv(proj_mat_ul, 1, GL_FALSE, matrix.GetOpenGLMatrix());
+void gorc::game::world::level::level_shader::set_projection_matrix(const math::matrix<float>& matrix) {
+	glUniformMatrix4fv(proj_mat_ul, 1, GL_FALSE, matrix.get_opengl_matrix());
 }
 
-void Gorc::Game::World::Level::LevelShader::SetModelMatrix(const Math::Matrix<float>& matrix) {
-	glUniformMatrix4fv(model_mat_ul, 1, GL_FALSE, matrix.GetOpenGLMatrix());
+void gorc::game::world::level::level_shader::set_model_matrix(const math::matrix<float>& matrix) {
+	glUniformMatrix4fv(model_mat_ul, 1, GL_FALSE, matrix.get_opengl_matrix());
 }
 
-Gorc::Game::World::Level::SurfaceShader::SurfaceShader(const Content::Assets::Shader& shader)
-	: LevelShader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
+gorc::game::world::level::surface_shader::surface_shader(const content::assets::shader& shader)
+	: level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
 			glGetUniformLocation(shader.program, "view_matrix"),
 			glGetUniformLocation(shader.program, "projection_matrix")),
 	  sector_tint_ul(glGetUniformLocation(shader.program, "sector_tint")),
@@ -33,7 +33,7 @@ Gorc::Game::World::Level::SurfaceShader::SurfaceShader(const Content::Assets::Sh
 	return;
 }
 
-void Gorc::Game::World::Level::SurfaceShader::Activate(const Math::Vector<3>& current_sector_tint) {
+void gorc::game::world::level::surface_shader::activate(const vector<3>& current_sector_tint) {
 	glUseProgram(program);
 
 	// Set texture locations
@@ -41,16 +41,16 @@ void Gorc::Game::World::Level::SurfaceShader::Activate(const Math::Vector<3>& cu
 	glUniform1i(light_ul, 1);
 
 	std::array<float, 4> tint_color;
-	std::get<0>(tint_color) = Math::Get<0>(current_sector_tint);
-	std::get<1>(tint_color) = Math::Get<1>(current_sector_tint);
-	std::get<2>(tint_color) = Math::Get<2>(current_sector_tint);
-	std::get<3>(tint_color) = Math::Length(current_sector_tint);
+	std::get<0>(tint_color) = math::get<0>(current_sector_tint);
+	std::get<1>(tint_color) = math::get<1>(current_sector_tint);
+	std::get<2>(tint_color) = math::get<2>(current_sector_tint);
+	std::get<3>(tint_color) = math::length(current_sector_tint);
 
 	glUniform4fv(sector_tint_ul, 1, tint_color.data());
 }
 
-Gorc::Game::World::Level::HorizonShader::HorizonShader(const Content::Assets::Shader& shader)
-	: LevelShader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
+gorc::game::world::level::horizon_shader::horizon_shader(const content::assets::shader& shader)
+	: level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
 			glGetUniformLocation(shader.program, "view_matrix"),
 			glGetUniformLocation(shader.program, "projection_matrix")),
 	  sector_tint_ul(glGetUniformLocation(shader.program, "sector_tint")),
@@ -60,15 +60,15 @@ Gorc::Game::World::Level::HorizonShader::HorizonShader(const Content::Assets::Sh
 	return;
 }
 
-void Gorc::Game::World::Level::HorizonShader::Activate(const Math::Vector<3>& current_sector_tint, const Math::Vector<2>& sky_offset,
-		float horizon_pixels_per_rev, float horizon_distance, const Math::Box<2, unsigned int>& screen_size, const Math::Vector<3>& camera_look) {
+void gorc::game::world::level::horizon_shader::activate(const vector<3>& current_sector_tint, const vector<2>& sky_offset,
+		float horizon_pixels_per_rev, float horizon_distance, const box<2, unsigned int>& screen_size, const vector<3>& camera_look) {
 	glUseProgram(program);
 
 	std::array<float, 4> tint_color;
-	std::get<0>(tint_color) = Math::Get<0>(current_sector_tint);
-	std::get<1>(tint_color) = Math::Get<1>(current_sector_tint);
-	std::get<2>(tint_color) = Math::Get<2>(current_sector_tint);
-	std::get<3>(tint_color) = Math::Length(current_sector_tint);
+	std::get<0>(tint_color) = math::get<0>(current_sector_tint);
+	std::get<1>(tint_color) = math::get<1>(current_sector_tint);
+	std::get<2>(tint_color) = math::get<2>(current_sector_tint);
+	std::get<3>(tint_color) = math::length(current_sector_tint);
 
 	std::array<float, 2> ssz { static_cast<float>(screen_size.Size<X>()), static_cast<float>(screen_size.Size<Y>()) };
 
@@ -76,13 +76,13 @@ void Gorc::Game::World::Level::HorizonShader::Activate(const Math::Vector<3>& cu
 	float horizons_per_rev = std::ceil(horizon_pixels_per_rev / 256.0f);
 	float horizon_scale = 128.0f / horizon_distance;
 
-	float yaw_revs = std::atan2(Get<X>(camera_look), Get<Y>(camera_look)) / 6.28318f;
-	Get<X>(horizon_start_offset) += yaw_revs * horizons_per_rev;
+	float yaw_revs = std::atan2(get<X>(camera_look), get<Y>(camera_look)) / 6.28318f;
+	get<X>(horizon_start_offset) += yaw_revs * horizons_per_rev;
 
-	float pitch_revs = std::acos(Dot(camera_look, Vec(0.0f, 0.0f, 1.0f))) * 0.5f + 1.0f;
-	Get<Y>(horizon_start_offset) -= pitch_revs;
+	float pitch_revs = std::acos(dot(camera_look, make_vector(0.0f, 0.0f, 1.0f))) * 0.5f + 1.0f;
+	get<Y>(horizon_start_offset) -= pitch_revs;
 
-	std::array<float, 3> offset = { Get<0>(horizon_start_offset), Get<1>(horizon_start_offset), horizon_scale };
+	std::array<float, 3> offset = { get<0>(horizon_start_offset), get<1>(horizon_start_offset), horizon_scale };
 
 	glUniform1i(diffuse_ul, 0);
 	glUniform4fv(sector_tint_ul, 1, tint_color.data());
@@ -90,8 +90,8 @@ void Gorc::Game::World::Level::HorizonShader::Activate(const Math::Vector<3>& cu
 	glUniform3fv(offset_ul, 1, offset.data());
 }
 
-Gorc::Game::World::Level::CeilingShader::CeilingShader(const Content::Assets::Shader& shader)
-	: LevelShader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
+gorc::game::world::level::ceiling_shader::ceiling_shader(const content::assets::shader& shader)
+	: level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
 			glGetUniformLocation(shader.program, "view_matrix"),
 			glGetUniformLocation(shader.program, "projection_matrix")),
 	  diffuse_ul(glGetUniformLocation(shader.program, "diffuse")),
@@ -100,24 +100,24 @@ Gorc::Game::World::Level::CeilingShader::CeilingShader(const Content::Assets::Sh
 	return;
 }
 
-void Gorc::Game::World::Level::CeilingShader::Activate(const Math::Vector<3>& current_sector_tint, const Math::Vector<2>& sky_offset, float ceiling_sky_z) {
+void gorc::game::world::level::ceiling_shader::activate(const vector<3>& current_sector_tint, const vector<2>& sky_offset, float ceiling_sky_z) {
 	glUseProgram(program);
 
 	std::array<float, 4> tint_color;
-	std::get<0>(tint_color) = Math::Get<0>(current_sector_tint);
-	std::get<1>(tint_color) = Math::Get<1>(current_sector_tint);
-	std::get<2>(tint_color) = Math::Get<2>(current_sector_tint);
-	std::get<3>(tint_color) = Math::Length(current_sector_tint);
+	std::get<0>(tint_color) = math::get<0>(current_sector_tint);
+	std::get<1>(tint_color) = math::get<1>(current_sector_tint);
+	std::get<2>(tint_color) = math::get<2>(current_sector_tint);
+	std::get<3>(tint_color) = math::length(current_sector_tint);
 
-	std::array<float, 3> offset = { Get<0>(sky_offset), Get<1>(sky_offset), ceiling_sky_z };
+	std::array<float, 3> offset = { get<0>(sky_offset), get<1>(sky_offset), ceiling_sky_z };
 
 	glUniform1i(diffuse_ul, 0);
 	glUniform4fv(sector_tint_ul, 1, tint_color.data());
 	glUniform3fv(offset_ul, 1, offset.data());
 }
 
-Gorc::Game::World::Level::LightShader::LightShader(const Content::Assets::Shader& shader)
-	: LevelShader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
+gorc::game::world::level::light_shader::light_shader(const content::assets::shader& shader)
+	: level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
 			glGetUniformLocation(shader.program, "view_matrix"),
 			glGetUniformLocation(shader.program, "projection_matrix")),
 	  diffuse_ul(glGetUniformLocation(shader.program, "diffuse")),
@@ -128,12 +128,12 @@ Gorc::Game::World::Level::LightShader::LightShader(const Content::Assets::Shader
 	return;
 }
 
-void Gorc::Game::World::Level::LightShader::Activate(const Math::Vector<3>& light_position, const Math::Vector<3>& camera_position,
+void gorc::game::world::level::light_shader::activate(const vector<3>& light_position, const vector<3>& camera_position,
 		float light_radius, float light_intensity) {
 	glUseProgram(program);
 
-	std::array<float, 3> light_pos = { Get<0>(light_position), Get<1>(light_position), Get<2>(light_position) };
-	std::array<float, 3> camera_pos = { Get<0>(camera_position), Get<1>(camera_position), Get<2>(camera_position) };
+	std::array<float, 3> light_pos = { get<0>(light_position), get<1>(light_position), get<2>(light_position) };
+	std::array<float, 3> camera_pos = { get<0>(camera_position), get<1>(camera_position), get<2>(camera_position) };
 
 	glUniform1i(diffuse_ul, 0);
 	glUniform3fv(lightpos_ul, 1, light_pos.data());

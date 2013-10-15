@@ -4,15 +4,15 @@
 #include "game/components.h"
 #include "action_place.h"
 
-namespace Gorc {
-namespace Game {
-namespace Screen {
-namespace Action {
+namespace gorc {
+namespace game {
+namespace screen {
+namespace action {
 
-class ActionPresenter : public Gorc::Place::Presenter {
+class action_presenter : public gorc::place::presenter {
 private:
-	Components& components;
-	ActionPlace place;
+	components& components;
+	action_place place;
 
 	bool window_has_focus = true;
 	bool r_key_down = false;
@@ -23,10 +23,10 @@ private:
 	bool g_key_down = false;
 
 public:
-	ActionPresenter(Components& components, const ActionPlace& place);
+	action_presenter(class components& components, const action_place& place);
 
-	void Start(Event::EventBus& eventBus);
-	void Update(double dt);
+	void start(event::event_bus& eventBus);
+	void update(double dt);
 };
 
 }

@@ -8,110 +8,110 @@
 #include <tuple>
 #include <vector>
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::AnimationLoader::AssetRootPath = { "3do/key" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::animation_loader::asset_root_path = { "3do/key" };
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-void SkipToNextAnimationSection(Text::Tokenizer& tok) {
-	Text::Token t;
+void SkipToNextAnimationSection(text::tokenizer& tok) {
+	text::token t;
 	do {
-		tok.GetToken(t);
+		tok.get_token(t);
 	}
-	while(t.Type != Text::TokenType::EndOfFile && (t.Type != Text::TokenType::Identifier || !boost::iequals(t.Value, "SECTION")));
+	while(t.type != text::token_type::end_of_file && (t.type != text::token_type::identifier || !boost::iequals(t.value, "SECTION")));
 
-	if(t.Type == Text::TokenType::EndOfFile) {
+	if(t.type == text::token_type::end_of_file) {
 		return;
 	}
 
-	tok.AssertPunctuator(":");
+	tok.assert_punctuator(":");
 }
 
-void ParseAnimationHeaderSection(Assets::Animation& anim, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	tok.AssertIdentifier("FLAGS");
-	anim.Flags = FlagSet<Flags::KeyFlag>(tok.GetNumber<uint32_t>());
+void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	tok.assert_identifier("FLAGS");
+	anim.flags = flag_set<flags::key_flag>(tok.get_number<uint32_t>());
 
-	tok.AssertIdentifier("TYPE"); // Unknown
-	tok.GetNumber<uint32_t>();
+	tok.assert_identifier("TYPE"); // Unknown
+	tok.get_number<uint32_t>();
 
-	tok.AssertIdentifier("FRAMES");
-	anim.FrameCount = tok.GetNumber<unsigned int>();
+	tok.assert_identifier("FRAMES");
+	anim.frame_count = tok.get_number<unsigned int>();
 
-	tok.AssertIdentifier("FPS");
-	anim.FrameRate = tok.GetNumber<double>();
+	tok.assert_identifier("FPS");
+	anim.framerate = tok.get_number<double>();
 
-	tok.AssertIdentifier("JOINTS");
-	tok.GetNumber<unsigned int>();
+	tok.assert_identifier("JOINTS");
+	tok.get_number<unsigned int>();
 }
 
-void ParseMarkersSection(Assets::Animation& anim, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	tok.AssertIdentifier("MARKERS");
-	unsigned int num_markers = tok.GetNumber<unsigned int>();
+void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	tok.assert_identifier("MARKERS");
+	unsigned int num_markers = tok.get_number<unsigned int>();
 
 	for(unsigned int i = 0; i < num_markers; ++i) {
-		double frame = tok.GetNumber<double>();
-		anim.Markers.emplace_back(frame, static_cast<Flags::KeyMarkerType>(tok.GetNumber<uint32_t>()));
+		double frame = tok.get_number<double>();
+		anim.markers.emplace_back(frame, static_cast<flags::key_marker_type>(tok.get_number<uint32_t>()));
 	}
 }
 
-void ParseKeyframeNodesSection(Assets::Animation& anim, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	tok.AssertIdentifier("NODES");
+void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	tok.assert_identifier("NODES");
 
-	tok.AssertIdentifier("NODES");
-	unsigned int num_nodes = tok.GetNumber<unsigned int>();
+	tok.assert_identifier("NODES");
+	unsigned int num_nodes = tok.get_number<unsigned int>();
 
 	for(unsigned int i = 0; i < num_nodes; ++i) {
-		anim.Nodes.push_back(Assets::AnimationNode());
-		Assets::AnimationNode& node = anim.Nodes.back();
+		anim.nodes.push_back(assets::animation_node());
+		assets::animation_node& node = anim.nodes.back();
 
-		tok.AssertIdentifier("NODE");
-		tok.GetNumber<unsigned int>();
+		tok.assert_identifier("NODE");
+		tok.get_number<unsigned int>();
 
-		tok.AssertIdentifier("MESH");
-		tok.AssertIdentifier("NAME");
-		tok.GetSpaceDelimitedString();
+		tok.assert_identifier("MESH");
+		tok.assert_identifier("NAME");
+		tok.get_space_delimited_string();
 
-		tok.AssertIdentifier("ENTRIES");
-		unsigned int num_entries = tok.GetNumber<unsigned int>();
+		tok.assert_identifier("ENTRIES");
+		unsigned int num_entries = tok.get_number<unsigned int>();
 
 		for(unsigned int j = 0; j < num_entries; ++j) {
-			node.Frames.push_back(Assets::AnimationFrame());
-			Assets::AnimationFrame& frame = node.Frames.back();
+			node.frames.push_back(assets::animation_frame());
+			assets::animation_frame& frame = node.frames.back();
 
-			tok.GetNumber<int>();
-			tok.AssertPunctuator(":");
+			tok.get_number<int>();
+			tok.assert_punctuator(":");
 
-			frame.Frame = tok.GetNumber<int>();
+			frame.frame = tok.get_number<int>();
 
-			tok.GetNumber<unsigned int>();
+			tok.get_number<unsigned int>();
 
-			float x = tok.GetNumber<float>();
-			float y = tok.GetNumber<float>();
-			float z = tok.GetNumber<float>();
+			float x = tok.get_number<float>();
+			float y = tok.get_number<float>();
+			float z = tok.get_number<float>();
 
-			float pi = tok.GetNumber<float>();
-			float ya = tok.GetNumber<float>();
-			float ro = tok.GetNumber<float>();
+			float pi = tok.get_number<float>();
+			float ya = tok.get_number<float>();
+			float ro = tok.get_number<float>();
 
-			float dx = tok.GetNumber<float>();
-			float dy = tok.GetNumber<float>();
-			float dz = tok.GetNumber<float>();
+			float dx = tok.get_number<float>();
+			float dy = tok.get_number<float>();
+			float dz = tok.get_number<float>();
 
-			float dpi = tok.GetNumber<float>();
-			float dya = tok.GetNumber<float>();
-			float dro = tok.GetNumber<float>();
+			float dpi = tok.get_number<float>();
+			float dya = tok.get_number<float>();
+			float dro = tok.get_number<float>();
 
-			frame.Position = Math::Vec(x, y, z);
-			frame.Orientation = Math::Vec(pi, ya, ro);
+			frame.position = math::make_vector(x, y, z);
+			frame.orientation = math::make_vector(pi, ya, ro);
 
-			frame.DeltaPosition = Math::Vec(dx, dy, dz);
-			frame.DeltaOrientation = Math::Vec(dpi, dya, dro);
+			frame.delta_position = math::make_vector(dx, dy, dz);
+			frame.delta_orientation = math::make_vector(dpi, dya, dro);
 		}
 	}
 }
 
-using AnimationLoaderSectionFn = std::function<void(Assets::Animation&, Text::Tokenizer&, Manager&, Diagnostics::Report&)>;
+using AnimationLoaderSectionFn = std::function<void(assets::animation&, text::tokenizer&, manager&, diagnostics::report&)>;
 const std::unordered_map<std::string, AnimationLoaderSectionFn> AnimationLoaderSectionMap {
 	{ "header", ParseAnimationHeaderSection },
 	{ "markers", ParseMarkersSection },
@@ -122,22 +122,22 @@ const std::unordered_map<std::string, AnimationLoaderSectionFn> AnimationLoaderS
 }
 }
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::AnimationLoader::Parse(Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Assets::Animation> lev(new Assets::Animation());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::animation_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<assets::animation> lev(new assets::animation());
 
-	Text::Token t;
+	text::token t;
 	while(true) {
 		SkipToNextAnimationSection(tok);
-		tok.GetToken(t);
+		tok.get_token(t);
 
-		if(t.Type == Text::TokenType::EndOfFile) {
+		if(t.type == text::token_type::end_of_file) {
 			break;
 		}
 		else {
-			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
-			auto it = AnimationLoaderSectionMap.find(t.Value);
+			std::transform(t.value.begin(), t.value.end(), t.value.begin(), tolower);
+			auto it = AnimationLoaderSectionMap.find(t.value);
 			if(it == AnimationLoaderSectionMap.end()) {
-				report.AddWarning("AnimationLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
+				report.add_warning("AnimationLoader", boost::str(boost::format("skipping unknown section %s") % t.value), t.location);
 			}
 			else {
 				it->second(*lev, tok, manager, report);
@@ -145,5 +145,5 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::AnimationLoader::P
 		}
 	}
 
-	return std::unique_ptr<Asset>(std::move(lev));
+	return std::unique_ptr<asset>(std::move(lev));
 }

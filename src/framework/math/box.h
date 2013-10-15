@@ -3,10 +3,10 @@
 #include <algorithm>
 #include "vector.h"
 
-namespace Gorc {
-namespace Math {
+namespace gorc {
+inline namespace math {
 
-template <size_t d, typename F = float> class Box {
+template <size_t d, typename F = float> class box {
 private:
 	std::array<std::tuple<F, F>, d> range;
 
@@ -38,11 +38,11 @@ public:
 		return range.cend();
 	}
 
-	Box() {
+	box() {
 		return;
 	}
 
-	Box(const Vector<d, F>& v, const Vector<d, F>& w) {
+	box(const vector<d, F>& v, const vector<d, F>& w) {
 		auto kt = range.begin();
 		for(auto it = v.begin(), jt = w.begin(); it != v.end(); ++it, ++jt, ++kt) {
 			auto min = std::min(*it, *jt);
@@ -57,8 +57,8 @@ public:
 		return std::get<1>(col) - std::get<0>(col);
 	}
 
-	template <typename G> operator Box<d, G>() const {
-		Box<d, G> rv;
+	template <typename G> operator box<d, G>() const {
+		box<d, G> rv;
 		auto it = begin();
 		auto jt = rv.begin();
 		for( ; it != end(); ++it, ++jt) {
@@ -68,10 +68,10 @@ public:
 		return rv;
 	}
 
-	Box<d, F> operator+(const Box<d, F>& box) const {
-		Box<d, F> rv;
+	box<d, F> operator+(const box<d, F>& b) const {
+		box<d, F> rv;
 		auto rv_it = rv.begin();
-		for(auto it = begin(), jt = box.begin(); it != end(); ++rv_it, ++it, ++jt) {
+		for(auto it = begin(), jt = b.begin(); it != end(); ++rv_it, ++it, ++jt) {
 			*rv_it = std::make_tuple(std::min(std::get<0>(*it), std::get<0>(*jt)),
 					std::max(std::get<1>(*it), std::get<1>(*jt)));
 		}
@@ -80,7 +80,7 @@ public:
 	}
 };
 
-template <size_t d, typename F> bool BoxesOverlap(const Box<d, F>& a, const Box<d, F>& b) {
+template <size_t d, typename F> bool BoxesOverlap(const box<d, F>& a, const box<d, F>& b) {
 	for(auto it = a.begin(), jt = b.begin(); it != a.end(); ++it, ++jt) {
 		// Cases: A entirely to left of B, A overlaps B from left,
 		// A inside B, A overlaps B from right, A entirely to right of B.
@@ -93,9 +93,9 @@ template <size_t d, typename F> bool BoxesOverlap(const Box<d, F>& a, const Box<
 	return true;
 }
 
-template <size_t d, typename F> Box<d, F> Intersect(const Box<d, F>& a, const Box<d, F>& b) {
-	Vector<d, F> min = Zero<d>(std::numeric_limits<F>::lowest());
-	Vector<d, F> max = Zero<d>(std::numeric_limits<F>::max());
+template <size_t d, typename F> box<d, F> Intersect(const box<d, F>& a, const box<d, F>& b) {
+	vector<d, F> min = zero<d>(std::numeric_limits<F>::lowest());
+	vector<d, F> max = zero<d>(std::numeric_limits<F>::max());
 
 	auto a_val = a.begin(), b_val = b.begin();
 	auto min_val = min.begin(), max_val = max.begin();
@@ -104,7 +104,7 @@ template <size_t d, typename F> Box<d, F> Intersect(const Box<d, F>& a, const Bo
 		*max_val = std::min(std::get<1>(*a_val), std::get<1>(*b_val));
 	}
 
-	return Box<d, F>(min, max);
+	return box<d, F>(min, max);
 }
 
 }

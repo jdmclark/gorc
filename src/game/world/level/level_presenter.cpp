@@ -3,145 +3,145 @@
 #include "game/constants.h"
 #include "physics/query.h"
 
-using namespace Gorc::Math;
+using namespace gorc::math;
 
-Gorc::Game::World::Level::LevelPresenter::LevelPresenter(Components& components, const LevelPlace& place)
+gorc::game::world::level::level_presenter::level_presenter(class components& components, const level_place& place)
 	: components(components), place(place),
-	  ScriptPresenter(components), SoundPresenter(*place.ContentManager),  KeyPresenter(*place.ContentManager),
-	  InventoryPresenter(*this),
-	  ActorController(*this), PlayerController(*this), CogController(*this), GhostController(*this),
-	  ItemController(*this), CorpseController(*this), WeaponController(*this) {
+	  script_presenter(components), sound_presenter(*place.contentmanager),  key_presenter(*place.contentmanager),
+	  inventory_presenter(*this),
+	  actor_controller(*this), player_controller(*this), cog_controller(*this), ghost_controller(*this),
+	  item_controller(*this), corpse_controller(*this), weapon_controller(*this) {
 
 	return;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Start(Event::EventBus& eventBus) {
-	components.CurrentLevelPresenter = this;
+void gorc::game::world::level::level_presenter::start(event::event_bus& eventBus) {
+	components.current_level_presenter = this;
 
-	Model = std::unique_ptr<LevelModel>(new LevelModel(*place.ContentManager, components.Compiler, place.Level,
-			place.ContentManager->Load<Content::Assets::Inventory>("items.dat", components.Compiler)));
+	model = std::unique_ptr<level_model>(new level_model(*place.contentmanager, components.compiler, place.level,
+			place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler)));
 
-	AnimationPresenter.Start(*Model, Model->AnimationModel);
-	ScriptPresenter.Start(*Model, Model->ScriptModel);
-	SoundPresenter.Start(*Model, Model->SoundModel);
-	KeyPresenter.Start(*Model, Model->KeyModel);
-	InventoryPresenter.Start(*Model, Model->InventoryModel);
+	animation_presenter.start(*model, model->animation_model);
+	script_presenter.start(*model, model->script_model);
+	sound_presenter.start(*model, model->sound_model);
+	key_presenter.start(*model, model->key_model);
+	inventory_presenter.start(*model, model->inventory_model);
 
-	InitializeWorld();
+	initialize_world();
 
-	components.LevelView.SetPresenter(this);
-	components.LevelView.SetLevelModel(Model.get());
-	components.WorldViewFrame.SetView(components.LevelView);
+	components.level_view.set_presenter(this);
+	components.level_view.set_level_model(model.get());
+	components.world_view_frame.set_view(components.level_view);
 
 	// Send startup and loading messages
-	ScriptPresenter.SendMessageToAll(Cog::MessageId::Loading, -1, -1, Flags::MessageType::Nothing);
+	script_presenter.send_message_to_all(cog::message_id::loading, -1, -1, flags::message_type::nothing);
 
 	return;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::InitializeWorld() {
-	ScriptPresenter.CreateLevelDummyInstances(Model->Level.Cogs.size());
+void gorc::game::world::level::level_presenter::initialize_world() {
+	script_presenter.create_level_dummy_instances(model->level.cogs.size());
 
-	// HACK: Create thing collision shapes and rigid bodies, enumerate spawn points
-	for(const auto& thing : Model->Level.Things) {
-		if(thing.Type == Flags::ThingType::Player) {
+	// HACK: create thing collision shapes and rigid bodies, enumerate spawn points
+	for(const auto& thing : model->level.things) {
+		if(thing.type == flags::thing_type::Player) {
 			// Add player spawn point and create ghost thing to fill ID.
-			Model->SpawnPoints.push_back(&thing);
-			CreateThing("none", thing.Sector, thing.Position, thing.Orientation);
+			model->spawn_points.push_back(&thing);
+			create_thing("none", thing.sector, thing.position, thing.orientation);
 		}
 		else {
-			CreateThing(thing, thing.Sector, thing.Position, thing.Orientation);
+			create_thing(thing, thing.sector, thing.position, thing.orientation);
 		}
 	}
 
 	// HACK: Spawn camera thing
-	Model->CurrentSpawnPoint = 0;
-	Model->CameraThingId = CreateThing(*Model->SpawnPoints[Model->CurrentSpawnPoint], Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector,
-			Model->SpawnPoints[Model->CurrentSpawnPoint]->Position, Model->SpawnPoints[Model->CurrentSpawnPoint]->Orientation);
-	auto& camera_thing = Model->Things[Model->CameraThingId];
-	camera_thing.Flags += Flags::ThingFlag::Invisible;
+	model->current_spawn_point = 0;
+	model->camera_thing_id = create_thing(*model->spawn_points[model->current_spawn_point], model->spawn_points[model->current_spawn_point]->sector,
+			model->spawn_points[model->current_spawn_point]->position, model->spawn_points[model->current_spawn_point]->orientation);
+	auto& camera_thing = model->things[model->camera_thing_id];
+	camera_thing.flags += flags::thing_flag::Invisible;
 
-	Model->CameraPosition = camera_thing.Position;
-	Model->CameraSector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
+	model->camera_position = camera_thing.position;
+	model->camera_sector = model->spawn_points[model->current_spawn_point]->sector;
 
-	// Create bin script instances.
-	for(const auto& bin_tuple : Model->InventoryModel.BaseInventory) {
+	// create bin script instances.
+	for(const auto& bin_tuple : model->inventory_model.base_inventory) {
 		const auto& bin = std::get<1>(bin_tuple);
 
-		if(bin.Cog) {
-			ScriptPresenter.CreateGlobalCogInstance(bin.Cog->Script, *place.ContentManager, components.Compiler);
+		if(bin.cog) {
+			script_presenter.create_global_cog_instance(bin.cog->script, *place.contentmanager, components.compiler);
 		}
 	}
 
-	// Create COG script instances.
-	for(unsigned int i = 0; i < Model->Level.Cogs.size(); ++i) {
-		const auto& cog = Model->Level.Cogs[i];
-		Content::Assets::Script const* script = std::get<0>(cog);
-		const std::vector<Cog::VM::Value>& values = std::get<1>(cog);
+	// create COG script instances.
+	for(unsigned int i = 0; i < model->level.cogs.size(); ++i) {
+		const auto& cog = model->level.cogs[i];
+		content::assets::script const* script = std::get<0>(cog);
+		const std::vector<cog::vm::value>& values = std::get<1>(cog);
 
 		if(script) {
-			ScriptPresenter.CreateLevelCogInstance(i, script->Script, *place.ContentManager, components.Compiler, values);
+			script_presenter.create_level_cog_instance(i, script->script, *place.contentmanager, components.compiler, values);
 		}
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Update(double dt) {
-	AnimationPresenter.Update(dt);
-	ScriptPresenter.Update(dt);
-	SoundPresenter.Update(dt);
-	KeyPresenter.Update(dt);
-	InventoryPresenter.Update(dt);
+void gorc::game::world::level::level_presenter::update(double dt) {
+	animation_presenter.update(dt);
+	script_presenter.update(dt);
+	sound_presenter.update(dt);
+	key_presenter.update(dt);
+	inventory_presenter.update(dt);
 
-	// Update things
-	for(auto& thing : Model->Things) {
-		thing.Controller->Update(thing.GetId(), dt);
+	// update things
+	for(auto& thing : model->things) {
+		thing.controller->update(thing.get_id(), dt);
 	}
 
-	// Update camera position
-	UpdateCamera();
+	// update camera position
+	update_camera();
 
-	// Update dynamic tint, game time.
-	Model->GameTime += dt;
-	Model->LevelTime += dt;
+	// update dynamic tint, game time.
+	model->game_time += dt;
+	model->level_time += dt;
 
-	Model->DynamicTint = Model->DynamicTint * (1.0 - dt);
-	Math::Get<0>(Model->DynamicTint) = std::max(Math::Get<0>(Model->DynamicTint), 0.0f);
-	Math::Get<1>(Model->DynamicTint) = std::max(Math::Get<1>(Model->DynamicTint), 0.0f);
-	Math::Get<2>(Model->DynamicTint) = std::max(Math::Get<2>(Model->DynamicTint), 0.0f);
+	model->dynamic_tint = model->dynamic_tint * (1.0 - dt);
+	math::get<0>(model->dynamic_tint) = std::max(math::get<0>(model->dynamic_tint), 0.0f);
+	math::get<1>(model->dynamic_tint) = std::max(math::get<1>(model->dynamic_tint), 0.0f);
+	math::get<2>(model->dynamic_tint) = std::max(math::get<2>(model->dynamic_tint), 0.0f);
 }
 
-Gorc::Game::World::Level::Gameplay::ThingController& Gorc::Game::World::Level::LevelPresenter::GetThingController(Flags::ThingType type) {
+gorc::game::world::level::gameplay::thing_controller& gorc::game::world::level::level_presenter::get_thing_controller(flags::thing_type type) {
 	switch(type) {
-	case Flags::ThingType::Actor:
-		return ActorController;
+	case flags::thing_type::Actor:
+		return actor_controller;
 
-	case Flags::ThingType::Cog:
-		return CogController;
+	case flags::thing_type::cog:
+		return cog_controller;
 
-	case Flags::ThingType::Player:
-		return PlayerController;
+	case flags::thing_type::Player:
+		return player_controller;
 
-	case Flags::ThingType::Corpse:
-		return CorpseController;
+	case flags::thing_type::Corpse:
+		return corpse_controller;
 
-	case Flags::ThingType::Item:
-		return ItemController;
+	case flags::thing_type::Item:
+		return item_controller;
 
-	case Flags::ThingType::Weapon:
-		return WeaponController;
+	case flags::thing_type::Weapon:
+		return weapon_controller;
 
 	default:
-	case Flags::ThingType::Ghost:
-		return GhostController;
+	case flags::thing_type::ghost:
+		return ghost_controller;
 	}
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::PointInsideSector(const Math::Vector<3>& position, const Gorc::Content::Assets::LevelSector& sec) {
-	for(size_t i =  sec.FirstSurface; i < sec.FirstSurface + sec.SurfaceCount; ++i) {
-		const auto& surf = Model->Level.Surfaces[i];
-		const auto& p = Model->Level.Vertices[std::get<0>(surf.Vertices[0])];
+bool gorc::game::world::level::level_presenter::point_inside_sector(const vector<3>& position, const gorc::content::assets::level_sector& sec) {
+	for(size_t i =  sec.first_surface; i < sec.first_surface + sec.surface_count; ++i) {
+		const auto& surf = model->level.surfaces[i];
+		const auto& p = model->level.vertices[std::get<0>(surf.vertices[0])];
 
-		if(Dot(surf.Normal, position - p) < 0.0f) {
+		if(dot(surf.normal, position - p) < 0.0f) {
 			return false;
 		}
 	}
@@ -149,30 +149,30 @@ bool Gorc::Game::World::Level::LevelPresenter::PointInsideSector(const Math::Vec
 	return true;
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::PointPathPassesThroughAdjoin(const Physics::Segment& segment,
-		const Content::Assets::LevelSector& sec, const Content::Assets::LevelSurface& surf) {
+bool gorc::game::world::level::level_presenter::point_path_passes_through_adjoin(const physics::segment& segment,
+		const content::assets::level_sector& sec, const content::assets::level_surface& surf) {
 	// Early elimination of back faces.
-	if(Dot(std::get<1>(segment) - std::get<0>(segment), surf.Normal) > 0.0f) {
+	if(dot(std::get<1>(segment) - std::get<0>(segment), surf.normal) > 0.0f) {
 		return false;
 	}
 
-	return Physics::SegmentSurfaceIntersection(segment, Model->Level, surf);
+	return physics::segment_surface_intersection(segment, model->level, surf);
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Physics::Segment& segment,
-		const Content::Assets::LevelSector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
-	if(PointInsideSector(std::get<1>(segment), sector)) {
-		path.emplace_back(sector.Number, -1);
+bool gorc::game::world::level::level_presenter::update_path_sector(const physics::segment& segment,
+		const content::assets::level_sector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
+	if(point_inside_sector(std::get<1>(segment), sector)) {
+		path.emplace_back(sector.number, -1);
 		return true;
 	}
 
-	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.SurfaceCount; ++sec_surf_id) {
-		const Content::Assets::LevelSurface& surf = Model->Surfaces[sec_surf_id + sector.FirstSurface];
-		if(surf.Adjoin >= 0 && !(surf.Flags & Flags::SurfaceFlag::Impassable)
-				&& PointPathPassesThroughAdjoin(segment, sector, surf)) {
-			path.emplace_back(sector.Number, sec_surf_id + sector.FirstSurface);
+	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.surface_count; ++sec_surf_id) {
+		const content::assets::level_surface& surf = model->surfaces[sec_surf_id + sector.first_surface];
+		if(surf.adjoin >= 0 && !(surf.flags & flags::surface_flag::Impassable)
+				&& point_path_passes_through_adjoin(segment, sector, surf)) {
+			path.emplace_back(sector.number, sec_surf_id + sector.first_surface);
 
-			if(UpdatePathSector(segment, Model->Sectors[surf.AdjoinedSector], path)) {
+			if(update_path_sector(segment, model->sectors[surf.adjoined_sector], path)) {
 				return true;
 			}
 
@@ -183,143 +183,143 @@ bool Gorc::Game::World::Level::LevelPresenter::UpdatePathSector(const Physics::S
 	return false;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::UpdateThingSector(int thing_id, Thing& thing,
-		const Vector<3>& oldThingPosition) {
-	if(PointInsideSector(thing.Position, Model->Sectors[thing.Sector])) {
-		// Thing hasn't moved to a different sector.
+void gorc::game::world::level::level_presenter::update_thing_sector(int thing_id, thing& thing,
+		const vector<3>& oldThingPosition) {
+	if(point_inside_sector(thing.position, model->sectors[thing.sector])) {
+		// thing hasn't moved to a different sector.
 		return;
 	}
 
-	Physics::Segment segment(oldThingPosition, thing.Position);
-	UpdatePathSectorScratch.clear();
-	if(UpdatePathSector(segment, Model->Sectors[thing.Sector], UpdatePathSectorScratch)) {
+	physics::segment segment(oldThingPosition, thing.position);
+	update_path_sector_scratch.clear();
+	if(update_path_sector(segment, model->sectors[thing.sector], update_path_sector_scratch)) {
 		// Fire messages along path
-		unsigned int first_adjoin = std::get<1>(UpdatePathSectorScratch.front());
-		if(Model->Surfaces[first_adjoin].Flags & Flags::SurfaceFlag::CogLinked) {
-			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Crossed, first_adjoin, Flags::MessageType::Surface,
-					static_cast<int>(thing_id), Flags::MessageType::Thing);
+		unsigned int first_adjoin = std::get<1>(update_path_sector_scratch.front());
+		if(model->surfaces[first_adjoin].flags & flags::surface_flag::CogLinked) {
+			script_presenter.send_message_to_linked(cog::message_id::crossed, first_adjoin, flags::message_type::surface,
+					static_cast<int>(thing_id), flags::message_type::thing);
 		}
 
-		for(unsigned int i = 1; i < UpdatePathSectorScratch.size() - 1; ++i) {
-			unsigned int sec_id = std::get<0>(UpdatePathSectorScratch[i]);
-			thing.Sector = sec_id;
-			if(Model->Sectors[sec_id].Flags & Flags::SectorFlag::CogLinked) {
-				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Entered, sec_id, Flags::MessageType::Sector,
-						static_cast<int>(thing_id), Flags::MessageType::Thing);
+		for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
+			unsigned int sec_id = std::get<0>(update_path_sector_scratch[i]);
+			thing.sector = sec_id;
+			if(model->sectors[sec_id].flags & flags::sector_flag::CogLinked) {
+				script_presenter.send_message_to_linked(cog::message_id::entered, sec_id, flags::message_type::sector,
+						static_cast<int>(thing_id), flags::message_type::thing);
 			}
 
-			unsigned int surf_id = std::get<1>(UpdatePathSectorScratch[i]);
-			if(Model->Surfaces[surf_id].Flags & Flags::SurfaceFlag::CogLinked) {
-				ScriptPresenter.SendMessageToLinked(Cog::MessageId::Crossed, surf_id, Flags::MessageType::Surface,
-						static_cast<int>(thing_id), Flags::MessageType::Thing);
+			unsigned int surf_id = std::get<1>(update_path_sector_scratch[i]);
+			if(model->surfaces[surf_id].flags & flags::surface_flag::CogLinked) {
+				script_presenter.send_message_to_linked(cog::message_id::crossed, surf_id, flags::message_type::surface,
+						static_cast<int>(thing_id), flags::message_type::thing);
 			}
 		}
 
-		unsigned int last_sector = std::get<0>(UpdatePathSectorScratch.back());
-		thing.Sector = last_sector;
-		if(Model->Sectors[last_sector].Flags & Flags::SectorFlag::CogLinked) {
-			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Entered, last_sector, Flags::MessageType::Sector,
-					static_cast<int>(thing_id), Flags::MessageType::Thing);
+		unsigned int last_sector = std::get<0>(update_path_sector_scratch.back());
+		thing.sector = last_sector;
+		if(model->sectors[last_sector].flags & flags::sector_flag::CogLinked) {
+			script_presenter.send_message_to_linked(cog::message_id::entered, last_sector, flags::message_type::sector,
+					static_cast<int>(thing_id), flags::message_type::thing);
 		}
 	}
 	else {
-		// Thing hasn't moved.
+		// thing hasn't moved.
 		// TODO: Need to run a backup random walk here.
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::UpdateCamera() {
+void gorc::game::world::level::level_presenter::update_camera() {
 	if(need_respawn) {
-		DoRespawn();
+		do_respawn();
 	}
 
-	Thing& camera = Model->Things[Model->CameraThingId];
-	camera.Thrust = Model->CameraVelocity;
-	Model->CameraVelocity = Zero<3>();
+	thing& camera = model->things[model->camera_thing_id];
+	camera.thrust = model->camera_velocity;
+	model->camera_velocity = zero<3>();
 
-	// Update camera with eye offset
-	auto p0 = camera.Position;
-	auto p1 = camera.Position + camera.EyeOffset;
-	if(PointInsideSector(p1, Model->Sectors[camera.Sector])) {
+	// update camera with eye offset
+	auto p0 = camera.position;
+	auto p1 = camera.position + camera.eye_offset;
+	if(point_inside_sector(p1, model->sectors[camera.sector])) {
 		// Eye offset doesn't change camera sector.
-		Model->CameraSector = camera.Sector;
+		model->camera_sector = camera.sector;
 	}
 	else {
-		UpdatePathSectorScratch.clear();
-		if(UpdatePathSector(Physics::Segment(p0, p1), Model->Sectors[camera.Sector], UpdatePathSectorScratch)) {
-			Model->CameraSector = std::get<0>(UpdatePathSectorScratch.back());
+		update_path_sector_scratch.clear();
+		if(update_path_sector(physics::segment(p0, p1), model->sectors[camera.sector], update_path_sector_scratch)) {
+			model->camera_sector = std::get<0>(update_path_sector_scratch.back());
 		}
 		else {
 			// TODO: Back-up random walk
-			Model->CameraSector = camera.Sector;
+			model->camera_sector = camera.sector;
 		}
 	}
 
-	Model->CameraPosition = p1;
+	model->camera_position = p1;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::TranslateCamera(const Vector<3>& amt) {
-	Vector<3> cam_vel = Zero<3>();
-	cam_vel = Zero<3>();
-	cam_vel += Get<X>(amt) * Cross(Model->CameraLook, Model->CameraUp);
-	cam_vel += Get<Z>(amt) * Model->CameraUp;
-	cam_vel += Get<Y>(amt) * Model->CameraLook;
+void gorc::game::world::level::level_presenter::translate_camera(const vector<3>& amt) {
+	vector<3> cam_vel = zero<3>();
+	cam_vel = zero<3>();
+	cam_vel += get<X>(amt) * cross(model->camera_look, model->camera_up);
+	cam_vel += get<Z>(amt) * model->camera_up;
+	cam_vel += get<Y>(amt) * model->camera_look;
 	cam_vel *= 1.2f;
 
-	Model->CameraVelocity = cam_vel;
+	model->camera_velocity = cam_vel;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::YawCamera(double amt) {
+void gorc::game::world::level::level_presenter::yaw_camera(double amt) {
 	float sint = std::sin(amt);
 	float cost = std::cos(amt);
 
-	Vector<3> NewLook = Vec(
-			cost * Get<X>(Model->CameraLook) - sint * Get<Y>(Model->CameraLook),
-			sint * Get<X>(Model->CameraLook) + cost * Get<Y>(Model->CameraLook),
-			Get<Z>(Model->CameraLook));
-	Vector<3> NewUp = Vec(
-			cost * Get<X>(Model->CameraUp) - sint * Get<Y>(Model->CameraUp),
-			sint * Get<X>(Model->CameraUp) + cost * Get<Y>(Model->CameraUp),
-			Get<Z>(Model->CameraUp));
+	vector<3> NewLook = make_vector(
+			cost * get<X>(model->camera_look) - sint * get<Y>(model->camera_look),
+			sint * get<X>(model->camera_look) + cost * get<Y>(model->camera_look),
+			get<Z>(model->camera_look));
+	vector<3> NewUp = make_vector(
+			cost * get<X>(model->camera_up) - sint * get<Y>(model->camera_up),
+			sint * get<X>(model->camera_up) + cost * get<Y>(model->camera_up),
+			get<Z>(model->camera_up));
 
-	Model->CameraLook = Normalize(NewLook);
-	Model->CameraUp = Normalize(NewUp);
+	model->camera_look = normalize(NewLook);
+	model->camera_up = normalize(NewUp);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::PitchCamera(double amt) {
+void gorc::game::world::level::level_presenter::pitch_camera(double amt) {
 	float sint = std::sin(amt);
 	float cost = std::cos(amt);
 
-	Vector<3> NewUp = (-sint * Model->CameraLook) + (cost * Model->CameraUp);
-	Vector<3> NewLook = (cost * Model->CameraLook) + (sint * Model->CameraUp);
-	Model->CameraUp = Normalize(NewUp);
-	Model->CameraLook = Normalize(NewLook);
+	vector<3> NewUp = (-sint * model->camera_look) + (cost * model->camera_up);
+	vector<3> NewLook = (cost * model->camera_look) + (sint * model->camera_up);
+	model->camera_up = normalize(NewUp);
+	model->camera_look = normalize(NewLook);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::DoRespawn() {
+void gorc::game::world::level::level_presenter::do_respawn() {
 	need_respawn = false;
 
-	++Model->CurrentSpawnPoint;
-	Model->CurrentSpawnPoint = Model->CurrentSpawnPoint % Model->SpawnPoints.size();
+	++model->current_spawn_point;
+	model->current_spawn_point = model->current_spawn_point % model->spawn_points.size();
 
-	Thing& cameraThing = Model->Things[Model->CameraThingId];
-	cameraThing.Sector = Model->SpawnPoints[Model->CurrentSpawnPoint]->Sector;
-	cameraThing.Position = Model->SpawnPoints[Model->CurrentSpawnPoint]->Position;
-	cameraThing.AttachFlags = FlagSet<Flags::AttachFlag>();
+	thing& cameraThing = model->things[model->camera_thing_id];
+	cameraThing.sector = model->spawn_points[model->current_spawn_point]->sector;
+	cameraThing.position = model->spawn_points[model->current_spawn_point]->position;
+	cameraThing.attach_flags = flag_set<flags::attach_flag>();
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Respawn() {
+void gorc::game::world::level::level_presenter::respawn() {
 	need_respawn = true;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Jump() {
-	Get<2>(Model->CameraVelocity) = 1.6f;
+void gorc::game::world::level::level_presenter::jump() {
+	get<2>(model->camera_velocity) = 1.6f;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Activate() {
+void gorc::game::world::level::level_presenter::activate() {
 	// TODO: Implement actual surface and thing activation
 
-	Math::Vector<3> camera_position = Model->CameraPosition;
+	vector<3> camera_position = model->camera_position;
 
 	int best_surf_candidate = -1;
 	float best_surf_dist = 0.25f;
@@ -327,16 +327,16 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 	int best_thing_candidate = -1;
 	float best_thing_dist = 0.25f;
 
-	for(int i = 0; i < Model->Surfaces.size(); ++i) {
-		const Content::Assets::LevelSurface& surf = Model->Surfaces[i];
-		if((surf.Adjoin >= 0 && (Model->Adjoins[surf.Adjoin].Flags & Flags::AdjoinFlag::AllowMovement))
-				|| !(surf.Flags & Flags::SurfaceFlag::CogLinked)
-				|| Math::Dot(surf.Normal, Model->CameraLook) >= 0.0f) {
+	for(int i = 0; i < model->surfaces.size(); ++i) {
+		const content::assets::level_surface& surf = model->surfaces[i];
+		if((surf.adjoin >= 0 && (model->adjoins[surf.adjoin].flags & flags::adjoin_flag::AllowMovement))
+				|| !(surf.flags & flags::surface_flag::CogLinked)
+				|| math::dot(surf.normal, model->camera_look) >= 0.0f) {
 			continue;
 		}
 
-		for(const auto& vx : surf.Vertices) {
-			float new_dist = Math::Length(camera_position - Model->Level.Vertices[std::get<0>(vx)]);
+		for(const auto& vx : surf.vertices) {
+			float new_dist = math::length(camera_position - model->level.vertices[std::get<0>(vx)]);
 			if(new_dist < best_surf_dist) {
 				best_surf_candidate = i;
 				best_surf_dist = new_dist;
@@ -345,281 +345,281 @@ void Gorc::Game::World::Level::LevelPresenter::Activate() {
 		}
 	}
 
-	for(auto& thing : Model->Things) {
-		if(thing.GetId() == Model->CameraThingId) {
+	for(auto& thing : model->things) {
+		if(thing.get_id() == model->camera_thing_id) {
 			continue;
 		}
 
-		auto dir_vec = thing.Position - camera_position;
-		if(!(thing.Flags & Flags::ThingFlag::CogLinked) || Math::Dot(dir_vec, Model->CameraLook) <= 0.0f) {
+		auto dir_vec = thing.position - camera_position;
+		if(!(thing.flags & flags::thing_flag::CogLinked) || math::dot(dir_vec, model->camera_look) <= 0.0f) {
 			continue;
 		}
 
-		float dir_len = Math::Length(dir_vec);
+		float dir_len = math::length(dir_vec);
 		if(dir_len >= best_thing_dist) {
 			continue;
 		}
 
-		best_thing_candidate = thing.GetId();
+		best_thing_candidate = thing.get_id();
 		best_thing_dist = dir_len;
 	}
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, best_surf_candidate, Flags::MessageType::Surface,
-				Model->CameraThingId, Flags::MessageType::Thing);
+		script_presenter.send_message_to_linked(cog::message_id::activated, best_surf_candidate, flags::message_type::surface,
+				model->camera_thing_id, flags::message_type::thing);
 	}
 	else if(best_thing_candidate >= 0) {
-		ScriptPresenter.SendMessageToLinked(Cog::MessageId::Activated, best_thing_candidate, Flags::MessageType::Thing,
-				Model->CameraThingId, Flags::MessageType::Thing);
-		SoundPresenter.PlaySoundClass(best_thing_candidate, Flags::SoundSubclassType::Activate);
+		script_presenter.send_message_to_linked(cog::message_id::activated, best_thing_candidate, flags::message_type::thing,
+				model->camera_thing_id, flags::message_type::thing);
+		sound_presenter.play_sound_class(best_thing_candidate, flags::sound_subclass_type::Activate);
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::Damage() {
+void gorc::game::world::level::level_presenter::damage() {
 	// TODO: Temporary code to fire a bryar bolt.
 
 	// Calculate orientation from camera look.
-	float bolt_yaw = std::atan2(Math::Get<1>(Model->CameraLook), Math::Get<0>(Model->CameraLook)) / Deg2Rad;
-	float bolt_pitch = std::acos(Math::Dot(Math::Vec(0.0f, 0.0f, 1.0f), Model->CameraLook)) / Deg2Rad;
+	float bolt_yaw = std::atan2(math::get<1>(model->camera_look), math::get<0>(model->camera_look)) / deg2rad;
+	float bolt_pitch = std::acos(math::dot(math::make_vector(0.0f, 0.0f, 1.0f), model->camera_look)) / deg2rad;
 
-	Math::Vector<3> bolt_offset = Model->CameraPosition + Model->CameraLook * 0.09f - Model->CameraUp * 0.01f;
-	UpdatePathSectorScratch.clear();
-	UpdatePathSector(Physics::Segment(Model->CameraPosition, bolt_offset), Model->Sectors[Model->CameraSector], UpdatePathSectorScratch);
-	int bolt_sector = std::get<0>(UpdatePathSectorScratch.back());
+	vector<3> bolt_offset = model->camera_position + model->camera_look * 0.09f - model->camera_up * 0.01f;
+	update_path_sector_scratch.clear();
+	update_path_sector(physics::segment(model->camera_position, bolt_offset), model->sectors[model->camera_sector], update_path_sector_scratch);
+	int bolt_sector = std::get<0>(update_path_sector_scratch.back());
 
-	int bolt_thing = CreateThing("+bryarbolt", bolt_sector, bolt_offset, Math::Vec(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+	int bolt_thing = create_thing("+bryarbolt", bolt_sector, bolt_offset, math::make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
 
-	auto& thing = Model->Things[bolt_thing];
+	auto& thing = model->things[bolt_thing];
 }
 
-void Gorc::Game::World::Level::LevelPresenter::ThingSighted(int thing_id) {
-	Model->Things[thing_id].Flags += Flags::ThingFlag::Sighted;
-	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Sighted, thing_id, Flags::MessageType::Thing);
+void gorc::game::world::level::level_presenter::thing_sighted(int thing_id) {
+	model->things[thing_id].flags += flags::thing_flag::Sighted;
+	script_presenter.send_message_to_linked(cog::message_id::sighted, thing_id, flags::message_type::thing);
 }
 
 // Color verbs
-void Gorc::Game::World::Level::LevelPresenter::AddDynamicTint(int player_id, const Math::Vector<3>& tint) {
-	Model->DynamicTint += tint;
+void gorc::game::world::level::level_presenter::add_dynamic_tint(int player_id, const vector<3>& tint) {
+	model->dynamic_tint += tint;
 
 	// Clamp dynamic tint
-	auto dynamic_tint = Model->DynamicTint;
-	Math::Get<0>(Model->DynamicTint) = std::max(Math::Get<0>(dynamic_tint), 0.0f);
-	Math::Get<1>(Model->DynamicTint) = std::max(Math::Get<1>(dynamic_tint), 0.0f);
-	Math::Get<2>(Model->DynamicTint) = std::max(Math::Get<2>(dynamic_tint), 0.0f);
-	Math::Get<0>(Model->DynamicTint) = std::min(Math::Get<0>(dynamic_tint), 1.0f);
-	Math::Get<1>(Model->DynamicTint) = std::min(Math::Get<1>(dynamic_tint), 1.0f);
-	Math::Get<2>(Model->DynamicTint) = std::min(Math::Get<2>(dynamic_tint), 1.0f);
+	auto dynamic_tint = model->dynamic_tint;
+	math::get<0>(model->dynamic_tint) = std::max(math::get<0>(dynamic_tint), 0.0f);
+	math::get<1>(model->dynamic_tint) = std::max(math::get<1>(dynamic_tint), 0.0f);
+	math::get<2>(model->dynamic_tint) = std::max(math::get<2>(dynamic_tint), 0.0f);
+	math::get<0>(model->dynamic_tint) = std::min(math::get<0>(dynamic_tint), 1.0f);
+	math::get<1>(model->dynamic_tint) = std::min(math::get<1>(dynamic_tint), 1.0f);
+	math::get<2>(model->dynamic_tint) = std::min(math::get<2>(dynamic_tint), 1.0f);
 }
 
 // Frame verbs
-int Gorc::Game::World::Level::LevelPresenter::GetCurFrame(int thing_id) {
-	return Model->Things[thing_id].CurrentFrame;
+int gorc::game::world::level::level_presenter::get_cur_frame(int thing_id) {
+	return model->things[thing_id].current_frame;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::JumpToFrame(int thing_id, int frame, int sector) {
-	Thing& referenced_thing = Model->Things[thing_id];
-	auto& referenced_frame = referenced_thing.Frames[frame];
-	SetThingPos(thing_id, std::get<0>(referenced_frame), std::get<1>(referenced_frame), sector);
+void gorc::game::world::level::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
+	thing& referenced_thing = model->things[thing_id];
+	auto& referenced_frame = referenced_thing.frames[frame];
+	set_thing_pos(thing_id, std::get<0>(referenced_frame), std::get<1>(referenced_frame), sector);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::MoveToFrame(int thing_id, int frame, float speed) {
-	Thing& referenced_thing = Model->Things[thing_id];
+void gorc::game::world::level::level_presenter::MoveToFrame(int thing_id, int frame, float speed) {
+	thing& referenced_thing = model->things[thing_id];
 
-	referenced_thing.GoalFrame = frame;
-	if(frame > referenced_thing.CurrentFrame) {
-		referenced_thing.NextFrame = referenced_thing.CurrentFrame + 1;
+	referenced_thing.goal_frame = frame;
+	if(frame > referenced_thing.current_frame) {
+		referenced_thing.next_frame = referenced_thing.current_frame + 1;
 	}
-	else if(frame < referenced_thing.CurrentFrame) {
-		referenced_thing.NextFrame = referenced_thing.CurrentFrame - 1;
+	else if(frame < referenced_thing.current_frame) {
+		referenced_thing.next_frame = referenced_thing.current_frame - 1;
 	}
 	else {
-		referenced_thing.NextFrame = frame;
+		referenced_thing.next_frame = frame;
 	}
 
-	referenced_thing.PathMoveSpeed = speed;
-	referenced_thing.PathMoving = true;
-	SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::StartMove);
-	SoundPresenter.PlayFoleyLoopClass(thing_id, Flags::SoundSubclassType::Moving);
+	referenced_thing.path_move_speed = speed;
+	referenced_thing.path_moving = true;
+	sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StartMove);
+	sound_presenter.play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
 }
 
-// Level verbs
-float Gorc::Game::World::Level::LevelPresenter::GetGameTime() {
-	return Model->GameTime;
+// level verbs
+float gorc::game::world::level::level_presenter::get_game_time() {
+	return model->game_time;
 }
 
-float Gorc::Game::World::Level::LevelPresenter::GetLevelTime() {
-	return Model->LevelTime;
+float gorc::game::world::level::level_presenter::get_level_time() {
+	return model->level_time;
 }
 
 // Misc verbs
-void Gorc::Game::World::Level::LevelPresenter::TakeItem(int thing_id, int player_id) {
-	auto& thing = Model->Things[thing_id];
-	thing.Controller->Taken(thing_id, player_id);
+void gorc::game::world::level::level_presenter::take_item(int thing_id, int player_id) {
+	auto& thing = model->things[thing_id];
+	thing.controller->taken(thing_id, player_id);
 }
 
 // Player verbs
-int Gorc::Game::World::Level::LevelPresenter::GetLocalPlayerThing() {
-	return Model->CameraThingId;
+int gorc::game::world::level::level_presenter::get_local_player_thing() {
+	return model->camera_thing_id;
 }
 
-// Sector verbs
-void Gorc::Game::World::Level::LevelPresenter::SetSectorAdjoins(int sector_id, bool state) {
-	Content::Assets::LevelSector& sector = Model->Sectors[sector_id];
-	for(unsigned int i = 0; i < sector.SurfaceCount; ++i) {
-		Content::Assets::LevelSurface& surface = Model->Surfaces[i + sector.FirstSurface];
-		if(surface.Adjoin >= 0) {
-			Content::Assets::LevelAdjoin& adjoin = Model->Adjoins[surface.Adjoin];
+// sector verbs
+void gorc::game::world::level::level_presenter::set_sector_adjoins(int sector_id, bool state) {
+	content::assets::level_sector& sector = model->sectors[sector_id];
+	for(unsigned int i = 0; i < sector.surface_count; ++i) {
+		content::assets::level_surface& surface = model->surfaces[i + sector.first_surface];
+		if(surface.adjoin >= 0) {
+			content::assets::level_adjoin& adjoin = model->adjoins[surface.adjoin];
 
 			if(state) {
-				adjoin.Flags += Flags::AdjoinFlag::Visible;
+				adjoin.flags += flags::adjoin_flag::Visible;
 			}
 			else {
-				adjoin.Flags -= Flags::AdjoinFlag::Visible;
+				adjoin.flags -= flags::adjoin_flag::Visible;
 			}
 		}
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetSectorLight(int sector_id, float value, float delay) {
-	// TODO: Create animation to implement delay feature.
-	Content::Assets::LevelSector& sector = Model->Sectors[sector_id];
-	sector.ExtraLight = value;
+void gorc::game::world::level::level_presenter::set_sector_light(int sector_id, float value, float delay) {
+	// TODO: create animation to implement delay feature.
+	content::assets::level_sector& sector = model->sectors[sector_id];
+	sector.extra_light = value;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetSectorThrust(int sector_id, const Math::Vector<3>& thrust) {
-	Content::Assets::LevelSector& sector = Model->Sectors[sector_id];
-	sector.Thrust = thrust * RateFactor;
+void gorc::game::world::level::level_presenter::set_sector_thrust(int sector_id, const vector<3>& thrust) {
+	content::assets::level_sector& sector = model->sectors[sector_id];
+	sector.thrust = thrust * rate_factor;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetSectorTint(int sector_id, const Math::Vector<3>& color) {
-	Content::Assets::LevelSector& sector = Model->Sectors[sector_id];
-	sector.Tint = color;
+void gorc::game::world::level::level_presenter::set_sector_tint(int sector_id, const vector<3>& color) {
+	content::assets::level_sector& sector = model->sectors[sector_id];
+	sector.tint = color;
 }
 
-// Surface verbs
-void Gorc::Game::World::Level::LevelPresenter::ClearAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags) {
-	Content::Assets::LevelSurface& surf = Model->Surfaces[surface];
-	if(surf.Adjoin >= 0) {
-		Content::Assets::LevelAdjoin& adj = Model->Adjoins[surf.Adjoin];
-		adj.Flags -= flags;
+// surface verbs
+void gorc::game::world::level::level_presenter::clear_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags) {
+	content::assets::level_surface& surf = model->surfaces[surface];
+	if(surf.adjoin >= 0) {
+		content::assets::level_adjoin& adj = model->adjoins[surf.adjoin];
+		adj.flags -= flags;
 	}
 }
 
-Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetSurfaceCenter(int surface) {
-	auto vec = Math::Zero<3>();
-	for(const auto& vx : Model->Level.Surfaces[surface].Vertices) {
-		vec += Model->Level.Vertices[std::get<0>(vx)];
+gorc::vector<3> gorc::game::world::level::level_presenter::get_surface_center(int surface) {
+	auto vec = math::zero<3>();
+	for(const auto& vx : model->level.surfaces[surface].vertices) {
+		vec += model->level.vertices[std::get<0>(vx)];
 	}
 
-	vec /= static_cast<float>(Model->Level.Surfaces[surface].Vertices.size());
+	vec /= static_cast<float>(model->level.surfaces[surface].vertices.size());
 	return vec;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetAdjoinFlags(int surface, FlagSet<Flags::AdjoinFlag> flags) {
-	Content::Assets::LevelSurface& surf = Model->Surfaces[surface];
-	if(surf.Adjoin >= 0) {
-		Content::Assets::LevelAdjoin& adj = Model->Adjoins[surf.Adjoin];
-		adj.Flags += flags;
+void gorc::game::world::level::level_presenter::set_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags) {
+	content::assets::level_surface& surf = model->surfaces[surface];
+	if(surf.adjoin >= 0) {
+		content::assets::level_adjoin& adj = model->adjoins[surf.adjoin];
+		adj.flags += flags;
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetFaceGeoMode(int surface, Flags::GeometryMode geo_mode) {
-	Model->Surfaces[surface].GeometryMode = geo_mode;
+void gorc::game::world::level::level_presenter::set_face_geo_mode(int surface, flags::geometry_mode geo_mode) {
+	model->surfaces[surface].geometry_mode = geo_mode;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetSurfaceFlags(int surface, FlagSet<Flags::SurfaceFlag> flags) {
-	Content::Assets::LevelSurface& surf = Model->Surfaces[surface];
-	surf.Flags += flags;
+void gorc::game::world::level::level_presenter::set_surface_flags(int surface, flag_set<flags::surface_flag> flags) {
+	content::assets::level_surface& surf = model->surfaces[surface];
+	surf.flags += flags;
 }
 
 // System verbs
-int Gorc::Game::World::Level::LevelPresenter::LoadSound(const char* fn) {
-	return place.ContentManager->LoadId<Content::Assets::Sound>(fn);
+int gorc::game::world::level::level_presenter::load_sound(const char* fn) {
+	return place.contentmanager->load_id<content::assets::sound>(fn);
 }
 
-// Thing action verbs
+// thing action verbs
 
-int Gorc::Game::World::Level::LevelPresenter::CreateThing(const Content::Assets::Template& tpl, unsigned int sector_num,
-		const Math::Vector<3>& pos, const Math::Vector<3>& orient) {
+int gorc::game::world::level::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
+		const vector<3>& pos, const vector<3>& orient) {
 	// Initialize thing properties
-	auto& thing = Model->Things.Create();
-	thing = Thing(tpl);
+	auto& new_thing = model->things.create();
+	new_thing = thing(tpl);
 
-	thing.ObjectData.ThingId = thing.GetId();
-	thing.Sector = sector_num;
-	thing.Position = pos;
-	thing.Orientation = orient;
-	thing.Controller = &GetThingController(thing.Type);
+	new_thing.object_data.thing_id = new_thing.get_id();
+	new_thing.sector = sector_num;
+	new_thing.position = pos;
+	new_thing.orientation = orient;
+	new_thing.controller = &get_thing_controller(new_thing.type);
 
-	thing.Controller->CreateControllerData(thing.GetId());
+	new_thing.controller->create_controller_data(new_thing.get_id());
 
-	if(thing.Cog) {
-		ScriptPresenter.CreateGlobalCogInstance(thing.Cog->Script, *place.ContentManager, components.Compiler);
+	if(new_thing.cog) {
+		script_presenter.create_global_cog_instance(new_thing.cog->script, *place.contentmanager, components.compiler);
 	}
 
-	SoundPresenter.PlaySoundClass(thing.GetId(), Flags::SoundSubclassType::Create);
+	sound_presenter.play_sound_class(new_thing.get_id(), flags::sound_subclass_type::create);
 
-	return thing.GetId();
+	return new_thing.get_id();
 }
 
-int Gorc::Game::World::Level::LevelPresenter::CreateThing(int tpl_id, unsigned int sector_num,
-		const Math::Vector<3>& pos, const Math::Vector<3>& orientation) {
-	return CreateThing(Model->Level.Templates[tpl_id], sector_num, pos, orientation);
+int gorc::game::world::level::level_presenter::create_thing(int tpl_id, unsigned int sector_num,
+		const vector<3>& pos, const vector<3>& orientation) {
+	return create_thing(model->level.templates[tpl_id], sector_num, pos, orientation);
 }
 
-int Gorc::Game::World::Level::LevelPresenter::CreateThing(const std::string& tpl_name, unsigned int sector_num,
-		const Math::Vector<3>& pos, const Math::Vector<3>& orientation) {
+int gorc::game::world::level::level_presenter::create_thing(const std::string& tpl_name, unsigned int sector_num,
+		const vector<3>& pos, const vector<3>& orientation) {
 	std::string temp;
 	std::transform(tpl_name.begin(), tpl_name.end(), std::back_inserter(temp), tolower);
-	auto it = Model->Level.TemplateMap.find(temp);
-	if(it != Model->Level.TemplateMap.end()) {
-		return CreateThing(it->second, sector_num, pos, orientation);
+	auto it = model->level.template_map.find(temp);
+	if(it != model->level.template_map.end()) {
+		return create_thing(it->second, sector_num, pos, orientation);
 	}
 	else {
-		// TODO: Template not found. Report error.
+		// TODO: thing_template not found. report error.
 		return -1;
 	}
 }
 
-void Gorc::Game::World::Level::LevelPresenter::AdjustThingPos(int thing_id, const Math::Vector<3>& new_pos) {
-	auto& thing = Model->Things[thing_id];
-	auto old_pos = thing.Position;
-	thing.Position = new_pos;
-	UpdateThingSector(thing_id, thing, old_pos);
+void gorc::game::world::level::level_presenter::adjust_thing_pos(int thing_id, const vector<3>& new_pos) {
+	auto& thing = model->things[thing_id];
+	auto old_pos = thing.position;
+	thing.position = new_pos;
+	update_thing_sector(thing_id, thing, old_pos);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetThingPos(int thing_id, const Math::Vector<3>& new_pos, const Math::Vector<3>& new_orient, int new_sector) {
-	Thing& thing = Model->Things[thing_id];
-	thing.Position = new_pos;
-	thing.Orientation = new_orient;
-	thing.Sector = new_sector;
+void gorc::game::world::level::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const vector<3>& new_orient, int new_sector) {
+	thing& thing = model->things[thing_id];
+	thing.position = new_pos;
+	thing.orientation = new_orient;
+	thing.sector = new_sector;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::AttachThingToThing(int thing_id, int base_id) {
-	auto& thing = Model->Things[thing_id];
-	auto& base = Model->Things[base_id];
+void gorc::game::world::level::level_presenter::attach_thing_to_thing(int thing_id, int base_id) {
+	auto& thing = model->things[thing_id];
+	auto& base = model->things[base_id];
 
-	thing.AttachFlags = FlagSet<Flags::AttachFlag> { Flags::AttachFlag::AttachedToThing };
-	thing.AttachedThing = base_id;
-	thing.PrevAttachedThingPosition = base.Position;
+	thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToThing };
+	thing.attached_thing = base_id;
+	thing.prev_attached_thing_position = base.position;
 }
 
-int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int thing_id) {
-	Thing& referencedThing = Model->Things[thing_id];
-	int new_thing_id = CreateThing(tpl_id, referencedThing.Sector, referencedThing.Position, referencedThing.Orientation);
-	Thing& new_thing = Model->Things[new_thing_id];
+int gorc::game::world::level::level_presenter::create_thing_at_thing(int tpl_id, int thing_id) {
+	thing& referencedThing = model->things[thing_id];
+	int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orientation);
+	thing& new_thing = model->things[new_thing_id];
 
-	new_thing.PathMoving = false;
+	new_thing.path_moving = false;
 
-	if(new_thing.Model3d) {
-		AdjustThingPos(new_thing_id, new_thing.Position + new_thing.Model3d->InsertOffset);
+	if(new_thing.model_3d) {
+		adjust_thing_pos(new_thing_id, new_thing.position + new_thing.model_3d->insert_offset);
 	}
 
 	// CreateThingAtThing really does copy frames.
-	std::transform(referencedThing.Frames.begin(), referencedThing.Frames.end(), std::back_inserter(new_thing.Frames),
-			[&new_thing](const std::tuple<Vector<3>, Vector<3>>& frame) -> std::tuple<Vector<3>, Vector<3>> {
-		if(new_thing.Model3d) {
-			return std::make_tuple(std::get<0>(frame) + new_thing.Model3d->InsertOffset, std::get<1>(frame));
+	std::transform(referencedThing.frames.begin(), referencedThing.frames.end(), std::back_inserter(new_thing.frames),
+			[&new_thing](const std::tuple<vector<3>, vector<3>>& frame) -> std::tuple<vector<3>, vector<3>> {
+		if(new_thing.model_3d) {
+			return std::make_tuple(std::get<0>(frame) + new_thing.model_3d->insert_offset, std::get<1>(frame));
 		}
 		else {
 			return frame;
@@ -629,28 +629,28 @@ int Gorc::Game::World::Level::LevelPresenter::CreateThingAtThing(int tpl_id, int
 	return new_thing_id;
 }
 
-float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float damage, FlagSet<Flags::DamageFlag> flags, int damager_id) {
-	ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, static_cast<int>(thing_id), Flags::MessageType::Thing,
-			damager_id, Flags::MessageType::Thing, damage, static_cast<int>(flags));
+float gorc::game::world::level::level_presenter::damage_thing(int thing_id, float damage, flag_set<flags::DamageFlag> flags, int damager_id) {
+	script_presenter.send_message_to_linked(cog::message_id::damaged, static_cast<int>(thing_id), flags::message_type::thing,
+			damager_id, flags::message_type::thing, damage, static_cast<int>(flags));
 
-	Thing& referencedThing = Model->Things[thing_id];
-	if(referencedThing.Health > 0.0f) {
-		referencedThing.Health -= damage;
+	thing& referencedThing = model->things[thing_id];
+	if(referencedThing.health > 0.0f) {
+		referencedThing.health -= damage;
 
-		if(referencedThing.Health <= 0.0f && (referencedThing.Type == Flags::ThingType::Actor || referencedThing.Type == Flags::ThingType::Player)) {
-			SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::Death1);
-			ScriptPresenter.SendMessageToLinked(Cog::MessageId::Killed, static_cast<int>(thing_id), Flags::MessageType::Thing,
-					damager_id, Flags::MessageType::Thing);
-			// TODO: Thing is dead. Reset to corpse
-			SetThingType(thing_id, Flags::ThingType::Corpse);
-			if(referencedThing.Puppet) {
-				KeyPresenter.PlayPuppetKey(thing_id, Flags::PuppetModeType::Default, Flags::PuppetSubmodeType::Death);
+		if(referencedThing.health <= 0.0f && (referencedThing.type == flags::thing_type::Actor || referencedThing.type == flags::thing_type::Player)) {
+			sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::Death1);
+			script_presenter.send_message_to_linked(cog::message_id::killed, static_cast<int>(thing_id), flags::message_type::thing,
+					damager_id, flags::message_type::thing);
+			// TODO: thing is dead. Reset to corpse
+			set_thing_type(thing_id, flags::thing_type::Corpse);
+			if(referencedThing.puppet) {
+				key_presenter.play_puppet_key(thing_id, flags::puppet_mode_type::Default, flags::puppet_submode_type::Death);
 			}
 		}
 		else {
-			SoundPresenter.PlaySoundClass(thing_id, Flags::SoundSubclassType::HurtSpecial);
-			if(referencedThing.Puppet) {
-				KeyPresenter.PlayPuppetKey(thing_id, Flags::PuppetModeType::Default, Flags::PuppetSubmodeType::Hit);
+			sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::HurtSpecial);
+			if(referencedThing.puppet) {
+				key_presenter.play_puppet_key(thing_id, flags::puppet_mode_type::Default, flags::puppet_submode_type::Hit);
 			}
 		}
 	}
@@ -660,298 +660,298 @@ float Gorc::Game::World::Level::LevelPresenter::DamageThing(int thing_id, float 
 	return 0.0f;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::DestroyThing(int thing_id) {
+void gorc::game::world::level::level_presenter::destroy_thing(int thing_id) {
 	// TODO: Clean up components owned by thing (animations, key mixes, sounds).
-	Model->Things[thing_id].Controller->RemoveControllerData(thing_id);
-	Model->Things.Destroy(thing_id);
+	model->things[thing_id].controller->remove_controller_data(thing_id);
+	model->things.destroy(thing_id);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::DetachThing(int thing_id) {
-	Model->Things[thing_id].AttachFlags = FlagSet<Flags::AttachFlag>();
+void gorc::game::world::level::level_presenter::detach_thing(int thing_id) {
+	model->things[thing_id].attach_flags = flag_set<flags::attach_flag>();
 }
 
-Gorc::Math::Vector<3> Gorc::Game::World::Level::LevelPresenter::GetThingPos(int thing_id) {
-	Thing& referenced_thing = Model->Things[thing_id];
-	return referenced_thing.Position;
+gorc::vector<3> gorc::game::world::level::level_presenter::get_thing_pos(int thing_id) {
+	thing& referenced_thing = model->things[thing_id];
+	return referenced_thing.position;
 }
 
-bool Gorc::Game::World::Level::LevelPresenter::IsThingMoving(int thing_id) {
+bool gorc::game::world::level::level_presenter::is_thing_moving(int thing_id) {
 	// TODO: Temporary hack implementation pending new physics implementation.
-	Thing& referencedThing = Model->Things[thing_id];
-	switch(referencedThing.Move) {
-	case Flags::MoveType::Physics:
+	thing& referencedThing = model->things[thing_id];
+	switch(referencedThing.move) {
+	case flags::move_type::physics:
 		return true;
 
-	case Flags::MoveType::Path:
+	case flags::move_type::Path:
 	default:
 		return false;
 	}
 }
 
-// Thing flags verbs
-void Gorc::Game::World::Level::LevelPresenter::ClearActorFlags(int thing_id, FlagSet<Flags::ActorFlag> flags) {
-	Model->Things[thing_id].ActorFlags -= flags;
+// thing flags verbs
+void gorc::game::world::level::level_presenter::clear_actor_flags(int thing_id, flag_set<flags::actor_flag> flags) {
+	model->things[thing_id].actor_flags -= flags;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::ClearThingFlags(int thing_id, FlagSet<Flags::ThingFlag> flags) {
-	Model->Things[thing_id].Flags -= flags;
+void gorc::game::world::level::level_presenter::clear_thing_flags(int thing_id, flag_set<flags::thing_flag> flags) {
+	model->things[thing_id].flags -= flags;
 }
 
-Gorc::FlagSet<Gorc::Flags::ActorFlag> Gorc::Game::World::Level::LevelPresenter::GetActorFlags(int thing_id) {
-	return Model->Things[thing_id].ActorFlags;
+gorc::flag_set<gorc::flags::actor_flag> gorc::game::world::level::level_presenter::get_actor_flags(int thing_id) {
+	return model->things[thing_id].actor_flags;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetActorFlags(int thing_id, FlagSet<Flags::ActorFlag> flags) {
-	Model->Things[thing_id].ActorFlags += flags;
+void gorc::game::world::level::level_presenter::set_actor_flags(int thing_id, flag_set<flags::actor_flag> flags) {
+	model->things[thing_id].actor_flags += flags;
 }
 
-// Thing property verbs
-int Gorc::Game::World::Level::LevelPresenter::GetThingParent(int thing_id) {
-	return Model->Things[thing_id].AttachedThing;
+// thing property verbs
+int gorc::game::world::level::level_presenter::get_thing_parent(int thing_id) {
+	return model->things[thing_id].attached_thing;
 }
 
-int Gorc::Game::World::Level::LevelPresenter::GetThingSector(int thing_id) {
-	return Model->Things[thing_id].Sector;
+int gorc::game::world::level::level_presenter::get_thing_sector(int thing_id) {
+	return model->things[thing_id].sector;
 }
 
-Gorc::Flags::ThingType Gorc::Game::World::Level::LevelPresenter::GetThingType(int thing_id) {
-	return Model->Things[thing_id].Type;
+gorc::flags::thing_type gorc::game::world::level::level_presenter::get_thing_type(int thing_id) {
+	return model->things[thing_id].type;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetThingType(int thing_id, Flags::ThingType type) {
+void gorc::game::world::level::level_presenter::set_thing_type(int thing_id, flags::thing_type type) {
 	// Clean up type physics.
-	auto& thing = Model->Things[thing_id];
-	thing.Controller->RemoveControllerData(thing_id);
+	auto& thing = model->things[thing_id];
+	thing.controller->remove_controller_data(thing_id);
 
-	thing.Type = type;
+	thing.type = type;
 
 	// Install new controller
-	thing.Controller = &GetThingController(thing.Type);
-	thing.Controller->CreateControllerData(thing_id);
+	thing.controller = &get_thing_controller(thing.type);
+	thing.controller->create_controller_data(thing_id);
 }
 
-void Gorc::Game::World::Level::LevelPresenter::SetThingLight(int thing_id, float light, float fade_time) {
+void gorc::game::world::level::level_presenter::set_thing_light(int thing_id, float light, float fade_time) {
 	// TODO: Implement fade_time
-	auto& thing = Model->Things[thing_id];
-	thing.Light = light;
+	auto& thing = model->things[thing_id];
+	thing.light = light;
 }
 
-void Gorc::Game::World::Level::LevelPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
-	Animations::AnimationPresenter::RegisterVerbs(verbTable, components);
-	Scripts::ScriptPresenter::RegisterVerbs(verbTable, components);
-	Sounds::SoundPresenter::RegisterVerbs(verbTable, components);
-	Keys::KeyPresenter::RegisterVerbs(verbTable, components);
-	Gameplay::InventoryPresenter::RegisterVerbs(verbTable, components);
+void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, class components& components) {
+	animations::animation_presenter::register_verbs(verbTable, components);
+	scripts::script_presenter::register_verbs(verbTable, components);
+	sounds::sound_presenter::register_verbs(verbTable, components);
+	keys::key_presenter::register_verbs(verbTable, components);
+	gameplay::inventory_presenter::register_verbs(verbTable, components);
 
 	// Color verbs
-	verbTable.AddVerb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {
-		components.CurrentLevelPresenter->AddDynamicTint(player_id, Math::Vec(r, g, b));
+	verbTable.add_verb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {
+		components.current_level_presenter->add_dynamic_tint(player_id, math::make_vector(r, g, b));
 	});
 
 	// Frame verbs
-	verbTable.AddVerb<int, 1>("getcurframe", [&components](int thing) {
-		return components.CurrentLevelPresenter->GetCurFrame(thing);
+	verbTable.add_verb<int, 1>("getcurframe", [&components](int thing) {
+		return components.current_level_presenter->get_cur_frame(thing);
 	});
 
-	verbTable.AddVerb<void, 3>("jumptoframe", [&components](int thing, int frame, int sector) {
-		return components.CurrentLevelPresenter->JumpToFrame(thing, frame, sector);
+	verbTable.add_verb<void, 3>("jumptoframe", [&components](int thing, int frame, int sector) {
+		return components.current_level_presenter->jump_to_frame(thing, frame, sector);
 	});
 
-	verbTable.AddVerb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
-		return components.CurrentLevelPresenter->MoveToFrame(thing, frame, speed);
+	verbTable.add_verb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
+		return components.current_level_presenter->MoveToFrame(thing, frame, speed);
 	});
 
-	// Level verbs
-	verbTable.AddVerb<float, 0>("getgametime", [&components] {
-		return components.CurrentLevelPresenter->GetGameTime();
+	// level verbs
+	verbTable.add_verb<float, 0>("getgametime", [&components] {
+		return components.current_level_presenter->get_game_time();
 	});
 
-	verbTable.AddVerb<float, 0>("getleveltime", [&components] {
-		return components.CurrentLevelPresenter->GetLevelTime();
+	verbTable.add_verb<float, 0>("getleveltime", [&components] {
+		return components.current_level_presenter->get_level_time();
 	});
 
 	// Misc verbs
-	verbTable.AddVerb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
-		components.CurrentLevelPresenter->TakeItem(thing_id, player_id);
+	verbTable.add_verb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
+		components.current_level_presenter->take_item(thing_id, player_id);
 	});
 
 	// Options verbs
-	verbTable.AddVerb<int, 0>("getdifficulty", [] {
+	verbTable.add_verb<int, 0>("getdifficulty", [] {
 		// TODO: Add actual difficulty setting.
-		return static_cast<int>(Flags::DifficultyMode::Medium);
+		return static_cast<int>(flags::difficulty_mode::medium);
 	});
 
-	verbTable.AddVerb<int, 0>("ismulti", [] {
+	verbTable.add_verb<int, 0>("ismulti", [] {
 		// TODO: Return actual multiplayer state.
 		return 0;
 	});
 
 	// Player verbs
-	verbTable.AddVerb<int, 0>("getlocalplayerthing", [&components] {
-		return components.CurrentLevelPresenter->GetLocalPlayerThing();
+	verbTable.add_verb<int, 0>("getlocalplayerthing", [&components] {
+		return components.current_level_presenter->get_local_player_thing();
 	});
 
-	verbTable.AddVerb<int, 0>("jkgetlocalplayer", [&components] {
-		return components.CurrentLevelPresenter->GetLocalPlayerThing();
+	verbTable.add_verb<int, 0>("jkgetlocalplayer", [&components] {
+		return components.current_level_presenter->get_local_player_thing();
 	});
 
 	// Print verbs
-	verbTable.AddVerb<void, 2>("jkprintunistring", [&components](int destination, int message_num) {
+	verbTable.add_verb<void, 2>("jkprintunistring", [&components](int destination, int message_num) {
 		// TODO: Add actual jkPrintUniString once localization is implemented.
 		std::cout << "COG_" << message_num << std::endl;
 	});
 
-	verbTable.AddVerb<void, 1>("print", [&components](const char* message) {
+	verbTable.add_verb<void, 1>("print", [&components](const char* message) {
 		// TODO: Add actual print.
 		std::cout << message << std::endl;
 	});
 
-	verbTable.AddVerb<void, 1>("printint", [&components](int value) {
+	verbTable.add_verb<void, 1>("printint", [&components](int value) {
 		// TOOD: Add actual printint.
 		std::cout << value << std::endl;
 	});
 
-	// Sector verbs
-	verbTable.AddVerb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
-		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	// sector verbs
+	verbTable.add_verb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
+		components.current_level_presenter->set_sector_adjoins(sector_id, state);
 	});
 
-	verbTable.AddVerb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
-		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	verbTable.add_verb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
+		components.current_level_presenter->set_sector_light(sector_id, light, delay);
 	});
 
-	verbTable.AddVerb<void, 3>("sectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
-		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
+	verbTable.add_verb<void, 3>("sectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
+		components.current_level_presenter->set_sector_thrust(sector_id, math::normalize(thrust_vec) * thrust_speed);
 	});
 
-	verbTable.AddVerb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
+	verbTable.add_verb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
 		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
 	});
 
-	verbTable.AddVerb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
-		components.CurrentLevelPresenter->SetSectorAdjoins(sector_id, state);
+	verbTable.add_verb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
+		components.current_level_presenter->set_sector_adjoins(sector_id, state);
 	});
 
-	verbTable.AddVerb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
+	verbTable.add_verb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
 		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
 	});
 
-	verbTable.AddVerb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
-		components.CurrentLevelPresenter->SetSectorLight(sector_id, light, delay);
+	verbTable.add_verb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
+		components.current_level_presenter->set_sector_light(sector_id, light, delay);
 	});
 
-	verbTable.AddVerb<void, 3>("setsectorthrust", [&components](int sector_id, Math::Vector<3> thrust_vec, float thrust_speed) {
-		components.CurrentLevelPresenter->SetSectorThrust(sector_id, Math::Normalize(thrust_vec) * thrust_speed);
+	verbTable.add_verb<void, 3>("setsectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
+		components.current_level_presenter->set_sector_thrust(sector_id, math::normalize(thrust_vec) * thrust_speed);
 	});
 
-	verbTable.AddVerb<void, 2>("setsectortint", [&components](int sector_id, Math::Vector<3> tint) {
-		components.CurrentLevelPresenter->SetSectorTint(sector_id, tint);
+	verbTable.add_verb<void, 2>("setsectortint", [&components](int sector_id, vector<3> tint) {
+		components.current_level_presenter->set_sector_tint(sector_id, tint);
 	});
 
-	// Surface verbs
-	verbTable.AddVerb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->ClearAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
+	// surface verbs
+	verbTable.add_verb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
+		components.current_level_presenter->clear_adjoin_flags(surface, flag_set<flags::adjoin_flag>(flags));
 	});
 
-	verbTable.AddVerb<Math::Vector<3>, 1>("getsurfacecenter", [&components](int surface) {
-		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
+	verbTable.add_verb<vector<3>, 1>("getsurfacecenter", [&components](int surface) {
+		return components.current_level_presenter->get_surface_center(surface);
 	});
 
-	verbTable.AddVerb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->SetAdjoinFlags(surface, FlagSet<Flags::AdjoinFlag>(flags));
+	verbTable.add_verb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
+		components.current_level_presenter->set_adjoin_flags(surface, flag_set<flags::adjoin_flag>(flags));
 	});
 
-	verbTable.AddVerb<void, 2>("setfacegeomode", [&components](int surface, int mode) {
-		components.CurrentLevelPresenter->SetFaceGeoMode(surface, static_cast<Flags::GeometryMode>(mode));
+	verbTable.add_verb<void, 2>("setfacegeomode", [&components](int surface, int mode) {
+		components.current_level_presenter->set_face_geo_mode(surface, static_cast<flags::geometry_mode>(mode));
 	});
 
-	verbTable.AddVerb<void, 2>("setsurfaceflags", [&components](int surface, int flags) {
-		components.CurrentLevelPresenter->SetSurfaceFlags(surface, FlagSet<Flags::SurfaceFlag>(flags));
+	verbTable.add_verb<void, 2>("setsurfaceflags", [&components](int surface, int flags) {
+		components.current_level_presenter->set_surface_flags(surface, flag_set<flags::surface_flag>(flags));
 	});
 
-	verbTable.AddVerb<Math::Vector<3>, 1>("surfacecenter", [&components](int surface) {
-		return components.CurrentLevelPresenter->GetSurfaceCenter(surface);
+	verbTable.add_verb<vector<3>, 1>("surfacecenter", [&components](int surface) {
+		return components.current_level_presenter->get_surface_center(surface);
 	});
 
 	// System verbs
-	verbTable.AddVerb<int, 2>("bittest", [](int flag1, int flag2) {
+	verbTable.add_verb<int, 2>("bittest", [](int flag1, int flag2) {
 		return flag1 & flag2;
 	});
 
-	verbTable.AddVerb<int, 1>("loadsound", [&components](const char* fn) {
-		return components.CurrentLevelPresenter->LoadSound(fn);
+	verbTable.add_verb<int, 1>("loadsound", [&components](const char* fn) {
+		return components.current_level_presenter->load_sound(fn);
 	});
 
-	verbTable.AddVerb<float, 0>("rand", [&components]{ return static_cast<float>(static_cast<double>(components.Randomizer)); });
+	verbTable.add_verb<float, 0>("rand", [&components]{ return static_cast<float>(static_cast<double>(components.randomizer)); });
 
-	// Thing action verbs
-	verbTable.AddVerb<void, 2>("attachthingtothing", [&components](int attach_thing, int base_thing) {
-		components.CurrentLevelPresenter->AttachThingToThing(attach_thing, base_thing);
+	// thing action verbs
+	verbTable.add_verb<void, 2>("attachthingtothing", [&components](int attach_thing, int base_thing) {
+		components.current_level_presenter->attach_thing_to_thing(attach_thing, base_thing);
 	});
 
-	verbTable.AddVerb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
-		return components.CurrentLevelPresenter->CreateThingAtThing(tpl_id, thing_pos);
+	verbTable.add_verb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
+		return components.current_level_presenter->create_thing_at_thing(tpl_id, thing_pos);
 	});
 
-	verbTable.AddVerb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
-		return components.CurrentLevelPresenter->DamageThing(thing_id, damage, FlagSet<Flags::DamageFlag>(flags), damager_id);
+	verbTable.add_verb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
+		return components.current_level_presenter->damage_thing(thing_id, damage, flag_set<flags::DamageFlag>(flags), damager_id);
 	});
 
-	verbTable.AddVerb<void, 1>("destroything", [&components](int thing_id) {
-		components.CurrentLevelPresenter->DestroyThing(thing_id);
+	verbTable.add_verb<void, 1>("destroything", [&components](int thing_id) {
+		components.current_level_presenter->destroy_thing(thing_id);
 	});
 
-	verbTable.AddVerb<void, 1>("detachthing", [&components](int thing_id) {
-		components.CurrentLevelPresenter->DetachThing(thing_id);
+	verbTable.add_verb<void, 1>("detachthing", [&components](int thing_id) {
+		components.current_level_presenter->detach_thing(thing_id);
 	});
 
-	verbTable.AddVerb<Math::Vector<3>, 1>("getthingpos", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->GetThingPos(thing_id);
+	verbTable.add_verb<vector<3>, 1>("getthingpos", [&components](int thing_id) {
+		return components.current_level_presenter->get_thing_pos(thing_id);
 	});
 
-	verbTable.AddVerb<bool, 1>("isthingmoving", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->IsThingMoving(thing_id);
+	verbTable.add_verb<bool, 1>("isthingmoving", [&components](int thing_id) {
+		return components.current_level_presenter->is_thing_moving(thing_id);
 	});
 
-	verbTable.AddVerb<bool, 1>("ismoving", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->IsThingMoving(thing_id);
+	verbTable.add_verb<bool, 1>("ismoving", [&components](int thing_id) {
+		return components.current_level_presenter->is_thing_moving(thing_id);
 	});
 
-	// Thing flags verbs
-	verbTable.AddVerb<void, 2>("clearactorflags", [&components](int thing_id, int flags) {
-		components.CurrentLevelPresenter->ClearActorFlags(thing_id, FlagSet<Flags::ActorFlag>(flags));
+	// thing flags verbs
+	verbTable.add_verb<void, 2>("clearactorflags", [&components](int thing_id, int flags) {
+		components.current_level_presenter->clear_actor_flags(thing_id, flag_set<flags::actor_flag>(flags));
 	});
 
-	verbTable.AddVerb<void, 2>("clearthingflags", [&components](int thing_id, int flags) {
-		components.CurrentLevelPresenter->ClearThingFlags(thing_id, FlagSet<Flags::ThingFlag>(flags));
+	verbTable.add_verb<void, 2>("clearthingflags", [&components](int thing_id, int flags) {
+		components.current_level_presenter->clear_thing_flags(thing_id, flag_set<flags::thing_flag>(flags));
 	});
 
-	verbTable.AddVerb<int, 1>("getactorflags", [&components](int thing_id) {
-		return static_cast<int>(components.CurrentLevelPresenter->GetActorFlags(thing_id));
+	verbTable.add_verb<int, 1>("getactorflags", [&components](int thing_id) {
+		return static_cast<int>(components.current_level_presenter->get_actor_flags(thing_id));
 	});
 
-	verbTable.AddVerb<void, 2>("setactorflags", [&components](int thing_id, int flags) {
-		components.CurrentLevelPresenter->SetActorFlags(thing_id, FlagSet<Flags::ActorFlag>(flags));
+	verbTable.add_verb<void, 2>("setactorflags", [&components](int thing_id, int flags) {
+		components.current_level_presenter->set_actor_flags(thing_id, flag_set<flags::actor_flag>(flags));
 	});
 
-	// Thing property verbs
-	verbTable.AddVerb<int, 1>("getthingparent", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->GetThingParent(thing_id);
+	// thing property verbs
+	verbTable.add_verb<int, 1>("getthingparent", [&components](int thing_id) {
+		return components.current_level_presenter->get_thing_parent(thing_id);
 	});
 
-	verbTable.AddVerb<int, 1>("getthingsector", [&components](int thing_id) {
-		return components.CurrentLevelPresenter->GetThingSector(thing_id);
+	verbTable.add_verb<int, 1>("getthingsector", [&components](int thing_id) {
+		return components.current_level_presenter->get_thing_sector(thing_id);
 	});
 
-	verbTable.AddVerb<int, 1>("getthingtype", [&components](int thing_id) {
-		return static_cast<int>(components.CurrentLevelPresenter->GetThingType(thing_id));
+	verbTable.add_verb<int, 1>("getthingtype", [&components](int thing_id) {
+		return static_cast<int>(components.current_level_presenter->get_thing_type(thing_id));
 	});
 
-	verbTable.AddVerb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {
-		components.CurrentLevelPresenter->SetThingLight(thing_id, light, fade_time);
+	verbTable.add_verb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {
+		components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
 	});
 
-	verbTable.AddVerb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
-		components.CurrentLevelPresenter->SetThingLight(thing_id, light, fade_time);
+	verbTable.add_verb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
+		components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
 	});
 }

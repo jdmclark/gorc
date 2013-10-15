@@ -2,224 +2,224 @@
 #include "code_buffer_read_stream.h"
 #include "opcode.h"
 
-void Gorc::Cog::VM::VirtualMachine::Execute(std::vector<Value>& heap, const CodeBuffer& code, size_t pc, const Verbs::VerbTable& verbTable) {
+void gorc::cog::vm::virtual_machine::execute(std::vector<value>& heap, const code_buffer& code, size_t pc, const verbs::verb_table& verbTable) {
 	allow_run = true;
 
-	CodeBufferReadStream stream(code);
-	stream.Seek(pc);
+	code_buffer_read_stream stream(code);
+	stream.seek(pc);
 
 	while(allow_run) {
-		Opcode op = stream.Read<Opcode>();
+		opcode op = stream.read<opcode>();
 
 		switch(op) {
-		case Opcode::NOP:
+		case opcode::NOP:
 			break;
 
-		case Opcode::COPY: {
-				Value v = stack.top();
-				Push(v);
+		case opcode::COPY: {
+				value v = stack.top();
+				push(v);
 			}
 			break;
 
-		case Opcode::CONST: {
-				Value v = stream.Read<Value>();
-				Push(v);
+		case opcode::CONST: {
+				value v = stream.read<value>();
+				push(v);
 			}
 			break;
 
-		case Opcode::LOAD: {
-				size_t addr = stream.Read<size_t>();
-				Push(heap[addr]);
+		case opcode::LOAD: {
+				size_t addr = stream.read<size_t>();
+				push(heap[addr]);
 			}
 			break;
 
-		case Opcode::LOADI: {
-				size_t addr = stream.Read<size_t>();
-				int offset = static_cast<int>(Pop());
-				Push(heap[addr + offset]);
+		case opcode::LOADI: {
+				size_t addr = stream.read<size_t>();
+				int offset = static_cast<int>(pop());
+				push(heap[addr + offset]);
 			}
 			break;
 
-		case Opcode::STORE: {
-				size_t addr = stream.Read<size_t>();
-				heap[addr] = Pop();
+		case opcode::STORE: {
+				size_t addr = stream.read<size_t>();
+				heap[addr] = pop();
 			}
 			break;
 
-		case Opcode::STOREI: {
-				size_t addr = stream.Read<size_t>();
-				int offset = static_cast<int>(Pop());
-				heap[addr + offset] = Pop();
+		case opcode::STOREI: {
+				size_t addr = stream.read<size_t>();
+				int offset = static_cast<int>(pop());
+				heap[addr + offset] = pop();
 			}
 			break;
 
-		case Opcode::JMP: {
-				size_t addr = stream.Read<size_t>();
-				stream.Seek(addr);
+		case opcode::JMP: {
+				size_t addr = stream.read<size_t>();
+				stream.seek(addr);
 			}
 			break;
 
-		case Opcode::JAL: {
-				size_t addr = stream.Read<size_t>();
-				Execute(heap, code, addr, verbTable);
+		case opcode::JAL: {
+				size_t addr = stream.read<size_t>();
+				execute(heap, code, addr, verbTable);
 			}
 			break;
 
-		case Opcode::BT: {
-				size_t addr = stream.Read<size_t>();
-				bool condition = static_cast<bool>(Pop());
+		case opcode::BT: {
+				size_t addr = stream.read<size_t>();
+				bool condition = static_cast<bool>(pop());
 				if(condition) {
-					stream.Seek(addr);
+					stream.seek(addr);
 				}
 			}
 			break;
 
-		case Opcode::BF: {
-				size_t addr = stream.Read<size_t>();
-				bool condition = static_cast<bool>(Pop());
+		case opcode::BF: {
+				size_t addr = stream.read<size_t>();
+				bool condition = static_cast<bool>(pop());
 				if(!condition) {
-					stream.Seek(addr);
+					stream.seek(addr);
 				}
 			}
 			break;
 
-		case Opcode::CALL: {
-				Verbs::VerbId verb = stream.Read<Verbs::VerbId>();
-				program_counter = stream.Tell(); // Stash program counter for engine code.
-				verbTable.Invoke(verb, stack);
+		case opcode::CALL: {
+				verbs::verb_id verb = stream.read<verbs::verb_id>();
+				program_counter = stream.tell(); // Stash program counter for engine code.
+				verbTable.invoke(verb, stack);
 			}
 			break;
 
-		case Opcode::CALLV: {
-				Verbs::VerbId verb = stream.Read<Verbs::VerbId>();
-				Push(verbTable.Invoke(verb, stack));
+		case opcode::CALLV: {
+				verbs::verb_id verb = stream.read<verbs::verb_id>();
+				push(verbTable.invoke(verb, stack));
 			}
 			break;
 
-		case Opcode::RET:
+		case opcode::RET:
 			return;
 
-		case Opcode::NEG: {
-				Value v = Pop();
-				Push(-v);
+		case opcode::NEG: {
+				value v = pop();
+				push(-v);
 			}
 			break;
 
-		case Opcode::ADD: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left + right);
+		case opcode::ADD: {
+				value right = pop();
+				value left = pop();
+				push(left + right);
 			}
 			break;
 
-		case Opcode::SUB: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left - right);
+		case opcode::SUB: {
+				value right = pop();
+				value left = pop();
+				push(left - right);
 			}
 			break;
 
-		case Opcode::MUL: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left * right);
+		case opcode::MUL: {
+				value right = pop();
+				value left = pop();
+				push(left * right);
 			}
 			break;
 
-		case Opcode::DIV: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left / right);
+		case opcode::DIV: {
+				value right = pop();
+				value left = pop();
+				push(left / right);
 			}
 			break;
 
-		case Opcode::MOD: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left % right);
+		case opcode::MOD: {
+				value right = pop();
+				value left = pop();
+				push(left % right);
 			}
 			break;
 
-		case Opcode::AND: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left & right);
+		case opcode::AND: {
+				value right = pop();
+				value left = pop();
+				push(left & right);
 			}
 			break;
 
-		case Opcode::OR: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left | right);
+		case opcode::OR: {
+				value right = pop();
+				value left = pop();
+				push(left | right);
 			}
 			break;
 
-		case Opcode::XOR: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left ^ right);
+		case opcode::XOR: {
+				value right = pop();
+				value left = pop();
+				push(left ^ right);
 			}
 			break;
 
-		case Opcode::LNOT: {
-				Value right = Pop();
-				Push(!right);
+		case opcode::LNOT: {
+				value right = pop();
+				push(!right);
 			}
 			break;
 
-		case Opcode::LAND: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left && right);
+		case opcode::LAND: {
+				value right = pop();
+				value left = pop();
+				push(left && right);
 			}
 			break;
 
-		case Opcode::LOR: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left || right);
+		case opcode::LOR: {
+				value right = pop();
+				value left = pop();
+				push(left || right);
 			}
 			break;
 
-		case Opcode::CGT: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left > right);
+		case opcode::CGT: {
+				value right = pop();
+				value left = pop();
+				push(left > right);
 			}
 			break;
 
-		case Opcode::CGEQ: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left >= right);
+		case opcode::CGEQ: {
+				value right = pop();
+				value left = pop();
+				push(left >= right);
 			}
 			break;
 
-		case Opcode::CLT: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left < right);
+		case opcode::CLT: {
+				value right = pop();
+				value left = pop();
+				push(left < right);
 			}
 			break;
 
-		case Opcode::CLEQ: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left <= right);
+		case opcode::CLEQ: {
+				value right = pop();
+				value left = pop();
+				push(left <= right);
 			}
 			break;
 
-		case Opcode::CEQ: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left == right);
+		case opcode::CEQ: {
+				value right = pop();
+				value left = pop();
+				push(left == right);
 			}
 			break;
 
-		case Opcode::CNEQ: {
-				Value right = Pop();
-				Value left = Pop();
-				Push(left != right);
+		case opcode::CNEQ: {
+				value right = pop();
+				value left = pop();
+				push(left != right);
 			}
 			break;
 		}

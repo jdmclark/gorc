@@ -2,24 +2,24 @@
 
 #include "content/assets/animation.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Keys {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace keys {
 
-class KeyMix;
+class key_mix;
 
-class KeyState {
+class key_state {
 public:
-	int MixId;
-	Content::Assets::Animation const* Animation = nullptr;
-	double AnimationTime;
-	double CurrentFrame;
-	double Speed;
-	FlagSet<Flags::KeyFlag> Flags;
+	int mix_id;
+	content::assets::animation const* animation = nullptr;
+	double animation_time;
+	double current_frame;
+	double speed;
+	flag_set<flags::key_flag> flags;
 
-	int HighPriority, LowPriority, BodyPriority;
+	int high_priority, low_priority, body_priority;
 };
 
 }

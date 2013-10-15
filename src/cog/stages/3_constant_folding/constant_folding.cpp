@@ -8,11 +8,11 @@
 
 #include "cog/stages/stages.h"
 
-void Gorc::Cog::Stages::ConstantFolding::ConstantFolding(AST::Factory& factory, AST::TranslationUnit* ast, Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, VM::Value>& constantTable, Diagnostics::Report& report) {
-	CodeVisitor v(factory, symbolTable, constantTable, report);
+void gorc::cog::stages::constant_folding::constant_folding(ast::factory& factory, ast::translation_unit* ast, symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, vm::value>& constantTable, diagnostics::report& report) {
+	code_visitor v(factory, symbolTable, constantTable, report);
 
-	for(auto& stmt : *ast->Code) {
-		stmt->Accept(v);
+	for(auto& stmt : *ast->code) {
+		stmt->accept(v);
 	}
 }

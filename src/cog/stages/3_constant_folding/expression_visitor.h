@@ -8,41 +8,41 @@
 #include <string>
 #include <unordered_map>
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace ConstantFolding {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace constant_folding {
 
-class ExpressionVisitor : public AST::Visitor {
+class expression_visitor : public ast::visitor {
 protected:
-	AST::Factory& Factory;
-	Symbols::SymbolTable& SymbolTable;
-	const std::unordered_map<std::string, VM::Value>& ConstantTable;
+	ast::factory& Factory;
+	symbols::symbol_table& symbol_table;
+	const std::unordered_map<std::string, vm::value>& ConstantTable;
 
 private:
 	bool isConstant;
-	VM::Value constantValue;
-	AST::Expression* visitedExpression;
+	vm::value constantvalue;
+	ast::expression* visitedExpression;
 
 public:
-	ExpressionVisitor(AST::Factory& factory, Symbols::SymbolTable& symbolTable,
-		const std::unordered_map<std::string, VM::Value>& constantTable,
-		Diagnostics::Report& report);
+	expression_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
+		const std::unordered_map<std::string, vm::value>& constantTable,
+		diagnostics::report& report);
 
-	inline AST::Expression* GetSubstitution() const {
+	inline ast::expression* get_substitution() const {
 		if(isConstant) {
-			return Factory.MakeConstantValueExpression(constantValue, visitedExpression->Location);
+			return Factory.make<ast::constant_value_expression>(visitedExpression->location, constantvalue);
 		}
 		else {
 			return visitedExpression;
 		}
 	}
 
-	inline VM::Value GetConstantValue() const {
-		return constantValue;
+	inline vm::value get_constant_value() const {
+		return constantvalue;
 	}
 
-	inline bool IsConstant() const {
+	inline bool is_constant() const {
 		return isConstant;
 	}
 

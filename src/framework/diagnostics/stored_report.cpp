@@ -1,49 +1,49 @@
 #include "stored_report.h"
 #include "error_level.h"
 
-using namespace Gorc::Diagnostics;
+using namespace gorc::diagnostics;
 
-StoredReport::StoredReport()
+stored_report::stored_report()
 	: errorCount(0), warningCount(0) {
 	return;
 }
 
-void StoredReport::AddError(const std::string& stage, const std::string& reason, const ErrorLocation& errorLocation) {
-	container.push_back(Error(ErrorLevel::Error, stage, reason, errorLocation));
+void stored_report::add_error(const std::string& stage, const std::string& reason, const error_location& errorLocation) {
+	container.push_back(error(error_level::error, stage, reason, errorLocation));
 	++errorCount;
 }
 
-void StoredReport::AddWarning(const std::string& stage, const std::string& reason, const ErrorLocation& errorLocation) {
-	container.push_back(Error(ErrorLevel::Warning, stage, reason, errorLocation));
+void stored_report::add_warning(const std::string& stage, const std::string& reason, const error_location& errorLocation) {
+	container.push_back(error(error_level::warning, stage, reason, errorLocation));
 	++warningCount;
 }
 
-void StoredReport::AddCriticalError(const std::string& stage, const std::string& reason) {
-	container.push_back(Error(ErrorLevel::CriticalError, stage, reason, ErrorLocation()));
+void stored_report::add_critical_error(const std::string& stage, const std::string& reason) {
+	container.push_back(error(error_level::critical_error, stage, reason, error_location()));
 	++errorCount;
 }
 
-unsigned int StoredReport::GetErrorCount() const {
+unsigned int stored_report::get_error_count() const {
 	return errorCount;
 }
 
-unsigned int StoredReport::GetWarningCount() const {
+unsigned int stored_report::get_warning_count() const {
 	return warningCount;
 }
 
-void StoredReport::Repeat(Report& report) const {
+void stored_report::repeat(report& report) const {
 	for(const auto& err : container) {
-		switch(err.Level) {
-		case ErrorLevel::CriticalError:
-			report.AddCriticalError(err.Stage, err.Reason);
+		switch(err.level) {
+		case error_level::critical_error:
+			report.add_critical_error(err.stage, err.reason);
 			break;
 
-		case ErrorLevel::Error:
-			report.AddError(err.Stage, err.Reason, err.Location);
+		case error_level::error:
+			report.add_error(err.stage, err.reason, err.location);
 			break;
 
-		case ErrorLevel::Warning:
-			report.AddWarning(err.Stage, err.Reason, err.Location);
+		case error_level::warning:
+			report.add_warning(err.stage, err.reason, err.location);
 			break;
 		}
 	}

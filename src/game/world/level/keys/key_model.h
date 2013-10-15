@@ -4,16 +4,16 @@
 #include "key_mix.h"
 #include "key_state.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Keys {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace keys {
 
-class KeyModel {
+class key_model {
 public:
-	Pool<KeyMix> Mixes;
-	Pool<KeyState> Keys;
+	pool<key_mix> mixes;
+	pool<key_state> keys;
 };
 
 }

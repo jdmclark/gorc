@@ -2,12 +2,12 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace Text {
+namespace gorc {
+namespace text {
 
-class TextException : public Exception { };
-class InvalidNumericConversionException : public Exception { };
-class TokenizerAssertionException : public Exception { };
+class text_exception : public exception { };
+class invalid_numeric_conversion_exception : public exception { };
+class tokenizer_assertion_exception : public exception { };
 
 }
 }

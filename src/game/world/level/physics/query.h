@@ -5,16 +5,16 @@
 #include "shape.h"
 #include "contact.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Physics {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace physics {
 
-bool PointInsideSurface(const Math::Vector<3>& point, const Content::Assets::Level& level, const Content::Assets::LevelSurface& surface);
-bool SegmentSurfaceIntersection(const Segment& segment, const Content::Assets::Level& level, const Content::Assets::LevelSurface& surface);
+bool point_inside_surface(const vector<3>& point, const content::assets::level& level, const content::assets::level_surface& surface);
+bool segment_surface_intersection(const segment& segment, const content::assets::level& level, const content::assets::level_surface& surface);
 
-Math::Vector<3> ClosestPointOnSurface(const Math::Vector<3>& origin, const Content::Assets::Level& level, const Content::Assets::LevelSurface& surface);
+vector<3> closest_point_on_surface(const vector<3>& origin, const content::assets::level& level, const content::assets::level_surface& surface);
 
 }
 }

@@ -1,9 +1,9 @@
 #include "read_only_file.h"
 
-Gorc::IO::ReadOnlyFile::ReadOnlyFile(const boost::filesystem::path& fn) : Filename(fn) {
+gorc::io::read_only_file::read_only_file(const boost::filesystem::path& fn) : Filename(fn) {
 	return;
 }
 
-Gorc::IO::ReadOnlyFile::~ReadOnlyFile() {
+gorc::io::read_only_file::~read_only_file() {
 	return;
 }

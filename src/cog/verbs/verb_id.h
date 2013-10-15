@@ -2,20 +2,20 @@
 
 #include <cstddef>
 
-namespace Gorc {
-namespace Cog {
-namespace Verbs {
+namespace gorc {
+namespace cog {
+namespace verbs {
 
-class VerbTable;
+class verb_table;
 
-class VerbId {
-	friend class VerbTable;
+class verb_id {
+	friend class verb_table;
 
 private:
 	size_t id;
 
 public:
-	VerbId(size_t id);
+	verb_id(size_t id);
 };
 
 }

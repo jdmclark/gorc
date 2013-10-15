@@ -1,6 +1,6 @@
 #include "surface.h"
 
-Gorc::Game::World::Level::Surface::Surface(const Content::Assets::LevelSurface& surf)
-	: Gorc::Content::Assets::LevelSurface(surf) {
+gorc::game::world::level::surface::surface(const content::assets::level_surface& surf)
+	: gorc::content::assets::level_surface(surf) {
 	return;
 }

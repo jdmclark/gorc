@@ -7,13 +7,13 @@
 #include "cog/vm/value.h"
 #include <stack>
 
-namespace Gorc {
-namespace Cog {
-namespace Verbs {
+namespace gorc {
+namespace cog {
+namespace verbs {
 
-template <typename T, int n> class VerbBinder;
+template <typename T, int n> class verb_binder;
 
-#define GORC_CV_BINDER_ARG(n) VM::Value v##n = stack.top(); stack.pop();
+#define GORC_CV_BINDER_ARG(n) vm::value v##n = stack.top(); stack.pop();
 
 #define GORC_CV_BINDER_ARGS_0
 #define GORC_CV_BINDER_ARGS_1 GORC_CV_BINDER_ARG(1); GORC_CV_BINDER_ARGS_0
@@ -40,24 +40,24 @@ template <typename T, int n> class VerbBinder;
 #define GORC_CV_BINDER_ARG_PASS_10 GORC_CV_BINDER_ARG_PASS_9, v10
 
 #define GORC_CV_BINDER(n)																						\
-template <typename T> class VerbBinder<T, n>																	\
+template <typename T> class verb_binder<T, n>																	\
 {																												\
 public:																											\
-	template <typename U> VM::Value Invoke(std::stack<VM::Value>& stack, U fn)									\
+	template <typename U> vm::value invoke(std::stack<vm::value>& stack, U fn)									\
 	{																											\
 		GORC_CV_BINDER_ARGS_##n;																				\
-		return VM::Value(fn(GORC_CV_BINDER_ARG_PASS_##n));															\
+		return vm::value(fn(GORC_CV_BINDER_ARG_PASS_##n));															\
 	}																											\
 };																												\
 																												\
-template <> class VerbBinder<void, n>																			\
+template <> class verb_binder<void, n>																			\
 {																												\
 public:																											\
-	template <typename U> VM::Value Invoke(std::stack<VM::Value>& stack, U fn)									\
+	template <typename U> vm::value invoke(std::stack<vm::value>& stack, U fn)									\
 	{																											\
 		GORC_CV_BINDER_ARGS_##n;																				\
 		fn(GORC_CV_BINDER_ARG_PASS_##n);																		\
-		return VM::Value();																						\
+		return vm::value();																						\
 	}																											\
 };
 

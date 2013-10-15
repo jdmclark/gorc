@@ -2,23 +2,23 @@
 
 #include "game/view.h"
 
-namespace Gorc {
-namespace Game {
-namespace Screen {
-namespace Action {
+namespace gorc {
+namespace game {
+namespace screen {
+namespace action {
 
-class ActionPresenter;
+class action_presenter;
 
-class ActionView : public View {
-	ActionPresenter* currentPresenter = nullptr;
+class action_view : public view {
+	action_presenter* currentPresenter = nullptr;
 
 public:
-	inline void SetPresenter(ActionPresenter* presenter) {
+	inline void set_presenter(action_presenter* presenter) {
 		currentPresenter = presenter;
 	}
 
-	void Update(double dt);
-	void Draw(double dt, const Math::Box<2, unsigned int>& view_size);
+	void update(double dt);
+	void draw(double dt, const box<2, unsigned int>& view_size);
 };
 
 }

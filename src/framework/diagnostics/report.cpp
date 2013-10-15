@@ -1,5 +1,5 @@
 #include "report.h"
 
-Gorc::Diagnostics::Report::~Report() {
+gorc::diagnostics::report::~report() {
 	return;
 }

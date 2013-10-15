@@ -2,15 +2,15 @@
 
 #include "game/view.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Nothing {
+namespace gorc {
+namespace game {
+namespace world {
+namespace nothing {
 
-class NothingView : public View {
+class nothing_view : public view {
 public:
-	void Update(double dt);
-	void Draw(double dt, const Math::Box<2, unsigned int>& view_size);
+	void update(double dt);
+	void draw(double dt, const box<2, unsigned int>& view_size);
 };
 
 }

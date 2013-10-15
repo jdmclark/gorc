@@ -1,9 +1,9 @@
 #include "entry.h"
 
-Gorc::Content::VFS::Episode::Entry::Entry(int Number, int Disc, int LevelNumber,
-		EntryType Type, const boost::filesystem::path& Filename, int LightPower, int DarkPower,
+gorc::content::vfs::episode::entry::entry(int number, int Disc, int LevelNumber,
+		entry_type type, const boost::filesystem::path& Filename, int LightPower, int DarkPower,
 		int GotoA, int GotoB)
-	: Number(Number), Disc(Disc), LevelNumber(LevelNumber), Type(Type), Filename(Filename),
-	  LightPower(LightPower), DarkPower(DarkPower), GotoA(GotoA), GotoB(GotoB) {
+	: number(number), disc(Disc), level_number(LevelNumber), type(type), filename(Filename),
+	  light_power(LightPower), dark_power(DarkPower), goto_a(GotoA), goto_b(GotoB) {
 	return;
 }

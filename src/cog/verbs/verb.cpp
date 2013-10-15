@@ -1,10 +1,10 @@
 #include "verb.h"
 
-Gorc::Cog::Verbs::BaseVerb::BaseVerb(VM::Type returnType, size_t parameterCount)
+gorc::cog::verbs::base_verb::base_verb(vm::type returnType, size_t parameterCount)
 	: parameterCount(parameterCount), returnType(returnType) {
 	return;
 }
 
-Gorc::Cog::Verbs::BaseVerb::~BaseVerb() {
+gorc::cog::verbs::base_verb::~base_verb() {
 	return;
 }

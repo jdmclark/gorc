@@ -3,23 +3,23 @@
 #include <initializer_list>
 #include <type_traits>
 
-namespace Gorc {
+namespace gorc {
 
-template <typename T> class FlagSet {
+template <typename T> class flag_set {
 	using UT = typename std::underlying_type<T>::type;
 private:
 	UT value;
 
 public:
-	FlagSet() : value(0) {
+	flag_set() : value(0) {
 		return;
 	}
 
-	explicit FlagSet(UT forced_value) : value(forced_value) {
+	explicit flag_set(UT forced_value) : value(forced_value) {
 		return;
 	}
 
-	FlagSet(const std::initializer_list<T>& initl) {
+	flag_set(const std::initializer_list<T>& initl) {
 		value = 0;
 		for(T val : initl) {
 			value |= static_cast<UT>(val);
@@ -34,42 +34,42 @@ public:
 		return value & static_cast<UT>(val);
 	}
 
-	inline bool operator&(FlagSet val) const {
+	inline bool operator&(flag_set val) const {
 		return value & val.value;
 	}
 
-	inline FlagSet operator+(T val) const {
-		return FlagSet(value | static_cast<UT>(val));
+	inline flag_set operator+(T val) const {
+		return flag_set(value | static_cast<UT>(val));
 	}
 
-	inline const FlagSet& operator+=(T val) {
+	inline const flag_set& operator+=(T val) {
 		value |= static_cast<UT>(val);
 		return *this;
 	}
 
-	inline FlagSet operator+(FlagSet val) const {
-		return FlagSet(value | val.value);
+	inline flag_set operator+(flag_set val) const {
+		return flag_set(value | val.value);
 	}
 
-	inline const FlagSet& operator+=(FlagSet val) {
+	inline const flag_set& operator+=(flag_set val) {
 		value |= val.value;
 		return *this;
 	}
 
-	inline FlagSet operator-(T val) const {
-		return FlagSet(value & ~static_cast<UT>(val));
+	inline flag_set operator-(T val) const {
+		return flag_set(value & ~static_cast<UT>(val));
 	}
 
-	inline const FlagSet& operator-=(T val) {
+	inline const flag_set& operator-=(T val) {
 		value &= ~static_cast<UT>(val);
 		return *this;
 	}
 
-	inline FlagSet operator-(FlagSet val) const {
-		return FlagSet(value & ~val.value);
+	inline flag_set operator-(flag_set val) const {
+		return flag_set(value & ~val.value);
 	}
 
-	inline const FlagSet& operator-=(FlagSet val) {
+	inline const flag_set& operator-=(flag_set val) {
 		value &= ~val.value;
 		return *this;
 	}

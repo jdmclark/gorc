@@ -6,51 +6,51 @@
 #include "framework/math/vector.h"
 #include "framework/pool.h"
 
-namespace Gorc {
+namespace gorc {
 
-namespace Cog {
-namespace Verbs {
+namespace cog {
+namespace verbs {
 
-class VerbTable;
+class verb_table;
 }
 }
 
-namespace Game {
+namespace game {
 
-class Components;
+class components;
 
-namespace World {
-namespace Level {
+namespace world {
+namespace level {
 
-class LevelModel;
+class level_model;
 
-namespace Animations {
+namespace animations {
 
-class AnimationModel;
+class animation_model;
 
-class AnimationPresenter {
+class animation_presenter {
 private:
-	LevelModel* levelModel;
-	AnimationModel* model;
+	level_model* levelModel;
+	animation_model* model;
 
 public:
-	void Start(LevelModel& levelModel, AnimationModel& model);
-	void Update(double dt);
+	void start(level_model& levelModel, animation_model& model);
+	void update(double dt);
 
-	int SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags);
-	int GetSurfaceAnim(int surface);
+	int surface_anim(int surface, float rate, flag_set<flags::AnimFlag> flags);
+	int get_surface_anim(int surface);
 
-	void StopAnim(int anim);
+	void stop_anim(int anim);
 
-	int GetSurfaceCel(int surface);
-	void SetSurfaceCel(int surface, int cel);
+	int get_surface_cel(int surface);
+	void set_surface_cel(int surface, int cel);
 
-	int SlideCeilingSky(float u_speed, float v_speed);
-	int SlideSurface(int surface_id, const Math::Vector<3>& direction);
+	int slide_ceiling_sky(float u_speed, float v_speed);
+	int slide_surface(int surface_id, const vector<3>& direction);
 
-	int SurfaceLightAnim(int surface_id, float start_light, float end_light, float change_time);
+	int surface_light_anim(int surface_id, float start_light, float end_light, float change_time);
 
-	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
+	static void register_verbs(cog::verbs::verb_table&, components&);
 };
 
 }

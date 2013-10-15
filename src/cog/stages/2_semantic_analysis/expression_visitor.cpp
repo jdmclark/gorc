@@ -3,100 +3,100 @@
 #include "framework/diagnostics/helper.h"
 #include <algorithm>
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::SemanticAnalysis::ExpressionVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::semantic_analysis::expression_visitor;
 
-ExpressionVisitor::ExpressionVisitor(Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, VM::Value>& constantTable,
-	Verbs::VerbTable& verbTable, Diagnostics::Report& report)
-	: AST::Visitor("Stage2::ExpressionVisitor", report), SymbolTable(symbolTable),
-	ConstantTable(constantTable), VerbTable(verbTable),	ExpressionType(VM::Type::Void) {
+expression_visitor::expression_visitor(symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, vm::value>& constantTable,
+	verbs::verb_table& verbTable, diagnostics::report& report)
+	: ast::visitor("Stage2::ExpressionVisitor", report), symbol_table(symbolTable),
+	ConstantTable(constantTable), verb_table(verbTable),	expression_type(vm::type::nothing) {
 	return;
 }
 
-void ExpressionVisitor::VisitStringLiteralExpression(StringLiteralExpression& e) {
-	ExpressionType = VM::Type::String;
+void expression_visitor::visit_string_literal_expression(string_literal_expression& e) {
+	expression_type = vm::type::string;
 }
 
-void ExpressionVisitor::VisitIntegerLiteralExpression(IntegerLiteralExpression& e) {
-	ExpressionType = VM::Type::Integer;
+void expression_visitor::visit_integer_literal_expression(integer_literal_expression& e) {
+	expression_type = vm::type::integer;
 }
 
-void ExpressionVisitor::VisitFloatLiteralExpression(FloatLiteralExpression& e) {
-	ExpressionType = VM::Type::Float;
+void expression_visitor::visit_float_literal_expression(float_literal_expression& e) {
+	expression_type = vm::type::floating;
 }
 
-void ExpressionVisitor::VisitVectorLiteralExpression(VectorLiteralExpression& e) {
-	ExpressionType = VM::Type::Vector;
+void expression_visitor::visit_vector_literal_expression(vector_literal_expression& e) {
+	expression_type = vm::type::vector;
 }
 
-void ExpressionVisitor::VisitIdentifierExpression(IdentifierExpression& e) {
+void expression_visitor::visit_identifier_expression(identifier_expression& e) {
 	// Convert identifier to lowercase for processing.
-	std::transform(e.Identifier.begin(), e.Identifier.end(), e.Identifier.begin(), tolower);
+	std::transform(e.identifier.begin(), e.identifier.end(), e.identifier.begin(), tolower);
 
 	// Check constant table.
-	auto it = ConstantTable.find(e.Identifier);
+	auto it = ConstantTable.find(e.identifier);
 	if(it != ConstantTable.end()) {
-		// Identifier represents a constant.
-		ExpressionType = it->second.GetType();
+		// identifier represents a constant.
+		expression_type = it->second.get_type();
 	}
 	else {
-		// Identifier does not represent a constant.
+		// identifier does not represent a constant.
 
 		// Actual type is not known, but the result must be
 		// an actual value. Fake the result.
-		ExpressionType = VM::Type::Integer;
+		expression_type = vm::type::integer;
 
-		if(!SymbolTable.IsSymbolDefined(e.Identifier)) {
-			Diagnostics::Helper::UndefinedSymbol(Report, VisitorName, e.Identifier, e.Location);
-			SymbolTable.AddSymbol(e.Identifier);
+		if(!symbol_table.is_symbol_defined(e.identifier)) {
+			diagnostics::helper::undefined_symbol(report, visitor_name, e.identifier, e.location);
+			symbol_table.add_symbol(e.identifier);
 		}
 	}
 }
 
-void ExpressionVisitor::VisitSubscriptExpression(SubscriptExpression& e) {
+void expression_visitor::visit_subscript_expression(subscript_expression& e) {
 	// Convert base identifier to lowercase for processing.
-	std::transform(e.Base.begin(), e.Base.end(), e.Base.begin(), tolower);
+	std::transform(e.base.begin(), e.base.end(), e.base.begin(), tolower);
 
-	if(!SymbolTable.IsSymbolDefined(e.Base)) {
-		Diagnostics::Helper::UndefinedArrayBase(Report, VisitorName, e.Base, e.Location);
+	if(!symbol_table.is_symbol_defined(e.base)) {
+		diagnostics::helper::undefined_array_base(report, visitor_name, e.base, e.location);
 	}
 
-	ExpressionVisitor subscript(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Index->Accept(subscript);
+	expression_visitor subscript(symbol_table, ConstantTable, verb_table, report);
+	e.index->accept(subscript);
 
-	if(subscript.ExpressionType == VM::Type::Void) {
-		Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, e.Index->Location);
+	if(subscript.expression_type == vm::type::nothing) {
+		diagnostics::helper::illegal_void_result(report, visitor_name, e.index->location);
 	}
 
 	// Actual type is not known, but the result must be
 	// an actual value. Fake the result.
-	ExpressionType = VM::Type::Integer;
+	expression_type = vm::type::integer;
 }
 
-void ExpressionVisitor::VisitMethodCallExpression(MethodCallExpression& e) {
+void expression_visitor::visit_method_call_expression(method_call_expression& e) {
 	// Convert verb name to lowercase for processing.
-	std::transform(e.Base.begin(), e.Base.end(), e.Base.begin(), tolower);
+	std::transform(e.base.begin(), e.base.end(), e.base.begin(), tolower);
 
-	if(!VerbTable.IsVerbDefined(e.Base)) {
-		Diagnostics::Helper::UnknownVerb(Report, VisitorName, e.Base, e.Location);
-		ExpressionType = VM::Type::Integer;
+	if(!verb_table.is_verb_defined(e.base)) {
+		diagnostics::helper::unknown_verb(report, visitor_name, e.base, e.location);
+		expression_type = vm::type::integer;
 	}
 	else {
-		auto id = VerbTable.GetVerb(e.Base);
-		size_t pcount = VerbTable.ParameterCount(id);
-		ExpressionType = VerbTable.ReturnType(id);
+		auto id = verb_table.get_verb(e.base);
+		size_t pcount = verb_table.parameter_count(id);
+		expression_type = verb_table.return_type(id);
 
-		if(pcount != e.Arguments->size()) {
-			Diagnostics::Helper::InvalidArgumentCount(Report, VisitorName, e.Base, pcount, e.Arguments->size(), e.Location);
+		if(pcount != e.arguments->size()) {
+			diagnostics::helper::invalid_argument_count(report, visitor_name, e.base, pcount, e.arguments->size(), e.location);
 		}
 		else {
-			for(auto& arg : *e.Arguments) {
-				ExpressionVisitor av(SymbolTable, ConstantTable, VerbTable, Report);
-				arg->Accept(av);
+			for(auto& arg : *e.arguments) {
+				expression_visitor av(symbol_table, ConstantTable, verb_table, report);
+				arg->accept(av);
 
-				if(av.ExpressionType == VM::Type::Void) {
-					Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, arg->Location);
+				if(av.expression_type == vm::type::nothing) {
+					diagnostics::helper::illegal_void_result(report, visitor_name, arg->location);
 				}
 			}
 		}
@@ -105,125 +105,125 @@ void ExpressionVisitor::VisitMethodCallExpression(MethodCallExpression& e) {
 	return;
 }
 
-void ExpressionVisitor::VisitUnaryExpression(UnaryExpression& e) {
-	ExpressionVisitor v(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Base->Accept(v);
+void expression_visitor::visit_unary_expression(unary_expression& e) {
+	expression_visitor v(symbol_table, ConstantTable, verb_table, report);
+	e.base->accept(v);
 
-	if(v.ExpressionType == VM::Type::Void) {
-		Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, e.Base->Location);
-		v.ExpressionType = VM::Type::Integer;
+	if(v.expression_type == vm::type::nothing) {
+		diagnostics::helper::illegal_void_result(report, visitor_name, e.base->location);
+		v.expression_type = vm::type::integer;
 	}
 
-	switch(e.Operator) {
-	case UnaryOperator::Plus:
-	case UnaryOperator::Minus:
-		ExpressionType = v.ExpressionType;
+	switch(e.op) {
+	case unary_operator::plus:
+	case unary_operator::minus:
+		expression_type = v.expression_type;
 		return;
 
-	case UnaryOperator::Not:
-		if(v.ExpressionType != VM::Type::Boolean) {
-			Diagnostics::Helper::ResultNotBoolean(Report, VisitorName, e.Location);
+	case unary_operator::logical_not:
+		if(v.expression_type != vm::type::boolean) {
+			diagnostics::helper::result_not_boolean(report, visitor_name, e.location);
 		}
 		
-		ExpressionType = VM::Type::Boolean;
+		expression_type = vm::type::boolean;
 		return;
 	}
 }
 
-void ExpressionVisitor::VisitInfixExpression(InfixExpression& e) {
-	ExpressionVisitor left(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Left->Accept(left);
+void expression_visitor::visit_infix_expression(infix_expression& e) {
+	expression_visitor left(symbol_table, ConstantTable, verb_table, report);
+	e.left->accept(left);
 
-	ExpressionVisitor right(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Right->Accept(right);
+	expression_visitor right(symbol_table, ConstantTable, verb_table, report);
+	e.right->accept(right);
 
 	// Left and right must both have values.
-	if(left.ExpressionType == VM::Type::Void) {
-		Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, e.Left->Location);
-		left.ExpressionType = VM::Type::Integer;
+	if(left.expression_type == vm::type::nothing) {
+		diagnostics::helper::illegal_void_result(report, visitor_name, e.left->location);
+		left.expression_type = vm::type::integer;
 	}
 
-	if(right.ExpressionType == VM::Type::Void) {
-		Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, e.Right->Location);
-		right.ExpressionType = VM::Type::Integer;
+	if(right.expression_type == vm::type::nothing) {
+		diagnostics::helper::illegal_void_result(report, visitor_name, e.right->location);
+		right.expression_type = vm::type::integer;
 	}
 
-	switch(e.Operator) {
-	case InfixOperator::Addition:
-	case InfixOperator::Subtraction:
-	case InfixOperator::Multiplication:
-	case InfixOperator::Division:
-	case InfixOperator::Modulo:
+	switch(e.op) {
+	case infix_operator::addition:
+	case infix_operator::subtraction:
+	case infix_operator::multiplication:
+	case infix_operator::division:
+	case infix_operator::modulo:
 		// Result must have a numeric type.
 		// Fake the result.
-		ExpressionType = VM::Type::Integer;
+		expression_type = vm::type::integer;
 		break;
 
-	case InfixOperator::Greater:
-	case InfixOperator::GreaterEqual:
-	case InfixOperator::Less:
-	case InfixOperator::LessEqual:
-	case InfixOperator::Equal:
-	case InfixOperator::NotEqual:
+	case infix_operator::greater:
+	case infix_operator::greater_equal:
+	case infix_operator::less:
+	case infix_operator::less_equal:
+	case infix_operator::equal:
+	case infix_operator::not_equal:
 		// Result must have a boolean type.
-		ExpressionType = VM::Type::Boolean;
+		expression_type = vm::type::boolean;
 		break;
 
-	case InfixOperator::And:
-	case InfixOperator::Or:
-	case InfixOperator::Xor:
+	case infix_operator::bitwise_and:
+	case infix_operator::bitwise_or:
+	case infix_operator::bitwise_xor:
 		// Result must have an integer type.
-		ExpressionType = VM::Type::Integer;
+		expression_type = vm::type::integer;
 		break;
 
-	case InfixOperator::LogicalAnd:
-	case InfixOperator::LogicalOr:
+	case infix_operator::logical_and:
+	case infix_operator::logical_or:
 		// Inputs must have boolean types.
-		if(left.ExpressionType != VM::Type::Boolean) {
-			Diagnostics::Helper::ResultNotBoolean(Report, VisitorName, e.Left->Location);
+		if(left.expression_type != vm::type::boolean) {
+			diagnostics::helper::result_not_boolean(report, visitor_name, e.left->location);
 		}
 
-		if(right.ExpressionType != VM::Type::Boolean) {
-			Diagnostics::Helper::ResultNotBoolean(Report, VisitorName, e.Right->Location);
+		if(right.expression_type != vm::type::boolean) {
+			diagnostics::helper::result_not_boolean(report, visitor_name, e.right->location);
 		}
 
 		// Result must have a boolean type.
-		ExpressionType = VM::Type::Boolean;
+		expression_type = vm::type::boolean;
 		break;
 	}
 
 	return;
 }
 
-void ExpressionVisitor::VisitAssignmentExpression(AssignmentExpression& e) {
-	LValueVisitor target(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Target->Accept(target);
+void expression_visitor::visit_assignment_expression(assignment_expression& e) {
+	lvalue_visitor target(symbol_table, ConstantTable, verb_table, report);
+	e.target->accept(target);
 
-	ExpressionVisitor value(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Value->Accept(value);
+	expression_visitor value(symbol_table, ConstantTable, verb_table, report);
+	e.value->accept(value);
 
-	if(value.ExpressionType == VM::Type::Void) {
-		Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, e.Value->Location);
+	if(value.expression_type == vm::type::nothing) {
+		diagnostics::helper::illegal_void_result(report, visitor_name, e.value->location);
 	}
 
-	ExpressionType = value.ExpressionType;
+	expression_type = value.expression_type;
 }
 
-void ExpressionVisitor::VisitCommaExpression(CommaExpression& e) {
-	ExpressionVisitor left(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Left->Accept(left);
+void expression_visitor::visit_comma_expression(comma_expression& e) {
+	expression_visitor left(symbol_table, ConstantTable, verb_table, report);
+	e.left->accept(left);
 
-	ExpressionVisitor right(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Right->Accept(right);
+	expression_visitor right(symbol_table, ConstantTable, verb_table, report);
+	e.right->accept(right);
 
-	ExpressionType = right.ExpressionType;
+	expression_type = right.expression_type;
 }
 
-void ExpressionVisitor::VisitForOptionalExpression(ForOptionalExpression& e) {
-	ExpressionType = VM::Type::Boolean;
+void expression_visitor::visit_for_optional_expression(for_optional_expression& e) {
+	expression_type = vm::type::boolean;
 }
 
-void ExpressionVisitor::VisitForExpression(ForExpression& e) {
-	e.Condition->Accept(*this);
+void expression_visitor::visit_for_expression(for_expression& e) {
+	e.condition->accept(*this);
 	return;
 }

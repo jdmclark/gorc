@@ -4,95 +4,95 @@
 #include "script_model.h"
 #include "cog/vm/virtual_machine.h"
 
-namespace Gorc {
-namespace Content {
-class Manager;
+namespace gorc {
+namespace content {
+class manager;
 }
 
-namespace Cog {
-class Script;
-class Compiler;
+namespace cog {
+class script;
+class compiler;
 
-namespace Verbs {
-class VerbTable;
+namespace verbs {
+class verb_table;
 }
 
-namespace VM {
-class VirtualMachine;
+namespace vm {
+class virtual_machine;
 }
 }
 
-namespace Game {
-class Components;
+namespace game {
+class components;
 
-namespace World {
-namespace Level {
-class LevelModel;
+namespace world {
+namespace level {
+class level_model;
 
-namespace Scripts {
+namespace scripts {
 
-class ScriptModel;
+class script_model;
 
-class ScriptPresenter {
+class script_presenter {
 private:
-	Components& components;
-	LevelModel* levelModel;
-	ScriptModel* model;
-	Cog::VM::VirtualMachine VirtualMachine;
+	components& components;
+	level_model* levelModel;
+	script_model* model;
+	cog::vm::virtual_machine VirtualMachine;
 	int master_cog = -1;
 
 public:
-	ScriptPresenter(Components& components);
+	script_presenter(class components& components);
 
-	void Start(LevelModel& levelModel, ScriptModel& scriptModel);
-	void Update(double dt);
+	void start(level_model& levelModel, script_model& scriptModel);
+	void update(double dt);
 
-	void RunWaitingCogs();
+	void run_waiting_cogs();
 
-	void CreateLevelDummyInstances(int count);
-	void CreateLevelCogInstance(int index, const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler,
-			const std::vector<Cog::VM::Value>& values);
-	void CreateGlobalCogInstance(const Cog::Script& script, Content::Manager& manager, Cog::Compiler& compiler);
+	void create_level_dummy_instances(int count);
+	void create_level_cog_instance(int index, const cog::script& script, content::manager& manager, cog::compiler& compiler,
+			const std::vector<cog::vm::value>& values);
+	void create_global_cog_instance(const cog::script& script, content::manager& manager, cog::compiler& compiler);
 
-	int GetGlobalCogInstance(Cog::Script const* script) const;
+	int get_global_cog_instance(cog::script const* script) const;
 
-	Cog::VM::Value SendMessage(int InstanceId, Cog::MessageId message,
-			int SenderId, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
-			Cog::VM::Value Param0 = 0, Cog::VM::Value Param1 = 0, Cog::VM::Value Param2 = 0, Cog::VM::Value Param3 = 0);
-	void SendMessageToAll(Cog::MessageId message, int SenderId, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
-			Cog::VM::Value Param0 = 0, Cog::VM::Value Param1 = 0, Cog::VM::Value Param2 = 0, Cog::VM::Value Param3 = 0);
-	void SendMessageToLinked(Cog::MessageId message, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef = -1, Flags::MessageType SourceType = Flags::MessageType::Nothing,
-			Cog::VM::Value Param0 = 0, Cog::VM::Value Param1 = 0, Cog::VM::Value Param2 = 0, Cog::VM::Value Param3 = 0);
+	cog::vm::value send_message(int InstanceId, cog::message_id message,
+			int SenderId, int SenderRef, flags::message_type SenderType,
+			int SourceRef = -1, flags::message_type SourceType = flags::message_type::nothing,
+			cog::vm::value Param0 = 0, cog::vm::value Param1 = 0, cog::vm::value Param2 = 0, cog::vm::value Param3 = 0);
+	void send_message_to_all(cog::message_id message, int SenderId, int SenderRef, flags::message_type SenderType,
+			int SourceRef = -1, flags::message_type SourceType = flags::message_type::nothing,
+			cog::vm::value Param0 = 0, cog::vm::value Param1 = 0, cog::vm::value Param2 = 0, cog::vm::value Param3 = 0);
+	void send_message_to_linked(cog::message_id message, int SenderRef, flags::message_type SenderType,
+			int SourceRef = -1, flags::message_type SourceType = flags::message_type::nothing,
+			cog::vm::value Param0 = 0, cog::vm::value Param1 = 0, cog::vm::value Param2 = 0, cog::vm::value Param3 = 0);
 
-	void ResumeWaitForStop(int wait_thing);
+	void resume_wait_for_stop(int wait_thing);
 
 	// COG run-time verbs
-	inline int GetParam(int param_num) { return model->RunningCogState.top().Params[param_num % 4]; }
-	inline int GetSenderId() { return model->RunningCogState.top().SenderId; }
-	inline int GetSenderRef() {	return model->RunningCogState.top().SenderRef; }
-	inline int GetSenderType() { return static_cast<int>(model->RunningCogState.top().SenderType); }
-	inline int GetSourceRef() { return model->RunningCogState.top().SourceRef; }
-	inline int GetSourceType() { return static_cast<int>(model->RunningCogState.top().SourceType); }
+	inline int get_param(int param_num) { return model->running_cog_state.top().params[param_num % 4]; }
+	inline int get_sender_id() { return model->running_cog_state.top().sender_id; }
+	inline int get_sender_ref() { return model->running_cog_state.top().sender_ref; }
+	inline int get_sender_type() { return static_cast<int>(model->running_cog_state.top().sender_type); }
+	inline int get_source_ref() { return model->running_cog_state.top().source_ref; }
+	inline int get_source_type() { return static_cast<int>(model->running_cog_state.top().source_type); }
 
-	void SetPulse(float time);
-	void SetTimer(float time);
-	void SetTimerEx(float delay, int id, Cog::VM::Value param0, Cog::VM::Value param1);
-	void Sleep(float time);
-	void WaitForStop(int thing);
-	void CaptureThing(int thing);
+	void set_pulse(float time);
+	void set_timer(float time);
+	void set_timer_ex(float delay, int id, cog::vm::value param0, cog::vm::value param1);
+	void sleep(float time);
+	void wait_for_stop(int thing);
+	void capture_thing(int thing);
 
-	inline int GetMasterCog() const {
+	inline int get_master_cog() const {
 		return master_cog;
 	}
 
-	inline void SetMasterCog(int cog) {
+	inline void set_master_cog(int cog) {
 		master_cog = cog;
 	}
 
-	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
+	static void register_verbs(cog::verbs::verb_table&, class components&);
 };
 
 }

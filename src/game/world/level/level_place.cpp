@@ -1,11 +1,11 @@
 #include "level_place.h"
 
-Gorc::Game::World::Level::LevelPlace::LevelPlace(std::shared_ptr<Content::Manager> ContentManager,
-		const Content::Assets::Level& Level)
-	: ContentManager(ContentManager), Level(Level) {
+gorc::game::world::level::level_place::level_place(std::shared_ptr<content::manager> contentmanager,
+		const content::assets::level& level)
+	: contentmanager(contentmanager), level(level) {
 	return;
 }
 
-void Gorc::Game::World::Level::LevelPlace::Accept(PlaceVisitor& v) const {
-	v.VisitLevelPlace(*this);
+void gorc::game::world::level::level_place::accept(place_visitor& v) const {
+	v.visit_level_place(*this);
 }

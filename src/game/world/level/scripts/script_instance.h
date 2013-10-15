@@ -5,13 +5,13 @@
 #include <tuple>
 #include <memory>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Scripts {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace scripts {
 
-using ScriptInstance = std::tuple<std::unique_ptr<Cog::Instance>, ScriptTimerState>;
+using script_instance = std::tuple<std::unique_ptr<cog::instance>, script_timer_state>;
 
 }
 }

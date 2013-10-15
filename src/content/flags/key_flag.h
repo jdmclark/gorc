@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class KeyFlag : uint32_t {
+enum class key_flag : uint32_t {
 	PausesOnFirstFrame 		= 0x1,
 	DoesNotLoop				= 0x2,
 	PausesOnLastFrame		= 0x4,

@@ -5,20 +5,20 @@
 #include <vector>
 #include <memory>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Animations {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace animations {
 
-class AnimationModel {
+class animation_model {
 private:
-	static void OnAnimationDestroy(Pool<PoolPtr<Animation>>&, Pool<PoolPtr<Animation>>::Element&);
+	static void on_animation_destroy(pool<pool_ptr<animation>>&, pool<pool_ptr<animation>>::element&);
 
 public:
-	Pool<PoolPtr<Animation>> Animations;
+	pool<pool_ptr<animation>> animations;
 
-	AnimationModel();
+	animation_model();
 };
 
 }

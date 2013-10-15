@@ -2,14 +2,14 @@
 
 #include "game/world/place.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Nothing {
+namespace gorc {
+namespace game {
+namespace world {
+namespace nothing {
 
-class NothingPlace : public Place {
+class nothing_place : public place {
 public:
-	void Accept(PlaceVisitor& v) const;
+	void accept(place_visitor& v) const;
 };
 
 }

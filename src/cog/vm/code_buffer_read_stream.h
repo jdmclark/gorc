@@ -2,38 +2,38 @@
 
 #include "code_buffer.h"
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class CodeBufferReadStream {
+class code_buffer_read_stream {
 private:
-	const CodeBuffer& codeBuffer;
+	const code_buffer& codeBuffer;
 	size_t streamPtr;
 
 public:
-	explicit CodeBufferReadStream(const CodeBuffer& cb);
+	explicit code_buffer_read_stream(const code_buffer& cb);
 
-	inline void Read(void* dest, size_t size) {
-		codeBuffer.Read(dest, streamPtr, size);
+	inline void read(void* dest, size_t size) {
+		codeBuffer.read(dest, streamPtr, size);
 		streamPtr += size;
 	}
 
-	template <typename T> inline T Read() {
-		T value = codeBuffer.Read<T>(streamPtr);
+	template <typename T> inline T read() {
+		T value = codeBuffer.read<T>(streamPtr);
 		streamPtr += sizeof(T);
 		return value;
 	}
 
-	inline void Seek(size_t dest) {
+	inline void seek(size_t dest) {
 		streamPtr = dest;
 	}
 
-	inline void Scan(ptrdiff_t offset) {
+	inline void scan(ptrdiff_t offset) {
 		streamPtr += offset;
 	}
 
-	inline size_t Tell() const {
+	inline size_t tell() const {
 		return streamPtr;
 	}
 };

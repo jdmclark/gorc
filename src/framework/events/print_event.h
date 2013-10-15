@@ -2,16 +2,16 @@
 
 #include <string>
 
-namespace Gorc {
-namespace Events {
+namespace gorc {
+namespace events {
 
-class PrintEvent {
+class print_event {
 public:
-	PrintEvent(const std::string& message);
+	print_event(const std::string& message);
 
 	std::string message;
 
-	static const std::string& GetEventType();
+	static const std::string& get_event_type();
 };
 
 }

@@ -3,18 +3,18 @@
 #include "virtual_file.h"
 #include <boost/filesystem/path.hpp>
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
+namespace gorc {
+namespace content {
+namespace vfs {
 
-class Container {
+class container {
 public:
-	virtual ~Container();
+	virtual ~container();
 
-	virtual size_t FileCount() const = 0;
-	virtual const VirtualFile& GetVirtualFile(size_t index) const = 0;
-	virtual bool IsEpisode() const = 0;
-	virtual const VirtualFile& GetEpisode() const = 0;
+	virtual size_t file_count() const = 0;
+	virtual const virtual_file& get_virtual_file(size_t index) const = 0;
+	virtual bool is_episode() const = 0;
+	virtual const virtual_file& get_episode() const = 0;
 };
 
 }

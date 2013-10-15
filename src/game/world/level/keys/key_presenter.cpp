@@ -6,17 +6,17 @@
 #include "content/manager.h"
 #include "game/world/level/gameplay/character_controller.h"
 
-Gorc::Game::World::Level::Keys::KeyPresenter::KeyPresenter(Content::Manager& contentManager)
-	: contentManager(contentManager), levelModel(nullptr), model(nullptr) {
+gorc::game::world::level::keys::key_presenter::key_presenter(content::manager& contentmanager)
+	: contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
 	return;
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::Start(LevelModel& levelModel, KeyModel& model) {
+void gorc::game::world::level::keys::key_presenter::start(level_model& levelModel, key_model& model) {
 	this->levelModel = &levelModel;
 	this->model = &model;
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, Flags::KeyMarkerType>>& markers,
+void gorc::game::world::level::keys::key_presenter::DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
 		double begin, double end, bool wraps, double frame_ct) {
 	if(wraps) {
 		begin = std::fmod(begin, frame_ct);
@@ -41,179 +41,179 @@ void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchAllMarkers(int thing_
 	}
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::DispatchMarker(int thing_id, Flags::KeyMarkerType marker) {
-	auto& thing = levelModel->Things[thing_id];
-	thing.Controller->HandleAnimationMarker(thing_id, marker);
+void gorc::game::world::level::keys::key_presenter::DispatchMarker(int thing_id, flags::key_marker_type marker) {
+	auto& thing = levelModel->things[thing_id];
+	thing.controller->handle_animation_marker(thing_id, marker);
 }
 
-int Gorc::Game::World::Level::Keys::KeyPresenter::GetThingMixId(int thing_id) {
-	auto& thing = levelModel->Things[thing_id];
-	if(thing.AttachedKeyMix < 0) {
-		auto& mix = model->Mixes.Create();
-		mix.AttachedThing = thing_id;
-		thing.AttachedKeyMix = mix.GetId();
+int gorc::game::world::level::keys::key_presenter::GetThingMixId(int thing_id) {
+	auto& thing = levelModel->things[thing_id];
+	if(thing.attached_key_mix < 0) {
+		auto& mix = model->mixes.create();
+		mix.attached_thing = thing_id;
+		thing.attached_key_mix = mix.get_id();
 	}
 
-	return thing.AttachedKeyMix;
+	return thing.attached_key_mix;
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::Update(double dt) {
+void gorc::game::world::level::keys::key_presenter::update(double dt) {
 	// Reset mix priorities.
-	for(auto& mix : model->Mixes) {
-		mix.Body.Priority = mix.High.Priority = mix.Low.Priority = std::numeric_limits<int>::lowest();
+	for(auto& mix : model->mixes) {
+		mix.body.priority = mix.high.priority = mix.low.priority = std::numeric_limits<int>::lowest();
 	}
 
-	// Update animation frames
-	for(auto& key : model->Keys) {
-		auto& mix = model->Mixes[key.MixId];
+	// update animation frames
+	for(auto& key : model->keys) {
+		auto& mix = model->mixes[key.mix_id];
 
-		// Update anim time and compute frame number
-		double prev_anim_time = key.AnimationTime;
-		key.AnimationTime += dt * key.Speed;
+		// update anim time and compute frame number
+		double prev_anim_time = key.animation_time;
+		key.animation_time += dt * key.speed;
 
-		if(key.Animation) {
+		if(key.animation) {
 			bool loops = false;
-			const auto& anim = *key.Animation;
-			double prev_logical_frame = anim.FrameRate * prev_anim_time;
-			double logical_frame = anim.FrameRate * key.AnimationTime;
+			const auto& anim = *key.animation;
+			double prev_logical_frame = anim.framerate * prev_anim_time;
+			double logical_frame = anim.framerate * key.animation_time;
 			double frame = logical_frame;
 
-			if(key.Flags & Flags::KeyFlag::PausesOnFirstFrame) {
-				if(frame > anim.FrameCount) {
+			if(key.flags & flags::key_flag::PausesOnFirstFrame) {
+				if(frame > anim.frame_count) {
 					frame = 0.0;
 				}
 			}
-			else if(key.Flags & Flags::KeyFlag::PausesOnLastFrame) {
-				if(frame > anim.FrameCount) {
-					frame = anim.FrameCount;
+			else if(key.flags & flags::key_flag::PausesOnLastFrame) {
+				if(frame > anim.frame_count) {
+					frame = anim.frame_count;
 				}
 			}
-			else if(static_cast<uint32_t>(key.Flags) == 0) {
+			else if(static_cast<uint32_t>(key.flags) == 0) {
 				loops = true;
-				frame = std::fmod(frame, anim.FrameCount);
+				frame = std::fmod(frame, anim.frame_count);
 			}
 
-			key.CurrentFrame = frame;
+			key.current_frame = frame;
 
-			DispatchAllMarkers(mix.AttachedThing, key.Animation->Markers, prev_logical_frame, logical_frame, loops, key.Animation->FrameCount);
+			DispatchAllMarkers(mix.attached_thing, key.animation->markers, prev_logical_frame, logical_frame, loops, key.animation->frame_count);
 
-			if((key.Flags & Flags::KeyFlag::EndSmoothly) && frame >= anim.FrameCount) {
+			if((key.flags & flags::key_flag::EndSmoothly) && frame >= anim.frame_count) {
 				// End smoothly, continue into next animation.
-				model->Keys.Destroy(key);
+				model->keys.destroy(key);
 				continue;
 			}
 		}
 
 		// Apply mix
-		if(key.HighPriority >= mix.High.Priority) {
-			mix.High.Animation = key.Animation;
-			mix.High.Frame = key.CurrentFrame;
-			mix.High.Priority = key.HighPriority;
+		if(key.high_priority >= mix.high.priority) {
+			mix.high.animation = key.animation;
+			mix.high.frame = key.current_frame;
+			mix.high.priority = key.high_priority;
 		}
 
-		if(key.LowPriority >= mix.Low.Priority) {
-			mix.Low.Animation = key.Animation;
-			mix.Low.Frame = key.CurrentFrame;
-			mix.Low.Priority = key.LowPriority;
+		if(key.low_priority >= mix.low.priority) {
+			mix.low.animation = key.animation;
+			mix.low.frame = key.current_frame;
+			mix.low.priority = key.low_priority;
 		}
 
-		if(key.BodyPriority >= mix.Body.Priority) {
-			mix.Body.Animation = key.Animation;
-			mix.Body.Frame = key.CurrentFrame;
-			mix.Body.Priority = key.BodyPriority;
+		if(key.body_priority >= mix.body.priority) {
+			mix.body.animation = key.animation;
+			mix.body.frame = key.current_frame;
+			mix.body.priority = key.body_priority;
 		}
 	}
 }
 
-std::tuple<Gorc::Math::Vector<3>, Gorc::Math::Vector<3>> Gorc::Game::World::Level::Keys::KeyPresenter::GetNodeFrame(int mix_id,
-		int node_id, FlagSet<Flags::MeshNodeType> node_type) const {
-	const KeyMix& mix = model->Mixes[mix_id];
+std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::level::keys::key_presenter::get_node_frame(int mix_id,
+		int node_id, flag_set<flags::mesh_node_type> node_type) const {
+	const key_mix& mix = model->mixes[mix_id];
 
-	// Get animation corresponding to node type
-	const KeyMixLevelState* mix_level;
-	if(node_type & Flags::MeshNodeType::UpperBody) {
-		mix_level = &mix.High;
+	// get animation corresponding to node type
+	const key_mix_level_state* mix_level;
+	if(node_type & flags::mesh_node_type::UpperBody) {
+		mix_level = &mix.high;
 	}
-	else if(node_type & Flags::MeshNodeType::LowerBody) {
-		mix_level = &mix.Low;
+	else if(node_type & flags::mesh_node_type::LowerBody) {
+		mix_level = &mix.low;
 	}
 	else {
-		mix_level = &mix.Body;
+		mix_level = &mix.body;
 	}
 
-	if(!mix_level->Animation || mix_level->Animation->Nodes.size() <= node_id ||
-			mix_level->Animation->Nodes[node_id].Frames.empty()) {
+	if(!mix_level->animation || mix_level->animation->nodes.size() <= node_id ||
+			mix_level->animation->nodes[node_id].frames.empty()) {
 		// Abort if there are no frames to interpolate.
-		return std::make_tuple(Math::Zero<3>(), Math::Zero<3>());
+		return std::make_tuple(math::zero<3>(), math::zero<3>());
 	}
 
-	const auto& anim_node = mix_level->Animation->Nodes[node_id];
+	const auto& anim_node = mix_level->animation->nodes[node_id];
 
-	int actual_frame = static_cast<int>(std::floor(mix_level->Frame));
+	int actual_frame = static_cast<int>(std::floor(mix_level->frame));
 
 	// Convert anim_time into a frame number
-	auto comp_fn = [](int tgt_fr, const Content::Assets::AnimationFrame& fr) {
-		return fr.Frame > tgt_fr;
+	auto comp_fn = [](int tgt_fr, const content::assets::animation_frame& fr) {
+		return fr.frame > tgt_fr;
 	};
 
 	// Find frame immediately after desired frame, then back off.
-	auto it = std::upper_bound(anim_node.Frames.begin(), anim_node.Frames.end(), actual_frame, comp_fn);
-	if(it == anim_node.Frames.begin()) {
-		it = anim_node.Frames.end() - 1;
+	auto it = std::upper_bound(anim_node.frames.begin(), anim_node.frames.end(), actual_frame, comp_fn);
+	if(it == anim_node.frames.begin()) {
+		it = anim_node.frames.end() - 1;
 	}
 	else {
 		--it;
 	}
 
-	float remaining_frame_time = static_cast<float>(mix_level->Frame) - static_cast<float>(it->Frame);
+	float remaining_frame_time = static_cast<float>(mix_level->frame) - static_cast<float>(it->frame);
 
-	auto position = it->Position + remaining_frame_time * it->DeltaPosition;
-	auto orientation = it->Orientation + remaining_frame_time * it->DeltaOrientation;
+	auto position = it->position + remaining_frame_time * it->delta_position;
+	auto orientation = it->orientation + remaining_frame_time * it->delta_orientation;
 
 	return std::make_tuple(position, orientation);
 }
 
-int Gorc::Game::World::Level::Keys::KeyPresenter::PlayKey(int thing_id, int key,
-		int priority, FlagSet<Flags::KeyFlag> flags) {
+int gorc::game::world::level::keys::key_presenter::play_key(int thing_id, int key,
+		int priority, flag_set<flags::key_flag> flags) {
 	int mix_id = GetThingMixId(thing_id);
 
-	auto& state = model->Keys.Create();
+	auto& state = model->keys.create();
 
-	state.Animation = &contentManager.GetAsset<Content::Assets::Animation>(key);
-	state.HighPriority = state.LowPriority = state.HighPriority = priority;
-	state.AnimationTime = 0.0;
-	state.CurrentFrame = 0.0;
-	state.MixId = mix_id;
-	state.Flags = flags;
-	state.Speed = 1.0;
+	state.animation = &contentmanager.get_asset<content::assets::animation>(key);
+	state.high_priority = state.low_priority = state.high_priority = priority;
+	state.animation_time = 0.0;
+	state.current_frame = 0.0;
+	state.mix_id = mix_id;
+	state.flags = flags;
+	state.speed = 1.0;
 
-	return state.GetId();
+	return state.get_id();
 }
 
-int Gorc::Game::World::Level::Keys::KeyPresenter::PlayPuppetKey(int thing_id,
-		Flags::PuppetModeType major_mode, Flags::PuppetSubmodeType minor_mode) {
+int gorc::game::world::level::keys::key_presenter::play_puppet_key(int thing_id,
+		flags::puppet_mode_type major_mode, flags::puppet_submode_type minor_mode) {
 	int mix_id = GetThingMixId(thing_id);
-	auto& thing = levelModel->Things[thing_id];
+	auto& thing = levelModel->things[thing_id];
 
-	auto& state = model->Keys.Create();
+	auto& state = model->keys.create();
 
-	const Content::Assets::PuppetSubmode& submode = thing.Puppet->GetMode(major_mode).GetSubmode(minor_mode);
+	const content::assets::puppet_submode& submode = thing.puppet->get_mode(major_mode).get_submode(minor_mode);
 
-	state.Animation = submode.Animation;
-	state.HighPriority = submode.HiPriority;
-	state.LowPriority = submode.LoPriority;
-	state.BodyPriority = std::max(submode.HiPriority, submode.LoPriority);
-	state.AnimationTime = 0.0;
-	state.CurrentFrame = 0.0;
-	state.MixId = mix_id;
-	state.Flags = submode.Flags;
-	state.Speed = 1.0;
+	state.animation = submode.animation;
+	state.high_priority = submode.hi_priority;
+	state.low_priority = submode.lo_priority;
+	state.body_priority = std::max(submode.hi_priority, submode.lo_priority);
+	state.animation_time = 0.0;
+	state.current_frame = 0.0;
+	state.mix_id = mix_id;
+	state.flags = submode.flags;
+	state.speed = 1.0;
 
-	return state.GetId();
+	return state.get_id();
 }
 
-void Gorc::Game::World::Level::Keys::KeyPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
-	verbTable.AddVerb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
-		return static_cast<int>(components.CurrentLevelPresenter->KeyPresenter.PlayKey(thing, key, priority, FlagSet<Flags::KeyFlag>(flags)));
+void gorc::game::world::level::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, components& components) {
+	verbTable.add_verb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
+		return static_cast<int>(components.current_level_presenter->key_presenter.play_key(thing, key, priority, flag_set<flags::key_flag>(flags)));
 	});
 }

@@ -1,11 +1,11 @@
 #include "animation_model.h"
 
-Gorc::Game::World::Level::Animations::AnimationModel::AnimationModel()
-	: Animations(OnAnimationDestroy) {
+gorc::game::world::level::animations::animation_model::animation_model()
+	: animations(on_animation_destroy) {
 	return;
 }
 
-void Gorc::Game::World::Level::Animations::AnimationModel::OnAnimationDestroy(Pool<PoolPtr<Animation>>& pool,
-		Pool<PoolPtr<Animation>>::Element& anim) {
-	anim->Stop();
+void gorc::game::world::level::animations::animation_model::on_animation_destroy(pool<pool_ptr<animation>>& p,
+		pool<pool_ptr<animation>>::element& anim) {
+	anim->stop();
 }

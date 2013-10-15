@@ -2,14 +2,14 @@
 
 #include <random>
 
-namespace Gorc {
+namespace gorc {
 
-class Randomizer {
+class randomizer {
 private:
 	std::default_random_engine rng;
 
 public:
-	Randomizer();
+	randomizer();
 
 	inline operator double() {
 		return std::generate_canonical<double, 10>(rng);

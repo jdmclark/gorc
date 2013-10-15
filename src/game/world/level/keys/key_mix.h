@@ -2,19 +2,19 @@
 
 #include "key_mix_level_state.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class Thing;
+class thing;
 
-namespace Keys {
+namespace keys {
 
-class KeyMix {
+class key_mix {
 public:
-	int AttachedThing;
-	KeyMixLevelState High, Low, Body;
+	int attached_thing;
+	key_mix_level_state high, low, body;
 };
 
 }

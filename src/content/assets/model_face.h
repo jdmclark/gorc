@@ -9,20 +9,20 @@
 #include <vector>
 #include <tuple>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class ModelFace {
+class model_face {
 public:
-	int Material;
-	FlagSet<Flags::FaceFlag> Type;
-	Flags::GeometryMode Geo;
-	Flags::LightMode Light;
-	Flags::TextureMode Tex;
-	float ExtraLight;
-	std::vector<std::tuple<size_t, size_t>> Vertices;
-	Math::Vector<3> Normal;
+	int material;
+	flag_set<flags::face_flag> type;
+	flags::geometry_mode geo;
+	flags::light_mode light;
+	flags::texture_mode tex;
+	float extra_light;
+	std::vector<std::tuple<size_t, size_t>> vertices;
+	vector<3> normal;
 };
 
 }

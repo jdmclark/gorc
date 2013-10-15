@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class MultiplayerModeFlag : uint32_t {
 	TeamPlay						= 0x1,

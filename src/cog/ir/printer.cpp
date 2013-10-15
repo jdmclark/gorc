@@ -1,5 +1,5 @@
 #include "printer.h"
 
-Gorc::Cog::IR::Printer::~Printer(){
+gorc::cog::ir::printer::~printer(){
 	return;
 }

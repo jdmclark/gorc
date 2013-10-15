@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class PhysicsFlag : uint32_t {
+enum class physics_flag : uint32_t {
 	HasGravity						= 0x1,
 	UsesThrustToMove				= 0x2,
 	AlignOrientationWithSurface		= 0x10,

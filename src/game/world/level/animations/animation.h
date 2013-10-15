@@ -2,20 +2,20 @@
 
 #include <memory>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Animations {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace animations {
 
-class Animation {
+class animation {
 public:
-	bool Expired = false;
+	bool expired = false;
 
-	virtual ~Animation();
+	virtual ~animation();
 
-	virtual void Update(double dt) = 0;
-	virtual void Stop();
+	virtual void update(double dt) = 0;
+	virtual void stop();
 };
 
 }

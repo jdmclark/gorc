@@ -2,11 +2,11 @@
 #include "game/world/level/level_model.h"
 #include "game/constants.h"
 
-Gorc::Game::World::Level::Animations::SlideCeilingSkyAnimation::SlideCeilingSkyAnimation(LevelModel& model, const Math::Vector<2>& speed)
+gorc::game::world::level::animations::slide_ceiling_sky_animation::slide_ceiling_sky_animation(level_model& model, const vector<2>& speed)
 	: model(model), speed(speed) {
 	return;
 }
 
-void Gorc::Game::World::Level::Animations::SlideCeilingSkyAnimation::Update(double dt) {
-	model.Header.CeilingSkyOffset += speed * dt * RateFactor;
+void gorc::game::world::level::animations::slide_ceiling_sky_animation::update(double dt) {
+	model.header.ceiling_sky_offset += speed * dt * rate_factor;
 }

@@ -2,17 +2,17 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace IO {
+namespace gorc {
+namespace io {
 
-class IOException : public Exception { };
-class FileOpenErrorException : public IOException { };
-class FileCreateErrorException : public IOException { };
-class FileReadErrorException : public IOException { };
-class FileWriteErrorException : public IOException { };
-class FileInvalidSeekException : public IOException { };
-class FileCorruptException : public IOException { };
-class FileNotFoundException : public IOException { };
+class io_exception : public exception { };
+class file_open_error_exception : public io_exception { };
+class file_create_error_exception : public io_exception { };
+class file_read_error_exception : public io_exception { };
+class file_write_error_exception : public io_exception { };
+class file_invalid_seek_exception : public io_exception { };
+class file_corrupt_exception : public io_exception { };
+class file_not_found_exception : public io_exception { };
 
 }
 }

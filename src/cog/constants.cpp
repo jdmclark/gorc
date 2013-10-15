@@ -1,3 +1,3 @@
 #include "constants.h"
 
-const char* Gorc::Cog::Constants::DefaultString = "";
+const char* gorc::cog::constants::default_string = "";

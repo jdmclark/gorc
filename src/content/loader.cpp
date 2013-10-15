@@ -1,5 +1,5 @@
 #include "loader.h"
 
-Gorc::Content::Loader::~Loader() {
+gorc::content::loader::~loader() {
 	return;
 }

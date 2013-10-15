@@ -3,25 +3,25 @@
 #include <boost/filesystem/path.hpp>
 #include "content/vfs/virtual_file.h"
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Gob {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace gob {
 
-class GobContainer;
+class gob_container;
 
-class GobVirtualFile : public VirtualFile {
+class gob_virtual_file : public virtual_file {
 private:
 	size_t chunkOffset;
 	size_t chunkLength;
 	boost::filesystem::path filename;
-	const GobContainer& parentContainer;
+	const gob_container& parentContainer;
 
 public:
-	GobVirtualFile(size_t chunkOffset, size_t chunkLength, const boost::filesystem::path& filename, const GobContainer& parentContainer);
+	gob_virtual_file(size_t chunkOffset, size_t chunkLength, const boost::filesystem::path& filename, const gob_container& parentContainer);
 
-	const boost::filesystem::path& GetFilename() const;
-	std::unique_ptr<IO::ReadOnlyFile> Open() const;
+	const boost::filesystem::path& get_filename() const;
+	std::unique_ptr<io::read_only_file> open() const;
 };
 
 }

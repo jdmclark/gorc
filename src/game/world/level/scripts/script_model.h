@@ -9,23 +9,23 @@
 #include <tuple>
 #include <unordered_map>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class Thing;
+class thing;
 
-namespace Scripts {
+namespace scripts {
 
-class ScriptModel {
+class script_model {
 public:
-	std::vector<ScriptInstance> Cogs;
-	std::unordered_map<Cog::Script const*, int> GlobalScriptInstances;
-	Pool<std::tuple<double, ScriptContinuation>, 8> SleepingCogs;
-	Pool<std::tuple<int, ScriptContinuation>, 8> WaitForStopCogs;
-	std::stack<ScriptContinuation> RunningCogState;
-	Pool<ScriptTimer> Timers;
+	std::vector<script_instance> cogs;
+	std::unordered_map<cog::script const*, int> global_script_instances;
+	pool<std::tuple<double, script_continuation>, 8> sleeping_cogs;
+	pool<std::tuple<int, script_continuation>, 8> wait_for_stop_cogs;
+	std::stack<script_continuation> running_cog_state;
+	pool<script_timer> timers;
 };
 
 }

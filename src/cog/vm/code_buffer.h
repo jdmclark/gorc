@@ -4,11 +4,11 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class CodeBuffer
+class code_buffer
 {
 private:
 	std::vector<uint8_t> data;
@@ -33,36 +33,36 @@ private:
 	}
 
 public:
-	CodeBuffer();
+	code_buffer();
 
-	void Write(size_t dest, const void* src, size_t size);
-	void Read(void* dest, size_t src, size_t size) const;
+	void write(size_t dest, const void* src, size_t size);
+	void read(void* dest, size_t src, size_t size) const;
 
-	template <typename T> inline void Write(T value, size_t dest)
+	template <typename T> inline void write(T value, size_t dest)
 	{
 		resizeDataForWrite(dest, sizeof(T));
 		*(T*)(&data[dest]) = value;
 	}
 
-	template <typename T> inline T Read(size_t src) const
+	template <typename T> inline T read(size_t src) const
 	{
 		tryRead(src, sizeof(T));
 		return *(T*)(&data[src]);
 	}
 
-	inline void* WritePointer(size_t dest, size_t size)
+	inline void* write_pointer(size_t dest, size_t size)
 	{
 		resizeDataForWrite(dest, size);
 		return (void*)&data[dest];
 	}
 
-	inline const void* ReadPointer(size_t src, size_t size) const
+	inline const void* read_pointer(size_t src, size_t size) const
 	{
 		tryRead(src, size);
 		return (const void*)&data[src];
 	}
 
-	inline size_t Size() const
+	inline size_t size() const
 	{
 		return topPtr;
 	}

@@ -7,11 +7,11 @@ class VfsSingleton {
 private:
 	VfsSingleton();
 	static VfsSingleton inst;
-	Gorc::Diagnostics::StreamReport report;
-	Gorc::Content::VFS::VirtualFileSystem vfs;
+	gorc::diagnostics::stream_report report;
+	gorc::content::vfs::virtual_filesystem vfs;
 
 public:
-	inline static const Gorc::Content::FileSystem& Get() {
+	inline static const gorc::content::filesystem& get() {
 		return inst.vfs;
 	}
 

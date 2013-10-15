@@ -56,7 +56,7 @@ Case(s2_verb_invalid_overload) {
 }
 
 Case(s2_verb_passing) {
-	VerbTable.AddVerb<void, 0>("testverb", [](){});
+	verb_table.add_verb<void, 0>("testverb", [](){});
 
 	ParseFile("verb_passing.cog");
 	AssertResult(0, 0);

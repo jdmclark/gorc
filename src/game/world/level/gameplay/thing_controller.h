@@ -3,39 +3,39 @@
 #include "framework/math/vector.h"
 #include "content/flags/key_marker_type.h"
 
-namespace Gorc {
+namespace gorc {
 
-namespace Content {
-namespace Assets {
-class Template;
+namespace content {
+namespace assets {
+class thing_template;
 }
 }
 
-namespace Game {
-namespace World {
-namespace Level {
+namespace game {
+namespace world {
+namespace level {
 
-class LevelPresenter;
-class Thing;
+class level_presenter;
+class thing;
 
-namespace Gameplay {
+namespace gameplay {
 
-class ThingController {
+class thing_controller {
 protected:
-	LevelPresenter& presenter;
+	level_presenter& presenter;
 
 public:
-	ThingController(LevelPresenter& presenter);
-	virtual ~ThingController() = 0;
+	thing_controller(level_presenter& presenter);
+	virtual ~thing_controller() = 0;
 
-	virtual void Update(int thing_id, double dt);
-	virtual void RemoveControllerData(int thing_id);
-	virtual void CreateControllerData(int thing_id);
-	virtual void HandleAnimationMarker(int thing_id, Flags::KeyMarkerType marker);
+	virtual void update(int thing_id, double dt);
+	virtual void remove_controller_data(int thing_id);
+	virtual void create_controller_data(int thing_id);
+	virtual void handle_animation_marker(int thing_id, flags::key_marker_type marker);
 
-	virtual void Taken(int thing_id, int player_id);
-	virtual void TouchedThing(int thing_id, int touched_thing_id);
-	virtual void TouchedSurface(int thing_id, int touched_surface_id);
+	virtual void taken(int thing_id, int player_id);
+	virtual void touched_thing(int thing_id, int touched_thing_id);
+	virtual void touched_surface(int thing_id, int touched_surface_id);
 };
 
 }

@@ -2,15 +2,15 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-enum class Opcode : uint8_t {
+enum class opcode : uint8_t {
 	NOP,			// NOP ; Non-operation
 
 	COPY,			// COPY ; Duplicates value on top of stack
-	CONST,			// CONSTV [Value] ; Push constant value
+	CONST,			// CONSTV [value] ; Push constant value
 
 	LOAD,			// LOAD [Address] ; Loads value from address
 	LOADI,			// LOADI [Address] ; Adds top value to address and loads

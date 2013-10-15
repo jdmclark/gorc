@@ -2,18 +2,18 @@
 
 #include "thing_controller.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Gameplay {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace gameplay {
 
-class GhostController : public ThingController {
+class ghost_controller : public thing_controller {
 public:
-	using ThingController::ThingController;
+	using thing_controller::thing_controller;
 
-	virtual void CreateControllerData(int thing_id) override;
-	virtual void RemoveControllerData(int thing_id) override;
+	virtual void create_controller_data(int thing_id) override;
+	virtual void remove_controller_data(int thing_id) override;
 };
 
 }

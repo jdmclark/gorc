@@ -5,76 +5,76 @@
 #include <vector>
 #include <string>
 
-namespace Gorc {
-namespace Event {
+namespace gorc {
+namespace event {
 
-class EventBus {
+class event_bus {
 private:
-	class EventBusHandlerContainer {
+	class event_bus_handler_container {
 	public:
-		virtual ~EventBusHandlerContainer();
+		virtual ~event_bus_handler_container();
 	};
 
-	template <typename T> class EventBusHandlerContainerImpl : public EventBusHandlerContainer {
+	template <typename T> class event_bus_handler_container_impl : public event_bus_handler_container {
 	public:
 		std::vector<std::function<void(T&)>> handlers;
 	};
 
-	EventBus* parent;
-	std::unordered_map<std::string, EventBusHandlerContainer*> handlers;
-	std::vector<EventBus*> children;
+	event_bus* parent;
+	std::unordered_map<std::string, event_bus_handler_container*> handlers;
+	std::vector<event_bus*> children;
 
-	void AddChild(EventBus* child);
-	void RemoveChild(EventBus* child);
+	void add_child(event_bus* child);
+	void remove_child(event_bus* child);
 
-	template <typename T> std::vector<std::function<void(T&)>>& GetHandlerVector() {
-		auto type = T::GetEventType();
+	template <typename T> std::vector<std::function<void(T&)>>& get_handler_vector() {
+		auto type = T::get_event_type();
 		auto it = handlers.find(type);
 		if(it == handlers.end()) {
-			auto nv = new EventBusHandlerContainerImpl<T>();
+			auto nv = new event_bus_handler_container_impl<T>();
 			handlers.insert(std::make_pair(type, nv));
 			return nv->handlers;
 		}
 		else {
-			auto hc = reinterpret_cast<EventBusHandlerContainerImpl<T>*>(it->second);
+			auto hc = reinterpret_cast<event_bus_handler_container_impl<T>*>(it->second);
 			return hc->handlers;
 		}
 	}
 
-	template <typename T> void DispatchEvent(T& event) {
-		auto& hvec = GetHandlerVector<T>();
+	template <typename T> void dispatch_event(T& event) {
+		auto& hvec = get_handler_vector<T>();
 		for(auto& eh : hvec) {
 			eh(event);
 		}
 
-		std::vector<EventBus*> tchildren(children);
+		std::vector<event_bus*> tchildren(children);
 
 		for(auto child : tchildren) {
-			child->DispatchEvent(event);
+			child->dispatch_event(event);
 		}
 	}
 
 public:
-	EventBus();
-	EventBus(EventBus* parent);
-	~EventBus();
+	event_bus();
+	event_bus(event_bus* parent);
+	~event_bus();
 
-	template <typename T> void FireEvent(T& event) {
+	template <typename T> void fire_event(T& event) {
 		if(parent == nullptr) {
-			DispatchEvent(event);
+			dispatch_event(event);
 			return;
 		}
 
-		parent->DispatchEvent(event);
+		parent->dispatch_event(event);
 	}
 
-	template <typename T> void AddHandler(std::function<void(T&)> handler) {
-		auto& hvec = GetHandlerVector<T>();
+	template <typename T> void add_handler(std::function<void(T&)> handler) {
+		auto& hvec = get_handler_vector<T>();
 		hvec.push_back(handler);
 	}
 
-	EventBus(const EventBus&) = delete;
-	EventBus& operator=(const EventBus&) = delete;
+	event_bus(const event_bus&) = delete;
+	event_bus& operator=(const event_bus&) = delete;
 };
 
 }

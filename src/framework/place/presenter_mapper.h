@@ -3,16 +3,16 @@
 #include "presenter.h"
 #include <memory>
 
-namespace Gorc {
-namespace Place {
+namespace gorc {
+namespace place {
 
-template <typename T> class PresenterMapper {
+template <typename T> class presenter_mapper {
 public:
-	virtual ~PresenterMapper() {
+	virtual ~presenter_mapper() {
 		return;
 	}
 
-	virtual std::unique_ptr<Presenter> GetPresenter(const T& place) = 0;
+	virtual std::unique_ptr<presenter> get_presenter(const T& place) = 0;
 };
 
 }

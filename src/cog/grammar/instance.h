@@ -5,49 +5,49 @@
 #include "framework/text/source.h"
 #include "framework/diagnostics/report.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Grammar {
+namespace gorc {
+namespace cog {
+namespace grammar {
 
-class Instance {
+class instance {
 private:
-	Text::Source& inputFilestream;
+	text::source& inputFilestream;
 
 	// Scanner initialization members
 	// implemented in gra_lexer.lex
-	void InitScanner();
-	void DestroyScanner();
+	void init_scanner();
+	void destroy_scanner();
 
 	void* scanner;
-	AST::TranslationUnit* ReturnValue;
-	const char* CurrentFilename;
+	ast::translation_unit* return_value;
+	const char* current_filename;
 
 public:
-	AST::Factory& Factory;
-	Diagnostics::Report& Report;
+	ast::factory& factory;
+	diagnostics::report& report;
 
-	Instance(Text::Source& inputFilestream, AST::Factory& ast, Diagnostics::Report& report);
-	~Instance();
+	instance(text::source& inputFilestream, ast::factory& ast, diagnostics::report& report);
+	~instance();
 
-	inline char GetNext() {
-		return inputFilestream.GetNext();
+	inline char get_next() {
+		return inputFilestream.get_next();
 	}
 
-	AST::TranslationUnit* Parse();
+	ast::translation_unit* parse();
 
-	inline void* GetScanner() const {
+	inline void* get_scanner() const {
 		return scanner;
 	}
 
-	inline void SetReturnValue(AST::TranslationUnit* astroot) {
-		ReturnValue = astroot;
+	inline void set_return_value(ast::translation_unit* astroot) {
+		return_value = astroot;
 	}
 
-	inline const char* GetFilename() const {
-		return CurrentFilename;
+	inline const char* get_filename() const {
+		return current_filename;
 	}
 
-	std::string TokenBuffer;
+	std::string token_buffer;
 };
 
 }

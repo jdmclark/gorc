@@ -6,27 +6,27 @@
 #include <boost/filesystem/path.hpp>
 #include <vector>
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Gob {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace gob {
 
-class GobContainer : public Container {
+class gob_container : public container {
 private:
 	boost::filesystem::path gobPath;
-	std::vector<GobVirtualFile> files;
+	std::vector<gob_virtual_file> files;
 	bool isEpisode;
 	size_t episodeIndex;
 
 public:
-	GobContainer(IO::ReadOnlyFile& file);
+	gob_container(io::read_only_file& file);
 
-	size_t FileCount() const;
-	const VirtualFile& GetVirtualFile(size_t index) const;
-	bool IsEpisode() const;
-	const VirtualFile& GetEpisode() const;
+	size_t file_count() const;
+	const virtual_file& get_virtual_file(size_t index) const;
+	bool is_episode() const;
+	const virtual_file& get_episode() const;
 
-	inline const boost::filesystem::path& GetPath() const {
+	inline const boost::filesystem::path& get_path() const {
 		return gobPath;
 	}
 };

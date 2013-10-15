@@ -2,15 +2,15 @@
 
 #include "content/loader.h"
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-class ShaderLoader : public Loader {
+class shader_loader : public loader {
 public:
-	static const std::vector<boost::filesystem::path> AssetRootPath;
+	static const std::vector<boost::filesystem::path> asset_root_path;
 
-	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) override;
+	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
 };
 
 }

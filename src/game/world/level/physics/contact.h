@@ -3,54 +3,54 @@
 #include "object_data.h"
 #include "framework/math/vector.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Physics {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace physics {
 
-class RestingContact {
+class resting_contact {
 public:
-	Math::Vector<3> Normal;
+	vector<3> normal;
 
-	RestingContact() = default;
-	RestingContact(const RestingContact&) = default;
-	RestingContact(const Math::Vector<3>& normal);
+	resting_contact() = default;
+	resting_contact(const resting_contact&) = default;
+	resting_contact(const vector<3>& normal);
 };
 
-class Contact {
+class contact {
 public:
-	const ObjectData* ContactObject = nullptr;
-	double Alpha;
-	Math::Vector<3> Position;
-	Math::Vector<3> Normal;
+	const object_data* contact_object = nullptr;
+	double alpha;
+	vector<3> position;
+	vector<3> normal;
 
-	Contact() = default;
-	Contact(const Contact&) = default;
-	Contact(const ObjectData& ContactObject, double Alpha, const Math::Vector<3>& position, const Math::Vector<3>& normal);
+	contact() = default;
+	contact(const contact&) = default;
+	contact(const object_data& ContactObject, double alpha, const vector<3>& position, const vector<3>& normal);
 };
 
-class ContactRangeConsumer {
+class contact_range_consumer {
 private:
 	bool has_valid_contact = false;
-	Contact contact;
+	contact contact;
 	float alpha_left = 0.0f;
 	float alpha_right = 1.0f;
 
 public:
-	ContactRangeConsumer(float alpha_left = 0.0f, float alpha_right = 1.0f);
+	contact_range_consumer(float alpha_left = 0.0f, float alpha_right = 1.0f);
 
 	inline operator bool() const {
 		return has_valid_contact;
 	}
 
-	inline operator const Contact&() const {
+	inline operator const class contact&() const {
 		return contact;
 	}
 
-	inline ContactRangeConsumer& operator<<=(const Contact& new_contact) {
-		if(new_contact.Alpha >= alpha_left && new_contact.Alpha <= alpha_right &&
-				(!has_valid_contact || contact.Alpha < contact.Alpha)) {
+	inline contact_range_consumer& operator<<=(const class contact& new_contact) {
+		if(new_contact.alpha >= alpha_left && new_contact.alpha <= alpha_right &&
+				(!has_valid_contact || contact.alpha < contact.alpha)) {
 			contact = new_contact;
 			has_valid_contact = true;
 		}

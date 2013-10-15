@@ -7,27 +7,27 @@
 
 #include "cog/stages/stages.h"
 
-void Gorc::Cog::Stages::GenerateCode::GenerateCode(AST::TranslationUnit* ast, IR::Printer& printer, Diagnostics::Report& report) {
-	printer.Comment("==============================");
-	printer.Comment("COG compiler diagnostic output");
-	printer.Comment("==============================");
+void gorc::cog::stages::generate_code::generate_code(ast::translation_unit* ast, ir::printer& printer, diagnostics::report& report) {
+	printer.comment("==============================");
+	printer.comment("COG compiler diagnostic output");
+	printer.comment("==============================");
 
 	// Generate 'default' action for unimplemented messages.
-	printer.Ret();
+	printer.ret();
 
 	int nextLabelNumber = 1;
-	CodeVisitor v(nextLabelNumber, printer, report);
+	code_visitor v(nextLabelNumber, printer, report);
 
-	for(auto& stmt : *ast->Code) {
-		stmt->Accept(v);
+	for(auto& stmt : *ast->code) {
+		stmt->accept(v);
 	}
 
 	// Generate guard return
-	if(ast->Code->size() > 0) {
-		printer.Ret();
+	if(ast->code->size() > 0) {
+		printer.ret();
 	}
 
-	printer.Backpatch();
+	printer.backpatch();
 
 	return;
 }

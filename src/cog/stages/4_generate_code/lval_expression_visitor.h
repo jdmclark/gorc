@@ -3,21 +3,21 @@
 #include "cog/ast/visitor.h"
 #include "cog/ir/printer.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace GenerateCode {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace generate_code {
 
-class LValueExpressionVisitor : public AST::Visitor {
+class lvalue_expression_visitor : public ast::visitor {
 protected:
-	IR::Printer& Printer;
+	ir::printer& Printer;
 
 public:
-	LValueExpressionVisitor(IR::Printer& printer, Diagnostics::Report& report);
+	lvalue_expression_visitor(ir::printer& printer, diagnostics::report& report);
 
 private:
-	AVPROTO(IdentifierExpression);
-	AVPROTO(SubscriptExpression);
+	AVPROTO(identifier_expression);
+	AVPROTO(subscript_expression);
 };
 
 }

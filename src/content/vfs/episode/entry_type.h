@@ -1,14 +1,14 @@
 #pragma once
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Episode {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace episode {
 
-enum class EntryType {
-	Cutscene,
-	Level,
-	Decision
+enum class entry_type {
+	cutscene,
+	level,
+	decision
 };
 
 }

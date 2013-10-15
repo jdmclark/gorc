@@ -5,45 +5,45 @@
 #include "physics/object_data.h"
 #include <memory>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-namespace Sounds {
-class Sound;
+namespace sounds {
+class sound;
 }
 
-namespace Keys {
-class KeyMix;
-class KeyState;
+namespace keys {
+class key_mix;
+class key_state;
 }
 
-class Thing : public Content::Assets::Template {
+class thing : public content::assets::thing_template {
 public:
-	Gameplay::ThingController* Controller;
-	Physics::ThingObjectData ObjectData;
+	gameplay::thing_controller* controller;
+	physics::thing_object_data object_data;
 
-	bool PathMoving = false;
-	int CurrentFrame = 0;
-	int NextFrame = 0;
-	int GoalFrame = 0;
-	float PathMoveSpeed = 0.0f;
+	bool path_moving = false;
+	int current_frame = 0;
+	int next_frame = 0;
+	int goal_frame = 0;
+	float path_move_speed = 0.0f;
 
-	int CurrentFoleyLoopChannel = -1;
+	int current_foley_loop_channel = -1;
 
-	int AttachedSurface = -1;
-	int AttachedThing = -1;
-	Math::Vector<3> PrevAttachedThingPosition;
+	int attached_surface = -1;
+	int attached_thing = -1;
+	vector<3> prev_attached_thing_position;
 
-	int AttachedKeyMix = -1;
-	int ActorWalkAnimation = -1;
+	int attached_key_mix = -1;
+	int actor_walk_animation = -1;
 
-	int CaptureCog = -1;
-	float TimeAlive = 0.0f;
+	int capture_cog = -1;
+	float time_alive = 0.0f;
 
-	Thing() = default;
-	Thing(const Content::Assets::Template& tpl);
+	thing() = default;
+	thing(const content::assets::thing_template& tpl);
 };
 
 }

@@ -4,18 +4,18 @@
 #include "framework/diagnostics/stream_report.h"
 #include <nullunit/nullunit.h>
 
-using namespace Gorc;
+using namespace gorc;
 
 BeginSuite(TokenizerTest);
 
 Case(GetTokenTests) {
-	// Basic tests of GetToken and all token types.
+	// Basic tests of get_token and all token types.
 
 	// Set up source:
 	std::string input = " \
 		# Line comment											\n\
-		\"String literal\"										\n\
-		\"String literal with \\\"escape sequences\\\"\"		\n\
+		\"string literal\"										\n\
+		\"string literal with \\\"escape sequences\\\"\"		\n\
 		identifier												\n\
 		numeric_0123456789_id									\n\
 		_identifierwithleadingunderscore						\n\
@@ -35,311 +35,311 @@ Case(GetTokenTests) {
 		.5														\n\
 		";
 
-	Diagnostics::StoredReport report;
-	Text::Source s(input);
-	Text::Tokenizer tok(s, report);
+	diagnostics::stored_report report;
+	text::source s(input);
+	text::tokenizer tok(s, report);
 
-	Text::Token t;
+	text::token t;
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::String);
-	Test_Assert_Eq(t.Value, "String literal");
-	Test_Assert_Eq(t.Location.first_line, 2);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::string);
+	Test_Assert_Eq(t.value, "string literal");
+	Test_Assert_Eq(t.location.first_line, 2);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::String);
-	Test_Assert_Eq(t.Value, "String literal with \"escape sequences\"");
-	Test_Assert_Eq(t.Location.first_line, 3);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::string);
+	Test_Assert_Eq(t.value, "string literal with \"escape sequences\"");
+	Test_Assert_Eq(t.location.first_line, 3);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "identifier");
-	Test_Assert_Eq(t.Location.first_line, 4);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "identifier");
+	Test_Assert_Eq(t.location.first_line, 4);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "numeric_0123456789_id");
-	Test_Assert_Eq(t.Location.first_line, 5);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "numeric_0123456789_id");
+	Test_Assert_Eq(t.location.first_line, 5);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "_identifierwithleadingunderscore");
-	Test_Assert_Eq(t.Location.first_line, 6);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "_identifierwithleadingunderscore");
+	Test_Assert_Eq(t.location.first_line, 6);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Integer);
-	Test_Assert_Eq(t.Value, "9");
-	Test_Assert_Eq(t.Location.first_line, 7);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::integer);
+	Test_Assert_Eq(t.value, "9");
+	Test_Assert_Eq(t.location.first_line, 7);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "illegalidentifier");
-	Test_Assert_Eq(t.Location.first_line, 7);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "illegalidentifier");
+	Test_Assert_Eq(t.location.first_line, 7);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "illegal");
-	Test_Assert_Eq(t.Location.first_line, 8);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "illegal");
+	Test_Assert_Eq(t.location.first_line, 8);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "!");
-	Test_Assert_Eq(t.Location.first_line, 8);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "!");
+	Test_Assert_Eq(t.location.first_line, 8);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "identifier");
-	Test_Assert_Eq(t.Location.first_line, 8);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "identifier");
+	Test_Assert_Eq(t.location.first_line, 8);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "{");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "{");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "}");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "}");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "[");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "[");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "]");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "]");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "(");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "(");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ")");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ")");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ".");
-	Test_Assert_Eq(t.Location.first_line, 9);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ".");
+	Test_Assert_Eq(t.location.first_line, 9);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "&");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "&");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "*");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "*");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "+");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "+");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "-");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "-");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "~");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "~");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "!");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "!");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "/");
-	Test_Assert_Eq(t.Location.first_line, 10);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "/");
+	Test_Assert_Eq(t.location.first_line, 10);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "%");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "%");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "<");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "<");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ">");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ">");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "^");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "^");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "|");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "|");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "?");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "?");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, "=");
-	Test_Assert_Eq(t.Location.first_line, 11);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, "=");
+	Test_Assert_Eq(t.location.first_line, 11);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ",");
-	Test_Assert_Eq(t.Location.first_line, 12);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ",");
+	Test_Assert_Eq(t.location.first_line, 12);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ";");
-	Test_Assert_Eq(t.Location.first_line, 12);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ";");
+	Test_Assert_Eq(t.location.first_line, 12);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ":");
-	Test_Assert_Eq(t.Location.first_line, 12);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ":");
+	Test_Assert_Eq(t.location.first_line, 12);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Integer);
-	Test_Assert_Eq(t.Value, "255");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::integer);
+	Test_Assert_Eq(t.value, "255");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Integer);
-	Test_Assert_Eq(t.Value, "-255");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::integer);
+	Test_Assert_Eq(t.value, "-255");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::HexInteger);
-	Test_Assert_Eq(t.Value, "0x255");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::hex_integer);
+	Test_Assert_Eq(t.value, "0x255");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::HexInteger);
-	Test_Assert_Eq(t.Value, "0xFF");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::hex_integer);
+	Test_Assert_Eq(t.value, "0xFF");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::HexInteger);
-	Test_Assert_Eq(t.Value, "-0x255");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::hex_integer);
+	Test_Assert_Eq(t.value, "-0x255");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::HexInteger);
-	Test_Assert_Eq(t.Value, "-0xFF");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::hex_integer);
+	Test_Assert_Eq(t.value, "-0xFF");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::HexInteger);
-	Test_Assert_Eq(t.Value, "0XFF");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::hex_integer);
+	Test_Assert_Eq(t.value, "0XFF");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::HexInteger);
-	Test_Assert_Eq(t.Value, "-0XFF");
-	Test_Assert_Eq(t.Location.first_line, 13);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::hex_integer);
+	Test_Assert_Eq(t.value, "-0XFF");
+	Test_Assert_Eq(t.location.first_line, 13);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1.0");
-	Test_Assert_Eq(t.Location.first_line, 14);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1.0");
+	Test_Assert_Eq(t.location.first_line, 14);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "-1.0");
-	Test_Assert_Eq(t.Location.first_line, 14);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "-1.0");
+	Test_Assert_Eq(t.location.first_line, 14);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "0.1");
-	Test_Assert_Eq(t.Location.first_line, 14);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "0.1");
+	Test_Assert_Eq(t.location.first_line, 14);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "-0.1");
-	Test_Assert_Eq(t.Location.first_line, 14);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "-0.1");
+	Test_Assert_Eq(t.location.first_line, 14);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1e2");
-	Test_Assert_Eq(t.Location.first_line, 16);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1e2");
+	Test_Assert_Eq(t.location.first_line, 16);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "-1e2");
-	Test_Assert_Eq(t.Location.first_line, 16);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "-1e2");
+	Test_Assert_Eq(t.location.first_line, 16);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1E2");
-	Test_Assert_Eq(t.Location.first_line, 16);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1E2");
+	Test_Assert_Eq(t.location.first_line, 16);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "-1E2");
-	Test_Assert_Eq(t.Location.first_line, 16);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "-1E2");
+	Test_Assert_Eq(t.location.first_line, 16);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "0.1e2");
-	Test_Assert_Eq(t.Location.first_line, 17);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "0.1e2");
+	Test_Assert_Eq(t.location.first_line, 17);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "-0.1e2");
-	Test_Assert_Eq(t.Location.first_line, 17);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "-0.1e2");
+	Test_Assert_Eq(t.location.first_line, 17);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "0.1E2");
-	Test_Assert_Eq(t.Location.first_line, 17);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "0.1E2");
+	Test_Assert_Eq(t.location.first_line, 17);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "-0.1E2");
-	Test_Assert_Eq(t.Location.first_line, 17);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "-0.1E2");
+	Test_Assert_Eq(t.location.first_line, 17);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1e+2");
-	Test_Assert_Eq(t.Location.first_line, 18);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1e+2");
+	Test_Assert_Eq(t.location.first_line, 18);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1e-2");
-	Test_Assert_Eq(t.Location.first_line, 18);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1e-2");
+	Test_Assert_Eq(t.location.first_line, 18);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1E+2");
-	Test_Assert_Eq(t.Location.first_line, 18);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1E+2");
+	Test_Assert_Eq(t.location.first_line, 18);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Float);
-	Test_Assert_Eq(t.Value, "1E-2");
-	Test_Assert_Eq(t.Location.first_line, 18);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::floating);
+	Test_Assert_Eq(t.value, "1E-2");
+	Test_Assert_Eq(t.location.first_line, 18);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Punctuator);
-	Test_Assert_Eq(t.Value, ".");
-	Test_Assert_Eq(t.Location.first_line, 20);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::punctuator);
+	Test_Assert_Eq(t.value, ".");
+	Test_Assert_Eq(t.location.first_line, 20);
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Integer);
-	Test_Assert_Eq(t.Value, "5");
-	Test_Assert_Eq(t.Location.first_line, 20);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::integer);
+	Test_Assert_Eq(t.value, "5");
+	Test_Assert_Eq(t.location.first_line, 20);
 }
 
 Case(AssertionTests) {
@@ -353,58 +353,58 @@ Case(AssertionTests) {
 		nice_data				\n\
 		";
 
-	Diagnostics::StreamReport report(std::cout);
-	Text::Source s(input);
-	Text::Tokenizer tok(s, report);
+	diagnostics::stream_report report(std::cout);
+	text::source s(input);
+	text::tokenizer tok(s, report);
 
-	tok.AssertIdentifier("identifier");
-	tok.AssertPunctuator("!");
-	tok.AssertLabel("label");
+	tok.assert_identifier("identifier");
+	tok.assert_punctuator("!");
+	tok.assert_label("label");
 
-	Text::Token t;
+	text::token t;
 
-	tok.GetDelimitedString(t, [](char c) { return c == '.'; });
-	Test_Assert_Eq(t.Type, Text::TokenType::String);
-	Test_Assert_Eq(t.Value, "some~delimited~string");
-	Test_Assert_Eq(t.Location.first_line, 3);
+	tok.get_delimited_string(t, [](char c) { return c == '.'; });
+	Test_Assert_Eq(t.type, text::token_type::string);
+	Test_Assert_Eq(t.value, "some~delimited~string");
+	Test_Assert_Eq(t.location.first_line, 3);
 
-	tok.AssertPunctuator(".");
+	tok.assert_punctuator(".");
 
-	Test_Assert_Eq(tok.GetNumber<int>(), 255);
-	Test_Assert_Eq(tok.GetNumber<int>(), 255);
+	Test_Assert_Eq(tok.get_number<int>(), 255);
+	Test_Assert_Eq(tok.get_number<int>(), 255);
 
-	tok.AssertLabel("some");
-	tok.SkipToNextLine();
+	tok.assert_label("some");
+	tok.skip_to_next_line();
 
-	tok.GetToken(t);
-	Test_Assert_Eq(t.Type, Text::TokenType::Identifier);
-	Test_Assert_Eq(t.Value, "nice_data");
-	Test_Assert_Eq(t.Location.first_line, 6);
+	tok.get_token(t);
+	Test_Assert_Eq(t.type, text::token_type::identifier);
+	Test_Assert_Eq(t.value, "nice_data");
+	Test_Assert_Eq(t.location.first_line, 6);
 }
 
 Case(ParseVectorTest) {
 	std::string input = " \
 			frame=(-8.850002/-5.300000/-0.671531:0.000000/-90.000000/0.000000)";
-	Diagnostics::StreamReport report(std::cout);
-	Text::Source s(input);
-	Text::Tokenizer tok(s, report);
+	diagnostics::stream_report report(std::cout);
+	text::source s(input);
+	text::tokenizer tok(s, report);
 
-	tok.AssertIdentifier("frame");
-	tok.AssertPunctuator("=");
+	tok.assert_identifier("frame");
+	tok.assert_punctuator("=");
 
-	tok.AssertPunctuator("(");
-	tok.GetNumber<float>();
-	tok.AssertPunctuator("/");
-	tok.GetNumber<float>();
-	tok.AssertPunctuator("/");
-	tok.GetNumber<float>();
-	tok.AssertPunctuator(":");
-	tok.GetNumber<float>();
-	tok.AssertPunctuator("/");
-	tok.GetNumber<float>();
-	tok.AssertPunctuator("/");
-	tok.GetNumber<float>();
-	tok.AssertPunctuator(")");
+	tok.assert_punctuator("(");
+	tok.get_number<float>();
+	tok.assert_punctuator("/");
+	tok.get_number<float>();
+	tok.assert_punctuator("/");
+	tok.get_number<float>();
+	tok.assert_punctuator(":");
+	tok.get_number<float>();
+	tok.assert_punctuator("/");
+	tok.get_number<float>();
+	tok.assert_punctuator("/");
+	tok.get_number<float>();
+	tok.assert_punctuator(")");
 }
 
 EndSuite(TokenizerTest);

@@ -2,16 +2,16 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class MessageType {
-	Nothing = 0,
-	System = 1,
-	Thing = 3,
-	Sector = 5,
-	Surface = 6,
-	Cog = 9
+enum class message_type {
+	nothing = 0,
+	system = 1,
+	thing = 3,
+	sector = 5,
+	surface = 6,
+	cog = 9
 };
 
 }

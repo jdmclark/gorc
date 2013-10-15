@@ -7,51 +7,51 @@
 #include <string>
 #include <memory>
 
-namespace Gorc {
-namespace Cog {
-namespace Symbols {
+namespace gorc {
+namespace cog {
+namespace symbols {
 
-class SymbolTable
+class symbol_table
 {
 private:
-	std::vector<Symbol> symbols;
+	std::vector<symbol> symbols;
 	std::unordered_map<std::string, size_t> symbolMap;
 	std::vector<std::unique_ptr<std::string>> strings;
 
 public:
-	void AddSymbol(SymbolType type, const std::string& name,
-		const VM::Value& defaultValue,
+	void add_symbol(symbol_type type, const std::string& name,
+		const vm::value& defaultvalue,
 		bool local, const std::string& desc, int mask, int linkid, bool nolink);
-	void AddSymbol(SymbolType type, const std::string& name,
+	void add_symbol(symbol_type type, const std::string& name,
 		bool local, const std::string& desc, int mask, int linkid, bool nolink);
-	void AddSymbol(const std::string& name);
+	void add_symbol(const std::string& name);
 
-	void ReplaceSymbol(SymbolType type, const std::string& name,
-		const VM::Value& defaultValue,
+	void replace_symbol(symbol_type type, const std::string& name,
+		const vm::value& defaultvalue,
 		bool local, const std::string& desc, int mask, int linkid, bool nolink);
-	void ReplaceSymbol(SymbolType type, const std::string& name,
+	void replace_symbol(symbol_type type, const std::string& name,
 		bool local, const std::string& desc, int mask, int linkid, bool nolink);
-	void ReplaceSymbol(const std::string& name);
+	void replace_symbol(const std::string& name);
 
-	const Symbol& GetSymbol(size_t index) const;
-	const Symbol& GetSymbol(const std::string& name) const;
+	const symbol& get_symbol(size_t index) const;
+	const symbol& get_symbol(const std::string& name) const;
 
-	bool IsSymbolDefined(size_t index) const;
-	bool IsSymbolDefined(const std::string& name) const;
+	bool is_symbol_defined(size_t index) const;
+	bool is_symbol_defined(const std::string& name) const;
 
-	const char* AddString(const std::string&);
+	const char* add_string(const std::string&);
 
-	size_t GetSymbolIndex(const std::string& name) const;
+	size_t get_symbol_index(const std::string& name) const;
 
 	inline size_t size() const {
 		return symbols.size();
 	}
 
-	inline std::vector<Symbol>::const_iterator begin() const {
+	inline std::vector<symbol>::const_iterator begin() const {
 		return symbols.begin();
 	}
 
-	inline std::vector<Symbol>::const_iterator end() const {
+	inline std::vector<symbol>::const_iterator end() const {
 		return symbols.end();
 	}
 };

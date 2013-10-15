@@ -2,15 +2,15 @@
 
 #include "content/flags/adjoin_flag.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class LevelAdjoin {
+class level_adjoin {
 public:
-	FlagSet<Flags::AdjoinFlag> Flags;
-	size_t Mirror;
-	float Distance;
+	flag_set<flags::adjoin_flag> flags;
+	size_t mirror;
+	float distance;
 };
 
 }

@@ -5,33 +5,33 @@
 
 #include <vector>
 
-namespace Gorc {
-namespace Diagnostics {
+namespace gorc {
+namespace diagnostics {
 
-class StoredReport : public Report {
+class stored_report : public report {
 private:
-	std::vector<Error> container;
+	std::vector<error> container;
 	unsigned int errorCount, warningCount;
 
 public:
-	StoredReport();
+	stored_report();
 
-	void AddError(const std::string& stage, const std::string& reason, const ErrorLocation& location);
-	void AddWarning(const std::string& stage, const std::string& reason, const ErrorLocation& location);
-	void AddCriticalError(const std::string& stage, const std::string& reason);
+	void add_error(const std::string& stage, const std::string& reason, const error_location& location);
+	void add_warning(const std::string& stage, const std::string& reason, const error_location& location);
+	void add_critical_error(const std::string& stage, const std::string& reason);
 
-	unsigned int GetErrorCount() const;
-	unsigned int GetWarningCount() const;
+	unsigned int get_error_count() const;
+	unsigned int get_warning_count() const;
 
-	inline std::vector<Error>::const_iterator begin() const {
+	inline std::vector<error>::const_iterator begin() const {
 		return container.begin();
 	}
 
-	inline std::vector<Error>::const_iterator end() const {
+	inline std::vector<error>::const_iterator end() const {
 		return container.end();
 	}
 
-	void Repeat(Report& report) const;
+	void repeat(report& report) const;
 };
 
 }

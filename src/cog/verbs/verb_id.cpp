@@ -1,6 +1,6 @@
 #include "verb_id.h"
 
-Gorc::Cog::Verbs::VerbId::VerbId(size_t id)
+gorc::cog::verbs::verb_id::verb_id(size_t id)
 	: id(id) {
 	return;
 }

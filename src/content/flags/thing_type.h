@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class ThingType : uint32_t {
+enum class thing_type : uint32_t {
 	Free							= 0,
 	Camera							= 1,
 	Actor							= 2,
@@ -13,8 +13,8 @@ enum class ThingType : uint32_t {
 	Debris							= 4,
 	Item							= 5,
 	Explosion						= 6,
-	Cog								= 7,
-	Ghost							= 8,
+	cog								= 7,
+	ghost							= 8,
 	Corpse							= 9,
 	Player							= 10,
 	Particle						= 11

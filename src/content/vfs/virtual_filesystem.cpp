@@ -8,15 +8,15 @@
 
 #include <iostream>
 
-using Gorc::Content::VFS::vfsmap;
+using gorc::content::vfs::vfsmap;
 
-Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::VfsEpisode(IO::ReadOnlyFile& file, std::unique_ptr<Container>& cnt, Diagnostics::Report& report)
+gorc::content::vfs::virtual_filesystem::vfs_episode::vfs_episode(io::read_only_file& file, std::unique_ptr<class container>& cnt, diagnostics::report& report)
 	: container(std::move(cnt)) {
-	Episode = std::unique_ptr<Episode::Episode>(new Episode::Episode(file, report));
+	Episode = std::unique_ptr<episode::episode>(new episode::episode(file, report));
 
-	for(size_t i = 0; i < container->FileCount(); ++i) {
-		const VirtualFile& vf = container->GetVirtualFile(i);
-		std::string fn = vf.GetFilename().generic_string();
+	for(size_t i = 0; i < container->file_count(); ++i) {
+		const virtual_file& vf = container->get_virtual_file(i);
+		std::string fn = vf.get_filename().generic_string();
 		std::transform(fn.begin(), fn.end(), fn.begin(), tolower);
 		FileMap.insert(std::make_pair(fn, &vf));
 	}
@@ -24,66 +24,66 @@ Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::VfsEpisode(IO::ReadOnlyFile& 
 	return;
 }
 
-const Gorc::Content::VFS::Episode::Episode& Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::GetEpisode() const {
+const gorc::content::vfs::episode::episode& gorc::content::vfs::virtual_filesystem::vfs_episode::get_episode() const {
 	return *Episode;
 }
 
-vfsmap::const_iterator Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::find(const std::string& path) const {
+vfsmap::const_iterator gorc::content::vfs::virtual_filesystem::vfs_episode::find(const std::string& path) const {
 	return FileMap.find(path);
 }
 
-vfsmap::const_iterator Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::begin() const {
+vfsmap::const_iterator gorc::content::vfs::virtual_filesystem::vfs_episode::begin() const {
 	return FileMap.begin();
 }
 
-vfsmap::const_iterator Gorc::Content::VFS::VirtualFileSystem::VfsEpisode::end() const {
+vfsmap::const_iterator gorc::content::vfs::virtual_filesystem::vfs_episode::end() const {
 	return FileMap.end();
 }
 
-Gorc::Content::VFS::VirtualFileSystem::VirtualFileSystem(const boost::filesystem::path& RestrictedPath, const boost::filesystem::path& ResourcePath,
-		const boost::filesystem::path& EpisodePath, Diagnostics::Report& report)
-	: RestrictedPath(RestrictedPath), ResourcePath(ResourcePath), hasGamePath(false), currentEpisode(nullptr) {
+gorc::content::vfs::virtual_filesystem::virtual_filesystem(const boost::filesystem::path& RestrictedPath, const boost::filesystem::path& ResourcePath,
+		const boost::filesystem::path& EpisodePath, diagnostics::report& report)
+	: RestrictedPath(RestrictedPath), ResourcePath(ResourcePath), hasgamePath(false), currentEpisode(nullptr) {
 	loadGobs(RestrictedPath, RestrictedFileMap, report);
 	loadGobs(ResourcePath, ResourceFileMap, report);
 	loadGobs(EpisodePath, ResourceFileMap, report);
 }
 
-Gorc::Content::VFS::VirtualFileSystem::VirtualFileSystem(const boost::filesystem::path& RestrictedPath, const boost::filesystem::path& ResourcePath,
-		const boost::filesystem::path& EpisodePath, const boost::filesystem::path& GamePath, Diagnostics::Report& report)
-	: RestrictedPath(RestrictedPath), ResourcePath(ResourcePath), GamePath(GamePath), hasGamePath(true), currentEpisode(nullptr) {
+gorc::content::vfs::virtual_filesystem::virtual_filesystem(const boost::filesystem::path& RestrictedPath, const boost::filesystem::path& ResourcePath,
+		const boost::filesystem::path& EpisodePath, const boost::filesystem::path& gamePath, diagnostics::report& report)
+	: RestrictedPath(RestrictedPath), ResourcePath(ResourcePath), gamePath(gamePath), hasgamePath(true), currentEpisode(nullptr) {
 	loadGobs(RestrictedPath, RestrictedFileMap, report);
 	loadGobs(ResourcePath, ResourceFileMap, report);
 	loadGobs(EpisodePath, ResourceFileMap, report);
-	loadGobs(GamePath, GameFileMap, report);
+	loadGobs(gamePath, gameFileMap, report);
 }
 
-void Gorc::Content::VFS::VirtualFileSystem::loadGob(const boost::filesystem::path& gobFilePath,	vfsmap& map, Diagnostics::Report& report) {
-	std::unique_ptr<Container> cnt;
+void gorc::content::vfs::virtual_filesystem::loadGob(const boost::filesystem::path& gobFilePath,	vfsmap& map, diagnostics::report& report) {
+	std::unique_ptr<container> cnt;
 
 	try {
-		IO::NativeFile file(gobFilePath, false);
-		cnt = std::unique_ptr<Container>(new Gob::GobContainer(file));
+		io::native_file file(gobFilePath, false);
+		cnt = std::unique_ptr<container>(new gob::gob_container(file));
 	}
-	catch(IO::IOException&) {
-		report.AddWarning("VirtualFileSystem", "container file corrupt",
-				Diagnostics::ErrorLocation(gobFilePath, 0, 0, 0, 0));
+	catch(io::io_exception&) {
+		report.add_warning("VirtualFileSystem", "container file corrupt",
+				diagnostics::error_location(gobFilePath, 0, 0, 0, 0));
 		return;
 	}
 
-	if(cnt->IsEpisode()) {
+	if(cnt->is_episode()) {
 		try {
-			std::unique_ptr<IO::ReadOnlyFile> file = cnt->GetEpisode().Open();
-			Episodes.emplace_back(new VfsEpisode(*file, cnt, report));
+			std::unique_ptr<io::read_only_file> file = cnt->get_episode().open();
+			episodes.emplace_back(new vfs_episode(*file, cnt, report));
 		}
 		catch(...) {
-			report.AddWarning("VirtualFileSystem", "episode file corrupt",
-					Diagnostics::ErrorLocation(gobFilePath / "episode.jk", 0, 0, 0, 0));
+			report.add_warning("VirtualFileSystem", "episode file corrupt",
+					diagnostics::error_location(gobFilePath / "episode.jk", 0, 0, 0, 0));
 		}
 	}
 	else {
-		for(size_t i = 0; i < cnt->FileCount(); ++i) {
-			const VirtualFile& vf = cnt->GetVirtualFile(i);
-			std::string fn = vf.GetFilename().generic_string();
+		for(size_t i = 0; i < cnt->file_count(); ++i) {
+			const virtual_file& vf = cnt->get_virtual_file(i);
+			std::string fn = vf.get_filename().generic_string();
 			std::transform(fn.begin(), fn.end(), fn.begin(), tolower);
 			map.insert(std::make_pair(fn, &vf));
 		}
@@ -92,7 +92,7 @@ void Gorc::Content::VFS::VirtualFileSystem::loadGob(const boost::filesystem::pat
 	}
 }
 
-void Gorc::Content::VFS::VirtualFileSystem::loadGobs(const boost::filesystem::path& basepath, vfsmap& map, Diagnostics::Report& report) {
+void gorc::content::vfs::virtual_filesystem::loadGobs(const boost::filesystem::path& basepath, vfsmap& map, diagnostics::report& report) {
 	if(boost::filesystem::exists(basepath) && boost::filesystem::is_directory(basepath)) {
 		for(boost::filesystem::directory_iterator dir_iter(basepath); dir_iter != boost::filesystem::directory_iterator(); ++dir_iter) {
 			if(boost::filesystem::is_regular_file(dir_iter->status())
@@ -103,22 +103,22 @@ void Gorc::Content::VFS::VirtualFileSystem::loadGobs(const boost::filesystem::pa
 	}
 }
 
-std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::findInGobs(const boost::filesystem::path& path,
+std::unique_ptr<gorc::io::read_only_file> gorc::content::vfs::virtual_filesystem::findInGobs(const boost::filesystem::path& path,
 		const boost::filesystem::path& basePath, const std::string& generic_string, const vfsmap& map) const {
 	boost::filesystem::path inBareDirectory = basePath / path;
 	if(boost::filesystem::exists(inBareDirectory) && boost::filesystem::is_regular_file(inBareDirectory)) {
-		return std::unique_ptr<IO::ReadOnlyFile>(new IO::NativeFile(inBareDirectory));
+		return std::unique_ptr<io::read_only_file>(new io::native_file(inBareDirectory));
 	}
 
 	auto inGob = map.find(generic_string);
 	if(inGob != map.end()) {
-		return inGob->second->Open();
+		return inGob->second->open();
 	}
 
-	return std::unique_ptr<IO::ReadOnlyFile>();
+	return std::unique_ptr<io::read_only_file>();
 }
 
-std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::Open(const boost::filesystem::path& path) const {
+std::unique_ptr<gorc::io::read_only_file> gorc::content::vfs::virtual_filesystem::open(const boost::filesystem::path& path) const {
 	std::string generic_string = path.generic_string();
 	std::transform(generic_string.begin(), generic_string.end(), generic_string.begin(), tolower);
 	boost::filesystem::path npath(generic_string);
@@ -134,13 +134,13 @@ std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::O
 	if(currentEpisode != nullptr) {
 		auto epPath = currentEpisode->find(generic_string);
 		if(epPath != currentEpisode->end()) {
-			return epPath->second->Open();
+			return epPath->second->open();
 		}
 	}
 
 	// Try from mod files.
-	if(hasGamePath) {
-		auto gameFile = findInGobs(npath, GamePath, generic_string, GameFileMap);
+	if(hasgamePath) {
+		auto gameFile = findInGobs(npath, gamePath, generic_string, gameFileMap);
 		if(gameFile) {
 			return gameFile;
 		}
@@ -153,5 +153,5 @@ std::unique_ptr<Gorc::IO::ReadOnlyFile> Gorc::Content::VFS::VirtualFileSystem::O
 	}
 
 	// Not found.
-	throw IO::FileNotFoundException();
+	throw io::file_not_found_exception();
 }

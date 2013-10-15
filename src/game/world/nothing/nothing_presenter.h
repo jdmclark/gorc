@@ -3,19 +3,19 @@
 #include "framework/place/presenter.h"
 #include "game/components.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Nothing {
+namespace gorc {
+namespace game {
+namespace world {
+namespace nothing {
 
-class NothingPresenter : public Gorc::Place::Presenter {
+class nothing_presenter : public gorc::place::presenter {
 private:
-	Components& components;
+	components& components;
 
 public:
-	NothingPresenter(Components& components);
+	nothing_presenter(class components& components);
 
-	void Start(Event::EventBus& eventBus);
+	void start(event::event_bus& eventBus);
 };
 
 }

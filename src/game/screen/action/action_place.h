@@ -3,14 +3,14 @@
 #include "game/screen/place.h"
 #include <string>
 
-namespace Gorc {
-namespace Game {
-namespace Screen {
-namespace Action {
+namespace gorc {
+namespace game {
+namespace screen {
+namespace action {
 
-class ActionPlace : public Place {
+class action_place : public place {
 public:
-	void Accept(PlaceVisitor& v) const;
+	void accept(place_visitor& v) const;
 };
 
 }

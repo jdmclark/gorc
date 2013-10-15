@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class DamageFlag : uint32_t {
 	Impact							= 0x1,

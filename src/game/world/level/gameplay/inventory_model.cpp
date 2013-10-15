@@ -1,93 +1,93 @@
 #include "inventory_model.h"
 
-using namespace Gorc::Game::World::Level::Gameplay;
+using namespace gorc::game::world::level::gameplay;
 
-PlayerInventoryModel::PlayerInventoryModel(const Content::Assets::Inventory& BaseInventory)
+player_inventory_model::player_inventory_model(const content::assets::inventory& BaseInventory)
 	: BaseInventory(BaseInventory) {
 	return;
 }
 
-PlayerBinModel& PlayerInventoryModel::InitializeBin(int bin) {
-	const auto& base_bin = BaseInventory.GetBin(bin);
+player_bin_model& player_inventory_model::initialize_bin(int bin) {
+	const auto& base_bin = BaseInventory.get_bin(bin);
 
-	auto& new_bin = std::get<1>(*std::get<0>(bins.emplace(bin, PlayerBinModel())));
+	auto& new_bin = std::get<1>(*std::get<0>(bins.emplace(bin, player_bin_model())));
 
-	new_bin.Cooldown = 0.0f;
-	new_bin.Value = base_bin.MinValue;
-	new_bin.Available = base_bin.Flags & Flags::InventoryFlag::AvailableByDefault;
+	new_bin.cooldown = 0.0f;
+	new_bin.value = base_bin.min_value;
+	new_bin.available = base_bin.flags & flags::inventory_flag::AvailableByDefault;
 	return new_bin;
 }
 
-PlayerBinModel& PlayerInventoryModel::GetBin(int bin) {
+player_bin_model& player_inventory_model::get_bin(int bin) {
 	auto it = bins.find(bin);
 	if(it == bins.end()) {
-		return InitializeBin(bin);
+		return initialize_bin(bin);
 	}
 	else {
 		return it->second;
 	}
 }
 
-int PlayerInventoryModel::GetBinValue(int bin) {
-	return GetBin(bin).Value;
+int player_inventory_model::get_bin_value(int bin) {
+	return get_bin(bin).value;
 }
 
-void PlayerInventoryModel::SetBinValue(int bin, int value) {
-	const auto& base_bin = BaseInventory.GetBin(bin);
-	GetBin(bin).Value = std::min(std::max(value, base_bin.MinValue), base_bin.MaxValue);
+void player_inventory_model::set_bin_value(int bin, int value) {
+	const auto& base_bin = BaseInventory.get_bin(bin);
+	get_bin(bin).value = std::min(std::max(value, base_bin.min_value), base_bin.max_value);
 }
 
-void PlayerInventoryModel::ModBinValue(int bin, int delta) {
-	SetBinValue(bin, GetBin(bin).Value + delta);
+void player_inventory_model::mod_bin_value(int bin, int delta) {
+	set_bin_value(bin, get_bin(bin).value + delta);
 }
 
-float PlayerInventoryModel::GetBinCooldown(int bin) {
-	return GetBin(bin).Cooldown;
+float player_inventory_model::get_bin_cooldown(int bin) {
+	return get_bin(bin).cooldown;
 }
 
-void PlayerInventoryModel::SetBinCooldown(int bin, float value) {
-	GetBin(bin).Cooldown = value;
+void player_inventory_model::set_bin_cooldown(int bin, float value) {
+	get_bin(bin).cooldown = value;
 }
 
-bool PlayerInventoryModel::IsBinActivated(int bin) {
-	return GetBin(bin).Activated;
+bool player_inventory_model::is_bin_activated(int bin) {
+	return get_bin(bin).activated;
 }
 
-void PlayerInventoryModel::SetBinActivated(int bin, bool state) {
-	GetBin(bin).Activated = state;
+void player_inventory_model::set_bin_activated(int bin, bool state) {
+	get_bin(bin).activated = state;
 }
 
-bool PlayerInventoryModel::IsBinAvailable(int bin) {
-	return GetBin(bin).Available;
+bool player_inventory_model::is_bin_available(int bin) {
+	return get_bin(bin).available;
 }
 
-void PlayerInventoryModel::SetBinAvailable(int bin, bool state) {
-	GetBin(bin).Available = state;
+void player_inventory_model::set_bin_available(int bin, bool state) {
+	get_bin(bin).available = state;
 }
 
-void PlayerInventoryModel::ModAllCooldowns(float value) {
+void player_inventory_model::mod_all_cooldowns(float value) {
 	for(auto& bin_pair : bins) {
-		std::get<1>(bin_pair).Cooldown = std::max(std::get<1>(bin_pair).Cooldown + value, 0.0f);
+		std::get<1>(bin_pair).cooldown = std::max(std::get<1>(bin_pair).cooldown + value, 0.0f);
 	}
 }
 
-InventoryModel::InventoryModel(const Content::Assets::Inventory& BaseInventory)
-	: BaseInventory(BaseInventory) {
+inventory_model::inventory_model(const content::assets::inventory& BaseInventory)
+	: base_inventory(BaseInventory) {
 	return;
 }
 
-PlayerInventoryModel& InventoryModel::GetInventory(int player_id) {
+player_inventory_model& inventory_model::get_inventory(int player_id) {
 	auto it = player_inventories.find(player_id);
 	if(it == player_inventories.end()) {
-		return std::get<0>(player_inventories.emplace(player_id, PlayerInventoryModel(BaseInventory)))->second;
+		return std::get<0>(player_inventories.emplace(player_id, player_inventory_model(base_inventory)))->second;
 	}
 	else {
 		return it->second;
 	}
 }
 
-void InventoryModel::ModAllCooldowns(float dt) {
+void inventory_model::mod_all_cooldowns(float dt) {
 	for(auto& inv_pair : player_inventories) {
-		std::get<1>(inv_pair).ModAllCooldowns(dt);
+		std::get<1>(inv_pair).mod_all_cooldowns(dt);
 	}
 }

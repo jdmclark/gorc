@@ -8,20 +8,20 @@
 #include "animation_node.h"
 #include <vector>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Animation : public Asset {
+class animation : public asset {
 public:
-	using Loader = Loaders::AnimationLoader;
+	using loader = loaders::animation_loader;
 
-	FlagSet<Flags::KeyFlag> Flags;
-	unsigned int FrameCount;
-	double FrameRate;
+	flag_set<flags::key_flag> flags;
+	unsigned int frame_count;
+	double framerate;
 
-	std::vector<std::tuple<double, Flags::KeyMarkerType>> Markers;
-	std::vector<AnimationNode> Nodes;
+	std::vector<std::tuple<double, flags::key_marker_type>> markers;
+	std::vector<animation_node> nodes;
 };
 
 }

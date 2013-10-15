@@ -3,22 +3,22 @@
 #include "cog/ast/visitor.h"
 #include "cog/ir/printer.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace GenerateCode {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace generate_code {
 
-class CodeVisitor : public AST::Visitor {
+class code_visitor : public ast::visitor {
 protected:
-	IR::Printer& Printer;
+	ir::printer& Printer;
 	int& nextLabelNumber;
 
 	const std::string BreakLabel;
 
-	std::string GenerateLabel(const std::string& prefix);
+	std::string generate_label(const std::string& prefix);
 
 public:
-	CodeVisitor(int& nextLabelNumber, IR::Printer& printer, Diagnostics::Report& report, const std::string breakLabel = "");
+	code_visitor(int& nextLabelNumber, ir::printer& printer, diagnostics::report& report, const std::string breakLabel = "");
 
 private:
 	ASTCLASS_STATEMENT(AVPROTO);

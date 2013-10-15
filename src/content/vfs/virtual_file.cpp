@@ -1,5 +1,5 @@
 #include "virtual_file.h"
 
-Gorc::Content::VFS::VirtualFile::~VirtualFile() {
+gorc::content::vfs::virtual_file::~virtual_file() {
 	return;
 }

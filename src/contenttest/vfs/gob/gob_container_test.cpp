@@ -8,87 +8,87 @@
 BeginSuite(GobContainerTest);
 
 Case(Empty) {
-	Gorc::IO::NativeFile file("test/gob/empty.gob");
-	Gorc::Content::VFS::Gob::GobContainer cnt(file);
+	gorc::io::native_file file("test/gob/empty.gob");
+	gorc::content::vfs::gob::gob_container cnt(file);
 
-	Test_Assert_Eq(cnt.FileCount(), 0);
+	Test_Assert_Eq(cnt.file_count(), 0);
 }
 
 Case(OneFile) {
-	Gorc::IO::NativeFile file("test/gob/onefile.gob");
-	Gorc::Content::VFS::Gob::GobContainer cnt(file);
+	gorc::io::native_file file("test/gob/onefile.gob");
+	gorc::content::vfs::gob::gob_container cnt(file);
 
-	Test_Assert_Eq(cnt.FileCount(), 1);
+	Test_Assert_Eq(cnt.file_count(), 1);
 
-	const Gorc::Content::VFS::VirtualFile& vf = cnt.GetVirtualFile(0);
-	Test_Assert_Eq(vf.GetFilename(), "test.txt");
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> test_txt = vf.Open();
+	const gorc::content::vfs::virtual_file& vf = cnt.get_virtual_file(0);
+	Test_Assert_Eq(vf.get_filename(), "test.txt");
+	std::unique_ptr<gorc::io::read_only_file> test_txt = vf.open();
 
-	Gorc::Diagnostics::StoredReport report;
+	gorc::diagnostics::stored_report report;
 
-	Gorc::Text::Source src(*test_txt);
-	Gorc::Text::Tokenizer tok(src, report);
+	gorc::text::source src(*test_txt);
+	gorc::text::tokenizer tok(src, report);
 
-	Test_Assert_Eq(tok.GetNumber<int>(), 1);
-	tok.AssertEndOfFile();
+	Test_Assert_Eq(tok.get_number<int>(), 1);
+	tok.assert_end_of_file();
 }
 
 Case(ThreeFiles) {
-	Gorc::IO::NativeFile file("test/gob/threefiles.gob");
-	Gorc::Content::VFS::Gob::GobContainer cnt(file);
+	gorc::io::native_file file("test/gob/threefiles.gob");
+	gorc::content::vfs::gob::gob_container cnt(file);
 
-	Test_Assert_Eq(cnt.FileCount(), 3);
+	Test_Assert_Eq(cnt.file_count(), 3);
 
-	const Gorc::Content::VFS::VirtualFile& vf1 = cnt.GetVirtualFile(0);
-	Test_Assert_Eq(vf1.GetFilename(), "first.txt");
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> test_txt1 = vf1.Open();
+	const gorc::content::vfs::virtual_file& vf1 = cnt.get_virtual_file(0);
+	Test_Assert_Eq(vf1.get_filename(), "first.txt");
+	std::unique_ptr<gorc::io::read_only_file> test_txt1 = vf1.open();
 
-	Gorc::Diagnostics::StoredReport report;
+	gorc::diagnostics::stored_report report;
 
-	Gorc::Text::Source src1(*test_txt1);
-	Gorc::Text::Tokenizer tok1(src1, report);
+	gorc::text::source src1(*test_txt1);
+	gorc::text::tokenizer tok1(src1, report);
 
-	Test_Assert_Eq(tok1.GetNumber<int>(), 1);
-	tok1.AssertEndOfFile();
+	Test_Assert_Eq(tok1.get_number<int>(), 1);
+	tok1.assert_end_of_file();
 
-	const Gorc::Content::VFS::VirtualFile& vf2 = cnt.GetVirtualFile(1);
-	Test_Assert_Eq(vf2.GetFilename(), "second.txt");
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> test_txt2 = vf2.Open();
+	const gorc::content::vfs::virtual_file& vf2 = cnt.get_virtual_file(1);
+	Test_Assert_Eq(vf2.get_filename(), "second.txt");
+	std::unique_ptr<gorc::io::read_only_file> test_txt2 = vf2.open();
 
-	Gorc::Text::Source src2(*test_txt2);
-	Gorc::Text::Tokenizer tok2(src2, report);
+	gorc::text::source src2(*test_txt2);
+	gorc::text::tokenizer tok2(src2, report);
 
-	Test_Assert_Eq(tok2.GetNumber<int>(), 2);
-	tok2.AssertEndOfFile();
+	Test_Assert_Eq(tok2.get_number<int>(), 2);
+	tok2.assert_end_of_file();
 
-	const Gorc::Content::VFS::VirtualFile& vf3 = cnt.GetVirtualFile(2);
-	Test_Assert_Eq(vf3.GetFilename(), "third.txt");
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> test_txt3 = vf3.Open();
+	const gorc::content::vfs::virtual_file& vf3 = cnt.get_virtual_file(2);
+	Test_Assert_Eq(vf3.get_filename(), "third.txt");
+	std::unique_ptr<gorc::io::read_only_file> test_txt3 = vf3.open();
 
-	Gorc::Text::Source src3(*test_txt3);
-	Gorc::Text::Tokenizer tok3(src3, report);
+	gorc::text::source src3(*test_txt3);
+	gorc::text::tokenizer tok3(src3, report);
 
-	Test_Assert_Eq(tok3.GetNumber<int>(), 3);
-	tok3.AssertEndOfFile();
+	Test_Assert_Eq(tok3.get_number<int>(), 3);
+	tok3.assert_end_of_file();
 }
 
 Case(Structured) {
-	Gorc::IO::NativeFile file("test/gob/structured.gob");
-	Gorc::Content::VFS::Gob::GobContainer cnt(file);
+	gorc::io::native_file file("test/gob/structured.gob");
+	gorc::content::vfs::gob::gob_container cnt(file);
 
-	Test_Assert_Eq(cnt.FileCount(), 1);
+	Test_Assert_Eq(cnt.file_count(), 1);
 
-	const Gorc::Content::VFS::VirtualFile& vf = cnt.GetVirtualFile(0);
-	Test_Assert_Eq(vf.GetFilename().generic_string(), boost::filesystem::path("dir/test.txt").generic_string());
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> test_txt = vf.Open();
+	const gorc::content::vfs::virtual_file& vf = cnt.get_virtual_file(0);
+	Test_Assert_Eq(vf.get_filename().generic_string(), boost::filesystem::path("dir/test.txt").generic_string());
+	std::unique_ptr<gorc::io::read_only_file> test_txt = vf.open();
 
-	Gorc::Diagnostics::StoredReport report;
+	gorc::diagnostics::stored_report report;
 
-	Gorc::Text::Source src(*test_txt);
-	Gorc::Text::Tokenizer tok(src, report);
+	gorc::text::source src(*test_txt);
+	gorc::text::tokenizer tok(src, report);
 
-	Test_Assert_Eq(tok.GetNumber<int>(), 3);
-	tok.AssertEndOfFile();
+	Test_Assert_Eq(tok.get_number<int>(), 3);
+	tok.assert_end_of_file();
 }
 
 EndSuite(GobContainerTest);

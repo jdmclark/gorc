@@ -2,24 +2,24 @@
 
 #include "thing_controller.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class Thing;
+class thing;
 
-namespace Gameplay {
+namespace gameplay {
 
-class CogController : public ThingController {
+class cog_controller : public thing_controller {
 private:
-	void UpdateThingPathMoving(int thing_id, Thing& thing, double dt);
+	void update_thing_path_moving(int thing_id, thing& thing, double dt);
 
 public:
-	using ThingController::ThingController;
+	using thing_controller::thing_controller;
 
-	virtual void Update(int thing_id, double dt) override;
-	virtual void CreateControllerData(int thing_id) override;
+	virtual void update(int thing_id, double dt) override;
+	virtual void create_controller_data(int thing_id) override;
 };
 
 }

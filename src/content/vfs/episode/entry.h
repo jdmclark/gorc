@@ -3,24 +3,24 @@
 #include "entry_type.h"
 #include <boost/filesystem/path.hpp>
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Episode {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace episode {
 
-class Entry {
+class entry {
 public:
-	const int Number;
-	const int Disc;
-	const int LevelNumber;
-	const EntryType Type;
-	const boost::filesystem::path Filename;
-	const int LightPower;
-	const int DarkPower;
-	const int GotoA;
-	const int GotoB;
+	const int number;
+	const int disc;
+	const int level_number;
+	const entry_type type;
+	const boost::filesystem::path filename;
+	const int light_power;
+	const int dark_power;
+	const int goto_a;
+	const int goto_b;
 
-	Entry(int Number, int Disc, int LevelNumber, EntryType Type,
+	entry(int number, int Disc, int LevelNumber, entry_type type,
 			const boost::filesystem::path& Filename, int LightPower, int DarkPower,
 			int GotoA, int GotoB);
 };

@@ -6,62 +6,62 @@
 
 #include <iostream>
 
-namespace Gorc {
-namespace Cog {
-namespace IR {
+namespace gorc {
+namespace cog {
+namespace ir {
 
-class TextPrinter : public Printer {
+class textPrinter : public printer {
 private:
 	std::ostream& stream;
 
-	void writeValue(const VM::Value& value);
+	void writevalue(const vm::value& value);
 
 public:
-	TextPrinter(std::ostream& os);
+	textPrinter(std::ostream& os);
 
-	void Backpatch();
+	void backpatch();
 
-	void Comment(const std::string& msg);
-	void Label(const std::string& name);
+	void comment(const std::string& msg);
+	void label(const std::string& name);
 
-	void Nop();
+	void nop();
 
-	void Copy();
-	void Const(const VM::Value& value);
+	void copy();
+	void constant(const vm::value& value);
 
-	void Load(const std::string& symbol);
-	void LoadI(const std::string& symbol);
-	void Store(const std::string& symbol);
-	void StoreI(const std::string& symbol);
+	void load(const std::string& symbol);
+	void loadi(const std::string& symbol);
+	void store(const std::string& symbol);
+	void storei(const std::string& symbol);
 
-	void Jmp(const std::string& label);
-	void Jal(const std::string& label);
-	void Bt(const std::string& label);
-	void Bf(const std::string& label);
-	void Call(const std::string& verb);
-	void CallV(const std::string& verb);
-	void Ret();
+	void jmp(const std::string& label);
+	void jal(const std::string& label);
+	void bt(const std::string& label);
+	void bf(const std::string& label);
+	void call(const std::string& verb);
+	void callv(const std::string& verb);
+	void ret();
 
-	void Neg();
-	void Add();
-	void Sub();
-	void Mul();
-	void Div();
-	void Mod();
-	void And();
-	void Or();
-	void Xor();
+	void neg();
+	void add();
+	void sub();
+	void mul();
+	void div();
+	void mod();
+	void band();
+	void bor();
+	void bxor();
 
-	void LNot();
-	void LAnd();
-	void LOr();
+	void lnot();
+	void land();
+	void lor();
 
-	void CGt();
-	void CGeq();
-	void CLt();
-	void CLeq();
-	void CEq();
-	void CNeq();
+	void cgt();
+	void cgeq();
+	void clt();
+	void cleq();
+	void ceq();
+	void cneq();
 };
 
 }

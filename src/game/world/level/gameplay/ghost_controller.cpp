@@ -2,10 +2,10 @@
 #include "game/world/level/level_presenter.h"
 #include "game/world/level/level_model.h"
 
-void Gorc::Game::World::Level::Gameplay::GhostController::CreateControllerData(int thing_id) {
+void gorc::game::world::level::gameplay::ghost_controller::create_controller_data(int thing_id) {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::GhostController::RemoveControllerData(int thing_id) {
+void gorc::game::world::level::gameplay::ghost_controller::remove_controller_data(int thing_id) {
 	return;
 }

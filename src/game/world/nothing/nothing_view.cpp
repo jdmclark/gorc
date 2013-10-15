@@ -1,9 +1,9 @@
 #include "nothing_view.h"
 
-void Gorc::Game::World::Nothing::NothingView::Update(double dt) {
+void gorc::game::world::nothing::nothing_view::update(double dt) {
 	return;
 }
 
-void Gorc::Game::World::Nothing::NothingView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
+void gorc::game::world::nothing::nothing_view::draw(double dt, const box<2, unsigned int>& view_size) {
 	return;
 }

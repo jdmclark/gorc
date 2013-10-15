@@ -1,52 +1,52 @@
 #pragma once
 
-namespace Gorc {
-namespace Cog {
-namespace Verbs {
-class VerbTable;
+namespace gorc {
+namespace cog {
+namespace verbs {
+class verb_table;
 }
 }
 
-namespace Game {
-class Components;
+namespace game {
+class components;
 
-namespace World {
-namespace Level {
-class LevelModel;
-class LevelPresenter;
+namespace world {
+namespace level {
+class level_model;
+class level_presenter;
 
-namespace Gameplay {
+namespace gameplay {
 
-class InventoryModel;
+class inventory_model;
 
-class InventoryPresenter {
+class inventory_presenter {
 private:
-	LevelPresenter& presenter;
-	InventoryModel* model;
-	LevelModel* levelModel;
+	level_presenter& presenter;
+	inventory_model* model;
+	level_model* levelModel;
 
 public:
-	InventoryPresenter(LevelPresenter& presenter);
+	inventory_presenter(level_presenter& presenter);
 
-	void Start(LevelModel& levelModel, InventoryModel& model);
-	void Update(double dt);
+	void start(level_model& levelModel, inventory_model& model);
+	void update(double dt);
 
-	void ChangeInv(int player, int bin, int amount);
-	int GetInvCog(int player, int bin);
-	int GetInv(int player, int bin);
-	int GetInvMax(int player, int bin);
-	int GetInvMin(int player, int bin);
-	bool IsInvActivated(int player, int bin);
-	bool IsInvAvailable(int player, int bin);
-	void SetBinWait(int player, int bin, float delay);
-	void SetInv(int player, int bin, int value);
-	void SetInvActivated(int player, int bin, bool value);
-	void SetInvAvailable(int player, int bin, bool value);
+	void change_inv(int player, int bin, int amount);
+	int get_inv_cog(int player, int bin);
+	int get_inv(int player, int bin);
+	int get_inv_max(int player, int bin);
+	int get_inv_min(int player, int bin);
+	bool is_inv_activated(int player, int bin);
+	bool is_inv_available(int player, int bin);
+	void set_bin_wait(int player, int bin, float delay);
+	void set_inv(int player, int bin, int value);
+	void set_inv_activated(int player, int bin, bool value);
+	void set_inv_available(int player, int bin, bool value);
 
-	void OnItemHotkeyPressed(int player, int bin);
-	void OnItemHotkeyReleased(int player, int bin);
+	void on_item_hotkey_pressed(int player, int bin);
+	void on_item_hotkey_released(int player, int bin);
 
-	static void RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components&);
+	static void register_verbs(cog::verbs::verb_table& verbTable, components&);
 };
 
 }

@@ -4,12 +4,12 @@
 #include "cog/vm/value.h"
 #include "cog/symbols/type.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace SemanticAnalysis {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace semantic_analysis {
 
-class SymbolExtensionVisitor : public AST::Visitor
+class symbol_extension_visitor : public ast::visitor
 {
 public:
 	bool local;
@@ -24,14 +24,14 @@ public:
 	bool mask_defined;
 	int mask;
 
-	SymbolExtensionVisitor(Symbols::SymbolType type, Diagnostics::Report& report);
+	symbol_extension_visitor(symbols::symbol_type type, diagnostics::report& report);
 
 private:
-	Symbols::SymbolType SymbolType;
+	symbols::symbol_type symbol_type;
 
 	ASTCLASS_SYMBOL_EXTENSION(AVPROTO);
 
-	bool ValidateExtension(const std::string& name, Text::Location& location);
+	bool validate_extension(const std::string& name, text::location& location);
 };
 
 }

@@ -2,22 +2,22 @@
 #include "game/world/level/level_presenter.h"
 #include "game/world/level/level_model.h"
 
-void Gorc::Game::World::Level::Gameplay::ItemController::CreateControllerData(int thing_id) {
-	ThingController::CreateControllerData(thing_id);
+void gorc::game::world::level::gameplay::item_controller::create_controller_data(int thing_id) {
+	thing_controller::create_controller_data(thing_id);
 
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ItemController::Taken(int thing_id, int player_id) {
-	auto& player_thing = presenter.Model->Things[player_id];
-	if(player_thing.Type != Flags::ThingType::Player) {
+void gorc::game::world::level::gameplay::item_controller::taken(int thing_id, int player_id) {
+	auto& player_thing = presenter.model->things[player_id];
+	if(player_thing.type != flags::thing_type::Player) {
 		return;
 	}
 
-	presenter.ScriptPresenter.SendMessageToLinked(Cog::MessageId::Taken,
-			thing_id, Flags::MessageType::Thing,
-			player_id, Flags::MessageType::Thing);
+	presenter.script_presenter.send_message_to_linked(cog::message_id::taken,
+			thing_id, flags::message_type::thing,
+			player_id, flags::message_type::thing);
 
 	// TODO: Don't destroy the thing. Flag it for respawn.
-	presenter.DestroyThing(thing_id);
+	presenter.destroy_thing(thing_id);
 }

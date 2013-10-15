@@ -4,190 +4,190 @@
 #include "content/manager.h"
 #include "sound_model.h"
 
-Gorc::Game::World::Level::Sounds::SoundPresenter::SoundPresenter(Content::Manager& contentManager)
-	: contentManager(contentManager), levelModel(nullptr), model(nullptr) {
+gorc::game::world::level::sounds::sound_presenter::sound_presenter(content::manager& contentmanager)
+	: contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
 	return;
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::Start(LevelModel& levelModel, SoundModel& soundModel) {
+void gorc::game::world::level::sounds::sound_presenter::start(level_model& levelModel, sound_model& soundModel) {
 	this->levelModel = &levelModel;
 	this->model = &soundModel;
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::Update(double dt) {
-	// Update listener
-	auto camera_position = levelModel->CameraPosition;
-	auto listener_target = camera_position + levelModel->CameraLook;
-	sf::Listener::setDirection(Math::Get<0>(listener_target), Math::Get<1>(listener_target), Math::Get<2>(listener_target));
-	sf::Listener::setPosition(Math::Get<0>(camera_position), Math::Get<1>(camera_position), Math::Get<2>(camera_position));
+void gorc::game::world::level::sounds::sound_presenter::update(double dt) {
+	// update listener
+	auto camera_position = levelModel->camera_position;
+	auto listener_target = camera_position + levelModel->camera_look;
+	sf::Listener::setDirection(math::get<0>(listener_target), math::get<1>(listener_target), math::get<2>(listener_target));
+	sf::Listener::setPosition(math::get<0>(camera_position), math::get<1>(camera_position), math::get<2>(camera_position));
 	// TODO: Handle camera orientation (not properly implemented in SFML).
-	const auto& player_sec = levelModel->Sectors[levelModel->CameraSector];
-	SetAmbientSound(player_sec.AmbientSound, player_sec.AmbientSoundVolume);
+	const auto& player_sec = levelModel->sectors[levelModel->camera_sector];
+	set_ambient_sound(player_sec.ambient_sound, player_sec.ambient_sound_volume);
 
-	// Update sounds
-	for(auto& sound : model->Sounds) {
-		sound.Update(dt, *levelModel);
+	// update sounds
+	for(auto& sound : model->sounds) {
+		sound.update(dt, *levelModel);
 	}
 
-	for(auto& sound : model->Sounds) {
-		if(sound.GetExpired()) {
-			sound.Stop();
-			model->Sounds.Destroy(sound);
+	for(auto& sound : model->sounds) {
+		if(sound.get_expired()) {
+			sound.stop();
+			model->sounds.destroy(sound);
 		}
 	}
 
-	model->AmbientMusic.Update(dt);
+	model->ambient_music.update(dt);
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::SetAmbientSound(Content::Assets::Sound const* sound, float volume) {
-	if(&sound->Buffer == model->AmbientSound.getBuffer() && model->AmbientSound.getStatus() != sf::Sound::Stopped) {
-		model->AmbientSound.setVolume(volume * 100.0f);
+void gorc::game::world::level::sounds::sound_presenter::set_ambient_sound(content::assets::sound const* sound, float volume) {
+	if(&sound->buffer == model->ambient_sound.getBuffer() && model->ambient_sound.getStatus() != sf::Sound::Stopped) {
+		model->ambient_sound.setVolume(volume * 100.0f);
 	}
 	else if(sound != nullptr) {
-		model->AmbientSound.setBuffer(sound->Buffer);
-		model->AmbientSound.setLoop(true);
-		model->AmbientSound.setVolume(volume * 100.0f);
-		model->AmbientSound.setPosition(0,0,0);
-		model->AmbientSound.setRelativeToListener(true);
-		model->AmbientSound.setAttenuation(0.0f);
-		model->AmbientSound.play();
+		model->ambient_sound.setBuffer(sound->buffer);
+		model->ambient_sound.setLoop(true);
+		model->ambient_sound.setVolume(volume * 100.0f);
+		model->ambient_sound.setPosition(0,0,0);
+		model->ambient_sound.setRelativeToListener(true);
+		model->ambient_sound.setAttenuation(0.0f);
+		model->ambient_sound.play();
 	}
 	else {
-		model->AmbientSound.stop();
+		model->ambient_sound.stop();
 	}
 }
 
-// Verbs:
+// verbs:
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::ChangeSoundPitch(int channel, float pitch, float delay) {
-	Sound& sound = model->Sounds[channel];
-	sound.SetPitch(pitch, delay);
+void gorc::game::world::level::sounds::sound_presenter::change_sound_pitch(int channel, float pitch, float delay) {
+	sound& sound = model->sounds[channel];
+	sound.set_pitch(pitch, delay);
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::ChangeSoundVol(int channel, float volume, float delay) {
-	Sound& sound = model->Sounds[channel];
-	sound.SetVolume(volume, delay);
+void gorc::game::world::level::sounds::sound_presenter::change_sound_vol(int channel, float volume, float delay) {
+	sound& sound = model->sounds[channel];
+	sound.set_volume(volume, delay);
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySong(int start, int end, int loopto) {
-	model->AmbientMusic.PlaySong(start, end, loopto);
+void gorc::game::world::level::sounds::sound_presenter::play_song(int start, int end, int loopto) {
+	model->ambient_music.play_song(start, end, loopto);
 }
 
-int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundClass(int thing,
-		Flags::SoundSubclassType subclass_type) {
-	Thing& referenced_thing = levelModel->Things[thing];
-	if(referenced_thing.SoundClass) {
-		const Content::Assets::SoundSubclass& subclass = referenced_thing.SoundClass->Get(subclass_type);
+int gorc::game::world::level::sounds::sound_presenter::play_sound_class(int thing_id,
+		flags::sound_subclass_type subclass_type) {
+	thing& referenced_thing = levelModel->things[thing_id];
+	if(referenced_thing.sound_class) {
+		const content::assets::sound_subclass& subclass = referenced_thing.sound_class->get(subclass_type);
 		if(subclass.sound >= 0) {
-			return PlaySoundThing(subclass.sound, thing, subclass.max_volume, subclass.min_radius, subclass.max_radius,
-					subclass.flags + Flags::SoundFlag::ThingOriginMovesWithThing);
+			return play_sound_thing(subclass.sound, thing_id, subclass.max_volume, subclass.min_radius, subclass.max_radius,
+					subclass.flags + flags::sound_flag::ThingOriginMovesWithThing);
 		}
 	}
 
 	return -1;
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass_type) {
-	Thing& referenced_thing = levelModel->Things[thing];
+void gorc::game::world::level::sounds::sound_presenter::play_foley_loop_class(int thing_id, flags::sound_subclass_type subclass_type) {
+	thing& referenced_thing = levelModel->things[thing_id];
 
-	if(referenced_thing.CurrentFoleyLoopChannel >= 0) {
-		model->Sounds[referenced_thing.CurrentFoleyLoopChannel].Stop();
+	if(referenced_thing.current_foley_loop_channel >= 0) {
+		model->sounds[referenced_thing.current_foley_loop_channel].stop();
 	}
 
-	auto channel = PlaySoundClass(thing, subclass_type);
+	auto channel = play_sound_class(thing_id, subclass_type);
 	if(channel >= 0) {
-		referenced_thing.CurrentFoleyLoopChannel = channel;
+		referenced_thing.current_foley_loop_channel = channel;
 	}
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::StopFoleyLoop(int thing) {
-	Thing& referenced_thing = levelModel->Things[thing];
+void gorc::game::world::level::sounds::sound_presenter::stop_foley_loop(int thing_id) {
+	thing& referenced_thing = levelModel->things[thing_id];
 
-	if(referenced_thing.CurrentFoleyLoopChannel >= 0) {
-		model->Sounds[referenced_thing.CurrentFoleyLoopChannel].Stop();
+	if(referenced_thing.current_foley_loop_channel >= 0) {
+		model->sounds[referenced_thing.current_foley_loop_channel].stop();
 	}
 }
 
-int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
+int gorc::game::world::level::sounds::sound_presenter::play_sound_local(int wav, float volume, float panning, flag_set<flags::sound_flag> flags) {
 	if(wav < 0) {
 		return -1;
 	}
 
-	auto& snd = model->Sounds.Create();
+	auto& snd = model->sounds.create();
 
-	snd.PlaySoundLocal(contentManager.GetAsset<Content::Assets::Sound>(wav), volume, panning, flags);
+	snd.play_sound_local(contentmanager.get_asset<content::assets::sound>(wav), volume, panning, flags);
 
-	return snd.GetId();
+	return snd.get_id();
 }
 
-int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundPos(int wav, Math::Vector<3> pos,
-		float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
+int gorc::game::world::level::sounds::sound_presenter::play_sound_pos(int wav, vector<3> pos,
+		float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
 	if(wav < 0) {
 		return -1;
 	}
 
-	auto& snd = model->Sounds.Create();
+	auto& snd = model->sounds.create();
 
-	snd.PlaySoundPos(contentManager.GetAsset<Content::Assets::Sound>(wav), pos, volume, minrad, maxrad, flags);
+	snd.play_sound_pos(contentmanager.get_asset<content::assets::sound>(wav), pos, volume, minrad, maxrad, flags);
 
-	return snd.GetId();
+	return snd.get_id();
 }
 
-int Gorc::Game::World::Level::Sounds::SoundPresenter::PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad,
-		FlagSet<Flags::SoundFlag> flags) {
+int gorc::game::world::level::sounds::sound_presenter::play_sound_thing(int wav, int thing, float volume, float minrad, float maxrad,
+		flag_set<flags::sound_flag> flags) {
 	if(wav < 0) {
 		return -1;
 	}
 
-	auto& snd = model->Sounds.Create();
+	auto& snd = model->sounds.create();
 
-	snd.PlaySoundThing(*levelModel, contentManager.GetAsset<Content::Assets::Sound>(wav), thing, volume, minrad, maxrad, flags);
+	snd.play_sound_thing(*levelModel, contentmanager.get_asset<content::assets::sound>(wav), thing, volume, minrad, maxrad, flags);
 
-	return snd.GetId();
+	return snd.get_id();
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::SetMusicVol(float volume) {
-	model->AmbientMusic.SetVolume(volume);
+void gorc::game::world::level::sounds::sound_presenter::set_music_vol(float volume) {
+	model->ambient_music.set_volume(volume);
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::StopSound(int channel, float delay) {
+void gorc::game::world::level::sounds::sound_presenter::stop_sound(int channel, float delay) {
 	if(channel >= 0) {
-		Sound& sound = model->Sounds[channel];
-		sound.Stop(delay);
-		model->Sounds.Destroy(channel);
+		sound& sound = model->sounds[channel];
+		sound.stop(delay);
+		model->sounds.destroy(channel);
 	}
 }
 
-void Gorc::Game::World::Level::Sounds::SoundPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
-	verbTable.AddVerb<void, 3>("changesoundpitch", [&components](int channel, float pitch, float delay) {
-		components.CurrentLevelPresenter->SoundPresenter.ChangeSoundPitch(channel, pitch, delay);
+void gorc::game::world::level::sounds::sound_presenter::register_verbs(cog::verbs::verb_table& verbTable, components& components) {
+	verbTable.add_verb<void, 3>("changesoundpitch", [&components](int channel, float pitch, float delay) {
+		components.current_level_presenter->sound_presenter.change_sound_pitch(channel, pitch, delay);
 	});
 
-	verbTable.AddVerb<void, 3>("changesoundvol", [&components](int channel, float volume, float delay) {
-		components.CurrentLevelPresenter->SoundPresenter.ChangeSoundVol(channel, volume, delay);
+	verbTable.add_verb<void, 3>("changesoundvol", [&components](int channel, float volume, float delay) {
+		components.current_level_presenter->sound_presenter.change_sound_vol(channel, volume, delay);
 	});
 
-	verbTable.AddVerb<void, 3>("playsong", [&components](int start, int end, int loopto) {
-		components.CurrentLevelPresenter->SoundPresenter.PlaySong(start, end, loopto);
+	verbTable.add_verb<void, 3>("playsong", [&components](int start, int end, int loopto) {
+		components.current_level_presenter->sound_presenter.play_song(start, end, loopto);
 	});
 
-	verbTable.AddVerb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
-		return components.CurrentLevelPresenter->SoundPresenter.PlaySoundLocal(wav, volume, panning, FlagSet<Flags::SoundFlag>(flags));
+	verbTable.add_verb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
+		return components.current_level_presenter->sound_presenter.play_sound_local(wav, volume, panning, flag_set<flags::sound_flag>(flags));
 	});
 
-	verbTable.AddVerb<int, 6>("playsoundpos", [&components](int wav, Math::Vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
-		return components.CurrentLevelPresenter->SoundPresenter.PlaySoundPos(wav, pos, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
+	verbTable.add_verb<int, 6>("playsoundpos", [&components](int wav, vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+		return components.current_level_presenter->sound_presenter.play_sound_pos(wav, pos, volume, min_rad, max_rad, flag_set<flags::sound_flag>(flags));
 	});
 
-	verbTable.AddVerb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
-		return components.CurrentLevelPresenter->SoundPresenter.PlaySoundThing(wav, thing, volume, min_rad, max_rad, FlagSet<Flags::SoundFlag>(flags));
+	verbTable.add_verb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
+		return components.current_level_presenter->sound_presenter.play_sound_thing(wav, thing, volume, min_rad, max_rad, flag_set<flags::sound_flag>(flags));
 	});
 
-	verbTable.AddVerb<void, 1>("setmusicvol", [&components](float vol) {
-		components.CurrentLevelPresenter->SoundPresenter.SetMusicVol(vol);
+	verbTable.add_verb<void, 1>("setmusicvol", [&components](float vol) {
+		components.current_level_presenter->sound_presenter.set_music_vol(vol);
 	});
 
-	verbTable.AddVerb<void, 2>("stopsound", [&components](int channel, float delay) {
-		components.CurrentLevelPresenter->SoundPresenter.StopSound(channel, delay);
+	verbTable.add_verb<void, 2>("stopsound", [&components](int channel, float delay) {
+		components.current_level_presenter->sound_presenter.stop_sound(channel, delay);
 	});
 }

@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class GoalFlag : uint32_t {
 	DisplayedInObjectives			= 0x1,

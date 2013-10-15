@@ -1,17 +1,17 @@
 #include "presenter_mapper.h"
 #include "game/screen/action/action_presenter.h"
 
-Gorc::Game::Screen::PresenterMapper::PresenterMapperPlaceVisitor::PresenterMapperPlaceVisitor(Gorc::Game::Components& components)
+gorc::game::screen::presenter_mapper::presenter_mapper_place_visitor::presenter_mapper_place_visitor(gorc::game::components& components)
 	: components(components) {
 	return;
 }
 
-void Gorc::Game::Screen::PresenterMapper::PresenterMapperPlaceVisitor::VisitActionPlace(const Action::ActionPlace& place) {
-	presenter = std::unique_ptr<Gorc::Place::Presenter>(new Action::ActionPresenter(components, place));
+void gorc::game::screen::presenter_mapper::presenter_mapper_place_visitor::visit_action_place(const action::action_place& place) {
+	presenter = std::unique_ptr<gorc::place::presenter>(new action::action_presenter(components, place));
 }
 
-std::unique_ptr<Gorc::Place::Presenter> Gorc::Game::Screen::PresenterMapper::GetPresenter(const Place& place) {
-	PresenterMapperPlaceVisitor v(*components);
-	place.Accept(v);
+std::unique_ptr<gorc::place::presenter> gorc::game::screen::presenter_mapper::get_presenter(const place& place) {
+	presenter_mapper_place_visitor v(*components);
+	place.accept(v);
 	return std::move(v.presenter);
 }

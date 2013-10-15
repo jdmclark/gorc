@@ -2,14 +2,14 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class CogFlag : unsigned int {
-	Local = 0x40,
-	Server = 0x80,
-	Global = 0x100,
-	NoSync = 0x200
+enum class cog_flag : unsigned int {
+	local = 0x40,
+	server = 0x80,
+	global = 0x100,
+	no_sync = 0x200
 };
 
 }

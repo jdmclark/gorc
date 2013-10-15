@@ -14,34 +14,34 @@
 
 #include <unordered_map>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Level : public Asset {
+class level : public asset {
 public:
-	using Loader = Loaders::LevelLoader;
+	using loader = loaders::level_loader;
 
-	LevelHeader Header;
-	std::vector<std::tuple<Material const*, float, float, std::string>> Materials;
+	level_header header;
+	std::vector<std::tuple<material const*, float, float, std::string>> materials;
 
-	Colormap const* MasterColormap = nullptr;
-	std::vector<Colormap const*> Colormaps;
+	colormap const* master_colormap = nullptr;
+	std::vector<colormap const*> colormaps;
 
-	std::vector<Script const*> Scripts;
+	std::vector<script const*> scripts;
 
-	std::vector<std::unique_ptr<std::string>> CogStrings;
-	std::vector<std::tuple<Script const*, std::vector<Cog::VM::Value>>> Cogs;
+	std::vector<std::unique_ptr<std::string>> cog_strings;
+	std::vector<std::tuple<script const*, std::vector<cog::vm::value>>> cogs;
 
-	std::vector<Math::Vector<3>> Vertices;
-	std::vector<Math::Vector<2>> TextureVertices;
-	std::vector<LevelAdjoin> Adjoins;
-	std::vector<LevelSurface> Surfaces;
-	std::vector<LevelSector> Sectors;
+	std::vector<vector<3>> vertices;
+	std::vector<vector<2>> texture_vertices;
+	std::vector<level_adjoin> adjoins;
+	std::vector<level_surface> surfaces;
+	std::vector<level_sector> sectors;
 
-	std::vector<Template> Templates;
-	std::unordered_map<std::string, int> TemplateMap;
-	std::vector<Template> Things;
+	std::vector<thing_template> templates;
+	std::unordered_map<std::string, int> template_map;
+	std::vector<thing_template> things;
 };
 
 }

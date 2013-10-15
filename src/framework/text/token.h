@@ -5,45 +5,45 @@
 #include "framework/text/location.h"
 #include "framework/text/exception.h"
 
-namespace Gorc {
-namespace Text {
+namespace gorc {
+namespace text {
 
-enum class TokenType {
-	Invalid,
-	EndOfFile,
-	EndOfLine,
-	Identifier,
-	HexInteger,
-	Integer,
-	Float,
-	String,
-	Punctuator,
+enum class token_type {
+	invalid,
+	end_of_file,
+	end_of_line,
+	identifier,
+	hex_integer,
+	integer,
+	floating,
+	string,
+	punctuator,
 };
 
-class Token {
+class token {
 public:
-	TokenType Type;
-	std::string Value;
-	Text::Location Location;
+	token_type type;
+	std::string value;
+	text::location location;
 
-	Token();
-	Token(TokenType Type, const std::string& Value, const Text::Location& Location);
+	token();
+	token(token_type type, const std::string& value, const text::location& location);
 
-	template <typename T> T GetNumericValue() {
+	template <typename T> T get_numeric_value() {
 		bool formatSuccess = false;
 		T result = T(0);
 
-		std::stringstream ss(Value);
+		std::stringstream ss(value);
 
-		if(Type == TokenType::Integer || Type == TokenType::Float) {
+		if(type == token_type::integer || type == token_type::floating) {
 			formatSuccess = !(ss >> result).fail();
 		}
-		else if(Type == TokenType::HexInteger) {
+		else if(type == token_type::hex_integer) {
 			formatSuccess = !(ss >> std::hex >> result).fail();
 		}
 
 		if(!formatSuccess) {
-			throw InvalidNumericConversionException();
+			throw invalid_numeric_conversion_exception();
 		}
 
 		return result;

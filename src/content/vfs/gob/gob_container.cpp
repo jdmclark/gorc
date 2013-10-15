@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 
-Gorc::Content::VFS::Gob::GobContainer::GobContainer(IO::ReadOnlyFile& file)
+gorc::content::vfs::gob::gob_container::gob_container(io::read_only_file& file)
 	: gobPath(file.Filename), isEpisode(false), episodeIndex(0) {
 
 	struct GOB_HEADER {
@@ -19,14 +19,14 @@ Gorc::Content::VFS::Gob::GobContainer::GobContainer(IO::ReadOnlyFile& file)
 		char chunkName[128];
 	} entry;
 
-	file.Read(&header, sizeof(GOB_HEADER));
+	file.read(&header, sizeof(GOB_HEADER));
 
 	if(strncmp(header.magic, "GOB ", 4) != 0) {
-		throw ContainerFileCorruptException();
+		throw container_file_corrupt_exception();
 	}
 
 	for(uint32_t i = 0; i < header.indexCount; ++i) {
-		file.Read(&entry, sizeof(GOB_ENTRY));
+		file.read(&entry, sizeof(GOB_ENTRY));
 
 		// Convert path separators for boost path.
 		for(size_t i = 0; i < 128; ++i) {
@@ -46,18 +46,18 @@ Gorc::Content::VFS::Gob::GobContainer::GobContainer(IO::ReadOnlyFile& file)
 	}
 }
 
-size_t Gorc::Content::VFS::Gob::GobContainer::FileCount() const {
+size_t gorc::content::vfs::gob::gob_container::file_count() const {
 	return files.size();
 }
 
-bool Gorc::Content::VFS::Gob::GobContainer::IsEpisode() const {
+bool gorc::content::vfs::gob::gob_container::is_episode() const {
 	return isEpisode;
 }
 
-const Gorc::Content::VFS::VirtualFile& Gorc::Content::VFS::Gob::GobContainer::GetEpisode() const {
-	return GetVirtualFile(episodeIndex);
+const gorc::content::vfs::virtual_file& gorc::content::vfs::gob::gob_container::get_episode() const {
+	return get_virtual_file(episodeIndex);
 }
 
-const Gorc::Content::VFS::VirtualFile& Gorc::Content::VFS::Gob::GobContainer::GetVirtualFile(size_t index) const {
+const gorc::content::vfs::virtual_file& gorc::content::vfs::gob::gob_container::get_virtual_file(size_t index) const {
 	return files[index];
 }

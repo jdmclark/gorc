@@ -3,49 +3,49 @@
 #include "game/world/level/level_model.h"
 #include "game/constants.h"
 
-Gorc::Game::World::Level::Gameplay::ThingController::ThingController(LevelPresenter& presenter)
+gorc::game::world::level::gameplay::thing_controller::thing_controller(level_presenter& presenter)
 	: presenter(presenter) {
 	return;
 }
 
-Gorc::Game::World::Level::Gameplay::ThingController::~ThingController() {
+gorc::game::world::level::gameplay::thing_controller::~thing_controller() {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::Update(int thing_id, double dt) {
-	auto& thing = presenter.Model->Things[thing_id];
-	thing.TimeAlive += dt;
+void gorc::game::world::level::gameplay::thing_controller::update(int thing_id, double dt) {
+	auto& thing = presenter.model->things[thing_id];
+	thing.time_alive += dt;
 
-	if(thing.Timer && thing.TimeAlive >= thing.Timer) {
-		presenter.DestroyThing(thing_id);
+	if(thing.timer && thing.time_alive >= thing.timer) {
+		presenter.destroy_thing(thing_id);
 	}
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::HandleAnimationMarker(int thing_id, Flags::KeyMarkerType marker) {
+void gorc::game::world::level::gameplay::thing_controller::handle_animation_marker(int thing_id, flags::key_marker_type marker) {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::CreateControllerData(int thing_id) {
-	auto& new_thing = presenter.Model->Things[thing_id];
-	new_thing.TimeAlive = 0.0f;
+void gorc::game::world::level::gameplay::thing_controller::create_controller_data(int thing_id) {
+	auto& new_thing = presenter.model->things[thing_id];
+	new_thing.time_alive = 0.0f;
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::RemoveControllerData(int thing_id) {
+void gorc::game::world::level::gameplay::thing_controller::remove_controller_data(int thing_id) {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::Taken(int thing_id, int player_id) {
+void gorc::game::world::level::gameplay::thing_controller::taken(int thing_id, int player_id) {
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::TouchedThing(int thing_id, int touched_thing_id) {
+void gorc::game::world::level::gameplay::thing_controller::touched_thing(int thing_id, int touched_thing_id) {
 	// Dispatch touched cog message.
-	presenter.ScriptPresenter.SendMessageToLinked(Cog::MessageId::Touched,
-			thing_id, Flags::MessageType::Thing,
-			touched_thing_id, Flags::MessageType::Thing);
+	presenter.script_presenter.send_message_to_linked(cog::message_id::touched,
+			thing_id, flags::message_type::thing,
+			touched_thing_id, flags::message_type::thing);
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::ThingController::TouchedSurface(int thing_id, int touched_surface_id) {
+void gorc::game::world::level::gameplay::thing_controller::touched_surface(int thing_id, int touched_surface_id) {
 	return;
 }

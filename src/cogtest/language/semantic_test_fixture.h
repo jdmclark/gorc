@@ -10,9 +10,9 @@
 
 class SemanticTestFixture : public LanguageTestFixture {
 public:
-	Gorc::Cog::Symbols::SymbolTable SymbolTable;
-	std::unordered_map<std::string, Gorc::Cog::VM::Value> ConstantTable;
-	Gorc::Cog::Verbs::VerbTable VerbTable;
+	gorc::cog::symbols::symbol_table symbol_table;
+	std::unordered_map<std::string, gorc::cog::vm::value> ConstantTable;
+	gorc::cog::verbs::verb_table verb_table;
 
 protected:
 	using LanguageTestFixture::LanguageTestFixture;

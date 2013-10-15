@@ -3,58 +3,58 @@
 #include <unordered_map>
 #include "content/assets/inventory.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Gameplay {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace gameplay {
 
-class PlayerBinModel {
+class player_bin_model {
 public:
-	bool Activated = false;
-	bool Available = false;
-	int Value = 0;
-	float Cooldown = 0.0f;
+	bool activated = false;
+	bool available = false;
+	int value = 0;
+	float cooldown = 0.0f;
 };
 
-class PlayerInventoryModel {
+class player_inventory_model {
 private:
-	const Content::Assets::Inventory& BaseInventory;
-	std::unordered_map<int, PlayerBinModel> bins;
+	const content::assets::inventory& BaseInventory;
+	std::unordered_map<int, player_bin_model> bins;
 
-	PlayerBinModel& InitializeBin(int bin);
-	PlayerBinModel& GetBin(int bin);
+	player_bin_model& initialize_bin(int bin);
+	player_bin_model& get_bin(int bin);
 
 public:
-	PlayerInventoryModel(const Content::Assets::Inventory& BaseInventory);
+	player_inventory_model(const content::assets::inventory& BaseInventory);
 
-	int GetBinValue(int bin);
-	void SetBinValue(int bin, int value);
-	void ModBinValue(int bin, int delta);
+	int get_bin_value(int bin);
+	void set_bin_value(int bin, int value);
+	void mod_bin_value(int bin, int delta);
 
-	float GetBinCooldown(int bin);
-	void SetBinCooldown(int bin, float value);
+	float get_bin_cooldown(int bin);
+	void set_bin_cooldown(int bin, float value);
 
-	bool IsBinActivated(int bin);
-	void SetBinActivated(int bin, bool value);
+	bool is_bin_activated(int bin);
+	void set_bin_activated(int bin, bool value);
 
-	bool IsBinAvailable(int bin);
-	void SetBinAvailable(int bin, bool value);
+	bool is_bin_available(int bin);
+	void set_bin_available(int bin, bool value);
 
-	void ModAllCooldowns(float dt);
+	void mod_all_cooldowns(float dt);
 };
 
-class InventoryModel {
+class inventory_model {
 private:
-	std::unordered_map<int, PlayerInventoryModel> player_inventories;
+	std::unordered_map<int, player_inventory_model> player_inventories;
 
 public:
-	const Content::Assets::Inventory& BaseInventory;
+	const content::assets::inventory& base_inventory;
 
-	InventoryModel(const Content::Assets::Inventory& BaseInventory);
+	inventory_model(const content::assets::inventory& BaseInventory);
 
-	PlayerInventoryModel& GetInventory(int player_id);
-	void ModAllCooldowns(float dt);
+	player_inventory_model& get_inventory(int player_id);
+	void mod_all_cooldowns(float dt);
 };
 
 }

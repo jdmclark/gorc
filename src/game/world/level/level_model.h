@@ -13,44 +13,44 @@
 #include "game/world/level/gameplay/inventory_model.h"
 #include <vector>
 
-using namespace Gorc::Math;
+using namespace gorc::math;
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class LevelModel {
+class level_model {
 public:
-	const Content::Assets::Level& Level;
-	Content::Assets::LevelHeader Header;
-	std::vector<Content::Assets::LevelAdjoin> Adjoins;
-	std::vector<Surface> Surfaces;
-	std::vector<Content::Assets::LevelSector> Sectors;
+	const content::assets::level& level;
+	content::assets::level_header header;
+	std::vector<content::assets::level_adjoin> adjoins;
+	std::vector<surface> surfaces;
+	std::vector<content::assets::level_sector> sectors;
 
-	Animations::AnimationModel AnimationModel;
-	Scripts::ScriptModel ScriptModel;
-	Sounds::SoundModel SoundModel;
-	Keys::KeyModel KeyModel;
-	Gameplay::InventoryModel InventoryModel;
+	animations::animation_model animation_model;
+	scripts::script_model script_model;
+	sounds::sound_model sound_model;
+	keys::key_model key_model;
+	gameplay::inventory_model inventory_model;
 
-	Pool<Thing> Things;
+	pool<thing> things;
 
-	int CameraThingId;
-	unsigned int CameraSector;
-	Vector<3> CameraPosition;
-	Vector<3> CameraLook = Vec(0.0f, 1.0f, 0.0f);
-	Vector<3> CameraUp = Vec(0.0f, 0.0f, 1.0f);
-	Vector<3> CameraVelocity = Zero<3>();
+	int camera_thing_id;
+	unsigned int camera_sector;
+	vector<3> camera_position;
+	vector<3> camera_look = make_vector(0.0f, 1.0f, 0.0f);
+	vector<3> camera_up = make_vector(0.0f, 0.0f, 1.0f);
+	vector<3> camera_velocity = zero<3>();
 
-	std::vector<Content::Assets::Template const*> SpawnPoints;
-	unsigned int CurrentSpawnPoint = 0;
+	std::vector<content::assets::thing_template const*> spawn_points;
+	unsigned int current_spawn_point = 0;
 
-	double LevelTime = 0.0;
-	double GameTime = 0.0;
-	Math::Vector<3> DynamicTint = Math::Zero<3>();
+	double level_time = 0.0;
+	double game_time = 0.0;
+	vector<3> dynamic_tint = math::zero<3>();
 
-	LevelModel(Content::Manager& Manager, Cog::Compiler& CogCompiler, const Content::Assets::Level& Level, const Content::Assets::Inventory& inv);
+	level_model(content::manager& manager, cog::compiler& Cogcompiler, const content::assets::level& level, const content::assets::inventory& inv);
 };
 
 }

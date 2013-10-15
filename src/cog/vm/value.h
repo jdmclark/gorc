@@ -3,199 +3,199 @@
 #include "framework/math/vector.h"
 #include "type.h"
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class Value {
+class value {
 private:
-	Type type;
+	type type_flag;
 
 	union {
-		int Integer;
+		int integer;
 		float Floating;
 		bool Boolean;
-		const char* String;
+		const char* string;
 		struct {
 			float X, Y, Z;
-		} Vector;
+		} vector;
 	} data;
 
 public:
-	Value();
+	value();
 
-	Value(const Value&);
-	const Value& operator=(const Value&);
+	value(const value&);
+	const value& operator=(const value&);
 
-	Value(int);
+	value(int);
 	int operator=(int);
 	operator int() const;
 
-	Value(float);
+	value(float);
 	float operator=(float);
 	operator float() const;
 
-	Value(bool);
+	value(bool);
 	bool operator=(bool);
 	operator bool() const;
 
-	Value(const char*);
+	value(const char*);
 	const char* operator=(const char*);
 	operator const char*() const;
 
-	Value(const Math::Vector<3>&);
-	const Math::Vector<3>& operator=(const Math::Vector<3>&);
-	operator Math::Vector<3>() const;
+	value(const vector<3>&);
+	const vector<3>& operator=(const vector<3>&);
+	operator vector<3>() const;
 
-	inline bool IsNumeric() const {
-		return type == Type::Integer || type == Type::Float;
+	inline bool is_numeric() const {
+		return type_flag == type::integer || type_flag == type::floating;
 	}
 
-	inline Type GetType() const {
-		return type;
+	inline type get_type() const {
+		return type_flag;
 	}
 
-	inline Value operator+(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) + static_cast<float>(v2));
+	inline value operator+(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) + static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) + static_cast<int>(v2));
+			return value(static_cast<int>(*this) + static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator-(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) - static_cast<float>(v2));
+	inline value operator-(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) - static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) - static_cast<int>(v2));
+			return value(static_cast<int>(*this) - static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator*(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) * static_cast<float>(v2));
+	inline value operator*(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) * static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) * static_cast<int>(v2));
+			return value(static_cast<int>(*this) * static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator/(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) / static_cast<float>(v2));
+	inline value operator/(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) / static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) / static_cast<int>(v2));
+			return value(static_cast<int>(*this) / static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator%(const Value& v2) const {
-		return Value(static_cast<int>(*this) % static_cast<int>(v2));
+	inline value operator%(const value& v2) const {
+		return value(static_cast<int>(*this) % static_cast<int>(v2));
 	}
 
-	inline Value operator&(const Value& v2) const {
-		return Value(static_cast<int>(*this) & static_cast<int>(v2));
+	inline value operator&(const value& v2) const {
+		return value(static_cast<int>(*this) & static_cast<int>(v2));
 	}
 
-	inline Value operator|(const Value& v2) const {
-		return Value(static_cast<int>(*this) | static_cast<int>(v2));
+	inline value operator|(const value& v2) const {
+		return value(static_cast<int>(*this) | static_cast<int>(v2));
 	}
 
-	inline Value operator^(const Value& v2) const {
-		return Value(static_cast<int>(*this) ^ static_cast<int>(v2));
+	inline value operator^(const value& v2) const {
+		return value(static_cast<int>(*this) ^ static_cast<int>(v2));
 	}
 
-	inline Value operator>(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) > static_cast<float>(v2));
+	inline value operator>(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) > static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) > static_cast<int>(v2));
+			return value(static_cast<int>(*this) > static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator>=(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) >= static_cast<float>(v2));
+	inline value operator>=(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) >= static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) >= static_cast<int>(v2));
+			return value(static_cast<int>(*this) >= static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator<(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) < static_cast<float>(v2));
+	inline value operator<(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) < static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) < static_cast<int>(v2));
+			return value(static_cast<int>(*this) < static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator<=(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) <= static_cast<float>(v2));
+	inline value operator<=(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) <= static_cast<float>(v2));
 		}
 		else {
-			return Value(static_cast<int>(*this) <= static_cast<int>(v2));
+			return value(static_cast<int>(*this) <= static_cast<int>(v2));
 		}
 	}
 
-	inline Value operator==(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) == static_cast<float>(v2));
+	inline value operator==(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) == static_cast<float>(v2));
 		}
-		else if(type == Type::Integer || v2.type == Type::Integer) {
-			return Value(static_cast<int>(*this) == static_cast<int>(v2));
+		else if(type_flag == type::integer || v2.type_flag == type::integer) {
+			return value(static_cast<int>(*this) == static_cast<int>(v2));
 		}
-		else if(type == Type::Boolean || v2.type == Type::Boolean) {
-			return Value(static_cast<bool>(*this) == static_cast<bool>(v2));
+		else if(type_flag == type::boolean || v2.type_flag == type::boolean) {
+			return value(static_cast<bool>(*this) == static_cast<bool>(v2));
 		}
 		else {
-			return Value(false);
+			return value(false);
 		}
 	}
 
-	inline Value operator!=(const Value& v2) const {
-		if(type == Type::Float || v2.type == Type::Float) {
-			return Value(static_cast<float>(*this) != static_cast<float>(v2));
+	inline value operator!=(const value& v2) const {
+		if(type_flag == type::floating || v2.type_flag == type::floating) {
+			return value(static_cast<float>(*this) != static_cast<float>(v2));
 		}
-		else if(type == Type::Integer || v2.type == Type::Integer) {
-			return Value(static_cast<int>(*this) != static_cast<int>(v2));
+		else if(type_flag == type::integer || v2.type_flag == type::integer) {
+			return value(static_cast<int>(*this) != static_cast<int>(v2));
 		}
-		else if(type == Type::Boolean || v2.type == Type::Boolean) {
-			return Value(static_cast<bool>(*this) != static_cast<bool>(v2));
+		else if(type_flag == type::boolean || v2.type_flag == type::boolean) {
+			return value(static_cast<bool>(*this) != static_cast<bool>(v2));
 		}
 		else {
-			return Value(false);
+			return value(false);
 		}
 	}
 
-	inline Value operator&&(const Value& v2) const {
-		return Value(static_cast<bool>(*this) && static_cast<bool>(v2));
+	inline value operator&&(const value& v2) const {
+		return value(static_cast<bool>(*this) && static_cast<bool>(v2));
 	}
 
-	inline Value operator||(const Value& v2) const {
-		return Value(static_cast<bool>(*this) || static_cast<bool>(v2));
+	inline value operator||(const value& v2) const {
+		return value(static_cast<bool>(*this) || static_cast<bool>(v2));
 	}
 
-	inline Value operator+() const {
+	inline value operator+() const {
 		return *this;
 	}
 
-	inline Value operator-() const {
-		if(type == Type::Float) {
-			return Value(-static_cast<float>(*this));
+	inline value operator-() const {
+		if(type_flag == type::floating) {
+			return value(-static_cast<float>(*this));
 		}
 		else {
-			return Value(-static_cast<int>(*this));
+			return value(-static_cast<int>(*this));
 		}
 	}
 
-	inline Value operator!() const {
-		return Value(!static_cast<bool>(*this));
+	inline value operator!() const {
+		return value(!static_cast<bool>(*this));
 	}
 };
 

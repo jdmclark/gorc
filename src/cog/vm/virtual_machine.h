@@ -6,34 +6,34 @@
 #include <vector>
 #include <stack>
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class VirtualMachine {
+class virtual_machine {
 private:
-	std::stack<Value> stack;
+	std::stack<value> stack;
 	bool allow_run;
 	unsigned int program_counter;
 
 public:
-	void Execute(std::vector<Value>& heap, const CodeBuffer& code, size_t pc, const Verbs::VerbTable& verbTable);
+	void execute(std::vector<value>& heap, const code_buffer& code, size_t pc, const verbs::verb_table& verbTable);
 
-	inline void Abort() {
+	inline void abort() {
 		allow_run = false;
 	}
 
-	inline void Push(const Value& val) {
+	inline void push(const value& val) {
 		stack.push(val);
 	}
 
-	inline Value Pop() {
-		Value val = stack.top();
+	inline value pop() {
+		value val = stack.top();
 		stack.pop();
 		return val;
 	}
 
-	inline unsigned int GetProgramCounter() const {
+	inline unsigned int get_program_counter() const {
 		return program_counter;
 	}
 };

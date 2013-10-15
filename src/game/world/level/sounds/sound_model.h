@@ -4,17 +4,17 @@
 #include "sound.h"
 #include "framework/pool.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Sounds {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace sounds {
 
-class SoundModel {
+class sound_model {
 public:
-	sf::Sound AmbientSound;
-	Music AmbientMusic;
-	Pool<Sound, 8> Sounds;
+	sf::Sound ambient_sound;
+	music ambient_music;
+	pool<sound, 8> sounds;
 };
 
 }

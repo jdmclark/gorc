@@ -1,5 +1,5 @@
 #include "view.h"
 
-Gorc::Game::View::~View() {
+gorc::game::view::~view() {
 	return;
 }

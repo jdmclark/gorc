@@ -1,88 +1,88 @@
 #include "code_visitor.h"
 #include "expression_visitor.h"
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::ConstantFolding::CodeVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::constant_folding::code_visitor;
 
-CodeVisitor::CodeVisitor(AST::Factory& factory, Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, VM::Value>& constantTable,
-	Diagnostics::Report& report)
-	: AST::Visitor("Stage3::CodeVisitor", report), Factory(factory), SymbolTable(symbolTable),
+code_visitor::code_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, vm::value>& constantTable,
+	diagnostics::report& report)
+	: ast::visitor("Stage3::CodeVisitor", report), Factory(factory), symbol_table(symbolTable),
 	ConstantTable(constantTable) {
 	return;
 }
 
-void CodeVisitor::VisitCompoundStatement(CompoundStatement& s) {
-	for(auto& stmt : *s.Code) {
-		stmt->Accept(*this);
+void code_visitor::visit_compound_statement(compound_statement& s) {
+	for(auto& stmt : *s.code) {
+		stmt->accept(*this);
 	}
 }
 
-void CodeVisitor::VisitEmptyStatement(EmptyStatement& s) {
+void code_visitor::visit_empty_statement(empty_statement& s) {
 	return;
 }
 
-void CodeVisitor::VisitExpressionStatement(ExpressionStatement& s) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	s.Expression->Accept(v);
-	s.Expression = v.GetSubstitution();
+void code_visitor::visit_expression_statement(expression_statement& s) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	s.expression->accept(v);
+	s.expression = v.get_substitution();
 }
 
-void CodeVisitor::VisitBreakStatement(BreakStatement& s) {
+void code_visitor::visit_break_statement(break_statement& s) {
 	return;
 }
 
-void CodeVisitor::VisitReturnStatement(ReturnStatement& s) {
+void code_visitor::visit_return_statement(return_statement& s) {
 	return;
 }
 
-void CodeVisitor::VisitCallStatement(CallStatement& s) {
+void code_visitor::visit_call_statement(call_statement& s) {
 	return;
 }
 
-void CodeVisitor::VisitIfStatement(IfStatement& s) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	s.Condition->Accept(v);
-	s.Condition = v.GetSubstitution();
+void code_visitor::visit_if_statement(if_statement& s) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	s.condition->accept(v);
+	s.condition = v.get_substitution();
 
-	s.Code->Accept(*this);
+	s.code->accept(*this);
 }
 
-void CodeVisitor::VisitIfElseStatement(IfElseStatement& s) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	s.Condition->Accept(v);
-	s.Condition = v.GetSubstitution();
+void code_visitor::visit_if_else_statement(if_else_statement& s) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	s.condition->accept(v);
+	s.condition = v.get_substitution();
 
-	s.Code->Accept(*this);
-	s.ElseCode->Accept(*this);
+	s.code->accept(*this);
+	s.else_code->accept(*this);
 }
 
-void CodeVisitor::VisitWhileStatement(WhileStatement& s) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	s.Condition->Accept(v);
-	s.Condition = v.GetSubstitution();
+void code_visitor::visit_while_statement(while_statement& s) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	s.condition->accept(v);
+	s.condition = v.get_substitution();
 
-	s.Code->Accept(*this);
+	s.code->accept(*this);
 }
 
-void CodeVisitor::VisitDoStatement(DoStatement& s) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	s.Condition->Accept(v);
-	s.Condition = v.GetSubstitution();
+void code_visitor::visit_do_statement(do_statement& s) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	s.condition->accept(v);
+	s.condition = v.get_substitution();
 
-	s.Code->Accept(*this);
+	s.code->accept(*this);
 }
 
-void CodeVisitor::VisitForStatement(ForStatement& s) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
+void code_visitor::visit_for_statement(for_statement& s) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
 
-	s.Condition->Accept(v);
-	s.Incrementer->Accept(v);
-	s.Initializer->Accept(v);
+	s.condition->accept(v);
+	s.incrementer->accept(v);
+	s.initializer->accept(v);
 
-	s.Code->Accept(*this);
+	s.code->accept(*this);
 }
 
-void CodeVisitor::VisitLabeledStatement(LabeledStatement& s) {
-	s.Code->Accept(*this);
+void code_visitor::visit_labeled_statement(labeled_statement& s) {
+	s.code->accept(*this);
 }

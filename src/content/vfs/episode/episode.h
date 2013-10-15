@@ -8,28 +8,28 @@
 #include <string>
 #include <unordered_map>
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Episode {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace episode {
 
-class Episode {
+class episode {
 private:
 	std::unordered_map<int, size_t> entryMap;
-	std::vector<Entry> entries;
+	std::vector<entry> entries;
 
 	std::string EpisodeName;
-	EpisodeType Type;
+	episode_type type;
 
 public:
-	Episode(IO::ReadOnlyFile& file, Diagnostics::Report& report);
+	episode(io::read_only_file& file, diagnostics::report& report);
 
-	inline const std::string& GetEpisodeName() const {
+	inline const std::string& get_episode_name() const {
 		return EpisodeName;
 	}
 
-	inline EpisodeType GetType() const {
-		return Type;
+	inline episode_type get_type() const {
+		return type;
 	}
 
 	inline auto begin() const -> decltype(entries.begin()) {
@@ -40,7 +40,7 @@ public:
 		return entries.end();
 	}
 
-	const Entry& GetEntry(int LineNumber) const;
+	const entry& get_entry(int LineNumber) const;
 };
 
 }

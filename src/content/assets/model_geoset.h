@@ -2,13 +2,13 @@
 
 #include "model_mesh.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class ModelGeoSet {
+class model_geoset {
 public:
-	std::vector<ModelMesh> Meshes;
+	std::vector<model_mesh> meshes;
 };
 
 }

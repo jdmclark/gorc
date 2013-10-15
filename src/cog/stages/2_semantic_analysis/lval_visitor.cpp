@@ -3,44 +3,44 @@
 #include "framework/diagnostics/helper.h"
 #include <algorithm>
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::SemanticAnalysis::LValueVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::semantic_analysis::lvalue_visitor;
 
-LValueVisitor::LValueVisitor(Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, VM::Value>& constantTable,
-	Verbs::VerbTable& verbTable, Diagnostics::Report& report)
-	: AST::Visitor("Stage2::LValueVisitor", report), SymbolTable(symbolTable),
-	ConstantTable(constantTable), VerbTable(verbTable) {
+lvalue_visitor::lvalue_visitor(symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, vm::value>& constantTable,
+	verbs::verb_table& verbTable, diagnostics::report& report)
+	: ast::visitor("Stage2::LvalueVisitor", report), symbol_table(symbolTable),
+	ConstantTable(constantTable), verb_table(verbTable) {
 	return;
 }
 
-void LValueVisitor::DefaultAction(const std::string& action, Node& n) {
-	Diagnostics::Helper::AssignToRValue(Report, VisitorName, n.Location);
+void lvalue_visitor::default_action(const std::string& action, node& n) {
+	diagnostics::helper::assign_to_rvalue(report, visitor_name, n.location);
 }
 
-void LValueVisitor::VisitIdentifierExpression(IdentifierExpression& e) {
+void lvalue_visitor::visit_identifier_expression(identifier_expression& e) {
 	// Convert identifier to lowercase for processing.
-	std::transform(e.Identifier.begin(), e.Identifier.end(), e.Identifier.begin(), tolower);
+	std::transform(e.identifier.begin(), e.identifier.end(), e.identifier.begin(), tolower);
 
-	if(!SymbolTable.IsSymbolDefined(e.Identifier)) {
-		Diagnostics::Helper::UndefinedSymbol(Report, VisitorName, e.Identifier, e.Location);
-		SymbolTable.AddSymbol(e.Identifier);
+	if(!symbol_table.is_symbol_defined(e.identifier)) {
+		diagnostics::helper::undefined_symbol(report, visitor_name, e.identifier, e.location);
+		symbol_table.add_symbol(e.identifier);
 	}
 }
 
-void LValueVisitor::VisitSubscriptExpression(SubscriptExpression& e) {
+void lvalue_visitor::visit_subscript_expression(subscript_expression& e) {
 	// Convert base identifier to lowercase for processing.
-	std::transform(e.Base.begin(), e.Base.end(), e.Base.begin(), tolower);
+	std::transform(e.base.begin(), e.base.end(), e.base.begin(), tolower);
 
-	if(!SymbolTable.IsSymbolDefined(e.Base)) {
-		Diagnostics::Helper::UndefinedSymbol(Report, VisitorName, e.Base, e.Location);
-		SymbolTable.AddSymbol(e.Base);
+	if(!symbol_table.is_symbol_defined(e.base)) {
+		diagnostics::helper::undefined_symbol(report, visitor_name, e.base, e.location);
+		symbol_table.add_symbol(e.base);
 	}
 
-	ExpressionVisitor subscript(SymbolTable, ConstantTable, VerbTable, Report);
-	e.Index->Accept(subscript);
+	expression_visitor subscript(symbol_table, ConstantTable, verb_table, report);
+	e.index->accept(subscript);
 
-	if(subscript.ExpressionType == VM::Type::Void) {
-		Diagnostics::Helper::IllegalVoidResult(Report, VisitorName, e.Index->Location);
+	if(subscript.expression_type == vm::type::nothing) {
+		diagnostics::helper::illegal_void_result(report, visitor_name, e.index->location);
 	}
 }

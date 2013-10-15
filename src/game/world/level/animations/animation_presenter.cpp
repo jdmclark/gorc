@@ -8,108 +8,108 @@
 #include "surface_material_animation.h"
 #include "surface_light_animation.h"
 
-using namespace Gorc::Game::World::Level::Animations;
+using namespace gorc::game::world::level::animations;
 
-void AnimationPresenter::Start(LevelModel& levelModel, AnimationModel& model) {
+void animation_presenter::start(level_model& levelModel, animation_model& model) {
 	this->levelModel = &levelModel;
 	this->model = &model;
 }
 
-void AnimationPresenter::Update(double dt) {
-	for(auto& entity : model->Animations) {
-			entity->Update(dt);
+void animation_presenter::update(double dt) {
+	for(auto& entity : model->animations) {
+			entity->update(dt);
 	}
 
-	for(auto& anim : model->Animations) {
-		if(anim->Expired) {
-			model->Animations.Destroy(anim);
+	for(auto& anim : model->animations) {
+		if(anim->expired) {
+			model->animations.destroy(anim);
 		}
 	}
 }
 
 // Anim / Cel verbs
-int AnimationPresenter::SurfaceAnim(int surface, float rate, FlagSet<Flags::AnimFlag> flags) {
-	auto& ent = model->Animations.Create();
-	ent.Value = std::unique_ptr<Animation>(new SurfaceMaterialAnimation(*levelModel, surface, rate, flags, ent.GetId()));
-	return ent.GetId();
+int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::AnimFlag> flags) {
+	auto& ent = model->animations.create();
+	ent.value = std::unique_ptr<animation>(new surface_material_animation(*levelModel, surface, rate, flags, ent.get_id()));
+	return ent.get_id();
 }
 
-int AnimationPresenter::GetSurfaceAnim(int surface) {
-	return levelModel->Surfaces[surface].AnimNumber;
+int animation_presenter::get_surface_anim(int surface) {
+	return levelModel->surfaces[surface].anim_number;
 }
 
-void AnimationPresenter::StopAnim(int anim) {
+void animation_presenter::stop_anim(int anim) {
 	if(anim >= 0) {
-		model->Animations.Destroy(anim);
+		model->animations.destroy(anim);
 	}
 }
 
-int AnimationPresenter::GetSurfaceCel(int surface) {
-	return levelModel->Surfaces[surface].CelNumber;
+int animation_presenter::get_surface_cel(int surface) {
+	return levelModel->surfaces[surface].cel_number;
 }
 
-void AnimationPresenter::SetSurfaceCel(int surface, int cel) {
-	levelModel->Surfaces[surface].CelNumber = cel;
+void animation_presenter::set_surface_cel(int surface, int cel) {
+	levelModel->surfaces[surface].cel_number = cel;
 }
 
-int AnimationPresenter::SlideSurface(int surface_id, const Math::Vector<3>& direction) {
-	auto& ent = model->Animations.Create();
-	ent.Value = std::unique_ptr<Animation>(new SlideSurfaceAnimation(*levelModel, surface_id, direction, ent.GetId()));
-	return ent.GetId();
+int animation_presenter::slide_surface(int surface_id, const vector<3>& direction) {
+	auto& ent = model->animations.create();
+	ent.value = std::unique_ptr<animation>(new slide_surface_animation(*levelModel, surface_id, direction, ent.get_id()));
+	return ent.get_id();
 }
 
-int AnimationPresenter::SlideCeilingSky(float u_speed, float v_speed) {
-	auto& ent = model->Animations.Create();
-	ent.Value = std::unique_ptr<Animation>(new SlideCeilingSkyAnimation(*levelModel, Vec(u_speed, v_speed)));
-	return ent.GetId();
+int animation_presenter::slide_ceiling_sky(float u_speed, float v_speed) {
+	auto& ent = model->animations.create();
+	ent.value = std::unique_ptr<animation>(new slide_ceiling_sky_animation(*levelModel, make_vector(u_speed, v_speed)));
+	return ent.get_id();
 }
 
-int AnimationPresenter::SurfaceLightAnim(int surface, float start_light, float end_light, float change_time) {
-	auto& ent = model->Animations.Create();
-	ent.Value = std::unique_ptr<Animation>(new SurfaceLightAnimation(*levelModel, surface, start_light, end_light, change_time, ent.GetId()));
-	return ent.GetId();
+int animation_presenter::surface_light_anim(int surface, float start_light, float end_light, float change_time) {
+	auto& ent = model->animations.create();
+	ent.value = std::unique_ptr<animation>(new surface_light_animation(*levelModel, surface, start_light, end_light, change_time, ent.get_id()));
+	return ent.get_id();
 }
 
-void Gorc::Game::World::Level::Animations::AnimationPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
-	verbTable.AddVerb<int, 1>("getsurfaceanim", [&components](int surface) {
-		return static_cast<int>(components.CurrentLevelPresenter->AnimationPresenter.GetSurfaceAnim(surface));
+void gorc::game::world::level::animations::animation_presenter::register_verbs(cog::verbs::verb_table& verbTable, components& components) {
+	verbTable.add_verb<int, 1>("getsurfaceanim", [&components](int surface) {
+		return static_cast<int>(components.current_level_presenter->animation_presenter.get_surface_anim(surface));
 	});
 
-	verbTable.AddVerb<void, 1>("stopsurfaceanim", [&components](int surface) {
-		components.CurrentLevelPresenter->AnimationPresenter.StopAnim(
-				components.CurrentLevelPresenter->AnimationPresenter.GetSurfaceAnim(surface));
+	verbTable.add_verb<void, 1>("stopsurfaceanim", [&components](int surface) {
+		components.current_level_presenter->animation_presenter.stop_anim(
+				components.current_level_presenter->animation_presenter.get_surface_anim(surface));
 	});
 
-	verbTable.AddVerb<int, 1>("getwallcel", [&components](int surface) {
-		return components.CurrentLevelPresenter->AnimationPresenter.GetSurfaceCel(surface);
+	verbTable.add_verb<int, 1>("getwallcel", [&components](int surface) {
+		return components.current_level_presenter->animation_presenter.get_surface_cel(surface);
 	});
 
-	verbTable.AddVerb<int, 2>("setwallcel", [&components](int surface, int cel) {
-		components.CurrentLevelPresenter->AnimationPresenter.SetSurfaceCel(surface, cel);
+	verbTable.add_verb<int, 2>("setwallcel", [&components](int surface, int cel) {
+		components.current_level_presenter->animation_presenter.set_surface_cel(surface, cel);
 		return 1;
 	});
 
-	verbTable.AddVerb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
-		return static_cast<int>(components.CurrentLevelPresenter->AnimationPresenter.SurfaceAnim(surface, rate, FlagSet<Flags::AnimFlag>(flags)));
+	verbTable.add_verb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
+		return static_cast<int>(components.current_level_presenter->animation_presenter.surface_anim(surface, rate, flag_set<flags::AnimFlag>(flags)));
 	});
 
-	verbTable.AddVerb<int, 2>("slideceilingsky", [&components](float u_speed, float v_speed) {
-		return static_cast<int>(components.CurrentLevelPresenter->AnimationPresenter.SlideCeilingSky(u_speed, v_speed));
+	verbTable.add_verb<int, 2>("slideceilingsky", [&components](float u_speed, float v_speed) {
+		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_ceiling_sky(u_speed, v_speed));
 	});
 
-	verbTable.AddVerb<int, 3>("slidesurface", [&components](int surface, Math::Vector<3> direction, float speed) {
-		return static_cast<int>(components.CurrentLevelPresenter->AnimationPresenter.SlideSurface(surface, Math::Normalize(direction) * speed));
+	verbTable.add_verb<int, 3>("slidesurface", [&components](int surface, vector<3> direction, float speed) {
+		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, math::normalize(direction) * speed));
 	});
 
-	verbTable.AddVerb<int, 3>("slidewall", [&components](int surface, Math::Vector<3> direction, float speed) {
-		return static_cast<int>(components.CurrentLevelPresenter->AnimationPresenter.SlideSurface(surface, Math::Normalize(direction) * speed));
+	verbTable.add_verb<int, 3>("slidewall", [&components](int surface, vector<3> direction, float speed) {
+		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, math::normalize(direction) * speed));
 	});
 
-	verbTable.AddVerb<void, 1>("stopanim", [&components](int anim) {
-		components.CurrentLevelPresenter->AnimationPresenter.StopAnim(anim);
+	verbTable.add_verb<void, 1>("stopanim", [&components](int anim) {
+		components.current_level_presenter->animation_presenter.stop_anim(anim);
 	});
 
-	verbTable.AddVerb<int, 4>("surfacelightanim", [&components](int surface, float start_light, float end_light, float change_time) {
-		return static_cast<int>(components.CurrentLevelPresenter->AnimationPresenter.SurfaceLightAnim(surface, start_light, end_light, change_time));
+	verbTable.add_verb<int, 4>("surfacelightanim", [&components](int surface, float start_light, float end_light, float change_time) {
+		return static_cast<int>(components.current_level_presenter->animation_presenter.surface_light_anim(surface, start_light, end_light, change_time));
 	});
 }

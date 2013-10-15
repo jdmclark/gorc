@@ -2,16 +2,16 @@
 
 #include <iosfwd>
 
-namespace Gorc {
-namespace Diagnostics {
+namespace gorc {
+namespace diagnostics {
 
-enum class ErrorLevel {
-	Warning,
-	Error,
-	CriticalError
+enum class error_level {
+	warning,
+	error,
+	critical_error
 };
 
 }
 }
 
-std::ostream& operator<<(std::ostream& str, Gorc::Diagnostics::ErrorLevel level);
+std::ostream& operator<<(std::ostream& str, gorc::diagnostics::error_level level);

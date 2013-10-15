@@ -3,20 +3,20 @@
 #include "content/text_loader.h"
 #include "cog/compiler.h"
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-class InventoryLoader : public TextLoader {
+class inventory_loader : public text_loader {
 private:
-	Cog::Compiler& compiler;
+	cog::compiler& compiler;
 
 public:
-	static const std::vector<boost::filesystem::path> AssetRootPath;
+	static const std::vector<boost::filesystem::path> asset_root_path;
 
-	InventoryLoader(Cog::Compiler& compiler);
+	inventory_loader(cog::compiler& compiler);
 
-	virtual std::unique_ptr<Asset> Parse(Text::Tokenizer& t, Manager& manager, Diagnostics::Report& report) override;
+	virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
 };
 
 }

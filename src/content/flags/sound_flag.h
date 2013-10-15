@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class SoundFlag : uint32_t {
+enum class sound_flag : uint32_t {
 	Loops = 0x1,
 	Voice = 0x2,
 	Ambient = 0x4,
@@ -13,7 +13,7 @@ enum class SoundFlag : uint32_t {
 	Delay = 0x20,
 	ClassOriginDoesNotMove = 0x40,
 	ThingOriginMovesWithThing = 0x80,
-	Priority = 0x100,
+	priority = 0x100,
 	Immediate = 0x200,
 	IgnoreIfAlreadyPlaying = 0x400,
 	IgnoreIfSoundclassAlreadyPlaying = 0x800,

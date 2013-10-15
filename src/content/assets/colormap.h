@@ -6,32 +6,32 @@
 #include "content/asset.h"
 #include "content/loaders/colormap_loader.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Colormap : public Asset {
+class colormap : public asset {
 private:
-	std::array<Math::Vector<3, uint8_t>, 256> Color;
-	std::array<Math::Vector<3, uint8_t>, 256> Extra;
+	std::array<vector<3, uint8_t>, 256> color;
+	std::array<vector<3, uint8_t>, 256> extra;
 
 public:
-	using Loader = Loaders::ColormapLoader;
+	using loader = loaders::colormap_loader;
 
-	inline void SetColor(uint8_t index, const Math::Vector<3, uint8_t>& color) {
-		Color[index] = color;
+	inline void set_color(uint8_t index, const vector<3, uint8_t>& new_color) {
+		color[index] = new_color;
 	}
 
-	inline void SetExtra(uint8_t index, const Math::Vector<3, uint8_t>& color) {
-		Extra[index] = color;
+	inline void set_extra(uint8_t index, const vector<3, uint8_t>& new_color) {
+		extra[index] = new_color;
 	}
 
-	inline const Math::Vector<3, uint8_t>& GetColor(uint8_t index) const {
-		return Color[index];
+	inline const vector<3, uint8_t>& get_color(uint8_t index) const {
+		return color[index];
 	}
 
-	inline const Math::Vector<3, uint8_t>& GetExtra(uint8_t index) const {
-		return Extra[index];
+	inline const vector<3, uint8_t>& get_extra(uint8_t index) const {
+		return extra[index];
 	}
 };
 

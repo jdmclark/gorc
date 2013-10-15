@@ -1,11 +1,11 @@
 #pragma once
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class Asset {
+class asset {
 public:
-	virtual ~Asset();
+	virtual ~asset();
 };
 
 }

@@ -2,15 +2,15 @@
 
 #include "character_controller.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Gameplay {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace gameplay {
 
-class ActorController : public CharacterController {
+class actor_controller : public character_controller {
 public:
-	using CharacterController::CharacterController;
+	using character_controller::character_controller;
 };
 
 }

@@ -11,15 +11,15 @@
 
 class LanguageTestFixture : public NullUnit::Fixture {
 private:
-	Gorc::Content::NativeFileSystem nfs;
+	gorc::content::native_filesystem nfs;
 
 public:
-	const Gorc::Content::FileSystem& FileSystem;
-	Gorc::Diagnostics::StoredReport Report;
+	const gorc::content::filesystem& FileSystem;
+	gorc::diagnostics::stored_report report;
 
 protected:
 	LanguageTestFixture(const boost::filesystem::path& BasePath);
-	LanguageTestFixture(const Gorc::Content::FileSystem& fs);
+	LanguageTestFixture(const gorc::content::filesystem& fs);
 
 public:
 	virtual void ParseFile(const boost::filesystem::path& file) = 0;
@@ -28,9 +28,9 @@ public:
 };
 
 #define AssertResult(n_errors, n_warnings) {												\
-	Test_Expect_Eq(Report.GetErrorCount(), n_errors);										\
-	Test_Expect_Eq(Report.GetWarningCount(), n_warnings);									\
-	if(Report.GetErrorCount() != n_errors || Report.GetWarningCount() != n_warnings) {		\
+	Test_Expect_Eq(report.get_error_count(), n_errors);										\
+	Test_Expect_Eq(report.get_warning_count(), n_warnings);									\
+	if(report.get_error_count() != n_errors || report.get_warning_count() != n_warnings) {		\
 		PrintErrors();																		\
 	}																						\
 }

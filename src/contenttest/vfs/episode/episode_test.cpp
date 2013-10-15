@@ -11,22 +11,22 @@ BeginSuite(EpisodeTest);
 
 Case(PreparedTest)
 {
-	Gorc::Diagnostics::StoredReport report;
-	Gorc::IO::NativeFile file("test/episode/test.jk");
-	Gorc::Content::VFS::Episode::Episode ep(file, report);
+	gorc::diagnostics::stored_report report;
+	gorc::io::native_file file("test/episode/test.jk");
+	gorc::content::vfs::episode::episode ep(file, report);
 
-	Test_Assert_Eq(ep.GetEpisodeName(), "The Farce Without");
-	Test_Assert_Eq(ep.GetType(), Gorc::Content::VFS::Episode::EpisodeType::SinglePlayer);
+	Test_Assert_Eq(ep.get_episode_name(), "The Farce Without");
+	Test_Assert_Eq(ep.get_type(), gorc::content::vfs::episode::episode_type::single_player);
 
-	const Gorc::Content::VFS::Episode::Entry& entry_21bjerk = ep.GetEntry(810);
-	Test_Assert_Eq(entry_21bjerk.Disc, 2);
-	Test_Assert_Eq(entry_21bjerk.Type, Gorc::Content::VFS::Episode::EntryType::Level);
-	Test_Assert_Eq(entry_21bjerk.Filename, "21bjerk.jkl");
+	const gorc::content::vfs::episode::entry& entry_21bjerk = ep.get_entry(810);
+	Test_Assert_Eq(entry_21bjerk.disc, 2);
+	Test_Assert_Eq(entry_21bjerk.type, gorc::content::vfs::episode::entry_type::level);
+	Test_Assert_Eq(entry_21bjerk.filename, "21bjerk.jkl");
 
-	const Gorc::Content::VFS::Episode::Entry& entry_decide = ep.GetEntry(143);
-	Test_Assert_Eq(entry_decide.Type, Gorc::Content::VFS::Episode::EntryType::Decision);
-	Test_Assert_Eq(entry_decide.GotoA, 200);
-	Test_Assert_Eq(entry_decide.GotoB, 800);
+	const gorc::content::vfs::episode::entry& entry_decide = ep.get_entry(143);
+	Test_Assert_Eq(entry_decide.type, gorc::content::vfs::episode::entry_type::decision);
+	Test_Assert_Eq(entry_decide.goto_a, 200);
+	Test_Assert_Eq(entry_decide.goto_b, 800);
 }
 
 EndSuite(EpisodeTest);

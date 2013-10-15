@@ -1,13 +1,13 @@
 #include "script_continuation.h"
 
-Gorc::Game::World::Level::Scripts::ScriptContinuation::ScriptContinuation(int InstanceId,
-		int SenderId, int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3,
+gorc::game::world::level::scripts::script_continuation::script_continuation(int InstanceId,
+		int SenderId, int SenderRef, flags::message_type SenderType,
+		int SourceRef, flags::message_type SourceType,
+		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3,
 		unsigned int ProgramCounter)
-	: InstanceId(InstanceId),
-	  SenderId(SenderId), SenderRef(SenderRef), SenderType(SenderType),
-	  SourceRef(SourceRef), SourceType(SourceType),
-	  Params({ Param0, Param1, Param2, Param3 }), ProgramCounter(ProgramCounter) {
+	: instance_id(InstanceId),
+	  sender_id(SenderId), sender_ref(SenderRef), sender_type(SenderType),
+	  source_ref(SourceRef), source_type(SourceType),
+	  params({ Param0, Param1, Param2, Param3 }), program_counter(ProgramCounter) {
 	return;
 }

@@ -5,29 +5,29 @@
 #include <boost/filesystem/path.hpp>
 #include <string>
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Gob {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace gob {
 
-class GobFile : public IO::ReadOnlyFile {
+class gob_file : public io::read_only_file {
 private:
-	IO::NativeFile file;
+	io::native_file file;
 	const size_t chunkOffset;
 	const size_t chunkLength;
 	const size_t chunkEnd;
 
 public:
-	GobFile(const boost::filesystem::path& gobPath, const boost::filesystem::path& filename, size_t chunkOffset, size_t chunkLength);
+	gob_file(const boost::filesystem::path& gobPath, const boost::filesystem::path& filename, size_t chunkOffset, size_t chunkLength);
 
-	virtual void Read(void* dest, size_t size) override;
+	virtual void read(void* dest, size_t size) override;
 
-	virtual void Seek(long offset) override;
-	virtual void SetPosition(size_t offset) override;
-	virtual size_t GetPosition() override;
+	virtual void seek(long offset) override;
+	virtual void set_position(size_t offset) override;
+	virtual size_t get_position() override;
 
-	virtual size_t GetSize() override;
-	virtual bool IsEndOfFile() override;
+	virtual size_t get_size() override;
+	virtual bool is_end_of_file() override;
 };
 
 }

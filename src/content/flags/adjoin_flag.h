@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class AdjoinFlag : uint32_t {
+enum class adjoin_flag : uint32_t {
 	Visible 						= 0x1,
 	AllowMovement 					= 0x2,
 	AllowSound 						= 0x4,

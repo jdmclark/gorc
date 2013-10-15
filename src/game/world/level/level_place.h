@@ -5,19 +5,19 @@
 #include "content/manager.h"
 #include <memory>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class LevelPlace : public Place {
+class level_place : public place {
 public:
-	std::shared_ptr<Content::Manager> ContentManager;
-	const Content::Assets::Level& Level;
+	std::shared_ptr<content::manager> contentmanager;
+	const content::assets::level& level;
 
-	LevelPlace(std::shared_ptr<Content::Manager> ContentManager, const Content::Assets::Level& Level);
+	level_place(std::shared_ptr<content::manager> contentmanager, const content::assets::level& level);
 
-	void Accept(PlaceVisitor& v) const;
+	void accept(place_visitor& v) const;
 };
 
 }

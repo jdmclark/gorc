@@ -1,5 +1,5 @@
 #include "action_place.h"
 
-void Gorc::Game::Screen::Action::ActionPlace::Accept(PlaceVisitor& v) const {
-	v.VisitActionPlace(*this);
+void gorc::game::screen::action::action_place::accept(place_visitor& v) const {
+	v.visit_action_place(*this);
 }

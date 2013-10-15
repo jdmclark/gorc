@@ -1,6 +1,6 @@
 #include "jump_table.h"
 
-Gorc::Cog::VM::JumpTable::JumpTable()
+gorc::cog::vm::jump_table::jump_table()
 	: table(64, 0) {
 	return;
 }

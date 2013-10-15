@@ -2,33 +2,33 @@
 #include "game/world/level/level_model.h"
 #include "game/constants.h"
 
-using namespace Gorc::Math;
+using namespace gorc::math;
 
-Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::SlideSurfaceAnimation(LevelModel& model, unsigned int surface,
-		const Math::Vector<3>& direction, int anim_num)
+gorc::game::world::level::animations::slide_surface_animation::slide_surface_animation(level_model& model, unsigned int surface,
+		const vector<3>& direction, int anim_num)
 	: model(model), surface(surface), direction(direction) {
-	auto& surf = model.Surfaces[surface];
-	surf.AnimNumber = anim_num;
+	auto& surf = model.surfaces[surface];
+	surf.anim_number = anim_num;
 
 	// Compute texture basis.
-	auto dnsb0 = model.Level.Vertices[std::get<0>(surf.Vertices[1])] - model.Level.Vertices[std::get<0>(surf.Vertices[0])];
+	auto dnsb0 = model.level.vertices[std::get<0>(surf.vertices[1])] - model.level.vertices[std::get<0>(surf.vertices[0])];
 
-	sb0 = dnsb0 / Length2(dnsb0);
-	sb1 = Cross(surf.Normal, sb0);
+	sb0 = dnsb0 / length2(dnsb0);
+	sb1 = cross(surf.normal, sb0);
 
 	unsigned int noncol_vert;
-	for(noncol_vert = 2; noncol_vert < surf.Vertices.size(); ++noncol_vert) {
-		auto sb2 = model.Level.Vertices[std::get<0>(surf.Vertices[noncol_vert])] - model.Level.Vertices[std::get<0>(surf.Vertices[0])];
-		if(Dot(sb1, sb2) != 0.0f) {
+	for(noncol_vert = 2; noncol_vert < surf.vertices.size(); ++noncol_vert) {
+		auto sb2 = model.level.vertices[std::get<0>(surf.vertices[noncol_vert])] - model.level.vertices[std::get<0>(surf.vertices[0])];
+		if(dot(sb1, sb2) != 0.0f) {
 			break;
 		}
 	}
 
-	auto vb0 = model.Level.TextureVertices[std::get<1>(surf.Vertices[1])] - model.Level.TextureVertices[std::get<1>(surf.Vertices[0])];
-	auto vb1 = Vec(Get<1>(vb0), -Get<0>(vb0));
+	auto vb0 = model.level.texture_vertices[std::get<1>(surf.vertices[1])] - model.level.texture_vertices[std::get<1>(surf.vertices[0])];
+	auto vb1 = make_vector(get<1>(vb0), -get<0>(vb0));
 
 	float sgn = 1.0f;
-	if(Dot(vb1, model.Level.TextureVertices[std::get<1>(surf.Vertices[noncol_vert])] - model.Level.TextureVertices[std::get<1>(surf.Vertices[0])]) < 0.0f) {
+	if(dot(vb1, model.level.texture_vertices[std::get<1>(surf.vertices[noncol_vert])] - model.level.texture_vertices[std::get<1>(surf.vertices[0])]) < 0.0f) {
 		sgn = -1.0f;
 	}
 
@@ -38,17 +38,17 @@ Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::SlideSurfaceAnimati
 	return;
 }
 
-void Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::Update(double dt) {
-	auto& surf = model.Surfaces[surface];
-	surf.Thrust = direction * RateFactor;
+void gorc::game::world::level::animations::slide_surface_animation::update(double dt) {
+	auto& surf = model.surfaces[surface];
+	surf.thrust = direction * rate_factor;
 
-	auto plane_dir = tb0 * Dot(direction, sb0) + tb1 * Dot(direction, sb1);
+	auto plane_dir = tb0 * dot(direction, sb0) + tb1 * dot(direction, sb1);
 
-	surf.TextureOffset += plane_dir * dt * RateFactor;
+	surf.texture_offset += plane_dir * dt * rate_factor;
 }
 
-void Gorc::Game::World::Level::Animations::SlideSurfaceAnimation::Stop() {
-	auto& surf = model.Surfaces[surface];
-	surf.AnimNumber = -1;
-	surf.Thrust = Math::Zero<3>();
+void gorc::game::world::level::animations::slide_surface_animation::stop() {
+	auto& surf = model.surfaces[surface];
+	surf.anim_number = -1;
+	surf.thrust = math::zero<3>();
 }

@@ -5,41 +5,41 @@
 #include <algorithm>
 #include <iostream>
 
-namespace Gorc {
-namespace Math {
+namespace gorc {
+inline namespace math {
 
-template <typename F = float> class Matrix {
+template <typename F = float> class matrix {
 private:
 	static constexpr F deg2rad = 0.0174532925;
 	F data[4][4];
 
 public:
-	Matrix() {
+	matrix() {
 		return;
 	}
 
-	Matrix(F const* gl_matrix) {
+	matrix(F const* gl_matrix) {
 		std::copy(gl_matrix, gl_matrix + 16, data);
 	}
 
-	F* GetOpenGLMatrix() {
+	F* get_opengl_matrix() {
 		return &data[0][0];
 	}
 
-	const F* GetOpenGLMatrix() const {
+	const F* get_opengl_matrix() const {
 		return &data[0][0];
 	}
 
-	F GetValue(int i, int j) const {
+	F get_value(int i, int j) const {
 		return data[j][i];
 	}
 
-	void SetValue(int i, int j, F value) {
+	void set_value(int i, int j, F value) {
 		data[j][i] = value;
 	}
 
-	static Matrix MakeIdentityMatrix() {
-		Matrix rv;
+	static matrix make_identity_matrix() {
+		matrix rv;
 		for(int i = 0; i < 4; ++i) {
 			for(int j = 0; j < 4; ++j) {
 				rv.data[i][j] = (i == j) ? 1 : 0;
@@ -49,8 +49,8 @@ public:
 		return rv;
 	}
 
-	static Matrix MakeFrustumMatrix(float left, float right, float bottom, float top, float znear, float zfar) {
-		Matrix rv;
+	static matrix make_frustum_matrix(float left, float right, float bottom, float top, float znear, float zfar) {
+		matrix rv;
 
 		float temp, temp2, temp3, temp4;
 		temp = 2.0f * znear;
@@ -81,14 +81,14 @@ public:
 		return rv;
 	}
 
-	static Matrix MakePerspectiveMatrix(float fovyInDegrees, float aspectRatio, float znear, float zfar) {
+	static matrix make_perspective_matrix(float fovyInDegrees, float aspectRatio, float znear, float zfar) {
 		float ymax = znear * std::tan(fovyInDegrees * deg2rad * 0.5);
 		float xmax = ymax * aspectRatio;
-		return MakeFrustumMatrix(-xmax, xmax, -ymax, ymax, znear, zfar);
+		return make_frustum_matrix(-xmax, xmax, -ymax, ymax, znear, zfar);
 	}
 
-	static Matrix MakeTranslationMatrix(const Vector<3, F>& translation) {
-		Matrix rv;
+	static matrix make_translation_matrix(const vector<3, F>& translation) {
+		matrix rv;
 
 		for(int i = 0; i < 4; ++i) {
 			for(int j = 0; j < 4; ++j) {
@@ -96,32 +96,32 @@ public:
 			}
 		}
 
-		rv.data[3][0] = Get<0>(translation);
-		rv.data[3][1] = Get<1>(translation);
-		rv.data[3][2] = Get<2>(translation);
+		rv.data[3][0] = get<0>(translation);
+		rv.data[3][1] = get<1>(translation);
+		rv.data[3][2] = get<2>(translation);
 
 		return rv;
 	}
 
-	static Matrix MakeLookMatrix(const Vector<3, F>& camera_position, const Vector<3, F>& camera_look, const Vector<3, F>& old_camera_up) {
-		auto camera_side = Cross(camera_look, old_camera_up);
-		auto camera_up = Cross(camera_side, camera_look);
+	static matrix make_look_matrix(const vector<3, F>& camera_position, const vector<3, F>& camera_look, const vector<3, F>& old_camera_up) {
+		auto camera_side = cross(camera_look, old_camera_up);
+		auto camera_up = cross(camera_side, camera_look);
 
-		Matrix rv;
+		matrix rv;
 
-		rv.data[0][0] = Get<0>(camera_side);
-		rv.data[0][1] = Get<0>(camera_up);
-		rv.data[0][2] = -Get<0>(camera_look);
+		rv.data[0][0] = get<0>(camera_side);
+		rv.data[0][1] = get<0>(camera_up);
+		rv.data[0][2] = -get<0>(camera_look);
 		rv.data[0][3] = 0;
 
-		rv.data[1][0] = Get<1>(camera_side);
-		rv.data[1][1] = Get<1>(camera_up);
-		rv.data[1][2] = -Get<1>(camera_look);
+		rv.data[1][0] = get<1>(camera_side);
+		rv.data[1][1] = get<1>(camera_up);
+		rv.data[1][2] = -get<1>(camera_look);
 		rv.data[1][3] = 0;
 
-		rv.data[2][0] = Get<2>(camera_side);
-		rv.data[2][1] = Get<2>(camera_up);
-		rv.data[2][2] = -Get<2>(camera_look);
+		rv.data[2][0] = get<2>(camera_side);
+		rv.data[2][1] = get<2>(camera_up);
+		rv.data[2][2] = -get<2>(camera_look);
 		rv.data[2][3] = 0;
 
 		rv.data[3][0] = 0;
@@ -129,15 +129,15 @@ public:
 		rv.data[3][2] = 0;
 		rv.data[3][3] = 1;
 
-		return rv * MakeTranslationMatrix(-camera_position);
+		return rv * make_translation_matrix(-camera_position);
 	}
 
-	static Matrix MakeRotationMatrix(F angle, const Math::Vector<3, F>& axis) {
-		Matrix rv;
+	static matrix make_rotation_matrix(F angle, const vector<3, F>& axis) {
+		matrix rv;
 
-		F ax = Get<0>(axis);
-		F ay = Get<1>(axis);
-		F az = Get<2>(axis);
+		F ax = get<0>(axis);
+		F ay = get<1>(axis);
+		F az = get<2>(axis);
 
 		F cost = std::cos(angle * deg2rad);
 		F sint = std::sin(angle * deg2rad);
@@ -166,8 +166,8 @@ public:
 		return rv;
 	}
 
-	Matrix operator*(const Matrix& m) const {
-		Matrix rv;
+	matrix operator*(const matrix& m) const {
+		matrix rv;
 
 		for(size_t j = 0; j < 4; ++j) {
 			for(size_t i = 0; i < 4; ++i) {
@@ -181,8 +181,8 @@ public:
 		return rv;
 	}
 
-	Matrix operator+(const Matrix& m) const {
-		Matrix rv;
+	matrix operator+(const matrix& m) const {
+		matrix rv;
 
 		for(size_t j = 0; j < 4; ++j) {
 			for(size_t i = 0; i < 4; ++i) {
@@ -193,8 +193,8 @@ public:
 		return rv;
 	}
 
-	Matrix Transpose() const {
-		Matrix rv;
+	matrix transpose() const {
+		matrix rv;
 
 		for(size_t j = 0; j < 4; ++j) {
 			for(size_t i = 0; i < 4; ++i) {

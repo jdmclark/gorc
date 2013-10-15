@@ -3,15 +3,15 @@
 #include "loader.h"
 #include "framework/text/tokenizer.h"
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class TextLoader : public Loader {
+class text_loader : public loader {
 protected:
-	virtual std::unique_ptr<Asset> Parse(Text::Tokenizer& t, Manager& manager, Diagnostics::Report& report) = 0;
+	virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) = 0;
 
 public:
-	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) override;
+	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
 };
 
 }

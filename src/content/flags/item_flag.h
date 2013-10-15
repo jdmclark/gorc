@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class ItemFlag : uint32_t {
 	RespawnInMultiplayer			= 0x1,

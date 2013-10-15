@@ -7,49 +7,49 @@
 #include <boost/integer/static_log2.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
-namespace Gorc {
+namespace gorc {
 
-template <typename T> class PoolPtr {
+template <typename T> class pool_ptr {
 public:
-	std::unique_ptr<T> Value;
+	std::unique_ptr<T> value;
 
 	inline T& operator*() {
-		return *Value;
+		return *value;
 	}
 
 	inline const T& operator*() const {
-		return *Value;
+		return *value;
 	}
 
 	inline T* operator->() {
-		return Value.get();
+		return value.get();
 	}
 
 	inline T const* operator->() const {
-		return Value.get();
+		return value.get();
 	}
 };
 
-template <typename T, size_t PageSize = 128> class Pool {
+template <typename T, size_t PageSize = 128> class pool {
 	static_assert(PageSize > 0 && (PageSize & (PageSize - 1)) == 0, "PageSize must be a power of 2");
 	static const int PageNumberShift = boost::static_log2<PageSize>::value;
-	static const size_t PageOffsetMask = PageSize - 1;
+	static const size_t PageOffsetmask = PageSize - 1;
 	friend class Iterator;
 
 public:
-	class Element : public T {
-		friend class Pool;
-		Element* pool_next_free = nullptr;
+	class element : public T {
+		friend class pool;
+		element* pool_next_free = nullptr;
 		int pool_element_id;
 
 	public:
-		inline int GetId() const {
+		inline int get_id() const {
 			return pool_element_id;
 		}
 
-		Element() = default;
+		element() = default;
 
-		Element(const T& value) {
+		element(const T& value) {
 			*this = value;
 		}
 
@@ -59,16 +59,16 @@ public:
 	};
 
 private:
-	std::function<void(Pool&, Element&)> del_cb;
-	Element* first_free = nullptr;
-	std::vector<std::unique_ptr<std::array<Element, PageSize>>> pages;
+	std::function<void(pool&, element&)> del_cb;
+	element* first_free = nullptr;
+	std::vector<std::unique_ptr<std::array<element, PageSize>>> pages;
 
-	void AddPage() {
-		int page_base = (pages.size() << PageNumberShift) | PageOffsetMask;
+	void add_page() {
+		int page_base = (pages.size() << PageNumberShift) | PageOffsetmask;
 
-		pages.emplace_back(new std::array<Element, PageSize>());
+		pages.emplace_back(new std::array<element, PageSize>());
 
-		Element* next_free = nullptr;
+		element* next_free = nullptr;
 		for(auto& obj : *pages.back() | boost::adaptors::reversed) {
 			obj.pool_next_free = next_free;
 			obj.pool_element_id = page_base--;
@@ -78,39 +78,39 @@ private:
 		first_free = next_free;
 	}
 
-	Element& GetPoolObject(int index) {
+	element& get_pool_object(int index) {
 		unsigned int page_num = index >> PageNumberShift;
-		unsigned int item_num = index & PageOffsetMask;
+		unsigned int item_num = index & PageOffsetmask;
 
 		return (*pages[page_num])[item_num];
 	}
 
-	const Element& GetPoolObject(int index) const {
+	const element& get_pool_object(int index) const {
 		unsigned int page_num = index >> PageNumberShift;
-		unsigned int item_num = index & PageOffsetMask;
+		unsigned int item_num = index & PageOffsetmask;
 
 		return (*pages[page_num])[item_num];
 	}
 
-	static void DefaultDestroyCallback(Pool& pool, Element& value) {
+	static void default_destroy_callback(pool& pool, element& value) {
 		return;
 	}
 
-	int GetIndexUpperBound() const {
-		return ((pages.size() - 1) << PageNumberShift) | PageOffsetMask;
+	int get_index_upper_bound() const {
+		return ((pages.size() - 1) << PageNumberShift) | PageOffsetmask;
 	}
 
 public:
-	class Iterator {
+	class iterator {
 	private:
 		int index;
-		Pool* pool;
+		pool* pool;
 
-		void Advance() {
-			int upper_bound = pool->GetIndexUpperBound();
+		void advance() {
+			int upper_bound = pool->get_index_upper_bound();
 			++index;
 			while(index < upper_bound) {
-				if(!pool->GetPoolObject(index).pool_next_free) {
+				if(!pool->get_pool_object(index).pool_next_free) {
 					return;
 				}
 				++index;
@@ -121,91 +121,91 @@ public:
 		}
 
 	public:
-		Iterator()
+		iterator()
 			: index(0), pool(nullptr) {
 			return;
 		}
 
-		Iterator(int index, Pool* pool)
+		iterator(int index, class pool* pool)
 			: index(index), pool(pool) {
-			if(pool->GetPoolObject(index).pool_next_free) {
-				Advance();
+			if(pool->get_pool_object(index).pool_next_free) {
+				advance();
 			}
 			return;
 		}
 
-		bool operator==(const Iterator& it) const {
+		bool operator==(const iterator& it) const {
 			return pool == it.pool && index == it.index;
 		}
 
-		bool operator!=(const Iterator& it) const {
+		bool operator!=(const iterator& it) const {
 			return pool != it.pool || index != it.index;
 		}
 
-		Element& operator*() {
+		element& operator*() {
 			return (*pool)[index];
 		}
 
-		Element* operator->() {
+		element* operator->() {
 			return &(*pool)[index];
 		}
 
-		Iterator& operator++() {
-			Advance();
+		iterator& operator++() {
+			advance();
 			return *this;
 		}
 
-		Iterator operator++(int) {
-			Iterator cpy(*this);
-			Advance();
+		iterator operator++(int) {
+			iterator cpy(*this);
+			advance();
 			return cpy;
 		}
 	};
 
-	Pool(std::function<void(Pool&, Element&)> delete_callback = DefaultDestroyCallback)
+	pool(std::function<void(pool&, element&)> delete_callback = default_destroy_callback)
 		: del_cb(delete_callback), first_free(nullptr) {
-		AddPage();
+		add_page();
 		return;
 	}
 
-	Element& operator[](int index) {
-		return GetPoolObject(index);
+	element& operator[](int index) {
+		return get_pool_object(index);
 	}
 
-	const Element& operator[](int index) const {
-		return GetPoolObject(index);
+	const element& operator[](int index) const {
+		return get_pool_object(index);
 	}
 
-	Element& Create() {
+	element& create() {
 		if(first_free) {
-			Element* obj = first_free;
+			element* obj = first_free;
 			first_free = obj->pool_next_free;
 			obj->pool_next_free = nullptr;
 			return *obj;
 		}
 		else {
-			AddPage();
-			return Create();
+			add_page();
+			return create();
 		}
 	}
 
-	void Destroy(Element& em) {
+	void destroy(element& em) {
 		em.pool_next_free = first_free;
 		first_free = &em;
 		del_cb(*this, em);
 	}
 
-	void Destroy(int index) {
-		auto& obj = GetPoolObject(index);
-		Destroy(obj);
+	void destroy(int index) {
+		auto& obj = get_pool_object(index);
+		destroy(obj);
 	}
 
-	Iterator begin() {
-		return Iterator(0, this);
+	iterator begin() {
+		return iterator(0, this);
 	}
 
-	Iterator end() {
-		return Iterator();
+	iterator end() {
+		return iterator();
 	}
 
 	size_t size() const {

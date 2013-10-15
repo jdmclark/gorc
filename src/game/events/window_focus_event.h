@@ -2,17 +2,17 @@
 
 #include <string>
 
-namespace Gorc {
-namespace Game {
-namespace Events {
+namespace gorc {
+namespace game {
+namespace events {
 
-class WindowFocusEvent {
+class window_focus_event {
 public:
-	static const std::string& GetEventType();
+	static const std::string& get_event_type();
 
-	const bool HasFocus;
+	const bool has_focus;
 
-	WindowFocusEvent(bool HasFocus);
+	window_focus_event(bool HasFocus);
 };
 
 }

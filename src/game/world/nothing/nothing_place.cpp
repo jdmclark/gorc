@@ -1,5 +1,5 @@
 #include "nothing_place.h"
 
-void Gorc::Game::World::Nothing::NothingPlace::Accept(PlaceVisitor& v) const {
-	v.VisitNothingPlace(*this);
+void gorc::game::world::nothing::nothing_place::accept(place_visitor& v) const {
+	v.visit_nothing_place(*this);
 }

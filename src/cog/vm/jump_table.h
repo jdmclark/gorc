@@ -4,22 +4,22 @@
 #include <vector>
 #include <cstddef>
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class JumpTable {
+class jump_table {
 private:
 	std::vector<size_t> table;
 
 public:
-	JumpTable();
+	jump_table();
 
-	inline void SetTarget(MessageId id, size_t target) {
+	inline void set_target(message_id id, size_t target) {
 		table[static_cast<uint8_t>(id)] = target;
 	}
 
-	inline size_t GetTarget(MessageId id) const {
+	inline size_t get_target(message_id id) const {
 		return table[static_cast<uint8_t>(id)];
 	}
 };

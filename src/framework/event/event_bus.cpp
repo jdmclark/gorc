@@ -2,32 +2,32 @@
 #include <algorithm>
 #include <iostream>
 
-using namespace Gorc::Event;
+using namespace gorc::event;
 
-EventBus::EventBusHandlerContainer::~EventBusHandlerContainer() {
+event_bus::event_bus_handler_container::~event_bus_handler_container() {
 	return;
 }
 
-void EventBus::AddChild(EventBus* child) {
+void event_bus::add_child(event_bus* child) {
 	children.push_back(child);
 }
 
-void EventBus::RemoveChild(EventBus* child) {
-	children.erase(std::remove_if(children.begin(), children.end(), [child](EventBus* em) { return em == child; }), children.end());
+void event_bus::remove_child(event_bus* child) {
+	children.erase(std::remove_if(children.begin(), children.end(), [child](event_bus* em) { return em == child; }), children.end());
 }
 
-EventBus::EventBus() : parent(nullptr) {
+event_bus::event_bus() : parent(nullptr) {
 	return;
 }
 
-EventBus::EventBus(EventBus* parent) : parent(parent) {
-	parent->AddChild(this);
+event_bus::event_bus(event_bus* parent) : parent(parent) {
+	parent->add_child(this);
 	return;
 }
 
-EventBus::~EventBus() {
+event_bus::~event_bus() {
 	if(parent != nullptr) {
-		parent->RemoveChild(this);
+		parent->remove_child(this);
 	}
 
 	for(auto pair : handlers) {

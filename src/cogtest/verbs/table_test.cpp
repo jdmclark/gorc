@@ -3,8 +3,8 @@
 #include "cog/verbs/exception.h"
 #include "cog/vm/value.h"
 
-using namespace Gorc::Cog::Verbs;
-using namespace Gorc::Cog::VM;
+using namespace gorc::cog::verbs;
+using namespace gorc::cog::vm;
 
 void EmptyVerb() {
 	return;
@@ -39,40 +39,40 @@ template <typename T> T ZeroVerb() {
 	return T();
 }
 
-BeginSuite(VerbTable_Test);
+BeginSuite(verb_table_Test);
 
 Case(Exists) {
-	VerbTable table;
+	verb_table table;
 }
 
-Case(AddVerb) {
-	VerbTable table;
+Case(add_verb) {
+	verb_table table;
 
-	table.AddVerb("Test", EmptyVerb);
+	table.add_verb("Test", EmptyVerb);
 
-	table.AddVerb("Test2", OverloadVerb);
+	table.add_verb("Test2", OverloadVerb);
 }
 
 Case(TestClass) {
-	VerbTable table;
-	table.AddVerb<int, 0>("Test", TestClass(5));
-	VerbId id = table.GetVerb("Test");
+	verb_table table;
+	table.add_verb<int, 0>("Test", TestClass(5));
+	verb_id id = table.get_verb("Test");
 
-	std::stack<Value> stack;
-	int rvalue = table.Invoke(id, stack);
+	std::stack<value> stack;
+	int rvalue = table.invoke(id, stack);
 
 	Test_Assert_Eq(rvalue, 5);
 }
 
 Case(OverloadVerb) {
-	VerbTable table;
+	verb_table table;
 
-	table.AddVerb("Test", ZeroVerb<int>);
+	table.add_verb("Test", ZeroVerb<int>);
 
 	try {
-		table.AddVerb("Test", ZeroVerb<int>);
+		table.add_verb("Test", ZeroVerb<int>);
 	}
-	catch(VerbRedefinitionException&) {
+	catch(verb_redefinition_exception&) {
 		return;
 	}
 
@@ -80,30 +80,30 @@ Case(OverloadVerb) {
 }
 
 Case(VerbRedefinition) {
-	VerbTable table;
+	verb_table table;
 
-	table.AddVerb("Test", EmptyVerb);
+	table.add_verb("Test", EmptyVerb);
 
 	try {
-		table.AddVerb("Test", EmptyVerb);
+		table.add_verb("Test", EmptyVerb);
 	}
-	catch(VerbRedefinitionException&) {
+	catch(verb_redefinition_exception&) {
 		return;
 	}
 
 	Test_Assert_Always("Did not throw exception");
 }
 
-Case(GetVerb) {
-	VerbTable table;
+Case(get_verb) {
+	verb_table table;
 
 	try {
-		table.GetVerb("Test");
+		table.get_verb("Test");
 	}
-	catch(UndefinedVerbException&) {
-		table.AddVerb("Test", EmptyVerb);
+	catch(undefined_verb_exception&) {
+		table.add_verb("Test", EmptyVerb);
 
-		VerbId id = table.GetVerb("Test");
+		verb_id id = table.get_verb("Test");
 
 		return;
 	}
@@ -111,66 +111,66 @@ Case(GetVerb) {
 	Test_Assert_Always("Did not throw exception");
 }
 
-Case(ParameterCount) {
-	VerbTable table;
-	table.AddVerb("Test", EmptyVerb);
+Case(parameter_count) {
+	verb_table table;
+	table.add_verb("Test", EmptyVerb);
 
-	VerbId id = table.GetVerb("Test");
+	verb_id id = table.get_verb("Test");
 
-	Test_Assert_Eq(table.ParameterCount(id), 0);
+	Test_Assert_Eq(table.parameter_count(id), 0);
 
-	table.AddVerb("Test2", ExtVerb);
+	table.add_verb("Test2", ExtVerb);
 
-	id = table.GetVerb("Test2");
+	id = table.get_verb("Test2");
 
-	Test_Assert_Eq(table.ParameterCount(id), 3);
+	Test_Assert_Eq(table.parameter_count(id), 3);
 }
 
-Case(ReturnType) {
-	VerbTable table;
+Case(return_type) {
+	verb_table table;
 
-	table.AddVerb("Void", EmptyVerb);
-	VerbId id = table.GetVerb("Void");
-	Test_Assert_Eq(table.ReturnType(id), Type::Void);
+	table.add_verb("Void", EmptyVerb);
+	verb_id id = table.get_verb("Void");
+	Test_Assert_Eq(table.return_type(id), type::nothing);
 
-	table.AddVerb("Int", ZeroVerb<int>);
-	id = table.GetVerb("Int");
-	Test_Assert_Eq(table.ReturnType(id), Type::Integer);
+	table.add_verb("Int", ZeroVerb<int>);
+	id = table.get_verb("Int");
+	Test_Assert_Eq(table.return_type(id), type::integer);
 
-	table.AddVerb("Float", ZeroVerb<float>);
-	id = table.GetVerb("Float");
-	Test_Assert_Eq(table.ReturnType(id), Type::Float);
+	table.add_verb("floating", ZeroVerb<float>);
+	id = table.get_verb("floating");
+	Test_Assert_Eq(table.return_type(id), type::floating);
 
-	table.AddVerb("Vector", ZeroVerb<Gorc::Math::Vector<3>>);
-	id = table.GetVerb("Vector");
-	Test_Assert_Eq(table.ReturnType(id), Type::Vector);
+	table.add_verb("vector", ZeroVerb<gorc::vector<3>>);
+	id = table.get_verb("vector");
+	Test_Assert_Eq(table.return_type(id), type::vector);
 
-	table.AddVerb("Boolean", ZeroVerb<bool>);
-	id = table.GetVerb("Boolean");
-	Test_Assert_Eq(table.ReturnType(id), Type::Boolean);
+	table.add_verb("Boolean", ZeroVerb<bool>);
+	id = table.get_verb("Boolean");
+	Test_Assert_Eq(table.return_type(id), type::boolean);
 }
 
-Case(Invoke) {
-	VerbTable table;
+Case(invoke) {
+	verb_table table;
 
-	table.AddVerb("Prod", Prod);
-	VerbId id = table.GetVerb("Prod");
+	table.add_verb("Prod", Prod);
+	verb_id id = table.get_verb("Prod");
 
-	std::stack<Value> stack;
+	std::stack<value> stack;
 	stack.push(5.0f);
 	stack.push(10);
 
-	Test_Assert_Eq(static_cast<float>(table.Invoke(id, stack)), 50);
+	Test_Assert_Eq(static_cast<float>(table.invoke(id, stack)), 50);
 }
 
 Case(VerbExists) {
-	VerbTable table;
+	verb_table table;
 
-	Test_Assert(!table.IsVerbDefined("Test"));
+	Test_Assert(!table.is_verb_defined("Test"));
 
-	table.AddVerb("Test", ZeroVerb<int>);
+	table.add_verb("Test", ZeroVerb<int>);
 
-	Test_Assert(table.IsVerbDefined("Test"));
+	Test_Assert(table.is_verb_defined("Test"));
 }
 
-EndSuite(VerbTable_Test);
+EndSuite(verb_table_Test);

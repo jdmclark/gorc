@@ -4,16 +4,16 @@
 #include <boost/filesystem/path.hpp>
 #include <memory>
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
+namespace gorc {
+namespace content {
+namespace vfs {
 
-class VirtualFile {
+class virtual_file {
 public:
-	virtual ~VirtualFile();
+	virtual ~virtual_file();
 
-	virtual const boost::filesystem::path& GetFilename() const = 0;
-	virtual std::unique_ptr<IO::ReadOnlyFile> Open() const = 0;
+	virtual const boost::filesystem::path& get_filename() const = 0;
+	virtual std::unique_ptr<io::read_only_file> open() const = 0;
 };
 
 }

@@ -3,36 +3,36 @@
 #include <sstream>
 #include <iomanip>
 
-using namespace Gorc::Diagnostics;
+using namespace gorc::diagnostics;
 
-Error::Error(ErrorLevel level, const std::string& stage, const std::string& reason,
-		const ErrorLocation& location)
-	: Level(level), Stage(stage), Reason(reason), Location(location) {
+error::error(error_level level, const std::string& stage, const std::string& reason,
+		const error_location& location)
+	: level(level), stage(stage), reason(reason), location(location) {
 	return;
 }
 
-std::string FormatError(const Error& error) {
+std::string FormatError(const error& error) {
 	std::stringstream ss;
 
-	ss << error.Level << ": " << error.Reason << " [" << error.Stage << "]";
+	ss << error.level << ": " << error.reason << " [" << error.stage << "]";
 	return ss.str();
 }
 
-std::string FormatLineError(const Error& error) {
+std::string FormatLineError(const error& error) {
 	std::stringstream ss;
 
-	ss << error.Location.filename << "(" << error.Location.first_line << "," << error.Location.first_column << "): "
-			<< error.Level << ": " << error.Reason << " [" << error.Stage << "]";
+	ss << error.location.filename << "(" << error.location.first_line << "," << error.location.first_column << "): "
+			<< error.level << ": " << error.reason << " [" << error.stage << "]";
 	return ss.str();
 }
 
-Error::operator std::string() const {
-	switch(Level) {
-	case ErrorLevel::CriticalError:
+error::operator std::string() const {
+	switch(level) {
+	case error_level::critical_error:
 		return FormatError(*this);
 
-	case ErrorLevel::Error:
-	case ErrorLevel::Warning:
+	case error_level::error:
+	case error_level::warning:
 		return FormatLineError(*this);
 	}
 

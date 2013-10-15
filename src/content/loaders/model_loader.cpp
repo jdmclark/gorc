@@ -9,227 +9,227 @@
 #include <vector>
 #include "content/constants.h"
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ModelLoader::AssetRootPath = { "3do" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::model_loader::asset_root_path = { "3do" };
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-void SkipToNextModelSection(Text::Tokenizer& tok) {
-	Text::Token t;
+void SkipToNextModelSection(text::tokenizer& tok) {
+	text::token t;
 	do {
-		tok.GetToken(t);
+		tok.get_token(t);
 	}
-	while(t.Type != Text::TokenType::EndOfFile && (t.Type != Text::TokenType::Identifier || !boost::iequals(t.Value, "SECTION")));
+	while(t.type != text::token_type::end_of_file && (t.type != text::token_type::identifier || !boost::iequals(t.value, "SECTION")));
 
-	if(t.Type == Text::TokenType::EndOfFile) {
+	if(t.type == text::token_type::end_of_file) {
 		return;
 	}
 
-	tok.AssertPunctuator(":");
+	tok.assert_punctuator(":");
 }
 
-void ParseModelHeaderSection(Assets::Model& model, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	std::string magic = tok.GetSpaceDelimitedString();
+void ParseModelHeaderSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	std::string magic = tok.get_space_delimited_string();
 	if(!boost::iequals(magic, "3DO")) {
-		report.AddError("ModelLoader::ParseModelHeaderSection", boost::str(boost::format("expected \'3DO\', found \'%s\'") % magic),
-				tok.GetInternalTokenLocation());
-		throw Text::TokenizerAssertionException();
+		report.add_error("ModelLoader::ParseModelHeaderSection", boost::str(boost::format("expected \'3DO\', found \'%s\'") % magic),
+				tok.get_internal_token_location());
+		throw text::tokenizer_assertion_exception();
 	}
 
-	tok.GetNumber<double>();
+	tok.get_number<double>();
 }
 
-void ParseModelResourceSection(Assets::Model& model, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	tok.AssertIdentifier("materials");
+void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	tok.assert_identifier("materials");
 
-	unsigned int num = tok.GetNumber<unsigned int>();
+	unsigned int num = tok.get_number<unsigned int>();
 	for(unsigned int i = 0; i < num; ++i) {
-		tok.GetNumber<unsigned int>();
-		tok.AssertPunctuator(":");
-		model.MaterialEntries.push_back(tok.GetSpaceDelimitedString());
+		tok.get_number<unsigned int>();
+		tok.assert_punctuator(":");
+		model.material_entries.push_back(tok.get_space_delimited_string());
 	}
 }
 
-void ParseGeometryDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	tok.AssertIdentifier("RADIUS");
-	model.Radius = tok.GetNumber<float>();
+void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	tok.assert_identifier("RADIUS");
+	model.radius = tok.get_number<float>();
 
-	tok.AssertIdentifier("INSERT");
-	tok.AssertIdentifier("OFFSET");
-	float insert_x = tok.GetNumber<float>();
-	float insert_y = tok.GetNumber<float>();
-	float insert_z = tok.GetNumber<float>();
-	model.InsertOffset = Math::Vec(insert_x, insert_y, insert_z);
+	tok.assert_identifier("INSERT");
+	tok.assert_identifier("OFFSET");
+	float insert_x = tok.get_number<float>();
+	float insert_y = tok.get_number<float>();
+	float insert_z = tok.get_number<float>();
+	model.insert_offset = math::make_vector(insert_x, insert_y, insert_z);
 
-	tok.AssertIdentifier("GEOSETS");
-	unsigned int num_geosets = tok.GetNumber<unsigned int>();
+	tok.assert_identifier("GEOSETS");
+	unsigned int num_geosets = tok.get_number<unsigned int>();
 
 	for(unsigned int i = 0; i < num_geosets; ++i) {
-		tok.AssertIdentifier("GEOSET");
-		tok.GetNumber<int>();
+		tok.assert_identifier("GEOSET");
+		tok.get_number<int>();
 
-		model.GeoSets.push_back(Assets::ModelGeoSet());
-		Assets::ModelGeoSet& geoset = model.GeoSets.back();
+		model.geosets.push_back(assets::model_geoset());
+		assets::model_geoset& geoset = model.geosets.back();
 
-		tok.AssertIdentifier("MESHES");
-		unsigned int num_meshes = tok.GetNumber<unsigned int>();
+		tok.assert_identifier("MESHES");
+		unsigned int num_meshes = tok.get_number<unsigned int>();
 
 		for(unsigned int j = 0; j < num_meshes; ++j) {
-			geoset.Meshes.push_back(Assets::ModelMesh());
-			Assets::ModelMesh& mesh = geoset.Meshes.back();
+			geoset.meshes.push_back(assets::model_mesh());
+			assets::model_mesh& mesh = geoset.meshes.back();
 
-			tok.AssertIdentifier("MESH");
-			mesh.Index = tok.GetNumber<int>();
+			tok.assert_identifier("MESH");
+			mesh.index = tok.get_number<int>();
 
-			tok.AssertIdentifier("NAME");
+			tok.assert_identifier("NAME");
 			// HACK: Some assets have spaces in mesh names. Don't really need it anyway.
-			//mesh.Name = tok.GetSpaceDelimitedString();
-			tok.SkipToNextLine();
+			//mesh.Name = tok.get_space_delimited_string();
+			tok.skip_to_next_line();
 
-			tok.AssertIdentifier("RADIUS");
-			mesh.Radius = tok.GetNumber<float>();
+			tok.assert_identifier("RADIUS");
+			mesh.radius = tok.get_number<float>();
 
-			tok.AssertIdentifier("GEOMETRYMODE");
-			mesh.Geo = static_cast<Flags::GeometryMode>(tok.GetNumber<uint32_t>());
+			tok.assert_identifier("GEOMETRYMODE");
+			mesh.geo = static_cast<flags::geometry_mode>(tok.get_number<uint32_t>());
 
-			tok.AssertIdentifier("LIGHTINGMODE");
-			mesh.Light = static_cast<Flags::LightMode>(tok.GetNumber<uint32_t>());
+			tok.assert_identifier("LIGHTINGMODE");
+			mesh.light = static_cast<flags::light_mode>(tok.get_number<uint32_t>());
 
-			tok.AssertIdentifier("TEXTUREMODE");
-			mesh.Tex = static_cast<Flags::TextureMode>(tok.GetNumber<uint32_t>());
+			tok.assert_identifier("TEXTUREMODE");
+			mesh.tex = static_cast<flags::texture_mode>(tok.get_number<uint32_t>());
 
-			tok.AssertIdentifier("VERTICES");
-			unsigned int num_vertices = tok.GetNumber<unsigned int>();
+			tok.assert_identifier("VERTICES");
+			unsigned int num_vertices = tok.get_number<unsigned int>();
 			for(unsigned int k = 0; k < num_vertices; ++k) {
-				tok.GetNumber<int>();
-				tok.AssertPunctuator(":");
+				tok.get_number<int>();
+				tok.assert_punctuator(":");
 
-				float v_x = tok.GetNumber<float>();
-				float v_y = tok.GetNumber<float>();
-				float v_z = tok.GetNumber<float>();
-				tok.GetNumber<float>();
+				float v_x = tok.get_number<float>();
+				float v_y = tok.get_number<float>();
+				float v_z = tok.get_number<float>();
+				tok.get_number<float>();
 
-				mesh.Vertices.push_back(Math::Vec(v_x, v_y, v_z));
+				mesh.vertices.push_back(math::make_vector(v_x, v_y, v_z));
 			}
 
-			tok.AssertIdentifier("TEXTURE");
-			tok.AssertIdentifier("VERTICES");
-			unsigned int num_tex_vertices = tok.GetNumber<unsigned int>();
+			tok.assert_identifier("TEXTURE");
+			tok.assert_identifier("VERTICES");
+			unsigned int num_tex_vertices = tok.get_number<unsigned int>();
 			for(unsigned int k = 0; k < num_tex_vertices; ++k) {
-				tok.GetNumber<int>();
-				tok.AssertPunctuator(":");
+				tok.get_number<int>();
+				tok.assert_punctuator(":");
 
-				float v_u = tok.GetNumber<float>();
-				float v_v = tok.GetNumber<float>();
+				float v_u = tok.get_number<float>();
+				float v_v = tok.get_number<float>();
 
-				mesh.TextureVertices.push_back(Math::Vec(v_u, v_v));
+				mesh.texture_vertices.push_back(math::make_vector(v_u, v_v));
 			}
 
-			tok.AssertIdentifier("VERTEX");
-			tok.AssertIdentifier("NORMALS");
+			tok.assert_identifier("VERTEX");
+			tok.assert_identifier("NORMALS");
 			for(unsigned int k = 0; k < num_vertices; ++k) {
-				tok.GetNumber<int>();
-				tok.AssertPunctuator(":");
+				tok.get_number<int>();
+				tok.assert_punctuator(":");
 
-				float n_x = tok.GetNumber<float>();
-				float n_y = tok.GetNumber<float>();
-				float n_z = tok.GetNumber<float>();
+				float n_x = tok.get_number<float>();
+				float n_y = tok.get_number<float>();
+				float n_z = tok.get_number<float>();
 
-				mesh.VertexNormals.push_back(Math::Vec(n_x, n_y, n_z));
+				mesh.vertex_normals.push_back(math::make_vector(n_x, n_y, n_z));
 			}
 
-			tok.AssertIdentifier("FACES");
-			unsigned int num_faces = tok.GetNumber<unsigned int>();
+			tok.assert_identifier("FACES");
+			unsigned int num_faces = tok.get_number<unsigned int>();
 			for(unsigned int k = 0; k < num_faces; ++k) {
-				mesh.Faces.push_back(Assets::ModelFace());
-				Assets::ModelFace& face = mesh.Faces.back();
+				mesh.faces.push_back(assets::model_face());
+				assets::model_face& face = mesh.faces.back();
 
-				tok.GetNumber<int>();
-				tok.AssertPunctuator(":");
+				tok.get_number<int>();
+				tok.assert_punctuator(":");
 
-				face.Material = tok.GetNumber<int>();
-				face.Type = FlagSet<Flags::FaceFlag>(tok.GetNumber<uint32_t>());
-				face.Geo = static_cast<Flags::GeometryMode>(tok.GetNumber<uint32_t>());
-				face.Light = static_cast<Flags::LightMode>(tok.GetNumber<uint32_t>());
-				face.Tex = static_cast<Flags::TextureMode>(tok.GetNumber<uint32_t>());
-				face.ExtraLight = tok.GetNumber<float>();
+				face.material = tok.get_number<int>();
+				face.type = flag_set<flags::face_flag>(tok.get_number<uint32_t>());
+				face.geo = static_cast<flags::geometry_mode>(tok.get_number<uint32_t>());
+				face.light = static_cast<flags::light_mode>(tok.get_number<uint32_t>());
+				face.tex = static_cast<flags::texture_mode>(tok.get_number<uint32_t>());
+				face.extra_light = tok.get_number<float>();
 
-				unsigned int num_face_verts = tok.GetNumber<unsigned int>();
+				unsigned int num_face_verts = tok.get_number<unsigned int>();
 				for(unsigned int l = 0; l < num_face_verts; ++l) {
-					unsigned int geo_v = tok.GetNumber<unsigned int>();
-					tok.AssertPunctuator(",");
-					unsigned int tex_v = tok.GetNumber<unsigned int>();
+					unsigned int geo_v = tok.get_number<unsigned int>();
+					tok.assert_punctuator(",");
+					unsigned int tex_v = tok.get_number<unsigned int>();
 
-					face.Vertices.emplace_back(geo_v, tex_v);
+					face.vertices.emplace_back(geo_v, tex_v);
 				}
 			}
 
-			tok.AssertIdentifier("FACE");
-			tok.AssertIdentifier("NORMALS");
+			tok.assert_identifier("FACE");
+			tok.assert_identifier("NORMALS");
 			for(unsigned int k = 0; k < num_faces; ++k) {
-				tok.GetNumber<int>();
-				tok.AssertPunctuator(":");
+				tok.get_number<int>();
+				tok.assert_punctuator(":");
 
-				float n_x = tok.GetNumber<float>();
-				float n_y = tok.GetNumber<float>();
-				float n_z = tok.GetNumber<float>();
+				float n_x = tok.get_number<float>();
+				float n_y = tok.get_number<float>();
+				float n_z = tok.get_number<float>();
 
-				mesh.Faces[k].Normal = Math::Vec(n_x, n_y, n_z);
+				mesh.faces[k].normal = math::make_vector(n_x, n_y, n_z);
 			}
 		}
 	}
 }
 
-void ParseHierarchyDefSection(Assets::Model& model, Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	tok.AssertIdentifier("hierarchy");
-	tok.AssertIdentifier("nodes");
+void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	tok.assert_identifier("hierarchy");
+	tok.assert_identifier("nodes");
 
-	int nodes = tok.GetNumber<int>();
-	model.HierarchyNodes.resize(nodes);
+	int nodes = tok.get_number<int>();
+	model.hierarchy_nodes.resize(nodes);
 
 	for(int i = 0; i < nodes; ++i) {
-		auto& node = model.HierarchyNodes[i];
+		auto& node = model.hierarchy_nodes[i];
 
-		tok.GetNumber<int>();
-		tok.AssertPunctuator(":");
+		tok.get_number<int>();
+		tok.assert_punctuator(":");
 
-		tok.GetNumber<int>();
+		tok.get_number<int>();
 
-		node.Type = FlagSet<Flags::MeshNodeType>(tok.GetNumber<unsigned int>());
-		node.Mesh = tok.GetNumber<int>();
-		node.Parent = tok.GetNumber<int>();
-		node.Child = tok.GetNumber<int>();
-		node.Sibling = tok.GetNumber<int>();
-		node.NumChildren = tok.GetNumber<int>();
+		node.type = flag_set<flags::mesh_node_type>(tok.get_number<unsigned int>());
+		node.mesh = tok.get_number<int>();
+		node.parent = tok.get_number<int>();
+		node.child = tok.get_number<int>();
+		node.sibling = tok.get_number<int>();
+		node.num_children = tok.get_number<int>();
 
-		Math::Get<0>(node.Offset) = tok.GetNumber<float>();
-		Math::Get<1>(node.Offset) = tok.GetNumber<float>();
-		Math::Get<2>(node.Offset) = tok.GetNumber<float>();
+		math::get<0>(node.offset) = tok.get_number<float>();
+		math::get<1>(node.offset) = tok.get_number<float>();
+		math::get<2>(node.offset) = tok.get_number<float>();
 
-		Math::Get<0>(node.Rotation) = tok.GetNumber<float>();
-		Math::Get<1>(node.Rotation) = tok.GetNumber<float>();
-		Math::Get<2>(node.Rotation) = tok.GetNumber<float>();
+		math::get<0>(node.rotation) = tok.get_number<float>();
+		math::get<1>(node.rotation) = tok.get_number<float>();
+		math::get<2>(node.rotation) = tok.get_number<float>();
 
-		Math::Get<0>(node.Pivot) = tok.GetNumber<float>();
-		Math::Get<1>(node.Pivot) = tok.GetNumber<float>();
-		Math::Get<2>(node.Pivot) = tok.GetNumber<float>();
+		math::get<0>(node.pivot) = tok.get_number<float>();
+		math::get<1>(node.pivot) = tok.get_number<float>();
+		math::get<2>(node.pivot) = tok.get_number<float>();
 
-		node.Name = tok.GetSpaceDelimitedString();
+		node.name = tok.get_space_delimited_string();
 	}
 }
 
-void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colormap& colormap, Diagnostics::Report& report) {
-	for(const auto& mat_name : model.MaterialEntries) {
-		model.Materials.push_back(&manager.Load<Assets::Material>(mat_name, colormap));
+void PostprocessModel(assets::model& model, manager& manager, const assets::colormap& colormap, diagnostics::report& report) {
+	for(const auto& mat_name : model.material_entries) {
+		model.materials.push_back(&manager.load<assets::material>(mat_name, colormap));
 	}
 
 	// Some color faces have invalid texture coordinates.
 	// Ensure each mesh has at least one texture vertex.
-	for(auto& geoset : model.GeoSets) {
-		for(auto& mesh : geoset.Meshes) {
-			if(mesh.TextureVertices.empty()) {
-				mesh.TextureVertices.push_back(Math::Vec(0.0f, 0.0f));
+	for(auto& geoset : model.geosets) {
+		for(auto& mesh : geoset.meshes) {
+			if(mesh.texture_vertices.empty()) {
+				mesh.texture_vertices.push_back(math::make_vector(0.0f, 0.0f));
 			}
 		}
 	}
@@ -237,7 +237,7 @@ void PostprocessModel(Assets::Model& model, Manager& manager, const Assets::Colo
 	return;
 }
 
-using ModelLoaderSectionFn = std::function<void(Assets::Model&, Text::Tokenizer&, Manager&, Diagnostics::Report&)>;
+using ModelLoaderSectionFn = std::function<void(assets::model&, text::tokenizer&, manager&, diagnostics::report&)>;
 const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMap {
 	{ "header", ParseModelHeaderSection },
 	{ "modelresource", ParseModelResourceSection },
@@ -249,22 +249,22 @@ const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMa
 }
 }
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ModelLoader::Parse(Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Assets::Model> lev(new Assets::Model());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::model_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<assets::model> lev(new assets::model());
 
-	Text::Token t;
+	text::token t;
 	while(true) {
 		SkipToNextModelSection(tok);
-		tok.GetToken(t);
+		tok.get_token(t);
 
-		if(t.Type == Text::TokenType::EndOfFile) {
+		if(t.type == text::token_type::end_of_file) {
 			break;
 		}
 		else {
-			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
-			auto it = ModelLoaderSectionMap.find(t.Value);
+			std::transform(t.value.begin(), t.value.end(), t.value.begin(), tolower);
+			auto it = ModelLoaderSectionMap.find(t.value);
 			if(it == ModelLoaderSectionMap.end()) {
-				report.AddWarning("ModelLoader", boost::str(boost::format("skipping unknown section %s") % t.Value), t.Location);
+				report.add_warning("ModelLoader", boost::str(boost::format("skipping unknown section %s") % t.value), t.location);
 			}
 			else {
 				it->second(*lev, tok, manager, report);
@@ -274,10 +274,10 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ModelLoader::Parse
 
 	PostprocessModel(*lev, manager, colormap, report);
 
-	return std::unique_ptr<Asset>(std::move(lev));
+	return std::unique_ptr<asset>(std::move(lev));
 }
 
-Gorc::Content::Loaders::ModelLoader::ModelLoader(const Assets::Colormap& colormap)
+gorc::content::loaders::model_loader::model_loader(const assets::colormap& colormap)
 	: colormap(colormap) {
 	return;
 }

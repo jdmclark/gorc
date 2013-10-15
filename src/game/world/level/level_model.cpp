@@ -3,16 +3,16 @@
 #include "content/manager.h"
 #include "game/constants.h"
 
-Gorc::Game::World::Level::LevelModel::LevelModel(Gorc::Content::Manager& ContentManager, Cog::Compiler& CogCompiler,
-		const Gorc::Content::Assets::Level& Level, const Content::Assets::Inventory& inv)
-	: Level(Level), Header(Level.Header), Adjoins(Level.Adjoins), Sectors(Level.Sectors), InventoryModel(inv) {
+gorc::game::world::level::level_model::level_model(gorc::content::manager& contentmanager, cog::compiler& Cogcompiler,
+		const gorc::content::assets::level& level, const content::assets::inventory& inv)
+	: level(level), header(level.header), adjoins(level.adjoins), sectors(level.sectors), inventory_model(inv) {
 
 	// Copy surfaces and set up object data.
-	std::copy(Level.Surfaces.begin(), Level.Surfaces.end(), std::back_inserter(Surfaces));
-	for(auto& sector : Sectors) {
-		for(int i = sector.FirstSurface; i < sector.FirstSurface + sector.SurfaceCount; ++i) {
-			Surfaces[i].ObjectData.SectorId = sector.Number;
-			Surfaces[i].ObjectData.SurfaceId = i;
+	std::copy(level.surfaces.begin(), level.surfaces.end(), std::back_inserter(surfaces));
+	for(auto& sector : sectors) {
+		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+			surfaces[i].object_data.sector_id = sector.number;
+			surfaces[i].object_data.surface_id = i;
 		}
 	}
 

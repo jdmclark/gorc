@@ -1,10 +1,10 @@
 #include "exiting_event.h"
 
-static const std::string GORC_EVENTS_EXITINGEVENT_TYPE = "Gorc::Events::ExitingEvent";
-const std::string& Gorc::Events::ExitingEvent::GetEventType() {
+static const std::string GORC_EVENTS_EXITINGEVENT_TYPE = "gorc::events::exiting_event";
+const std::string& gorc::events::exiting_event::get_event_type() {
 	return GORC_EVENTS_EXITINGEVENT_TYPE;
 }
 
-Gorc::Events::ExitingEvent::ExitingEvent() : Cancel(false) {
+gorc::events::exiting_event::exiting_event() : cancel(false) {
 	return;
 }

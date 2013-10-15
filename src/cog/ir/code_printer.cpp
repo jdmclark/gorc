@@ -1,186 +1,186 @@
 #include "code_printer.h"
 #include "cog/vm/opcode.h"
 
-using Gorc::Cog::IR::CodePrinter;
+using gorc::cog::ir::code_printer;
 
-Gorc::Cog::IR::CodePrinter::CodePrinter(VM::CodeBuffer& codeBuffer,
-	const Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, MessageId>& messageTable,
-	const Verbs::VerbTable& verbTable, VM::JumpTable& jumpTable)
-	: codeBuffer(codeBuffer), stream(codeBuffer), SymbolTable(symbolTable), VerbTable(verbTable),
+gorc::cog::ir::code_printer::code_printer(vm::code_buffer& codeBuffer,
+	const symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, message_id>& messageTable,
+	const verbs::verb_table& verbTable, vm::jump_table& jumpTable)
+	: codeBuffer(codeBuffer), stream(codeBuffer), symbol_table(symbolTable), verb_table(verbTable),
 	MessageTable(messageTable), JumpTable(jumpTable) {
 	return;
 }
 
-void CodePrinter::Backpatch() {
+void code_printer::backpatch() {
 	for(const std::pair<std::string, size_t>& label : labelmap) {
 		auto jt = MessageTable.find(label.first);
 		if(jt != MessageTable.end()) {
-			MessageId id = static_cast<MessageId>(static_cast<int>(jt->second));
-			JumpTable.SetTarget(id, label.second);
+			message_id id = static_cast<message_id>(static_cast<int>(jt->second));
+			JumpTable.set_target(id, label.second);
 		}
 	}
 
 	for(const std::pair<std::string, size_t>& backpatch : backpatchmap) {
 		auto jt = labelmap.find(backpatch.first);
 		if(jt != labelmap.end()) {
-			codeBuffer.Write<size_t>(jt->second, backpatch.second);
+			codeBuffer.write<size_t>(jt->second, backpatch.second);
 		}
 		else {
 			// Missing labels already reported by semantic analysis.
 			// Default to zero.
-			codeBuffer.Write<size_t>(0, backpatch.second);
+			codeBuffer.write<size_t>(0, backpatch.second);
 		}
 	}
 }
 
-void CodePrinter::Comment(const std::string&) {
+void code_printer::comment(const std::string&) {
 	return;
 }
 
-void CodePrinter::Label(const std::string& name) {
-	labelmap.insert(std::make_pair(name, stream.Tell()));
+void code_printer::label(const std::string& name) {
+	labelmap.insert(std::make_pair(name, stream.tell()));
 }
 
-void CodePrinter::Nop() {
-	stream.Write(VM::Opcode::NOP);
+void code_printer::nop() {
+	stream.write(vm::opcode::NOP);
 }
 
-void CodePrinter::Copy() {
-	stream.Write(VM::Opcode::COPY);
+void code_printer::copy() {
+	stream.write(vm::opcode::COPY);
 }
 
-void CodePrinter::Const(const VM::Value& value) {
-	stream.Write(VM::Opcode::CONST);
-	stream.Write(value);
+void code_printer::constant(const vm::value& value) {
+	stream.write(vm::opcode::CONST);
+	stream.write(value);
 }
 
-void CodePrinter::Load(const std::string& symbol) {
-	stream.Write(VM::Opcode::LOAD);
-	stream.Write(SymbolTable.GetSymbolIndex(symbol));
+void code_printer::load(const std::string& symbol) {
+	stream.write(vm::opcode::LOAD);
+	stream.write(symbol_table.get_symbol_index(symbol));
 }
 
-void CodePrinter::LoadI(const std::string& symbol) {
-	stream.Write(VM::Opcode::LOADI);
-	stream.Write(SymbolTable.GetSymbolIndex(symbol));
+void code_printer::loadi(const std::string& symbol) {
+	stream.write(vm::opcode::LOADI);
+	stream.write(symbol_table.get_symbol_index(symbol));
 }
 
-void CodePrinter::Store(const std::string& symbol) {
-	stream.Write(VM::Opcode::STORE);
-	stream.Write(SymbolTable.GetSymbolIndex(symbol));
+void code_printer::store(const std::string& symbol) {
+	stream.write(vm::opcode::STORE);
+	stream.write(symbol_table.get_symbol_index(symbol));
 }
 
-void CodePrinter::StoreI(const std::string& symbol) {
-	stream.Write(VM::Opcode::STOREI);
-	stream.Write(SymbolTable.GetSymbolIndex(symbol));
+void code_printer::storei(const std::string& symbol) {
+	stream.write(vm::opcode::STOREI);
+	stream.write(symbol_table.get_symbol_index(symbol));
 }
 
-void CodePrinter::Jmp(const std::string& label) {
-	stream.Write(VM::Opcode::JMP);
-	backpatchmap.insert(std::make_pair(label, stream.Tell()));
-	stream.Write<size_t>(0);
+void code_printer::jmp(const std::string& label) {
+	stream.write(vm::opcode::JMP);
+	backpatchmap.insert(std::make_pair(label, stream.tell()));
+	stream.write<size_t>(0);
 }
 
-void CodePrinter::Jal(const std::string& label) {
-	stream.Write(VM::Opcode::JAL);
-	backpatchmap.insert(std::make_pair(label, stream.Tell()));
-	stream.Write<size_t>(0);
+void code_printer::jal(const std::string& label) {
+	stream.write(vm::opcode::JAL);
+	backpatchmap.insert(std::make_pair(label, stream.tell()));
+	stream.write<size_t>(0);
 }
 
-void CodePrinter::Bt(const std::string& label) {
-	stream.Write(VM::Opcode::BT);
-	backpatchmap.insert(std::make_pair(label, stream.Tell()));
-	stream.Write<size_t>(0);
+void code_printer::bt(const std::string& label) {
+	stream.write(vm::opcode::BT);
+	backpatchmap.insert(std::make_pair(label, stream.tell()));
+	stream.write<size_t>(0);
 }
 
-void CodePrinter::Bf(const std::string& label) {
-	stream.Write(VM::Opcode::BF);
-	backpatchmap.insert(std::make_pair(label, stream.Tell()));
-	stream.Write<size_t>(0);
+void code_printer::bf(const std::string& label) {
+	stream.write(vm::opcode::BF);
+	backpatchmap.insert(std::make_pair(label, stream.tell()));
+	stream.write<size_t>(0);
 }
 
-void CodePrinter::Call(const std::string& verb) {
-	stream.Write(VM::Opcode::CALL);
-	stream.Write(VerbTable.GetVerb(verb));
+void code_printer::call(const std::string& verb) {
+	stream.write(vm::opcode::CALL);
+	stream.write(verb_table.get_verb(verb));
 }
 
-void CodePrinter::CallV(const std::string& verb) {
-	stream.Write(VM::Opcode::CALLV);
-	stream.Write(VerbTable.GetVerb(verb));
+void code_printer::callv(const std::string& verb) {
+	stream.write(vm::opcode::CALLV);
+	stream.write(verb_table.get_verb(verb));
 }
 
-void CodePrinter::Ret() {
-	stream.Write(VM::Opcode::RET);
+void code_printer::ret() {
+	stream.write(vm::opcode::RET);
 }
 
-void CodePrinter::Neg() {
-	stream.Write(VM::Opcode::NEG);
+void code_printer::neg() {
+	stream.write(vm::opcode::NEG);
 }
 
-void CodePrinter::Add() {
-	stream.Write(VM::Opcode::ADD);
+void code_printer::add() {
+	stream.write(vm::opcode::ADD);
 }
 
-void CodePrinter::Sub() {
-	stream.Write(VM::Opcode::SUB);
+void code_printer::sub() {
+	stream.write(vm::opcode::SUB);
 }
 
-void CodePrinter::Mul() {
-	stream.Write(VM::Opcode::MUL);
+void code_printer::mul() {
+	stream.write(vm::opcode::MUL);
 }
 
-void CodePrinter::Div() {
-	stream.Write(VM::Opcode::DIV);
+void code_printer::div() {
+	stream.write(vm::opcode::DIV);
 }
 
-void CodePrinter::Mod() {
-	stream.Write(VM::Opcode::MOD);
+void code_printer::mod() {
+	stream.write(vm::opcode::MOD);
 }
 
-void CodePrinter::And() {
-	stream.Write(VM::Opcode::AND);
+void code_printer::band() {
+	stream.write(vm::opcode::AND);
 }
 
-void CodePrinter::Or() {
-	stream.Write(VM::Opcode::OR);
+void code_printer::bor() {
+	stream.write(vm::opcode::OR);
 }
 
-void CodePrinter::Xor() {
-	stream.Write(VM::Opcode::XOR);
+void code_printer::bxor() {
+	stream.write(vm::opcode::XOR);
 }
 
-void CodePrinter::LNot() {
-	stream.Write(VM::Opcode::LNOT);
+void code_printer::lnot() {
+	stream.write(vm::opcode::LNOT);
 }
 
-void CodePrinter::LAnd() {
-	stream.Write(VM::Opcode::LAND);
+void code_printer::land() {
+	stream.write(vm::opcode::LAND);
 }
 
-void CodePrinter::LOr() {
-	stream.Write(VM::Opcode::LOR);
+void code_printer::lor() {
+	stream.write(vm::opcode::LOR);
 }
 
-void CodePrinter::CGt() {
-	stream.Write(VM::Opcode::CGT);
+void code_printer::cgt() {
+	stream.write(vm::opcode::CGT);
 }
 
-void CodePrinter::CGeq() {
-	stream.Write(VM::Opcode::CGEQ);
+void code_printer::cgeq() {
+	stream.write(vm::opcode::CGEQ);
 }
 
-void CodePrinter::CLt() {
-	stream.Write(VM::Opcode::CLT);
+void code_printer::clt() {
+	stream.write(vm::opcode::CLT);
 }
 
-void CodePrinter::CLeq() {
-	stream.Write(VM::Opcode::CLEQ);
+void code_printer::cleq() {
+	stream.write(vm::opcode::CLEQ);
 }
 
-void CodePrinter::CEq() {
-	stream.Write(VM::Opcode::CEQ);
+void code_printer::ceq() {
+	stream.write(vm::opcode::CEQ);
 }
 
-void CodePrinter::CNeq() {
-	stream.Write(VM::Opcode::CNEQ);
+void code_printer::cneq() {
+	stream.write(vm::opcode::CNEQ);
 }

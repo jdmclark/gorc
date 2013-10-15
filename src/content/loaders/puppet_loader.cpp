@@ -8,114 +8,114 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::PuppetLoader::AssetRootPath = { "misc/pup" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::puppet_loader::asset_root_path = { "misc/pup" };
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-const std::unordered_map<std::string, Flags::PuppetSubmodeType> SubmodeMap {
-	{ "stand", Flags::PuppetSubmodeType::Stand },
-	{ "walk", Flags::PuppetSubmodeType::Walk },
-	{ "run", Flags::PuppetSubmodeType::Run },
-	{ "walkback", Flags::PuppetSubmodeType::WalkBack },
-	{ "strafeleft", Flags::PuppetSubmodeType::StrafeLeft },
-	{ "straferight", Flags::PuppetSubmodeType::StrafeRight },
-	{ "death", Flags::PuppetSubmodeType::Death },
-	{ "death2", Flags::PuppetSubmodeType::Death2 },
-	{ "fire", Flags::PuppetSubmodeType::Fire },
-	{ "hit", Flags::PuppetSubmodeType::Hit },
-	{ "rising", Flags::PuppetSubmodeType::Rising },
-	{ "drop", Flags::PuppetSubmodeType::Drop },
-	{ "fall", Flags::PuppetSubmodeType::Fall },
-	{ "activate", Flags::PuppetSubmodeType::Activate },
-	{ "crouchforward", Flags::PuppetSubmodeType::CrouchForward },
-	{ "toss", Flags::PuppetSubmodeType::Toss },
-	{ "place", Flags::PuppetSubmodeType::Place },
-	{ "magic", Flags::PuppetSubmodeType::Magic },
-	{ "fire2", Flags::PuppetSubmodeType::Fire2 },
-	{ "choke", Flags::PuppetSubmodeType::Choke },
-	{ "leap", Flags::PuppetSubmodeType::Leap },
-	{ "turnleft", Flags::PuppetSubmodeType::TurnLeft },
-	{ "turnright", Flags::PuppetSubmodeType::TurnRight },
-	{ "crouchback", Flags::PuppetSubmodeType::CrouchBack },
-	{ "fidget", Flags::PuppetSubmodeType::Fidget },
-	{ "fidget2", Flags::PuppetSubmodeType::Fidget2 },
-	{ "land", Flags::PuppetSubmodeType::Land },
-	{ "magic2", Flags::PuppetSubmodeType::Magic2 },
-	{ "magic3", Flags::PuppetSubmodeType::Magic3 },
-	{ "windup", Flags::PuppetSubmodeType::Windup },
-	{ "holster", Flags::PuppetSubmodeType::Holster },
-	{ "drawfists", Flags::PuppetSubmodeType::DrawFists },
-	{ "drawgun", Flags::PuppetSubmodeType::DrawGun },
-	{ "drawsaber", Flags::PuppetSubmodeType::DrawSaber }
+const std::unordered_map<std::string, flags::puppet_submode_type> SubmodeMap {
+	{ "stand", flags::puppet_submode_type::Stand },
+	{ "walk", flags::puppet_submode_type::Walk },
+	{ "run", flags::puppet_submode_type::Run },
+	{ "walkback", flags::puppet_submode_type::WalkBack },
+	{ "strafeleft", flags::puppet_submode_type::StrafeLeft },
+	{ "straferight", flags::puppet_submode_type::StrafeRight },
+	{ "death", flags::puppet_submode_type::Death },
+	{ "death2", flags::puppet_submode_type::Death2 },
+	{ "fire", flags::puppet_submode_type::Fire },
+	{ "hit", flags::puppet_submode_type::Hit },
+	{ "rising", flags::puppet_submode_type::Rising },
+	{ "drop", flags::puppet_submode_type::Drop },
+	{ "fall", flags::puppet_submode_type::Fall },
+	{ "activate", flags::puppet_submode_type::Activate },
+	{ "crouchforward", flags::puppet_submode_type::CrouchForward },
+	{ "toss", flags::puppet_submode_type::Toss },
+	{ "place", flags::puppet_submode_type::Place },
+	{ "magic", flags::puppet_submode_type::Magic },
+	{ "fire2", flags::puppet_submode_type::Fire2 },
+	{ "choke", flags::puppet_submode_type::Choke },
+	{ "leap", flags::puppet_submode_type::Leap },
+	{ "turnleft", flags::puppet_submode_type::TurnLeft },
+	{ "turnright", flags::puppet_submode_type::TurnRight },
+	{ "crouchback", flags::puppet_submode_type::CrouchBack },
+	{ "fidget", flags::puppet_submode_type::Fidget },
+	{ "fidget2", flags::puppet_submode_type::Fidget2 },
+	{ "land", flags::puppet_submode_type::Land },
+	{ "magic2", flags::puppet_submode_type::Magic2 },
+	{ "magic3", flags::puppet_submode_type::Magic3 },
+	{ "windup", flags::puppet_submode_type::Windup },
+	{ "holster", flags::puppet_submode_type::Holster },
+	{ "drawfists", flags::puppet_submode_type::DrawFists },
+	{ "drawgun", flags::puppet_submode_type::DrawGun },
+	{ "drawsaber", flags::puppet_submode_type::DrawSaber }
 };
 
 }
 }
 }
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::PuppetLoader::Parse(Text::Tokenizer& tok, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Assets::Puppet> pup(new Assets::Puppet());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::puppet_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<assets::puppet> pup(new assets::puppet());
 
-	Text::Token t;
+	text::token t;
 
-	Assets::PuppetMode* mode = nullptr;
+	assets::puppet_mode* mode = nullptr;
 	while(true) {
-		tok.GetToken(t);
+		tok.get_token(t);
 
-		if(t.Type == Text::TokenType::EndOfFile) {
+		if(t.type == text::token_type::end_of_file) {
 			break;
 		}
-		else if(boost::iequals(t.Value, "mode")) {
-			tok.SetReportEOL(true);
+		else if(boost::iequals(t.value, "mode")) {
+			tok.set_report_eol(true);
 
-			tok.AssertPunctuator("=");
-			mode = &pup->Modes[tok.GetNumber<int>()];
+			tok.assert_punctuator("=");
+			mode = &pup->modes[tok.get_number<int>()];
 
-			tok.GetToken(t);
-			if(t.Type != Text::TokenType::EndOfLine) {
-				tok.AssertIdentifier("BasedOn");
-				tok.AssertPunctuator("=");
-				*mode = pup->Modes[tok.GetNumber<int>()];
+			tok.get_token(t);
+			if(t.type != text::token_type::end_of_line) {
+				tok.assert_identifier("BasedOn");
+				tok.assert_punctuator("=");
+				*mode = pup->modes[tok.get_number<int>()];
 			}
 
-			tok.SetReportEOL(false);
+			tok.set_report_eol(false);
 		}
-		else if(boost::iequals(t.Value, "joints")) {
+		else if(boost::iequals(t.value, "joints")) {
 			while(true) {
-				tok.GetToken(t);
+				tok.get_token(t);
 
-				if(t.Type == Text::TokenType::EndOfFile || boost::iequals(t.Value, "end")) {
+				if(t.type == text::token_type::end_of_file || boost::iequals(t.value, "end")) {
 					break;
 				}
 				else {
-					tok.AssertPunctuator("=");
-					pup->JointMap.emplace(t.GetNumericValue<int>(), tok.GetNumber<int>());
+					tok.assert_punctuator("=");
+					pup->joint_map.emplace(t.get_numeric_value<int>(), tok.get_number<int>());
 				}
 			}
 		}
 		else if(!mode) {
-			report.AddWarning("PuppetLoader::Parse", "expected \'mode\', \'joints\' or \'end\'", t.Location);
-			tok.SkipToNextLine();
+			report.add_warning("PuppetLoader::Parse", "expected \'mode\', \'joints\' or \'end\'", t.location);
+			tok.skip_to_next_line();
 		}
 		else {
-			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
-			auto it = SubmodeMap.find(t.Value);
+			std::transform(t.value.begin(), t.value.end(), t.value.begin(), tolower);
+			auto it = SubmodeMap.find(t.value);
 			if(it == SubmodeMap.end()) {
-				report.AddWarning("PuppetLoader::Parse",
-						boost::str(boost::format("unknown submode %s") % t.Value), t.Location);
-				tok.SkipToNextLine();
+				report.add_warning("PuppetLoader::Parse",
+						boost::str(boost::format("unknown submode %s") % t.value), t.location);
+				tok.skip_to_next_line();
 			}
 			else {
-				Assets::PuppetSubmode& submode = mode->Submodes[static_cast<unsigned int>(it->second)];
-				submode.Animation = &manager.Load<Assets::Animation>(tok.GetSpaceDelimitedString());
-				submode.Flags = FlagSet<Flags::KeyFlag>(tok.GetNumber<unsigned int>());
-				submode.LoPriority = tok.GetNumber<unsigned int>();
-				submode.HiPriority = tok.GetNumber<unsigned int>();
+				assets::puppet_submode& submode = mode->submodes[static_cast<unsigned int>(it->second)];
+				submode.animation = &manager.load<assets::animation>(tok.get_space_delimited_string());
+				submode.flags = flag_set<flags::key_flag>(tok.get_number<unsigned int>());
+				submode.lo_priority = tok.get_number<unsigned int>();
+				submode.hi_priority = tok.get_number<unsigned int>();
 			}
 		}
 	}
 
-	return std::unique_ptr<Asset>(std::move(pup));
+	return std::unique_ptr<asset>(std::move(pup));
 }

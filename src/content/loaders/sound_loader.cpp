@@ -5,16 +5,16 @@
 #include <vector>
 #include <cstdint>
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::SoundLoader::AssetRootPath = { "sound", "voice" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::sound_loader::asset_root_path = { "sound", "voice" };
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::SoundLoader::Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Content::Assets::Sound> wav(new Content::Assets::Sound());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::sound_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<content::assets::sound> wav(new content::assets::sound());
 
-	size_t wav_sz = file.GetSize();
+	size_t wav_sz = file.get_size();
 	std::vector<char> wav_buf(wav_sz);
-	file.Read(&wav_buf[0], wav_sz);
+	file.read(&wav_buf[0], wav_sz);
 
-	wav->Buffer.loadFromMemory(&wav_buf[0], wav_sz);
+	wav->buffer.loadFromMemory(&wav_buf[0], wav_sz);
 
-	return std::unique_ptr<Asset>(std::move(wav));
+	return std::unique_ptr<asset>(std::move(wav));
 }

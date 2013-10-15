@@ -2,22 +2,22 @@
 
 #include "framework/diagnostics/error_location.h"
 
-namespace Gorc {
-namespace Text {
+namespace gorc {
+namespace text {
 
-class Location {
+class location {
 public:
 	const char* filename;
 	unsigned int first_line, first_column, last_line, last_column;
 
-	Location();
-	Location(const char* filename, unsigned int first_line, unsigned int first_col, unsigned int last_line, unsigned int last_col);
-	Location(const Location& loc);
+	location();
+	location(const char* filename, unsigned int first_line, unsigned int first_col, unsigned int last_line, unsigned int last_col);
+	location(const location& loc);
 
-	const Location& operator=(const Location& loc);
-	bool operator==(const Location&) const;
+	const location& operator=(const location& loc);
+	bool operator==(const location&) const;
 
-	operator Diagnostics::ErrorLocation() const;
+	operator diagnostics::error_location() const;
 };
 
 }

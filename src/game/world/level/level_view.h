@@ -9,77 +9,77 @@
 #include <stack>
 #include <unordered_set>
 
-namespace Gorc {
+namespace gorc {
 
-namespace Cog {
-namespace Verbs {
-class VerbTable;
+namespace cog {
+namespace verbs {
+class verb_table;
 }
 }
 
-namespace Content {
-class Manager;
+namespace content {
+class manager;
 
-namespace Assets {
-class Template;
-class LevelSector;
-class Shader;
-class Model;
-class Animation;
-class Sprite;
+namespace assets {
+class thing_template;
+class level_sector;
+class shader;
+class model;
+class animation;
+class sprite;
 }
 }
 
-namespace Game {
+namespace game {
 
-class Components;
+class components;
 
-namespace World {
-namespace Level {
+namespace world {
+namespace level {
 
-class LevelPresenter;
-class LevelModel;
-class Thing;
+class level_presenter;
+class level_model;
+class thing;
 
-class LevelView : public View {
+class level_view : public view {
 private:
-	SurfaceShader surfaceShader;
-	HorizonShader horizonShader;
-	CeilingShader ceilingShader;
-	LightShader lightShader;
+	surface_shader surfaceShader;
+	horizon_shader horizonShader;
+	ceiling_shader ceilingShader;
+	light_shader lightShader;
 
-	LevelShader* currentLevelShader = nullptr;
+	level_shader* currentLevelShader = nullptr;
 
-	Math::Matrix<float> ProjectionMatrix;
-	Math::Matrix<float> ViewMatrix;
-	std::stack<Math::Matrix<float>> ModelMatrixStack;
+	math::matrix<float> projection_matrix;
+	math::matrix<float> view_matrix;
+	std::stack<math::matrix<float>> model_matrix_stack;
 
-	template <typename T, typename... U> void SetCurrentShader(T& shader, U... args) {
+	template <typename T, typename... U> void set_current_shader(T& shader, U... args) {
 		currentLevelShader = &shader;
-		shader.Activate(args...);
-		shader.SetProjectionMatrix(ProjectionMatrix);
-		shader.SetViewMatrix(ViewMatrix);
-		shader.SetModelMatrix(ModelMatrixStack.top());
+		shader.activate(args...);
+		shader.set_projection_matrix(projection_matrix);
+		shader.set_view_matrix(view_matrix);
+		shader.set_model_matrix(model_matrix_stack.top());
 	}
 
-	inline void UpdateShaderModelMatrix() {
-		currentLevelShader->SetModelMatrix(ModelMatrixStack.top());
+	inline void update_shader_model_matrix() {
+		currentLevelShader->set_model_matrix(model_matrix_stack.top());
 	}
 
-	inline void ConcatenateMatrix(const Math::Matrix<float>& mat) {
-		ModelMatrixStack.top() = ModelMatrixStack.top() * mat;
+	inline void concatenate_matrix(const math::matrix<float>& mat) {
+		model_matrix_stack.top() = model_matrix_stack.top() * mat;
 	}
 
-	void PushMatrix() {
-		ModelMatrixStack.push(ModelMatrixStack.top());
+	void push_matrix() {
+		model_matrix_stack.push(model_matrix_stack.top());
 	}
 
-	void PopMatrix() {
-		ModelMatrixStack.pop();
+	void pop_matrix() {
+		model_matrix_stack.pop();
 	}
 
-	LevelPresenter* currentPresenter = nullptr;
-	LevelModel* currentModel = nullptr;
+	level_presenter* currentPresenter = nullptr;
+	level_model* currentModel = nullptr;
 	std::unordered_set<unsigned int> sector_vis_scratch;
 	std::unordered_set<unsigned int> sector_visited_scratch;
 	std::vector<std::tuple<unsigned int, unsigned int>> horizon_sky_surfaces_scratch;
@@ -87,33 +87,33 @@ private:
 	std::vector<std::tuple<unsigned int, unsigned int, float>> translucent_surfaces_scratch;
 	std::vector<std::tuple<int, float>> visible_thing_scratch;
 
-	void ComputeVisibleSectors(const Math::Box<2, unsigned int>& view_size);
-	void RecordVisibleSpecialSurfaces();
-	void RecordVisibleThings();
-	void DoSectorVis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
-			const std::array<int, 4>& viewport, const Math::Box<2, double>& adj_bbox, const Math::Vector<3>& cam_pos, const Math::Vector<3>& cam_look);
-	void DrawVisibleDiffuseSurfaces();
-	void DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& screen_size, const Math::Vector<3>& sector_tint);
-	void DrawVisibleTranslucentSurfacesAndThings();
+	void compute_visible_sectors(const box<2, unsigned int>& view_size);
+	void record_visible_special_surfaces();
+	void record_visible_things();
+	void do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
+			const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look);
+	void draw_visible_diffuse_surfaces();
+	void draw_visible_sky_surfaces(const box<2, unsigned int>& screen_size, const vector<3>& sector_tint);
+	void draw_visible_translucent_surfaces_and_things();
 
-	void DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector, float alpha);
-	void DrawMeshNode(const Thing& thing, const Content::Assets::Model& model, int node_id, float sector_light);
-	void DrawSprite(const Thing& thing, const Content::Assets::Sprite& sprite, float sector_light);
-	void DrawThing(const Thing& thing);
+	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
+	void draw_mesh_node(const thing& thing, const content::assets::model& model, int node_id, float sector_light);
+	void draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light);
+	void draw_thing(const thing& thing);
 
 public:
-	LevelView(Content::Manager& shaderContentManager);
+	level_view(content::manager& shadercontentmanager);
 
-	inline void SetPresenter(LevelPresenter* presenter) {
+	inline void set_presenter(level_presenter* presenter) {
 		currentPresenter = presenter;
 	}
 
-	inline void SetLevelModel(LevelModel* levelModel) {
+	inline void set_level_model(level_model* levelModel) {
 		currentModel = levelModel;
 	}
 
-	void Update(double dt);
-	void Draw(double dt, const Math::Box<2, unsigned int>& view_size);
+	void update(double dt);
+	void draw(double dt, const box<2, unsigned int>& view_size);
 };
 
 }

@@ -1,9 +1,9 @@
 #include "animation.h"
 
-Gorc::Game::World::Level::Animations::Animation::~Animation() {
+gorc::game::world::level::animations::animation::~animation() {
 	return;
 }
 
-void Gorc::Game::World::Level::Animations::Animation::Stop() {
+void gorc::game::world::level::animations::animation::stop() {
 	return;
 }

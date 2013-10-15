@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class InventoryFlag : uint32_t {
+enum class inventory_flag : uint32_t {
 	Registered						= 0x1,
 	Item							= 0x2,
 	Weapon							= 0x4,

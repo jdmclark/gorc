@@ -1,25 +1,25 @@
 #pragma once
 
-namespace Gorc {
-namespace Game {
-namespace Screen {
+namespace gorc {
+namespace game {
+namespace screen {
 
-class PlaceVisitor;
+class place_visitor;
 
-namespace Action { class ActionPlace; }
+namespace action { class action_place; }
 
-class Place {
+class place {
 public:
-	virtual ~Place();
+	virtual ~place();
 
-	virtual void Accept(PlaceVisitor& v) const = 0;
+	virtual void accept(place_visitor& v) const = 0;
 };
 
-class PlaceVisitor {
+class place_visitor {
 public:
-	virtual ~PlaceVisitor();
+	virtual ~place_visitor();
 
-	virtual void VisitActionPlace(const Action::ActionPlace& place) = 0;
+	virtual void visit_action_place(const action::action_place& place) = 0;
 };
 
 }

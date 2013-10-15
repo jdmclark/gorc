@@ -3,26 +3,26 @@
 #include "animation.h"
 #include "framework/math/vector.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class LevelModel;
+class level_model;
 
-namespace Animations {
+namespace animations {
 
-class SurfaceLightAnimation : public Animation {
+class surface_light_animation : public animation {
 private:
-	LevelModel& model;
+	level_model& model;
 	unsigned int surface;
 	float start_light, end_light, change_time, anim_time;
 
 public:
-	SurfaceLightAnimation(LevelModel& model, unsigned int surface, float start_light, float end_light, float change_time, int anim_num);
+	surface_light_animation(level_model& model, unsigned int surface, float start_light, float end_light, float change_time, int anim_num);
 
-	void Update(double dt);
-	void Stop();
+	void update(double dt);
+	void stop();
 };
 
 }

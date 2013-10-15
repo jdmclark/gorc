@@ -4,16 +4,16 @@
 #include "content/loaders/material_loader.h"
 #include <vector>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Material : public Asset {
+class material : public asset {
 public:
-	using Loader = Loaders::MaterialLoader;
+	using loader = loaders::material_loader;
 
-	unsigned int Width, Height;
-	std::vector<MaterialCel> Cels;
+	unsigned int width, height;
+	std::vector<material_cel> cels;
 };
 
 }

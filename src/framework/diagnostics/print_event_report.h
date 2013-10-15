@@ -5,28 +5,28 @@
 
 #include <vector>
 
-namespace Gorc {
+namespace gorc {
 
-namespace Event {
-class EventBus;
+namespace event {
+class event_bus;
 }
 
-namespace Diagnostics {
+namespace diagnostics {
 
-class PrintEventReport : public Report {
+class print_event_report : public report {
 private:
-	Event::EventBus& EventBus;
+	event::event_bus& EventBus;
 	unsigned int errorCount, warningCount;
 
 public:
-	PrintEventReport(Event::EventBus& EventBus);
+	print_event_report(event::event_bus& EventBus);
 
-	void AddError(const std::string& stage, const std::string& reason, const ErrorLocation& location);
-	void AddWarning(const std::string& stage, const std::string& reason, const ErrorLocation& location);
-	void AddCriticalError(const std::string& stage, const std::string& reason);
+	void add_error(const std::string& stage, const std::string& reason, const error_location& location);
+	void add_warning(const std::string& stage, const std::string& reason, const error_location& location);
+	void add_critical_error(const std::string& stage, const std::string& reason);
 
-	unsigned int GetErrorCount() const;
-	unsigned int GetWarningCount() const;
+	unsigned int get_error_count() const;
+	unsigned int get_warning_count() const;
 };
 
 }

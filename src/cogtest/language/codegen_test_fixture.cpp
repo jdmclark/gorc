@@ -7,134 +7,134 @@
 #include "cog/instance.h"
 #include <fstream>
 
-using namespace Gorc::Cog;
+using namespace gorc::cog;
 
 CodegenTestFixture::CodegenTestFixture(const boost::filesystem::path& BasePath)
 	: LanguageTestFixture(BasePath) {
-	PopulateTables();
+	populate_tables();
 }
 
-CodegenTestFixture::CodegenTestFixture(const Gorc::Content::FileSystem& fs)
+CodegenTestFixture::CodegenTestFixture(const gorc::content::filesystem& fs)
 	: LanguageTestFixture(fs) {
-	PopulateTables();
+	populate_tables();
 }
 
-void CodegenTestFixture::PopulateTables() {
+void CodegenTestFixture::populate_tables() {
 #define MSG(x, y) MessageTable.insert(std::make_pair(x, y))
-		MSG("activate", MessageId::Activated);
-		MSG("activated", MessageId::Activated);
-		MSG("aievent", MessageId::AiEvent);
-		MSG("arrived", MessageId::Arrived);
-		MSG("autoselect", MessageId::Autoselect);
-		MSG("blocked", MessageId::Blocked);
-		MSG("changed", MessageId::Changed);
-		MSG("created", MessageId::Created);
-		MSG("crossed", MessageId::Crossed);
-		MSG("damaged", MessageId::Damaged);
-		MSG("deactivated", MessageId::Deactivated);
-		MSG("deselected", MessageId::Deselected);
-		MSG("entered", MessageId::Entered);
-		MSG("exited", MessageId::Exited);
-		MSG("fire", MessageId::Fire);
-		MSG("global0", MessageId::Global0);
-		MSG("join", MessageId::Join);
-		MSG("killed", MessageId::Killed);
-		MSG("leave", MessageId::Leave);
-		MSG("loading", MessageId::Loading);
-		MSG("newplayer", MessageId::NewPlayer);
-		MSG("pulse", MessageId::Pulse);
-		MSG("removed", MessageId::Removed);
-		MSG("respawn", MessageId::Respawn);
-		MSG("selected", MessageId::Selected);
-		MSG("shutdown", MessageId::Shutdown);
-		MSG("sighted", MessageId::Sighted);
-		MSG("skill", MessageId::Skill);
-		MSG("splash", MessageId::Splash);
-		MSG("startup", MessageId::Startup);
-		MSG("taken", MessageId::Taken);
-		MSG("timer", MessageId::Timer);
-		MSG("touched", MessageId::Touched);
-		MSG("trigger", MessageId::Trigger);
-		MSG("user0", MessageId::User0);
-		MSG("user1", MessageId::User1);
-		MSG("user2", MessageId::User2);
-		MSG("user3", MessageId::User3);
-		MSG("user4", MessageId::User4);
-		MSG("user5", MessageId::User5);
-		MSG("user6", MessageId::User6);
-		MSG("user7", MessageId::User7);
+		MSG("activate", message_id::activated);
+		MSG("activated", message_id::activated);
+		MSG("aievent", message_id::ai_event);
+		MSG("arrived", message_id::arrived);
+		MSG("autoselect", message_id::autoselect);
+		MSG("blocked", message_id::blocked);
+		MSG("changed", message_id::changed);
+		MSG("created", message_id::created);
+		MSG("crossed", message_id::crossed);
+		MSG("damaged", message_id::damaged);
+		MSG("deactivated", message_id::deactivated);
+		MSG("deselected", message_id::deselected);
+		MSG("entered", message_id::entered);
+		MSG("exited", message_id::exited);
+		MSG("fire", message_id::fire);
+		MSG("global0", message_id::global0);
+		MSG("join", message_id::join);
+		MSG("killed", message_id::killed);
+		MSG("leave", message_id::leave);
+		MSG("loading", message_id::loading);
+		MSG("newplayer", message_id::new_player);
+		MSG("pulse", message_id::pulse);
+		MSG("removed", message_id::removed);
+		MSG("respawn", message_id::respawn);
+		MSG("selected", message_id::selected);
+		MSG("shutdown", message_id::shutdown);
+		MSG("sighted", message_id::sighted);
+		MSG("skill", message_id::skill);
+		MSG("splash", message_id::splash);
+		MSG("startup", message_id::startup);
+		MSG("taken", message_id::taken);
+		MSG("timer", message_id::timer);
+		MSG("touched", message_id::touched);
+		MSG("trigger", message_id::trigger);
+		MSG("user0", message_id::user0);
+		MSG("user1", message_id::user1);
+		MSG("user2", message_id::user2);
+		MSG("user3", message_id::user3);
+		MSG("user4", message_id::user4);
+		MSG("user5", message_id::user5);
+		MSG("user6", message_id::user6);
+		MSG("user7", message_id::user7);
 	#undef MSG
 
 	return;
 }
 
-std::unique_ptr<Gorc::Cog::Instance> CreateInstance(Gorc::Cog::Script& Script) {
-	std::unique_ptr<Gorc::Cog::Instance> inst(new Gorc::Cog::Instance(Script));
+std::unique_ptr<gorc::cog::instance> CreateInstance(gorc::cog::script& script) {
+	std::unique_ptr<gorc::cog::instance> inst(new gorc::cog::instance(script));
 
-	inst->Heap.resize(Script.SymbolTable.size());
+	inst->heap.resize(script.symbol_table.size());
 
-	auto it = Script.SymbolTable.begin();
-	auto jt = inst->Heap.begin();
+	auto it = script.symbol_table.begin();
+	auto jt = inst->heap.begin();
 
-	for( ; it != Script.SymbolTable.end() && jt != inst->Heap.end(); ++it, ++jt) {
-		(*jt) = it->DefaultValue;
+	for( ; it != script.symbol_table.end() && jt != inst->heap.end(); ++it, ++jt) {
+		(*jt) = it->default_value;
 	}
 
 	return std::move(inst);
 }
 
 void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
-	Gorc::Cog::AST::Factory astFactory;
+	gorc::cog::ast::factory astFactory;
 
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> file;
+	std::unique_ptr<gorc::io::read_only_file> file;
 	try {
-		file = FileSystem.Open(filename);
+		file = FileSystem.open(filename);
 	}
 	catch(const std::exception& e) {
-		Report.AddCriticalError("CodegenTestFixture", "could not open file");
+		report.add_critical_error("CodegenTestFixture", "could not open file");
 		return;
 	}
 
-	Gorc::Text::Source source(*file);
+	gorc::text::source source(*file);
 
-	Gorc::Cog::AST::TranslationUnit* ast = Gorc::Cog::Stages::GenerateAST::GenerateAST(source, Report, astFactory);
+	gorc::cog::ast::translation_unit* ast = gorc::cog::stages::generate_ast::generate_ast(source, report, astFactory);
 
-	if(Report.GetErrorCount() != 0) {
+	if(report.get_error_count() != 0) {
 		return;
 	}
 
-	Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(ast, Script.SymbolTable, ConstantTable, VerbTable, Report);
+	gorc::cog::stages::semantic_analysis::semantic_analysis(ast, script.symbol_table, ConstantTable, verb_table, report);
 
-	if(Report.GetErrorCount() != 0) {
+	if(report.get_error_count() != 0) {
 		return;
 	}
 
-	Gorc::Cog::Stages::ConstantFolding::ConstantFolding(astFactory, ast, Script.SymbolTable, ConstantTable, Report);
+	gorc::cog::stages::constant_folding::constant_folding(astFactory, ast, script.symbol_table, ConstantTable, report);
 
-	if(Report.GetErrorCount() != 0) {
+	if(report.get_error_count() != 0) {
 		return;
 	}
 
-	IR::CodePrinter printer(Script.Code, Script.SymbolTable, MessageTable, VerbTable, Script.JumpTable);
+	ir::code_printer printer(script.code, script.symbol_table, MessageTable, verb_table, script.jump_table);
 
-	Gorc::Cog::Stages::GenerateCode::GenerateCode(ast, printer, Report);
+	gorc::cog::stages::generate_code::generate_code(ast, printer, report);
 
-	if(Report.GetErrorCount() != 0) {
+	if(report.get_error_count() != 0) {
 		return;
 	}
 
 	// Build instance
-	auto inst = CreateInstance(Script);
+	auto inst = CreateInstance(script);
 
 	// Execute from the 'startup' message.
-	size_t startupAddr = Script.JumpTable.GetTarget(MessageId::Startup);
+	size_t startupAddr = script.jump_table.get_target(message_id::startup);
 
-	Gorc::Cog::VM::VirtualMachine vm;
+	gorc::cog::vm::virtual_machine vm;
 
 	try {
-		vm.Execute(inst->Heap, inst->Script.Code, startupAddr, VerbTable);
+		vm.execute(inst->heap, inst->script.code, startupAddr, verb_table);
 	}
-	catch(const Gorc::Cog::VM::CodeBufferOverflowException& e) {
-		Report.AddCriticalError("CodeGenTestFixture::ParseFile", "code buffer overflow");
+	catch(const gorc::cog::vm::code_buffer_overflow_exception& e) {
+		report.add_critical_error("CodeGenTestFixture::ParseFile", "code buffer overflow");
 	}
 }

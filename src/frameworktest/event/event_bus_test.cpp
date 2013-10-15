@@ -2,108 +2,108 @@
 #include "framework/event/event_bus.h"
 #include "framework/events/print_event.h"
 
-using namespace Gorc;
+using namespace gorc;
 
 BeginSuite(EventBusTest);
 
 Case(Instantiation) {
-	Event::EventBus eventBus;
+	event::event_bus eventBus;
 }
 
-Case(FireEvent) {
-	Event::EventBus eventBus;
+Case(fire_event) {
+	event::event_bus eventBus;
 
 	size_t call_ct = 0;
 
 	Test_Assert_Eq(call_ct, 0);
 
-	Events::PrintEvent e("Test Message");
+	events::print_event e("Test Message");
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 0);
 
-	eventBus.AddHandler<Events::PrintEvent>([&call_ct](Events::PrintEvent& e) {
+	eventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
 		++call_ct;
 	});
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 1);
 
-	eventBus.AddHandler<Events::PrintEvent>([&call_ct](Events::PrintEvent& e) {
+	eventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
 		++call_ct;
 	});
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 3);
 }
 
 Case(ChildFireEvent) {
-	Event::EventBus parentEventBus;
-	Event::EventBus eventBus(&parentEventBus);
+	event::event_bus parentEventBus;
+	event::event_bus eventBus(&parentEventBus);
 
 	size_t call_ct = 0;
 
 	Test_Assert_Eq(call_ct, 0);
 
-	Events::PrintEvent e("Test Message");
+	events::print_event e("Test Message");
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 0);
 
-	parentEventBus.AddHandler<Events::PrintEvent>([&call_ct](Events::PrintEvent& e) {
+	parentEventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
 		++call_ct;
 	});
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 1);
 
-	eventBus.AddHandler<Events::PrintEvent>([&call_ct](Events::PrintEvent& e) {
+	eventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
 		++call_ct;
 	});
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 3);
 }
 
 Case(ChildDetachFireEvent) {
-	Event::EventBus parentEventBus;
-	Event::EventBus* eventBus = new Event::EventBus(&parentEventBus);
+	event::event_bus parentEventBus;
+	event::event_bus* eventBus = new event::event_bus(&parentEventBus);
 
 	size_t call_ct = 0;
 
 	Test_Assert_Eq(call_ct, 0);
 
-	Events::PrintEvent e("Test Message");
+	events::print_event e("Test Message");
 
-	eventBus->FireEvent(e);
+	eventBus->fire_event(e);
 
 	Test_Assert_Eq(call_ct, 0);
 
-	parentEventBus.AddHandler<Events::PrintEvent>([&call_ct](Events::PrintEvent& e) {
+	parentEventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
 		++call_ct;
 	});
 
-	eventBus->FireEvent(e);
+	eventBus->fire_event(e);
 
 	Test_Assert_Eq(call_ct, 1);
 
-	eventBus->AddHandler<Events::PrintEvent>([&call_ct](Events::PrintEvent& e) {
+	eventBus->add_handler<events::print_event>([&call_ct](events::print_event& e) {
 		++call_ct;
 	});
 
-	eventBus->FireEvent(e);
+	eventBus->fire_event(e);
 
 	Test_Assert_Eq(call_ct, 3);
 
 	delete eventBus;
 
-	parentEventBus.FireEvent(e);
+	parentEventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 4);
 }
@@ -117,22 +117,22 @@ Case(CallMemberFunction) {
 			return;
 		}
 
-		void HandlePrintEvent(Events::PrintEvent& e) {
+		void HandlePrintEvent(events::print_event& e) {
 			++i;
 		}
 	} someClass;
 
-	Event::EventBus eventBus;
+	event::event_bus eventBus;
 
-	Events::PrintEvent e("Test message");
+	events::print_event e("Test message");
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(someClass.i, 0);
 
-	eventBus.AddHandler<Events::PrintEvent>(std::bind(&SomeClass::HandlePrintEvent, &someClass, std::placeholders::_1));
+	eventBus.add_handler<events::print_event>(std::bind(&SomeClass::HandlePrintEvent, &someClass, std::placeholders::_1));
 
-	eventBus.FireEvent(e);
+	eventBus.fire_event(e);
 
 	Test_Assert_Eq(someClass.i, 1);
 }

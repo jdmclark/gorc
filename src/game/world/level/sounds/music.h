@@ -2,15 +2,15 @@
 
 #include <SFML/Audio.hpp>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Sounds {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace sounds {
 
-class Music {
+class music {
 private:
-	sf::Music music;
+	sf::Music internal_music;
 
 	bool play = false;
 
@@ -22,13 +22,13 @@ private:
 
 	static const int num_tracks = 7;
 
-	void InternalPlaySong(int song);
+	void internal_play_song(int song);
 
 public:
-	void PlaySong(int start, int end, int loopto);
-	void SetVolume(float volume);
+	void play_song(int start, int end, int loopto);
+	void set_volume(float volume);
 
-	void Update(double dt);
+	void update(double dt);
 };
 
 }

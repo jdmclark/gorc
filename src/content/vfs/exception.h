@@ -2,12 +2,12 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
+namespace gorc {
+namespace content {
+namespace vfs {
 
-class VfsException : public Exception { };
-class ContainerFileCorruptException : public VfsException { };
+class vfs_exception : public exception { };
+class container_file_corrupt_exception : public vfs_exception { };
 
 }
 }

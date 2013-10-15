@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class AnimFlag : uint32_t {
 	Looping							= 0x1,

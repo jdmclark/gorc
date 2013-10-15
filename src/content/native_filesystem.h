@@ -2,16 +2,16 @@
 
 #include "filesystem.h"
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class NativeFileSystem : public FileSystem {
+class native_filesystem : public filesystem {
 private:
 	const boost::filesystem::path basepath;
 public:
-	NativeFileSystem(const boost::filesystem::path& basepath);
+	native_filesystem(const boost::filesystem::path& basepath);
 
-	virtual std::unique_ptr<Gorc::IO::ReadOnlyFile> Open(const boost::filesystem::path& name) const override;
+	virtual std::unique_ptr<gorc::io::read_only_file> open(const boost::filesystem::path& name) const override;
 };
 
 }

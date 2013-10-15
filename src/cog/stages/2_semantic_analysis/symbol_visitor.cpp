@@ -6,201 +6,201 @@
 #include <algorithm>
 #include <boost/format.hpp>
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::SemanticAnalysis::SymbolVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::semantic_analysis::symbol_visitor;
 
-SymbolVisitor::SymbolVisitor(Symbols::SymbolTable& symbolTable,
-	const std::unordered_set<std::string>& SeenLabels, Diagnostics::Report& report)
-	: AST::Visitor("Stage2::SymbolVisitor", report), SymbolTable(symbolTable), SeenLabels(SeenLabels) {
+symbol_visitor::symbol_visitor(symbols::symbol_table& symbolTable,
+	const std::unordered_set<std::string>& SeenLabels, diagnostics::report& report)
+	: ast::visitor("Stage2::SymbolVisitor", report), symbol_table(symbolTable), SeenLabels(SeenLabels) {
 	return;
 }
 
-void SymbolVisitor::VisitSymbol(Symbol& symbol) {
-	Symbols::SymbolType type = GetType(symbol);
+void symbol_visitor::visit_symbol(symbol& symbol) {
+	symbols::symbol_type type = get_type(symbol);
 
-	VM::Value defaultValue;
+	vm::value defaultvalue;
 
 	switch(type) {
-	case Symbols::SymbolType::Flex:
-	case Symbols::SymbolType::Float:
-		defaultValue = 0.0f;
+	case symbols::symbol_type::flex:
+	case symbols::symbol_type::floating:
+		defaultvalue = 0.0f;
 		break;
 
-	case Symbols::SymbolType::Int:
-		defaultValue = 0;
+	case symbols::symbol_type::integer:
+		defaultvalue = 0;
 		break;
 
-	case Symbols::SymbolType::Vector:
-		defaultValue = Math::Zero<3>();
+	case symbols::symbol_type::vector:
+		defaultvalue = math::zero<3>();
 		break;
 
 	default:
-	case Symbols::SymbolType::Ai:
-	case Symbols::SymbolType::Keyframe:
-	case Symbols::SymbolType::Material:
-	case Symbols::SymbolType::Model:
-	case Symbols::SymbolType::Sound:
-	case Symbols::SymbolType::Template:
-	case Symbols::SymbolType::Cog:
-	case Symbols::SymbolType::Message:
-	case Symbols::SymbolType::Sector:
-	case Symbols::SymbolType::Surface:
-	case Symbols::SymbolType::String:
-	case Symbols::SymbolType::Thing:
+	case symbols::symbol_type::ai:
+	case symbols::symbol_type::keyframe:
+	case symbols::symbol_type::material:
+	case symbols::symbol_type::model:
+	case symbols::symbol_type::sound:
+	case symbols::symbol_type::thing_template:
+	case symbols::symbol_type::cog:
+	case symbols::symbol_type::message:
+	case symbols::symbol_type::sector:
+	case symbols::symbol_type::surface:
+	case symbols::symbol_type::string:
+	case symbols::symbol_type::thing:
 		break;
 	}
 
 	// Convert symbol name to lowercase for processing.
-	std::transform(symbol.Name.begin(), symbol.Name.end(), symbol.Name.begin(), tolower);
+	std::transform(symbol.name.begin(), symbol.name.end(), symbol.name.begin(), tolower);
 
 	// Visit extension
-	SymbolExtensionVisitor w(type, Report);
-	for(auto& ext : *symbol.Extensions) {
-		ext->Accept(w);
+	symbol_extension_visitor w(type, report);
+	for(auto& ext : *symbol.extensions) {
+		ext->accept(w);
 	}
 
-	if(SymbolTable.IsSymbolDefined(symbol.Name)) {
-		Diagnostics::Helper::SymbolRedefinition(Report, VisitorName, symbol.Name, symbol.Location);
-		SymbolTable.ReplaceSymbol(type, symbol.Name, defaultValue, w.local, w.desc, w.mask, w.linkid, w.nolink);
+	if(symbol_table.is_symbol_defined(symbol.name)) {
+		diagnostics::helper::symbol_redefinition(report, visitor_name, symbol.name, symbol.location);
+		symbol_table.replace_symbol(type, symbol.name, defaultvalue, w.local, w.desc, w.mask, w.linkid, w.nolink);
 	}
 	else {
-		SymbolTable.AddSymbol(type, symbol.Name, defaultValue, w.local, w.desc, w.mask, w.linkid, w.nolink);
+		symbol_table.add_symbol(type, symbol.name, defaultvalue, w.local, w.desc, w.mask, w.linkid, w.nolink);
 
-		if(type == Symbols::SymbolType::Message) {
-			if(SeenLabels.find(symbol.Name) == SeenLabels.end()) {
-				Diagnostics::Helper::MissingExport(Report, VisitorName, symbol.Name, symbol.Location);
+		if(type == symbols::symbol_type::message) {
+			if(SeenLabels.find(symbol.name) == SeenLabels.end()) {
+				diagnostics::helper::missing_export(report, visitor_name, symbol.name, symbol.location);
 			}
 		}
 	}
 }
 
-void SymbolVisitor::VisitValuedSymbol(ValuedSymbol& symbol) {
-	SymbolFieldVisitor v(Report);
-	symbol.Value->Accept(v);
+void symbol_visitor::visit_valued_symbol(valued_symbol& symbol) {
+	symbol_field_visitor v(report);
+	symbol.value->accept(v);
 
-	Symbols::SymbolType type = GetType(symbol);
+	symbols::symbol_type type = get_type(symbol);
 
-	VM::Value defaultValue(0);
+	vm::value defaultvalue(0);
 
 	switch(type) {
-	case Symbols::SymbolType::Flex:
-	case Symbols::SymbolType::Float:
+	case symbols::symbol_type::flex:
+	case symbols::symbol_type::floating:
 		if(!v.is_numeric) {
-			Diagnostics::Helper::TypeMismatch(Report, VisitorName, symbol.Location);
+			diagnostics::helper::type_mismatch(report, visitor_name, symbol.location);
 		}
 		else {
-			defaultValue = VM::Value(v.float_value);
+			defaultvalue = vm::value(v.float_value);
 		}
 		break;
 
-	case Symbols::SymbolType::Int:
+	case symbols::symbol_type::integer:
 		if(!v.is_numeric) {
-			Diagnostics::Helper::TypeMismatch(Report, VisitorName, symbol.Location);
+			diagnostics::helper::type_mismatch(report, visitor_name, symbol.location);
 		}
 		else {
-			defaultValue = VM::Value(v.int_value);
+			defaultvalue = vm::value(v.int_value);
 		}
 		break;
 	
-	case Symbols::SymbolType::Ai:
-	case Symbols::SymbolType::Keyframe:
-	case Symbols::SymbolType::Material:
-	case Symbols::SymbolType::Model:
-	case Symbols::SymbolType::Sound:
-	case Symbols::SymbolType::Template:
+	case symbols::symbol_type::ai:
+	case symbols::symbol_type::keyframe:
+	case symbols::symbol_type::material:
+	case symbols::symbol_type::model:
+	case symbols::symbol_type::sound:
+	case symbols::symbol_type::thing_template:
 		if(!v.is_str) {
-			Diagnostics::Helper::TypeMismatch(Report, VisitorName, symbol.Location);
+			diagnostics::helper::type_mismatch(report, visitor_name, symbol.location);
 		}
 		else {
-			defaultValue = VM::Value(SymbolTable.AddString(v.str_value));
+			defaultvalue = vm::value(symbol_table.add_string(v.str_value));
 		}
 		break;
 
 	default:
-	case Symbols::SymbolType::Cog:
-	case Symbols::SymbolType::Message:
-	case Symbols::SymbolType::Sector:
-	case Symbols::SymbolType::String:
-	case Symbols::SymbolType::Surface:
-	case Symbols::SymbolType::Thing:
-	case Symbols::SymbolType::Vector:
-		Diagnostics::Helper::IllegalAssignment(Report, VisitorName, symbol.Location);
+	case symbols::symbol_type::cog:
+	case symbols::symbol_type::message:
+	case symbols::symbol_type::sector:
+	case symbols::symbol_type::string:
+	case symbols::symbol_type::surface:
+	case symbols::symbol_type::thing:
+	case symbols::symbol_type::vector:
+		diagnostics::helper::illegal_assignment(report, visitor_name, symbol.location);
 		break;
 	}
 
 	// Convert symbol name to lowercase for processing.
-	std::transform(symbol.Name.begin(), symbol.Name.end(), symbol.Name.begin(), tolower);
+	std::transform(symbol.name.begin(), symbol.name.end(), symbol.name.begin(), tolower);
 
 	// Visit extension
-	SymbolExtensionVisitor w(type, Report);
-	for(auto& ext : *symbol.Extensions) {
-		ext->Accept(w);
+	symbol_extension_visitor w(type, report);
+	for(auto& ext : *symbol.extensions) {
+		ext->accept(w);
 	}
 
-	if(SymbolTable.IsSymbolDefined(symbol.Name)) {
-		Diagnostics::Helper::SymbolRedefinition(Report, VisitorName, symbol.Name, symbol.Location);
-		SymbolTable.ReplaceSymbol(type, symbol.Name, defaultValue, w.local, w.desc, w.mask, w.linkid, w.nolink);
+	if(symbol_table.is_symbol_defined(symbol.name)) {
+		diagnostics::helper::symbol_redefinition(report, visitor_name, symbol.name, symbol.location);
+		symbol_table.replace_symbol(type, symbol.name, defaultvalue, w.local, w.desc, w.mask, w.linkid, w.nolink);
 	}
 	else {
-		SymbolTable.AddSymbol(type, symbol.Name, defaultValue, w.local, w.desc, w.mask, w.linkid, w.nolink);
+		symbol_table.add_symbol(type, symbol.name, defaultvalue, w.local, w.desc, w.mask, w.linkid, w.nolink);
 	}
 }
 
-Gorc::Cog::Symbols::SymbolType SymbolVisitor::GetType(Symbol& symbol) {
+gorc::cog::symbols::symbol_type symbol_visitor::get_type(symbol& symbol) {
 	// Convert symbol type to lowercase for processing.
-	std::transform(symbol.Type.begin(), symbol.Type.end(), symbol.Type.begin(), tolower);
+	std::transform(symbol.type.begin(), symbol.type.end(), symbol.type.begin(), tolower);
 
-	if(symbol.Type == "ai") {
-		return Symbols::SymbolType::Ai;
+	if(symbol.type == "ai") {
+		return symbols::symbol_type::ai;
 	}
-	else if(symbol.Type == "cog") {
-		return Symbols::SymbolType::Cog;
+	else if(symbol.type == "cog") {
+		return symbols::symbol_type::cog;
 	}
-	else if(symbol.Type == "flex") {
-		return Symbols::SymbolType::Flex;
+	else if(symbol.type == "flex") {
+		return symbols::symbol_type::flex;
 	}
-	else if(symbol.Type == "float") {
-		return Symbols::SymbolType::Float;
+	else if(symbol.type == "float") {
+		return symbols::symbol_type::floating;
 	}
-	else if(symbol.Type == "int") {
-		return Symbols::SymbolType::Int;
+	else if(symbol.type == "int") {
+		return symbols::symbol_type::integer;
 	}
-	else if(symbol.Type == "keyframe") {
-		return Symbols::SymbolType::Keyframe;
+	else if(symbol.type == "keyframe") {
+		return symbols::symbol_type::keyframe;
 	}
-	else if(symbol.Type == "material") {
-		return Symbols::SymbolType::Material;
+	else if(symbol.type == "material") {
+		return symbols::symbol_type::material;
 	}
-	else if(symbol.Type == "message") {
-		return Symbols::SymbolType::Message;
+	else if(symbol.type == "message") {
+		return symbols::symbol_type::message;
 	}
-	else if(symbol.Type == "model") {
-		return Symbols::SymbolType::Model;
+	else if(symbol.type == "model") {
+		return symbols::symbol_type::model;
 	}
-	else if(symbol.Type == "sector") {
-		return Symbols::SymbolType::Sector;
+	else if(symbol.type == "sector") {
+		return symbols::symbol_type::sector;
 	}
-	else if(symbol.Type == "sound") {
-		return Symbols::SymbolType::Sound;
+	else if(symbol.type == "sound") {
+		return symbols::symbol_type::sound;
 	}
-	else if(symbol.Type == "string") {
-		return Symbols::SymbolType::String;
+	else if(symbol.type == "string") {
+		return symbols::symbol_type::string;
 	}
-	else if(symbol.Type == "surface") {
-		return Symbols::SymbolType::Surface;
+	else if(symbol.type == "surface") {
+		return symbols::symbol_type::surface;
 	}
-	else if(symbol.Type == "template") {
-		return Symbols::SymbolType::Template;
+	else if(symbol.type == "template") {
+		return symbols::symbol_type::thing_template;
 	}
-	else if(symbol.Type == "thing") {
-		return Symbols::SymbolType::Thing;
+	else if(symbol.type == "thing") {
+		return symbols::symbol_type::thing;
 	}
-	else if(symbol.Type == "vector") {
-		return Symbols::SymbolType::Vector;
+	else if(symbol.type == "vector") {
+		return symbols::symbol_type::vector;
 	}
 	else {
-		Diagnostics::Helper::UnknownType(Report, VisitorName, symbol.Type, symbol.Location);
+		diagnostics::helper::unknown_type(report, visitor_name, symbol.type, symbol.location);
 
-		return Symbols::SymbolType::Int;
+		return symbols::symbol_type::integer;
 	}
 }

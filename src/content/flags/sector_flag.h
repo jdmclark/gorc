@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class SectorFlag : uint32_t {
+enum class sector_flag : uint32_t {
 	NoGravity						= 0x1,
 	Underwater						= 0x2,
 	CogLinked						= 0x4,

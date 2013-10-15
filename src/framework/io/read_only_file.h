@@ -2,30 +2,30 @@
 
 #include <boost/filesystem/path.hpp>
 
-namespace Gorc {
-namespace IO {
+namespace gorc {
+namespace io {
 
-class ReadOnlyFile {
+class read_only_file {
 public:
 	const boost::filesystem::path Filename;
 
-	ReadOnlyFile(const boost::filesystem::path& filename);
-	virtual ~ReadOnlyFile();
+	read_only_file(const boost::filesystem::path& filename);
+	virtual ~read_only_file();
 
-	virtual void Read(void* dest, size_t size) = 0;
+	virtual void read(void* dest, size_t size) = 0;
 
-	template <typename T> T Read() {
+	template <typename T> T read() {
 		T retval;
-		Read(&retval, sizeof(T));
+		read(&retval, sizeof(T));
 		return retval;
 	}
 
-	virtual void Seek(long offset) = 0;
-	virtual void SetPosition(size_t offset) = 0;
-	virtual size_t GetPosition() = 0;
+	virtual void seek(long offset) = 0;
+	virtual void set_position(size_t offset) = 0;
+	virtual size_t get_position() = 0;
 
-	virtual size_t GetSize() = 0;
-	virtual bool IsEndOfFile() = 0;
+	virtual size_t get_size() = 0;
+	virtual bool is_end_of_file() = 0;
 };
 
 }

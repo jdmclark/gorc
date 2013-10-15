@@ -1,17 +1,17 @@
 #include "script_loader.h"
 #include "content/assets/script.h"
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ScriptLoader::AssetRootPath = { "cog" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::script_loader::asset_root_path = { "cog" };
 
-Gorc::Content::Loaders::ScriptLoader::ScriptLoader(const Cog::Compiler& compiler)
-	: Compiler(compiler) {
+gorc::content::loaders::script_loader::script_loader(const cog::compiler& compiler)
+	: compiler(compiler) {
 	return;
 }
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ScriptLoader::Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Content::Assets::Script> script(new Content::Assets::Script());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::script_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<content::assets::script> script(new content::assets::script());
 
-	Compiler.Compile(file, script->Script, report);
+	compiler.compile(file, script->script, report);
 
-	return std::unique_ptr<Asset>(std::move(script));
+	return std::unique_ptr<asset>(std::move(script));
 }

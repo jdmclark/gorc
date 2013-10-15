@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class AiModeFlag : uint32_t {
 	MovingTowardDestination			= 0x1,

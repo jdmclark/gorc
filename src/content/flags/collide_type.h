@@ -2,12 +2,12 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class CollideType : uint32_t {
-	None = 0,
-	Sphere = 1,
+enum class collide_type : uint32_t {
+	none = 0,
+	sphere = 1,
 	SphereUnknown = 2,
 	Face = 3
 };

@@ -3,17 +3,17 @@
 #include "cog/ast/visitor.h"
 #include "cog/ir/printer.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace GenerateCode {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace generate_code {
 
-class ExpressionVisitor : public AST::Visitor {
+class expression_visitor : public ast::visitor {
 protected:
-	IR::Printer& Printer;
+	ir::printer& Printer;
 
 public:
-	ExpressionVisitor(IR::Printer& printer, Diagnostics::Report& report);
+	expression_visitor(ir::printer& printer, diagnostics::report& report);
 
 private:
 	ASTCLASS_FINAL_EXPRESSION(AVPROTO);

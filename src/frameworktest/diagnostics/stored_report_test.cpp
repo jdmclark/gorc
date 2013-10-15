@@ -3,66 +3,66 @@
 
 #include "framework/diagnostics/stored_report.h"
 
-using namespace Gorc::Diagnostics;
+using namespace gorc::diagnostics;
 
 class StoredReportTestFixture : public NullUnit::Fixture {
 public:
-	StoredReport report;
+	stored_report report;
 };
 
 BeginSuiteFixture(StoredReportTest, StoredReportTestFixture);
 
-Case(AddError) {
-	Test_Assert_Eq(report.GetWarningCount(), 0);
-	Test_Assert_Eq(report.GetErrorCount(), 0);
+Case(add_error) {
+	Test_Assert_Eq(report.get_warning_count(), 0);
+	Test_Assert_Eq(report.get_error_count(), 0);
 
-	report.AddError("Stage 0", "Reason", ErrorLocation("test.w", 15, 16, 10, 11));
+	report.add_error("Stage 0", "Reason", error_location("test.w", 15, 16, 10, 11));
 
-	Test_Assert_Eq(report.GetWarningCount(), 0);
-	Test_Assert_Eq(report.GetErrorCount(), 1);
+	Test_Assert_Eq(report.get_warning_count(), 0);
+	Test_Assert_Eq(report.get_error_count(), 1);
 
 	auto it = report.begin();
-	Test_Assert_Eq(it->Level, ErrorLevel::Error);
-	Test_Assert_Eq(it->Stage, "Stage 0");
-	Test_Assert_Eq(it->Reason, "Reason");
+	Test_Assert_Eq(it->level, error_level::error);
+	Test_Assert_Eq(it->stage, "Stage 0");
+	Test_Assert_Eq(it->reason, "Reason");
 
-	ErrorLocation l("test.w", 15, 16, 10, 11);
+	error_location l("test.w", 15, 16, 10, 11);
 
-	Test_Assert_Eq(it->Location, l);
+	Test_Assert_Eq(it->location, l);
 }
 
-Case(AddWarning) {
-	Test_Assert_Eq(report.GetErrorCount(), 0);
-	Test_Assert_Eq(report.GetWarningCount(), 0);
+Case(add_warning) {
+	Test_Assert_Eq(report.get_error_count(), 0);
+	Test_Assert_Eq(report.get_warning_count(), 0);
 
-	report.AddWarning("Stage 0", "Reason", ErrorLocation("test.w", 15, 16, 10, 11));
+	report.add_warning("Stage 0", "Reason", error_location("test.w", 15, 16, 10, 11));
 
-	Test_Assert_Eq(report.GetErrorCount(), 0);
-	Test_Assert_Eq(report.GetWarningCount(), 1);
+	Test_Assert_Eq(report.get_error_count(), 0);
+	Test_Assert_Eq(report.get_warning_count(), 1);
 
 	auto it = report.begin();
-	Test_Assert_Eq(it->Level, ErrorLevel::Warning);
-	Test_Assert_Eq(it->Stage, "Stage 0");
-	Test_Assert_Eq(it->Reason, "Reason");
+	Test_Assert_Eq(it->level, error_level::warning);
+	Test_Assert_Eq(it->stage, "Stage 0");
+	Test_Assert_Eq(it->reason, "Reason");
 
-	ErrorLocation l("test.w", 15, 16, 10, 11);
+	error_location l("test.w", 15, 16, 10, 11);
 
-	Test_Assert_Eq(it->Location, l);
+	Test_Assert_Eq(it->location, l);
 }
 
-Case(AddCriticalError) {
-	Test_Assert_Eq(report.GetWarningCount(), 0);
-	Test_Assert_Eq(report.GetErrorCount(), 0);
+Case(add_critical_error) {
+	Test_Assert_Eq(report.get_warning_count(), 0);
+	Test_Assert_Eq(report.get_error_count(), 0);
 
-	report.AddCriticalError("Stage 0", "Reason");
+	report.add_critical_error("Stage 0", "Reason");
 
-	Test_Assert_Eq(report.GetWarningCount(), 0);
-	Test_Assert_Eq(report.GetErrorCount(), 1);
+	Test_Assert_Eq(report.get_warning_count(), 0);
+	Test_Assert_Eq(report.get_error_count(), 1);
 
 	auto it = report.begin();
-	Test_Assert_Eq(it->Level, ErrorLevel::CriticalError);
-	Test_Assert_Eq(it->Stage, "Stage 0");
-	Test_Assert_Eq(it->Reason, "Reason");
+	Test_Assert_Eq(it->level, error_level::critical_error);
+	Test_Assert_Eq(it->stage, "Stage 0");
+	Test_Assert_Eq(it->reason, "Reason");
 }
 
 EndSuite(StoredReportTest);

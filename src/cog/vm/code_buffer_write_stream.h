@@ -2,43 +2,43 @@
 
 #include "code_buffer.h"
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class CodeBufferWriteStream {
+class code_buffer_write_stream {
 private:
-	CodeBuffer& codeBuffer;
+	code_buffer& codeBuffer;
 	size_t streamPtr;
 
 public:
-	explicit CodeBufferWriteStream(CodeBuffer& cb);
+	explicit code_buffer_write_stream(code_buffer& cb);
 
-	inline void Write(const void* src, size_t size) {
-		codeBuffer.Write(streamPtr, src, size);
+	inline void write(const void* src, size_t size) {
+		codeBuffer.write(streamPtr, src, size);
 		streamPtr += size;
 	}
 
-	template <typename T> inline void Write(T value) {
-		codeBuffer.Write<T>(value, streamPtr);
+	template <typename T> inline void write(T value) {
+		codeBuffer.write<T>(value, streamPtr);
 		streamPtr += sizeof(T);
 	}
 
-	inline size_t WriteBuffer(CodeBuffer& cb) {
+	inline size_t write_buffer(code_buffer& cb) {
 		size_t retVal = streamPtr;
-		size_t size = cb.Size();
+		size_t size = cb.size();
 
-		codeBuffer.Write(streamPtr, cb.ReadPointer(0, size), size);
+		codeBuffer.write(streamPtr, cb.read_pointer(0, size), size);
 		streamPtr += size;
 
 		return retVal;
 	}
 
-	inline void Seek(size_t dest) {
+	inline void seek(size_t dest) {
 		streamPtr = dest;
 	}
 
-	inline size_t Tell() const {
+	inline size_t tell() const {
 		return streamPtr;
 	}
 };

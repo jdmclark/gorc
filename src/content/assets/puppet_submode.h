@@ -2,16 +2,16 @@
 
 #include "animation.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class PuppetSubmode {
+class puppet_submode {
 public:
-	Animation const* Animation;
-	FlagSet<Flags::KeyFlag> Flags;
-	unsigned int LoPriority;
-	unsigned int HiPriority;
+	animation const* animation;
+	flag_set<flags::key_flag> flags;
+	unsigned int lo_priority;
+	unsigned int hi_priority;
 };
 
 }

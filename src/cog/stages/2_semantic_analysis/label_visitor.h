@@ -6,17 +6,17 @@
 #include <string>
 #include <unordered_set>
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace SemanticAnalysis {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace semantic_analysis {
 
-class LabelVisitor : public AST::Visitor {
+class label_visitor : public ast::visitor {
 protected:
 	std::unordered_set<std::string>& SeenLabels;
 
 public:
-	LabelVisitor(std::unordered_set<std::string>& SeenLabels, Diagnostics::Report& report);
+	label_visitor(std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
 
 private:
 	ASTCLASS_STATEMENT(AVPROTO);

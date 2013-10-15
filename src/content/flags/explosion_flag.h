@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class ExplosionFlag : uint32_t {
 	AnimatedSprite					= 0x1,

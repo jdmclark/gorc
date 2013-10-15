@@ -1,9 +1,9 @@
 #pragma once
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class KeyMarkerType : uint32_t {
+enum class key_marker_type : uint32_t {
 	LeftFootstep = 1,
 	RightFootstep = 2,
 	ActivateBin = 3,

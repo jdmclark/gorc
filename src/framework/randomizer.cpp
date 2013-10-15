@@ -1,6 +1,6 @@
 #include "randomizer.h"
 
-Gorc::Randomizer::Randomizer() {
+gorc::randomizer::randomizer() {
 	std::random_device rd;
 	rng.seed(rd());
 }

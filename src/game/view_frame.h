@@ -4,34 +4,34 @@
 #include "view.h"
 #include <SFML/Window.hpp>
 
-namespace Gorc {
-namespace Game {
+namespace gorc {
+namespace game {
 
-class ViewFrame {
+class view_frame {
 private:
 	sf::Window& Window;
-	View* currentView;
+	view* currentView;
 
 public:
-	ViewFrame(sf::Window& Window);
+	view_frame(sf::Window& Window);
 
-	inline Math::Box<2, unsigned int> GetSize() const {
-		return Math::Box<2, unsigned int>(Math::Zero<2, unsigned int>(), Math::Vec(Window.getSize().x, Window.getSize().y));
+	inline box<2, unsigned int> get_size() const {
+		return box<2, unsigned int>(math::zero<2, unsigned int>(), math::make_vector(Window.getSize().x, Window.getSize().y));
 	}
 
-	inline void SetView(View& v) {
+	inline void set_view(view& v) {
 		currentView = &v;
 	}
 
-	inline void Update(double dt) {
+	inline void update(double dt) {
 		if(currentView) {
-			currentView->Update(dt);
+			currentView->update(dt);
 		}
 	}
 
-	inline void Draw(double dt) {
+	inline void draw(double dt) {
 		if(currentView) {
-			currentView->Draw(dt, GetSize());
+			currentView->draw(dt, get_size());
 		}
 	}
 };

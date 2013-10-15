@@ -2,16 +2,16 @@
 
 #include <string>
 
-namespace Gorc {
-namespace Events {
+namespace gorc {
+namespace events {
 
-class ExitingEvent {
+class exiting_event {
 public:
-	bool Cancel;
+	bool cancel;
 
-	ExitingEvent();
+	exiting_event();
 
-	static const std::string& GetEventType();
+	static const std::string& get_event_type();
 };
 
 }

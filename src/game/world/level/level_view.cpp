@@ -11,64 +11,64 @@
 #include <SFML/Window.hpp>
 #include <GL/glu.h>
 
-using namespace Gorc::Math;
+using namespace gorc::math;
 
-Gorc::Game::World::Level::LevelView::LevelView(Content::Manager& contentManager)
-	: surfaceShader(contentManager.Load<Content::Assets::Shader>("surface.glsl")),
-	  horizonShader(contentManager.Load<Content::Assets::Shader>("horizon.glsl")),
-	  ceilingShader(contentManager.Load<Content::Assets::Shader>("ceiling.glsl")),
-	  lightShader(contentManager.Load<Content::Assets::Shader>("light.glsl")),
+gorc::game::world::level::level_view::level_view(content::manager& contentmanager)
+	: surfaceShader(contentmanager.load<content::assets::shader>("surface.glsl")),
+	  horizonShader(contentmanager.load<content::assets::shader>("horizon.glsl")),
+	  ceilingShader(contentmanager.load<content::assets::shader>("ceiling.glsl")),
+	  lightShader(contentmanager.load<content::assets::shader>("light.glsl")),
 	  currentPresenter(nullptr), currentModel(nullptr) {
 	return;
 }
 
-void Gorc::Game::World::Level::LevelView::Update(double dt) {
+void gorc::game::world::level::level_view::update(double dt) {
 	if(currentPresenter) {
-		currentPresenter->Update(dt);
+		currentPresenter->update(dt);
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::ComputeVisibleSectors(const Box<2, unsigned int>& view_size) {
-	unsigned int current_camera_sector_id = currentModel->CameraSector;
-	const auto& camera_pos = currentModel->CameraPosition;
+void gorc::game::world::level::level_view::compute_visible_sectors(const box<2, unsigned int>& view_size) {
+	unsigned int current_camera_sector_id = currentModel->camera_sector;
+	const auto& camera_pos = currentModel->camera_position;
 
 	std::array<double, 16> proj_matrix;
 	std::array<double, 16> view_matrix;
 	std::array<int, 4> viewport;
 
-	float const* proj = ProjectionMatrix.GetOpenGLMatrix();
+	float const* proj = projection_matrix.get_opengl_matrix();
 	std::transform(proj, proj + 16, proj_matrix.begin(), [](float value) { return static_cast<double>(value); });
 
-	float const* view = ViewMatrix.GetOpenGLMatrix();
+	float const* view = this->view_matrix.get_opengl_matrix();
 	std::transform(view, view + 16, view_matrix.begin(), [](float value) { return static_cast<double>(value); });
 
 	glGetIntegerv(GL_VIEWPORT, viewport.data());
 
-	Math::Box<2, double> adj_bbox(Math::Vec<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
-			Math::Vec<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
+	box<2, double> adj_bbox(math::make_vector<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
+			math::make_vector<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
 					static_cast<double>(std::get<1>(viewport) + std::get<3>(viewport))));
 
 	sector_visited_scratch.clear();
 	sector_vis_scratch.clear();
 	sector_vis_scratch.emplace(current_camera_sector_id);
-	DoSectorVis(current_camera_sector_id, proj_matrix, view_matrix, viewport, adj_bbox, camera_pos, currentModel->CameraLook);
+	do_sector_vis(current_camera_sector_id, proj_matrix, view_matrix, viewport, adj_bbox, camera_pos, currentModel->camera_look);
 }
 
-void Gorc::Game::World::Level::LevelView::DoSectorVis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
-		const std::array<int, 4>& viewport, const Math::Box<2, double>& adj_bbox, const Math::Vector<3>& cam_pos, const Math::Vector<3>& cam_look) {
+void gorc::game::world::level::level_view::do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
+		const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look) {
 	sector_visited_scratch.emplace(sec_num);
 
-	const auto& sector = currentModel->Sectors[sec_num];
-	for(unsigned int i = 0; i < sector.SurfaceCount; ++i) {
-		const auto& surface = currentModel->Surfaces[sector.FirstSurface + i];
+	const auto& sector = currentModel->sectors[sec_num];
+	for(unsigned int i = 0; i < sector.surface_count; ++i) {
+		const auto& surface = currentModel->surfaces[sector.first_surface + i];
 
-		const Math::Vector<3>& surf_vx_pos = currentModel->Level.Vertices[std::get<0>(surface.Vertices.front())];
+		const vector<3>& surf_vx_pos = currentModel->level.vertices[std::get<0>(surface.vertices.front())];
 
-		if(surface.Adjoin < 0 || sector_visited_scratch.count(surface.AdjoinedSector) > 0) {
+		if(surface.adjoin < 0 || sector_visited_scratch.count(surface.adjoined_sector) > 0) {
 			continue;
 		}
 
-		float dist = Math::Dot(surface.Normal, cam_pos - surf_vx_pos);
+		float dist = math::dot(surface.normal, cam_pos - surf_vx_pos);
 		if(dist < 0.0f) {
 			continue;
 		}
@@ -80,10 +80,10 @@ void Gorc::Game::World::Level::LevelView::DoSectorVis(unsigned int sec_num, cons
 
 		bool failed = false;
 		bool culled = true;
-		for(const auto& vx : surface.Vertices) {
-			auto vx_pos = currentModel->Level.Vertices[std::get<0>(vx)];
+		for(const auto& vx : surface.vertices) {
+			auto vx_pos = currentModel->level.vertices[std::get<0>(vx)];
 
-			if(Math::Dot(cam_look, vx_pos - cam_pos) < 0.0f) {
+			if(math::dot(cam_look, vx_pos - cam_pos) < 0.0f) {
 				// Vertex behind camera.
 				failed = true;
 				continue;
@@ -93,7 +93,7 @@ void Gorc::Game::World::Level::LevelView::DoSectorVis(unsigned int sec_num, cons
 
 			double x_out, y_out, z_out;
 
-			gluProject(Math::Get<0>(vx_pos), Math::Get<1>(vx_pos), Math::Get<2>(vx_pos),
+			gluProject(math::get<0>(vx_pos), math::get<1>(vx_pos), math::get<2>(vx_pos),
 					view_mat.data(), proj_mat.data(), viewport.data(),
 					&x_out, &y_out, &z_out);
 
@@ -108,55 +108,55 @@ void Gorc::Game::World::Level::LevelView::DoSectorVis(unsigned int sec_num, cons
 		}
 
 		if(failed) {
-			sector_vis_scratch.emplace(surface.AdjoinedSector);
-			DoSectorVis(surface.AdjoinedSector, proj_mat, view_mat, viewport, adj_bbox, cam_pos, cam_look);
+			sector_vis_scratch.emplace(surface.adjoined_sector);
+			do_sector_vis(surface.adjoined_sector, proj_mat, view_mat, viewport, adj_bbox, cam_pos, cam_look);
 			continue;
 		}
 
-		Math::Box<2, double> new_adj_bbox(Math::Vec(min_x, min_y), Math::Vec(max_x, max_y));
-		if(Math::BoxesOverlap(adj_bbox, new_adj_bbox)) {
-			sector_vis_scratch.emplace(surface.AdjoinedSector);
-			DoSectorVis(surface.AdjoinedSector, proj_mat, view_mat, viewport,
-					Math::Intersect(adj_bbox, new_adj_bbox), cam_pos, cam_look);
+		box<2, double> new_adj_bbox(math::make_vector(min_x, min_y), math::make_vector(max_x, max_y));
+		if(math::BoxesOverlap(adj_bbox, new_adj_bbox)) {
+			sector_vis_scratch.emplace(surface.adjoined_sector);
+			do_sector_vis(surface.adjoined_sector, proj_mat, view_mat, viewport,
+					math::Intersect(adj_bbox, new_adj_bbox), cam_pos, cam_look);
 		}
 	}
 
 	sector_visited_scratch.erase(sec_num);
 }
 
-void Gorc::Game::World::Level::LevelView::RecordVisibleSpecialSurfaces() {
-	const Content::Assets::Level& lev = currentModel->Level;
+void gorc::game::world::level::level_view::record_visible_special_surfaces() {
+	const content::assets::level& lev = currentModel->level;
 
 	for(auto sec_num : sector_vis_scratch) {
-		const Content::Assets::LevelSector& sector = currentModel->Sectors[sec_num];
+		const content::assets::level_sector& sector = currentModel->sectors[sec_num];
 
-		for(size_t i = sector.FirstSurface; i < sector.FirstSurface + sector.SurfaceCount; ++i) {
-			const auto& surface = currentModel->Surfaces[i];
+		for(size_t i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+			const auto& surface = currentModel->surfaces[i];
 
-			if(surface.GeometryMode == Flags::GeometryMode::NotDrawn) {
+			if(surface.geometry_mode == flags::geometry_mode::NotDrawn) {
 				continue;
 			}
 
-			if(surface.Adjoin < 0 && (surface.Flags & Flags::SurfaceFlag::HorizonSky)) {
+			if(surface.adjoin < 0 && (surface.flags & flags::surface_flag::HorizonSky)) {
 				horizon_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
 			}
-			else if(surface.Adjoin < 0 && (surface.Flags & Flags::SurfaceFlag::CeilingSky)) {
+			else if(surface.adjoin < 0 && (surface.flags & flags::surface_flag::CeilingSky)) {
 				ceiling_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
 			}
-			else if(surface.Adjoin >= 0) {
+			else if(surface.adjoin >= 0) {
 				translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, i, 0.0f));
 			}
 		}
 	}
 
-	const auto& cam_pos = currentModel->CameraPosition;
+	const auto& cam_pos = currentModel->camera_position;
 
 	// Compute distances to translucent surfaces
 	for(auto& surf_tuple : translucent_surfaces_scratch) {
 		unsigned int surf_id = std::get<1>(surf_tuple);
-		const auto& surf = currentModel->Surfaces[surf_id];
-		auto vx_pos = currentModel->Level.Vertices[std::get<0>(surf.Vertices.front())];
-		std::get<2>(surf_tuple) = Math::Dot(surf.Normal, cam_pos - vx_pos);
+		const auto& surf = currentModel->surfaces[surf_id];
+		auto vx_pos = currentModel->level.vertices[std::get<0>(surf.vertices.front())];
+		std::get<2>(surf_tuple) = math::dot(surf.normal, cam_pos - vx_pos);
 
 		// TODO: Currently uses distance to plane. Compute actual distance to polygon.
 	}
@@ -168,14 +168,14 @@ void Gorc::Game::World::Level::LevelView::RecordVisibleSpecialSurfaces() {
 	});
 }
 
-void Gorc::Game::World::Level::LevelView::RecordVisibleThings() {
-	for(auto& thing : currentModel->Things) {
-		if(sector_vis_scratch.find(thing.Sector) != sector_vis_scratch.end()) {
-			visible_thing_scratch.emplace_back(thing.GetId(), Math::Length(thing.Position - currentModel->CameraPosition));
+void gorc::game::world::level::level_view::record_visible_things() {
+	for(auto& thing : currentModel->things) {
+		if(sector_vis_scratch.find(thing.sector) != sector_vis_scratch.end()) {
+			visible_thing_scratch.emplace_back(thing.get_id(), math::length(thing.position - currentModel->camera_position));
 
-			if(!(thing.Flags & Flags::ThingFlag::Sighted)) {
-				// Thing has been sighted for first time. Fire sighted event.
-				currentPresenter->ThingSighted(thing.GetId());
+			if(!(thing.flags & flags::thing_flag::Sighted)) {
+				// thing has been sighted for first time. Fire sighted event.
+				currentPresenter->thing_sighted(thing.get_id());
 			}
 		}
 	}
@@ -187,66 +187,66 @@ void Gorc::Game::World::Level::LevelView::RecordVisibleThings() {
 	});
 }
 
-void Gorc::Game::World::Level::LevelView::DrawVisibleDiffuseSurfaces() {
+void gorc::game::world::level::level_view::draw_visible_diffuse_surfaces() {
 	glDepthMask(GL_TRUE);
-	const Content::Assets::Level& lev = currentModel->Level;
+	const content::assets::level& lev = currentModel->level;
 
 	for(auto sec_num : sector_vis_scratch) {
-		const Content::Assets::LevelSector& sector = currentModel->Sectors[sec_num];
+		const content::assets::level_sector& sector = currentModel->sectors[sec_num];
 
-		for(size_t i = sector.FirstSurface; i < sector.FirstSurface + sector.SurfaceCount; ++i) {
-			const auto& surface = currentModel->Surfaces[i];
+		for(size_t i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+			const auto& surface = currentModel->surfaces[i];
 
-			if(surface.GeometryMode == Flags::GeometryMode::NotDrawn
-					|| surface.Adjoin >= 0
-					|| (surface.Flags & Flags::SurfaceFlag::HorizonSky)
-					|| (surface.Flags & Flags::SurfaceFlag::CeilingSky)) {
+			if(surface.geometry_mode == flags::geometry_mode::NotDrawn
+					|| surface.adjoin >= 0
+					|| (surface.flags & flags::surface_flag::HorizonSky)
+					|| (surface.flags & flags::surface_flag::CeilingSky)) {
 				continue;
 			}
 
-			DrawSurface(i, sector, 1.0f);
+			draw_surface(i, sector, 1.0f);
 		}
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawVisibleSkySurfaces(const Math::Box<2, unsigned int>& view_size, const Math::Vector<3>& sector_tint) {
+void gorc::game::world::level::level_view::draw_visible_sky_surfaces(const box<2, unsigned int>& view_size, const vector<3>& sector_tint) {
 	glDepthMask(GL_TRUE);
 
 	if(!horizon_sky_surfaces_scratch.empty()) {
-		SetCurrentShader(horizonShader, sector_tint,
-				currentModel->Header.HorizonSkyOffset, currentModel->Header.HorizonPixelsPerRev,
-				currentModel->Header.HorizonDistance, view_size, currentModel->CameraLook);
+		set_current_shader(horizonShader, sector_tint,
+				currentModel->header.horizon_sky_offset, currentModel->header.horizon_pixels_per_rev,
+				currentModel->header.horizon_distance, view_size, currentModel->camera_look);
 
 		for(auto surf_tuple : horizon_sky_surfaces_scratch) {
-			DrawSurface(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)], 1.0f);
+			draw_surface(std::get<1>(surf_tuple), currentModel->sectors[std::get<0>(surf_tuple)], 1.0f);
 		}
 	}
 
 	if(!ceiling_sky_surfaces_scratch.empty()) {
-		SetCurrentShader(ceilingShader, sector_tint,
-				currentModel->Header.CeilingSkyOffset, currentModel->Header.CeilingSkyZ);
+		set_current_shader(ceilingShader, sector_tint,
+				currentModel->header.ceiling_sky_offset, currentModel->header.ceiling_sky_z);
 
 		for(auto surf_tuple : ceiling_sky_surfaces_scratch) {
-			DrawSurface(std::get<1>(surf_tuple), currentModel->Sectors[std::get<0>(surf_tuple)], 1.0f);
+			draw_surface(std::get<1>(surf_tuple), currentModel->sectors[std::get<0>(surf_tuple)], 1.0f);
 		}
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawVisibleTranslucentSurfacesAndThings() {
+void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and_things() {
 	auto thing_it = visible_thing_scratch.begin();
 	auto surf_it = translucent_surfaces_scratch.begin();
 	while(thing_it != visible_thing_scratch.end() && surf_it != translucent_surfaces_scratch.end()) {
 		if(std::get<1>(*thing_it) <= std::get<2>(*surf_it)) {
 			glDepthMask(GL_TRUE);
 			glDisable(GL_CULL_FACE);
-			DrawThing(currentModel->Things[std::get<0>(*thing_it)]);
+			draw_thing(currentModel->things[std::get<0>(*thing_it)]);
 			++thing_it;
 		}
 		else {
 			glDepthMask(GL_FALSE);
 			glEnable(GL_CULL_FACE);
-			DrawSurface(std::get<1>(*surf_it), currentModel->Sectors[std::get<0>(*surf_it)],
-					(currentModel->Surfaces[std::get<1>(*surf_it)].FaceTypeFlags & Flags::FaceFlag::Translucent) ? 0.5f : 1.0f);
+			draw_surface(std::get<1>(*surf_it), currentModel->sectors[std::get<0>(*surf_it)],
+					(currentModel->surfaces[std::get<1>(*surf_it)].face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
 			++surf_it;
 		}
 	}
@@ -254,20 +254,20 @@ void Gorc::Game::World::Level::LevelView::DrawVisibleTranslucentSurfacesAndThing
 	glDepthMask(GL_TRUE);
 	glDisable(GL_CULL_FACE);
 	while(thing_it != visible_thing_scratch.end()) {
-		DrawThing(currentModel->Things[std::get<0>(*thing_it)]);
+		draw_thing(currentModel->things[std::get<0>(*thing_it)]);
 		++thing_it;
 	}
 
 	glDepthMask(GL_FALSE);
 	glEnable(GL_CULL_FACE);
 	while(surf_it != translucent_surfaces_scratch.end()) {
-		DrawSurface(std::get<1>(*surf_it), currentModel->Sectors[std::get<0>(*surf_it)],
-				(currentModel->Surfaces[std::get<1>(*surf_it)].FaceTypeFlags & Flags::FaceFlag::Translucent) ? 0.5f : 1.0f);
+		draw_surface(std::get<1>(*surf_it), currentModel->sectors[std::get<0>(*surf_it)],
+				(currentModel->surfaces[std::get<1>(*surf_it)].face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
 		++surf_it;
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
+void gorc::game::world::level::level_view::draw(double dt, const box<2, unsigned int>& view_size) {
 	if(currentModel) {
 		glDisable(GL_STENCIL_TEST);
 		glDisable(GL_ALPHA_TEST);
@@ -290,56 +290,56 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 		// Set up world and projection matrices
 		double aspect = static_cast<double>(view_size.Size<X>()) / static_cast<double>(view_size.Size<Y>());
 
-		ProjectionMatrix = Matrix<float>::MakePerspectiveMatrix(70.0f, static_cast<float>(aspect), 0.001f, 1000.0f);
-		ViewMatrix = Matrix<float>::MakeLookMatrix(currentModel->CameraPosition, currentModel->CameraLook, currentModel->CameraUp);
+		projection_matrix = matrix<float>::make_perspective_matrix(70.0f, static_cast<float>(aspect), 0.001f, 1000.0f);
+		view_matrix = matrix<float>::make_look_matrix(currentModel->camera_position, currentModel->camera_look, currentModel->camera_up);
 
-		while(!ModelMatrixStack.empty()) {
-			ModelMatrixStack.pop();
+		while(!model_matrix_stack.empty()) {
+			model_matrix_stack.pop();
 		}
-		ModelMatrixStack.push(Matrix<float>::MakeIdentityMatrix());
+		model_matrix_stack.push(matrix<float>::make_identity_matrix());
 
 		// Run level hidden surface removal
-		ComputeVisibleSectors(view_size);
-		RecordVisibleSpecialSurfaces();
-		RecordVisibleThings();
+		compute_visible_sectors(view_size);
+		record_visible_special_surfaces();
+		record_visible_things();
 
 		// Prepare for rendering ordinary surfaces
-		auto sector_tint = currentModel->Sectors[currentModel->CameraSector].Tint;
-		sector_tint = (sector_tint * Math::Length(sector_tint)) + (currentModel->DynamicTint * (1.0f - Math::Length(sector_tint)));
+		auto sector_tint = currentModel->sectors[currentModel->camera_sector].tint;
+		sector_tint = (sector_tint * math::length(sector_tint)) + (currentModel->dynamic_tint * (1.0f - math::length(sector_tint)));
 
-		SetCurrentShader(surfaceShader, sector_tint);
+		set_current_shader(surfaceShader, sector_tint);
 
 		glDisable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
 
 		// Render ordinary surfaces and enqueue translucent/sky.
-		DrawVisibleDiffuseSurfaces();
+		draw_visible_diffuse_surfaces();
 
 		// Render skies
-		DrawVisibleSkySurfaces(view_size, sector_tint);
+		draw_visible_sky_surfaces(view_size, sector_tint);
 
 		// Interleave rendering things and translucent surfaces.
 		glEnable(GL_BLEND);
-		SetCurrentShader(surfaceShader, sector_tint);
+		set_current_shader(surfaceShader, sector_tint);
 
-		DrawVisibleTranslucentSurfacesAndThings();
+		draw_visible_translucent_surfaces_and_things();
 
 		// Draw lights
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glEnable(GL_BLEND);
 		for(const auto& light_thing : visible_thing_scratch) {
-			const auto& thing = currentModel->Things[std::get<0>(light_thing)];
+			const auto& thing = currentModel->things[std::get<0>(light_thing)];
 
-			float light = thing.Light + ((thing.ActorFlags & Flags::ActorFlag::HasFieldlight) ? thing.LightIntensity : 0.0f);
+			float light = thing.light + ((thing.actor_flags & flags::actor_flag::HasFieldlight) ? thing.light_intensity : 0.0f);
 
 			if(light <= 0.0f) {
 				continue;
 			}
 
-			SetCurrentShader(lightShader, thing.Position + thing.LightOffset, currentModel->CameraPosition, light, light);
+			set_current_shader(lightShader, thing.position + thing.light_offset, currentModel->camera_position, light, light);
 
-			DrawVisibleDiffuseSurfaces();
-			DrawVisibleTranslucentSurfacesAndThings();
+			draw_visible_diffuse_surfaces();
+			draw_visible_translucent_surfaces_and_things();
 		}
 
 		glDepthMask(GL_TRUE);
@@ -348,160 +348,160 @@ void Gorc::Game::World::Level::LevelView::Draw(double dt, const Math::Box<2, uns
 
 		/*
 		// Enable debug drawing for physics.
-		ViewMatrix = Matrix<float>::MakeLookMatrix(currentModel->CameraPosition * PhysicsWorldScale,
+		ViewMatrix = matrix<float>::make_look_matrix(currentModel->CameraPosition * PhysicsWorldScale,
 				currentModel->CameraLook, currentModel->CameraUp);
-		SetCurrentShader(surfaceShader, sector_tint);
+		set_current_shader(surfaceShader, sector_tint);
 		currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
 		currentModel->DynamicsWorld.debugDrawWorld();
 		*/
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawSurface(unsigned int surf_num, const Content::Assets::LevelSector& sector, float alpha) {
-	const auto& surface = currentModel->Surfaces[surf_num];
-	const auto& lev = currentModel->Level;
+void gorc::game::world::level::level_view::draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha) {
+	const auto& surface = currentModel->surfaces[surf_num];
+	const auto& lev = currentModel->level;
 
-	if(surface.Material >= 0) {
-		const auto& material_entry = currentModel->Level.Materials[surface.Material];
+	if(surface.material >= 0) {
+		const auto& material_entry = currentModel->level.materials[surface.material];
 		const auto& material = std::get<0>(material_entry);
 
-		Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
-				1.0f / static_cast<float>(material->Height));
+		vector<2> tex_scale = make_vector(1.0f / static_cast<float>(material->width),
+				1.0f / static_cast<float>(material->height));
 
-		int surfaceCelNumber = surface.CelNumber;
+		int surfaceCelNumber = surface.cel_number;
 		int actualSurfaceCelNumber;
 		if(surfaceCelNumber >= 0) {
-			actualSurfaceCelNumber = surfaceCelNumber % material->Cels.size();
+			actualSurfaceCelNumber = surfaceCelNumber % material->cels.size();
 		}
 		else {
 			// TODO: Add MaterialAnim.
 			actualSurfaceCelNumber = 0;
-			//actualSurfaceCelNumber = currentModel->MaterialCelNumber[surface.Material] % material->Cels.size();
+			//actualSurfaceCelNumber = currentModel->MaterialCelNumber[surface.material] % material->Cels.size();
 		}
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, material->Cels[actualSurfaceCelNumber].Diffuse);
+		glBindTexture(GL_TEXTURE_2D, material->cels[actualSurfaceCelNumber].diffuse);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, material->Cels[actualSurfaceCelNumber].Light);
+		glBindTexture(GL_TEXTURE_2D, material->cels[actualSurfaceCelNumber].light);
 
 		glBegin(GL_TRIANGLES);
 
-		Vector<3> first_geo = lev.Vertices[std::get<0>(surface.Vertices[0])];
-		Vector<2> first_tex = lev.TextureVertices[std::get<1>(surface.Vertices[0])] + surface.TextureOffset;
-		float first_intensity = std::get<2>(surface.Vertices[0]) + sector.ExtraLight + surface.ExtraLight;
+		vector<3> first_geo = lev.vertices[std::get<0>(surface.vertices[0])];
+		vector<2> first_tex = lev.texture_vertices[std::get<1>(surface.vertices[0])] + surface.texture_offset;
+		float first_intensity = std::get<2>(surface.vertices[0]) + sector.extra_light + surface.extra_light;
 
-		for(size_t i = 2; i < surface.Vertices.size(); ++i) {
-			Vector<3> second_geo = lev.Vertices[std::get<0>(surface.Vertices[i - 1])];
-			Vector<2> second_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i - 1])] + surface.TextureOffset;
-			float second_intensity = std::get<2>(surface.Vertices[i - 1]) + sector.ExtraLight + surface.ExtraLight;
+		for(size_t i = 2; i < surface.vertices.size(); ++i) {
+			vector<3> second_geo = lev.vertices[std::get<0>(surface.vertices[i - 1])];
+			vector<2> second_tex = lev.texture_vertices[std::get<1>(surface.vertices[i - 1])] + surface.texture_offset;
+			float second_intensity = std::get<2>(surface.vertices[i - 1]) + sector.extra_light + surface.extra_light;
 
-			Vector<3> third_geo = lev.Vertices[std::get<0>(surface.Vertices[i])];
-			Vector<2> third_tex = lev.TextureVertices[std::get<1>(surface.Vertices[i])] + surface.TextureOffset;
-			float third_intensity = std::get<2>(surface.Vertices[i]) + sector.ExtraLight + surface.ExtraLight;
+			vector<3> third_geo = lev.vertices[std::get<0>(surface.vertices[i])];
+			vector<2> third_tex = lev.texture_vertices[std::get<1>(surface.vertices[i])] + surface.texture_offset;
+			float third_intensity = std::get<2>(surface.vertices[i]) + sector.extra_light + surface.extra_light;
 
-			glNormal3f(Get<X>(surface.Normal), Get<Y>(surface.Normal), Get<Z>(surface.Normal));
-			glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
+			glNormal3f(get<X>(surface.normal), get<Y>(surface.normal), get<Z>(surface.normal));
+			glTexCoord2f(get<X>(first_tex) * get<X>(tex_scale), get<Y>(first_tex) * get<Y>(tex_scale));
 			glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-			glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
+			glVertex3f(get<X>(first_geo), get<Y>(first_geo), get<Z>(first_geo));
 
-			glNormal3f(Get<X>(surface.Normal), Get<Y>(surface.Normal), Get<Z>(surface.Normal));
-			glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
+			glNormal3f(get<X>(surface.normal), get<Y>(surface.normal), get<Z>(surface.normal));
+			glTexCoord2f(get<X>(second_tex) * get<X>(tex_scale), get<Y>(second_tex) * get<Y>(tex_scale));
 			glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-			glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
+			glVertex3f(get<X>(second_geo), get<Y>(second_geo), get<Z>(second_geo));
 
-			glNormal3f(Get<X>(surface.Normal), Get<Y>(surface.Normal), Get<Z>(surface.Normal));
-			glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
+			glNormal3f(get<X>(surface.normal), get<Y>(surface.normal), get<Z>(surface.normal));
+			glTexCoord2f(get<X>(third_tex) * get<X>(tex_scale), get<Y>(third_tex) * get<Y>(tex_scale));
 			glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-			glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
+			glVertex3f(get<X>(third_geo), get<Y>(third_geo), get<Z>(third_geo));
 		}
 
 		glEnd();
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const Content::Assets::Model& model,
+void gorc::game::world::level::level_view::draw_mesh_node(const thing& thing, const content::assets::model& model,
 		int mesh_id, float sector_light) {
 	if(mesh_id < 0) {
 		return;
 	}
 
-	const Content::Assets::ModelNode& node = model.HierarchyNodes[mesh_id];
+	const content::assets::model_node& node = model.hierarchy_nodes[mesh_id];
 
-	PushMatrix();
+	push_matrix();
 
-	Math::Vector<3> anim_translate = Math::Zero<3>();
-	Math::Vector<3> anim_rotate = Math::Zero<3>();
+	vector<3> anim_translate = math::zero<3>();
+	vector<3> anim_rotate = math::zero<3>();
 
-	if(thing.AttachedKeyMix >= 0) {
-		std::tie(anim_translate, anim_rotate) = currentPresenter->KeyPresenter.GetNodeFrame(thing.AttachedKeyMix, mesh_id, node.Type);
+	if(thing.attached_key_mix >= 0) {
+		std::tie(anim_translate, anim_rotate) = currentPresenter->key_presenter.get_node_frame(thing.attached_key_mix, mesh_id, node.type);
 	}
 	else {
-		anim_translate += node.Offset;
-		anim_rotate += node.Rotation;
+		anim_translate += node.offset;
+		anim_rotate += node.rotation;
 	}
 
-	ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(anim_translate));
-	ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<1>(anim_rotate), Math::Vec(0.0f, 0.0f, 1.0f)));
-	ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<0>(anim_rotate), Math::Vec(1.0f, 0.0f, 0.0f)));
-	ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<2>(anim_rotate), Math::Vec(0.0f, 1.0f, 0.0f)));
-	ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(node.Pivot));
-	UpdateShaderModelMatrix();
+	concatenate_matrix(math::matrix<float>::make_translation_matrix(anim_translate));
+	concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<1>(anim_rotate), math::make_vector(0.0f, 0.0f, 1.0f)));
+	concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<0>(anim_rotate), math::make_vector(1.0f, 0.0f, 0.0f)));
+	concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<2>(anim_rotate), math::make_vector(0.0f, 1.0f, 0.0f)));
+	concatenate_matrix(math::matrix<float>::make_translation_matrix(node.pivot));
+	update_shader_model_matrix();
 
-	if(node.Mesh >= 0) {
-		const Content::Assets::ModelMesh& mesh = model.GeoSets.front().Meshes[node.Mesh];
-		for(const auto& face : mesh.Faces) {
-			if(face.Material >= 0) {
-				const auto& material = model.Materials[face.Material];
+	if(node.mesh >= 0) {
+		const content::assets::model_mesh& mesh = model.geosets.front().meshes[node.mesh];
+		for(const auto& face : mesh.faces) {
+			if(face.material >= 0) {
+				const auto& material = model.materials[face.material];
 
-				float alpha = (face.Type & Flags::FaceFlag::Translucent) ? 0.5f : 1.0f;
+				float alpha = (face.type & flags::face_flag::Translucent) ? 0.5f : 1.0f;
 
-				Vector<2> tex_scale = Vec(1.0f / static_cast<float>(material->Width),
-						1.0f / static_cast<float>(material->Height));
+				vector<2> tex_scale = make_vector(1.0f / static_cast<float>(material->width),
+						1.0f / static_cast<float>(material->height));
 
-				float light = sector_light + face.ExtraLight;
-				if(face.Light == Flags::LightMode::FullyLit || mesh.Light == Flags::LightMode::FullyLit) {
+				float light = sector_light + face.extra_light;
+				if(face.light == flags::light_mode::FullyLit || mesh.light == flags::light_mode::FullyLit) {
 					light = 1.0f;
 				}
 
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, material->Cels[0].Diffuse);
+				glBindTexture(GL_TEXTURE_2D, material->cels[0].diffuse);
 
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, material->Cels[0].Light);
+				glBindTexture(GL_TEXTURE_2D, material->cels[0].light);
 
 				glBegin(GL_TRIANGLES);
 
-				Vector<3> first_geo = mesh.Vertices[std::get<0>(face.Vertices[0])];
-				Vector<2> first_tex = mesh.TextureVertices[std::get<1>(face.Vertices[0])];
-				Vector<3> first_normal = mesh.VertexNormals[std::get<0>(face.Vertices[0])];
+				vector<3> first_geo = mesh.vertices[std::get<0>(face.vertices[0])];
+				vector<2> first_tex = mesh.texture_vertices[std::get<1>(face.vertices[0])];
+				vector<3> first_normal = mesh.vertex_normals[std::get<0>(face.vertices[0])];
 				float first_intensity = light;
 
-				for(size_t i = 2; i < face.Vertices.size(); ++i) {
-					Vector<3> second_geo = mesh.Vertices[std::get<0>(face.Vertices[i - 1])];
-					Vector<2> second_tex = mesh.TextureVertices[std::get<1>(face.Vertices[i - 1])];
-					Vector<3> second_normal = mesh.VertexNormals[std::get<0>(face.Vertices[i - 1])];
+				for(size_t i = 2; i < face.vertices.size(); ++i) {
+					vector<3> second_geo = mesh.vertices[std::get<0>(face.vertices[i - 1])];
+					vector<2> second_tex = mesh.texture_vertices[std::get<1>(face.vertices[i - 1])];
+					vector<3> second_normal = mesh.vertex_normals[std::get<0>(face.vertices[i - 1])];
 					float second_intensity = light;
 
-					Vector<3> third_geo = mesh.Vertices[std::get<0>(face.Vertices[i])];
-					Vector<2> third_tex = mesh.TextureVertices[std::get<1>(face.Vertices[i])];
-					Vector<3> third_normal = mesh.VertexNormals[std::get<0>(face.Vertices[i])];
+					vector<3> third_geo = mesh.vertices[std::get<0>(face.vertices[i])];
+					vector<2> third_tex = mesh.texture_vertices[std::get<1>(face.vertices[i])];
+					vector<3> third_normal = mesh.vertex_normals[std::get<0>(face.vertices[i])];
 					float third_intensity = light;
 
-					glNormal3f(Get<X>(first_normal), Get<Y>(first_normal), Get<Z>(first_normal));
-					glTexCoord2f(Get<X>(first_tex) * Get<X>(tex_scale), Get<Y>(first_tex) * Get<Y>(tex_scale));
+					glNormal3f(get<X>(first_normal), get<Y>(first_normal), get<Z>(first_normal));
+					glTexCoord2f(get<X>(first_tex) * get<X>(tex_scale), get<Y>(first_tex) * get<Y>(tex_scale));
 					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-					glVertex3f(Get<X>(first_geo), Get<Y>(first_geo), Get<Z>(first_geo));
+					glVertex3f(get<X>(first_geo), get<Y>(first_geo), get<Z>(first_geo));
 
-					glNormal3f(Get<X>(second_normal), Get<Y>(second_normal), Get<Z>(second_normal));
-					glTexCoord2f(Get<X>(second_tex) * Get<X>(tex_scale), Get<Y>(second_tex) * Get<Y>(tex_scale));
+					glNormal3f(get<X>(second_normal), get<Y>(second_normal), get<Z>(second_normal));
+					glTexCoord2f(get<X>(second_tex) * get<X>(tex_scale), get<Y>(second_tex) * get<Y>(tex_scale));
 					glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-					glVertex3f(Get<X>(second_geo), Get<Y>(second_geo), Get<Z>(second_geo));
+					glVertex3f(get<X>(second_geo), get<Y>(second_geo), get<Z>(second_geo));
 
-					glNormal3f(Get<X>(third_normal), Get<Y>(third_normal), Get<Z>(third_normal));
-					glTexCoord2f(Get<X>(third_tex) * Get<X>(tex_scale), Get<Y>(third_tex) * Get<Y>(tex_scale));
+					glNormal3f(get<X>(third_normal), get<Y>(third_normal), get<Z>(third_normal));
+					glTexCoord2f(get<X>(third_tex) * get<X>(tex_scale), get<Y>(third_tex) * get<Y>(tex_scale));
 					glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-					glVertex3f(Get<X>(third_geo), Get<Y>(third_geo), Get<Z>(third_geo));
+					glVertex3f(get<X>(third_geo), get<Y>(third_geo), get<Z>(third_geo));
 				}
 
 				glEnd();
@@ -509,84 +509,84 @@ void Gorc::Game::World::Level::LevelView::DrawMeshNode(const Thing& thing, const
 		}
 	}
 
-	ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(-node.Pivot));
+	concatenate_matrix(math::matrix<float>::make_translation_matrix(-node.pivot));
 
-	DrawMeshNode(thing, model, node.Child, sector_light);
-	PopMatrix();
-	UpdateShaderModelMatrix();
+	draw_mesh_node(thing, model, node.child, sector_light);
+	pop_matrix();
+	update_shader_model_matrix();
 
-	DrawMeshNode(thing, model, node.Sibling, sector_light);
+	draw_mesh_node(thing, model, node.sibling, sector_light);
 }
 
-void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const Content::Assets::Sprite& sprite, float sector_light) {
-	if(sprite.Material) {
-		float light = sector_light + sprite.ExtraLight;
-		if(sprite.LightMode == Flags::LightMode::FullyLit) {
+void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light) {
+	if(sprite.material) {
+		float light = sector_light + sprite.extra_light;
+		if(sprite.light_mode == flags::light_mode::FullyLit) {
 			light = 1.0f;
 		}
 
-		Vector<3> offset = Cross(currentModel->CameraLook, currentModel->CameraUp) * Get<X>(sprite.Offset) +
-				currentModel->CameraLook * Get<Y>(sprite.Offset) +
-				currentModel->CameraUp * Get<Z>(sprite.Offset);
-		ConcatenateMatrix(Matrix<float>::MakeTranslationMatrix(thing.Position + offset));
+		vector<3> offset = cross(currentModel->camera_look, currentModel->camera_up) * get<X>(sprite.offset) +
+				currentModel->camera_look * get<Y>(sprite.offset) +
+				currentModel->camera_up * get<Z>(sprite.offset);
+		concatenate_matrix(matrix<float>::make_translation_matrix(thing.position + offset));
 
-		Matrix<float> new_model = Matrix<float>::MakeIdentityMatrix();
+		matrix<float> new_model = matrix<float>::make_identity_matrix();
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
-				new_model.SetValue(i, j, ViewMatrix.GetValue(j, i));
+				new_model.set_value(i, j, view_matrix.get_value(j, i));
 			}
 		}
-		ConcatenateMatrix(new_model);
+		concatenate_matrix(new_model);
 
-		UpdateShaderModelMatrix();
+		update_shader_model_matrix();
 
 		// TODO: Currently plays animation over duration of timer. Behavior should be verified.
 		int current_frame = 0;
-		if(thing.Timer) {
-			current_frame = static_cast<int>(std::floor(sprite.Material->Cels.size() * thing.TimeAlive / thing.Timer)) % sprite.Material->Cels.size();
+		if(thing.timer) {
+			current_frame = static_cast<int>(std::floor(sprite.material->cels.size() * thing.time_alive / thing.timer)) % sprite.material->cels.size();
 		}
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, sprite.Material->Cels[current_frame].Diffuse);
+		glBindTexture(GL_TEXTURE_2D, sprite.material->cels[current_frame].diffuse);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, sprite.Material->Cels[current_frame].Light);
+		glBindTexture(GL_TEXTURE_2D, sprite.material->cels[current_frame].light);
 
-		Vector<3> sprite_middle = Zero<3>();//sprite.Offset;
-		Vector<3> horiz_off = Math::Vec(1.0f,0.0f,0.0f) * sprite.Width * 0.5f;
-		Vector<3> vert_off = Math::Vec(0.0f,1.0f,0.0f) * sprite.Height * 0.5f;
+		vector<3> sprite_middle = zero<3>();//sprite.Offset;
+		vector<3> horiz_off = math::make_vector(1.0f,0.0f,0.0f) * sprite.width * 0.5f;
+		vector<3> vert_off = math::make_vector(0.0f,1.0f,0.0f) * sprite.height * 0.5f;
 
-		Vector<3> sprite_vx1 = sprite_middle + horiz_off + vert_off;
-		Vector<3> sprite_vx2 = sprite_middle + horiz_off - vert_off;
-		Vector<3> sprite_vx3 = sprite_middle - horiz_off - vert_off;
-		Vector<3> sprite_vx4 = sprite_middle - horiz_off + vert_off;
+		vector<3> sprite_vx1 = sprite_middle + horiz_off + vert_off;
+		vector<3> sprite_vx2 = sprite_middle + horiz_off - vert_off;
+		vector<3> sprite_vx3 = sprite_middle - horiz_off - vert_off;
+		vector<3> sprite_vx4 = sprite_middle - horiz_off + vert_off;
 
-		Vector<3> sprite_normal = Math::Vec(0.0f, 1.0f, 0.0f);
+		vector<3> sprite_normal = math::make_vector(0.0f, 1.0f, 0.0f);
 
 		glDepthMask(GL_FALSE);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0f, 1.0f);
 		glBegin(GL_QUADS);
 
-		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
 		glTexCoord2f(1,0);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx1), Get<Y>(sprite_vx1), Get<Z>(sprite_vx1));
+		glVertex3f(get<X>(sprite_vx1), get<Y>(sprite_vx1), get<Z>(sprite_vx1));
 
-		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
 		glTexCoord2f(1,1);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx2), Get<Y>(sprite_vx2), Get<Z>(sprite_vx2));
+		glVertex3f(get<X>(sprite_vx2), get<Y>(sprite_vx2), get<Z>(sprite_vx2));
 
-		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
 		glTexCoord2f(0,1);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx3), Get<Y>(sprite_vx3), Get<Z>(sprite_vx3));
+		glVertex3f(get<X>(sprite_vx3), get<Y>(sprite_vx3), get<Z>(sprite_vx3));
 
-		glNormal3f(Get<X>(sprite_normal), Get<Y>(sprite_normal), Get<Z>(sprite_normal));
+		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
 		glTexCoord2f(0,0);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(Get<X>(sprite_vx4), Get<Y>(sprite_vx4), Get<Z>(sprite_vx4));
+		glVertex3f(get<X>(sprite_vx4), get<Y>(sprite_vx4), get<Z>(sprite_vx4));
 
 		glEnd();
 		glDepthMask(GL_TRUE);
@@ -594,33 +594,33 @@ void Gorc::Game::World::Level::LevelView::DrawSprite(const Thing& thing, const C
 	}
 }
 
-void Gorc::Game::World::Level::LevelView::DrawThing(const Thing& thing) {
-	if(thing.Flags & Flags::ThingFlag::Invisible) {
+void gorc::game::world::level::level_view::draw_thing(const thing& thing) {
+	if(thing.flags & flags::thing_flag::Invisible) {
 		return;
 	}
 
-	float sector_light = currentModel->Sectors[thing.Sector].AmbientLight
-			+ currentModel->Sectors[thing.Sector].ExtraLight;
+	float sector_light = currentModel->sectors[thing.sector].ambient_light
+			+ currentModel->sectors[thing.sector].extra_light;
 
-	if(thing.Model3d) {
-		PushMatrix();
+	if(thing.model_3d) {
+		push_matrix();
 
-		ConcatenateMatrix(Math::Matrix<float>::MakeTranslationMatrix(thing.Position));
-		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<1>(thing.Orientation), Math::Vec(0.0f, 0.0f, 1.0f)));
-		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<0>(thing.Orientation), Math::Vec(1.0f, 0.0f, 0.0f)));
-		ConcatenateMatrix(Math::Matrix<float>::MakeRotationMatrix(Math::Get<2>(thing.Orientation), Math::Vec(0.0f, 1.0f, 0.0f)));
+		concatenate_matrix(math::matrix<float>::make_translation_matrix(thing.position));
+		concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<1>(thing.orientation), math::make_vector(0.0f, 0.0f, 1.0f)));
+		concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<0>(thing.orientation), math::make_vector(1.0f, 0.0f, 0.0f)));
+		concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<2>(thing.orientation), math::make_vector(0.0f, 1.0f, 0.0f)));
 
-		UpdateShaderModelMatrix();
+		update_shader_model_matrix();
 
-		DrawMeshNode(thing, *thing.Model3d, 0, sector_light);
+		draw_mesh_node(thing, *thing.model_3d, 0, sector_light);
 
-		PopMatrix();
-		UpdateShaderModelMatrix();
+		pop_matrix();
+		update_shader_model_matrix();
 	}
-	else if(thing.Sprite) {
-		PushMatrix();
-		DrawSprite(thing, *thing.Sprite, sector_light);
-		PopMatrix();
-		UpdateShaderModelMatrix();
+	else if(thing.sprite) {
+		push_matrix();
+		draw_sprite(thing, *thing.sprite, sector_light);
+		pop_matrix();
+		update_shader_model_matrix();
 	}
 }

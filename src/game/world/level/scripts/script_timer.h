@@ -3,17 +3,17 @@
 #include "cog/vm/value.h"
 #include "script_instance.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Scripts {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace scripts {
 
-class ScriptTimer {
+class script_timer {
 public:
-	double Delay;
-	int InstanceId;
-	Cog::VM::Value Id, Param0, Param1;
+	double delay;
+	int instance_id;
+	cog::vm::value id, param0, param1;
 };
 
 }

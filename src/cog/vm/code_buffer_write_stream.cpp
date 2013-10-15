@@ -1,6 +1,6 @@
 #include "code_buffer_write_stream.h"
 
-Gorc::Cog::VM::CodeBufferWriteStream::CodeBufferWriteStream(CodeBuffer& cBuffer)
+gorc::cog::vm::code_buffer_write_stream::code_buffer_write_stream(code_buffer& cBuffer)
 	: codeBuffer(cBuffer), streamPtr(0)
 {
 	return;

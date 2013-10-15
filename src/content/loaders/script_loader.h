@@ -3,19 +3,19 @@
 #include "content/loader.h"
 #include "cog/compiler.h"
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-class ScriptLoader : public Loader {
-	const Cog::Compiler& Compiler;
+class script_loader : public loader {
+	const cog::compiler& compiler;
 
 public:
-	static const std::vector<boost::filesystem::path> AssetRootPath;
+	static const std::vector<boost::filesystem::path> asset_root_path;
 
-	ScriptLoader(const Cog::Compiler& Compiler);
+	script_loader(const cog::compiler& compiler);
 
-	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) override;
+	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
 };
 
 }

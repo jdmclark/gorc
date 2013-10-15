@@ -3,20 +3,20 @@
 #include "content/loader.h"
 #include "content/assets/colormap.h"
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-class MaterialLoader : public Loader {
+class material_loader : public loader {
 protected:
-	const Assets::Colormap& Colormap;
+	const assets::colormap& colormap;
 
 public:
-	static const std::vector<boost::filesystem::path> AssetRootPath;
+	static const std::vector<boost::filesystem::path> asset_root_path;
 
-	MaterialLoader(const Assets::Colormap& Colormap);
+	material_loader(const assets::colormap& colormap);
 
-	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) override;
+	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
 };
 
 }

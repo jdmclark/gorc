@@ -12,17 +12,17 @@
 
 class CodegenTestFixture : public LanguageTestFixture {
 private:
-	void PopulateTables();
+	void populate_tables();
 
 public:
-	std::unordered_map<std::string, Gorc::Cog::VM::Value> ConstantTable;
-	std::unordered_map<std::string, Gorc::Cog::MessageId> MessageTable;
-	Gorc::Cog::Verbs::VerbTable VerbTable;
-	Gorc::Cog::Script Script;
+	std::unordered_map<std::string, gorc::cog::vm::value> ConstantTable;
+	std::unordered_map<std::string, gorc::cog::message_id> MessageTable;
+	gorc::cog::verbs::verb_table verb_table;
+	gorc::cog::script script;
 
 protected:
 	CodegenTestFixture(const boost::filesystem::path& BasePath);
-	CodegenTestFixture(const Gorc::Content::FileSystem& fs);
+	CodegenTestFixture(const gorc::content::filesystem& fs);
 
 public:
 	virtual void ParseFile(const boost::filesystem::path& file);

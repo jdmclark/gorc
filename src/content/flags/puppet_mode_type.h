@@ -1,9 +1,9 @@
 #pragma once
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class PuppetModeType : int {
+enum class puppet_mode_type : int {
 	Default = 0,
 	AimedWeapon = 1,
 	MeleeWeapon = 2,

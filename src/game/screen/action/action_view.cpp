@@ -1,12 +1,12 @@
 #include "action_view.h"
 #include "action_presenter.h"
 
-void Gorc::Game::Screen::Action::ActionView::Update(double dt) {
+void gorc::game::screen::action::action_view::update(double dt) {
 	if(currentPresenter) {
-		currentPresenter->Update(dt);
+		currentPresenter->update(dt);
 	}
 }
 
-void Gorc::Game::Screen::Action::ActionView::Draw(double dt, const Math::Box<2, unsigned int>& view_size) {
+void gorc::game::screen::action::action_view::draw(double dt, const box<2, unsigned int>& view_size) {
 	// TODO
 }

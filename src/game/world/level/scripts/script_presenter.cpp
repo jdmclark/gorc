@@ -3,160 +3,160 @@
 #include "game/components.h"
 #include "game/world/level/level_model.h"
 
-Gorc::Game::World::Level::Scripts::ScriptPresenter::ScriptPresenter(Components& components)
+gorc::game::world::level::scripts::script_presenter::script_presenter(class components& components)
 	: components(components), levelModel(nullptr), model(nullptr) {
 	return;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::Start(LevelModel& levelModel, ScriptModel& scriptModel) {
+void gorc::game::world::level::scripts::script_presenter::start(level_model& levelModel, script_model& scriptModel) {
 	this->levelModel = &levelModel;
 	model = &scriptModel;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::Update(double dt) {
-	// Update cogs
-	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
-		auto& cog = model->Cogs[i];
-		Cog::Instance& inst = *std::get<0>(cog);
-		ScriptTimerState& timer_state = std::get<1>(cog);
+void gorc::game::world::level::scripts::script_presenter::update(double dt) {
+	// update cogs
+	for(unsigned int i = 0; i < model->cogs.size(); ++i) {
+		auto& cog = model->cogs[i];
+		cog::instance& inst = *std::get<0>(cog);
+		script_timer_state& timer_state = std::get<1>(cog);
 
-		if(timer_state.TimerRemainingTime > 0.0) {
-			timer_state.TimerRemainingTime -= dt;
-			if(timer_state.TimerRemainingTime <= 0.0) {
-				timer_state.TimerRemainingTime = 0.0;
-				SendMessage(i, Cog::MessageId::Timer, -1, -1, Flags::MessageType::Nothing);
+		if(timer_state.timer_remaining_time > 0.0) {
+			timer_state.timer_remaining_time -= dt;
+			if(timer_state.timer_remaining_time <= 0.0) {
+				timer_state.timer_remaining_time = 0.0;
+				send_message(i, cog::message_id::timer, -1, -1, flags::message_type::nothing);
 			}
 		}
 
-		if(timer_state.PulseTime > 0.0) {
-			timer_state.PulseRemainingTime -= dt;
-			if(timer_state.PulseRemainingTime <= 0.0) {
-				timer_state.PulseRemainingTime = timer_state.PulseTime;
-				SendMessage(i, Cog::MessageId::Pulse, -1, -1, Flags::MessageType::Nothing);
+		if(timer_state.pulse_time > 0.0) {
+			timer_state.pulse_remaining_time -= dt;
+			if(timer_state.pulse_remaining_time <= 0.0) {
+				timer_state.pulse_remaining_time = timer_state.pulse_time;
+				send_message(i, cog::message_id::pulse, -1, -1, flags::message_type::nothing);
 			}
 		}
 	}
 
 	// Enqueue sleeping cogs
-	for(auto& cog : model->SleepingCogs) {
+	for(auto& cog : model->sleeping_cogs) {
 		std::get<0>(cog) -= dt;
 		if(std::get<0>(cog) <= 0.0) {
-			model->RunningCogState.push(std::get<1>(cog));
-			model->SleepingCogs.Destroy(cog);
+			model->running_cog_state.push(std::get<1>(cog));
+			model->sleeping_cogs.destroy(cog);
 		}
 	}
 
 	// Run sleeping cogs
-	RunWaitingCogs();
+	run_waiting_cogs();
 
-	// Update timers
-	for(auto& timer : model->Timers) {
-		timer.Delay -= dt;
-		if(timer.Delay <= 0.0) {
-			SendMessage(timer.InstanceId, Cog::MessageId::Timer, timer.Id, 0, Flags::MessageType::Nothing,
-					0, Flags::MessageType::Nothing, timer.Param0, timer.Param1);
-			model->Timers.Destroy(timer.GetId());
+	// update timers
+	for(auto& timer : model->timers) {
+		timer.delay -= dt;
+		if(timer.delay <= 0.0) {
+			send_message(timer.instance_id, cog::message_id::timer, timer.id, 0, flags::message_type::nothing,
+					0, flags::message_type::nothing, timer.param0, timer.param1);
+			model->timers.destroy(timer.get_id());
 		}
 	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::RunWaitingCogs() {
-	while(!model->RunningCogState.empty()) {
-		Cog::Instance& inst = *std::get<0>(model->Cogs[model->RunningCogState.top().InstanceId]);
-		VirtualMachine.Execute(inst.Heap, inst.Script.Code, model->RunningCogState.top().ProgramCounter, components.VerbTable);
-		model->RunningCogState.pop();
+void gorc::game::world::level::scripts::script_presenter::run_waiting_cogs() {
+	while(!model->running_cog_state.empty()) {
+		cog::instance& inst = *std::get<0>(model->cogs[model->running_cog_state.top().instance_id]);
+		VirtualMachine.execute(inst.heap, inst.script.code, model->running_cog_state.top().program_counter, components.verb_table);
+		model->running_cog_state.pop();
 	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::ResumeWaitForStop(int wait_thing) {
+void gorc::game::world::level::scripts::script_presenter::resume_wait_for_stop(int wait_thing) {
 	// Enqueue waiting cogs
-	for(auto& wait_cog : model->WaitForStopCogs) {
+	for(auto& wait_cog : model->wait_for_stop_cogs) {
 		if(std::get<0>(wait_cog) == wait_thing) {
-			model->RunningCogState.push(std::get<1>(wait_cog));
-			model->WaitForStopCogs.Destroy(wait_cog);
+			model->running_cog_state.push(std::get<1>(wait_cog));
+			model->wait_for_stop_cogs.destroy(wait_cog);
 		}
 	}
 
-	RunWaitingCogs();
+	run_waiting_cogs();
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelDummyInstances(int count) {
-	// Create empty, non-functional COG instances for padding out the list of level instances.
+void gorc::game::world::level::scripts::script_presenter::create_level_dummy_instances(int count) {
+	// create empty, non-functional COG instances for padding out the list of level instances.
 	for(int i = 0; i < count; ++i) {
-		model->Cogs.emplace_back(std::unique_ptr<Cog::Instance>(nullptr), ScriptTimerState());
+		model->cogs.emplace_back(std::unique_ptr<cog::instance>(nullptr), script_timer_state());
 	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(int index, const Cog::Script& script, Content::Manager& manager,
-		Cog::Compiler& compiler, const std::vector<Cog::VM::Value>& values) {
-	auto& cog_inst_pair = model->Cogs[index];
-	std::get<0>(cog_inst_pair) = std::unique_ptr<Cog::Instance>(new Cog::Instance(script));
-	std::get<1>(cog_inst_pair) = ScriptTimerState();
+void gorc::game::world::level::scripts::script_presenter::create_level_cog_instance(int index, const cog::script& script, content::manager& manager,
+		cog::compiler& compiler, const std::vector<cog::vm::value>& values) {
+	auto& cog_inst_pair = model->cogs[index];
+	std::get<0>(cog_inst_pair) = std::unique_ptr<cog::instance>(new cog::instance(script));
+	std::get<1>(cog_inst_pair) = script_timer_state();
 
-	Cog::Instance& inst = *std::get<0>(cog_inst_pair);
+	cog::instance& inst = *std::get<0>(cog_inst_pair);
 
-	inst.Heap.resize(script.SymbolTable.size());
+	inst.heap.resize(script.symbol_table.size());
 
-	auto it = script.SymbolTable.begin();
-	auto jt = inst.Heap.begin();
+	auto it = script.symbol_table.begin();
+	auto jt = inst.heap.begin();
 	auto kt = values.begin();
 
-	for( ; it != script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		if(kt != values.end() && !it->Local && it->Type != Cog::Symbols::SymbolType::Message) {
+	for( ; it != script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
+		if(kt != values.end() && !it->local && it->type != cog::symbols::symbol_type::message) {
 			(*jt) = *kt;
 			++kt;
 		}
 		else {
-			(*jt) = it->DefaultValue;
+			(*jt) = it->default_value;
 		}
 	}
 
 	// Load instance resources and set flags
-	it = script.SymbolTable.begin();
-	jt = inst.Heap.begin();
+	it = script.symbol_table.begin();
+	jt = inst.heap.begin();
 
-	for( ; it != script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		switch(it->Type) {
-		case Cog::Symbols::SymbolType::Material:
+	for( ; it != script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
+		switch(it->type) {
+		case cog::symbols::symbol_type::material:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Material>(static_cast<const char*>(*jt), *levelModel->Level.MasterColormap);
+				(*jt) = manager.load_id<content::assets::material>(static_cast<const char*>(*jt), *levelModel->level.master_colormap);
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Model:
+		case cog::symbols::symbol_type::model:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Model>(static_cast<const char*>(*jt), *levelModel->Level.MasterColormap);
+				(*jt) = manager.load_id<content::assets::model>(static_cast<const char*>(*jt), *levelModel->level.master_colormap);
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Sound:
+		case cog::symbols::symbol_type::sound:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Sound>(static_cast<const char*>(*jt));
+				(*jt) = manager.load_id<content::assets::sound>(static_cast<const char*>(*jt));
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Keyframe:
+		case cog::symbols::symbol_type::keyframe:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Animation>(static_cast<const char*>(*jt));
+				(*jt) = manager.load_id<content::assets::animation>(static_cast<const char*>(*jt));
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Template: {
-			auto it = levelModel->Level.TemplateMap.find(static_cast<const char*>(*jt));
-			if(it == levelModel->Level.TemplateMap.end()) {
-				// TODO: Template not found, report error.
+		case cog::symbols::symbol_type::thing_template: {
+			auto it = levelModel->level.template_map.find(static_cast<const char*>(*jt));
+			if(it == levelModel->level.template_map.end()) {
+				// TODO: thing_template not found, report error.
 				(*jt) = -1;
 			}
 			else {
@@ -165,36 +165,36 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Cog: {
+		case cog::symbols::symbol_type::cog: {
 			// Already an integer index.
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Sector: {
+		case cog::symbols::symbol_type::sector: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				levelModel->Sectors[index].Flags += Flags::SectorFlag::CogLinked;
+				levelModel->sectors[index].flags += flags::sector_flag::CogLinked;
 			}
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Surface: {
+		case cog::symbols::symbol_type::surface: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				levelModel->Surfaces[index].Flags += Flags::SurfaceFlag::CogLinked;
+				levelModel->surfaces[index].flags += flags::surface_flag::CogLinked;
 			}
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Thing: {
+		case cog::symbols::symbol_type::thing: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				levelModel->Things[index].Flags += Flags::ThingFlag::CogLinked;
+				levelModel->things[index].flags += flags::thing_flag::CogLinked;
 			}
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Ai:
+		case cog::symbols::symbol_type::ai:
 			// TODO: Handle AI loading.
 		default:
 			break;
@@ -202,75 +202,75 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateLevelCogInstance(
 	}
 
 	// Send startup message
-	SendMessage(index, Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
+	send_message(index, cog::message_id::startup, -1, -1, flags::message_type::nothing);
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateGlobalCogInstance(const Cog::Script& script,
-		Content::Manager& manager, Cog::Compiler& compiler) {
-	if(model->GlobalScriptInstances.find(&script) != model->GlobalScriptInstances.end()) {
+void gorc::game::world::level::scripts::script_presenter::create_global_cog_instance(const cog::script& script,
+		content::manager& manager, cog::compiler& compiler) {
+	if(model->global_script_instances.find(&script) != model->global_script_instances.end()) {
 		// Instance already created.
 		return;
 	}
 
-	model->Cogs.emplace_back(std::unique_ptr<Cog::Instance>(new Cog::Instance(script)), ScriptTimerState());
-	Cog::Instance& inst = *std::get<0>(model->Cogs.back());
-	model->GlobalScriptInstances.emplace(&script, model->Cogs.size() - 1);
+	model->cogs.emplace_back(std::unique_ptr<cog::instance>(new cog::instance(script)), script_timer_state());
+	cog::instance& inst = *std::get<0>(model->cogs.back());
+	model->global_script_instances.emplace(&script, model->cogs.size() - 1);
 
-	inst.Heap.resize(script.SymbolTable.size());
+	inst.heap.resize(script.symbol_table.size());
 
-	auto it = script.SymbolTable.begin();
-	auto jt = inst.Heap.begin();
+	auto it = script.symbol_table.begin();
+	auto jt = inst.heap.begin();
 
-	for( ; it != script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		(*jt) = it->DefaultValue;
+	for( ; it != script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
+		(*jt) = it->default_value;
 	}
 
 	// Load instance resources and set flags
-	it = script.SymbolTable.begin();
-	jt = inst.Heap.begin();
+	it = script.symbol_table.begin();
+	jt = inst.heap.begin();
 
-	for( ; it != script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-		switch(it->Type) {
-		case Cog::Symbols::SymbolType::Material:
+	for( ; it != script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
+		switch(it->type) {
+		case cog::symbols::symbol_type::material:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Material>(static_cast<const char*>(*jt), *levelModel->Level.MasterColormap);
+				(*jt) = manager.load_id<content::assets::material>(static_cast<const char*>(*jt), *levelModel->level.master_colormap);
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Model:
+		case cog::symbols::symbol_type::model:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Model>(static_cast<const char*>(*jt), *levelModel->Level.MasterColormap);
+				(*jt) = manager.load_id<content::assets::model>(static_cast<const char*>(*jt), *levelModel->level.master_colormap);
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Sound:
+		case cog::symbols::symbol_type::sound:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Sound>(static_cast<const char*>(*jt));
+				(*jt) = manager.load_id<content::assets::sound>(static_cast<const char*>(*jt));
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Keyframe:
+		case cog::symbols::symbol_type::keyframe:
 			try {
-				(*jt) = manager.LoadId<Content::Assets::Animation>(static_cast<const char*>(*jt));
+				(*jt) = manager.load_id<content::assets::animation>(static_cast<const char*>(*jt));
 			}
 			catch(...) {
 				(*jt) = nullptr;
 			}
 			break;
 
-		case Cog::Symbols::SymbolType::Template: {
-			auto it = levelModel->Level.TemplateMap.find(static_cast<const char*>(*jt));
-			if(it == levelModel->Level.TemplateMap.end()) {
-				// TODO: Template not found, report error.
+		case cog::symbols::symbol_type::thing_template: {
+			auto it = levelModel->level.template_map.find(static_cast<const char*>(*jt));
+			if(it == levelModel->level.template_map.end()) {
+				// TODO: thing_template not found, report error.
 				(*jt) = -1;
 			}
 			else {
@@ -279,36 +279,36 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateGlobalCogInstance
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Cog: {
+		case cog::symbols::symbol_type::cog: {
 			// Already an integer index.
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Sector: {
+		case cog::symbols::symbol_type::sector: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				levelModel->Sectors[index].Flags += Flags::SectorFlag::CogLinked;
+				levelModel->sectors[index].flags += flags::sector_flag::CogLinked;
 			}
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Surface: {
+		case cog::symbols::symbol_type::surface: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				levelModel->Surfaces[index].Flags += Flags::SurfaceFlag::CogLinked;
+				levelModel->surfaces[index].flags += flags::surface_flag::CogLinked;
 			}
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Thing: {
+		case cog::symbols::symbol_type::thing: {
 			int index = static_cast<int>(*jt);
 			if(index >= 0) {
-				levelModel->Things[index].Flags += Flags::ThingFlag::CogLinked;
+				levelModel->things[index].flags += flags::thing_flag::CogLinked;
 			}
 		}
 		break;
 
-		case Cog::Symbols::SymbolType::Ai:
+		case cog::symbols::symbol_type::ai:
 			// TODO: Handle AI loading.
 		default:
 			break;
@@ -316,35 +316,35 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::CreateGlobalCogInstance
 	}
 
 	// Send startup message
-	SendMessage(model->Cogs.size() - 1, Cog::MessageId::Startup, -1, -1, Flags::MessageType::Nothing);
+	send_message(model->cogs.size() - 1, cog::message_id::startup, -1, -1, flags::message_type::nothing);
 }
 
-int Gorc::Game::World::Level::Scripts::ScriptPresenter::GetGlobalCogInstance(Cog::Script const* script) const {
-	auto it = model->GlobalScriptInstances.find(script);
-	if(it != model->GlobalScriptInstances.end()) {
+int gorc::game::world::level::scripts::script_presenter::get_global_cog_instance(cog::script const* script) const {
+	auto it = model->global_script_instances.find(script);
+	if(it != model->global_script_instances.end()) {
 		return it->second;
 	}
 
 	return -1;
 }
 
-Gorc::Cog::VM::Value Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessage(int InstanceId, Cog::MessageId message,
-		int SenderId, int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3) {
+gorc::cog::vm::value gorc::game::world::level::scripts::script_presenter::send_message(int InstanceId, cog::message_id message,
+		int SenderId, int SenderRef, flags::message_type SenderType,
+		int SourceRef, flags::message_type SourceType,
+		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
 	if(InstanceId < 0) {
 		return 0;
 	}
 
-	auto& instance = std::get<0>(model->Cogs[InstanceId]);
+	auto& instance = std::get<0>(model->cogs[InstanceId]);
 	if(instance) {
-		model->RunningCogState.emplace(InstanceId, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
+		model->running_cog_state.emplace(InstanceId, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
 
-		instance->Call(components.VerbTable, VirtualMachine, message);
+		instance->call(components.verb_table, VirtualMachine, message);
 
-		Cog::VM::Value rex_val = model->RunningCogState.top().ReturnExValue;
+		cog::vm::value rex_val = model->running_cog_state.top().returnex_value;
 
-		model->RunningCogState.pop();
+		model->running_cog_state.pop();
 
 		return rex_val;
 	}
@@ -352,99 +352,99 @@ Gorc::Cog::VM::Value Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMes
 	return 0;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToAll(Cog::MessageId message,
-		int SenderId, int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3) {
-	for(unsigned int i = 0; i < model->Cogs.size(); ++i) {
-		SendMessage(i, message, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
+void gorc::game::world::level::scripts::script_presenter::send_message_to_all(cog::message_id message,
+		int SenderId, int SenderRef, flags::message_type SenderType,
+		int SourceRef, flags::message_type SourceType,
+		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
+	for(unsigned int i = 0; i < model->cogs.size(); ++i) {
+		send_message(i, message, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
 	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog::MessageId message,
-		int SenderRef, Flags::MessageType SenderType,
-		int SourceRef, Flags::MessageType SourceType,
-		Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3) {
-	Cog::Symbols::SymbolType expectedSymbolType;
+void gorc::game::world::level::scripts::script_presenter::send_message_to_linked(cog::message_id message,
+		int SenderRef, flags::message_type SenderType,
+		int SourceRef, flags::message_type SourceType,
+		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
+	cog::symbols::symbol_type expectedsymbol_type;
 
 	int capture_cog = -1;
 	int class_cog = -1;
 
 	int source_mask = 0;
-	if(SourceType == Flags::MessageType::Thing) {
-		const auto& sender_thing = levelModel->Things[SourceRef];
-		source_mask = 1 << static_cast<int>(sender_thing.Type);
+	if(SourceType == flags::message_type::thing) {
+		const auto& sender_thing = levelModel->things[SourceRef];
+		source_mask = 1 << static_cast<int>(sender_thing.type);
 	}
 
 	switch(SenderType) {
-	case Flags::MessageType::Sector: {
-			expectedSymbolType = Cog::Symbols::SymbolType::Sector;
+	case flags::message_type::sector: {
+			expectedsymbol_type = cog::symbols::symbol_type::sector;
 
-			auto& sec = levelModel->Sectors[SenderRef];
-			if(!(sec.Flags & Flags::SectorFlag::CogLinked)) {
+			auto& sec = levelModel->sectors[SenderRef];
+			if(!(sec.flags & flags::sector_flag::CogLinked)) {
 				return;
 			}
 		}
 		break;
 
-	case Flags::MessageType::Surface: {
-			expectedSymbolType = Cog::Symbols::SymbolType::Surface;
+	case flags::message_type::surface: {
+			expectedsymbol_type = cog::symbols::symbol_type::surface;
 
-			auto& surf = levelModel->Surfaces[SenderRef];
-			if(!(surf.Flags & Flags::SurfaceFlag::CogLinked)) {
+			auto& surf = levelModel->surfaces[SenderRef];
+			if(!(surf.flags & flags::surface_flag::CogLinked)) {
 				return;
 			}
 		}
 		break;
 
-	case Flags::MessageType::Thing: {
-			expectedSymbolType = Cog::Symbols::SymbolType::Thing;
+	case flags::message_type::thing: {
+			expectedsymbol_type = cog::symbols::symbol_type::thing;
 
 			// Dispatch to capture cog
-			Thing& thing = levelModel->Things[SenderRef];
-			if(thing.CaptureCog >= 0) {
-				capture_cog = thing.CaptureCog;
-				SendMessage(capture_cog, message, -1, SenderRef, SenderType,
+			thing& thing = levelModel->things[SenderRef];
+			if(thing.capture_cog >= 0) {
+				capture_cog = thing.capture_cog;
+				send_message(capture_cog, message, -1, SenderRef, SenderType,
 						SourceRef, SourceType, Param0, Param1, Param2, Param3);
 			}
 
 			// Dispatch to class cog
-			if(thing.Cog) {
-				auto it = model->GlobalScriptInstances.find(&thing.Cog->Script);
-				if(it != model->GlobalScriptInstances.end()) {
+			if(thing.cog) {
+				auto it = model->global_script_instances.find(&thing.cog->script);
+				if(it != model->global_script_instances.end()) {
 					class_cog = it->second;
-					SendMessage(it->second, message, -1, SenderRef, SenderType,
+					send_message(it->second, message, -1, SenderRef, SenderType,
 							SourceRef, SourceType, Param0, Param1, Param2, Param3);
 				}
 			}
 
-			if(!(thing.Flags & Flags::ThingFlag::CogLinked)) {
+			if(!(thing.flags & flags::thing_flag::CogLinked)) {
 				return;
 			}
 		}
 		break;
 	}
 
-	for(int i = 0; i < levelModel->Level.Cogs.size(); ++i) {
+	for(int i = 0; i < levelModel->level.cogs.size(); ++i) {
 		if(i == class_cog || i == capture_cog) {
 			continue;
 		}
 
-		auto& inst_ptr = std::get<0>(model->Cogs[i]);
+		auto& inst_ptr = std::get<0>(model->cogs[i]);
 		if(!inst_ptr) {
 			continue;
 		}
 
-		Cog::Instance& inst = *inst_ptr;
+		cog::instance& inst = *inst_ptr;
 
-		auto it = inst.Script.SymbolTable.begin();
-		auto jt = inst.Heap.begin();
+		auto it = inst.script.symbol_table.begin();
+		auto jt = inst.heap.begin();
 
-		for(; it != inst.Script.SymbolTable.end() && jt != inst.Heap.end(); ++it, ++jt) {
-			if(!it->Nolink && it->Type == expectedSymbolType && static_cast<int>(*jt) == SenderRef
-					&& (!source_mask || (it->Mask & source_mask))) {
-				SendMessage(i, message,
-						it->Linkid, SenderRef, SenderType, SourceRef, SourceType,
+		for(; it != inst.script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
+			if(!it->no_link && it->type == expectedsymbol_type && static_cast<int>(*jt) == SenderRef
+					&& (!source_mask || (it->mask & source_mask))) {
+				send_message(i, message,
+						it->link_id, SenderRef, SenderType, SourceRef, SourceType,
 						Param0, Param1, Param2, Param3);
 				break;
 			}
@@ -452,125 +452,125 @@ void Gorc::Game::World::Level::Scripts::ScriptPresenter::SendMessageToLinked(Cog
 	}
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::SetPulse(float time) {
-	ScriptTimerState& state = std::get<1>(model->Cogs[model->RunningCogState.top().InstanceId]);
-	state.PulseTime = time;
-	state.PulseRemainingTime = time;
+void gorc::game::world::level::scripts::script_presenter::set_pulse(float time) {
+	script_timer_state& state = std::get<1>(model->cogs[model->running_cog_state.top().instance_id]);
+	state.pulse_time = time;
+	state.pulse_remaining_time = time;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::SetTimer(float time) {
-	std::get<1>(model->Cogs[model->RunningCogState.top().InstanceId]).TimerRemainingTime = time;
+void gorc::game::world::level::scripts::script_presenter::set_timer(float time) {
+	std::get<1>(model->cogs[model->running_cog_state.top().instance_id]).timer_remaining_time = time;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::SetTimerEx(float time, int id, Cog::VM::Value param0, Cog::VM::Value param1) {
-	ScriptTimer& timer = model->Timers.Create();
-	timer.InstanceId = model->RunningCogState.top().InstanceId;
-	timer.Delay = time;
-	timer.Id = id;
-	timer.Param0 = param0;
-	timer.Param1 = param1;
+void gorc::game::world::level::scripts::script_presenter::set_timer_ex(float time, int id, cog::vm::value param0, cog::vm::value param1) {
+	script_timer& timer = model->timers.create();
+	timer.instance_id = model->running_cog_state.top().instance_id;
+	timer.delay = time;
+	timer.id = id;
+	timer.param0 = param0;
+	timer.param1 = param1;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::Sleep(float time) {
-	ScriptContinuation continuation = model->RunningCogState.top();
+void gorc::game::world::level::scripts::script_presenter::sleep(float time) {
+	script_continuation continuation = model->running_cog_state.top();
 
-	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
+	continuation.program_counter = VirtualMachine.get_program_counter();
 
-	auto& sleep_tuple = model->SleepingCogs.Create();
+	auto& sleep_tuple = model->sleeping_cogs.create();
 	std::get<0>(sleep_tuple) = time;
 	std::get<1>(sleep_tuple) = continuation;
 
-	VirtualMachine.Abort();
+	VirtualMachine.abort();
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::WaitForStop(int thing) {
-	ScriptContinuation continuation = model->RunningCogState.top();
+void gorc::game::world::level::scripts::script_presenter::wait_for_stop(int thing) {
+	script_continuation continuation = model->running_cog_state.top();
 
-	continuation.ProgramCounter = VirtualMachine.GetProgramCounter();
+	continuation.program_counter = VirtualMachine.get_program_counter();
 
-	auto& sleep_tuple = model->WaitForStopCogs.Create();
+	auto& sleep_tuple = model->wait_for_stop_cogs.create();
 	std::get<0>(sleep_tuple) = thing;
 	std::get<1>(sleep_tuple) = continuation;
 
-	VirtualMachine.Abort();
+	VirtualMachine.abort();
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::CaptureThing(int thing_id) {
-	levelModel->Things[thing_id].CaptureCog = model->RunningCogState.top().InstanceId;
+void gorc::game::world::level::scripts::script_presenter::capture_thing(int thing_id) {
+	levelModel->things[thing_id].capture_cog = model->running_cog_state.top().instance_id;
 }
 
-void Gorc::Game::World::Level::Scripts::ScriptPresenter::RegisterVerbs(Cog::Verbs::VerbTable& verbTable, Components& components) {
-	verbTable.AddVerb<int, 1>("getparam", [&components](int param_num) {
-		return components.CurrentLevelPresenter->ScriptPresenter.GetParam(param_num);
+void gorc::game::world::level::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, class components& components) {
+	verbTable.add_verb<int, 1>("getparam", [&components](int param_num) {
+		return components.current_level_presenter->script_presenter.get_param(param_num);
 	});
 
-	verbTable.AddVerb<int, 0>("getsenderid", [&components]{
-		return components.CurrentLevelPresenter->ScriptPresenter.GetSenderId();
+	verbTable.add_verb<int, 0>("getsenderid", [&components]{
+		return components.current_level_presenter->script_presenter.get_sender_id();
 	});
 
-	verbTable.AddVerb<int, 0>("getsenderref", [&components]{
-		return components.CurrentLevelPresenter->ScriptPresenter.GetSenderRef();
+	verbTable.add_verb<int, 0>("getsenderref", [&components]{
+		return components.current_level_presenter->script_presenter.get_sender_ref();
 	});
 
-	verbTable.AddVerb<int, 0>("getsendertype", [&components]{
-		return components.CurrentLevelPresenter->ScriptPresenter.GetSenderType();
+	verbTable.add_verb<int, 0>("getsendertype", [&components]{
+		return components.current_level_presenter->script_presenter.get_sender_type();
 	});
 
-	verbTable.AddVerb<int, 0>("getsourceref", [&components]{
-		return components.CurrentLevelPresenter->ScriptPresenter.GetSourceRef();
+	verbTable.add_verb<int, 0>("getsourceref", [&components]{
+		return components.current_level_presenter->script_presenter.get_source_ref();
 	});
 
-	verbTable.AddVerb<int, 0>("getsourcetype", [&components]{
-		return components.CurrentLevelPresenter->ScriptPresenter.GetSourceType();
+	verbTable.add_verb<int, 0>("getsourcetype", [&components]{
+		return components.current_level_presenter->script_presenter.get_source_type();
 	});
 
-	verbTable.AddVerb<void, 1>("returnex", [&components](Cog::VM::Value value) {
-		components.CurrentLevelPresenter->ScriptPresenter.model->RunningCogState.top().ReturnExValue = value;
+	verbTable.add_verb<void, 1>("returnex", [&components](cog::vm::value value) {
+		components.current_level_presenter->script_presenter.model->running_cog_state.top().returnex_value = value;
 	});
 
-	verbTable.AddVerb<void, 2>("sendmessage", [&components](int cog_id, int message) {
-		components.CurrentLevelPresenter->ScriptPresenter.SendMessage(cog_id, static_cast<Cog::MessageId>(message),
-				-1, components.CurrentLevelPresenter->ScriptPresenter.model->RunningCogState.top().InstanceId, Flags::MessageType::Cog,
-				static_cast<int>(components.CurrentLevelPresenter->GetLocalPlayerThing()), Flags::MessageType::Thing);
+	verbTable.add_verb<void, 2>("sendmessage", [&components](int cog_id, int message) {
+		components.current_level_presenter->script_presenter.send_message(cog_id, static_cast<cog::message_id>(message),
+				-1, components.current_level_presenter->script_presenter.model->running_cog_state.top().instance_id, flags::message_type::cog,
+				static_cast<int>(components.current_level_presenter->get_local_player_thing()), flags::message_type::thing);
 	});
 
-	verbTable.AddVerb<Cog::VM::Value, 6>("sendmessageex", [&components](int cog_id, int message,
-			Cog::VM::Value param0, Cog::VM::Value param1, Cog::VM::Value param2, Cog::VM::Value param3) {
-		return components.CurrentLevelPresenter->ScriptPresenter.SendMessage(cog_id, static_cast<Cog::MessageId>(message),
-				-1, components.CurrentLevelPresenter->ScriptPresenter.model->RunningCogState.top().InstanceId, Flags::MessageType::Cog,
-				static_cast<int>(components.CurrentLevelPresenter->GetLocalPlayerThing()), Flags::MessageType::Thing,
+	verbTable.add_verb<cog::vm::value, 6>("sendmessageex", [&components](int cog_id, int message,
+			cog::vm::value param0, cog::vm::value param1, cog::vm::value param2, cog::vm::value param3) {
+		return components.current_level_presenter->script_presenter.send_message(cog_id, static_cast<cog::message_id>(message),
+				-1, components.current_level_presenter->script_presenter.model->running_cog_state.top().instance_id, flags::message_type::cog,
+				static_cast<int>(components.current_level_presenter->get_local_player_thing()), flags::message_type::thing,
 				param0, param1, param2, param3);
 	});
 
-	verbTable.AddVerb<void, 1>("setpulse", [&components](float time) {
-		components.CurrentLevelPresenter->ScriptPresenter.SetPulse(time);
+	verbTable.add_verb<void, 1>("setpulse", [&components](float time) {
+		components.current_level_presenter->script_presenter.set_pulse(time);
 	});
 
-	verbTable.AddVerb<void, 1>("settimer", [&components](float time) {
-		components.CurrentLevelPresenter->ScriptPresenter.SetTimer(time);
+	verbTable.add_verb<void, 1>("settimer", [&components](float time) {
+		components.current_level_presenter->script_presenter.set_timer(time);
 	});
 
-	verbTable.AddVerb<void, 4>("settimerex", [&components](float time, int id, Cog::VM::Value param0, Cog::VM::Value param1) {
-		components.CurrentLevelPresenter->ScriptPresenter.SetTimerEx(time, id, param0, param1);
+	verbTable.add_verb<void, 4>("settimerex", [&components](float time, int id, cog::vm::value param0, cog::vm::value param1) {
+		components.current_level_presenter->script_presenter.set_timer_ex(time, id, param0, param1);
 	});
 
-	verbTable.AddVerb<void, 1>("sleep", [&components](float time) {
-		components.CurrentLevelPresenter->ScriptPresenter.Sleep(time);
+	verbTable.add_verb<void, 1>("sleep", [&components](float time) {
+		components.current_level_presenter->script_presenter.sleep(time);
 	});
 
-	verbTable.AddVerb<void, 1>("waitforstop", [&components](int thing_id) {
-		components.CurrentLevelPresenter->ScriptPresenter.WaitForStop(thing_id);
+	verbTable.add_verb<void, 1>("waitforstop", [&components](int thing_id) {
+		components.current_level_presenter->script_presenter.wait_for_stop(thing_id);
 	});
 
-	verbTable.AddVerb<void, 1>("capturething", [&components](int thing_id) {
-		components.CurrentLevelPresenter->ScriptPresenter.CaptureThing(thing_id);
+	verbTable.add_verb<void, 1>("capturething", [&components](int thing_id) {
+		components.current_level_presenter->script_presenter.capture_thing(thing_id);
 	});
 
-	verbTable.AddVerb<int, 0>("getmastercog", [&components] {
-		return components.CurrentLevelPresenter->ScriptPresenter.GetMasterCog();
+	verbTable.add_verb<int, 0>("getmastercog", [&components] {
+		return components.current_level_presenter->script_presenter.get_master_cog();
 	});
 
-	verbTable.AddVerb<void, 1>("setmastercog", [&components](int cog) {
-		components.CurrentLevelPresenter->ScriptPresenter.SetMasterCog(cog);
+	verbTable.add_verb<void, 1>("setmastercog", [&components](int cog) {
+		components.current_level_presenter->script_presenter.set_master_cog(cog);
 	});
 }

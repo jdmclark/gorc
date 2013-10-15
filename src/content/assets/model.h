@@ -9,22 +9,22 @@
 
 #include <memory>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Model : public Asset {
+class model : public asset {
 public:
-	using Loader = Loaders::ModelLoader;
+	using loader = loaders::model_loader;
 
-	std::vector<std::string> MaterialEntries;
-	std::vector<Material const*> Materials;
+	std::vector<std::string> material_entries;
+	std::vector<material const*> materials;
 
-	float Radius;
-	Math::Vector<3> InsertOffset;
+	float radius;
+	vector<3> insert_offset;
 
-	std::vector<ModelGeoSet> GeoSets;
-	std::vector<ModelNode> HierarchyNodes;
+	std::vector<model_geoset> geosets;
+	std::vector<model_node> hierarchy_nodes;
 };
 
 }

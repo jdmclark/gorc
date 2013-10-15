@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class MeshNodeType : unsigned int {
+enum class mesh_node_type : unsigned int {
 	LowerBody		= 0x000F0,
 	UpperBody		= 0x0000F,
 

@@ -4,36 +4,36 @@
 #include "framework/place/presenter_mapper.h"
 #include <memory>
 
-namespace Gorc {
-namespace Game {
+namespace gorc {
+namespace game {
 
-class Components;
+class components;
 
-namespace World {
+namespace world {
 
-class PresenterMapper : public Gorc::Place::PresenterMapper<Place> {
+class presenter_mapper : public gorc::place::presenter_mapper<place> {
 private:
-	class PresenterMapperPlaceVisitor : public PlaceVisitor {
+	class presenter_mapper_place_visitor : public place_visitor {
 	private:
-		Components& components;
+		components& components;
 
 	public:
-		std::unique_ptr<Gorc::Place::Presenter> presenter;
+		std::unique_ptr<gorc::place::presenter> presenter;
 
-		PresenterMapperPlaceVisitor(Components& components);
+		presenter_mapper_place_visitor(class components& components);
 
-		void VisitNothingPlace(const Nothing::NothingPlace& place);
-		void VisitLevelPlace(const Level::LevelPlace& place);
+		void visit_nothing_place(const nothing::nothing_place& place);
+		void visit_level_place(const level::level_place& place);
 	};
 
-	Components* components;
+	components* components;
 
 public:
-	inline void SetComponents(Components& cmp) {
+	inline void set_components(class components& cmp) {
 		components = &cmp;
 	}
 
-	std::unique_ptr<Gorc::Place::Presenter> GetPresenter(const Place& place);
+	std::unique_ptr<gorc::place::presenter> get_presenter(const place& place);
 };
 
 }

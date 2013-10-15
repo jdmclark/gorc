@@ -2,13 +2,13 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Verbs {
+namespace gorc {
+namespace cog {
+namespace verbs {
 
-class VerbException : public Exception { };
-class UndefinedVerbException : public VerbException { };
-class VerbRedefinitionException : public VerbException { };
+class verb_exception : public exception { };
+class undefined_verb_exception : public verb_exception { };
+class verb_redefinition_exception : public verb_exception { };
 
 }
 }

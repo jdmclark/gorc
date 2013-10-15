@@ -3,26 +3,26 @@
 #include "report.h"
 #include <iosfwd>
 
-namespace Gorc {
-namespace Diagnostics {
+namespace gorc {
+namespace diagnostics {
 
-class StreamReport : public Report {
+class stream_report : public report {
 private:
 	unsigned int errorCount, warningCount;
 	std::ostream& stream;
 
 	void PrintFormattedError(const std::string& errorLevel, const std::string& stage, const std::string& reason);
-	void PrintLineFormattedError(const std::string& errorLevel, const std::string& stage, const std::string& reason, const ErrorLocation& location);
+	void PrintLineFormattedError(const std::string& errorLevel, const std::string& stage, const std::string& reason, const error_location& location);
 
 public:
-	StreamReport(std::ostream& stream);
+	stream_report(std::ostream& stream);
 
-	void AddError(const std::string& stage, const std::string& reason, const ErrorLocation& location);
-	void AddWarning(const std::string& stage, const std::string& reason, const ErrorLocation& location);
-	void AddCriticalError(const std::string& stage, const std::string& reason);
+	void add_error(const std::string& stage, const std::string& reason, const error_location& location);
+	void add_warning(const std::string& stage, const std::string& reason, const error_location& location);
+	void add_critical_error(const std::string& stage, const std::string& reason);
 
-	unsigned int GetErrorCount() const;
-	unsigned int GetWarningCount() const;
+	unsigned int get_error_count() const;
+	unsigned int get_warning_count() const;
 };
 
 }

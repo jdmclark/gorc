@@ -2,17 +2,17 @@
 
 #include "framework/math/vector.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class AnimationFrame {
+class animation_frame {
 public:
-	int Frame;
-	Math::Vector<3> Position;
-	Math::Vector<3> Orientation;
-	Math::Vector<3> DeltaPosition;
-	Math::Vector<3> DeltaOrientation;
+	int frame;
+	vector<3> position;
+	vector<3> orientation;
+	vector<3> delta_position;
+	vector<3> delta_orientation;
 };
 
 }

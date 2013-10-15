@@ -2,21 +2,21 @@
 #include "game/world/nothing/nothing_presenter.h"
 #include "game/world/level/level_presenter.h"
 
-Gorc::Game::World::PresenterMapper::PresenterMapperPlaceVisitor::PresenterMapperPlaceVisitor(Gorc::Game::Components& components)
+gorc::game::world::presenter_mapper::presenter_mapper_place_visitor::presenter_mapper_place_visitor(gorc::game::components& components)
 	: components(components) {
 	return;
 }
 
-void Gorc::Game::World::PresenterMapper::PresenterMapperPlaceVisitor::VisitNothingPlace(const Nothing::NothingPlace& place) {
-	presenter = std::unique_ptr<Gorc::Place::Presenter>(new Nothing::NothingPresenter(components));
+void gorc::game::world::presenter_mapper::presenter_mapper_place_visitor::visit_nothing_place(const nothing::nothing_place& place) {
+	presenter = std::unique_ptr<gorc::place::presenter>(new nothing::nothing_presenter(components));
 }
 
-void Gorc::Game::World::PresenterMapper::PresenterMapperPlaceVisitor::VisitLevelPlace(const Level::LevelPlace& place) {
-	presenter = std::unique_ptr<Gorc::Place::Presenter>(new Level::LevelPresenter(components, place));
+void gorc::game::world::presenter_mapper::presenter_mapper_place_visitor::visit_level_place(const level::level_place& place) {
+	presenter = std::unique_ptr<gorc::place::presenter>(new level::level_presenter(components, place));
 }
 
-std::unique_ptr<Gorc::Place::Presenter> Gorc::Game::World::PresenterMapper::GetPresenter(const Place& place) {
-	PresenterMapperPlaceVisitor v(*components);
-	place.Accept(v);
+std::unique_ptr<gorc::place::presenter> gorc::game::world::presenter_mapper::get_presenter(const place& place) {
+	presenter_mapper_place_visitor v(*components);
+	place.accept(v);
 	return std::move(v.presenter);
 }

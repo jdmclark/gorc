@@ -2,12 +2,12 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class MoveType : uint32_t {
-	None,
-	Physics,
+enum class move_type : uint32_t {
+	none,
+	physics,
 	Path
 };
 

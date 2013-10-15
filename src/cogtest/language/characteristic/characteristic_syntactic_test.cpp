@@ -8,7 +8,7 @@
 class CharacteristicSyntacticTestFixture : public SyntacticTestFixture {
 public:
 	CharacteristicSyntacticTestFixture()
-		: SyntacticTestFixture(VfsSingleton::Get())
+		: SyntacticTestFixture(VfsSingleton::get())
 	{
 		return;
 	}

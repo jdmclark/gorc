@@ -21,52 +21,52 @@
 #include <string>
 #include <memory>
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class Manager;
+class manager;
 
-namespace Assets {
+namespace assets {
 
-class Template {
+class thing_template {
 public:
 	// General fields
-	unsigned int Sector;
-	Math::Vector<3> Position;
-	Math::Vector<3> Orientation;
-	Math::Vector<3> Thrust;
+	unsigned int sector;
+	vector<3> position;
+	vector<3> orientation;
+	vector<3> thrust;
 
-	FlagSet<Flags::ActorFlag> ActorFlags;
-	FlagSet<Flags::AttachFlag> AttachFlags;
-	Script const* Cog = nullptr;
-	Flags::CollideType Collide = Flags::CollideType::None;
-	int CreateThing = 0;
-	int Explode = 0;
-	Math::Vector<3> EyeOffset;
-	FlagSet<Flags::ThingFlag> Flags;
-	int FleshHit = 0;
-	std::vector<std::tuple<Math::Vector<3>, Math::Vector<3>>> Frames;
-	float Health = 100.0f;
-	float Height = 0.18f;
-	float Light = 0.0f;
-	float LightIntensity = 0.0f;
-	Math::Vector<3> LightOffset;
-	float Mass = 2.0f;
-	float MaxHealth = 100.0f;
-	float MaxLight = 1.0f;
-	Model const* Model3d = nullptr;
-	Flags::MoveType Move = Flags::MoveType::None;
-	float MoveSize = 0.05f;
-	FlagSet<Flags::PhysicsFlag> PhysicsFlags;
-	Puppet const* Puppet = nullptr;
-	float Size = 0.05f;
-	SoundClass const* SoundClass = nullptr;
-	Sprite const* Sprite = nullptr;
-	float Timer = 0.0f;
-	Flags::ThingType Type = Flags::ThingType::Ghost;
+	flag_set<flags::actor_flag> actor_flags;
+	flag_set<flags::attach_flag> attach_flags;
+	script const* cog = nullptr;
+	flags::collide_type collide = flags::collide_type::none;
+	int create_thing = 0;
+	int explode = 0;
+	vector<3> eye_offset;
+	flag_set<flags::thing_flag> flags;
+	int flesh_hit = 0;
+	std::vector<std::tuple<vector<3>, vector<3>>> frames;
+	float health = 100.0f;
+	float height = 0.18f;
+	float light = 0.0f;
+	float light_intensity = 0.0f;
+	vector<3> light_offset;
+	float mass = 2.0f;
+	float max_health = 100.0f;
+	float max_light = 1.0f;
+	model const* model_3d = nullptr;
+	flags::move_type move = flags::move_type::none;
+	float move_size = 0.05f;
+	flag_set<flags::physics_flag> physics_flags;
+	puppet const* puppet = nullptr;
+	float size = 0.05f;
+	soundclass const* sound_class = nullptr;
+	sprite const* sprite = nullptr;
+	float timer = 0.0f;
+	flags::thing_type type = flags::thing_type::ghost;
 
-	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Colormap& cmp, const Cog::Compiler& compiler,
-			const std::unordered_map<std::string, int>& templates, Diagnostics::Report& report);
+	void parse_args(text::tokenizer& tok, manager& manager, const colormap& cmp, const cog::compiler& compiler,
+			const std::unordered_map<std::string, int>& templates, diagnostics::report& report);
 };
 
 }

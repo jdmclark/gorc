@@ -2,10 +2,10 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class ThingFlag : uint32_t {
+enum class thing_flag : uint32_t {
 	EmitsLight						= 0x1,
 	Dead							= 0x2,
 	MagSealed						= 0x4,

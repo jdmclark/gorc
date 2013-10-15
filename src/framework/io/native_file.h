@@ -4,10 +4,10 @@
 #include <boost/filesystem/path.hpp>
 #include "file.h"
 
-namespace Gorc {
-namespace IO {
+namespace gorc {
+namespace io {
 
-class NativeFile : public File {
+class native_file : public file {
 private:
 	FILE* hFile;
 
@@ -16,18 +16,18 @@ private:
 	bool close();
 
 public:
-	NativeFile(const boost::filesystem::path& filename, bool createNew = false);
-	~NativeFile();
+	native_file(const boost::filesystem::path& filename, bool createNew = false);
+	~native_file();
 
-	void Read(void* dest, size_t length);
-	void Write(const void* buffer, size_t length);
+	virtual void read(void* dest, size_t length) override;
+	virtual void write(const void* buffer, size_t length) override;
 
-	void Seek(long offset);
-	void SetPosition(size_t offset);
-	size_t GetPosition();
+	virtual void seek(long offset) override;
+	virtual void set_position(size_t offset) override;
+	virtual size_t get_position() override;
 
-	size_t GetSize();
-	bool IsEndOfFile();
+	virtual size_t get_size() override;
+	virtual bool is_end_of_file() override;
 };
 
 }

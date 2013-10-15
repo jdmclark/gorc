@@ -1,19 +1,19 @@
 #include "text_printer.h"
 
-using Gorc::Cog::IR::TextPrinter;
+using gorc::cog::ir::textPrinter;
 
-Gorc::Cog::IR::TextPrinter::TextPrinter(std::ostream& os)
+gorc::cog::ir::textPrinter::textPrinter(std::ostream& os)
 	: stream(os) {
 	return;
 }
 
-void TextPrinter::Backpatch() {
+void textPrinter::backpatch() {
 	return;
 }
 
-void TextPrinter::writeValue(const VM::Value& value) {
-	switch(value.GetType()) {
-	case VM::Type::Boolean:
+void textPrinter::writevalue(const vm::value& value) {
+	switch(value.get_type()) {
+	case vm::type::boolean:
 		if(static_cast<bool>(value)) {
 			stream << "boolean(true)";
 		}
@@ -22,170 +22,170 @@ void TextPrinter::writeValue(const VM::Value& value) {
 		}
 		break;
 
-	case VM::Type::Float:
+	case vm::type::floating:
 		stream << "float(" << static_cast<float>(value) << ")";
 		break;
 
-	case VM::Type::Integer:
+	case vm::type::integer:
 		stream << "integer(" << static_cast<int>(value) << ")";
 		break;
 
-	case VM::Type::String:
+	case vm::type::string:
 		stream << "string(" << static_cast<const char*>(value) << ")";
 		break;
 
-	case VM::Type::Vector: {
-			Math::Vector<3> v = static_cast<Math::Vector<3>>(value);
-			stream << "vector(" << Math::Get<Math::X>(v) << ", " << Math::Get<Math::Y>(v) << ", " << Math::Get<Math::Z>(v) << ")";
+	case vm::type::vector: {
+			vector<3> v = static_cast<vector<3>>(value);
+			stream << "vector(" << math::get<math::X>(v) << ", " << math::get<math::Y>(v) << ", " << math::get<math::Z>(v) << ")";
 		}
 		break;
 
-	case VM::Type::Void:
+	case vm::type::nothing:
 		stream << "void()";
 		break;
 
-	case VM::Type::Dynamic:
+	case vm::type::dynamic:
 		stream << "dynamic(?)";
 		break;
 	}
 }
 
-void TextPrinter::Comment(const std::string& msg) {
+void textPrinter::comment(const std::string& msg) {
 	stream << "; " << msg << std::endl;
 }
 
-void TextPrinter::Label(const std::string& name) {
+void textPrinter::label(const std::string& name) {
 	stream << name << ":" << std::endl;
 }
 
-void TextPrinter::Nop() {
+void textPrinter::nop() {
 	stream << "\t\tnop" << std::endl;
 }
 
-void TextPrinter::Copy() {
+void textPrinter::copy() {
 	stream << "\t\tcopy" << std::endl;
 }
 
-void TextPrinter::Const(const VM::Value& value) {
+void textPrinter::constant(const vm::value& value) {
 	stream << "\t\tconst ";
 
-	writeValue(value);
+	writevalue(value);
 
 	stream << std::endl;
 }
 
-void TextPrinter::Load(const std::string& symbol) {
+void textPrinter::load(const std::string& symbol) {
 	stream << "\t\tload symbol(" << symbol << ")" << std::endl;
 }
 
-void TextPrinter::LoadI(const std::string& symbol) {
+void textPrinter::loadi(const std::string& symbol) {
 	stream << "\t\tloadi symbol(" << symbol << ")" << std::endl;
 }
 
-void TextPrinter::Store(const std::string& symbol) {
+void textPrinter::store(const std::string& symbol) {
 	stream << "\t\tstore symbol(" << symbol << ")" << std::endl;
 }
 
-void TextPrinter::StoreI(const std::string& symbol) {
+void textPrinter::storei(const std::string& symbol) {
 	stream << "\t\tstorei symbol(" << symbol << ")" << std::endl;
 }
 
-void TextPrinter::Jmp(const std::string& label) {
+void textPrinter::jmp(const std::string& label) {
 	stream << "\t\tjmp " << label << std::endl;
 }
 
-void TextPrinter::Jal(const std::string& label) {
+void textPrinter::jal(const std::string& label) {
 	stream << "\t\tjal " << label << std::endl;
 }
 
-void TextPrinter::Bt(const std::string& label) {
+void textPrinter::bt(const std::string& label) {
 	stream << "\t\tbt " << label << std::endl;
 }
 
-void TextPrinter::Bf(const std::string& label) {
+void textPrinter::bf(const std::string& label) {
 	stream << "\t\tbf " << label << std::endl;
 }
 
-void TextPrinter::Call(const std::string& verb) {
+void textPrinter::call(const std::string& verb) {
 	stream << "\t\tcall " << verb << std::endl;
 }
 
-void TextPrinter::CallV(const std::string& verb) {
+void textPrinter::callv(const std::string& verb) {
 	stream << "\t\tcallv " << verb << std::endl;
 }
 
-void TextPrinter::Ret() {
+void textPrinter::ret() {
 	stream << "\t\tret" << std::endl;
 }
 
-void TextPrinter::Neg() {
+void textPrinter::neg() {
 	stream << "\t\tneg" << std::endl;
 }
 
-void TextPrinter::Add() {
+void textPrinter::add() {
 	stream << "\t\tadd" << std::endl;
 }
 
-void TextPrinter::Sub() {
+void textPrinter::sub() {
 	stream << "\t\tsub" << std::endl;
 }
 
-void TextPrinter::Mul() {
+void textPrinter::mul() {
 	stream << "\t\tmul" << std::endl;
 }
 
-void TextPrinter::Div() {
+void textPrinter::div() {
 	stream << "\t\tdiv" << std::endl;
 }
 
-void TextPrinter::Mod() {
+void textPrinter::mod() {
 	stream << "\t\tmod" << std::endl;
 }
 
-void TextPrinter::And() {
+void textPrinter::band() {
 	stream << "\t\tand" << std::endl;
 }
 
-void TextPrinter::Or() {
+void textPrinter::bor() {
 	stream << "\t\tor" << std::endl;
 }
 
-void TextPrinter::Xor() {
+void textPrinter::bxor() {
 	stream << "\t\txor" << std::endl;
 }
 
-void TextPrinter::LNot() {
+void textPrinter::lnot() {
 	stream << "\t\tlnot" << std::endl;
 }
 
-void TextPrinter::LAnd() {
+void textPrinter::land() {
 	stream << "\t\tland" << std::endl;
 }
 
-void TextPrinter::LOr() {
+void textPrinter::lor() {
 	stream << "\t\tlor" << std::endl;
 }
 
-void TextPrinter::CGt() {
+void textPrinter::cgt() {
 	stream << "\t\tcgt" << std::endl;
 }
 
-void TextPrinter::CGeq() {
+void textPrinter::cgeq() {
 	stream << "\t\tcgeq" << std::endl;
 }
 
-void TextPrinter::CLt() {
+void textPrinter::clt() {
 	stream << "\t\tclt" << std::endl;
 }
 
-void TextPrinter::CLeq() {
+void textPrinter::cleq() {
 	stream << "\t\tcleq" << std::endl;
 }
 
-void TextPrinter::CEq() {
+void textPrinter::ceq() {
 	stream << "\t\tceq" << std::endl;
 }
 
-void TextPrinter::CNeq() {
+void textPrinter::cneq() {
 	stream << "\t\tcneq" << std::endl;
 }

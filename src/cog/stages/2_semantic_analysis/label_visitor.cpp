@@ -3,69 +3,69 @@
 
 #include <algorithm>
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::SemanticAnalysis::LabelVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::semantic_analysis::label_visitor;
 
-LabelVisitor::LabelVisitor(std::unordered_set<std::string>& SeenLabels, Diagnostics::Report& report)
-	: AST::Visitor("Stage2::LabelVisitor", report), SeenLabels(SeenLabels) {
+label_visitor::label_visitor(std::unordered_set<std::string>& SeenLabels, diagnostics::report& report)
+	: ast::visitor("Stage2::LabelVisitor", report), SeenLabels(SeenLabels) {
 	return;
 }
 
-void LabelVisitor::VisitCompoundStatement(CompoundStatement& s) {
-	for(auto& stmt : *s.Code) {
-		stmt->Accept(*this);
+void label_visitor::visit_compound_statement(compound_statement& s) {
+	for(auto& stmt : *s.code) {
+		stmt->accept(*this);
 	}
 }
 
-void LabelVisitor::VisitEmptyStatement(EmptyStatement& s) {
+void label_visitor::visit_empty_statement(empty_statement& s) {
 	return;
 }
 
-void LabelVisitor::VisitExpressionStatement(ExpressionStatement& s) {
+void label_visitor::visit_expression_statement(expression_statement& s) {
 	return;
 }
 
-void LabelVisitor::VisitBreakStatement(BreakStatement& s) {
+void label_visitor::visit_break_statement(break_statement& s) {
 	return;
 }
 
-void LabelVisitor::VisitReturnStatement(ReturnStatement& s) {
+void label_visitor::visit_return_statement(return_statement& s) {
 	return;
 }
 
-void LabelVisitor::VisitCallStatement(CallStatement& s) {
+void label_visitor::visit_call_statement(call_statement& s) {
 	return;
 }
 
-void LabelVisitor::VisitIfStatement(IfStatement& s) {
-	s.Code->Accept(*this);
+void label_visitor::visit_if_statement(if_statement& s) {
+	s.code->accept(*this);
 }
 
-void LabelVisitor::VisitIfElseStatement(IfElseStatement& s) {
-	s.Code->Accept(*this);
-	s.ElseCode->Accept(*this);
+void label_visitor::visit_if_else_statement(if_else_statement& s) {
+	s.code->accept(*this);
+	s.else_code->accept(*this);
 }
 
-void LabelVisitor::VisitWhileStatement(WhileStatement& s) {
-	s.Code->Accept(*this);
+void label_visitor::visit_while_statement(while_statement& s) {
+	s.code->accept(*this);
 }
 
-void LabelVisitor::VisitDoStatement(DoStatement& s) {
-	s.Code->Accept(*this);
+void label_visitor::visit_do_statement(do_statement& s) {
+	s.code->accept(*this);
 }
 
-void LabelVisitor::VisitForStatement(ForStatement& s) {
-	s.Code->Accept(*this);
+void label_visitor::visit_for_statement(for_statement& s) {
+	s.code->accept(*this);
 }
 
-void LabelVisitor::VisitLabeledStatement(LabeledStatement& s) {
+void label_visitor::visit_labeled_statement(labeled_statement& s) {
 	// Convert label name to lowercase for processing
-	std::transform(s.Label.begin(), s.Label.end(), s.Label.begin(), tolower);
+	std::transform(s.label.begin(), s.label.end(), s.label.begin(), tolower);
 
-	if(SeenLabels.find(s.Label) != SeenLabels.end()) {
-		Diagnostics::Helper::LabelRedefinition(Report, VisitorName, s.Label, s.Location);
+	if(SeenLabels.find(s.label) != SeenLabels.end()) {
+		diagnostics::helper::label_redefinition(report, visitor_name, s.label, s.location);
 	}
 	else {
-		SeenLabels.insert(s.Label);
+		SeenLabels.insert(s.label);
 	}
 }

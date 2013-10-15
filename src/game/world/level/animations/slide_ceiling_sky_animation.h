@@ -3,24 +3,24 @@
 #include "animation.h"
 #include "framework/math/vector.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class LevelModel;
+class level_model;
 
-namespace Animations {
+namespace animations {
 
-class SlideCeilingSkyAnimation : public Animation {
+class slide_ceiling_sky_animation : public animation {
 private:
-	LevelModel& model;
-	Math::Vector<2> speed;
+	level_model& model;
+	vector<2> speed;
 
 public:
-	SlideCeilingSkyAnimation(LevelModel& model, const Math::Vector<2>& speed);
+	slide_ceiling_sky_animation(level_model& model, const vector<2>& speed);
 
-	void Update(double dt);
+	void update(double dt);
 };
 
 }

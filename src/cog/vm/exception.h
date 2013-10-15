@@ -2,13 +2,13 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-class VirtualMachineException : public Exception { };
+class virtual_machine_exception : public exception { };
 
-class CodeBufferOverflowException : public VirtualMachineException {
+class code_buffer_overflow_exception : public virtual_machine_exception {
 public:
 	virtual const char* what() const throw() override;
 };

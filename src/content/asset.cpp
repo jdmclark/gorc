@@ -1,5 +1,5 @@
 #include "asset.h"
 
-Gorc::Content::Asset::~Asset() {
+gorc::content::asset::~asset() {
 	return;
 }

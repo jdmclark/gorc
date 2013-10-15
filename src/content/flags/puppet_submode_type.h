@@ -1,9 +1,9 @@
 #pragma once
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class PuppetSubmodeType : int {
+enum class puppet_submode_type : int {
 	Stand = 0,
 	Walk = 1,
 	Run = 2,

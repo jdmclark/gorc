@@ -6,57 +6,57 @@
 #include "framework/flag_set.h"
 #include "framework/math/vector.h"
 
-namespace Gorc {
-namespace Content {
-class Manager;
+namespace gorc {
+namespace content {
+class manager;
 }
 
-namespace Cog {
-namespace Verbs {
-class VerbTable;
+namespace cog {
+namespace verbs {
+class verb_table;
 }
 }
 
-namespace Game {
-class Components;
+namespace game {
+class components;
 
-namespace World {
-namespace Level {
-class LevelModel;
-class Thing;
+namespace world {
+namespace level {
+class level_model;
+class thing;
 
-namespace Sounds {
-class SoundModel;
-class Sound;
+namespace sounds {
+class sound_model;
+class sound;
 
-class SoundPresenter {
+class sound_presenter {
 private:
-	Content::Manager& contentManager;
-	LevelModel* levelModel;
-	SoundModel* model;
+	content::manager& contentmanager;
+	level_model* levelModel;
+	sound_model* model;
 
 public:
-	SoundPresenter(Content::Manager&);
+	sound_presenter(content::manager&);
 
-	void Start(LevelModel& levelModel, SoundModel& soundModel);
-	void Update(double dt);
+	void start(level_model& levelModel, sound_model& soundModel);
+	void update(double dt);
 
-	void SetAmbientSound(Content::Assets::Sound const* sound, float volume);
-	void PlayFoleyLoopClass(int thing, Flags::SoundSubclassType subclass);
-	void StopFoleyLoop(int thing);
+	void set_ambient_sound(content::assets::sound const* sound, float volume);
+	void play_foley_loop_class(int thing, flags::sound_subclass_type subclass);
+	void stop_foley_loop(int thing);
 
-	// Sound verbs
-	void ChangeSoundPitch(int channel, float pitch, float delay);
-	void ChangeSoundVol(int channel, float volume, float delay);
-	void PlaySong(int start, int end, int loopto);
-	int PlaySoundClass(int thing, Flags::SoundSubclassType subclass);
-	int PlaySoundLocal(int wav, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
-	int PlaySoundPos(int wav, Math::Vector<3> pos, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	int PlaySoundThing(int wav, int thing, float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	void SetMusicVol(float volume);
-	void StopSound(int channel, float delay);
+	// sound verbs
+	void change_sound_pitch(int channel, float pitch, float delay);
+	void change_sound_vol(int channel, float volume, float delay);
+	void play_song(int start, int end, int loopto);
+	int play_sound_class(int thing, flags::sound_subclass_type subclass);
+	int play_sound_local(int wav, float volume, float panning, flag_set<flags::sound_flag> flags);
+	int play_sound_pos(int wav, vector<3> pos, float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags);
+	int play_sound_thing(int wav, int thing, float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags);
+	void set_music_vol(float volume);
+	void stop_sound(int channel, float delay);
 
-	static void RegisterVerbs(Cog::Verbs::VerbTable&, Components&);
+	static void register_verbs(cog::verbs::verb_table&, components&);
 };
 
 }

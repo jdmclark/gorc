@@ -5,51 +5,51 @@
 #include "symbolfield_visitor.h"
 #include "cog/constants.h"
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::SemanticAnalysis::SymbolExtensionVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::semantic_analysis::symbol_extension_visitor;
 
-SymbolExtensionVisitor::SymbolExtensionVisitor(Symbols::SymbolType type, Diagnostics::Report& report)
-	: AST::Visitor("Stage2::SymbolExtensionVisitor", report), SymbolType(type) {
+symbol_extension_visitor::symbol_extension_visitor(symbols::symbol_type type, diagnostics::report& report)
+	: ast::visitor("Stage2::SymbolExtensionVisitor", report), symbol_type(type) {
 	// Set sensible default extensions.
 	local = false;
 
 	linkid_defined = false;
-	linkid = Cog::Constants::DefaultLinkId;
+	linkid = cog::constants::default_link_id;
 
 	nolink = false;
 
 	mask_defined = false;
 
-	switch(SymbolType) {
+	switch(symbol_type) {
 	default:
-		mask = Cog::Constants::DefaultMask;
+		mask = cog::constants::default_mask;
 		break;
 
-	case Symbols::SymbolType::Sector:
-		mask = Cog::Constants::DefaultSectorMask;
+	case symbols::symbol_type::sector:
+		mask = cog::constants::default_sector_mask;
 		break;
 
-	case Symbols::SymbolType::Surface:
-		mask = Cog::Constants::DefaultSurfaceMask;
+	case symbols::symbol_type::surface:
+		mask = cog::constants::default_surface_mask;
 		break;
 
-	case Symbols::SymbolType::Thing:
-		mask = Cog::Constants::DefaultThingMask;
+	case symbols::symbol_type::thing:
+		mask = cog::constants::default_thing_mask;
 		break;
 	}
 
 	return;
 }
 
-bool SymbolExtensionVisitor::ValidateExtension(const std::string& name, Text::Location& location) {
+bool symbol_extension_visitor::validate_extension(const std::string& name, text::location& location) {
 	if(name == "local") {
 		if(local) {
-			Diagnostics::Helper::ExtensionRedefinition(Report, VisitorName, name, location);
+			diagnostics::helper::extension_redefinition(report, visitor_name, name, location);
 		}
 
-		switch(SymbolType) {
-		case Symbols::SymbolType::Message:
-			Diagnostics::Helper::IllegalExtension(Report, VisitorName, name, location);
+		switch(symbol_type) {
+		case symbols::symbol_type::message:
+			diagnostics::helper::illegal_extension(report, visitor_name, name, location);
 			break;
 
 		default:
@@ -58,43 +58,43 @@ bool SymbolExtensionVisitor::ValidateExtension(const std::string& name, Text::Lo
 	}
 	else if(name == "linkid") {
 		if(linkid_defined) {
-			Diagnostics::Helper::ExtensionRedefinition(Report, VisitorName, name, location);
+			diagnostics::helper::extension_redefinition(report, visitor_name, name, location);
 		}
 
-		switch(SymbolType) {
-		case Symbols::SymbolType::Sector:
-		case Symbols::SymbolType::Surface:
-		case Symbols::SymbolType::Thing:
+		switch(symbol_type) {
+		case symbols::symbol_type::sector:
+		case symbols::symbol_type::surface:
+		case symbols::symbol_type::thing:
 			break;
 
 		default:
-			Diagnostics::Helper::IllegalExtension(Report, VisitorName, name, location);
+			diagnostics::helper::illegal_extension(report, visitor_name, name, location);
 		}
 	}
 	else if(name == "nolink") {
 		if(nolink) {
-			Diagnostics::Helper::ExtensionRedefinition(Report, VisitorName, name, location);
+			diagnostics::helper::extension_redefinition(report, visitor_name, name, location);
 		}
 
-		switch(SymbolType) {
-		case Symbols::SymbolType::Cog:
-		case Symbols::SymbolType::Sector:
-		case Symbols::SymbolType::Surface:
-		case Symbols::SymbolType::Thing:
+		switch(symbol_type) {
+		case symbols::symbol_type::cog:
+		case symbols::symbol_type::sector:
+		case symbols::symbol_type::surface:
+		case symbols::symbol_type::thing:
 			break;
 
 		default:
-			Diagnostics::Helper::IllegalExtension(Report, VisitorName, name, location);
+			diagnostics::helper::illegal_extension(report, visitor_name, name, location);
 		}
 	}
 	else if(name == "desc") {
 		if(!desc.empty()) {
-			Diagnostics::Helper::ExtensionRedefinition(Report, VisitorName, name, location);
+			diagnostics::helper::extension_redefinition(report, visitor_name, name, location);
 		}
 
-		switch(SymbolType) {
-		case Symbols::SymbolType::Message:
-			Diagnostics::Helper::IllegalExtension(Report, VisitorName, name, location);
+		switch(symbol_type) {
+		case symbols::symbol_type::message:
+			diagnostics::helper::illegal_extension(report, visitor_name, name, location);
 			break;
 
 		default:
@@ -103,71 +103,71 @@ bool SymbolExtensionVisitor::ValidateExtension(const std::string& name, Text::Lo
 	}
 	else if(name == "mask") {
 		if(mask_defined) {
-			Diagnostics::Helper::ExtensionRedefinition(Report, VisitorName, name, location);
+			diagnostics::helper::extension_redefinition(report, visitor_name, name, location);
 		}
 
-		switch(SymbolType) {
-		case Symbols::SymbolType::Sector:
-		case Symbols::SymbolType::Surface:
-		case Symbols::SymbolType::Thing:
+		switch(symbol_type) {
+		case symbols::symbol_type::sector:
+		case symbols::symbol_type::surface:
+		case symbols::symbol_type::thing:
 			break;
 
 		default:
-			Diagnostics::Helper::IllegalExtension(Report, VisitorName, name, location);
+			diagnostics::helper::illegal_extension(report, visitor_name, name, location);
 		}
 	}
 	else {
-		Diagnostics::Helper::UnknownExtension(Report, VisitorName, name, location);
+		diagnostics::helper::unknown_extension(report, visitor_name, name, location);
 		return false;
 	}
 
 	return true;
 }
 
-void SymbolExtensionVisitor::VisitBareExtension(BareExtension& ext) {
-	std::transform(ext.Name.begin(), ext.Name.end(), ext.Name.begin(), tolower);
+void symbol_extension_visitor::visit_bare_extension(bare_extension& ext) {
+	std::transform(ext.name.begin(), ext.name.end(), ext.name.begin(), tolower);
 
-	if(!ValidateExtension(ext.Name, ext.Location)) {
+	if(!validate_extension(ext.name, ext.location)) {
 		return;
 	}
 
-	if(ext.Name == "linkid" || ext.Name == "desc" || ext.Name == "mask") {
-		Diagnostics::Helper::ExtensionValueMissing(Report, VisitorName, ext.Name, ext.Location);
+	if(ext.name == "linkid" || ext.name == "desc" || ext.name == "mask") {
+		diagnostics::helper::extension_value_missing(report, visitor_name, ext.name, ext.location);
 		return;
 	}
-	else if(ext.Name == "local") {
+	else if(ext.name == "local") {
 		local = true;
 	}
-	else if(ext.Name == "nolink") {
+	else if(ext.name == "nolink") {
 		nolink = true;
 	}
 }
 
-void SymbolExtensionVisitor::VisitValuedExtension(ValuedExtension& ext) {
-	std::transform(ext.Name.begin(), ext.Name.end(), ext.Name.begin(), tolower);
+void symbol_extension_visitor::visit_valued_extension(valued_extension& ext) {
+	std::transform(ext.name.begin(), ext.name.end(), ext.name.begin(), tolower);
 
-	if(!ValidateExtension(ext.Name, ext.Location)) {
+	if(!validate_extension(ext.name, ext.location)) {
 		return;
 	}
 
-	SymbolFieldVisitor v(Report);
-	ext.Value->Accept(v);
+	symbol_field_visitor v(report);
+	ext.value->accept(v);
 
-	if(ext.Name == "local" || ext.Name == "nolink") {
-		Diagnostics::Helper::IllegalExtensionAssignment(Report, VisitorName, ext.Name, ext.Location);
+	if(ext.name == "local" || ext.name == "nolink") {
+		diagnostics::helper::illegal_extension_assignment(report, visitor_name, ext.name, ext.location);
 		return;
 	}
-	else if(ext.Name == "linkid") {
+	else if(ext.name == "linkid") {
 		if(v.is_int) {
 			linkid = v.int_value;
 		}
 		else {
-			Diagnostics::Helper::ExtensionTypeMismatch(Report, VisitorName, ext.Name, ext.Location);
+			diagnostics::helper::extension_type_mismatch(report, visitor_name, ext.name, ext.location);
 		}
 
 		linkid_defined = true;
 	}
-	else if(ext.Name == "desc") {
+	else if(ext.name == "desc") {
 		if(v.is_int) {
 			desc = boost::str(boost::format("%d") % v.int_value);
 		}
@@ -178,15 +178,15 @@ void SymbolExtensionVisitor::VisitValuedExtension(ValuedExtension& ext) {
 			desc = v.str_value;
 		}
 		else {
-			Diagnostics::Helper::ExtensionTypeMismatch(Report, VisitorName, ext.Name, ext.Location);
+			diagnostics::helper::extension_type_mismatch(report, visitor_name, ext.name, ext.location);
 		}
 	}
-	else if(ext.Name == "mask") {
+	else if(ext.name == "mask") {
 		if(v.is_int) {
 			mask = v.int_value;
 		}
 		else {
-			Diagnostics::Helper::ExtensionTypeMismatch(Report, VisitorName, ext.Name, ext.Location);
+			diagnostics::helper::extension_type_mismatch(report, visitor_name, ext.name, ext.location);
 		}
 
 		mask_defined = true;

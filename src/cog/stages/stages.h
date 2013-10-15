@@ -3,56 +3,56 @@
 #include <string>
 #include <unordered_map>
 
-namespace Gorc {
+namespace gorc {
 
-namespace Text {
-class Source;
+namespace text {
+class source;
 }
 
-namespace Diagnostics {
-class Report;
+namespace diagnostics {
+class report;
 }
 
-namespace Cog {
-namespace AST {
-class TranslationUnit;
-class Factory;
+namespace cog {
+namespace ast {
+class translation_unit;
+class factory;
 }
 
-namespace Symbols {
-class SymbolTable;
+namespace symbols {
+class symbol_table;
 }
 
-namespace Verbs {
-class VerbTable;
+namespace verbs {
+class verb_table;
 }
 
-namespace VM {
-class Value;
+namespace vm {
+class value;
 }
 
-namespace IR {
-class Printer;
+namespace ir {
+class printer;
 }
 
-namespace Stages {
+namespace stages {
 
-namespace GenerateAST {
-AST::TranslationUnit* GenerateAST(Text::Source& inputFilestream, Diagnostics::Report& report, AST::Factory& factory);
+namespace generate_ast {
+ast::translation_unit* generate_ast(text::source& inputFilestream, diagnostics::report& report, ast::factory& factory);
 }
 
-namespace SemanticAnalysis {
-void SemanticAnalysis(AST::TranslationUnit* ast, Symbols::SymbolTable& symbolTable, const std::unordered_map<std::string, VM::Value>& constantTable,
-		Verbs::VerbTable& verbTable, Diagnostics::Report& report);
+namespace semantic_analysis {
+void semantic_analysis(ast::translation_unit* ast, symbols::symbol_table& symbolTable, const std::unordered_map<std::string, vm::value>& constantTable,
+		verbs::verb_table& verbTable, diagnostics::report& report);
 }
 
-namespace ConstantFolding {
-void ConstantFolding(AST::Factory& factory, AST::TranslationUnit* ast, Symbols::SymbolTable& symbolTable,
-		const std::unordered_map<std::string, VM::Value>& constantTable, Diagnostics::Report& report);
+namespace constant_folding {
+void constant_folding(ast::factory& factory, ast::translation_unit* ast, symbols::symbol_table& symbolTable,
+		const std::unordered_map<std::string, vm::value>& constantTable, diagnostics::report& report);
 }
 
-namespace GenerateCode {
-void GenerateCode(AST::TranslationUnit* ast, IR::Printer& printer, Diagnostics::Report& report);
+namespace generate_code {
+void generate_code(ast::translation_unit* ast, ir::printer& printer, diagnostics::report& report);
 }
 }
 }

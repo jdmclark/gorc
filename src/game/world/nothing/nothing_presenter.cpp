@@ -1,10 +1,10 @@
 #include "nothing_presenter.h"
 
-Gorc::Game::World::Nothing::NothingPresenter::NothingPresenter(Components& components)
+gorc::game::world::nothing::nothing_presenter::nothing_presenter(class components& components)
 	: components(components) {
 	return;
 }
 
-void Gorc::Game::World::Nothing::NothingPresenter::Start(Event::EventBus& eventBus) {
-	components.WorldViewFrame.SetView(components.NothingView);
+void gorc::game::world::nothing::nothing_presenter::start(event::event_bus& eventBus) {
+	components.world_view_frame.set_view(components.nothing_view);
 }

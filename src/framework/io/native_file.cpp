@@ -3,10 +3,10 @@
 
 #include <errno.h>
 
-using namespace Gorc::IO;
+using namespace gorc::io;
 
-NativeFile::NativeFile(const boost::filesystem::path& filename, bool createnew)
-	: File(filename.native()) {
+native_file::native_file(const boost::filesystem::path& filename, bool createnew)
+	: file(filename.native()) {
 	hFile = nullptr;
 
 	if(createnew) {
@@ -14,25 +14,25 @@ NativeFile::NativeFile(const boost::filesystem::path& filename, bool createnew)
 			return;
 		}
 
-		throw FileCreateErrorException();
+		throw file_create_error_exception();
 	}
 	else {
 		if(open(filename)) {
 			return;
 		}
 
-		throw FileOpenErrorException();
+		throw file_open_error_exception();
 	}
 
 	return;
 }
 
-NativeFile::~NativeFile() {
+native_file::~native_file() {
 	close();
 	return;
 }
 
-bool NativeFile::open(const boost::filesystem::path& filename) {
+bool native_file::open(const boost::filesystem::path& filename) {
 	if(hFile) {
 		if(!close()) {
 			return false;
@@ -44,7 +44,7 @@ bool NativeFile::open(const boost::filesystem::path& filename) {
 	return hFile != nullptr;
 }
 
-bool NativeFile::create(const boost::filesystem::path& filename) {
+bool native_file::create(const boost::filesystem::path& filename) {
 	if(hFile) {
 		if(!close()) {
 			return false;
@@ -56,7 +56,7 @@ bool NativeFile::create(const boost::filesystem::path& filename) {
 	return hFile != nullptr;
 }
 
-bool NativeFile::close() {
+bool native_file::close() {
 	if(hFile) {
 		if(fclose(hFile) != 0) {
 			return false;
@@ -67,47 +67,47 @@ bool NativeFile::close() {
 	return true;
 }
 
-void NativeFile::Read(void* dest, size_t length) {
+void native_file::read(void* dest, size_t length) {
 	if(hFile) {
 		size_t len = fread(dest, 1U, length, hFile);
 
 		if(len != length) {
-			throw FileReadErrorException();
+			throw file_read_error_exception();
 		}
 	}
 
 	return;
 }
 
-void NativeFile::Write(const void* buffer, size_t length) {
+void native_file::write(const void* buffer, size_t length) {
 	if(hFile) {
 		size_t len = fwrite(buffer, 1U, length, hFile);
 
 		if(len != length) {
-			throw FileWriteErrorException();
+			throw file_write_error_exception();
 		}
 	}
 
 	return;
 }
 
-void NativeFile::Seek(long offset) {
+void native_file::seek(long offset) {
 	if(hFile) {
 		if(fseek(hFile, offset, SEEK_CUR) != 0) {
-			throw FileInvalidSeekException();
+			throw file_invalid_seek_exception();
 		}
 	}
 }
 
-void NativeFile::SetPosition(size_t offset) {
+void native_file::set_position(size_t offset) {
 	if(hFile) {
 		if(fseek(hFile, static_cast<long>(offset), SEEK_SET) != 0) {
-			throw FileInvalidSeekException();
+			throw file_invalid_seek_exception();
 		}
 	}
 }
 
-size_t NativeFile::GetPosition() {
+size_t native_file::get_position() {
 	if(hFile) {
 		return static_cast<size_t>(ftell(hFile));
 	}
@@ -115,7 +115,7 @@ size_t NativeFile::GetPosition() {
 	return 0;
 }
 
-size_t NativeFile::GetSize() {
+size_t native_file::get_size() {
 	if(hFile) {
 		auto currentPointer = ftell(hFile);
 		fseek(hFile, 0, SEEK_END);
@@ -127,7 +127,7 @@ size_t NativeFile::GetSize() {
 	return 0;
 }
 
-bool NativeFile::IsEndOfFile() {
+bool native_file::is_end_of_file() {
 	if(hFile) {
 		return feof(hFile) != 0;
 	}

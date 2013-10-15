@@ -1,15 +1,15 @@
 #pragma once
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class ScriptTimerState {
+class script_timer_state {
 public:
-	double TimerRemainingTime = 0.0;
-	double PulseTime = 0.0;
-	double PulseRemainingTime = 0.0;
+	double timer_remaining_time = 0.0;
+	double pulse_time = 0.0;
+	double pulse_remaining_time = 0.0;
 };
 
 }

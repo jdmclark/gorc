@@ -4,21 +4,21 @@
 #include <vector>
 #include "framework/io/read_only_file.h"
 
-namespace Gorc {
-namespace Text {
+namespace gorc {
+namespace text {
 
-class Source {
+class source {
 private:
 	std::vector<char> buffer;
 	size_t index;
 
 public:
-	const std::string Filename;
+	const std::string filename;
 
-	Source(IO::ReadOnlyFile& f);
-	Source(const std::string& s);
+	source(io::read_only_file& f);
+	source(const std::string& s);
 
-	inline char GetNext() {
+	inline char get_next() {
 		return (index >= buffer.size()) ? '\0' : buffer[index++];
 	}
 };

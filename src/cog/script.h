@@ -7,17 +7,17 @@
 #include "framework/flag_set.h"
 #include <memory>
 
-namespace Gorc {
-namespace Cog {
+namespace gorc {
+namespace cog {
 
-class Script {
+class script {
 public:
-	Script();
+	script();
 
-	FlagSet<Flags::CogFlag> Flags;
-	Symbols::SymbolTable SymbolTable;
-	VM::JumpTable JumpTable;
-	VM::CodeBuffer Code;
+	flag_set<flags::cog_flag> flags;
+	symbols::symbol_table symbol_table;
+	vm::jump_table jump_table;
+	vm::code_buffer code;
 };
 
 }

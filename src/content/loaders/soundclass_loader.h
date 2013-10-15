@@ -3,15 +3,15 @@
 #include "content/text_loader.h"
 #include "cog/compiler.h"
 
-namespace Gorc {
-namespace Content {
-namespace Loaders {
+namespace gorc {
+namespace content {
+namespace loaders {
 
-class SoundClassLoader : public TextLoader {
+class soundclass_loader : public text_loader {
 public:
-	static const std::vector<boost::filesystem::path> AssetRootPath;
+	static const std::vector<boost::filesystem::path> asset_root_path;
 
-	virtual std::unique_ptr<Asset> Parse(Text::Tokenizer& t, Manager& manager, Diagnostics::Report& report) override;
+	virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
 };
 
 }

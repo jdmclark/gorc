@@ -2,17 +2,17 @@
 
 #include "content/assets/animation.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Keys {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace keys {
 
-class KeyMixLevelState {
+class key_mix_level_state {
 public:
-	Content::Assets::Animation const* Animation = nullptr;
-	double Frame;
-	int Priority;
+	content::assets::animation const* animation = nullptr;
+	double frame;
+	int priority;
 };
 
 }

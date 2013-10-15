@@ -5,23 +5,23 @@
 #include "framework/pool.h"
 #include "physics/object_data.h"
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class Surface : public Content::Assets::LevelSurface {
+class surface : public content::assets::level_surface {
 public:
-	Physics::SurfaceObjectData ObjectData;
+	physics::surface_object_data object_data;
 
-	int CelNumber = -1;
-	int AnimNumber = -1;
+	int cel_number = -1;
+	int anim_number = -1;
 
-	inline const Physics::SurfaceObjectData& GetObjectData() const {
-		return ObjectData;
+	inline const physics::surface_object_data& get_object_data() const {
+		return object_data;
 	}
 
-	Surface(const Content::Assets::LevelSurface& surf);
+	surface(const content::assets::level_surface& surf);
 };
 
 }

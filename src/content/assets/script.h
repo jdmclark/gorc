@@ -8,23 +8,23 @@
 #include <unordered_map>
 #include <string>
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class Manager;
+class manager;
 
-namespace Assets {
+namespace assets {
 
-class Colormap;
-class LevelAdjoin;
-class LevelSector;
-class LevelSurface;
+class colormap;
+class level_adjoin;
+class level_sector;
+class level_surface;
 
-class Script : public Asset {
+class script : public asset {
 public:
-	using Loader = Loaders::ScriptLoader;
+	using loader = loaders::script_loader;
 
-	Cog::Script Script;
+	cog::script script;
 };
 
 }

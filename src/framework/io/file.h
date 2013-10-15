@@ -2,18 +2,18 @@
 
 #include "read_only_file.h"
 
-namespace Gorc {
-namespace IO {
+namespace gorc {
+namespace io {
 
-class File : public ReadOnlyFile {
+class file : public read_only_file {
 public:
-	File(const boost::filesystem::path& filename);
-	virtual ~File();
+	file(const boost::filesystem::path& filename);
+	virtual ~file();
 
-	virtual void Write(const void* buffer, size_t size) = 0;
+	virtual void write(const void* buffer, size_t size) = 0;
 
-	template <typename T> void Write(const T& value) {
-		Write(&value, sizeof(T));
+	template <typename T> void write(const T& value) {
+		write(&value, sizeof(T));
 	}
 };
 

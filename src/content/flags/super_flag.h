@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
 enum class SuperFlag : uint32_t {
 	WeaponSupercharge				= 0x1,

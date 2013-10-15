@@ -1,44 +1,44 @@
 #include "surface_material_animation.h"
 #include "game/world/level/level_model.h"
 
-Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::SurfaceMaterialAnimation(LevelModel& model, unsigned int surface,
-		double framerate, FlagSet<Flags::AnimFlag> flag, int anim_num)
+gorc::game::world::level::animations::surface_material_animation::surface_material_animation(level_model& model, unsigned int surface,
+		double framerate, flag_set<flags::AnimFlag> flag, int anim_num)
 	: model(model), surface(surface), framerate(1.0 / framerate), flag(flag), framerate_accumulator(0.0) {
 
-	int surface_material = model.Level.Surfaces[surface].Material;
+	int surface_material = model.level.surfaces[surface].material;
 	if(surface_material < 0) {
-		// TODO: Surface has no material but has an animation? Report error.
+		// TODO: surface has no material but has an animation? report error.
 		num_cels = 0;
 		return;
 	}
 
-	num_cels = std::get<0>(model.Level.Materials[surface_material])->Cels.size();
+	num_cels = std::get<0>(model.level.materials[surface_material])->cels.size();
 
-	if(flag & Flags::AnimFlag::SkipFirstTwoFrames) {
-		model.Surfaces[surface].CelNumber = 2 % num_cels;
+	if(flag & flags::AnimFlag::SkipFirstTwoFrames) {
+		model.surfaces[surface].cel_number = 2 % num_cels;
 	}
-	else if(flag & Flags::AnimFlag::SkipFirstFrame) {
-		model.Surfaces[surface].CelNumber = 1 % num_cels;
+	else if(flag & flags::AnimFlag::SkipFirstFrame) {
+		model.surfaces[surface].cel_number = 1 % num_cels;
 	}
 	else {
-		model.Surfaces[surface].CelNumber = 0;
+		model.surfaces[surface].cel_number = 0;
 	}
 
-	model.Surfaces[surface].AnimNumber = anim_num;
+	model.surfaces[surface].anim_number = anim_num;
 }
 
-void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Update(double dt) {
+void gorc::game::world::level::animations::surface_material_animation::update(double dt) {
 	framerate_accumulator += dt;
 
 	while(framerate_accumulator >= framerate) {
 		framerate_accumulator -= framerate;
 
-		int next_cel = model.Surfaces[surface].CelNumber + 1;
+		int next_cel = model.surfaces[surface].cel_number + 1;
 		if(next_cel >= num_cels) {
-			if(flag & Flags::AnimFlag::SkipFirstTwoFrames) {
+			if(flag & flags::AnimFlag::SkipFirstTwoFrames) {
 				next_cel = 2 % num_cels;
 			}
-			else if(flag & Flags::AnimFlag::SkipFirstFrame) {
+			else if(flag & flags::AnimFlag::SkipFirstFrame) {
 				next_cel = 1 % num_cels;
 			}
 			else {
@@ -46,10 +46,10 @@ void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Update(doub
 			}
 		}
 
-		model.Surfaces[surface].CelNumber = next_cel;
+		model.surfaces[surface].cel_number = next_cel;
 	}
 }
 
-void Gorc::Game::World::Level::Animations::SurfaceMaterialAnimation::Stop() {
-	model.Surfaces[surface].AnimNumber = -1;
+void gorc::game::world::level::animations::surface_material_animation::stop() {
+	model.surfaces[surface].anim_number = -1;
 }

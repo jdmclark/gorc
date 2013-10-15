@@ -2,40 +2,40 @@
 #include "game/world/level/level_presenter.h"
 #include "game/world/level/level_model.h"
 
-void Gorc::Game::World::Level::Gameplay::WeaponController::CreateControllerData(int thing_id) {
-	ThingController::CreateControllerData(thing_id);
+void gorc::game::world::level::gameplay::weapon_controller::create_controller_data(int thing_id) {
+	thing_controller::create_controller_data(thing_id);
 
 	return;
 }
 
-void Gorc::Game::World::Level::Gameplay::WeaponController::TouchedThing(int thing_id, int touched_thing_id) {
-	ThingController::TouchedThing(thing_id, touched_thing_id);
+void gorc::game::world::level::gameplay::weapon_controller::touched_thing(int thing_id, int touched_thing_id) {
+	thing_controller::touched_thing(thing_id, touched_thing_id);
 
 	// Damage thing
 	// TODO: Actual damage properties from template.
-	presenter.DamageThing(touched_thing_id, 50.0f, { Flags::DamageFlag::Saber }, thing_id);
+	presenter.damage_thing(touched_thing_id, 50.0f, { flags::DamageFlag::Saber }, thing_id);
 
-	auto& thing = presenter.Model->Things[thing_id];
-	auto& touched_thing = presenter.Model->Things[touched_thing_id];
-	if(touched_thing.Type == Flags::ThingType::Actor || touched_thing.Type == Flags::ThingType::Player) {
-		presenter.CreateThingAtThing(thing.FleshHit, thing_id);
+	auto& thing = presenter.model->things[thing_id];
+	auto& touched_thing = presenter.model->things[touched_thing_id];
+	if(touched_thing.type == flags::thing_type::Actor || touched_thing.type == flags::thing_type::Player) {
+		presenter.create_thing_at_thing(thing.flesh_hit, thing_id);
 	}
 	else {
-		presenter.CreateThingAtThing(thing.Explode, thing_id);
+		presenter.create_thing_at_thing(thing.explode, thing_id);
 	}
 
-	presenter.DestroyThing(thing_id);
+	presenter.destroy_thing(thing_id);
 }
 
-void Gorc::Game::World::Level::Gameplay::WeaponController::TouchedSurface(int thing_id, int touched_surface_id) {
-	ThingController::TouchedSurface(thing_id, touched_surface_id);
+void gorc::game::world::level::gameplay::weapon_controller::touched_surface(int thing_id, int touched_surface_id) {
+	thing_controller::touched_surface(thing_id, touched_surface_id);
 
 	// Damage surface
 	// TODO: Actual damage properties from template.
-	presenter.ScriptPresenter.SendMessageToLinked(Cog::MessageId::Damaged, touched_surface_id, Flags::MessageType::Surface,
-			thing_id, Flags::MessageType::Thing, 1000, static_cast<int>(Flags::DamageFlag::Saber));
+	presenter.script_presenter.send_message_to_linked(cog::message_id::damaged, touched_surface_id, flags::message_type::surface,
+			thing_id, flags::message_type::thing, 1000, static_cast<int>(flags::DamageFlag::Saber));
 
-	auto& thing = presenter.Model->Things[thing_id];
-	presenter.CreateThingAtThing(thing.Explode, thing_id);
-	presenter.DestroyThing(thing_id);
+	auto& thing = presenter.model->things[thing_id];
+	presenter.create_thing_at_thing(thing.explode, thing_id);
+	presenter.destroy_thing(thing_id);
 }

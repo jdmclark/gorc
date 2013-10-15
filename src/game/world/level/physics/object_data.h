@@ -1,25 +1,25 @@
 #pragma once
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Physics {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace physics {
 
-class ObjectData {
+class object_data {
 public:
-	virtual ~ObjectData();
+	virtual ~object_data();
 };
 
-class ThingObjectData : public ObjectData {
+class thing_object_data : public object_data {
 public:
-	int ThingId;
+	int thing_id;
 };
 
-class SurfaceObjectData : public ObjectData {
+class surface_object_data : public object_data {
 public:
-	int SectorId;
-	int SurfaceId;
+	int sector_id;
+	int surface_id;
 };
 
 }

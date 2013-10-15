@@ -5,24 +5,24 @@
 #include <vector>
 #include <set>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-namespace Physics {
-class ContactRangeConsumer;
+namespace physics {
+class contact_range_consumer;
 }
 
-namespace Gameplay {
+namespace gameplay {
 
-class PlayerController : public CharacterController {
-	void FindSectorRestingManifolds(const Physics::Sphere& sphere, int sector_id, std::set<int>& closed, std::vector<Math::Vector<3>>& manifolds);
+class player_controller : public character_controller {
+	void find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, std::set<int>& closed, std::vector<vector<3>>& manifolds);
 
 public:
-	using CharacterController::CharacterController;
+	using character_controller::character_controller;
 
-	virtual void Update(int thing_id, double dt) override;
+	virtual void update(int thing_id, double dt) override;
 };
 
 }

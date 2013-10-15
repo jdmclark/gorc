@@ -5,31 +5,31 @@
 #include "script_instance.h"
 #include <array>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Scripts {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace scripts {
 
-class ScriptContinuation {
+class script_continuation {
 public:
-	int InstanceId;
+	int instance_id;
 
-	int SenderId;
-	int SenderRef;
-	Flags::MessageType SenderType;
-	int SourceRef;
-	Flags::MessageType SourceType;
-	std::array<Cog::VM::Value, 4> Params;
-	Cog::VM::Value ReturnExValue;
+	int sender_id;
+	int sender_ref;
+	flags::message_type sender_type;
+	int source_ref;
+	flags::message_type source_type;
+	std::array<cog::vm::value, 4> params;
+	cog::vm::value returnex_value;
 
-	unsigned int ProgramCounter;
+	unsigned int program_counter;
 
-	ScriptContinuation() = default;
-	ScriptContinuation(int InstanceId,
-			int SenderId, int SenderRef, Flags::MessageType SenderType,
-			int SourceRef, Flags::MessageType SourceType,
-			Cog::VM::Value Param0, Cog::VM::Value Param1, Cog::VM::Value Param2, Cog::VM::Value Param3,
+	script_continuation() = default;
+	script_continuation(int InstanceId,
+			int SenderId, int SenderRef, flags::message_type SenderType,
+			int SourceRef, flags::message_type SourceType,
+			cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3,
 			unsigned int ProgramCounter = 0);
 };
 

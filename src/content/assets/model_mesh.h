@@ -4,26 +4,26 @@
 #include <memory>
 #include <vector>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class ModelMesh {
+class model_mesh {
 public:
-	unsigned int Index;
-	std::string Name;
-	float Radius;
-	Flags::GeometryMode Geo;
-	Flags::LightMode Light;
-	Flags::TextureMode Tex;
+	unsigned int index;
+	std::string name;
+	float radius;
+	flags::geometry_mode geo;
+	flags::light_mode light;
+	flags::texture_mode tex;
 
-	std::vector<Math::Vector<3>> Vertices;
-	std::vector<Math::Vector<3>> VertexNormals;
-	std::vector<Math::Vector<2>> TextureVertices;
+	std::vector<vector<3>> vertices;
+	std::vector<vector<3>> vertex_normals;
+	std::vector<vector<2>> texture_vertices;
 
-	std::vector<ModelFace> Faces;
+	std::vector<model_face> faces;
 
-	std::vector<int> MeshIndexBuffer;
+	std::vector<int> mesh_index_buffer;
 };
 
 }

@@ -1,48 +1,48 @@
 #include "gob_file.h"
 #include "framework/io/exception.h"
 
-Gorc::Content::VFS::Gob::GobFile::GobFile(const boost::filesystem::path& gobPath,
+gorc::content::vfs::gob::gob_file::gob_file(const boost::filesystem::path& gobPath,
 		const boost::filesystem::path& filename, size_t chunkOffset, size_t chunkLength)
-	: IO::ReadOnlyFile(filename), file(gobPath, false), chunkOffset(chunkOffset),
+	: io::read_only_file(filename), file(gobPath, false), chunkOffset(chunkOffset),
 	  chunkLength(chunkLength), chunkEnd(chunkOffset + chunkLength) {
-	file.SetPosition(chunkOffset);
+	file.set_position(chunkOffset);
 	return;
 }
 
-void Gorc::Content::VFS::Gob::GobFile::Read(void* dest, size_t size) {
-	if(GetPosition() + size > chunkLength) {
-		throw IO::FileReadErrorException();
+void gorc::content::vfs::gob::gob_file::read(void* dest, size_t size) {
+	if(get_position() + size > chunkLength) {
+		throw io::file_read_error_exception();
 	}
 
-	file.Read(dest, size);
+	file.read(dest, size);
 }
 
-void Gorc::Content::VFS::Gob::GobFile::Seek(long offset) {
-	size_t currentPosition = GetPosition();
+void gorc::content::vfs::gob::gob_file::seek(long offset) {
+	size_t currentPosition = get_position();
 	if((offset < 0 && static_cast<size_t>(std::abs(offset)) > currentPosition)
 			|| currentPosition + offset >= chunkEnd) {
-		throw IO::FileInvalidSeekException();
+		throw io::file_invalid_seek_exception();
 	}
 
-	file.Seek(offset);
+	file.seek(offset);
 }
 
-void Gorc::Content::VFS::Gob::GobFile::SetPosition(size_t offset) {
+void gorc::content::vfs::gob::gob_file::set_position(size_t offset) {
 	if(offset > chunkLength) {
-		throw IO::FileInvalidSeekException();
+		throw io::file_invalid_seek_exception();
 	}
 
-	file.SetPosition(chunkOffset + offset);
+	file.set_position(chunkOffset + offset);
 }
 
-size_t Gorc::Content::VFS::Gob::GobFile::GetPosition() {
-	return file.GetPosition() - chunkOffset;
+size_t gorc::content::vfs::gob::gob_file::get_position() {
+	return file.get_position() - chunkOffset;
 }
 
-size_t Gorc::Content::VFS::Gob::GobFile::GetSize() {
+size_t gorc::content::vfs::gob::gob_file::get_size() {
 	return chunkLength;
 }
 
-bool Gorc::Content::VFS::Gob::GobFile::IsEndOfFile() {
-	return GetPosition() >= chunkLength;
+bool gorc::content::vfs::gob::gob_file::is_end_of_file() {
+	return get_position() >= chunkLength;
 }

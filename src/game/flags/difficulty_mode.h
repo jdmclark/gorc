@@ -2,13 +2,13 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Flags {
+namespace gorc {
+namespace flags {
 
-enum class DifficultyMode {
-	Easy = 0,
-	Medium = 1,
-	Hard = 2
+enum class difficulty_mode {
+	easy = 0,
+	medium = 1,
+	hard = 2
 };
 
 }
