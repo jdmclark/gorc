@@ -41,16 +41,32 @@ void gorc::game::world::level::gameplay::player_controller::update(int thing_id,
 	std::set<int> closed_set;
 	find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, closed_set, resting_manifolds);
 
-	vector<3> new_thing_vel = thing.thrust;
+	vector<3> prev_thing_vel = thing.thrust;
+	bool reject_vel = true;
 
-	// Reject manifold vectors from velocity.
-	for(const auto& manifold : resting_manifolds) {
-		auto vel_dot = math::dot(new_thing_vel, manifold);
-		if(vel_dot < 0.0f) {
-			// Reject manifold vector from velocity.
-			new_thing_vel -= vel_dot * manifold;
+	// Solve LCP, 10 iterations
+	for(int i = 0; i < 10; ++i) {
+		vector<3> new_computed_vel = prev_thing_vel;
+		for(const auto& manifold : resting_manifolds) {
+			auto vel_dot = math::dot(new_computed_vel, manifold);
+			if(vel_dot < 0.0f) {
+				// Reject manifold vector from velocity
+				new_computed_vel -= vel_dot * manifold;
+			}
+		}
+
+		if(length2(new_computed_vel - prev_thing_vel) < 0.000001f) {
+			// Solution has stabilized
+			reject_vel = false;
+			break;
+		}
+		else {
+			// Solution has not yet stabilized.
+			prev_thing_vel = new_computed_vel;
 		}
 	}
 
-	presenter.adjust_thing_pos(thing_id, thing.position + new_thing_vel * dt);
+	if(!reject_vel) {
+		presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * dt);
+	}
 }
