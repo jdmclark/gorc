@@ -51,14 +51,16 @@ Case(CastIntToString) {
 }
 
 Case(CastIntToVector) {
+	auto zerov = make_zero_vector<3, float>();
+
 	value v1(0);
-	Test_Expect_Eq(static_cast<vector<3>>(v1), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v1), zerov);
 
 	value v2(1);
-	Test_Expect_Eq(static_cast<vector<3>>(v2), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v2), zerov);
 
 	value v3(-1);
-	Test_Expect_Eq(static_cast<vector<3>>(v3), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v3), zerov);
 }
 
 Case(CastFloatToInt) {
@@ -106,14 +108,16 @@ Case(CastFloatToString) {
 }
 
 Case(CastFloatToVector) {
+	auto zerov = make_zero_vector<3, float>();
+
 	value v1(0.0f);
-	Test_Expect_Eq(static_cast<vector<3>>(v1), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v1), zerov);
 
 	value v2(1.0f);
-	Test_Expect_Eq(static_cast<vector<3>>(v2), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v2), zerov);
 
 	value v3(-1.0f);
-	Test_Expect_Eq(static_cast<vector<3>>(v3), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v3), zerov);
 }
 
 Case(CastBoolToInt) {
@@ -149,11 +153,13 @@ Case(CastBoolToString) {
 }
 
 Case(CastBoolToVector) {
+	auto zerov = make_zero_vector<3, float>();
+
 	value v1(true);
-	Test_Expect_Eq(static_cast<vector<3>>(v1), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v1), zerov);
 
 	value v2(false);
-	Test_Expect_Eq(static_cast<vector<3>>(v2), vector<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v2), zerov);
 }
 
 Case(CastStringToInt) {
@@ -201,18 +207,20 @@ Case(CastStringToString) {
 }
 
 Case(CastStringToVector) {
+	auto zerov = make_zero_vector<3, float>();
+
 	value v1("Any string");
-	Test_Expect_Eq(static_cast<vector<3>>(v1), zero<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v1), zerov);
 
 	value v2("Any other string");
-	Test_Expect_Eq(static_cast<vector<3>>(v2), zero<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v2), zerov);
 
 	value v3("");
-	Test_Expect_Eq(static_cast<vector<3>>(v3), zero<3>());
+	Test_Expect_Eq(static_cast<vector<3>>(v3), zerov);
 }
 
 Case(CastVectorToInt) {
-	value v1 = value(zero<3>());
+	value v1 = value(make_zero_vector<3, float>());
 	Test_Expect_Eq(static_cast<int>(v1), -1);
 
 	value v2(make_vector(10.0f, 20.0f, 30.0f));
@@ -223,7 +231,7 @@ Case(CastVectorToInt) {
 }
 
 Case(CastVectorToFloat) {
-	value v1 = value(zero<3>());
+	value v1 = value(make_zero_vector<3, float>());
 	Test_Expect_Eq(static_cast<float>(v1), 0.0f);
 
 	value v2(make_vector(10.0f, 20.0f, 30.0f));
@@ -234,7 +242,7 @@ Case(CastVectorToFloat) {
 }
 
 Case(CastVectorToBool) {
-	value v1 = value(zero<3>());
+	value v1 = value(make_zero_vector<3, float>());
 	Test_Expect(static_cast<bool>(v1));
 
 	value v2(make_vector(10.0f, 20.0f, 30.0f));
@@ -245,7 +253,7 @@ Case(CastVectorToBool) {
 }
 
 Case(CastVectorToString) {
-	value v1 = value(zero<3>());
+	value v1 = value(make_zero_vector<3, float>());
 	Test_Expect_Eq(static_cast<const char*>(v1), std::string());
 
 	value v2(make_vector(10.0f, 20.0f, 30.0f));
@@ -256,8 +264,10 @@ Case(CastVectorToString) {
 }
 
 Case(CastVectorToVector) {
-	value v1 = value(zero<3>());
-	Test_Expect_Eq(static_cast<vector<3>>(v1), zero<3>());
+	auto zerov = make_zero_vector<3, float>();
+
+	value v1 = value(make_zero_vector<3, float>());
+	Test_Expect_Eq(static_cast<vector<3>>(v1), zerov);
 
 	value v2(make_vector(10.0f, 20.0f, 30.0f));
 	Test_Expect_Eq(static_cast<vector<3>>(v2), make_vector(10.0f, 20.0f, 30.0f));

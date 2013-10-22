@@ -7,6 +7,6 @@ void gorc::game::screen::action::action_view::update(double dt) {
 	}
 }
 
-void gorc::game::screen::action::action_view::draw(double dt, const box<2, unsigned int>& view_size) {
+void gorc::game::screen::action::action_view::draw(double dt, const box<2, int>& view_size) {
 	// TODO
 }

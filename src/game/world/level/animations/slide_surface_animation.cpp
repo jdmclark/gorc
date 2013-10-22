@@ -13,7 +13,7 @@ gorc::game::world::level::animations::slide_surface_animation::slide_surface_ani
 	// Compute texture basis.
 	auto dnsb0 = model.level.vertices[std::get<0>(surf.vertices[1])] - model.level.vertices[std::get<0>(surf.vertices[0])];
 
-	sb0 = dnsb0 / length2(dnsb0);
+	sb0 = dnsb0 / length_squared(dnsb0);
 	sb1 = cross(surf.normal, sb0);
 
 	unsigned int noncol_vert;
@@ -50,5 +50,5 @@ void gorc::game::world::level::animations::slide_surface_animation::update(doubl
 void gorc::game::world::level::animations::slide_surface_animation::stop() {
 	auto& surf = model.surfaces[surface];
 	surf.anim_number = -1;
-	surf.thrust = math::zero<3>();
+	surf.thrust = make_zero_vector<3, float>();
 }

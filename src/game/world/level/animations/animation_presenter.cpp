@@ -98,11 +98,11 @@ void gorc::game::world::level::animations::animation_presenter::register_verbs(c
 	});
 
 	verbTable.add_verb<int, 3>("slidesurface", [&components](int surface, vector<3> direction, float speed) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, math::normalize(direction) * speed));
+		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, normalize(direction) * speed));
 	});
 
 	verbTable.add_verb<int, 3>("slidewall", [&components](int surface, vector<3> direction, float speed) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, math::normalize(direction) * speed));
+		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, normalize(direction) * speed));
 	});
 
 	verbTable.add_verb<void, 1>("stopanim", [&components](int anim) {

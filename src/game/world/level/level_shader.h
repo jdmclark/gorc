@@ -20,9 +20,9 @@ protected:
 public:
 	virtual ~level_shader();
 
-	void set_view_matrix(const math::matrix<float>& view_matrix);
-	void set_projection_matrix(const math::matrix<float>& proj_matrix);
-	void set_model_matrix(const math::matrix<float>& model_matrix);
+	void set_view_matrix(const matrix<4>& view_matrix);
+	void set_projection_matrix(const matrix<4>& proj_matrix);
+	void set_model_matrix(const matrix<4>& model_matrix);
 };
 
 class surface_shader : public level_shader {
@@ -40,7 +40,7 @@ public:
 	horizon_shader(const content::assets::shader& shader);
 
 	void activate(const vector<3>& sector_tint, const vector<2>& offset, float horizon_pixels_per_rev,
-			float horizon_distance, const box<2, unsigned int>& screen_size, const vector<3>& camera_look);
+			float horizon_distance, const box<2, int>& screen_size, const vector<3>& camera_look);
 };
 
 class ceiling_shader : public level_shader {

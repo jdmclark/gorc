@@ -31,7 +31,7 @@ void symbol_visitor::visit_symbol(symbol& symbol) {
 		break;
 
 	case symbols::symbol_type::vector:
-		defaultvalue = math::zero<3>();
+		defaultvalue = make_zero_vector<3, float>();
 		break;
 
 	default:

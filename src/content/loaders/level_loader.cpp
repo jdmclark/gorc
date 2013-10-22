@@ -60,14 +60,14 @@ void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, manager& manag
 	tok.assert_identifier("Horizon");
 	tok.assert_identifier("Sky");
 	tok.assert_identifier("Offset");
-	math::get<math::X>(lev.header.horizon_sky_offset) = tok.get_number<float>();
-	math::get<math::Y>(lev.header.horizon_sky_offset) = tok.get_number<float>();
+	get<0>(lev.header.horizon_sky_offset) = tok.get_number<float>();
+	get<1>(lev.header.horizon_sky_offset) = tok.get_number<float>();
 
 	tok.assert_identifier("Ceiling");
 	tok.assert_identifier("Sky");
 	tok.assert_identifier("Offset");
-	math::get<math::X>(lev.header.ceiling_sky_offset) = tok.get_number<float>();
-	math::get<math::Y>(lev.header.ceiling_sky_offset) = tok.get_number<float>();
+	get<0>(lev.header.ceiling_sky_offset) = tok.get_number<float>();
+	get<1>(lev.header.ceiling_sky_offset) = tok.get_number<float>();
 
 	tok.assert_identifier("MipMap");
 	tok.assert_identifier("Distances");
@@ -154,7 +154,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		float y = tok.get_number<float>();
 		float z = tok.get_number<float>();
 
-		lev.vertices.push_back(math::make_vector(x, y, z));
+		lev.vertices.push_back(make_vector(x, y, z));
 	}
 
 	tok.assert_identifier("world");
@@ -170,7 +170,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		float u = tok.get_number<float>();
 		float v = tok.get_number<float>();
 
-		lev.texture_vertices.push_back(math::make_vector(u, v));
+		lev.texture_vertices.push_back(make_vector(u, v));
 	}
 
 	tok.assert_identifier("world");
@@ -236,7 +236,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		float y = tok.get_number<float>();
 		float z = tok.get_number<float>();
 
-		surf.normal = math::make_vector(x, y, z);
+		surf.normal = make_vector(x, y, z);
 	}
 }
 
@@ -279,7 +279,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
 				float r = tok.get_number<float>();
 				float g = tok.get_number<float>();
 				float b = tok.get_number<float>();
-				sec.tint = math::make_vector(r, g, b);
+				sec.tint = make_vector(r, g, b);
 			}
 			else if(boost::iequals(t.value, "boundbox")) {
 				float x0 = tok.get_number<float>();
@@ -289,7 +289,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
 				float y1 = tok.get_number<float>();
 				float z1 = tok.get_number<float>();
 
-				sec.bounding_box = box<3>(math::make_vector(x0, y0, z0), math::make_vector(x1, y1, z1));
+				sec.bounding_box = box<3>(make_vector(x0, y0, z0), make_vector(x1, y1, z1));
 			}
 			else if(boost::iequals(t.value, "collidebox")) {
 				float x0 = tok.get_number<float>();
@@ -299,7 +299,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
 				float y1 = tok.get_number<float>();
 				float z1 = tok.get_number<float>();
 
-				sec.collide_box = box<3>(math::make_vector(x0, y0, z0), math::make_vector(x1, y1, z1));
+				sec.collide_box = box<3>(make_vector(x0, y0, z0), make_vector(x1, y1, z1));
 			}
 			else if(boost::iequals(t.value, "sound")) {
 				sec.ambient_sound = &manager.load<assets::sound>(tok.get_space_delimited_string());
@@ -309,7 +309,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
 				float x = tok.get_number<float>();
 				float y = tok.get_number<float>();
 				float z = tok.get_number<float>();
-				sec.center = math::make_vector(x, y, z);
+				sec.center = make_vector(x, y, z);
 			}
 			else if(boost::iequals(t.value, "radius")) {
 				sec.radius = tok.get_number<float>();
@@ -405,7 +405,7 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, manager& manager
 						tok.assert_punctuator("/");
 						float z = tok.get_number<float>();
 						tok.assert_punctuator(")");
-						values.push_back(math::make_vector(x, y, z));
+						values.push_back(make_vector(x, y, z));
 					}
 					break;
 
@@ -525,8 +525,8 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, manager& manag
 
 			lev.things.emplace_back(lev.templates[base_it->second]);
 			lev.things.back().sector = sector;
-			lev.things.back().position = math::make_vector(x, y, z);
-			lev.things.back().orientation = math::make_vector(pitch, yaw, roll);
+			lev.things.back().position = make_vector(x, y, z);
+			lev.things.back().orientation = make_vector(pitch, yaw, roll);
 			lev.things.back().parse_args(tok, manager, *lev.master_colormap, compiler, lev.template_map, report);
 		}
 	}
@@ -579,8 +579,8 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
 
 	// Calculate axis-aligned bounding box for each sector;
 	for(auto& sec : lev.sectors) {
-		vector<3> min_aabb = math::zero<3>(std::numeric_limits<float>::max());
-		vector<3> max_aabb = math::zero<3>(std::numeric_limits<float>::lowest());
+		vector<3> min_aabb = make_fill_vector<3>(std::numeric_limits<float>::max());
+		vector<3> max_aabb = make_fill_vector<3>(std::numeric_limits<float>::lowest());
 
 		for(auto& vx_id : sec.vertices) {
 			auto& vx = lev.vertices[vx_id];

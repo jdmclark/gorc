@@ -61,7 +61,7 @@ void symbol_table::replace_symbol(symbol_type type, const std::string& name,
 		break;
 
 	case symbol_type::vector:
-		defaultvalue = vm::value(vector<3>());
+		defaultvalue = vm::value(make_zero_vector<3, float>());
 		break;
 
 	default:

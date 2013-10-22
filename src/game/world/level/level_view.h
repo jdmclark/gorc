@@ -1,8 +1,8 @@
 #pragma once
 
+#include "framework/math/matrix.h"
 #include "game/view.h"
 #include "framework/math/box.h"
-#include "framework/math/matrix.h"
 #include "framework/flag_set.h"
 #include "content/flags/key_flag.h"
 #include "level_shader.h"
@@ -50,9 +50,9 @@ private:
 
 	level_shader* currentLevelShader = nullptr;
 
-	math::matrix<float> projection_matrix;
-	math::matrix<float> view_matrix;
-	std::stack<math::matrix<float>> model_matrix_stack;
+	matrix<4> projection_matrix = make_identity_matrix<4>();
+	matrix<4> view_matrix = make_identity_matrix<4>();
+	std::stack<matrix<4>> model_matrix_stack;
 
 	template <typename T, typename... U> void set_current_shader(T& shader, U... args) {
 		currentLevelShader = &shader;
@@ -66,7 +66,7 @@ private:
 		currentLevelShader->set_model_matrix(model_matrix_stack.top());
 	}
 
-	inline void concatenate_matrix(const math::matrix<float>& mat) {
+	inline void concatenate_matrix(const matrix<4>& mat) {
 		model_matrix_stack.top() = model_matrix_stack.top() * mat;
 	}
 
@@ -87,13 +87,13 @@ private:
 	std::vector<std::tuple<unsigned int, unsigned int, float>> translucent_surfaces_scratch;
 	std::vector<std::tuple<int, float>> visible_thing_scratch;
 
-	void compute_visible_sectors(const box<2, unsigned int>& view_size);
+	void compute_visible_sectors(const box<2, int>& view_size);
 	void record_visible_special_surfaces();
 	void record_visible_things();
 	void do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
 			const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look);
 	void draw_visible_diffuse_surfaces();
-	void draw_visible_sky_surfaces(const box<2, unsigned int>& screen_size, const vector<3>& sector_tint);
+	void draw_visible_sky_surfaces(const box<2, int>& screen_size, const vector<3>& sector_tint);
 	void draw_visible_translucent_surfaces_and_things();
 
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
@@ -113,7 +113,7 @@ public:
 	}
 
 	void update(double dt);
-	void draw(double dt, const box<2, unsigned int>& view_size);
+	void draw(double dt, const box<2, int>& view_size);
 };
 
 }

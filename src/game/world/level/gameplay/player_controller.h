@@ -17,7 +17,12 @@ class contact_range_consumer;
 namespace gameplay {
 
 class player_controller : public character_controller {
-	void find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, std::set<int>& closed, std::vector<vector<3>>& manifolds);
+	void find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, std::set<int>& closed, std::vector<vector<3>>& manifolds,
+			const vector<3>& vel_dir);
+	void find_thing_resting_manifolds(const physics::sphere& sphere, std::set<int>& closed, std::vector<vector<3>>& manifolds,
+			const vector<3>& vel_dir, int current_thing_id);
+
+	void step_physics(int thing_id, double dt);
 
 public:
 	using character_controller::character_controller;

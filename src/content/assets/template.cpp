@@ -85,11 +85,11 @@ template <typename T> void TemplateParameterFlagMapper(flag_set<T>& value, const
 
 void TemplateParameterVectorMapper(vector<3>& value, text::tokenizer& tok) {
 	tok.assert_punctuator("(");
-	math::get<0>(value) = tok.get_number<float>();
+	get<0>(value) = tok.get_number<float>();
 	tok.assert_punctuator("/");
-	math::get<1>(value) = tok.get_number<float>();
+	get<1>(value) = tok.get_number<float>();
 	tok.assert_punctuator("/");
-	math::get<2>(value) = tok.get_number<float>();
+	get<2>(value) = tok.get_number<float>();
 	tok.assert_punctuator(")");
 }
 
@@ -142,10 +142,10 @@ void TemplateAddFrame(thing_template& tpl, text::tokenizer& tok) {
 		float r = tok.get_number<float>();
 		tok.assert_punctuator(")");
 
-		tpl.frames.emplace_back(math::make_vector(x, y, z), math::make_vector(p, a, r));
+		tpl.frames.emplace_back(make_vector(x, y, z), make_vector(p, a, r));
 	}
 	else {
-		tpl.frames.emplace_back(math::make_vector(x, y, z), math::zero<3>());
+		tpl.frames.emplace_back(make_vector(x, y, z), make_zero_vector<3, float>());
 	}
 }
 

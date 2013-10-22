@@ -10,7 +10,7 @@ public:
 	virtual ~view();
 
 	virtual void update(double dt) = 0;
-	virtual void draw(double dt, const box<2, unsigned int>& view_size) = 0;
+	virtual void draw(double dt, const box<2, int>& view_size) = 0;
 };
 
 }

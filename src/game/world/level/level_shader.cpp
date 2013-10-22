@@ -11,16 +11,16 @@ gorc::game::world::level::level_shader::~level_shader() {
 	return;
 }
 
-void gorc::game::world::level::level_shader::set_view_matrix(const math::matrix<float>& matrix) {
-	glUniformMatrix4fv(view_mat_ul, 1, GL_FALSE, matrix.get_opengl_matrix());
+void gorc::game::world::level::level_shader::set_view_matrix(const matrix<4>& matrix) {
+	glUniformMatrix4fv(view_mat_ul, 1, GL_FALSE, make_opengl_matrix(matrix));
 }
 
-void gorc::game::world::level::level_shader::set_projection_matrix(const math::matrix<float>& matrix) {
-	glUniformMatrix4fv(proj_mat_ul, 1, GL_FALSE, matrix.get_opengl_matrix());
+void gorc::game::world::level::level_shader::set_projection_matrix(const matrix<4>& matrix) {
+	glUniformMatrix4fv(proj_mat_ul, 1, GL_FALSE, make_opengl_matrix(matrix));
 }
 
-void gorc::game::world::level::level_shader::set_model_matrix(const math::matrix<float>& matrix) {
-	glUniformMatrix4fv(model_mat_ul, 1, GL_FALSE, matrix.get_opengl_matrix());
+void gorc::game::world::level::level_shader::set_model_matrix(const matrix<4>& matrix) {
+	glUniformMatrix4fv(model_mat_ul, 1, GL_FALSE, make_opengl_matrix(matrix));
 }
 
 gorc::game::world::level::surface_shader::surface_shader(const content::assets::shader& shader)
@@ -41,10 +41,10 @@ void gorc::game::world::level::surface_shader::activate(const vector<3>& current
 	glUniform1i(light_ul, 1);
 
 	std::array<float, 4> tint_color;
-	std::get<0>(tint_color) = math::get<0>(current_sector_tint);
-	std::get<1>(tint_color) = math::get<1>(current_sector_tint);
-	std::get<2>(tint_color) = math::get<2>(current_sector_tint);
-	std::get<3>(tint_color) = math::length(current_sector_tint);
+	std::get<0>(tint_color) = get<0>(current_sector_tint);
+	std::get<1>(tint_color) = get<1>(current_sector_tint);
+	std::get<2>(tint_color) = get<2>(current_sector_tint);
+	std::get<3>(tint_color) = length(current_sector_tint);
 
 	glUniform4fv(sector_tint_ul, 1, tint_color.data());
 }
@@ -61,26 +61,26 @@ gorc::game::world::level::horizon_shader::horizon_shader(const content::assets::
 }
 
 void gorc::game::world::level::horizon_shader::activate(const vector<3>& current_sector_tint, const vector<2>& sky_offset,
-		float horizon_pixels_per_rev, float horizon_distance, const box<2, unsigned int>& screen_size, const vector<3>& camera_look) {
+		float horizon_pixels_per_rev, float horizon_distance, const box<2, int>& screen_size, const vector<3>& camera_look) {
 	glUseProgram(program);
 
 	std::array<float, 4> tint_color;
-	std::get<0>(tint_color) = math::get<0>(current_sector_tint);
-	std::get<1>(tint_color) = math::get<1>(current_sector_tint);
-	std::get<2>(tint_color) = math::get<2>(current_sector_tint);
-	std::get<3>(tint_color) = math::length(current_sector_tint);
+	std::get<0>(tint_color) = get<0>(current_sector_tint);
+	std::get<1>(tint_color) = get<1>(current_sector_tint);
+	std::get<2>(tint_color) = get<2>(current_sector_tint);
+	std::get<3>(tint_color) = length(current_sector_tint);
 
-	std::array<float, 2> ssz { static_cast<float>(screen_size.Size<X>()), static_cast<float>(screen_size.Size<Y>()) };
+	std::array<float, 2> ssz { static_cast<float>(get_size<0>(screen_size)), static_cast<float>(get_size<1>(screen_size)) };
 
 	auto horizon_start_offset = sky_offset / 256.0f;
 	float horizons_per_rev = std::ceil(horizon_pixels_per_rev / 256.0f);
 	float horizon_scale = 128.0f / horizon_distance;
 
-	float yaw_revs = std::atan2(get<X>(camera_look), get<Y>(camera_look)) / 6.28318f;
-	get<X>(horizon_start_offset) += yaw_revs * horizons_per_rev;
+	float yaw_revs = std::atan2(get<0>(camera_look), get<1>(camera_look)) / 6.28318f;
+	get<0>(horizon_start_offset) += yaw_revs * horizons_per_rev;
 
 	float pitch_revs = std::acos(dot(camera_look, make_vector(0.0f, 0.0f, 1.0f))) * 0.5f + 1.0f;
-	get<Y>(horizon_start_offset) -= pitch_revs;
+	get<1>(horizon_start_offset) -= pitch_revs;
 
 	std::array<float, 3> offset = { get<0>(horizon_start_offset), get<1>(horizon_start_offset), horizon_scale };
 
@@ -104,10 +104,10 @@ void gorc::game::world::level::ceiling_shader::activate(const vector<3>& current
 	glUseProgram(program);
 
 	std::array<float, 4> tint_color;
-	std::get<0>(tint_color) = math::get<0>(current_sector_tint);
-	std::get<1>(tint_color) = math::get<1>(current_sector_tint);
-	std::get<2>(tint_color) = math::get<2>(current_sector_tint);
-	std::get<3>(tint_color) = math::length(current_sector_tint);
+	std::get<0>(tint_color) = get<0>(current_sector_tint);
+	std::get<1>(tint_color) = get<1>(current_sector_tint);
+	std::get<2>(tint_color) = get<2>(current_sector_tint);
+	std::get<3>(tint_color) = length(current_sector_tint);
 
 	std::array<float, 3> offset = { get<0>(sky_offset), get<1>(sky_offset), ceiling_sky_z };
 

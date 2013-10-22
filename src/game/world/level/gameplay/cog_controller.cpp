@@ -34,7 +34,7 @@ void gorc::game::world::level::gameplay::cog_controller::update_thing_path_movin
 
 	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 	// Use a magic multiple to correct it.
-	float dist_len = math::length(targetPosition - currentPosition);
+	float dist_len = length(targetPosition - currentPosition);
 	float alpha = rate_factor * dt * thing.path_move_speed / dist_len;
 	if(alpha >= 1.0f || dist_len == 0.0f) {
 		thing.position = targetPosition;
@@ -60,8 +60,8 @@ void gorc::game::world::level::gameplay::cog_controller::update_thing_path_movin
 		}
 	}
 	else {
-		thing.position = math::lerp(thing.position, targetPosition, alpha);
-		thing.orientation = math::lerp(thing.orientation, targetOrientation, alpha);
+		thing.position = lerp(thing.position, targetPosition, alpha);
+		thing.orientation = lerp(thing.orientation, targetOrientation, alpha);
 	}
 }
 

@@ -142,18 +142,18 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 			uint8_t buffer[bufsz];
 
 			for(uint8_t* buf_idx = buffer; buf_idx < buffer + bufsz; buf_idx += 4) {
-				buf_idx[0] = math::get<0>(color);
-				buf_idx[1] = math::get<1>(color);
-				buf_idx[2] = math::get<2>(color);
+				buf_idx[0] = get<0>(color);
+				buf_idx[1] = get<1>(color);
+				buf_idx[2] = get<2>(color);
 				buf_idx[3] = 255;
 			}
 
 			auto diffuse = LoadMaterialFromMemory(16, 16, buffer);
 
 			for(uint8_t* buf_idx = buffer; buf_idx < buffer + bufsz; buf_idx += 4) {
-				buf_idx[0] = math::get<0>(lightcolor);
-				buf_idx[1] = math::get<1>(lightcolor);
-				buf_idx[2] = math::get<2>(lightcolor);
+				buf_idx[0] = get<0>(lightcolor);
+				buf_idx[1] = get<1>(lightcolor);
+				buf_idx[2] = get<2>(lightcolor);
 				buf_idx[3] = 255;
 			}
 
@@ -188,9 +188,9 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
 				for(auto it = orig_buffer.begin(), jt = col_buffer.begin(); it != orig_buffer.end() && jt != col_buffer.end(); ++it, jt += 4) {
 					auto color = colormap.get_color(*it);
-					*(jt + 0) = math::get<0>(color);
-					*(jt + 1) = math::get<1>(color);
-					*(jt + 2) = math::get<2>(color);
+					*(jt + 0) = get<0>(color);
+					*(jt + 1) = get<1>(color);
+					*(jt + 2) = get<2>(color);
 
 					if(dataheader.UseTransparency && (*it == record_headers[i].TransparentColor || *it == header.Transparency)) {
 						*(jt + 3) = 0;
@@ -204,9 +204,9 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
 				for(auto it = orig_buffer.begin(), jt = col_buffer.begin(); it != orig_buffer.end() && jt != col_buffer.end(); ++it, jt += 4) {
 					auto color = colormap.get_extra(*it);
-					*(jt + 0) = math::get<0>(color);
-					*(jt + 1) = math::get<1>(color);
-					*(jt + 2) = math::get<2>(color);
+					*(jt + 0) = get<0>(color);
+					*(jt + 1) = get<1>(color);
+					*(jt + 2) = get<2>(color);
 					*(jt + 3) = 255;
 				}
 

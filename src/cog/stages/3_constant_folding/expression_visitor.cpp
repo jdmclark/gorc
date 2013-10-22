@@ -30,7 +30,7 @@ void expression_visitor::visit_float_literal_expression(float_literal_expression
 void expression_visitor::visit_vector_literal_expression(vector_literal_expression& e) {
 	visitedExpression = &e;
 	isConstant = true;
-	constantvalue = vm::value(math::make_vector(e.x, e.y, e.z));
+	constantvalue = vm::value(make_vector(e.x, e.y, e.z));
 }
 
 void expression_visitor::visit_identifier_expression(identifier_expression& e) {

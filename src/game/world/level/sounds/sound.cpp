@@ -37,7 +37,7 @@ void gorc::game::world::level::sounds::sound::play_positional(const content::ass
 	float actual_max_rad = std::max(minrad, maxrad);
 
 	internal_sound.setBuffer(buffer.buffer);
-	internal_sound.setPosition(math::get<0>(position), math::get<1>(position), math::get<2>(position));
+	internal_sound.setPosition(get<0>(position), get<1>(position), get<2>(position));
 	internal_sound.setRelativeToListener(false);
 	internal_sound.setVolume(volume * 100.0f);
 	internal_sound.setLoop(flags & flags::sound_flag::Loops);
@@ -94,7 +94,7 @@ void gorc::game::world::level::sounds::sound::stop(float delay) {
 void gorc::game::world::level::sounds::sound::update(double dt, const level_model& model) {
 	if(update_position) {
 		vector<3> pos = model.things[thing].position;
-		internal_sound.setPosition(math::get<0>(pos), math::get<1>(pos), math::get<2>(pos));
+		internal_sound.setPosition(get<0>(pos), get<1>(pos), get<2>(pos));
 	}
 
 	expired = (internal_sound.getStatus() != sf::Sound::Playing);

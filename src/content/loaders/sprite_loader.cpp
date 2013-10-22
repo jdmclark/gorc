@@ -23,9 +23,9 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::sprite_loader::par
 	spr->light_mode = static_cast<flags::light_mode>(t.get_number<uint32_t>());
 	spr->texture_mode = static_cast<flags::texture_mode>(t.get_number<uint32_t>());
 	spr->extra_light = t.get_number<float>();
-	math::get<0>(spr->offset) = t.get_number<float>();
-	math::get<1>(spr->offset) = t.get_number<float>();
-	math::get<2>(spr->offset) = t.get_number<float>();
+	get<0>(spr->offset) = t.get_number<float>();
+	get<1>(spr->offset) = t.get_number<float>();
+	get<2>(spr->offset) = t.get_number<float>();
 
 	return std::unique_ptr<asset>(std::move(spr));
 }

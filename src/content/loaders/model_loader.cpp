@@ -60,7 +60,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
 	float insert_x = tok.get_number<float>();
 	float insert_y = tok.get_number<float>();
 	float insert_z = tok.get_number<float>();
-	model.insert_offset = math::make_vector(insert_x, insert_y, insert_z);
+	model.insert_offset = make_vector(insert_x, insert_y, insert_z);
 
 	tok.assert_identifier("GEOSETS");
 	unsigned int num_geosets = tok.get_number<unsigned int>();
@@ -110,7 +110,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
 				float v_z = tok.get_number<float>();
 				tok.get_number<float>();
 
-				mesh.vertices.push_back(math::make_vector(v_x, v_y, v_z));
+				mesh.vertices.push_back(make_vector(v_x, v_y, v_z));
 			}
 
 			tok.assert_identifier("TEXTURE");
@@ -123,7 +123,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
 				float v_u = tok.get_number<float>();
 				float v_v = tok.get_number<float>();
 
-				mesh.texture_vertices.push_back(math::make_vector(v_u, v_v));
+				mesh.texture_vertices.push_back(make_vector(v_u, v_v));
 			}
 
 			tok.assert_identifier("VERTEX");
@@ -136,7 +136,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
 				float n_y = tok.get_number<float>();
 				float n_z = tok.get_number<float>();
 
-				mesh.vertex_normals.push_back(math::make_vector(n_x, n_y, n_z));
+				mesh.vertex_normals.push_back(make_vector(n_x, n_y, n_z));
 			}
 
 			tok.assert_identifier("FACES");
@@ -175,7 +175,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
 				float n_y = tok.get_number<float>();
 				float n_z = tok.get_number<float>();
 
-				mesh.faces[k].normal = math::make_vector(n_x, n_y, n_z);
+				mesh.faces[k].normal = make_vector(n_x, n_y, n_z);
 			}
 		}
 	}
@@ -203,17 +203,17 @@ void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manage
 		node.sibling = tok.get_number<int>();
 		node.num_children = tok.get_number<int>();
 
-		math::get<0>(node.offset) = tok.get_number<float>();
-		math::get<1>(node.offset) = tok.get_number<float>();
-		math::get<2>(node.offset) = tok.get_number<float>();
+		get<0>(node.offset) = tok.get_number<float>();
+		get<1>(node.offset) = tok.get_number<float>();
+		get<2>(node.offset) = tok.get_number<float>();
 
-		math::get<0>(node.rotation) = tok.get_number<float>();
-		math::get<1>(node.rotation) = tok.get_number<float>();
-		math::get<2>(node.rotation) = tok.get_number<float>();
+		get<0>(node.rotation) = tok.get_number<float>();
+		get<1>(node.rotation) = tok.get_number<float>();
+		get<2>(node.rotation) = tok.get_number<float>();
 
-		math::get<0>(node.pivot) = tok.get_number<float>();
-		math::get<1>(node.pivot) = tok.get_number<float>();
-		math::get<2>(node.pivot) = tok.get_number<float>();
+		get<0>(node.pivot) = tok.get_number<float>();
+		get<1>(node.pivot) = tok.get_number<float>();
+		get<2>(node.pivot) = tok.get_number<float>();
 
 		node.name = tok.get_space_delimited_string();
 	}
@@ -229,7 +229,7 @@ void PostprocessModel(assets::model& model, manager& manager, const assets::colo
 	for(auto& geoset : model.geosets) {
 		for(auto& mesh : geoset.meshes) {
 			if(mesh.texture_vertices.empty()) {
-				mesh.texture_vertices.push_back(math::make_vector(0.0f, 0.0f));
+				mesh.texture_vertices.push_back(make_vector(0.0f, 0.0f));
 			}
 		}
 	}

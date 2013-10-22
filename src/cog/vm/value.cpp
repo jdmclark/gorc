@@ -169,9 +169,9 @@ value::value(const vector<3>& v) {
 
 const gorc::vector<3>& value::operator=(const vector<3>& v) {
 	type_flag = type::vector;
-	data.vector.X = math::get<math::X>(v);
-	data.vector.Y = math::get<math::Y>(v);
-	data.vector.Z = math::get<math::Z>(v);
+	data.vector.X = get<0>(v);
+	data.vector.Y = get<1>(v);
+	data.vector.Z = get<2>(v);
 
 	return v;
 }
@@ -179,24 +179,24 @@ const gorc::vector<3>& value::operator=(const vector<3>& v) {
 value::operator gorc::vector<3>() const {
 	switch(type_flag) {
 	case type::nothing:
-		return vector<3>();
+		return make_zero_vector<3, float>();
 
 	case type::integer:
-		return vector<3>();
+		return make_zero_vector<3, float>();
 
 	case type::floating:
-		return vector<3>();
+		return make_zero_vector<3, float>();
 
 	case type::boolean:
-		return vector<3>();
+		return make_zero_vector<3, float>();
 
 	case type::string:
-		return vector<3>();
+		return make_zero_vector<3, float>();
 
 	case type::vector:
 		return make_vector(data.vector.X, data.vector.Y, data.vector.Z);
 
 	default:
-		return vector<3>();
+		return make_zero_vector<3, float>();
 	}
 }

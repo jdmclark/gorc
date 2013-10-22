@@ -105,9 +105,9 @@ void gorc::game::world::level::level_presenter::update(double dt) {
 	model->level_time += dt;
 
 	model->dynamic_tint = model->dynamic_tint * (1.0 - dt);
-	math::get<0>(model->dynamic_tint) = std::max(math::get<0>(model->dynamic_tint), 0.0f);
-	math::get<1>(model->dynamic_tint) = std::max(math::get<1>(model->dynamic_tint), 0.0f);
-	math::get<2>(model->dynamic_tint) = std::max(math::get<2>(model->dynamic_tint), 0.0f);
+	get<0>(model->dynamic_tint) = std::max(get<0>(model->dynamic_tint), 0.0f);
+	get<1>(model->dynamic_tint) = std::max(get<1>(model->dynamic_tint), 0.0f);
+	get<2>(model->dynamic_tint) = std::max(get<2>(model->dynamic_tint), 0.0f);
 }
 
 gorc::game::world::level::gameplay::thing_controller& gorc::game::world::level::level_presenter::get_thing_controller(flags::thing_type type) {
@@ -156,7 +156,7 @@ bool gorc::game::world::level::level_presenter::point_path_passes_through_adjoin
 		return false;
 	}
 
-	return physics::segment_surface_intersection(segment, model->level, surf);
+	return physics::segment_surface_intersection(segment, model->level, surf, make_identity_matrix<4>());
 }
 
 bool gorc::game::world::level::level_presenter::update_path_sector(const physics::segment& segment,
@@ -235,7 +235,7 @@ void gorc::game::world::level::level_presenter::update_camera() {
 
 	thing& camera = model->things[model->camera_thing_id];
 	camera.thrust = model->camera_velocity;
-	model->camera_velocity = zero<3>();
+	model->camera_velocity = make_zero_vector<3, float>();
 
 	// update camera with eye offset
 	auto p0 = camera.position;
@@ -259,12 +259,11 @@ void gorc::game::world::level::level_presenter::update_camera() {
 }
 
 void gorc::game::world::level::level_presenter::translate_camera(const vector<3>& amt) {
-	vector<3> cam_vel = zero<3>();
-	cam_vel = zero<3>();
-	cam_vel += get<X>(amt) * cross(model->camera_look, model->camera_up);
-	cam_vel += get<Z>(amt) * model->camera_up;
-	cam_vel += get<Y>(amt) * model->camera_look;
-	cam_vel *= 1.2f;
+	vector<3> cam_vel = make_zero_vector<3, float>();
+	cam_vel += get<0>(amt) * cross(model->camera_look, model->camera_up);
+	cam_vel += get<2>(amt) * model->camera_up;
+	cam_vel += get<1>(amt) * model->camera_look;
+	cam_vel = cam_vel * 1.2f;
 
 	model->camera_velocity = cam_vel;
 }
@@ -274,13 +273,13 @@ void gorc::game::world::level::level_presenter::yaw_camera(double amt) {
 	float cost = std::cos(amt);
 
 	vector<3> NewLook = make_vector(
-			cost * get<X>(model->camera_look) - sint * get<Y>(model->camera_look),
-			sint * get<X>(model->camera_look) + cost * get<Y>(model->camera_look),
-			get<Z>(model->camera_look));
+			cost * get<0>(model->camera_look) - sint * get<1>(model->camera_look),
+			sint * get<0>(model->camera_look) + cost * get<1>(model->camera_look),
+			get<2>(model->camera_look));
 	vector<3> NewUp = make_vector(
-			cost * get<X>(model->camera_up) - sint * get<Y>(model->camera_up),
-			sint * get<X>(model->camera_up) + cost * get<Y>(model->camera_up),
-			get<Z>(model->camera_up));
+			cost * get<0>(model->camera_up) - sint * get<1>(model->camera_up),
+			sint * get<0>(model->camera_up) + cost * get<1>(model->camera_up),
+			get<2>(model->camera_up));
 
 	model->camera_look = normalize(NewLook);
 	model->camera_up = normalize(NewUp);
@@ -331,12 +330,12 @@ void gorc::game::world::level::level_presenter::activate() {
 		const content::assets::level_surface& surf = model->surfaces[i];
 		if((surf.adjoin >= 0 && (model->adjoins[surf.adjoin].flags & flags::adjoin_flag::AllowMovement))
 				|| !(surf.flags & flags::surface_flag::CogLinked)
-				|| math::dot(surf.normal, model->camera_look) >= 0.0f) {
+				|| dot(surf.normal, model->camera_look) >= 0.0f) {
 			continue;
 		}
 
 		for(const auto& vx : surf.vertices) {
-			float new_dist = math::length(camera_position - model->level.vertices[std::get<0>(vx)]);
+			float new_dist = length(camera_position - model->level.vertices[std::get<0>(vx)]);
 			if(new_dist < best_surf_dist) {
 				best_surf_candidate = i;
 				best_surf_dist = new_dist;
@@ -351,11 +350,11 @@ void gorc::game::world::level::level_presenter::activate() {
 		}
 
 		auto dir_vec = thing.position - camera_position;
-		if(!(thing.flags & flags::thing_flag::CogLinked) || math::dot(dir_vec, model->camera_look) <= 0.0f) {
+		if(!(thing.flags & flags::thing_flag::CogLinked) || dot(dir_vec, model->camera_look) <= 0.0f) {
 			continue;
 		}
 
-		float dir_len = math::length(dir_vec);
+		float dir_len = length(dir_vec);
 		if(dir_len >= best_thing_dist) {
 			continue;
 		}
@@ -379,15 +378,15 @@ void gorc::game::world::level::level_presenter::damage() {
 	// TODO: Temporary code to fire a bryar bolt.
 
 	// Calculate orientation from camera look.
-	float bolt_yaw = std::atan2(math::get<1>(model->camera_look), math::get<0>(model->camera_look)) / deg2rad;
-	float bolt_pitch = std::acos(math::dot(math::make_vector(0.0f, 0.0f, 1.0f), model->camera_look)) / deg2rad;
+	float bolt_yaw = std::atan2(get<1>(model->camera_look), get<0>(model->camera_look)) / deg2rad;
+	float bolt_pitch = std::acos(dot(make_vector(0.0f, 0.0f, 1.0f), model->camera_look)) / deg2rad;
 
 	vector<3> bolt_offset = model->camera_position + model->camera_look * 0.09f - model->camera_up * 0.01f;
 	update_path_sector_scratch.clear();
 	update_path_sector(physics::segment(model->camera_position, bolt_offset), model->sectors[model->camera_sector], update_path_sector_scratch);
 	int bolt_sector = std::get<0>(update_path_sector_scratch.back());
 
-	int bolt_thing = create_thing("+bryarbolt", bolt_sector, bolt_offset, math::make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+	int bolt_thing = create_thing("+bryarbolt", bolt_sector, bolt_offset, make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
 
 	auto& thing = model->things[bolt_thing];
 }
@@ -403,12 +402,12 @@ void gorc::game::world::level::level_presenter::add_dynamic_tint(int player_id, 
 
 	// Clamp dynamic tint
 	auto dynamic_tint = model->dynamic_tint;
-	math::get<0>(model->dynamic_tint) = std::max(math::get<0>(dynamic_tint), 0.0f);
-	math::get<1>(model->dynamic_tint) = std::max(math::get<1>(dynamic_tint), 0.0f);
-	math::get<2>(model->dynamic_tint) = std::max(math::get<2>(dynamic_tint), 0.0f);
-	math::get<0>(model->dynamic_tint) = std::min(math::get<0>(dynamic_tint), 1.0f);
-	math::get<1>(model->dynamic_tint) = std::min(math::get<1>(dynamic_tint), 1.0f);
-	math::get<2>(model->dynamic_tint) = std::min(math::get<2>(dynamic_tint), 1.0f);
+	get<0>(model->dynamic_tint) = std::max(get<0>(dynamic_tint), 0.0f);
+	get<1>(model->dynamic_tint) = std::max(get<1>(dynamic_tint), 0.0f);
+	get<2>(model->dynamic_tint) = std::max(get<2>(dynamic_tint), 0.0f);
+	get<0>(model->dynamic_tint) = std::min(get<0>(dynamic_tint), 1.0f);
+	get<1>(model->dynamic_tint) = std::min(get<1>(dynamic_tint), 1.0f);
+	get<2>(model->dynamic_tint) = std::min(get<2>(dynamic_tint), 1.0f);
 }
 
 // Frame verbs
@@ -506,12 +505,12 @@ void gorc::game::world::level::level_presenter::clear_adjoin_flags(int surface, 
 }
 
 gorc::vector<3> gorc::game::world::level::level_presenter::get_surface_center(int surface) {
-	auto vec = math::zero<3>();
+	auto vec = make_zero_vector<3, float>();
 	for(const auto& vx : model->level.surfaces[surface].vertices) {
 		vec += model->level.vertices[std::get<0>(vx)];
 	}
 
-	vec /= static_cast<float>(model->level.surfaces[surface].vertices.size());
+	vec = vec / static_cast<float>(model->level.surfaces[surface].vertices.size());
 	return vec;
 }
 
@@ -745,7 +744,7 @@ void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_
 
 	// Color verbs
 	verbTable.add_verb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {
-		components.current_level_presenter->add_dynamic_tint(player_id, math::make_vector(r, g, b));
+		components.current_level_presenter->add_dynamic_tint(player_id, make_vector(r, g, b));
 	});
 
 	// Frame verbs
@@ -821,7 +820,7 @@ void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_
 	});
 
 	verbTable.add_verb<void, 3>("sectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
-		components.current_level_presenter->set_sector_thrust(sector_id, math::normalize(thrust_vec) * thrust_speed);
+		components.current_level_presenter->set_sector_thrust(sector_id, normalize(thrust_vec) * thrust_speed);
 	});
 
 	verbTable.add_verb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
@@ -841,7 +840,7 @@ void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_
 	});
 
 	verbTable.add_verb<void, 3>("setsectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
-		components.current_level_presenter->set_sector_thrust(sector_id, math::normalize(thrust_vec) * thrust_speed);
+		components.current_level_presenter->set_sector_thrust(sector_id, normalize(thrust_vec) * thrust_speed);
 	});
 
 	verbTable.add_verb<void, 2>("setsectortint", [&components](int sector_id, vector<3> tint) {

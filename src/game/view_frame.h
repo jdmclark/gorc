@@ -15,8 +15,8 @@ private:
 public:
 	view_frame(sf::Window& Window);
 
-	inline box<2, unsigned int> get_size() const {
-		return box<2, unsigned int>(math::zero<2, unsigned int>(), math::make_vector(Window.getSize().x, Window.getSize().y));
+	inline box<2, int> get_size() const {
+		return box<2, int>(make_vector(0, 0), make_vector(Window.getSize().x, Window.getSize().y));
 	}
 
 	inline void set_view(view& v) {

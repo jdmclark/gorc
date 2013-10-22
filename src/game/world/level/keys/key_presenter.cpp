@@ -144,7 +144,7 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::level::keys::key
 	if(!mix_level->animation || mix_level->animation->nodes.size() <= node_id ||
 			mix_level->animation->nodes[node_id].frames.empty()) {
 		// Abort if there are no frames to interpolate.
-		return std::make_tuple(math::zero<3>(), math::zero<3>());
+		return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
 	}
 
 	const auto& anim_node = mix_level->animation->nodes[node_id];

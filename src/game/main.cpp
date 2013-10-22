@@ -32,6 +32,14 @@
 using namespace gorc;
 
 int main(int argc, char** argv) {
+	if(argc != 3) {
+		std::cout << "Usage: game \"Episode Name\" levelfilename.jkl" << std::endl;
+		return 0;
+	}
+
+	std::string episode = argv[1];
+	std::string levelfilename = argv[2];
+
 	// create window and OpenGL context.
 	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
 	Window.setVerticalSyncEnabled(true);
@@ -104,14 +112,14 @@ int main(int argc, char** argv) {
 
 	// HACK: Set current episode to The Force Within.
 	for(size_t i = 0; i < FileSystem.get_episode_count(); ++i) {
-		if(boost::iequals(FileSystem.get_episode(i).get_episode_name(), "The Force Within")) {
+		if(boost::iequals(FileSystem.get_episode(i).get_episode_name(), episode)) {
 			FileSystem.set_episode(i);
 		}
 	}
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentmanager = std::make_shared<content::manager>(report, FileSystem);
-	const auto& lev = contentmanager->load<content::assets::level>("01narshadda.jkl", compiler);
+	const auto& lev = contentmanager->load<content::assets::level>(levelfilename, compiler);
 	WorldPlaceController.go_to(game::world::level::level_place(contentmanager, lev));
 
 	ScreenPlaceController.go_to(game::screen::action::action_place());

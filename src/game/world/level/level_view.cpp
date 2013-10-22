@@ -28,7 +28,7 @@ void gorc::game::world::level::level_view::update(double dt) {
 	}
 }
 
-void gorc::game::world::level::level_view::compute_visible_sectors(const box<2, unsigned int>& view_size) {
+void gorc::game::world::level::level_view::compute_visible_sectors(const box<2, int>& view_size) {
 	unsigned int current_camera_sector_id = currentModel->camera_sector;
 	const auto& camera_pos = currentModel->camera_position;
 
@@ -36,16 +36,16 @@ void gorc::game::world::level::level_view::compute_visible_sectors(const box<2, 
 	std::array<double, 16> view_matrix;
 	std::array<int, 4> viewport;
 
-	float const* proj = projection_matrix.get_opengl_matrix();
+	float const* proj = make_opengl_matrix(projection_matrix);
 	std::transform(proj, proj + 16, proj_matrix.begin(), [](float value) { return static_cast<double>(value); });
 
-	float const* view = this->view_matrix.get_opengl_matrix();
+	float const* view = make_opengl_matrix(this->view_matrix);
 	std::transform(view, view + 16, view_matrix.begin(), [](float value) { return static_cast<double>(value); });
 
 	glGetIntegerv(GL_VIEWPORT, viewport.data());
 
-	box<2, double> adj_bbox(math::make_vector<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
-			math::make_vector<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
+	box<2, double> adj_bbox(make_vector<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
+			make_vector<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
 					static_cast<double>(std::get<1>(viewport) + std::get<3>(viewport))));
 
 	sector_visited_scratch.clear();
@@ -68,7 +68,7 @@ void gorc::game::world::level::level_view::do_sector_vis(unsigned int sec_num, c
 			continue;
 		}
 
-		float dist = math::dot(surface.normal, cam_pos - surf_vx_pos);
+		float dist = dot(surface.normal, cam_pos - surf_vx_pos);
 		if(dist < 0.0f) {
 			continue;
 		}
@@ -83,7 +83,7 @@ void gorc::game::world::level::level_view::do_sector_vis(unsigned int sec_num, c
 		for(const auto& vx : surface.vertices) {
 			auto vx_pos = currentModel->level.vertices[std::get<0>(vx)];
 
-			if(math::dot(cam_look, vx_pos - cam_pos) < 0.0f) {
+			if(dot(cam_look, vx_pos - cam_pos) < 0.0f) {
 				// Vertex behind camera.
 				failed = true;
 				continue;
@@ -93,7 +93,7 @@ void gorc::game::world::level::level_view::do_sector_vis(unsigned int sec_num, c
 
 			double x_out, y_out, z_out;
 
-			gluProject(math::get<0>(vx_pos), math::get<1>(vx_pos), math::get<2>(vx_pos),
+			gluProject(get<0>(vx_pos), get<1>(vx_pos), get<2>(vx_pos),
 					view_mat.data(), proj_mat.data(), viewport.data(),
 					&x_out, &y_out, &z_out);
 
@@ -113,11 +113,11 @@ void gorc::game::world::level::level_view::do_sector_vis(unsigned int sec_num, c
 			continue;
 		}
 
-		box<2, double> new_adj_bbox(math::make_vector(min_x, min_y), math::make_vector(max_x, max_y));
-		if(math::BoxesOverlap(adj_bbox, new_adj_bbox)) {
+		box<2, double> new_adj_bbox(make_vector(min_x, min_y), make_vector(max_x, max_y));
+		if(adj_bbox.overlaps(new_adj_bbox)) {
 			sector_vis_scratch.emplace(surface.adjoined_sector);
 			do_sector_vis(surface.adjoined_sector, proj_mat, view_mat, viewport,
-					math::Intersect(adj_bbox, new_adj_bbox), cam_pos, cam_look);
+					adj_bbox & new_adj_bbox, cam_pos, cam_look);
 		}
 	}
 
@@ -156,7 +156,7 @@ void gorc::game::world::level::level_view::record_visible_special_surfaces() {
 		unsigned int surf_id = std::get<1>(surf_tuple);
 		const auto& surf = currentModel->surfaces[surf_id];
 		auto vx_pos = currentModel->level.vertices[std::get<0>(surf.vertices.front())];
-		std::get<2>(surf_tuple) = math::dot(surf.normal, cam_pos - vx_pos);
+		std::get<2>(surf_tuple) = dot(surf.normal, cam_pos - vx_pos);
 
 		// TODO: Currently uses distance to plane. Compute actual distance to polygon.
 	}
@@ -171,7 +171,7 @@ void gorc::game::world::level::level_view::record_visible_special_surfaces() {
 void gorc::game::world::level::level_view::record_visible_things() {
 	for(auto& thing : currentModel->things) {
 		if(sector_vis_scratch.find(thing.sector) != sector_vis_scratch.end()) {
-			visible_thing_scratch.emplace_back(thing.get_id(), math::length(thing.position - currentModel->camera_position));
+			visible_thing_scratch.emplace_back(thing.get_id(), length(thing.position - currentModel->camera_position));
 
 			if(!(thing.flags & flags::thing_flag::Sighted)) {
 				// thing has been sighted for first time. Fire sighted event.
@@ -209,7 +209,7 @@ void gorc::game::world::level::level_view::draw_visible_diffuse_surfaces() {
 	}
 }
 
-void gorc::game::world::level::level_view::draw_visible_sky_surfaces(const box<2, unsigned int>& view_size, const vector<3>& sector_tint) {
+void gorc::game::world::level::level_view::draw_visible_sky_surfaces(const box<2, int>& view_size, const vector<3>& sector_tint) {
 	glDepthMask(GL_TRUE);
 
 	if(!horizon_sky_surfaces_scratch.empty()) {
@@ -238,7 +238,8 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 	while(thing_it != visible_thing_scratch.end() && surf_it != translucent_surfaces_scratch.end()) {
 		if(std::get<1>(*thing_it) <= std::get<2>(*surf_it)) {
 			glDepthMask(GL_TRUE);
-			glDisable(GL_CULL_FACE);
+			//glDisable(GL_CULL_FACE);
+			glEnable(GL_CULL_FACE);
 			draw_thing(currentModel->things[std::get<0>(*thing_it)]);
 			++thing_it;
 		}
@@ -252,7 +253,8 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 	}
 
 	glDepthMask(GL_TRUE);
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	while(thing_it != visible_thing_scratch.end()) {
 		draw_thing(currentModel->things[std::get<0>(*thing_it)]);
 		++thing_it;
@@ -267,7 +269,7 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 	}
 }
 
-void gorc::game::world::level::level_view::draw(double dt, const box<2, unsigned int>& view_size) {
+void gorc::game::world::level::level_view::draw(double dt, const box<2, int>& view_size) {
 	if(currentModel) {
 		glDisable(GL_STENCIL_TEST);
 		glDisable(GL_ALPHA_TEST);
@@ -288,15 +290,15 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, unsigned
 		visible_thing_scratch.clear();
 
 		// Set up world and projection matrices
-		double aspect = static_cast<double>(view_size.Size<X>()) / static_cast<double>(view_size.Size<Y>());
+		double aspect = static_cast<double>(get_size<0>(view_size)) / static_cast<double>(get_size<1>(view_size));
 
-		projection_matrix = matrix<float>::make_perspective_matrix(70.0f, static_cast<float>(aspect), 0.001f, 1000.0f);
-		view_matrix = matrix<float>::make_look_matrix(currentModel->camera_position, currentModel->camera_look, currentModel->camera_up);
+		projection_matrix = make_perspective_matrix(70.0f, static_cast<float>(aspect), 0.001f, 1000.0f);
+		view_matrix = make_look_matrix(currentModel->camera_position, currentModel->camera_look, currentModel->camera_up);
 
 		while(!model_matrix_stack.empty()) {
 			model_matrix_stack.pop();
 		}
-		model_matrix_stack.push(matrix<float>::make_identity_matrix());
+		model_matrix_stack.push(make_identity_matrix<4, float>());
 
 		// Run level hidden surface removal
 		compute_visible_sectors(view_size);
@@ -305,7 +307,7 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, unsigned
 
 		// Prepare for rendering ordinary surfaces
 		auto sector_tint = currentModel->sectors[currentModel->camera_sector].tint;
-		sector_tint = (sector_tint * math::length(sector_tint)) + (currentModel->dynamic_tint * (1.0f - math::length(sector_tint)));
+		sector_tint = (sector_tint * length(sector_tint)) + (currentModel->dynamic_tint * (1.0f - length(sector_tint)));
 
 		set_current_shader(surfaceShader, sector_tint);
 
@@ -345,15 +347,6 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, unsigned
 		glDepthMask(GL_TRUE);
 
 		glDisable(GL_DEPTH_TEST);
-
-		/*
-		// Enable debug drawing for physics.
-		ViewMatrix = matrix<float>::make_look_matrix(currentModel->CameraPosition * PhysicsWorldScale,
-				currentModel->CameraLook, currentModel->CameraUp);
-		set_current_shader(surfaceShader, sector_tint);
-		currentModel->DynamicsWorld.setDebugDrawer(&physicsDebugDraw);
-		currentModel->DynamicsWorld.debugDrawWorld();
-		*/
 	}
 }
 
@@ -400,20 +393,20 @@ void gorc::game::world::level::level_view::draw_surface(unsigned int surf_num, c
 			vector<2> third_tex = lev.texture_vertices[std::get<1>(surface.vertices[i])] + surface.texture_offset;
 			float third_intensity = std::get<2>(surface.vertices[i]) + sector.extra_light + surface.extra_light;
 
-			glNormal3f(get<X>(surface.normal), get<Y>(surface.normal), get<Z>(surface.normal));
-			glTexCoord2f(get<X>(first_tex) * get<X>(tex_scale), get<Y>(first_tex) * get<Y>(tex_scale));
+			glNormal3f(get<0>(surface.normal), get<1>(surface.normal), get<2>(surface.normal));
+			glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
 			glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-			glVertex3f(get<X>(first_geo), get<Y>(first_geo), get<Z>(first_geo));
+			glVertex3f(get<0>(first_geo), get<1>(first_geo), get<2>(first_geo));
 
-			glNormal3f(get<X>(surface.normal), get<Y>(surface.normal), get<Z>(surface.normal));
-			glTexCoord2f(get<X>(second_tex) * get<X>(tex_scale), get<Y>(second_tex) * get<Y>(tex_scale));
+			glNormal3f(get<0>(surface.normal), get<1>(surface.normal), get<2>(surface.normal));
+			glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
 			glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-			glVertex3f(get<X>(second_geo), get<Y>(second_geo), get<Z>(second_geo));
+			glVertex3f(get<0>(second_geo), get<1>(second_geo), get<2>(second_geo));
 
-			glNormal3f(get<X>(surface.normal), get<Y>(surface.normal), get<Z>(surface.normal));
-			glTexCoord2f(get<X>(third_tex) * get<X>(tex_scale), get<Y>(third_tex) * get<Y>(tex_scale));
+			glNormal3f(get<0>(surface.normal), get<1>(surface.normal), get<2>(surface.normal));
+			glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
 			glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-			glVertex3f(get<X>(third_geo), get<Y>(third_geo), get<Z>(third_geo));
+			glVertex3f(get<0>(third_geo), get<1>(third_geo), get<2>(third_geo));
 		}
 
 		glEnd();
@@ -430,8 +423,8 @@ void gorc::game::world::level::level_view::draw_mesh_node(const thing& thing, co
 
 	push_matrix();
 
-	vector<3> anim_translate = math::zero<3>();
-	vector<3> anim_rotate = math::zero<3>();
+	vector<3> anim_translate = make_zero_vector<3, float>();
+	vector<3> anim_rotate = make_zero_vector<3, float>();
 
 	if(thing.attached_key_mix >= 0) {
 		std::tie(anim_translate, anim_rotate) = currentPresenter->key_presenter.get_node_frame(thing.attached_key_mix, mesh_id, node.type);
@@ -441,11 +434,11 @@ void gorc::game::world::level::level_view::draw_mesh_node(const thing& thing, co
 		anim_rotate += node.rotation;
 	}
 
-	concatenate_matrix(math::matrix<float>::make_translation_matrix(anim_translate));
-	concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<1>(anim_rotate), math::make_vector(0.0f, 0.0f, 1.0f)));
-	concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<0>(anim_rotate), math::make_vector(1.0f, 0.0f, 0.0f)));
-	concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<2>(anim_rotate), math::make_vector(0.0f, 1.0f, 0.0f)));
-	concatenate_matrix(math::matrix<float>::make_translation_matrix(node.pivot));
+	concatenate_matrix(make_translation_matrix(anim_translate));
+	concatenate_matrix(make_rotation_matrix(get<1>(anim_rotate), make_vector(0.0f, 0.0f, 1.0f)));
+	concatenate_matrix(make_rotation_matrix(get<0>(anim_rotate), make_vector(1.0f, 0.0f, 0.0f)));
+	concatenate_matrix(make_rotation_matrix(get<2>(anim_rotate), make_vector(0.0f, 1.0f, 0.0f)));
+	concatenate_matrix(make_translation_matrix(node.pivot));
 	update_shader_model_matrix();
 
 	if(node.mesh >= 0) {
@@ -488,20 +481,20 @@ void gorc::game::world::level::level_view::draw_mesh_node(const thing& thing, co
 					vector<3> third_normal = mesh.vertex_normals[std::get<0>(face.vertices[i])];
 					float third_intensity = light;
 
-					glNormal3f(get<X>(first_normal), get<Y>(first_normal), get<Z>(first_normal));
-					glTexCoord2f(get<X>(first_tex) * get<X>(tex_scale), get<Y>(first_tex) * get<Y>(tex_scale));
+					glNormal3f(get<0>(first_normal), get<1>(first_normal), get<2>(first_normal));
+					glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
 					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-					glVertex3f(get<X>(first_geo), get<Y>(first_geo), get<Z>(first_geo));
+					glVertex3f(get<0>(first_geo), get<1>(first_geo), get<2>(first_geo));
 
-					glNormal3f(get<X>(second_normal), get<Y>(second_normal), get<Z>(second_normal));
-					glTexCoord2f(get<X>(second_tex) * get<X>(tex_scale), get<Y>(second_tex) * get<Y>(tex_scale));
+					glNormal3f(get<0>(second_normal), get<1>(second_normal), get<2>(second_normal));
+					glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
 					glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-					glVertex3f(get<X>(second_geo), get<Y>(second_geo), get<Z>(second_geo));
+					glVertex3f(get<0>(second_geo), get<1>(second_geo), get<2>(second_geo));
 
-					glNormal3f(get<X>(third_normal), get<Y>(third_normal), get<Z>(third_normal));
-					glTexCoord2f(get<X>(third_tex) * get<X>(tex_scale), get<Y>(third_tex) * get<Y>(tex_scale));
+					glNormal3f(get<0>(third_normal), get<1>(third_normal), get<2>(third_normal));
+					glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
 					glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-					glVertex3f(get<X>(third_geo), get<Y>(third_geo), get<Z>(third_geo));
+					glVertex3f(get<0>(third_geo), get<1>(third_geo), get<2>(third_geo));
 				}
 
 				glEnd();
@@ -509,7 +502,7 @@ void gorc::game::world::level::level_view::draw_mesh_node(const thing& thing, co
 		}
 	}
 
-	concatenate_matrix(math::matrix<float>::make_translation_matrix(-node.pivot));
+	concatenate_matrix(make_translation_matrix(-node.pivot));
 
 	draw_mesh_node(thing, model, node.child, sector_light);
 	pop_matrix();
@@ -525,17 +518,12 @@ void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const
 			light = 1.0f;
 		}
 
-		vector<3> offset = cross(currentModel->camera_look, currentModel->camera_up) * get<X>(sprite.offset) +
-				currentModel->camera_look * get<Y>(sprite.offset) +
-				currentModel->camera_up * get<Z>(sprite.offset);
-		concatenate_matrix(matrix<float>::make_translation_matrix(thing.position + offset));
+		vector<3> offset = cross(currentModel->camera_look, currentModel->camera_up) * get<0>(sprite.offset) +
+				currentModel->camera_look * get<1>(sprite.offset) +
+				currentModel->camera_up * get<2>(sprite.offset);
+		concatenate_matrix(make_translation_matrix(thing.position + offset));
 
-		matrix<float> new_model = matrix<float>::make_identity_matrix();
-		for(int i = 0; i < 3; ++i) {
-			for(int j = 0; j < 3; ++j) {
-				new_model.set_value(i, j, view_matrix.get_value(j, i));
-			}
-		}
+		matrix<4> new_model = view_matrix.transpose();
 		concatenate_matrix(new_model);
 
 		update_shader_model_matrix();
@@ -552,41 +540,41 @@ void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, sprite.material->cels[current_frame].light);
 
-		vector<3> sprite_middle = zero<3>();//sprite.Offset;
-		vector<3> horiz_off = math::make_vector(1.0f,0.0f,0.0f) * sprite.width * 0.5f;
-		vector<3> vert_off = math::make_vector(0.0f,1.0f,0.0f) * sprite.height * 0.5f;
+		vector<3> sprite_middle = make_zero_vector<3, float>();//sprite.Offset;
+		vector<3> horiz_off = make_vector(1.0f,0.0f,0.0f) * sprite.width * 0.5f;
+		vector<3> vert_off = make_vector(0.0f,1.0f,0.0f) * sprite.height * 0.5f;
 
 		vector<3> sprite_vx1 = sprite_middle + horiz_off + vert_off;
 		vector<3> sprite_vx2 = sprite_middle + horiz_off - vert_off;
 		vector<3> sprite_vx3 = sprite_middle - horiz_off - vert_off;
 		vector<3> sprite_vx4 = sprite_middle - horiz_off + vert_off;
 
-		vector<3> sprite_normal = math::make_vector(0.0f, 1.0f, 0.0f);
+		vector<3> sprite_normal = make_vector(0.0f, 1.0f, 0.0f);
 
 		glDepthMask(GL_FALSE);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0f, 1.0f);
 		glBegin(GL_QUADS);
 
-		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
+		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
 		glTexCoord2f(1,0);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<X>(sprite_vx1), get<Y>(sprite_vx1), get<Z>(sprite_vx1));
+		glVertex3f(get<0>(sprite_vx1), get<1>(sprite_vx1), get<2>(sprite_vx1));
 
-		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
+		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
 		glTexCoord2f(1,1);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<X>(sprite_vx2), get<Y>(sprite_vx2), get<Z>(sprite_vx2));
+		glVertex3f(get<0>(sprite_vx2), get<1>(sprite_vx2), get<2>(sprite_vx2));
 
-		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
+		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
 		glTexCoord2f(0,1);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<X>(sprite_vx3), get<Y>(sprite_vx3), get<Z>(sprite_vx3));
+		glVertex3f(get<0>(sprite_vx3), get<1>(sprite_vx3), get<2>(sprite_vx3));
 
-		glNormal3f(get<X>(sprite_normal), get<Y>(sprite_normal), get<Z>(sprite_normal));
+		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
 		glTexCoord2f(0,0);
 		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<X>(sprite_vx4), get<Y>(sprite_vx4), get<Z>(sprite_vx4));
+		glVertex3f(get<0>(sprite_vx4), get<1>(sprite_vx4), get<2>(sprite_vx4));
 
 		glEnd();
 		glDepthMask(GL_TRUE);
@@ -605,10 +593,10 @@ void gorc::game::world::level::level_view::draw_thing(const thing& thing) {
 	if(thing.model_3d) {
 		push_matrix();
 
-		concatenate_matrix(math::matrix<float>::make_translation_matrix(thing.position));
-		concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<1>(thing.orientation), math::make_vector(0.0f, 0.0f, 1.0f)));
-		concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<0>(thing.orientation), math::make_vector(1.0f, 0.0f, 0.0f)));
-		concatenate_matrix(math::matrix<float>::make_rotation_matrix(math::get<2>(thing.orientation), math::make_vector(0.0f, 1.0f, 0.0f)));
+		concatenate_matrix(make_translation_matrix(thing.position));
+		concatenate_matrix(make_rotation_matrix(get<1>(thing.orientation), make_vector(0.0f, 0.0f, 1.0f)));
+		concatenate_matrix(make_rotation_matrix(get<0>(thing.orientation), make_vector(1.0f, 0.0f, 0.0f)));
+		concatenate_matrix(make_rotation_matrix(get<2>(thing.orientation), make_vector(0.0f, 1.0f, 0.0f)));
 
 		update_shader_model_matrix();
 

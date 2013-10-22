@@ -86,17 +86,17 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 		vector<2, double> ScreenCenter = make_vector(static_cast<double>(components.window.getSize().x) / 2.0,
 				static_cast<double>(components.window.getSize().y) / 2.0);
 		vector<2, double> CursorPos = (make_vector(static_cast<double>(sf::Mouse::getPosition(components.window).x),
-				static_cast<double>(sf::Mouse::getPosition(components.window).y)) - ScreenCenter) / get<X>(ScreenCenter);
+				static_cast<double>(sf::Mouse::getPosition(components.window).y)) - ScreenCenter) / get<0>(ScreenCenter);
 		sf::Mouse::setPosition(sf::Vector2i(components.window.getSize().x / 2, components.window.getSize().y / 2), components.window);
 
 		auto CameraRotation = -CursorPos * 180.0 * dt;
 
-		components.current_level_presenter->yaw_camera(get<X>(CameraRotation));
-		components.current_level_presenter->pitch_camera(get<Y>(CameraRotation));
+		components.current_level_presenter->yaw_camera(get<0>(CameraRotation));
+		components.current_level_presenter->pitch_camera(get<1>(CameraRotation));
 	}
 
 	// Camera translate
-	vector<3> Translate = zero<3>();
+	vector<3> Translate = make_zero_vector<3, float>();
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
 		Translate += make_vector(0.0f, 1.0f, 0.0f);
 	}
@@ -113,11 +113,11 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 		Translate += make_vector(1.0f, 0.0f, 0.0f);
 	}
 
-	if(length2(Translate) > std::numeric_limits<float>::epsilon()) {
+	if(length_squared(Translate) > std::numeric_limits<float>::epsilon()) {
 		Translate = normalize(Translate);
 	}
 	else {
-		Translate = zero<3>();
+		Translate = make_zero_vector<3, float>();
 	}
 
 	components.current_level_presenter->translate_camera(Translate);

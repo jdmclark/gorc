@@ -102,11 +102,11 @@ void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, ma
 			float dya = tok.get_number<float>();
 			float dro = tok.get_number<float>();
 
-			frame.position = math::make_vector(x, y, z);
-			frame.orientation = math::make_vector(pi, ya, ro);
+			frame.position = make_vector(x, y, z);
+			frame.orientation = make_vector(pi, ya, ro);
 
-			frame.delta_position = math::make_vector(dx, dy, dz);
-			frame.delta_orientation = math::make_vector(dpi, dya, dro);
+			frame.delta_position = make_vector(dx, dy, dz);
+			frame.delta_orientation = make_vector(dpi, dya, dro);
 		}
 	}
 }

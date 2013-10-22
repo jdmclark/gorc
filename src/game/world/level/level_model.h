@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framework/math/vector.h"
 #include "content/assets/level.h"
 #include "cog/instance.h"
 #include "framework/pool.h"
@@ -12,8 +13,6 @@
 #include "game/world/level/keys/key_model.h"
 #include "game/world/level/gameplay/inventory_model.h"
 #include <vector>
-
-using namespace gorc::math;
 
 namespace gorc {
 namespace game {
@@ -41,14 +40,14 @@ public:
 	vector<3> camera_position;
 	vector<3> camera_look = make_vector(0.0f, 1.0f, 0.0f);
 	vector<3> camera_up = make_vector(0.0f, 0.0f, 1.0f);
-	vector<3> camera_velocity = zero<3>();
+	vector<3> camera_velocity = make_vector(0.0f, 0.0f, 0.0f);
 
 	std::vector<content::assets::thing_template const*> spawn_points;
 	unsigned int current_spawn_point = 0;
 
 	double level_time = 0.0;
 	double game_time = 0.0;
-	vector<3> dynamic_tint = math::zero<3>();
+	vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
 	level_model(content::manager& manager, cog::compiler& Cogcompiler, const content::assets::level& level, const content::assets::inventory& inv);
 };

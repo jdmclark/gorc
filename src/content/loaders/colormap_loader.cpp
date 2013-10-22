@@ -28,7 +28,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::d
 
 	uint8_t* cb_idx = colorbytes;
 	for(size_t i = 0; i < 256; ++i, cb_idx += 3) {
-		cmp->set_color(i, math::make_vector(cb_idx[0], cb_idx[1], cb_idx[2]));
+		cmp->set_color(i, make_vector(cb_idx[0], cb_idx[1], cb_idx[2]));
 	}
 
 	// Read first (darkest) light level table to generate texture light data.
