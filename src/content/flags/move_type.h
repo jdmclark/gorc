@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class move_type : uint32_t {
+enum class move_type {
 	none,
 	physics,
 	Path

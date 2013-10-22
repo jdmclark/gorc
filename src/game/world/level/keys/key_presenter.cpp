@@ -88,7 +88,7 @@ void gorc::game::world::level::keys::key_presenter::update(double dt) {
 					frame = anim.frame_count;
 				}
 			}
-			else if(static_cast<uint32_t>(key.flags) == 0) {
+			else if(static_cast<int>(key.flags) == 0) {
 				loops = true;
 				frame = std::fmod(frame, anim.frame_count);
 			}

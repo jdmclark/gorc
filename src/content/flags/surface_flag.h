@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class surface_flag : uint32_t {
+enum class surface_flag {
 	Floor							= 0x1,
 	CogLinked						= 0x2,
 	Impassable 						= 0x4,

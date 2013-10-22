@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class thing_type : uint32_t {
+enum class thing_type {
 	Free							= 0,
 	Camera							= 1,
 	Actor							= 2,

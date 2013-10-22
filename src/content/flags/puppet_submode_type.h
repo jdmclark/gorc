@@ -3,7 +3,7 @@
 namespace gorc {
 namespace flags {
 
-enum class puppet_submode_type : int {
+enum class puppet_submode_type {
 	Stand = 0,
 	Walk = 1,
 	Run = 2,

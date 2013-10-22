@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class ExplosionFlag : uint32_t {
+enum class ExplosionFlag {
 	AnimatedSprite					= 0x1,
 	ExplosionIncludesBlastPhase		= 0x2,
 	DamageInBlastRadius				= 0x4,

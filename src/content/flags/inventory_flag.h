@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class inventory_flag : uint32_t {
+enum class inventory_flag {
 	Registered						= 0x1,
 	Item							= 0x2,
 	Weapon							= 0x4,

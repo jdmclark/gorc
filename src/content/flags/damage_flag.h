@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class DamageFlag : uint32_t {
+enum class DamageFlag {
 	Impact							= 0x1,
 	Energy							= 0x2,
 	Explosion						= 0x4,

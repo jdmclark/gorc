@@ -326,7 +326,7 @@ void gorc::game::world::level::level_presenter::activate() {
 	int best_thing_candidate = -1;
 	float best_thing_dist = 0.25f;
 
-	for(int i = 0; i < model->surfaces.size(); ++i) {
+	for(size_t i = 0; i < model->surfaces.size(); ++i) {
 		const content::assets::level_surface& surf = model->surfaces[i];
 		if((surf.adjoin >= 0 && (model->adjoins[surf.adjoin].flags & flags::adjoin_flag::AllowMovement))
 				|| !(surf.flags & flags::surface_flag::CogLinked)

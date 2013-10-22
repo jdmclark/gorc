@@ -3,7 +3,7 @@
 namespace gorc {
 namespace flags {
 
-enum class key_marker_type : uint32_t {
+enum class key_marker_type {
 	LeftFootstep = 1,
 	RightFootstep = 2,
 	ActivateBin = 3,

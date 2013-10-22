@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class JkFlag : uint32_t {
+enum class JkFlag {
 	HasSaber						= 0x1,
 	SaberCollides					= 0x2,
 	SaberIgniting					= 0x4,

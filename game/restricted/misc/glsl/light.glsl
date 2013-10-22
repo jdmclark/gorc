@@ -1,3 +1,5 @@
+#version 130
+
 uniform vec3 light_position;
 uniform vec3 camera_position;
 
@@ -21,7 +23,9 @@ void main() {
 	point_cam_dir = camera_position - world_pos.xyz;
 }
 
-#else if FRAGMENTPROGRAM
+#endif
+
+#ifdef FRAGMENTPROGRAM
 
 uniform sampler2D diffuse;
 uniform float inv_light_radius_squared;
@@ -39,7 +43,7 @@ void main() {
 	
 	float specularity = 0.25;
 	float shininess = 10.0;
-	float specular_reflection = vec4(1.0, 1.0, 1.0, 1.0) * attenuation * specularity *
+	float specular_reflection = attenuation * specularity *
 		pow(max(0.0, dot(reflect(-norm_light_dir, norm_point_norm), norm_cam_dir)), shininess);
 	
 	vec4 light_color = vec4(1.0, 1.0, 1.0, 1.0) * attenuation;

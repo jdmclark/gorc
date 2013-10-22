@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class actor_flag : uint32_t {
+enum class actor_flag {
 	PitchingChangesHeadPitch 		= 0x1,
 	HasFieldlight					= 0x4,
 	Invulnerability					= 0x8,
@@ -27,7 +25,7 @@ enum class actor_flag : uint32_t {
 	NoDisplayHud					= 0x800000,
 	DamagesAtFullRate				= 0x1000000,
 	CanSeeInDark					= 0x2000000,
-	CausesGreenCornerBrackets		= 0x80000000
+	CausesGreenCornerBrackets		= -2147483648
 };
 
 }

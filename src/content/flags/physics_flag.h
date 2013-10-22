@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class physics_flag : uint32_t {
+enum class physics_flag {
 	HasGravity						= 0x1,
 	UsesThrustToMove				= 0x2,
 	AlignOrientationWithSurface		= 0x10,

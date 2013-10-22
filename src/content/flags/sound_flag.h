@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class sound_flag : uint32_t {
+enum class sound_flag {
 	Loops = 0x1,
 	Voice = 0x2,
 	Ambient = 0x4,

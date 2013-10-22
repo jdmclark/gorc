@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class AiModeFlag : uint32_t {
+enum class AiModeFlag {
 	MovingTowardDestination			= 0x1,
 	AttackingTarget					= 0x2,
 	SearchingForTarget				= 0x4,

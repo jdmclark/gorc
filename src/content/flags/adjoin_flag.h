@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class adjoin_flag : uint32_t {
+enum class adjoin_flag {
 	Visible 						= 0x1,
 	AllowMovement 					= 0x2,
 	AllowSound 						= 0x4,

@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class sector_flag : uint32_t {
+enum class sector_flag {
 	NoGravity						= 0x1,
 	Underwater						= 0x2,
 	CogLinked						= 0x4,

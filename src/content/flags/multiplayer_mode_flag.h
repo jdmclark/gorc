@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class MultiplayerModeFlag : uint32_t {
+enum class MultiplayerModeFlag {
 	TeamPlay						= 0x1,
 	NoFriendlyFire					= 0x2,
 	CtfComputesOwnScore				= 0x4,

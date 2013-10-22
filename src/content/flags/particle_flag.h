@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class ParticleFlag : uint32_t {
+enum class ParticleFlag {
 	OutwardExpanding				= 0x1,
 	AnimateCel						= 0x2,
 	RandomStartCel					= 0x4,

@@ -238,8 +238,7 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 	while(thing_it != visible_thing_scratch.end() && surf_it != translucent_surfaces_scratch.end()) {
 		if(std::get<1>(*thing_it) <= std::get<2>(*surf_it)) {
 			glDepthMask(GL_TRUE);
-			//glDisable(GL_CULL_FACE);
-			glEnable(GL_CULL_FACE);
+			glDisable(GL_CULL_FACE);
 			draw_thing(currentModel->things[std::get<0>(*thing_it)]);
 			++thing_it;
 		}
@@ -253,8 +252,7 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 	}
 
 	glDepthMask(GL_TRUE);
-	//glDisable(GL_CULL_FACE);
-	glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 	while(thing_it != visible_thing_scratch.end()) {
 		draw_thing(currentModel->things[std::get<0>(*thing_it)]);
 		++thing_it;
@@ -329,6 +327,9 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, int>& vi
 		// Draw lights
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_TRUE);
+
 		for(const auto& light_thing : visible_thing_scratch) {
 			const auto& thing = currentModel->things[std::get<0>(light_thing)];
 

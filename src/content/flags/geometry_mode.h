@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class geometry_mode : uint32_t {
+enum class geometry_mode {
 	NotDrawn						= 0,
 	Points							= 1,
 	Wireframe						= 2,

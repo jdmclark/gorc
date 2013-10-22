@@ -1,11 +1,9 @@
 #pragma once
 
-#include <cstdint>
-
 namespace gorc {
 namespace flags {
 
-enum class collide_type : uint32_t {
+enum class collide_type  {
 	none = 0,
 	sphere = 1,
 	sphere_unknown = 2,
