@@ -45,12 +45,6 @@ private:
 	void initialize_world();
 	void physics_tick_update(double dt);
 
-	bool point_inside_sector(const vector<3>& position, const content::assets::level_sector& sec);
-	bool point_path_passes_through_adjoin(const physics::segment& segment,
-			const content::assets::level_sector& sec, const content::assets::level_surface& surf);
-	bool update_path_sector(const physics::segment& segment, const content::assets::level_sector& sector,
-			std::vector<std::tuple<unsigned int, unsigned int>>& path);
-
 	void update_thing_sector(int thing_id, thing& thing, const vector<3>& oldThingPosition);
 	void update_camera();
 

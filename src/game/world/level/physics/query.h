@@ -7,6 +7,7 @@
 #include "contact.h"
 #include "framework/math/util.h"
 #include "framework/math/matrix.h"
+#include "game/world/level/level_model.h"
 
 namespace gorc {
 namespace game {
@@ -84,6 +85,11 @@ template <typename VertexProvider, typename EdgeProvider> vector<3> closest_poin
 
 	return closest_point;
 }
+
+bool point_inside_sector(const vector<3>& position, const level_model& level_model, const content::assets::level_sector& sec);
+
+void segment_adjoin_path(const segment& segment, const level_model& level_model, const content::assets::level_sector& initial_sector,
+		std::vector<std::tuple<unsigned int, unsigned int>>& path);
 
 }
 }

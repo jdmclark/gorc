@@ -136,95 +136,43 @@ gorc::game::world::level::gameplay::thing_controller& gorc::game::world::level::
 	}
 }
 
-bool gorc::game::world::level::level_presenter::point_inside_sector(const vector<3>& position, const gorc::content::assets::level_sector& sec) {
-	for(size_t i =  sec.first_surface; i < sec.first_surface + sec.surface_count; ++i) {
-		const auto& surf = model->level.surfaces[i];
-		const auto& p = model->level.vertices[std::get<0>(surf.vertices[0])];
-
-		if(dot(surf.normal, position - p) < 0.0f) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool gorc::game::world::level::level_presenter::point_path_passes_through_adjoin(const physics::segment& segment,
-		const content::assets::level_sector& sec, const content::assets::level_surface& surf) {
-	// Early elimination of back faces.
-	if(dot(std::get<1>(segment) - std::get<0>(segment), surf.normal) > 0.0f) {
-		return false;
-	}
-
-	return physics::segment_surface_intersection(segment, model->level, surf, make_identity_matrix<4>());
-}
-
-bool gorc::game::world::level::level_presenter::update_path_sector(const physics::segment& segment,
-		const content::assets::level_sector& sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
-	if(point_inside_sector(std::get<1>(segment), sector)) {
-		path.emplace_back(sector.number, -1);
-		return true;
-	}
-
-	for(unsigned int sec_surf_id = 0; sec_surf_id < sector.surface_count; ++sec_surf_id) {
-		const content::assets::level_surface& surf = model->surfaces[sec_surf_id + sector.first_surface];
-		if(surf.adjoin >= 0 && !(surf.flags & flags::surface_flag::Impassable)
-				&& point_path_passes_through_adjoin(segment, sector, surf)) {
-			path.emplace_back(sector.number, sec_surf_id + sector.first_surface);
-
-			if(update_path_sector(segment, model->sectors[surf.adjoined_sector], path)) {
-				return true;
-			}
-
-			path.pop_back();
-		}
-	}
-
-	return false;
-}
-
 void gorc::game::world::level::level_presenter::update_thing_sector(int thing_id, thing& thing,
 		const vector<3>& oldThingPosition) {
-	if(point_inside_sector(thing.position, model->sectors[thing.sector])) {
+	physics::segment segment(oldThingPosition, thing.position);
+	physics::segment_adjoin_path(segment, *model, model->sectors[thing.sector], update_path_sector_scratch);
+
+	if(std::get<0>(update_path_sector_scratch.back()) == thing.sector) {
 		// thing hasn't moved to a different sector.
 		return;
 	}
 
-	physics::segment segment(oldThingPosition, thing.position);
-	update_path_sector_scratch.clear();
-	if(update_path_sector(segment, model->sectors[thing.sector], update_path_sector_scratch)) {
-		// Fire messages along path
-		unsigned int first_adjoin = std::get<1>(update_path_sector_scratch.front());
-		if(model->surfaces[first_adjoin].flags & flags::surface_flag::CogLinked) {
-			script_presenter.send_message_to_linked(cog::message_id::crossed, first_adjoin, flags::message_type::surface,
+	// Fire messages along path.
+	unsigned int first_adjoin = std::get<1>(update_path_sector_scratch.front());
+	if(model->surfaces[first_adjoin].flags & flags::surface_flag::CogLinked) {
+		script_presenter.send_message_to_linked(cog::message_id::crossed, first_adjoin, flags::message_type::surface,
+				static_cast<int>(thing_id), flags::message_type::thing);
+	}
+
+	for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
+		unsigned int sec_id = std::get<0>(update_path_sector_scratch[i]);
+		thing.sector = sec_id;
+		if(model->sectors[sec_id].flags & flags::sector_flag::CogLinked) {
+			script_presenter.send_message_to_linked(cog::message_id::entered, sec_id, flags::message_type::sector,
 					static_cast<int>(thing_id), flags::message_type::thing);
 		}
 
-		for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
-			unsigned int sec_id = std::get<0>(update_path_sector_scratch[i]);
-			thing.sector = sec_id;
-			if(model->sectors[sec_id].flags & flags::sector_flag::CogLinked) {
-				script_presenter.send_message_to_linked(cog::message_id::entered, sec_id, flags::message_type::sector,
-						static_cast<int>(thing_id), flags::message_type::thing);
-			}
-
-			unsigned int surf_id = std::get<1>(update_path_sector_scratch[i]);
-			if(model->surfaces[surf_id].flags & flags::surface_flag::CogLinked) {
-				script_presenter.send_message_to_linked(cog::message_id::crossed, surf_id, flags::message_type::surface,
-						static_cast<int>(thing_id), flags::message_type::thing);
-			}
-		}
-
-		unsigned int last_sector = std::get<0>(update_path_sector_scratch.back());
-		thing.sector = last_sector;
-		if(model->sectors[last_sector].flags & flags::sector_flag::CogLinked) {
-			script_presenter.send_message_to_linked(cog::message_id::entered, last_sector, flags::message_type::sector,
+		unsigned int surf_id = std::get<1>(update_path_sector_scratch[i]);
+		if(model->surfaces[surf_id].flags & flags::surface_flag::CogLinked) {
+			script_presenter.send_message_to_linked(cog::message_id::crossed, surf_id, flags::message_type::surface,
 					static_cast<int>(thing_id), flags::message_type::thing);
 		}
 	}
-	else {
-		// thing hasn't moved.
-		// TODO: Need to run a backup random walk here.
+
+	unsigned int last_sector = std::get<0>(update_path_sector_scratch.back());
+	thing.sector = last_sector;
+	if(model->sectors[last_sector].flags & flags::sector_flag::CogLinked) {
+		script_presenter.send_message_to_linked(cog::message_id::entered, last_sector, flags::message_type::sector,
+				static_cast<int>(thing_id), flags::message_type::thing);
 	}
 }
 
@@ -240,21 +188,8 @@ void gorc::game::world::level::level_presenter::update_camera() {
 	// update camera with eye offset
 	auto p0 = camera.position;
 	auto p1 = camera.position + camera.eye_offset;
-	if(point_inside_sector(p1, model->sectors[camera.sector])) {
-		// Eye offset doesn't change camera sector.
-		model->camera_sector = camera.sector;
-	}
-	else {
-		update_path_sector_scratch.clear();
-		if(update_path_sector(physics::segment(p0, p1), model->sectors[camera.sector], update_path_sector_scratch)) {
-			model->camera_sector = std::get<0>(update_path_sector_scratch.back());
-		}
-		else {
-			// TODO: Back-up random walk
-			model->camera_sector = camera.sector;
-		}
-	}
-
+	physics::segment_adjoin_path(physics::segment(p0, p1), *model, model->sectors[camera.sector], update_path_sector_scratch);
+	model->camera_sector = std::get<0>(update_path_sector_scratch.back());
 	model->camera_position = p1;
 }
 
@@ -382,11 +317,9 @@ void gorc::game::world::level::level_presenter::damage() {
 	float bolt_pitch = std::acos(dot(make_vector(0.0f, 0.0f, 1.0f), model->camera_look)) / deg2rad;
 
 	vector<3> bolt_offset = model->camera_position + model->camera_look * 0.09f - model->camera_up * 0.01f;
-	update_path_sector_scratch.clear();
-	update_path_sector(physics::segment(model->camera_position, bolt_offset), model->sectors[model->camera_sector], update_path_sector_scratch);
-	int bolt_sector = std::get<0>(update_path_sector_scratch.back());
 
-	int bolt_thing = create_thing("+bryarbolt", bolt_sector, bolt_offset, make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+	int bolt_thing = create_thing("+bryarbolt", model->camera_sector, model->camera_position, make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+	adjust_thing_pos(bolt_thing, bolt_offset);
 
 	auto& thing = model->things[bolt_thing];
 }
