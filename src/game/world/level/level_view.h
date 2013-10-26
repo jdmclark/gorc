@@ -62,22 +62,6 @@ private:
 		shader.set_model_matrix(model_matrix_stack.top());
 	}
 
-	inline void update_shader_model_matrix() {
-		currentLevelShader->set_model_matrix(model_matrix_stack.top());
-	}
-
-	inline void concatenate_matrix(const matrix<4>& mat) {
-		model_matrix_stack.top() = model_matrix_stack.top() * mat;
-	}
-
-	void push_matrix() {
-		model_matrix_stack.push(model_matrix_stack.top());
-	}
-
-	void pop_matrix() {
-		model_matrix_stack.pop();
-	}
-
 	level_presenter* currentPresenter = nullptr;
 	level_model* currentModel = nullptr;
 	std::unordered_set<unsigned int> sector_vis_scratch;
@@ -97,7 +81,6 @@ private:
 	void draw_visible_translucent_surfaces_and_things();
 
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
-	void draw_mesh_node(const thing& thing, const content::assets::model& model, int node_id, float sector_light);
 	void draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light);
 	void draw_thing(const thing& thing);
 
@@ -112,8 +95,49 @@ public:
 		currentModel = levelModel;
 	}
 
+	inline void update_shader_model_matrix() {
+		currentLevelShader->set_model_matrix(model_matrix_stack.top());
+	}
+
+	inline void concatenate_matrix(const matrix<4>& mat) {
+		model_matrix_stack.top() = model_matrix_stack.top() * mat;
+	}
+
+	inline void push_matrix() {
+		model_matrix_stack.push(model_matrix_stack.top());
+	}
+
+	inline void pop_matrix() {
+		model_matrix_stack.pop();
+	}
+
 	void update(double dt);
 	void draw(double dt, const box<2, int>& view_size);
+
+	class mesh_node_visitor {
+	private:
+		float sector_light;
+		level_view& view;
+
+	public:
+		mesh_node_visitor(float sector_light, level_view& view);
+
+		inline void concatenate_matrix(const matrix<4>& mat) {
+			view.concatenate_matrix(mat);
+			view.update_shader_model_matrix();
+		}
+
+		inline void push_matrix() {
+			view.push_matrix();
+		}
+
+		inline void pop_matrix() {
+			view.pop_matrix();
+			view.update_shader_model_matrix();
+		}
+
+		void visit_mesh(const content::assets::model& model, int mesh_id);
+	};
 };
 
 }

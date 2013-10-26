@@ -394,122 +394,90 @@ void gorc::game::world::level::level_view::draw_surface(unsigned int surf_num, c
 			vector<2> third_tex = lev.texture_vertices[std::get<1>(surface.vertices[i])] + surface.texture_offset;
 			float third_intensity = std::get<2>(surface.vertices[i]) + sector.extra_light + surface.extra_light;
 
-			glNormal3f(get<0>(surface.normal), get<1>(surface.normal), get<2>(surface.normal));
+			apply(glNormal3f, surface.normal);
 			glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
 			glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-			glVertex3f(get<0>(first_geo), get<1>(first_geo), get<2>(first_geo));
+			apply(glVertex3f, first_geo);
 
-			glNormal3f(get<0>(surface.normal), get<1>(surface.normal), get<2>(surface.normal));
+			apply(glNormal3f, surface.normal);
 			glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
 			glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-			glVertex3f(get<0>(second_geo), get<1>(second_geo), get<2>(second_geo));
+			apply(glVertex3f, second_geo);
 
-			glNormal3f(get<0>(surface.normal), get<1>(surface.normal), get<2>(surface.normal));
+			apply(glNormal3f, surface.normal);
 			glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
 			glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-			glVertex3f(get<0>(third_geo), get<1>(third_geo), get<2>(third_geo));
+			apply(glVertex3f, third_geo);
 		}
 
 		glEnd();
 	}
 }
 
-void gorc::game::world::level::level_view::draw_mesh_node(const thing& thing, const content::assets::model& model,
-		int mesh_id, float sector_light) {
-	if(mesh_id < 0) {
-		return;
-	}
+gorc::game::world::level::level_view::mesh_node_visitor::mesh_node_visitor(float sector_light, level_view& view)
+	: sector_light(sector_light), view(view) {
+	return;
+}
 
-	const content::assets::model_node& node = model.hierarchy_nodes[mesh_id];
+void gorc::game::world::level::level_view::mesh_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id) {
+	const content::assets::model_mesh& mesh = model.geosets.front().meshes[mesh_id];
+	for(const auto& face : mesh.faces) {
+		if(face.material >= 0) {
+			const auto& material = model.materials[face.material];
 
-	push_matrix();
+			float alpha = (face.type & flags::face_flag::Translucent) ? 0.5f : 1.0f;
 
-	vector<3> anim_translate = make_zero_vector<3, float>();
-	vector<3> anim_rotate = make_zero_vector<3, float>();
+			vector<2> tex_scale = make_vector(1.0f / static_cast<float>(material->width),
+					1.0f / static_cast<float>(material->height));
 
-	if(thing.attached_key_mix >= 0) {
-		std::tie(anim_translate, anim_rotate) = currentPresenter->key_presenter.get_node_frame(thing.attached_key_mix, mesh_id, node.type);
-	}
-	else {
-		anim_translate += node.offset;
-		anim_rotate += node.rotation;
-	}
-
-	concatenate_matrix(make_translation_matrix(anim_translate));
-	concatenate_matrix(make_rotation_matrix(get<1>(anim_rotate), make_vector(0.0f, 0.0f, 1.0f)));
-	concatenate_matrix(make_rotation_matrix(get<0>(anim_rotate), make_vector(1.0f, 0.0f, 0.0f)));
-	concatenate_matrix(make_rotation_matrix(get<2>(anim_rotate), make_vector(0.0f, 1.0f, 0.0f)));
-	concatenate_matrix(make_translation_matrix(node.pivot));
-	update_shader_model_matrix();
-
-	if(node.mesh >= 0) {
-		const content::assets::model_mesh& mesh = model.geosets.front().meshes[node.mesh];
-		for(const auto& face : mesh.faces) {
-			if(face.material >= 0) {
-				const auto& material = model.materials[face.material];
-
-				float alpha = (face.type & flags::face_flag::Translucent) ? 0.5f : 1.0f;
-
-				vector<2> tex_scale = make_vector(1.0f / static_cast<float>(material->width),
-						1.0f / static_cast<float>(material->height));
-
-				float light = sector_light + face.extra_light;
-				if(face.light == flags::light_mode::FullyLit || mesh.light == flags::light_mode::FullyLit) {
-					light = 1.0f;
-				}
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, material->cels[0].diffuse);
-
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, material->cels[0].light);
-
-				glBegin(GL_TRIANGLES);
-
-				vector<3> first_geo = mesh.vertices[std::get<0>(face.vertices[0])];
-				vector<2> first_tex = mesh.texture_vertices[std::get<1>(face.vertices[0])];
-				vector<3> first_normal = mesh.vertex_normals[std::get<0>(face.vertices[0])];
-				float first_intensity = light;
-
-				for(size_t i = 2; i < face.vertices.size(); ++i) {
-					vector<3> second_geo = mesh.vertices[std::get<0>(face.vertices[i - 1])];
-					vector<2> second_tex = mesh.texture_vertices[std::get<1>(face.vertices[i - 1])];
-					vector<3> second_normal = mesh.vertex_normals[std::get<0>(face.vertices[i - 1])];
-					float second_intensity = light;
-
-					vector<3> third_geo = mesh.vertices[std::get<0>(face.vertices[i])];
-					vector<2> third_tex = mesh.texture_vertices[std::get<1>(face.vertices[i])];
-					vector<3> third_normal = mesh.vertex_normals[std::get<0>(face.vertices[i])];
-					float third_intensity = light;
-
-					glNormal3f(get<0>(first_normal), get<1>(first_normal), get<2>(first_normal));
-					glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
-					glColor4f(first_intensity, first_intensity, first_intensity, alpha);
-					glVertex3f(get<0>(first_geo), get<1>(first_geo), get<2>(first_geo));
-
-					glNormal3f(get<0>(second_normal), get<1>(second_normal), get<2>(second_normal));
-					glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
-					glColor4f(second_intensity, second_intensity, second_intensity, alpha);
-					glVertex3f(get<0>(second_geo), get<1>(second_geo), get<2>(second_geo));
-
-					glNormal3f(get<0>(third_normal), get<1>(third_normal), get<2>(third_normal));
-					glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
-					glColor4f(third_intensity, third_intensity, third_intensity, alpha);
-					glVertex3f(get<0>(third_geo), get<1>(third_geo), get<2>(third_geo));
-				}
-
-				glEnd();
+			float light = sector_light + face.extra_light;
+			if(face.light == flags::light_mode::FullyLit || mesh.light == flags::light_mode::FullyLit) {
+				light = 1.0f;
 			}
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, material->cels[0].diffuse);
+
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, material->cels[0].light);
+
+			glBegin(GL_TRIANGLES);
+
+			vector<3> first_geo = mesh.vertices[std::get<0>(face.vertices[0])];
+			vector<2> first_tex = mesh.texture_vertices[std::get<1>(face.vertices[0])];
+			vector<3> first_normal = mesh.vertex_normals[std::get<0>(face.vertices[0])];
+			float first_intensity = light;
+
+			for(size_t i = 2; i < face.vertices.size(); ++i) {
+				vector<3> second_geo = mesh.vertices[std::get<0>(face.vertices[i - 1])];
+				vector<2> second_tex = mesh.texture_vertices[std::get<1>(face.vertices[i - 1])];
+				vector<3> second_normal = mesh.vertex_normals[std::get<0>(face.vertices[i - 1])];
+				float second_intensity = light;
+
+				vector<3> third_geo = mesh.vertices[std::get<0>(face.vertices[i])];
+				vector<2> third_tex = mesh.texture_vertices[std::get<1>(face.vertices[i])];
+				vector<3> third_normal = mesh.vertex_normals[std::get<0>(face.vertices[i])];
+				float third_intensity = light;
+
+				apply(glNormal3f, first_normal);
+				glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
+				glColor4f(first_intensity, first_intensity, first_intensity, alpha);
+				apply(glVertex3f, first_geo);
+
+				apply(glNormal3f, second_normal);
+				glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
+				glColor4f(second_intensity, second_intensity, second_intensity, alpha);
+				apply(glVertex3f, second_geo);
+
+				apply(glNormal3f, third_normal);
+				glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
+				glColor4f(third_intensity, third_intensity, third_intensity, alpha);
+				apply(glVertex3f, third_geo);
+			}
+
+			glEnd();
 		}
 	}
-
-	concatenate_matrix(make_translation_matrix(-node.pivot));
-
-	draw_mesh_node(thing, model, node.child, sector_light);
-	pop_matrix();
-	update_shader_model_matrix();
-
-	draw_mesh_node(thing, model, node.sibling, sector_light);
 }
 
 void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light) {
@@ -552,30 +520,32 @@ void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const
 
 		vector<3> sprite_normal = make_vector(0.0f, 1.0f, 0.0f);
 
+		auto light_vec = make_vector(light, light, light, 1.0f);
+
 		glDepthMask(GL_FALSE);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0f, 1.0f);
 		glBegin(GL_QUADS);
 
-		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
+		apply(glNormal3f, sprite_normal);
 		glTexCoord2f(1,0);
-		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<0>(sprite_vx1), get<1>(sprite_vx1), get<2>(sprite_vx1));
+		apply(glColor4f, light_vec);
+		apply(glVertex3f, sprite_vx1);
 
-		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
+		apply(glNormal3f, sprite_normal);
 		glTexCoord2f(1,1);
-		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<0>(sprite_vx2), get<1>(sprite_vx2), get<2>(sprite_vx2));
+		apply(glColor4f, light_vec);
+		apply(glVertex3f, sprite_vx2);
 
-		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
+		apply(glNormal3f, sprite_normal);
 		glTexCoord2f(0,1);
-		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<0>(sprite_vx3), get<1>(sprite_vx3), get<2>(sprite_vx3));
+		apply(glColor4f, light_vec);
+		apply(glVertex3f, sprite_vx3);
 
-		glNormal3f(get<0>(sprite_normal), get<1>(sprite_normal), get<2>(sprite_normal));
+		apply(glNormal3f, sprite_normal);
 		glTexCoord2f(0,0);
-		glColor4f(light,light,light,1.0f);
-		glVertex3f(get<0>(sprite_vx4), get<1>(sprite_vx4), get<2>(sprite_vx4));
+		apply(glColor4f, light_vec);
+		apply(glVertex3f, sprite_vx4);
 
 		glEnd();
 		glDepthMask(GL_TRUE);
@@ -592,19 +562,8 @@ void gorc::game::world::level::level_view::draw_thing(const thing& thing) {
 			+ currentModel->sectors[thing.sector].extra_light;
 
 	if(thing.model_3d) {
-		push_matrix();
-
-		concatenate_matrix(make_translation_matrix(thing.position));
-		concatenate_matrix(make_rotation_matrix(get<1>(thing.orientation), make_vector(0.0f, 0.0f, 1.0f)));
-		concatenate_matrix(make_rotation_matrix(get<0>(thing.orientation), make_vector(1.0f, 0.0f, 0.0f)));
-		concatenate_matrix(make_rotation_matrix(get<2>(thing.orientation), make_vector(0.0f, 1.0f, 0.0f)));
-
-		update_shader_model_matrix();
-
-		draw_mesh_node(thing, *thing.model_3d, 0, sector_light);
-
-		pop_matrix();
-		update_shader_model_matrix();
+		mesh_node_visitor v(sector_light, *this);
+		currentPresenter->key_presenter.visit_mesh_hierarchy(v, thing);
 	}
 	else if(thing.sprite) {
 		push_matrix();
