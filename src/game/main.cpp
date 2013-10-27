@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	std::string levelfilename = argv[2];
 
 	// create window and OpenGL context.
-	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
+	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc", sf::Style::Default, sf::ContextSettings(24, 8, 0));
 	Window.setVerticalSyncEnabled(true);
 	Window.setActive();
 
