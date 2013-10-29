@@ -30,6 +30,9 @@ private:
 	void play_running_animation(int thing_id, thing& thing, double speed);
 	void play_standing_animation(int thing_id, thing& thing);
 
+	void run_falling_sweep(int thing_id, thing& thing, double dt);
+	void run_walking_sweep(int thing_id, thing& thing, double dt);
+
 	void update_falling(int thing_id, thing& thing, double dt);
 	void update_standing_on_surface(int thing_id, thing& thing, double dt);
 	void update_standing_on_thing(int thing_id, thing& thing, double dt);

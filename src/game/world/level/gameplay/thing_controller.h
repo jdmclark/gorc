@@ -2,6 +2,12 @@
 
 #include "framework/math/vector.h"
 #include "content/flags/key_marker_type.h"
+#include "content/assets/model.h"
+#include "framework/math/matrix.h"
+#include "game/world/level/physics/shape.h"
+#include <vector>
+#include <set>
+#include <stack>
 
 namespace gorc {
 

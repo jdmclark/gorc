@@ -2,6 +2,7 @@
 #include "game/world/level/level_presenter.h"
 #include "game/world/level/level_model.h"
 #include "game/constants.h"
+#include "game/world/level/physics/query.h"
 
 gorc::game::world::level::gameplay::thing_controller::thing_controller(level_presenter& presenter)
 	: presenter(presenter) {

@@ -1,5 +1,6 @@
 #include "sound.h"
 #include "game/world/level/level_model.h"
+#include "framework/math/util.h"
 
 void gorc::game::world::level::sounds::sound::play_ambient(const content::assets::sound& buffer, float volume, float panning, flag_set<flags::sound_flag> flags) {
 	expired = false;
@@ -11,6 +12,8 @@ void gorc::game::world::level::sounds::sound::play_ambient(const content::assets
 	internal_sound.setVolume(volume * 100.0f);
 	internal_sound.setLoop(flags & flags::sound_flag::Loops);
 	internal_sound.setPitch(1.0f);
+	internal_sound.setAttenuation(0.0f);
+	internal_sound.setMinDistance(1.0f);
 	internal_sound.play();
 }
 
@@ -24,6 +27,8 @@ void gorc::game::world::level::sounds::sound::play_voice(const content::assets::
 	internal_sound.setVolume(volume * 100.0f);
 	internal_sound.setLoop(flags & flags::sound_flag::Loops);
 	internal_sound.setPitch(1.0f);
+	internal_sound.setAttenuation(0.0f);
+	internal_sound.setMinDistance(1.0f);
 	internal_sound.play();
 }
 
@@ -33,16 +38,16 @@ void gorc::game::world::level::sounds::sound::play_positional(const content::ass
 
 	// TODO: Handle ambient flag.
 
-	float actual_min_rad = std::min(minrad, maxrad);
-	float actual_max_rad = std::max(minrad, maxrad);
+	actual_min_rad = std::min(minrad, maxrad);
+	actual_max_rad = std::max(minrad, maxrad);
 
 	internal_sound.setBuffer(buffer.buffer);
-	internal_sound.setPosition(get<0>(position), get<1>(position), get<2>(position));
+	internal_sound.setPosition(get<0>(position), get<2>(position), get<1>(position));
 	internal_sound.setRelativeToListener(false);
 	internal_sound.setVolume(volume * 100.0f);
 	internal_sound.setLoop(flags & flags::sound_flag::Loops);
 	internal_sound.setMinDistance(actual_min_rad);
-	internal_sound.setAttenuation(2.5f);
+	internal_sound.setAttenuation(0.0f);
 	internal_sound.setPitch(1.0f);
 	internal_sound.play();
 }
@@ -94,7 +99,13 @@ void gorc::game::world::level::sounds::sound::stop(float delay) {
 void gorc::game::world::level::sounds::sound::update(double dt, const level_model& model) {
 	if(update_position) {
 		vector<3> pos = model.things[thing].position;
-		internal_sound.setPosition(get<0>(pos), get<1>(pos), get<2>(pos));
+		internal_sound.setPosition(get<0>(pos), get<2>(pos), get<1>(pos));
+
+		auto sound_dist = length(model.camera_position - pos);
+		float attenuation = (actual_min_rad != actual_max_rad) ? ((sound_dist - actual_max_rad) / (actual_min_rad - actual_max_rad)) : 1.0f;
+		attenuation = clamp(attenuation, 0.0f, 1.0f);
+
+		internal_sound.setVolume(attenuation * 100.0f);
 	}
 
 	expired = (internal_sound.getStatus() != sf::Sound::Playing);

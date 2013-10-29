@@ -37,6 +37,7 @@ public:
 	vector<3> thrust;
 
 	flag_set<flags::actor_flag> actor_flags;
+	vector<3> ang_vel;
 	flag_set<flags::attach_flag> attach_flags;
 	script const* cog = nullptr;
 	flags::collide_type collide = flags::collide_type::none;
@@ -54,6 +55,8 @@ public:
 	float mass = 2.0f;
 	float max_health = 100.0f;
 	float max_light = 1.0f;
+	float max_rot_vel = 200.0f;
+	float max_vel = 1.0f;
 	model const* model_3d = nullptr;
 	flags::move_type move = flags::move_type::none;
 	float move_size = 0.05f;
@@ -64,6 +67,7 @@ public:
 	sprite const* sprite = nullptr;
 	float timer = 0.0f;
 	flags::thing_type type = flags::thing_type::ghost;
+	vector<3> vel;
 
 	void parse_args(text::tokenizer& tok, manager& manager, const colormap& cmp, const cog::compiler& compiler,
 			const std::unordered_map<std::string, int>& templates, diagnostics::report& report);

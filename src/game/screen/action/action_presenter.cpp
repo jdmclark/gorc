@@ -89,7 +89,7 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 				static_cast<double>(sf::Mouse::getPosition(components.window).y)) - ScreenCenter) / get<0>(ScreenCenter);
 		sf::Mouse::setPosition(sf::Vector2i(components.window.getSize().x / 2, components.window.getSize().y / 2), components.window);
 
-		auto CameraRotation = -CursorPos * 180.0 * dt;
+		auto CameraRotation = -CursorPos * 320.0 * dt;
 
 		components.current_level_presenter->yaw_camera(get<0>(CameraRotation));
 		components.current_level_presenter->pitch_camera(get<1>(CameraRotation));

@@ -25,6 +25,8 @@
 
 #include <memory>
 #include <stack>
+#include <set>
+#include <unordered_map>
 
 namespace gorc {
 namespace game {
@@ -38,11 +40,24 @@ class level_presenter : public gorc::place::presenter {
 private:
 	// Scratch space
 	std::vector<std::tuple<unsigned int, unsigned int>> update_path_sector_scratch;
+	std::unordered_multimap<int, int> physics_broadphase_thing_influence;
+	std::unordered_multimap<int, int> physics_broadphase_sector_things;
+	std::set<int> physics_overlapping_things;
+	std::vector<vector<3>> physics_thing_resting_manifolds;
+	std::set<int> physics_thing_closed_set;
+	std::vector<int> physics_thing_open_set;
+	std::set<int> physics_thing_touched_things;
+	std::set<int> physics_thing_touched_surfaces;
 
 	components& components;
 	level_place place;
 
 	void initialize_world();
+
+	void physics_calculate_broadphase(double dt);
+	void physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir, int current_thing_id);
+	void physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id);
+	void physics_thing_step(int thing_id, thing& thing, double dt);
 	void physics_tick_update(double dt);
 
 	void update_thing_sector(int thing_id, thing& thing, const vector<3>& oldThingPosition);
@@ -52,6 +67,33 @@ private:
 
 	bool need_respawn = false;
 	void do_respawn();
+
+	class physics_node_visitor {
+	private:
+		std::vector<vector<3>>& resting_manifolds;
+		std::stack<matrix<4>> matrices;
+		matrix<4> current_matrix = make_identity_matrix<4>();
+
+	public:
+		physics_node_visitor(std::vector<vector<3>>& resting_manifolds);
+
+		inline void push_matrix() {
+			matrices.push(current_matrix);
+		}
+
+		inline void pop_matrix() {
+			current_matrix = matrices.top();
+			matrices.pop();
+		}
+
+		inline void concatenate_matrix(const matrix<4>& mat) {
+			current_matrix = current_matrix * mat;
+		}
+
+		void visit_mesh(const content::assets::model& model, int mesh_id);
+
+		physics::sphere sphere;
+	} physics_anim_node_visitor;
 
 public:
 	std::unique_ptr<level_model> model;

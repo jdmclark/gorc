@@ -156,6 +156,7 @@ using TemplateParameterParser = std::function<void(thing_template&, text::tokeni
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
 	{ "actorflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.actor_flags, flag_set<flags::actor_flag>(), tok, report); }},
+	{ "angvel", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.ang_vel, tok); }},
 	{ "cog", [](TPP_ARGS) { TemplateAssetLoader(tpl.cog, tok, content, compiler); }},
 	{ "collide", [](TPP_ARGS) { TemplateParameterEnumMapper(tpl.collide, flags::collide_type::none, tok, report); }},
 	{ "creatething", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.create_thing, 0, templates, tok, report); }},
@@ -171,6 +172,8 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "mass", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.mass, 2.0f, tok, report); }},
 	{ "maxhealth", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.max_health, 100.0f, tok, report); }},
 	{ "maxlight", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.light, 1.0f, tok, report); }},
+	{ "maxrotvel", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.max_rot_vel, 200.0f, tok, report); }},
+	{ "maxvel", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.max_vel, 1.0f, tok, report); }},
 	{ "model3d", [](TPP_ARGS) { TemplateAssetLoader(tpl.model_3d, tok, content, colormap); }},
 	{ "move", [](TPP_ARGS) { TemplateParametervalueMapper(MoveTypeMap, tpl.move, flags::move_type::none, tok, report); }},
 	{ "movesize", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.move_size, 0.05f, tok, report); }},
@@ -182,7 +185,8 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "sprite", [](TPP_ARGS) { TemplateAssetLoader(tpl.sprite, tok, content, colormap); }},
 	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.flags, flag_set<flags::thing_flag>(), tok, report); }},
 	{ "timer", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.timer, 0.0f, tok, report); }},
-	{ "type", [](TPP_ARGS) { TemplateParametervalueMapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, tok, report); }}
+	{ "type", [](TPP_ARGS) { TemplateParametervalueMapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, tok, report); }},
+	{ "vel", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.vel, tok); }}
 };
 
 #undef TPP_ARGS

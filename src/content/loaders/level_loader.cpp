@@ -593,6 +593,7 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
 		}
 
 		sec.bounding_box = box<3>(min_aabb, max_aabb);
+		sec.collide_box = box<3>(min_aabb, max_aabb);
 	}
 }
 

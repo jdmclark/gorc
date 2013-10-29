@@ -10,7 +10,8 @@ gorc::game::world::level::level_presenter::level_presenter(class components& com
 	  script_presenter(components), sound_presenter(*place.contentmanager),  key_presenter(*place.contentmanager),
 	  inventory_presenter(*this),
 	  actor_controller(*this), player_controller(*this), cog_controller(*this), ghost_controller(*this),
-	  item_controller(*this), corpse_controller(*this), weapon_controller(*this) {
+	  item_controller(*this), corpse_controller(*this), weapon_controller(*this),
+	  physics_anim_node_visitor(physics_thing_resting_manifolds) {
 
 	return;
 }
@@ -85,6 +86,236 @@ void gorc::game::world::level::level_presenter::initialize_world() {
 	}
 }
 
+gorc::game::world::level::level_presenter::physics_node_visitor::physics_node_visitor(std::vector<vector<3>>& resting_manifolds)
+	: resting_manifolds(resting_manifolds) {
+	return;
+}
+
+void gorc::game::world::level::level_presenter::physics_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id) {
+	const auto& mesh = model.geosets.front().meshes[mesh_id];
+
+	for(const auto& face : mesh.faces) {
+		auto maybe_face_nearest_point = physics::bounded_closest_point_on_surface(std::get<0>(sphere), mesh, face, current_matrix, std::get<1>(sphere));
+
+		vector<3> face_nearest_point;
+		if(maybe_face_nearest_point >> face_nearest_point) {
+			auto face_nearest_dist = length(std::get<0>(sphere) - face_nearest_point);
+			if(face_nearest_dist <= std::get<1>(sphere)) {
+				resting_manifolds.push_back((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist);
+			}
+		}
+	}
+}
+
+void gorc::game::world::level::level_presenter::physics_calculate_broadphase(double dt) {
+	physics_broadphase_thing_influence.clear();
+	physics_broadphase_sector_things.clear();
+
+	// Calculate influence AABBs and record overlapping sectors.
+	for(const auto& thing : model->things) {
+		auto thing_off_v = make_vector(1.0f, 1.0f, 1.0f) * (thing.move_size + length(thing.vel) * dt);
+		auto thing_aabb = make_box(thing.position - thing_off_v, thing.position + thing_off_v);
+
+		physics_thing_closed_set.clear();
+		physics_thing_open_set.clear();
+
+		physics_thing_open_set.push_back(thing.sector);
+
+		while(!physics_thing_open_set.empty()) {
+			int sector_id = physics_thing_open_set.back();
+			physics_thing_open_set.pop_back();
+
+			const auto& sector = model->sectors[sector_id];
+
+			if(physics_thing_closed_set.find(sector_id) != physics_thing_closed_set.end()
+					|| !thing_aabb.overlaps(sector.collide_box)) {
+				// Thing does not influence sector.
+				continue;
+			}
+
+			// Thing influences sector. Move to closed set.
+			physics_thing_closed_set.emplace(sector_id);
+			physics_broadphase_sector_things.emplace(sector_id, thing.get_id());
+			physics_broadphase_thing_influence.emplace(thing.get_id(), sector_id);
+
+			// Add adjoining sectors to open set.
+			for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+				const auto& surf = model->surfaces[i];
+				if(surf.adjoin >= 0) {
+					physics_thing_open_set.push_back(surf.adjoined_sector);
+				}
+			}
+		}
+	}
+
+	return;
+}
+
+void gorc::game::world::level::level_presenter::physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir,
+		int current_thing_id) {
+	// Get list of sectors within thing influence.
+	auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
+	for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
+		const auto& sector = model->sectors[it->second];
+
+		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+			const auto& surface = model->surfaces[i];
+
+			if(		// Passable:
+					surface.adjoin >= 0 &&
+					(model->adjoins[surface.adjoin].flags & flags::adjoin_flag::AllowMovement) &&
+					!(model->adjoins[surface.adjoin].flags & flags::adjoin_flag::AllowAiOnly) &&
+					!(surface.flags & flags::surface_flag::Impassable)) {
+				// Skip
+				continue;
+			}
+
+			auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(std::get<0>(sphere), model->level, surface, std::get<1>(sphere));
+			vector<3> surf_nearest_point;
+			if(maybe_surf_nearest_point >> surf_nearest_point) {
+				auto surf_nearest_dist = length(std::get<0>(sphere) - surf_nearest_point);
+
+				if(surf_nearest_dist <= std::get<1>(sphere)) {
+					physics_thing_resting_manifolds.push_back((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist);
+				}
+			}
+		}
+	}
+}
+
+void gorc::game::world::level::level_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id) {
+	// Get list of things within thing influence.
+	physics_overlapping_things.clear();
+	auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
+	for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
+		auto influenced_thing_range = physics_broadphase_sector_things.equal_range(it->second);
+		for(auto jt = std::get<0>(influenced_thing_range); jt != std::get<1>(influenced_thing_range); ++jt) {
+			physics_overlapping_things.emplace(jt->second);
+		}
+	}
+
+	for(auto col_thing_id : physics_overlapping_things) {
+		auto& col_thing = model->things[col_thing_id];
+
+		if(col_thing.get_id() == current_thing_id) {
+			// TODO: Skip things in inaccessible sectors
+			continue;
+		}
+
+		// Skip things too far away
+		auto vec_to = std::get<0>(sphere) - col_thing.position;
+		auto vec_to_len = length(vec_to);
+		if(vec_to_len > col_thing.move_size + std::get<1>(sphere)) {
+			continue;
+		}
+
+		if(col_thing.collide == flags::collide_type::sphere) {
+			if(vec_to_len <= col_thing.size + std::get<1>(sphere)) {
+				// Spheres colliding
+				physics_thing_resting_manifolds.push_back(vec_to / vec_to_len);
+			}
+		}
+		else if(col_thing.collide == flags::collide_type::face) {
+			if(!col_thing.model_3d) {
+				continue;
+			}
+
+			physics_anim_node_visitor.sphere = sphere;
+			key_presenter.visit_mesh_hierarchy(physics_anim_node_visitor, col_thing);
+		}
+	}
+}
+
+void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id, thing& thing, double dt) {
+	thing.orientation = thing.orientation + thing.ang_vel * static_cast<float>(dt);
+	thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
+
+	if(thing.physics_flags & flags::physics_flag::has_gravity) {
+		thing.vel = thing.vel + make_vector(0.0f, 0.0f, -1.0f) * model->header.world_gravity * static_cast<float>(dt);
+	}
+
+	// Only perform collision detection for player, actor, and weapon types.
+	if(thing.type != flags::thing_type::Actor && thing.type != flags::thing_type::Player && thing.type != flags::thing_type::Weapon) {
+		return;
+	}
+
+	if(thing.collide != flags::collide_type::sphere && thing.collide != flags::collide_type::sphere_unknown) {
+		// Do not need sphere collision.
+		return;
+	}
+
+	double dt_remaining = dt;
+	double dt_step = static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
+
+	int loop_ct = 0;
+
+	while(dt_remaining > 0.0) {
+		++loop_ct;
+
+		if(length_squared(thing.vel) < 0.000001f) {
+			// Thing is moving too slowly; don't need sphere collision.
+			break;
+		}
+
+		double this_step_dt = (dt_remaining < dt_step) ? dt_remaining : dt_step;
+
+		// Do sphere collision:
+		auto thing_vel = thing.vel;
+
+		physics_thing_resting_manifolds.clear();
+		physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, thing_vel, thing_id);
+		physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing_vel, thing_id);
+
+		vector<3> prev_thing_vel = thing.vel;
+		bool reject_vel = true;
+
+		// Solve LCP, 20 iterations
+		for(int i = 0; i < 5; ++i) {
+			vector<3> new_computed_vel = prev_thing_vel;
+			for(const auto& manifold : physics_thing_resting_manifolds) {
+				auto vel_dot = dot(new_computed_vel, manifold);
+				if(vel_dot < 0.0f) {
+					// Reject manifold vector from velocity
+					new_computed_vel -= vel_dot * manifold;
+				}
+			}
+
+			if(length_squared(new_computed_vel - prev_thing_vel) < 0.000001f) {
+				// Solution has stabilized
+				prev_thing_vel = new_computed_vel;
+				reject_vel = false;
+				break;
+			}
+			else {
+				// Solution has not yet stabilized.
+				prev_thing_vel = new_computed_vel;
+			}
+		}
+
+		if(!reject_vel) {
+			thing.vel = prev_thing_vel;
+			adjust_thing_pos(thing_id, thing.position + prev_thing_vel * this_step_dt);
+		}
+		else {
+			thing.vel = make_zero_vector<3, float>();
+			break;
+		}
+
+		dt_remaining -= dt_step;
+	}
+}
+
+void gorc::game::world::level::level_presenter::physics_tick_update(double dt) {
+	physics_calculate_broadphase(dt);
+	for(auto& thing : model->things) {
+		if(thing.move == flags::move_type::physics) {
+			physics_thing_step(thing.get_id(), thing, dt);
+		}
+
+		thing.controller->update(thing.get_id(), dt);
+	}
+}
+
 void gorc::game::world::level::level_presenter::update(double dt) {
 	animation_presenter.update(dt);
 	script_presenter.update(dt);
@@ -93,9 +324,7 @@ void gorc::game::world::level::level_presenter::update(double dt) {
 	inventory_presenter.update(dt);
 
 	// update things
-	for(auto& thing : model->things) {
-		thing.controller->update(thing.get_id(), dt);
-	}
+	physics_tick_update(dt);
 
 	// update camera position
 	update_camera();
@@ -240,6 +469,7 @@ void gorc::game::world::level::level_presenter::do_respawn() {
 	cameraThing.sector = model->spawn_points[model->current_spawn_point]->sector;
 	cameraThing.position = model->spawn_points[model->current_spawn_point]->position;
 	cameraThing.attach_flags = flag_set<flags::attach_flag>();
+	cameraThing.vel = make_zero_vector<3, float>();
 }
 
 void gorc::game::world::level::level_presenter::respawn() {
@@ -313,8 +543,8 @@ void gorc::game::world::level::level_presenter::damage() {
 	// TODO: Temporary code to fire a bryar bolt.
 
 	// Calculate orientation from camera look.
-	float bolt_yaw = std::atan2(get<1>(model->camera_look), get<0>(model->camera_look)) / deg2rad;
-	float bolt_pitch = std::acos(dot(make_vector(0.0f, 0.0f, 1.0f), model->camera_look)) / deg2rad;
+	float bolt_yaw = to_degrees(std::atan2(get<1>(model->camera_look), get<0>(model->camera_look)));
+	float bolt_pitch = to_degrees(std::acos(dot(make_vector(0.0f, 0.0f, 1.0f), model->camera_look)));
 
 	vector<3> bolt_offset = model->camera_position + model->camera_look * 0.09f - model->camera_up * 0.01f;
 
@@ -322,6 +552,10 @@ void gorc::game::world::level::level_presenter::damage() {
 	adjust_thing_pos(bolt_thing, bolt_offset);
 
 	auto& thing = model->things[bolt_thing];
+
+	// Rotate velocity.
+	thing.vel = (make_rotation_matrix(90.0f - bolt_pitch, make_vector(-1.0f, 0.0f, 0.0f)) * make_rotation_matrix(bolt_yaw - 90.0f, make_vector(0.0f, 0.0f, 1.0f)))
+			.transform_normal(thing.vel);
 }
 
 void gorc::game::world::level::level_presenter::thing_sighted(int thing_id) {

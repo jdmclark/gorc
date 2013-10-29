@@ -23,6 +23,8 @@ private:
 
 	int thing;
 	bool update_position;
+	float actual_min_rad;
+	float actual_max_rad;
 
 	void play_ambient(const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
 	void play_voice(const content::assets::sound& sound, float volume, flag_set<flags::sound_flag> flags);
