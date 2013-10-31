@@ -71,11 +71,12 @@ private:
 	class physics_node_visitor {
 	private:
 		std::vector<vector<3>>& resting_manifolds;
+		std::set<int>& physics_thing_touched_things;
 		std::stack<matrix<4>> matrices;
 		matrix<4> current_matrix = make_identity_matrix<4>();
 
 	public:
-		physics_node_visitor(std::vector<vector<3>>& resting_manifolds);
+		physics_node_visitor(std::vector<vector<3>>& resting_manifolds, std::set<int>& physics_thing_touched_things);
 
 		inline void push_matrix() {
 			matrices.push(current_matrix);
@@ -92,6 +93,7 @@ private:
 
 		void visit_mesh(const content::assets::model& model, int mesh_id);
 
+		int visited_thing_id;
 		physics::sphere sphere;
 	} physics_anim_node_visitor;
 

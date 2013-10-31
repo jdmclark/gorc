@@ -48,5 +48,9 @@ void gorc::game::world::level::gameplay::thing_controller::touched_thing(int thi
 }
 
 void gorc::game::world::level::gameplay::thing_controller::touched_surface(int thing_id, int touched_surface_id) {
+	// Dispatch touched message to surface.
+	presenter.script_presenter.send_message_to_linked(cog::message_id::touched,
+			touched_surface_id, flags::message_type::surface,
+			thing_id, flags::message_type::thing);
 	return;
 }

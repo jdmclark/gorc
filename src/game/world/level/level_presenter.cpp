@@ -11,7 +11,7 @@ gorc::game::world::level::level_presenter::level_presenter(class components& com
 	  inventory_presenter(*this),
 	  actor_controller(*this), player_controller(*this), cog_controller(*this), ghost_controller(*this),
 	  item_controller(*this), corpse_controller(*this), weapon_controller(*this),
-	  physics_anim_node_visitor(physics_thing_resting_manifolds) {
+	  physics_anim_node_visitor(physics_thing_resting_manifolds, physics_thing_touched_things) {
 
 	return;
 }
@@ -86,8 +86,9 @@ void gorc::game::world::level::level_presenter::initialize_world() {
 	}
 }
 
-gorc::game::world::level::level_presenter::physics_node_visitor::physics_node_visitor(std::vector<vector<3>>& resting_manifolds)
-	: resting_manifolds(resting_manifolds) {
+gorc::game::world::level::level_presenter::physics_node_visitor::physics_node_visitor(std::vector<vector<3>>& resting_manifolds,
+		std::set<int>& physics_thing_touched_things)
+	: resting_manifolds(resting_manifolds), physics_thing_touched_things(physics_thing_touched_things) {
 	return;
 }
 
@@ -102,6 +103,7 @@ void gorc::game::world::level::level_presenter::physics_node_visitor::visit_mesh
 			auto face_nearest_dist = length(std::get<0>(sphere) - face_nearest_point);
 			if(face_nearest_dist <= std::get<1>(sphere)) {
 				resting_manifolds.push_back((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist);
+				physics_thing_touched_things.emplace(visited_thing_id);
 			}
 		}
 	}
@@ -177,6 +179,7 @@ void gorc::game::world::level::level_presenter::physics_find_sector_resting_mani
 
 				if(surf_nearest_dist <= std::get<1>(sphere)) {
 					physics_thing_resting_manifolds.push_back((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist);
+					physics_thing_touched_surfaces.emplace(i);
 				}
 			}
 		}
@@ -213,6 +216,7 @@ void gorc::game::world::level::level_presenter::physics_find_thing_resting_manif
 			if(vec_to_len <= col_thing.size + std::get<1>(sphere)) {
 				// Spheres colliding
 				physics_thing_resting_manifolds.push_back(vec_to / vec_to_len);
+				physics_thing_touched_things.emplace(col_thing_id);
 			}
 		}
 		else if(col_thing.collide == flags::collide_type::face) {
@@ -221,6 +225,7 @@ void gorc::game::world::level::level_presenter::physics_find_thing_resting_manif
 			}
 
 			physics_anim_node_visitor.sphere = sphere;
+			physics_anim_node_visitor.visited_thing_id = col_thing_id;
 			key_presenter.visit_mesh_hierarchy(physics_anim_node_visitor, col_thing);
 		}
 	}
@@ -244,6 +249,9 @@ void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id,
 		return;
 	}
 
+	physics_thing_touched_things.clear();
+	physics_thing_touched_surfaces.clear();
+
 	double dt_remaining = dt;
 	double dt_step = static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
 
@@ -251,11 +259,6 @@ void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id,
 
 	while(dt_remaining > 0.0) {
 		++loop_ct;
-
-		if(length_squared(thing.vel) < 0.000001f) {
-			// Thing is moving too slowly; don't need sphere collision.
-			break;
-		}
 
 		double this_step_dt = (dt_remaining < dt_step) ? dt_remaining : dt_step;
 
@@ -302,6 +305,15 @@ void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id,
 		}
 
 		dt_remaining -= dt_step;
+	}
+
+	// Dispatch messages
+	for(auto touched_thing_id : physics_thing_touched_things) {
+		thing.controller->touched_thing(thing_id, touched_thing_id);
+	}
+
+	for(auto touched_surf_id : physics_thing_touched_surfaces) {
+		thing.controller->touched_surface(thing_id, touched_surf_id);
 	}
 }
 
