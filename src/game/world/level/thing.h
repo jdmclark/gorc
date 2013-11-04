@@ -30,6 +30,7 @@ public:
 	int next_frame = 0;
 	int goal_frame = 0;
 	float path_move_speed = 0.0f;
+	bool is_blocked = false;
 
 	maybe<sounds::sound*> current_foley_loop_channel;
 

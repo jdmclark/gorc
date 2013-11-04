@@ -11,6 +11,7 @@
 #include "physics/shape.h"
 #include "physics/contact.h"
 #include "game/flags/difficulty_mode.h"
+#include "game/world/level/physics/physics_presenter.h"
 #include "game/world/level/animations/animation_presenter.h"
 #include "game/world/level/scripts/script_presenter.h"
 #include "game/world/level/sounds/sound_presenter.h"
@@ -41,28 +42,11 @@ class level_presenter : public gorc::place::presenter {
 private:
 	// Scratch space
 	std::vector<std::tuple<unsigned int, unsigned int>> update_path_sector_scratch;
-	std::unordered_multimap<int, int> physics_broadphase_thing_influence;
-	std::unordered_multimap<int, int> physics_broadphase_sector_things;
-	std::set<int> physics_overlapping_things;
-	std::vector<physics::contact> physics_thing_resting_manifolds;
-	std::set<int> physics_thing_closed_set;
-	std::vector<int> physics_thing_open_set;
-	std::set<std::tuple<int, int>> physics_touched_thing_pairs;
-	std::set<std::tuple<int, int>> physics_touched_surface_pairs;
 
 	components& components;
 	level_place place;
 
 	void initialize_world();
-
-	bool physics_surface_needs_collision_response(int moving_thing_id, int surface_id);
-	bool physics_thing_needs_collision_response(int moving_thing_id, int collision_thing_id);
-
-	void physics_calculate_broadphase(double dt);
-	void physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir, int current_thing_id);
-	void physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id);
-	void physics_thing_step(int thing_id, thing& thing, double dt);
-	void physics_tick_update(double dt);
 
 	void update_thing_sector(int thing_id, thing& thing, const vector<3>& oldThingPosition);
 	void update_camera();
@@ -72,40 +56,10 @@ private:
 	bool need_respawn = false;
 	void do_respawn();
 
-	class physics_node_visitor {
-	private:
-		std::vector<physics::contact>& resting_manifolds;
-		std::set<std::tuple<int, int>>& physics_touched_thing_pairs;
-		std::stack<matrix<4>> matrices;
-		matrix<4> current_matrix = make_identity_matrix<4>();
-
-	public:
-		physics_node_visitor(std::vector<physics::contact>& resting_manifolds, std::set<std::tuple<int, int>>& physics_touched_thing_pairs);
-
-		inline void push_matrix() {
-			matrices.push(current_matrix);
-		}
-
-		inline void pop_matrix() {
-			current_matrix = matrices.top();
-			matrices.pop();
-		}
-
-		inline void concatenate_matrix(const matrix<4>& mat) {
-			current_matrix = current_matrix * mat;
-		}
-
-		void visit_mesh(const content::assets::model& model, int mesh_id);
-
-		bool needs_response;
-		int moving_thing_id;
-		int visited_thing_id;
-		physics::sphere sphere;
-	} physics_anim_node_visitor;
-
 public:
 	std::unique_ptr<level_model> model;
 
+	physics::physics_presenter physics_presenter;
 	animations::animation_presenter animation_presenter;
 	scripts::script_presenter script_presenter;
 	sounds::sound_presenter sound_presenter;
@@ -141,7 +95,7 @@ public:
 	// Frame verbs
 	int get_cur_frame(int thing_id);
 	void jump_to_frame(int thing_id, int frame, int sector);
-	void MoveToFrame(int thing_id, int frame, float speed);
+	void move_to_frame(int thing_id, int frame, float speed);
 
 	// level verbs
 	float get_game_time();
