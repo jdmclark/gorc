@@ -8,7 +8,7 @@ gorc::game::world::level::animations::slide_surface_animation::slide_surface_ani
 		const vector<3>& direction, int anim_num)
 	: model(model), surface(surface), direction(direction) {
 	auto& surf = model.surfaces[surface];
-	surf.anim_number = anim_num;
+	model.surfaces[surface].surface_anim = make_maybe(this);
 
 	// Compute texture basis.
 	auto dnsb0 = model.level.vertices[std::get<0>(surf.vertices[1])] - model.level.vertices[std::get<0>(surf.vertices[0])];
@@ -49,6 +49,6 @@ void gorc::game::world::level::animations::slide_surface_animation::update(doubl
 
 void gorc::game::world::level::animations::slide_surface_animation::stop() {
 	auto& surf = model.surfaces[surface];
-	surf.anim_number = -1;
+	model.surfaces[surface].surface_anim = maybe<animation*>();
 	surf.thrust = make_zero_vector<3, float>();
 }

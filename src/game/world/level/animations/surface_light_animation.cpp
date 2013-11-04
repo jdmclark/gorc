@@ -5,7 +5,7 @@ gorc::game::world::level::animations::surface_light_animation::surface_light_ani
 		float end_light, float change_time, int anim_num)
 	: model(model), surface(surface), start_light(start_light), end_light(end_light), change_time(change_time), anim_time(0.0) {
 	model.surfaces[surface].extra_light = start_light;
-	model.surfaces[surface].anim_number = anim_num;
+	model.surfaces[surface].surface_anim = make_maybe(this);
 	return;
 }
 
@@ -19,5 +19,5 @@ void gorc::game::world::level::animations::surface_light_animation::update(doubl
 
 void gorc::game::world::level::animations::surface_light_animation::stop() {
 	auto& surf = model.surfaces[surface];
-	surf.anim_number = -1;
+	model.surfaces[surface].surface_anim = maybe<animation*>();
 }

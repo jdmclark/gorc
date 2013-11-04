@@ -63,6 +63,23 @@ public:
 			fn(*value);
 		}
 	}
+
+	template <typename Fn, typename U> U if_set(Fn fn, U else_value) const {
+		if(value != nullptr) {
+			return fn(*value);
+		}
+
+		return else_value;
+	}
+
+	template <typename Fn, typename ElseFn> void if_else_set(Fn fn, ElseFn else_fn) const {
+		if(value != nullptr) {
+			fn(*value);
+		}
+		else {
+			else_fn();
+		}
+	}
 };
 
 template <typename T> class maybe<T, typename std::enable_if<!std::is_pointer<T>::value>::type> {
@@ -136,6 +153,23 @@ public:
 	template <typename Fn> void if_set(Fn fn) const {
 		if(has_value) {
 			fn(value);
+		}
+	}
+
+	template <typename Fn, typename U> U if_set(Fn fn, U default_value) const {
+		if(has_value) {
+			return fn(value);
+		}
+
+		return default_value;
+	}
+
+	template <typename Fn, typename ElseFn> void if_else_set(Fn fn, ElseFn else_fn) const {
+		if(has_value) {
+			fn(value);
+		}
+		else {
+			else_fn();
 		}
 	}
 };

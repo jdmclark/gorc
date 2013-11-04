@@ -24,7 +24,7 @@ gorc::game::world::level::animations::surface_material_animation::surface_materi
 		model.surfaces[surface].cel_number = 0;
 	}
 
-	model.surfaces[surface].anim_number = anim_num;
+	model.surfaces[surface].surface_anim = make_maybe(this);
 }
 
 void gorc::game::world::level::animations::surface_material_animation::update(double dt) {
@@ -51,5 +51,5 @@ void gorc::game::world::level::animations::surface_material_animation::update(do
 }
 
 void gorc::game::world::level::animations::surface_material_animation::stop() {
-	model.surfaces[surface].anim_number = -1;
+	model.surfaces[surface].surface_anim = maybe<animation*>();
 }

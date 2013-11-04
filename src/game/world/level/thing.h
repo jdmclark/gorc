@@ -3,6 +3,7 @@
 #include "content/assets/template.h"
 #include "gameplay/thing_controller.h"
 #include "physics/object_data.h"
+#include "framework/utility/maybe.h"
 #include <memory>
 
 namespace gorc {
@@ -30,7 +31,7 @@ public:
 	int goal_frame = 0;
 	float path_move_speed = 0.0f;
 
-	int current_foley_loop_channel = -1;
+	maybe<sounds::sound*> current_foley_loop_channel;
 
 	int attached_surface = -1;
 	int attached_thing = -1;

@@ -14,6 +14,7 @@ public:
 
 	virtual ~animation();
 
+	virtual int get_id() const;
 	virtual void update(double dt) = 0;
 	virtual void stop();
 };
