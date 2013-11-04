@@ -37,7 +37,7 @@ private:
 	std::unordered_multimap<int, int> physics_broadphase_thing_influence;
 	std::unordered_multimap<int, int> physics_broadphase_sector_things;
 	std::set<int> physics_overlapping_things;
-	std::unordered_multimap<int, physics::contact> physics_thing_resting_manifolds;
+	std::vector<physics::contact> physics_thing_resting_manifolds;
 	std::set<int> physics_thing_closed_set;
 	std::vector<int> physics_thing_open_set;
 	std::set<std::tuple<int, int>> physics_touched_thing_pairs;
@@ -52,16 +52,19 @@ private:
 	void physics_thing_step(int thing_id, thing& thing, double dt);
 
 	void update_thing_path_moving(int thing_id, thing& thing, double dt);
+	vector<3> get_thing_path_moving_point_velocity(int thing_id, const vector<3>& rel_point);
 
 	class physics_node_visitor {
 	private:
-		std::unordered_multimap<int, physics::contact>& resting_manifolds;
+		physics_presenter& presenter;
+		std::vector<physics::contact>& resting_manifolds;
 		std::set<std::tuple<int, int>>& physics_touched_thing_pairs;
 		std::stack<matrix<4>> matrices;
 		matrix<4> current_matrix = make_identity_matrix<4>();
 
 	public:
-		physics_node_visitor(std::unordered_multimap<int, physics::contact>& resting_manifolds, std::set<std::tuple<int, int>>& physics_touched_thing_pairs);
+		physics_node_visitor(physics_presenter& presenter, std::vector<physics::contact>& resting_manifolds,
+				std::set<std::tuple<int, int>>& physics_touched_thing_pairs);
 
 		inline void push_matrix() {
 			matrices.push(current_matrix);

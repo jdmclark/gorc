@@ -5,12 +5,13 @@
 #include "game/world/level/level_model.h"
 #include "game/constants.h"
 #include "framework/utility/pair_range.h"
+#include "framework/math/matrix.h"
 #include "query.h"
 
 using namespace gorc::game::world::level::physics;
 
 physics_presenter::physics_presenter(level_presenter& presenter)
-	: presenter(presenter), model(nullptr), physics_anim_node_visitor(physics_thing_resting_manifolds, physics_touched_thing_pairs) {
+	: presenter(presenter), model(nullptr), physics_anim_node_visitor(*this, physics_thing_resting_manifolds, physics_touched_thing_pairs) {
 	return;
 }
 
@@ -56,9 +57,9 @@ bool physics_presenter::physics_thing_needs_collision_response(int moving_thing_
 			ct_type == flags::thing_type::Player);
 }
 
-physics_presenter::physics_node_visitor::physics_node_visitor(std::unordered_multimap<int, physics::contact>& resting_manifolds,
+physics_presenter::physics_node_visitor::physics_node_visitor(physics_presenter& presenter, std::vector<physics::contact>& resting_manifolds,
 		std::set<std::tuple<int, int>>& physics_touched_thing_pairs)
-	: resting_manifolds(resting_manifolds), physics_touched_thing_pairs(physics_touched_thing_pairs) {
+	: presenter(presenter), resting_manifolds(resting_manifolds), physics_touched_thing_pairs(physics_touched_thing_pairs) {
 	return;
 }
 
@@ -73,8 +74,8 @@ void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::
 			auto face_nearest_dist = length(std::get<0>(sphere) - face_nearest_point);
 			if(face_nearest_dist <= std::get<1>(sphere)) {
 				if(needs_response) {
-					resting_manifolds.emplace(moving_thing_id,
-							contact((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist, make_zero_vector<3, float>()));
+					vector<3> contact_pos_vel = presenter.get_thing_path_moving_point_velocity(visited_thing_id, face_nearest_point);
+					resting_manifolds.emplace_back((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist, contact_pos_vel, visited_thing_id);
 				}
 				physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
 			}
@@ -146,8 +147,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 				auto surf_nearest_dist = length(std::get<0>(sphere) - surf_nearest_point);
 
 				if(surf_nearest_dist <= std::get<1>(sphere)) {
-					physics_thing_resting_manifolds.emplace(current_thing_id,
-							contact((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist, make_zero_vector<3, float>()));
+					physics_thing_resting_manifolds.emplace_back((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist, make_zero_vector<3, float>());
 					physics_touched_surface_pairs.emplace(current_thing_id, i);
 				}
 			}
@@ -184,7 +184,19 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 			if(vec_to_len <= col_thing.size + std::get<1>(sphere)) {
 				// Spheres colliding
 				if(physics_thing_needs_collision_response(current_thing_id, col_thing_id)) {
-					physics_thing_resting_manifolds.emplace(current_thing_id, contact(vec_to / vec_to_len, make_zero_vector<3, float>()));
+					// Find contact point velocity:
+					vector<3> contact_normal = vec_to / vec_to_len;
+					vector<3> contact_point = col_thing.position + contact_normal * col_thing.size;
+
+					vector<3> contact_point_vel = make_zero_vector<3, float>();
+					if(col_thing.move == flags::move_type::physics) {
+						contact_point_vel = col_thing.vel;
+					}
+					else if(col_thing.move == flags::move_type::Path) {
+						contact_point_vel = get_thing_path_moving_point_velocity(col_thing_id, contact_point);
+					}
+
+					physics_thing_resting_manifolds.emplace_back(vec_to / vec_to_len, make_zero_vector<3, float>(), col_thing_id);
 				}
 
 				physics_touched_thing_pairs.emplace(std::min(current_thing_id, col_thing_id), std::max(current_thing_id, col_thing_id));
@@ -233,20 +245,37 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 		double this_step_dt = (dt_remaining < dt_step) ? dt_remaining : dt_step;
 
 		// Do sphere collision:
-		auto thing_vel = thing.vel;
 
 		physics_thing_resting_manifolds.clear();
-		physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, thing_vel, thing_id);
-		physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing_vel, thing_id);
+		physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, thing.vel, thing_id);
+		physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, thing_id);
 
 		vector<3> prev_thing_vel = thing.vel;
+
+		// Add 'towards' velocities from resting contacts.
+		for(const auto& manifold : physics_thing_resting_manifolds) {
+			auto man_vel_len = length(manifold.velocity);
+
+			if(man_vel_len == 0.0f || dot(manifold.normal, manifold.velocity) < 0.0f) {
+				// Not contributing velocity.
+				continue;
+			}
+
+			auto vel_dot = dot(prev_thing_vel, manifold.velocity);
+			auto amt_in_man_vel = vel_dot / man_vel_len;
+
+			if(amt_in_man_vel < man_vel_len) {
+				prev_thing_vel += (man_vel_len - amt_in_man_vel) * (manifold.velocity / man_vel_len);
+			}
+		}
+
 		bool reject_vel = true;
 
 		// Solve LCP, 20 iterations
 		for(int i = 0; i < 5; ++i) {
 			vector<3> new_computed_vel = prev_thing_vel;
-			for(const auto& manifold_pair : make_pair_range(physics_thing_resting_manifolds.equal_range(thing_id))) {
-				const auto& manifold = std::get<1>(manifold_pair);
+			for(const auto& manifold : physics_thing_resting_manifolds) {
+				// Three cases:
 				auto vel_dot = dot(new_computed_vel, manifold.normal);
 				if(vel_dot < 0.0f) {
 					// Reject manifold vector from velocity
@@ -275,11 +304,36 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 			break;
 		}
 
+		// Check vel to make sure all valid resting velocities are still applied.
+		for(const auto& manifold : physics_thing_resting_manifolds) {
+			auto man_vel_len = length(manifold.velocity);
+
+			if(man_vel_len == 0.0f || dot(manifold.normal, manifold.velocity) < 0.0f) {
+				// Not contributing velocity.
+				continue;
+			}
+
+			auto vel_dot = dot(prev_thing_vel, manifold.velocity);
+			auto amt_in_man_vel = vel_dot / man_vel_len;
+
+			if(amt_in_man_vel < man_vel_len) {
+				// Thing is blocked.
+				manifold.contact_thing_id.if_set([this](int contact_thing_id) {
+					auto& contact_thing = model->things[contact_thing_id];
+					contact_thing.is_blocked = true;
+				});
+			}
+		}
+
 		dt_remaining -= dt_step;
 	}
 }
 
 void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, double dt) {
+	if(thing.move != flags::move_type::Path || !thing.path_moving || thing.is_blocked) {
+		return;
+	}
+
 	auto target_position_tuple = thing.frames[thing.next_frame];
 	vector<3> targetPosition = std::get<0>(target_position_tuple);
 	vector<3> targetOrientation = std::get<1>(target_position_tuple);
@@ -320,6 +374,37 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 	}
 }
 
+gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thing_id, const vector<3>& rel_point) {
+	auto& thing = model->things[thing_id];
+
+	if(thing.move == flags::move_type::Path && thing.path_moving && !thing.is_blocked) {
+		auto target_position_tuple = thing.frames[thing.next_frame];
+		vector<3> targetPosition = std::get<0>(target_position_tuple);
+		vector<3> targetOrientation = std::get<1>(target_position_tuple);
+
+		vector<3> currentPosition = thing.position;
+		vector<3> currentOrientation = thing.orientation;
+
+		// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
+		// Use a magic multiple to correct it.
+		float dist_len = length(targetPosition - currentPosition);
+		float alpha = rate_factor * thing.path_move_speed / dist_len;
+
+		auto delta_position = lerp(thing.position, targetPosition, alpha);
+		auto delta_orientation = lerp(thing.orientation, targetOrientation, alpha);
+
+		auto rel_v = (make_translation_matrix(delta_position)
+			* make_rotation_matrix(get<1>(delta_orientation), make_vector(0.0f, 0.0f, 1.0f))
+			* make_rotation_matrix(get<0>(delta_orientation), make_vector(1.0f, 0.0f, 0.0f))
+			* make_rotation_matrix(get<2>(delta_orientation), make_vector(0.0f, 1.0f, 0.0f))
+			* make_translation_matrix(-currentPosition)
+			).transform(rel_point) - rel_point;
+		return rel_v;
+	}
+
+	return make_zero_vector<3, float>();
+}
+
 void physics_presenter::update(double dt) {
 	physics_touched_thing_pairs.clear();
 	physics_touched_surface_pairs.clear();
@@ -334,31 +419,22 @@ void physics_presenter::update(double dt) {
 	// - Calculate potentially overlapping pairs (broadphase)
 	physics_calculate_broadphase(dt);
 
-	// - Calculate physics thing resting contacts and contact velocities.
+	// - Rectify physics thing position vs. velocity, resting contacts, etc.
+	for(auto& thing : model->things) {
+		if(thing.move == flags::move_type::physics) {
+			physics_thing_step(thing.get_id(), thing, dt);
+		}
+	}
 
-	// - Calculate physics thing velocities.
-
-	// - Compare resting contacts to detect crushing.
-
-	// - Send blocked message to all blocked things.
+	// - Send blocked message to all blocked things; else, update path.
 	for(auto& thing : model->things) {
 		if(thing.is_blocked) {
 			presenter.script_presenter.send_message_to_linked(cog::message_id::blocked, thing.get_id(), flags::message_type::thing,
 					-1, flags::message_type::nothing);
 		}
-	}
-
-
-
-	for(auto& thing : model->things) {
-		if(thing.move == flags::move_type::physics) {
-			physics_thing_step(thing.get_id(), thing, dt);
-		}
-		else if(thing.move == flags::move_type::Path && thing.path_moving) {
+		else if(thing.path_moving) {
 			update_thing_path_moving(thing.get_id(), thing, dt);
 		}
-
-		thing.controller->update(thing.get_id(), dt);
 	}
 
 	// Dispatch touched messages
