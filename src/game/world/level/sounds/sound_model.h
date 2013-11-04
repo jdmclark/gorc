@@ -2,7 +2,7 @@
 
 #include "music.h"
 #include "sound.h"
-#include "framework/pool.h"
+#include "framework/utility/pool.h"
 
 namespace gorc {
 namespace game {

@@ -2,7 +2,7 @@
 
 #include "content/flags/sound_flag.h"
 #include "content/assets/sound.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 #include <SFML/Audio.hpp>
 
@@ -48,6 +48,8 @@ public:
 	inline bool get_expired() {
 		return expired;
 	}
+
+	~sound();
 };
 
 }

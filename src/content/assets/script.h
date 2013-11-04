@@ -4,7 +4,7 @@
 #include "content/loaders/script_loader.h"
 #include "cog/script.h"
 #include "cog/instance.h"
-#include "framework/pool.h"
+#include "framework/utility/pool.h"
 #include <unordered_map>
 #include <string>
 

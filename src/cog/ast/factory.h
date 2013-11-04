@@ -1,7 +1,7 @@
 #pragma once
 
 #include "node.h"
-#include "framework/make_unique.h"
+#include "framework/utility/make_unique.h"
 #include <memory>
 
 namespace gorc {

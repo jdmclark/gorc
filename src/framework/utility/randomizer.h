@@ -3,6 +3,7 @@
 #include <random>
 
 namespace gorc {
+inline namespace utility {
 
 class randomizer {
 private:
@@ -16,4 +17,5 @@ public:
 	}
 };
 
+}
 }

@@ -42,7 +42,7 @@ void gorc::game::world::level::scripts::script_presenter::update(double dt) {
 		std::get<0>(cog) -= dt;
 		if(std::get<0>(cog) <= 0.0) {
 			model->running_cog_state.push(std::get<1>(cog));
-			model->sleeping_cogs.destroy(cog);
+			model->sleeping_cogs.erase(cog);
 		}
 	}
 
@@ -55,7 +55,7 @@ void gorc::game::world::level::scripts::script_presenter::update(double dt) {
 		if(timer.delay <= 0.0) {
 			send_message(timer.instance_id, cog::message_id::timer, timer.id, 0, flags::message_type::nothing,
 					0, flags::message_type::nothing, timer.param0, timer.param1);
-			model->timers.destroy(timer.get_id());
+			model->timers.erase(timer.get_id());
 		}
 	}
 }
@@ -73,7 +73,7 @@ void gorc::game::world::level::scripts::script_presenter::resume_wait_for_stop(i
 	for(auto& wait_cog : model->wait_for_stop_cogs) {
 		if(std::get<0>(wait_cog) == wait_thing) {
 			model->running_cog_state.push(std::get<1>(wait_cog));
-			model->wait_for_stop_cogs.destroy(wait_cog);
+			model->wait_for_stop_cogs.erase(wait_cog);
 		}
 	}
 
@@ -463,7 +463,7 @@ void gorc::game::world::level::scripts::script_presenter::set_timer(float time) 
 }
 
 void gorc::game::world::level::scripts::script_presenter::set_timer_ex(float time, int id, cog::vm::value param0, cog::vm::value param1) {
-	script_timer& timer = model->timers.create();
+	script_timer& timer = model->timers.emplace();
 	timer.instance_id = model->running_cog_state.top().instance_id;
 	timer.delay = time;
 	timer.id = id;
@@ -476,7 +476,7 @@ void gorc::game::world::level::scripts::script_presenter::sleep(float time) {
 
 	continuation.program_counter = VirtualMachine.get_program_counter();
 
-	auto& sleep_tuple = model->sleeping_cogs.create();
+	auto& sleep_tuple = model->sleeping_cogs.emplace();
 	std::get<0>(sleep_tuple) = time;
 	std::get<1>(sleep_tuple) = continuation;
 
@@ -488,7 +488,7 @@ void gorc::game::world::level::scripts::script_presenter::wait_for_stop(int thin
 
 	continuation.program_counter = VirtualMachine.get_program_counter();
 
-	auto& sleep_tuple = model->wait_for_stop_cogs.create();
+	auto& sleep_tuple = model->wait_for_stop_cogs.emplace();
 	std::get<0>(sleep_tuple) = thing;
 	std::get<1>(sleep_tuple) = continuation;
 

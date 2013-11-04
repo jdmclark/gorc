@@ -3,7 +3,7 @@
 #include "framework/math/matrix.h"
 #include "game/view.h"
 #include "framework/math/box.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 #include "content/flags/key_flag.h"
 #include "level_shader.h"
 #include <stack>

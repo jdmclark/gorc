@@ -1,6 +1,7 @@
 #include "animation.h"
 
 gorc::game::world::level::animations::animation::~animation() {
+	stop();
 	return;
 }
 

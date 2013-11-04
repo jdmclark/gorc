@@ -5,7 +5,7 @@
 #include "framework/diagnostics/report.h"
 #include "framework/event/event_bus.h"
 #include "framework/place/place_controller.h"
-#include "framework/randomizer.h"
+#include "framework/utility/randomizer.h"
 
 #include "content/vfs/virtual_filesystem.h"
 

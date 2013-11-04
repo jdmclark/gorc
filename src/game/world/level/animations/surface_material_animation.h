@@ -1,9 +1,9 @@
 #pragma once
 
 #include "animation.h"
-#include "framework/pool.h"
+#include "framework/utility/pool.h"
 #include "content/flags/anim_flag.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 
 namespace gorc {
 namespace game {

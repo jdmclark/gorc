@@ -11,7 +11,7 @@ gorc::game::world::level::level_presenter::level_presenter(class components& com
 	  inventory_presenter(*this),
 	  actor_controller(*this), player_controller(*this), cog_controller(*this), ghost_controller(*this),
 	  item_controller(*this), corpse_controller(*this), weapon_controller(*this),
-	  physics_anim_node_visitor(physics_thing_resting_manifolds, physics_thing_touched_things) {
+	  physics_anim_node_visitor(physics_thing_resting_manifolds, physics_touched_thing_pairs) {
 
 	return;
 }
@@ -86,9 +86,47 @@ void gorc::game::world::level::level_presenter::initialize_world() {
 	}
 }
 
-gorc::game::world::level::level_presenter::physics_node_visitor::physics_node_visitor(std::vector<vector<3>>& resting_manifolds,
-		std::set<int>& physics_thing_touched_things)
-	: resting_manifolds(resting_manifolds), physics_thing_touched_things(physics_thing_touched_things) {
+bool gorc::game::world::level::level_presenter::physics_surface_needs_collision_response(int moving_thing_id, int surface_id) {
+	const auto& moving_thing = model->things[moving_thing_id];
+	const auto& surface = model->surfaces[surface_id];
+
+	if(surface.adjoin < 0) {
+		return true;
+	}
+
+	const auto& adjoin = model->adjoins[surface.adjoin];
+
+	bool movement_allowed = adjoin.flags & flags::adjoin_flag::AllowMovement;
+	bool ai_and_blocked = moving_thing.type == flags::thing_type::Actor && (adjoin.flags & flags::adjoin_flag::AllowPlayerOnly);
+	bool player_and_blocked = moving_thing.type == flags::thing_type::Player && (adjoin.flags & flags::adjoin_flag::AllowAiOnly);
+
+	bool surface_ethereal = movement_allowed && !ai_and_blocked && !player_and_blocked;
+
+	return !surface_ethereal;
+}
+
+bool gorc::game::world::level::level_presenter::physics_thing_needs_collision_response(int moving_thing_id, int collision_thing_id) {
+	const auto& moving_thing = model->things[moving_thing_id];
+	const auto& collision_thing = model->things[collision_thing_id];
+
+	auto mt_type = moving_thing.type;
+	auto ct_type = collision_thing.type;
+
+	return (mt_type == flags::thing_type::Actor ||
+			mt_type == flags::thing_type::Weapon ||
+			mt_type == flags::thing_type::Debris ||
+			mt_type == flags::thing_type::cog ||
+			mt_type == flags::thing_type::Player) &&
+			(ct_type == flags::thing_type::Actor ||
+			ct_type == flags::thing_type::Weapon ||
+			ct_type == flags::thing_type::Debris ||
+			ct_type == flags::thing_type::cog ||
+			ct_type == flags::thing_type::Player);
+}
+
+gorc::game::world::level::level_presenter::physics_node_visitor::physics_node_visitor(std::vector<physics::contact>& resting_manifolds,
+		std::set<std::tuple<int, int>>& physics_touched_thing_pairs)
+	: resting_manifolds(resting_manifolds), physics_touched_thing_pairs(physics_touched_thing_pairs) {
 	return;
 }
 
@@ -102,8 +140,10 @@ void gorc::game::world::level::level_presenter::physics_node_visitor::visit_mesh
 		if(maybe_face_nearest_point >> face_nearest_point) {
 			auto face_nearest_dist = length(std::get<0>(sphere) - face_nearest_point);
 			if(face_nearest_dist <= std::get<1>(sphere)) {
-				resting_manifolds.push_back((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist);
-				physics_thing_touched_things.emplace(visited_thing_id);
+				if(needs_response) {
+					resting_manifolds.emplace_back((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist, make_zero_vector<3, float>());
+				}
+				physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
 			}
 		}
 	}
@@ -163,12 +203,7 @@ void gorc::game::world::level::level_presenter::physics_find_sector_resting_mani
 		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = model->surfaces[i];
 
-			if(		// Passable:
-					surface.adjoin >= 0 &&
-					(model->adjoins[surface.adjoin].flags & flags::adjoin_flag::AllowMovement) &&
-					!(model->adjoins[surface.adjoin].flags & flags::adjoin_flag::AllowAiOnly) &&
-					!(surface.flags & flags::surface_flag::Impassable)) {
-				// Skip
+			if(!physics_surface_needs_collision_response(current_thing_id, i)) {
 				continue;
 			}
 
@@ -178,8 +213,8 @@ void gorc::game::world::level::level_presenter::physics_find_sector_resting_mani
 				auto surf_nearest_dist = length(std::get<0>(sphere) - surf_nearest_point);
 
 				if(surf_nearest_dist <= std::get<1>(sphere)) {
-					physics_thing_resting_manifolds.push_back((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist);
-					physics_thing_touched_surfaces.emplace(i);
+					physics_thing_resting_manifolds.emplace_back((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist, make_zero_vector<3, float>());
+					physics_touched_surface_pairs.emplace(current_thing_id, i);
 				}
 			}
 		}
@@ -215,8 +250,11 @@ void gorc::game::world::level::level_presenter::physics_find_thing_resting_manif
 		if(col_thing.collide == flags::collide_type::sphere) {
 			if(vec_to_len <= col_thing.size + std::get<1>(sphere)) {
 				// Spheres colliding
-				physics_thing_resting_manifolds.push_back(vec_to / vec_to_len);
-				physics_thing_touched_things.emplace(col_thing_id);
+				if(physics_thing_needs_collision_response(current_thing_id, col_thing_id)) {
+					physics_thing_resting_manifolds.emplace_back(vec_to / vec_to_len, make_zero_vector<3, float>());
+				}
+
+				physics_touched_thing_pairs.emplace(std::min(current_thing_id, col_thing_id), std::max(current_thing_id, col_thing_id));
 			}
 		}
 		else if(col_thing.collide == flags::collide_type::face) {
@@ -224,8 +262,10 @@ void gorc::game::world::level::level_presenter::physics_find_thing_resting_manif
 				continue;
 			}
 
+			physics_anim_node_visitor.needs_response = physics_thing_needs_collision_response(current_thing_id, col_thing_id);
 			physics_anim_node_visitor.sphere = sphere;
 			physics_anim_node_visitor.visited_thing_id = col_thing_id;
+			physics_anim_node_visitor.moving_thing_id = current_thing_id;
 			key_presenter.visit_mesh_hierarchy(physics_anim_node_visitor, col_thing);
 		}
 	}
@@ -248,9 +288,6 @@ void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id,
 		// Do not need sphere collision.
 		return;
 	}
-
-	physics_thing_touched_things.clear();
-	physics_thing_touched_surfaces.clear();
 
 	double dt_remaining = dt;
 	double dt_step = static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
@@ -276,10 +313,10 @@ void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id,
 		for(int i = 0; i < 5; ++i) {
 			vector<3> new_computed_vel = prev_thing_vel;
 			for(const auto& manifold : physics_thing_resting_manifolds) {
-				auto vel_dot = dot(new_computed_vel, manifold);
+				auto vel_dot = dot(new_computed_vel, manifold.normal);
 				if(vel_dot < 0.0f) {
 					// Reject manifold vector from velocity
-					new_computed_vel -= vel_dot * manifold;
+					new_computed_vel -= vel_dot * manifold.normal;
 				}
 			}
 
@@ -306,18 +343,12 @@ void gorc::game::world::level::level_presenter::physics_thing_step(int thing_id,
 
 		dt_remaining -= dt_step;
 	}
-
-	// Dispatch messages
-	for(auto touched_thing_id : physics_thing_touched_things) {
-		thing.controller->touched_thing(thing_id, touched_thing_id);
-	}
-
-	for(auto touched_surf_id : physics_thing_touched_surfaces) {
-		thing.controller->touched_surface(thing_id, touched_surf_id);
-	}
 }
 
 void gorc::game::world::level::level_presenter::physics_tick_update(double dt) {
+	physics_touched_thing_pairs.clear();
+	physics_touched_surface_pairs.clear();
+
 	physics_calculate_broadphase(dt);
 	for(auto& thing : model->things) {
 		if(thing.move == flags::move_type::physics) {
@@ -325,6 +356,22 @@ void gorc::game::world::level::level_presenter::physics_tick_update(double dt) {
 		}
 
 		thing.controller->update(thing.get_id(), dt);
+	}
+
+	// Dispatch touched messages
+	for(const auto& touched_surface_pair : physics_touched_surface_pairs) {
+		int thing_id, surf_id;
+		std::tie(thing_id, surf_id) = touched_surface_pair;
+		auto& thing = model->things[thing_id];
+		thing.controller->touched_surface(thing_id, surf_id);
+	}
+
+	for(const auto& touched_thing_pair : physics_touched_thing_pairs) {
+		int thing_a_id, thing_b_id;
+		std::tie(thing_a_id, thing_b_id) = touched_thing_pair;
+
+		model->things[thing_a_id].controller->touched_thing(thing_a_id, thing_b_id);
+		model->things[thing_b_id].controller->touched_thing(thing_b_id, thing_a_id);
 	}
 }
 
@@ -720,8 +767,7 @@ int gorc::game::world::level::level_presenter::load_sound(const char* fn) {
 int gorc::game::world::level::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
 		const vector<3>& pos, const vector<3>& orient) {
 	// Initialize thing properties
-	auto& new_thing = model->things.create();
-	new_thing = thing(tpl);
+	auto& new_thing = model->things.emplace(tpl);
 
 	new_thing.object_data.thing_id = new_thing.get_id();
 	new_thing.sector = sector_num;
@@ -841,7 +887,7 @@ float gorc::game::world::level::level_presenter::damage_thing(int thing_id, floa
 void gorc::game::world::level::level_presenter::destroy_thing(int thing_id) {
 	// TODO: Clean up components owned by thing (animations, key mixes, sounds).
 	model->things[thing_id].controller->remove_controller_data(thing_id);
-	model->things.destroy(thing_id);
+	model->things.erase(thing_id);
 }
 
 void gorc::game::world::level::level_presenter::detach_thing(int thing_id) {

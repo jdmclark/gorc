@@ -49,7 +49,7 @@ void gorc::game::world::level::keys::key_presenter::DispatchMarker(int thing_id,
 int gorc::game::world::level::keys::key_presenter::GetThingMixId(int thing_id) {
 	auto& thing = levelModel->things[thing_id];
 	if(thing.attached_key_mix < 0) {
-		auto& mix = model->mixes.create();
+		auto& mix = model->mixes.emplace();
 		mix.attached_thing = thing_id;
 		thing.attached_key_mix = mix.get_id();
 	}
@@ -99,7 +99,7 @@ void gorc::game::world::level::keys::key_presenter::update(double dt) {
 
 			if((key.flags & flags::key_flag::EndSmoothly) && frame >= anim.frame_count) {
 				// End smoothly, continue into next animation.
-				model->keys.destroy(key);
+				model->keys.emplace(key);
 				continue;
 			}
 		}
@@ -177,7 +177,7 @@ int gorc::game::world::level::keys::key_presenter::play_key(int thing_id, int ke
 		int priority, flag_set<flags::key_flag> flags) {
 	int mix_id = GetThingMixId(thing_id);
 
-	auto& state = model->keys.create();
+	auto& state = model->keys.emplace();
 
 	state.animation = &contentmanager.get_asset<content::assets::animation>(key);
 	state.high_priority = state.low_priority = state.high_priority = priority;
@@ -195,7 +195,7 @@ int gorc::game::world::level::keys::key_presenter::play_puppet_key(int thing_id,
 	int mix_id = GetThingMixId(thing_id);
 	auto& thing = levelModel->things[thing_id];
 
-	auto& state = model->keys.create();
+	auto& state = model->keys.emplace();
 
 	const content::assets::puppet_submode& submode = thing.puppet->get_mode(major_mode).get_submode(minor_mode);
 

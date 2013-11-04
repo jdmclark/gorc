@@ -8,7 +8,7 @@
 #include "framework/math/util.h"
 #include "framework/math/matrix.h"
 #include "game/world/level/level_model.h"
-#include "framework/maybe.h"
+#include "framework/utility/maybe.h"
 
 namespace gorc {
 namespace game {

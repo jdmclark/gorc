@@ -3,7 +3,7 @@
 #include "sound.h"
 #include "content/flags/sound_flag.h"
 #include "content/flags/sound_subclass_type.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 
 namespace gorc {
 namespace content {

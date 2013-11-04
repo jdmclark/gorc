@@ -4,6 +4,7 @@
 #include <type_traits>
 
 namespace gorc {
+inline namespace utility {
 
 template <typename T> class flag_set {
 	using UT = typename std::underlying_type<T>::type;
@@ -75,4 +76,5 @@ public:
 	}
 };
 
+}
 }

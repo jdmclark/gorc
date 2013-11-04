@@ -1,7 +1,7 @@
 #pragma once
 
 #include "content/flags/key_flag.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 
 namespace gorc {

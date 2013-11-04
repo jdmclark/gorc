@@ -110,3 +110,7 @@ void gorc::game::world::level::sounds::sound::update(double dt, const level_mode
 
 	expired = (internal_sound.getStatus() != sf::Sound::Playing);
 }
+
+gorc::game::world::level::sounds::sound::~sound() {
+	internal_sound.stop();
+}

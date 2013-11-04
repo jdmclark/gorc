@@ -9,6 +9,7 @@
 #include "content/flags/damage_flag.h"
 #include "content/assets/inventory.h"
 #include "physics/shape.h"
+#include "physics/contact.h"
 #include "game/flags/difficulty_mode.h"
 #include "game/world/level/animations/animation_presenter.h"
 #include "game/world/level/scripts/script_presenter.h"
@@ -43,16 +44,19 @@ private:
 	std::unordered_multimap<int, int> physics_broadphase_thing_influence;
 	std::unordered_multimap<int, int> physics_broadphase_sector_things;
 	std::set<int> physics_overlapping_things;
-	std::vector<vector<3>> physics_thing_resting_manifolds;
+	std::vector<physics::contact> physics_thing_resting_manifolds;
 	std::set<int> physics_thing_closed_set;
 	std::vector<int> physics_thing_open_set;
-	std::set<int> physics_thing_touched_things;
-	std::set<int> physics_thing_touched_surfaces;
+	std::set<std::tuple<int, int>> physics_touched_thing_pairs;
+	std::set<std::tuple<int, int>> physics_touched_surface_pairs;
 
 	components& components;
 	level_place place;
 
 	void initialize_world();
+
+	bool physics_surface_needs_collision_response(int moving_thing_id, int surface_id);
+	bool physics_thing_needs_collision_response(int moving_thing_id, int collision_thing_id);
 
 	void physics_calculate_broadphase(double dt);
 	void physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir, int current_thing_id);
@@ -70,13 +74,13 @@ private:
 
 	class physics_node_visitor {
 	private:
-		std::vector<vector<3>>& resting_manifolds;
-		std::set<int>& physics_thing_touched_things;
+		std::vector<physics::contact>& resting_manifolds;
+		std::set<std::tuple<int, int>>& physics_touched_thing_pairs;
 		std::stack<matrix<4>> matrices;
 		matrix<4> current_matrix = make_identity_matrix<4>();
 
 	public:
-		physics_node_visitor(std::vector<vector<3>>& resting_manifolds, std::set<int>& physics_thing_touched_things);
+		physics_node_visitor(std::vector<physics::contact>& resting_manifolds, std::set<std::tuple<int, int>>& physics_touched_thing_pairs);
 
 		inline void push_matrix() {
 			matrices.push(current_matrix);
@@ -93,6 +97,8 @@ private:
 
 		void visit_mesh(const content::assets::model& model, int mesh_id);
 
+		bool needs_response;
+		int moving_thing_id;
 		int visited_thing_id;
 		physics::sphere sphere;
 	} physics_anim_node_visitor;

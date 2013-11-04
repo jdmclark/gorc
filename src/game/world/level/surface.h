@@ -2,7 +2,7 @@
 
 #include "content/assets/level_surface.h"
 #include "animations/animation.h"
-#include "framework/pool.h"
+#include "framework/utility/pool.h"
 #include "physics/object_data.h"
 
 namespace gorc {

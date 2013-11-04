@@ -4,6 +4,7 @@
 #include <utility>
 
 namespace gorc {
+inline namespace utility {
 
 template <typename T, typename Enable = void> class maybe;
 
@@ -143,4 +144,5 @@ template <typename T> maybe<T> make_maybe(T value) {
 	return maybe<T>(value);
 }
 
+}
 }

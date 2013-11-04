@@ -2,9 +2,9 @@
 
 #include "animation.h"
 #include "content/flags/anim_flag.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
-#include "framework/pool.h"
+#include "framework/utility/pool.h"
 
 namespace gorc {
 

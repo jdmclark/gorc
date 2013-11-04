@@ -3,7 +3,7 @@
 #include "framework/math/vector.h"
 #include "content/assets/level.h"
 #include "cog/instance.h"
-#include "framework/pool.h"
+#include "framework/utility/pool.h"
 #include "thing.h"
 #include "surface.h"
 #include "sounds/sound.h"

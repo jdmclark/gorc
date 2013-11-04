@@ -32,7 +32,7 @@ void gorc::game::world::level::sounds::sound_presenter::update(double dt) {
 	for(auto& sound : model->sounds) {
 		if(sound.get_expired()) {
 			sound.stop();
-			model->sounds.destroy(sound);
+			model->sounds.erase(sound);
 		}
 	}
 
@@ -113,7 +113,7 @@ int gorc::game::world::level::sounds::sound_presenter::play_sound_local(int wav,
 		return -1;
 	}
 
-	auto& snd = model->sounds.create();
+	auto& snd = model->sounds.emplace();
 
 	snd.play_sound_local(contentmanager.get_asset<content::assets::sound>(wav), volume, panning, flags);
 
@@ -126,7 +126,7 @@ int gorc::game::world::level::sounds::sound_presenter::play_sound_pos(int wav, v
 		return -1;
 	}
 
-	auto& snd = model->sounds.create();
+	auto& snd = model->sounds.emplace();
 
 	snd.play_sound_pos(contentmanager.get_asset<content::assets::sound>(wav), pos, volume, minrad, maxrad, flags);
 
@@ -139,7 +139,7 @@ int gorc::game::world::level::sounds::sound_presenter::play_sound_thing(int wav,
 		return -1;
 	}
 
-	auto& snd = model->sounds.create();
+	auto& snd = model->sounds.emplace();
 
 	snd.play_sound_thing(*levelModel, contentmanager.get_asset<content::assets::sound>(wav), thing, volume, minrad, maxrad, flags);
 
@@ -154,7 +154,7 @@ void gorc::game::world::level::sounds::sound_presenter::stop_sound(int channel, 
 	if(channel >= 0) {
 		sound& sound = model->sounds[channel];
 		sound.stop(delay);
-		model->sounds.destroy(channel);
+		model->sounds.erase(channel);
 	}
 }
 

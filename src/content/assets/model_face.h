@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 #include "content/flags/face_flag.h"
 #include "content/flags/geometry_mode.h"
 #include "content/flags/light_mode.h"

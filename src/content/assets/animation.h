@@ -4,7 +4,7 @@
 #include "content/loaders/animation_loader.h"
 #include "content/flags/key_flag.h"
 #include "content/flags/key_marker_type.h"
-#include "framework/flag_set.h"
+#include "framework/utility/flag_set.h"
 #include "animation_node.h"
 #include <vector>
 
