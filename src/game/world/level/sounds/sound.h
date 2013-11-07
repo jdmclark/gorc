@@ -32,8 +32,8 @@ private:
 			flag_set<flags::sound_flag> flags);
 
 public:
-	void play_sound_local(const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
-	void play_sound_pos(const content::assets::sound& sound, const vector<3>& pos, float volume,
+	void play_sound_local(const level_model& model, const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
+	void play_sound_pos(const level_model& model, const content::assets::sound& sound, const vector<3>& pos, float volume,
 			float minrad, float maxrad, flag_set<flags::sound_flag> flags);
 	void play_sound_thing(const level_model& model, const content::assets::sound& sound, int thing, float volume,
 			float minrad, float maxrad, flag_set<flags::sound_flag> flags);

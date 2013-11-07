@@ -393,12 +393,18 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 		auto delta_position = lerp(thing.position, targetPosition, alpha);
 		auto delta_orientation = lerp(thing.orientation, targetOrientation, alpha);
 
+		// Rotate rel_point into object space
+		auto rel_point_rotated = (
+				make_rotation_matrix(get<2>(-currentOrientation), make_vector(0.0f, 1.0f, 0.0f))
+				* make_rotation_matrix(get<0>(-currentOrientation), make_vector(1.0f, 0.0f, 0.0f))
+				* make_rotation_matrix(get<1>(-currentOrientation), make_vector(0.0f, 0.0f, 1.0f))
+				* make_translation_matrix(-currentPosition)).transform(rel_point);
+
 		auto rel_v = (make_translation_matrix(delta_position)
 			* make_rotation_matrix(get<1>(delta_orientation), make_vector(0.0f, 0.0f, 1.0f))
 			* make_rotation_matrix(get<0>(delta_orientation), make_vector(1.0f, 0.0f, 0.0f))
 			* make_rotation_matrix(get<2>(delta_orientation), make_vector(0.0f, 1.0f, 0.0f))
-			* make_translation_matrix(-currentPosition)
-			).transform(rel_point) - rel_point;
+			).transform(rel_point_rotated) - rel_point;
 		return rel_v;
 	}
 

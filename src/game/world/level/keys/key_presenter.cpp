@@ -99,7 +99,7 @@ void gorc::game::world::level::keys::key_presenter::update(double dt) {
 
 			if((key.flags & flags::key_flag::EndSmoothly) && frame >= anim.frame_count) {
 				// End smoothly, continue into next animation.
-				model->keys.emplace(key);
+				model->keys.erase(key);
 				continue;
 			}
 		}

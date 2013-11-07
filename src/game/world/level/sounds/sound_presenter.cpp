@@ -114,7 +114,7 @@ int gorc::game::world::level::sounds::sound_presenter::play_sound_local(int wav,
 
 	auto& snd = model->sounds.emplace();
 
-	snd.play_sound_local(contentmanager.get_asset<content::assets::sound>(wav), volume, panning, flags);
+	snd.play_sound_local(*levelModel, contentmanager.get_asset<content::assets::sound>(wav), volume, panning, flags);
 
 	return snd.get_id();
 }
@@ -127,7 +127,7 @@ int gorc::game::world::level::sounds::sound_presenter::play_sound_pos(int wav, v
 
 	auto& snd = model->sounds.emplace();
 
-	snd.play_sound_pos(contentmanager.get_asset<content::assets::sound>(wav), pos, volume, minrad, maxrad, flags);
+	snd.play_sound_pos(*levelModel, contentmanager.get_asset<content::assets::sound>(wav), pos, volume, minrad, maxrad, flags);
 
 	return snd.get_id();
 }

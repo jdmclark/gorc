@@ -52,29 +52,35 @@ void gorc::game::world::level::sounds::sound::play_positional(const content::ass
 	internal_sound.play();
 }
 
-void gorc::game::world::level::sounds::sound::play_sound_local(const content::assets::sound& sound, float volume, float panning,
-		flag_set<flags::sound_flag> flags) {
+void gorc::game::world::level::sounds::sound::play_sound_local(const level_model& model, const content::assets::sound& sound, float volume,
+		float panning, flag_set<flags::sound_flag> flags) {
 	if(flags & flags::sound_flag::Voice) {
 		play_voice(sound, volume, flags);
 	}
 	else {
 		play_ambient(sound, volume, panning, flags);
 	}
+
+	update(0.0, model);
 }
 
-void gorc::game::world::level::sounds::sound::play_sound_pos(const content::assets::sound& sound, const vector<3>& pos, float volume,
-		float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
+void gorc::game::world::level::sounds::sound::play_sound_pos(const level_model& model, const content::assets::sound& sound,
+		const vector<3>& pos, float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
 	update_position = false;
 	play_positional(sound, pos, volume, minrad, maxrad, flags);
+
+	update(0.0, model);
 }
 
-void gorc::game::world::level::sounds::sound::play_sound_thing(const level_model& model, const content::assets::sound& sound, int thing, float volume,
-		float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
+void gorc::game::world::level::sounds::sound::play_sound_thing(const level_model& model, const content::assets::sound& sound,
+		int thing, float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
 	this->thing = thing;
 	update_position = (flags & flags::sound_flag::ThingOriginMovesWithThing);
 
 	vector<3> pos = model.things[thing].position;
 	play_positional(sound, pos, volume, minrad, maxrad, flags);
+
+	update(0.0, model);
 }
 
 void gorc::game::world::level::sounds::sound::set_pitch(float pitch, float delay) {
