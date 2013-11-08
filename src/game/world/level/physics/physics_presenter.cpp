@@ -67,15 +67,15 @@ void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::
 	const auto& mesh = model.geosets.front().meshes[mesh_id];
 
 	for(const auto& face : mesh.faces) {
-		auto maybe_face_nearest_point = physics::bounded_closest_point_on_surface(std::get<0>(sphere), mesh, face, current_matrix, std::get<1>(sphere));
+		auto maybe_face_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, mesh, face, current_matrix, sphere.radius);
 
 		vector<3> face_nearest_point;
 		if(maybe_face_nearest_point >> face_nearest_point) {
-			auto face_nearest_dist = length(std::get<0>(sphere) - face_nearest_point);
-			if(face_nearest_dist <= std::get<1>(sphere)) {
+			auto face_nearest_dist = length(sphere.position - face_nearest_point);
+			if(face_nearest_dist <= sphere.radius) {
 				if(needs_response) {
 					vector<3> contact_pos_vel = presenter.get_thing_path_moving_point_velocity(visited_thing_id, face_nearest_point);
-					resting_manifolds.emplace_back((std::get<0>(sphere) - face_nearest_point) / face_nearest_dist, contact_pos_vel, visited_thing_id);
+					resting_manifolds.emplace_back((sphere.position - face_nearest_point) / face_nearest_dist, contact_pos_vel, visited_thing_id);
 				}
 				physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
 			}
@@ -141,13 +141,13 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 				continue;
 			}
 
-			auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(std::get<0>(sphere), model->level, surface, std::get<1>(sphere));
+			auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, model->level, surface, sphere.radius);
 			vector<3> surf_nearest_point;
 			if(maybe_surf_nearest_point >> surf_nearest_point) {
-				auto surf_nearest_dist = length(std::get<0>(sphere) - surf_nearest_point);
+				auto surf_nearest_dist = length(sphere.position - surf_nearest_point);
 
-				if(surf_nearest_dist <= std::get<1>(sphere)) {
-					physics_thing_resting_manifolds.emplace_back((std::get<0>(sphere) - surf_nearest_point) / surf_nearest_dist, make_zero_vector<3, float>());
+				if(surf_nearest_dist <= sphere.radius) {
+					physics_thing_resting_manifolds.emplace_back((sphere.position - surf_nearest_point) / surf_nearest_dist, make_zero_vector<3, float>());
 					physics_touched_surface_pairs.emplace(current_thing_id, i);
 				}
 			}
@@ -174,14 +174,14 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 		}
 
 		// Skip things too far away
-		auto vec_to = std::get<0>(sphere) - col_thing.position;
+		auto vec_to = sphere.position - col_thing.position;
 		auto vec_to_len = length(vec_to);
-		if(vec_to_len > col_thing.move_size + std::get<1>(sphere)) {
+		if(vec_to_len > col_thing.move_size + sphere.radius) {
 			continue;
 		}
 
 		if(col_thing.collide == flags::collide_type::sphere) {
-			if(vec_to_len <= col_thing.size + std::get<1>(sphere)) {
+			if(vec_to_len <= col_thing.size + sphere.radius) {
 				// Spheres colliding
 				if(physics_thing_needs_collision_response(current_thing_id, col_thing_id)) {
 					// Find contact point velocity:

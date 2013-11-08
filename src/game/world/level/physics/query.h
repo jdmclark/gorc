@@ -173,6 +173,42 @@ bool point_inside_sector(const vector<3>& position, const level_model& level_mod
 void segment_adjoin_path(const segment& segment, const level_model& level_model, const content::assets::level_sector& initial_sector,
 		std::vector<std::tuple<unsigned int, unsigned int>>& path);
 
+template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sphere_plane_collision_time(const swept_sphere& sphere,
+		const VertexProvider& level, const EdgeProvider& surface, const matrix<4>& trns) {
+	auto nrm = trns.transform_normal(surface.normal);
+	auto p = trns.transform(level.vertices[std::get<0>(surface.vertices[0])]);
+	auto u = dot(std::get<1>(sphere.position), std::get<0>(sphere.position), nrm);
+	if(u == 0.0f) {
+		return maybe<float>();
+	}
+
+	float t = (sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u;
+	if(t >= 0.0f && t <= 1.0f) {
+		return make_maybe(t);
+	}
+	else {
+		return maybe<float>();
+	}
+}
+
+template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sphere_plane_collision_time(const swept_sphere& sphere,
+		const VertexProvider& level, const EdgeProvider& surface) {
+	auto nrm = surface.normal;
+	auto p = level.vertices[std::get<0>(surface.vertices[0])];
+	auto u = dot(std::get<1>(sphere.position), std::get<0>(sphere.position), nrm);
+	if(u == 0.0f) {
+		return maybe<float>();
+	}
+
+	float t = (sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u;
+	if(t >= 0.0f && t <= 1.0f) {
+		return make_maybe(t);
+	}
+	else {
+		return maybe<float>();
+	}
+}
+
 }
 }
 }
