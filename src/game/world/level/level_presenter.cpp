@@ -319,15 +319,19 @@ void gorc::game::world::level::level_presenter::damage() {
 	float bolt_yaw = to_degrees(std::atan2(get<1>(model->camera_look), get<0>(model->camera_look)));
 	float bolt_pitch = to_degrees(std::acos(dot(make_vector(0.0f, 0.0f, 1.0f), model->camera_look)));
 
-	vector<3> bolt_offset = model->camera_position + model->camera_look * 0.09f - model->camera_up * 0.01f;
+	const auto& player_thing = model->things[model->camera_thing_id];
 
-	int bolt_thing = create_thing("+bryarbolt", model->camera_sector, model->camera_position, make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+	int bolt_thing = create_thing("+bryarbolt", player_thing.sector, player_thing.position, make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+
+	const auto& bolt_thing_ref = model->things[bolt_thing];
+	vector<3> bolt_offset = player_thing.position + model->camera_look * (player_thing.size * 2.0f + bolt_thing_ref.size);
+
 	adjust_thing_pos(bolt_thing, bolt_offset);
 
 	auto& thing = model->things[bolt_thing];
 
 	// Rotate velocity.
-	thing.vel = (make_rotation_matrix(90.0f - bolt_pitch, make_vector(-1.0f, 0.0f, 0.0f)) * make_rotation_matrix(bolt_yaw - 90.0f, make_vector(0.0f, 0.0f, 1.0f)))
+	thing.vel = (make_rotation_matrix(bolt_yaw - 90.0f, make_vector(0.0f, 0.0f, 1.0f)) * make_rotation_matrix(90.0f - bolt_pitch, make_vector(1.0f, 0.0f, 0.0f)))
 			.transform_normal(thing.vel);
 }
 
