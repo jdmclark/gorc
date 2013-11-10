@@ -78,7 +78,8 @@ void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::
 					vector<3> nrm = current_matrix.transform_normal(face.normal);
 					vector<3> nrm_vel = nrm * ((sphere.radius / face_nearest_dist) - 1.0f);
 
-					resting_manifolds.emplace_back((sphere.position - face_nearest_point) / face_nearest_dist, contact_pos_vel + nrm_vel, visited_thing_id);
+					resting_manifolds.emplace_back(face_nearest_point, (sphere.position - face_nearest_point) / face_nearest_dist,
+							contact_pos_vel + nrm_vel, visited_thing_id);
 				}
 				physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
 			}
@@ -150,7 +151,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 				auto surf_nearest_dist = length(sphere.position - surf_nearest_point);
 
 				if(surf_nearest_dist <= sphere.radius) {
-					physics_thing_resting_manifolds.emplace_back((sphere.position - surf_nearest_point) / surf_nearest_dist,
+					physics_thing_resting_manifolds.emplace_back(surf_nearest_point, (sphere.position - surf_nearest_point) / surf_nearest_dist,
 							surface.normal * ((sphere.radius / surf_nearest_dist) - 1.0f));
 					physics_touched_surface_pairs.emplace(current_thing_id, i);
 				}
@@ -200,7 +201,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 						contact_point_vel = get_thing_path_moving_point_velocity(col_thing_id, contact_point);
 					}
 
-					physics_thing_resting_manifolds.emplace_back(vec_to / vec_to_len, contact_point_vel, col_thing_id);
+					physics_thing_resting_manifolds.emplace_back(contact_point, vec_to / vec_to_len, contact_point_vel, col_thing_id);
 				}
 
 				physics_touched_thing_pairs.emplace(std::min(current_thing_id, col_thing_id), std::max(current_thing_id, col_thing_id));
@@ -225,17 +226,17 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 	thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
 
 	if(thing.physics_flags & flags::physics_flag::has_gravity) {
-			thing.vel = thing.vel + make_vector(0.0f, 0.0f, -1.0f) * model->header.world_gravity * static_cast<float>(dt);
+		thing.vel = thing.vel + make_vector(0.0f, 0.0f, -1.0f) * model->header.world_gravity * static_cast<float>(dt);
 	}
 
 	// Only perform collision detection for player, actor, and weapon types.
 	if(thing.type != flags::thing_type::Actor && thing.type != flags::thing_type::Player && thing.type != flags::thing_type::Weapon) {
-			return;
+		return;
 	}
 
 	if(thing.collide != flags::collide_type::sphere && thing.collide != flags::collide_type::sphere_unknown) {
-			// Do not need sphere collision.
-			return;
+		// Do not need sphere collision.
+		return;
 	}
 
 	double dt_remaining = dt;
@@ -244,92 +245,111 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 	int loop_ct = 0;
 
 	while(dt_remaining > 0.0) {
-			++loop_ct;
+		++loop_ct;
 
-			double this_step_dt = (dt_remaining < dt_step) ? dt_remaining : dt_step;
+		double this_step_dt = (dt_remaining < dt_step) ? dt_remaining : dt_step;
 
-			// Do sphere collision:
+		// Do sphere collision:
 
-			physics_thing_resting_manifolds.clear();
-			physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, thing.vel, thing_id);
-			physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, thing_id);
+		physics_thing_resting_manifolds.clear();
+		physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, thing.vel, thing_id);
+		physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, thing_id);
 
-			vector<3> prev_thing_vel = thing.vel;
+		vector<3> prev_thing_vel = thing.vel;
 
-			// Add 'towards' velocities from resting contacts.
-			for(const auto& manifold : physics_thing_resting_manifolds) {
-					auto man_vel_len = length(manifold.velocity);
+		// Add 'towards' velocities from resting contacts, projected into manifold direction.
+		for(const auto& manifold : physics_thing_resting_manifolds) {
+			auto man_vel_len = dot(manifold.velocity, manifold.normal);
 
-					if(man_vel_len == 0.0f || dot(manifold.normal, manifold.velocity) < 0.0f) {
-							// Not contributing velocity.
-							continue;
-					}
-
-					auto vel_dot = dot(prev_thing_vel, manifold.velocity);
-					auto amt_in_man_vel = vel_dot / man_vel_len;
-
-					if(amt_in_man_vel < man_vel_len) {
-							prev_thing_vel += (man_vel_len - amt_in_man_vel) * (manifold.velocity / man_vel_len);
-					}
+			if(man_vel_len <= 0.0f) {
+				// Not contributing velocity.
+				continue;
 			}
 
-			bool reject_vel = true;
+			auto man_vel = manifold.normal * man_vel_len;
 
-			// Solve LCP, 20 iterations
-			for(int i = 0; i < 5; ++i) {
-					vector<3> new_computed_vel = prev_thing_vel;
-					for(const auto& manifold : physics_thing_resting_manifolds) {
-							// Three cases:
-							auto vel_dot = dot(new_computed_vel, manifold.normal);
-							if(vel_dot < 0.0f) {
-									// Reject manifold vector from velocity
-									new_computed_vel -= vel_dot * manifold.normal;
-							}
-					}
+			auto vel_dot = dot(prev_thing_vel, man_vel);
+			auto amt_in_man_vel = vel_dot / man_vel_len;
 
-					if(length_squared(new_computed_vel - prev_thing_vel) < 0.000001f) {
-							// Solution has stabilized
-							prev_thing_vel = new_computed_vel;
-							reject_vel = false;
-							break;
+			if(amt_in_man_vel < man_vel_len) {
+				prev_thing_vel += (man_vel_len - amt_in_man_vel) * (man_vel / man_vel_len);
+			}
+		}
+
+		bool reject_vel = true;
+
+		// Solve LCP, 20 iterations
+		for(int i = 0; i < 5; ++i) {
+			vector<3> new_computed_vel = prev_thing_vel;
+			for(const auto& manifold : physics_thing_resting_manifolds) {
+				// Three cases:
+				auto vel_dot = dot(new_computed_vel, manifold.normal);
+				if(vel_dot < 0.0f) {
+					// Reject manifold vector from velocity.
+					// But just enough to prevent drift.
+					auto vel_man_vel_dot = dot(new_computed_vel, manifold.velocity);
+					if(vel_man_vel_dot <= 0.0f) {
+						// Object is being stopped.
+						new_computed_vel -= vel_dot * manifold.normal;
 					}
 					else {
-							// Solution has not yet stabilized.
-							prev_thing_vel = new_computed_vel;
+						// Object is possibly being slowed.
+						float manifold_vel_len = length(manifold.velocity);
+						auto nrm_manifold_vel = manifold.velocity / manifold_vel_len;
+						auto nrm_man_vel_dot = vel_man_vel_dot / manifold_vel_len;
+						if(nrm_man_vel_dot > manifold_vel_len) {
+							// Object is being slowed.
+							new_computed_vel -= nrm_manifold_vel * (nrm_man_vel_dot - manifold_vel_len);
+						}
 					}
+				}
 			}
 
-			if(!reject_vel) {
-					thing.vel = prev_thing_vel;
-					presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * this_step_dt);
+			if(length_squared(new_computed_vel - prev_thing_vel) < 0.000001f) {
+				// Solution has stabilized
+				prev_thing_vel = new_computed_vel;
+				reject_vel = false;
+				break;
 			}
 			else {
-					thing.vel = make_zero_vector<3, float>();
-					break;
+				// Solution has not yet stabilized.
+				prev_thing_vel = new_computed_vel;
+			}
+		}
+
+		if(!reject_vel) {
+			thing.vel = prev_thing_vel;
+			presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * this_step_dt);
+		}
+		else {
+			thing.vel = make_zero_vector<3, float>();
+			break;
+		}
+
+		// Check vel to make sure all valid resting velocities are still applied.
+		for(const auto& manifold : physics_thing_resting_manifolds) {
+			auto man_vel_len = dot(manifold.velocity, manifold.normal);
+
+			if(man_vel_len <= 0.0f) {
+				// Not contributing velocity.
+				continue;
 			}
 
-			// Check vel to make sure all valid resting velocities are still applied.
-			for(const auto& manifold : physics_thing_resting_manifolds) {
-					auto man_vel_len = length(manifold.velocity);
+			auto man_vel = manifold.normal * man_vel_len;
 
-					if(man_vel_len == 0.0f || dot(manifold.normal, manifold.velocity) < 0.0f) {
-							// Not contributing velocity.
-							continue;
-					}
+			auto vel_dot = dot(prev_thing_vel, man_vel);
+			auto amt_in_man_vel = vel_dot / man_vel_len;
 
-					auto vel_dot = dot(prev_thing_vel, manifold.velocity);
-					auto amt_in_man_vel = vel_dot / man_vel_len;
-
-					if(amt_in_man_vel < man_vel_len) {
-							// Thing is blocked.
-							manifold.contact_thing_id.if_set([this](int contact_thing_id) {
-									auto& contact_thing = model->things[contact_thing_id];
-									contact_thing.is_blocked = true;
-							});
-					}
+			if(amt_in_man_vel < man_vel_len) {
+				// Thing is blocked.
+				manifold.contact_thing_id.if_set([this](int contact_thing_id) {
+						auto& contact_thing = model->things[contact_thing_id];
+						contact_thing.is_blocked = true;
+				});
 			}
+		}
 
-			dt_remaining -= dt_step;
+		dt_remaining -= dt_step;
 	}
 }
 
@@ -438,7 +458,7 @@ void physics_presenter::update(double dt) {
 
 	// - Send blocked message to all blocked things; else, update path.
 	for(auto& thing : model->things) {
-		if(thing.is_blocked) {
+		if(thing.is_blocked && thing.path_moving) {
 			presenter.script_presenter.send_message_to_linked(cog::message_id::blocked, thing.get_id(), flags::message_type::thing,
 					-1, flags::message_type::nothing);
 		}
