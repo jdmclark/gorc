@@ -42,6 +42,8 @@ private:
 	std::vector<int> physics_thing_open_set;
 	std::set<std::tuple<int, int>> physics_touched_thing_pairs;
 	std::set<std::tuple<int, int>> physics_touched_surface_pairs;
+	std::set<int> segment_query_closed_sectors;
+	std::vector<int> segment_query_open_sectors;
 
 	bool physics_surface_needs_collision_response(int moving_thing_id, int surface_id);
 	bool physics_thing_needs_collision_response(int moving_thing_id, int collision_thing_id);

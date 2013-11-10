@@ -543,27 +543,39 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 
 	// Find contact among sectors.
 	// Get list of sectors within thing influence.
-	auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
-	for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
-		const auto& sector = model->sectors[it->second];
+	segment_query_closed_sectors.clear();
+	segment_query_open_sectors.clear();
+	segment_query_open_sectors.emplace_back(current_thing.sector);
+	while(!segment_query_open_sectors.empty()) {
+		int current_sector = segment_query_open_sectors.back();
+		segment_query_open_sectors.pop_back();
+
+		if(segment_query_closed_sectors.find(current_sector) != segment_query_closed_sectors.end()) {
+			continue;
+		}
+
+		segment_query_closed_sectors.emplace(current_sector);
+
+		const auto& sector = model->sectors[current_sector];
 
 		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = model->surfaces[i];
 
-			if(!physics_surface_needs_collision_response(current_thing_id, i)) {
-				continue;
-			}
-
 			auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
 			vector<3> nearest_point;
 			if(maybe_nearest_point >> nearest_point) {
-				auto dist = length(nearest_point - std::get<0>(cam_segment));
-				if(dist < closest_contact_distance) {
-					closest_contact_distance = dist;
-					has_contact = true;
-					closest_contact_surface_id = i;
-					closest_contact_position = nearest_point;
-					closest_contact_normal = surface.normal;
+				if(physics_surface_needs_collision_response(current_thing_id, i)) {
+					auto dist = length(nearest_point - std::get<0>(cam_segment));
+					if(dist < closest_contact_distance) {
+						closest_contact_distance = dist;
+						has_contact = true;
+						closest_contact_surface_id = i;
+						closest_contact_position = nearest_point;
+						closest_contact_normal = surface.normal;
+					}
+				}
+				else if(surface.adjoin >= 0) {
+					segment_query_open_sectors.push_back(surface.adjoined_sector);
 				}
 			}
 		}
@@ -572,8 +584,8 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	// Find contact among things.
 	// Get list of things within thing influence.
 	physics_overlapping_things.clear();
-	for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
-		auto influenced_thing_range = physics_broadphase_sector_things.equal_range(it->second);
+	for(auto sector_id : segment_query_closed_sectors) {
+		auto influenced_thing_range = physics_broadphase_sector_things.equal_range(sector_id);
 		for(auto jt = std::get<0>(influenced_thing_range); jt != std::get<1>(influenced_thing_range); ++jt) {
 			physics_overlapping_things.emplace(jt->second);
 		}
