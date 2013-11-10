@@ -3,30 +3,30 @@
 #include "framework/math/vector.h"
 #include "framework/math/box.h"
 #include "sound.h"
-#include "content/flags/sectorflag.h"
+#include "content/flags/sector_flag.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class LevelSector {
+class level_sector {
 public:
-	size_t Number;
-	FlagSet<Flags::SectorFlag> Flags;
-	float AmbientLight;
-	float ExtraLight;
-	size_t ColorMap;
-	Math::Vector<3> Tint;
-	Math::Box<3> BoundingBox;
-	Math::Box<3> CollideBox;
-	Sound const* AmbientSound = nullptr;
-	float AmbientSoundVolume = 0.0f;
-	Math::Vector<3> Center;
-	float Radius;
-	std::vector<size_t> Vertices;
-	size_t FirstSurface;
-	size_t SurfaceCount;
-	Math::Vector<3> Thrust;
+	size_t number;
+	flag_set<flags::sector_flag> flags;
+	float ambient_light;
+	float extra_light;
+	size_t color_map;
+	vector<3> tint;
+	box<3> bounding_box;
+	box<3> collide_box;
+	sound const* ambient_sound = nullptr;
+	float ambient_sound_volume = 0.0f;
+	vector<3> center;
+	float radius;
+	std::vector<size_t> vertices;
+	size_t first_surface;
+	size_t surface_count;
+	vector<3> thrust;
 };
 
 }

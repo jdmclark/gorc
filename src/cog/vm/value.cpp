@@ -1,125 +1,125 @@
 #include "value.h"
 #include "cog/constants.h"
 
-using namespace Gorc::Cog::VM;
+using namespace gorc::cog::vm;
 
-Value::Value()
-	: type(Type::Void) {
+value::value()
+	: type_flag(type::nothing) {
 	return;
 }
 
-Value::Value(const Value& v) {
+value::value(const value& v) {
 	*this = v;
 }
 
-const Value& Value::operator=(const Value& v) {
-	type = v.type;
+const value& value::operator=(const value& v) {
+	type_flag = v.type_flag;
 	data = v.data;
 
 	return v;
 }
 
-Value::Value(int v) {
+value::value(int v) {
 	*this = v;
 }
 
-int Value::operator=(int v) {
-	type = Type::Integer;
-	data.Integer = v;
+int value::operator=(int v) {
+	type_flag = type::integer;
+	data.integer = v;
 
 	return v;
 }
 
-Value::operator int() const {
-	switch(type) {
-	case Type::Void:
-		return Constants::DefaultInt;
+value::operator int() const {
+	switch(type_flag) {
+	case type::nothing:
+		return constants::default_int;
 
-	case Type::Integer:
-		return data.Integer;
+	case type::integer:
+		return data.integer;
 
-	case Type::Float:
+	case type::floating:
 		return static_cast<int>(data.Floating);
 
-	case Type::Boolean:
+	case type::boolean:
 		return (data.Boolean) ? 1 : 0;
 
-	case Type::String:
-		return Constants::DefaultInt;
+	case type::string:
+		return constants::default_int;
 
-	case Type::Vector:
-		return Constants::DefaultInt;
+	case type::vector:
+		return constants::default_int;
 
 	default:
-		return Constants::DefaultInt;
+		return constants::default_int;
 	}
 }
 
-Value::Value(float v) {
+value::value(float v) {
 	*this = v;
 }
 
-float Value::operator=(float v) {
-	type = Type::Float;
+float value::operator=(float v) {
+	type_flag = type::floating;
 	data.Floating = v;
 
 	return v;
 }
 
-Value::operator float() const {
-	switch(type) {
-	case Type::Void:
-		return Constants::DefaultFloat;
+value::operator float() const {
+	switch(type_flag) {
+	case type::nothing:
+		return constants::default_float;
 
-	case Type::Integer:
-		return static_cast<float>(data.Integer);
+	case type::integer:
+		return static_cast<float>(data.integer);
 
-	case Type::Float:
+	case type::floating:
 		return data.Floating;
 
-	case Type::Boolean:
+	case type::boolean:
 		return (data.Boolean) ? 1.0f : 0.0f;
 
-	case Type::String:
-		return Constants::DefaultFloat;
+	case type::string:
+		return constants::default_float;
 
-	case Type::Vector:
-		return Constants::DefaultFloat;
+	case type::vector:
+		return constants::default_float;
 
 	default:
-		return Constants::DefaultFloat;
+		return constants::default_float;
 	}
 }
 
-Value::Value(bool v) {
+value::value(bool v) {
 	*this = v;
 }
 
-bool Value::operator=(bool v) {
-	type = Type::Boolean;
+bool value::operator=(bool v) {
+	type_flag = type::boolean;
 	data.Boolean = v;
 
 	return v;
 }
 
-Value::operator bool() const {
-	switch(type) {
-	case Type::Void:
+value::operator bool() const {
+	switch(type_flag) {
+	case type::nothing:
 		return false;
 
-	case Type::Integer:
-		return data.Integer != 0;
+	case type::integer:
+		return data.integer != 0;
 
-	case Type::Float:
+	case type::floating:
 		return data.Floating != 0.0f;
 
-	case Type::Boolean:
+	case type::boolean:
 		return data.Boolean;
 
-	case Type::String:
+	case type::string:
 		return true;
 
-	case Type::Vector:
+	case type::vector:
 		return true;
 
 	default:
@@ -127,76 +127,76 @@ Value::operator bool() const {
 	}
 }
 
-Value::Value(const char* v) {
+value::value(const char* v) {
 	*this = v;
 }
 
-const char* Value::operator=(const char* v) {
-	type = Type::String;
-	data.String = v;
+const char* value::operator=(const char* v) {
+	type_flag = type::string;
+	data.string = v;
 
 	return v;
 }
 
-Value::operator const char*() const {
-	switch(type) {
-	case Type::Void:
-		return Constants::DefaultString;
+value::operator const char*() const {
+	switch(type_flag) {
+	case type::nothing:
+		return constants::default_string;
 
-	case Type::Integer:
-		return Constants::DefaultString;
+	case type::integer:
+		return constants::default_string;
 
-	case Type::Float:
-		return Constants::DefaultString;
+	case type::floating:
+		return constants::default_string;
 
-	case Type::Boolean:
-		return Constants::DefaultString;
+	case type::boolean:
+		return constants::default_string;
 
-	case Type::String:
-		return data.String;
+	case type::string:
+		return data.string;
 
-	case Type::Vector:
-		return Constants::DefaultString;
+	case type::vector:
+		return constants::default_string;
 
 	default:
-		return Constants::DefaultString;
+		return constants::default_string;
 	}
 }
 
-Value::Value(const Math::Vector<3>& v) {
+value::value(const vector<3>& v) {
 	*this = v;
 }
 
-const Gorc::Math::Vector<3>& Value::operator=(const Math::Vector<3>& v) {
-	type = Type::Vector;
-	data.Vector.X = Math::Get<Math::X>(v);
-	data.Vector.Y = Math::Get<Math::Y>(v);
-	data.Vector.Z = Math::Get<Math::Z>(v);
+const gorc::vector<3>& value::operator=(const vector<3>& v) {
+	type_flag = type::vector;
+	data.vector.X = get<0>(v);
+	data.vector.Y = get<1>(v);
+	data.vector.Z = get<2>(v);
 
 	return v;
 }
 
-Value::operator Gorc::Math::Vector<3>() const {
-	switch(type) {
-	case Type::Void:
-		return Math::Vector<3>();
+value::operator gorc::vector<3>() const {
+	switch(type_flag) {
+	case type::nothing:
+		return make_zero_vector<3, float>();
 
-	case Type::Integer:
-		return Math::Vector<3>();
+	case type::integer:
+		return make_zero_vector<3, float>();
 
-	case Type::Float:
-		return Math::Vector<3>();
+	case type::floating:
+		return make_zero_vector<3, float>();
 
-	case Type::Boolean:
-		return Math::Vector<3>();
+	case type::boolean:
+		return make_zero_vector<3, float>();
 
-	case Type::String:
-		return Math::Vector<3>();
+	case type::string:
+		return make_zero_vector<3, float>();
 
-	case Type::Vector:
-		return Math::Vec(data.Vector.X, data.Vector.Y, data.Vector.Z);
+	case type::vector:
+		return make_vector(data.vector.X, data.vector.Y, data.vector.Z);
 
 	default:
-		return Math::Vector<3>();
+		return make_zero_vector<3, float>();
 	}
 }

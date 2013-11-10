@@ -2,13 +2,13 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Symbols {
+namespace gorc {
+namespace cog {
+namespace symbols {
 
-class SymbolException : public Exception { };
-class UndefinedSymbolException : public SymbolException { };
-class SymbolRedefinitionException : public SymbolException { };
+class symbol_exception : public exception { };
+class undefined_symbol_exception : public symbol_exception { };
+class symbol_redefinition_exception : public symbol_exception { };
 
 }
 }

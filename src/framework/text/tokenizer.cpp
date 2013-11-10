@@ -2,9 +2,9 @@
 #include "framework/diagnostics/helper.h"
 #include <boost/algorithm/string.hpp>
 
-using namespace Gorc::Text;
+using namespace gorc::text;
 
-void Tokenizer::scan() {
+void tokenizer::scan() {
 	++col;
 
 	if(current == '\n') {
@@ -13,10 +13,10 @@ void Tokenizer::scan() {
 	}
 
 	current = next;
-	next = buffer.GetNext();
+	next = buffer.get_next();
 }
 
-bool Tokenizer::skipWhitespaceStep() {
+bool tokenizer::skipWhitespaceStep() {
 	if(current == '\0') {
 		// EOF in a block of whitespace
 		return false;
@@ -30,7 +30,7 @@ bool Tokenizer::skipWhitespaceStep() {
 	}
 	else if(current == '#') {
 		// Line comment, skip to eol.
-		SkipToNextLine();
+		skip_to_next_line();
 		return true;
 	}
 	else {
@@ -38,7 +38,7 @@ bool Tokenizer::skipWhitespaceStep() {
 	}
 }
 
-void Tokenizer::skipWhitespace() {
+void tokenizer::skipWhitespace() {
 	while(skipWhitespaceStep()) {
 		// Repeatedly call skipWhitespaceStep() until it returns false.
 		// Returning false indicates no more whitespace to skip.
@@ -47,40 +47,40 @@ void Tokenizer::skipWhitespace() {
 	return;
 }
 
-bool Tokenizer::isIdentifierLead(char c) {
+bool tokenizer::isIdentifierLead(char c) {
 	return isalpha(c) || (c == '_');
 }
 
-bool Tokenizer::isIdentifierChar(char c) {
+bool tokenizer::isIdentifierChar(char c) {
 	return isalnum(c) || (c == '_');
 }
 
-void Tokenizer::readNumericLiteralHexPart(Token& out) {
+void tokenizer::readNumericLiteralHexPart(token& out) {
 	while(isxdigit(current)) {
-		out.Value.push_back(current);
+		out.value.push_back(current);
 		scan();
 	}
 }
 
-void Tokenizer::readNumericLiteralIntegerPart(Token& out) {
+void tokenizer::readNumericLiteralIntegerPart(token& out) {
 	while(isdigit(current)) {
-		out.Value.push_back(current);
+		out.value.push_back(current);
 		scan();
 	}
 }
 
-void Tokenizer::readNumericLiteral(Token& out) {
+void tokenizer::readNumericLiteral(token& out) {
 	// Check for sign:
 	if(current == '-') {
-		out.Value.push_back(current);
+		out.value.push_back(current);
 		scan();
 	}
 
 	if(current == '0' && (next == 'x' || next == 'X')) {
-		out.Type = TokenType::HexInteger;
+		out.type = token_type::hex_integer;
 
-		out.Value.push_back(current);
-		out.Value.push_back(next);
+		out.value.push_back(current);
+		out.value.push_back(next);
 
 		scan();
 		scan();
@@ -89,65 +89,65 @@ void Tokenizer::readNumericLiteral(Token& out) {
 		return;
 	}
 
-	out.Type = TokenType::Integer;
+	out.type = token_type::integer;
 
 	readNumericLiteralIntegerPart(out);
 
 	if(current == '.' && isdigit(next)) {
-		out.Value.push_back(current);
+		out.value.push_back(current);
 		scan();
 
 		readNumericLiteralIntegerPart(out);
 
-		out.Type = TokenType::Float;
+		out.type = token_type::floating;
 	}
 
 	if(current == 'e' || current == 'E') {
-		out.Value.push_back(current);
+		out.value.push_back(current);
 		scan();
 
 		if(current == '+' || current == '-') {
-			out.Value.push_back(current);
+			out.value.push_back(current);
 			scan();
 		}
 
 		readNumericLiteralIntegerPart(out);
-		out.Type = TokenType::Float;
+		out.type = token_type::floating;
 	}
 }
 
-void Tokenizer::readIdentifier(Token& out) {
+void tokenizer::readIdentifier(token& out) {
 	if(isIdentifierLead(current)) {
 		// Valid identifier
-		out.Type = TokenType::Identifier;
+		out.type = token_type::identifier;
 
 		do {
-			out.Value.push_back(current);
+			out.value.push_back(current);
 			scan();
 		} while(isIdentifierChar(current));
 	}
 }
 
-void Tokenizer::readStringLiteral(Token& out) {
+void tokenizer::readStringLiteral(token& out) {
 	while(true) {
 		scan();
 
 		if(current == '\0') {
-			out.Location.last_line = line;
-			out.Location.last_column = col;
-			Diagnostics::Helper::UnexpectedEndOfFileInString(ErrorReport, "tokenizer", out.Location);
-			out.Type = TokenType::Invalid;
+			out.location.last_line = line;
+			out.location.last_column = col;
+			diagnostics::helper::unexpected_end_of_file_in_string(ErrorReport, "tokenizer", out.location);
+			out.type = token_type::invalid;
 			return;
 		}
 		else if(current == '\n') {
-			out.Location.last_line = line;
-			out.Location.last_column = col;
-			Diagnostics::Helper::UnexpectedEndOfLineInString(ErrorReport, "tokenizer", out.Location);
-			out.Type = TokenType::Invalid;
+			out.location.last_line = line;
+			out.location.last_column = col;
+			diagnostics::helper::unexpected_end_of_line_in_string(ErrorReport, "tokenizer", out.location);
+			out.type = token_type::invalid;
 			return;
 		}
 		else if(current == '\"') {
-			out.Type = TokenType::String;
+			out.type = token_type::string;
 			scan();
 			return;
 		}
@@ -163,56 +163,56 @@ void Tokenizer::readStringLiteral(Token& out) {
 			case '\'':
 			case '\"':
 			case '\\':
-				out.Value.push_back(current);
+				out.value.push_back(current);
 				break;
 
 			case 'n':
-				out.Value.push_back('\n');
+				out.value.push_back('\n');
 				break;
 
 			case 't':
-				out.Value.push_back('\t');
+				out.value.push_back('\t');
 				break;
 
 			default:
-				out.Type = TokenType::Invalid;
+				out.type = token_type::invalid;
 				return;
 			}
 		}
 		else {
-			out.Value.push_back(current);
+			out.value.push_back(current);
 		}
 	}
 }
 
-Tokenizer::Tokenizer(Source& stream, Diagnostics::Report& errorReport)
+tokenizer::tokenizer(source& stream, diagnostics::report& errorReport)
 	: ErrorReport(errorReport), buffer(stream), report_eol(false) {
 	line = 1;
 	col = 1;
-	current = buffer.GetNext();
-	next = buffer.GetNext();
+	current = buffer.get_next();
+	next = buffer.get_next();
 }
 
-void Tokenizer::SkipToNextLine() {
+void tokenizer::skip_to_next_line() {
 	while(current != '\n' && current != '\0') {
 		scan();
 	}
 }
 
-void Tokenizer::GetToken(Token& out) {
+void tokenizer::get_token(token& out) {
 	skipWhitespace();
 
-	out.Value.clear();
-	out.Location.filename = buffer.Filename.c_str();
-	out.Location.first_line = line;
-	out.Location.first_column = col;
+	out.value.clear();
+	out.location.filename = buffer.filename.c_str();
+	out.location.first_line = line;
+	out.location.first_column = col;
 
 	if(current == '\0') {
 		// Stream has reached end of file.
-		out.Type = TokenType::EndOfFile;
+		out.type = token_type::end_of_file;
 	}
 	else if(current == '\n') {
-		out.Type = TokenType::EndOfLine;
+		out.type = token_type::end_of_line;
 		scan();
 	}
 	else if(current == '\"') {
@@ -229,109 +229,109 @@ void Tokenizer::GetToken(Token& out) {
 			readNumericLiteral(out);
 		}
 		else {
-			out.Value.push_back(current);
-			out.Type = TokenType::Punctuator;
+			out.value.push_back(current);
+			out.type = token_type::punctuator;
 			scan();
 		}
 	}
 	else {
-		out.Type = TokenType::Invalid;
+		out.type = token_type::invalid;
 	}
 
-	out.Location.last_line = line;
-	out.Location.last_column = col;
+	out.location.last_line = line;
+	out.location.last_column = col;
 }
 
-void Tokenizer::GetDelimitedString(Token& out, const std::function<bool(char)>& match_delim) {
+void tokenizer::get_delimited_string(token& out, const std::function<bool(char)>& match_delim) {
 	skipWhitespace();
 
-	out.Value.clear();
-	out.Location.filename = buffer.Filename.c_str();
-	out.Location.first_line = line;
-	out.Location.first_column = col;
+	out.value.clear();
+	out.location.filename = buffer.filename.c_str();
+	out.location.first_line = line;
+	out.location.first_column = col;
 
 	while(!match_delim(current)) {
-		out.Value.push_back(current);
+		out.value.push_back(current);
 		scan();
 	}
 
-	out.Type = TokenType::String;
-	out.Location.last_line = line;
-	out.Location.last_column = col;
+	out.type = token_type::string;
+	out.location.last_line = line;
+	out.location.last_column = col;
 
 	return;
 }
 
-std::string& Tokenizer::GetIdentifier() {
-	GetToken(internalToken);
+std::string& tokenizer::get_identifier() {
+	get_token(internalToken);
 
-	if(internalToken.Type != TokenType::Identifier) {
-		Diagnostics::Helper::Expected(ErrorReport, "tokenizer", "identifier", internalToken.Location);
-		throw TokenizerAssertionException();
+	if(internalToken.type != token_type::identifier) {
+		diagnostics::helper::expected(ErrorReport, "tokenizer", "identifier", internalToken.location);
+		throw tokenizer_assertion_exception();
 	}
 
-	return internalToken.Value;
+	return internalToken.value;
 }
 
-std::string& Tokenizer::GetStringLiteral() {
-	GetToken(internalToken);
+std::string& tokenizer::get_string_literal() {
+	get_token(internalToken);
 
-	if(internalToken.Type != TokenType::String) {
-		Diagnostics::Helper::ExpectedString(ErrorReport, "tokenizer", internalToken.Location);
-		throw TokenizerAssertionException();
+	if(internalToken.type != token_type::string) {
+		diagnostics::helper::expected_string(ErrorReport, "tokenizer", internalToken.location);
+		throw tokenizer_assertion_exception();
 	}
 
-	return internalToken.Value;
+	return internalToken.value;
 }
 
-std::string& Tokenizer::GetSpaceDelimitedString() {
-	GetDelimitedString(internalToken, [](char c) { return isspace(c); });
-	if(internalToken.Value.empty()) {
-		Diagnostics::Helper::Expected(ErrorReport, "tokenizer", "filename", internalToken.Location);
-		throw TokenizerAssertionException();
+std::string& tokenizer::get_space_delimited_string() {
+	get_delimited_string(internalToken, [](char c) { return isspace(c); });
+	if(internalToken.value.empty()) {
+		diagnostics::helper::expected(ErrorReport, "tokenizer", "filename", internalToken.location);
+		throw tokenizer_assertion_exception();
 	}
 
-	return internalToken.Value;
+	return internalToken.value;
 }
 
-void Tokenizer::AssertIdentifier(const std::string& id) {
-	GetToken(internalToken);
+void tokenizer::assert_identifier(const std::string& id) {
+	get_token(internalToken);
 
-	if(internalToken.Type != TokenType::Identifier || !boost::iequals(internalToken.Value, id)) {
-		Diagnostics::Helper::ExpectedIdentifier(ErrorReport, "tokenizer", internalToken.Value, id, internalToken.Location);
-		throw TokenizerAssertionException();
-	}
-}
-
-void Tokenizer::AssertPunctuator(const std::string& punc) {
-	GetToken(internalToken);
-
-	if(internalToken.Type != TokenType::Punctuator || internalToken.Value != punc) {
-		Diagnostics::Helper::ExpectedPunctuator(ErrorReport, "tokenizer", internalToken.Value, punc, internalToken.Location);
-		throw TokenizerAssertionException();
+	if(internalToken.type != token_type::identifier || !boost::iequals(internalToken.value, id)) {
+		diagnostics::helper::expected_identifier(ErrorReport, "tokenizer", internalToken.value, id, internalToken.location);
+		throw tokenizer_assertion_exception();
 	}
 }
 
-void Tokenizer::AssertLabel(const std::string& label) {
-	GetToken(internalToken);
+void tokenizer::assert_punctuator(const std::string& punc) {
+	get_token(internalToken);
 
-	if(internalToken.Type != TokenType::Identifier || !boost::iequals(internalToken.Value, label)) {
-		Diagnostics::Helper::ExpectedLabel(ErrorReport, "tokenizer", internalToken.Value, label, internalToken.Location);
-		throw TokenizerAssertionException();
-	}
-
-	GetToken(internalToken);
-
-	if(internalToken.Type != TokenType::Punctuator || internalToken.Value != ":") {
-		Diagnostics::Helper::ExpectedLabel(ErrorReport, "tokenizer", internalToken.Value, ":", internalToken.Location);
-		throw TokenizerAssertionException();
+	if(internalToken.type != token_type::punctuator || internalToken.value != punc) {
+		diagnostics::helper::expected_punctuator(ErrorReport, "tokenizer", internalToken.value, punc, internalToken.location);
+		throw tokenizer_assertion_exception();
 	}
 }
 
-void Tokenizer::AssertEndOfFile() {
-	GetToken(internalToken);
-	if(internalToken.Type != TokenType::EndOfFile) {
-		Diagnostics::Helper::ExpectedEndOfFile(ErrorReport, "tokenizer", internalToken.Value, internalToken.Location);
-		throw TokenizerAssertionException();
+void tokenizer::assert_label(const std::string& label) {
+	get_token(internalToken);
+
+	if(internalToken.type != token_type::identifier || !boost::iequals(internalToken.value, label)) {
+		diagnostics::helper::expected_label(ErrorReport, "tokenizer", internalToken.value, label, internalToken.location);
+		throw tokenizer_assertion_exception();
+	}
+
+	get_token(internalToken);
+
+	if(internalToken.type != token_type::punctuator || internalToken.value != ":") {
+		diagnostics::helper::expected_label(ErrorReport, "tokenizer", internalToken.value, ":", internalToken.location);
+		throw tokenizer_assertion_exception();
+	}
+}
+
+void tokenizer::assert_end_of_file() {
+	get_token(internalToken);
+	if(internalToken.type != token_type::end_of_file) {
+		diagnostics::helper::expected_end_of_file(ErrorReport, "tokenizer", internalToken.value, internalToken.location);
+		throw tokenizer_assertion_exception();
 	}
 }

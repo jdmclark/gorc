@@ -1,16 +1,16 @@
 #pragma once
 
-#include "framework/io/readonlyfile.h"
+#include "framework/io/read_only_file.h"
 #include <memory>
 #include <boost/filesystem/path.hpp>
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class FileSystem {
+class filesystem {
 public:
-	virtual ~FileSystem();
-	virtual std::unique_ptr<IO::ReadOnlyFile> Open(const boost::filesystem::path& path) const = 0;
+	virtual ~filesystem();
+	virtual std::unique_ptr<io::read_only_file> open(const boost::filesystem::path& path) const = 0;
 };
 
 }

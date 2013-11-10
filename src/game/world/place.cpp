@@ -1,9 +1,9 @@
 #include "place.h"
 
-Gorc::Game::World::Place::~Place() {
+gorc::game::world::place::~place() {
 	return;
 }
 
-Gorc::Game::World::PlaceVisitor::~PlaceVisitor() {
+gorc::game::world::place_visitor::~place_visitor() {
 	return;
 }

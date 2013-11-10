@@ -1,23 +1,23 @@
 #pragma once
 
 #include "cog/vm/value.h"
-#include "cog/vm/virtualmachine.h"
-#include "cog/messageid.h"
+#include "cog/vm/virtual_machine.h"
+#include "cog/message_id.h"
 #include <vector>
 
-namespace Gorc {
-namespace Cog {
+namespace gorc {
+namespace cog {
 
-class Script;
+class script;
 
-class Instance {
+class instance {
 public:
-	const Cog::Script& Script;
-	std::vector<VM::Value> Heap;
+	const cog::script& script;
+	std::vector<vm::value> heap;
 
-	Instance(const Cog::Script& Script);
+	instance(const cog::script& script);
 
-	void Call(Verbs::VerbTable& verbTable, VM::VirtualMachine& vm, MessageId message);
+	void call(verbs::verb_table& verbTable, vm::virtual_machine& vm, message_id message);
 };
 
 }

@@ -1,31 +1,28 @@
 #pragma once
 
-#include "framework/flagset.h"
-#include "content/flags/faceflag.h"
-#include "content/flags/geometrymode.h"
-#include "content/flags/lightmode.h"
-#include "content/flags/texturemode.h"
+#include "framework/utility/flag_set.h"
+#include "content/flags/face_flag.h"
+#include "content/flags/geometry_mode.h"
+#include "content/flags/light_mode.h"
+#include "content/flags/texture_mode.h"
 
 #include <vector>
 #include <tuple>
-#include <btBulletDynamicsCommon.h>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class ModelFace {
+class model_face {
 public:
-	int Material;
-	FlagSet<Flags::FaceFlag> Type;
-	Flags::GeometryMode Geo;
-	Flags::LightMode Light;
-	Flags::TextureMode Tex;
-	float ExtraLight;
-	std::vector<std::tuple<size_t, size_t>> Vertices;
-	Math::Vector<3> Normal;
-
-	std::unique_ptr<btConvexHullShape> Shape;
+	int material;
+	flag_set<flags::face_flag> type;
+	flags::geometry_mode geo;
+	flags::light_mode light;
+	flags::texture_mode tex;
+	float extra_light;
+	std::vector<std::tuple<size_t, size_t>> vertices;
+	vector<3> normal;
 };
 
 }

@@ -2,118 +2,118 @@
 #include "exception.h"
 #include <string.h>
 
-using namespace Gorc::Cog::Symbols;
+using namespace gorc::cog::symbols;
 
-void SymbolTable::AddSymbol(SymbolType type, const std::string& name,
-	const VM::Value& defaultValue, bool local, const std::string& desc, int mask, int linkid, bool nolink) {
-	if(IsSymbolDefined(name)) {
-		throw SymbolRedefinitionException();
+void symbol_table::add_symbol(symbol_type type, const std::string& name,
+	const vm::value& defaultvalue, bool local, const std::string& desc, int mask, int linkid, bool nolink) {
+	if(is_symbol_defined(name)) {
+		throw symbol_redefinition_exception();
 	}
 
-	ReplaceSymbol(type, name, defaultValue, local, desc, mask, linkid, nolink);
+	replace_symbol(type, name, defaultvalue, local, desc, mask, linkid, nolink);
 }
 
-void SymbolTable::AddSymbol(SymbolType type, const std::string& name,
+void symbol_table::add_symbol(symbol_type type, const std::string& name,
 	bool local, const std::string& desc, int mask, int linkid, bool nolink) {
-	if(IsSymbolDefined(name)) {
-		throw SymbolRedefinitionException();
+	if(is_symbol_defined(name)) {
+		throw symbol_redefinition_exception();
 	}
 
-	ReplaceSymbol(type, name, local, desc, mask, linkid, nolink);
+	replace_symbol(type, name, local, desc, mask, linkid, nolink);
 }
 
-void SymbolTable::AddSymbol(const std::string& name) {
-	if(IsSymbolDefined(name)) {
-		throw SymbolRedefinitionException();
+void symbol_table::add_symbol(const std::string& name) {
+	if(is_symbol_defined(name)) {
+		throw symbol_redefinition_exception();
 	}
 
-	ReplaceSymbol(name);
+	replace_symbol(name);
 }
 
-void SymbolTable::ReplaceSymbol(SymbolType type, const std::string& name,
-	const VM::Value& defaultValue,
+void symbol_table::replace_symbol(symbol_type type, const std::string& name,
+	const vm::value& defaultvalue,
 	bool local, const std::string& desc, int mask, int linkid, bool nolink) {
 	size_t index = symbols.size();
-	symbols.push_back(Symbol(type, name, defaultValue, local, desc, mask, linkid, nolink));
+	symbols.push_back(symbol(type, name, defaultvalue, local, desc, mask, linkid, nolink));
 	symbolMap.insert(std::make_pair(name, index));
 }
 
-void SymbolTable::ReplaceSymbol(SymbolType type, const std::string& name,
+void symbol_table::replace_symbol(symbol_type type, const std::string& name,
 	bool local, const std::string& desc, int mask, int linkid, bool nolink) {
 	// Generate default value
-	VM::Value defaultValue;
+	vm::value defaultvalue;
 
 	switch(type) {
-	case SymbolType::Flex:
-		defaultValue = VM::Value(-1.0f);
+	case symbol_type::flex:
+		defaultvalue = vm::value(-1.0f);
 		break;
 
-	case SymbolType::Float:
-		defaultValue = VM::Value(-1.0f);
+	case symbol_type::floating:
+		defaultvalue = vm::value(-1.0f);
 		break;
 
-	case SymbolType::Int:
-		defaultValue = VM::Value(-1);
+	case symbol_type::integer:
+		defaultvalue = vm::value(-1);
 		break;
 
-	case SymbolType::String:
-		defaultValue = VM::Value("");
+	case symbol_type::string:
+		defaultvalue = vm::value("");
 		break;
 
-	case SymbolType::Vector:
-		defaultValue = VM::Value(Math::Vector<3>());
+	case symbol_type::vector:
+		defaultvalue = vm::value(make_zero_vector<3, float>());
 		break;
 
 	default:
-		defaultValue = VM::Value(0);
+		defaultvalue = vm::value(0);
 	}
 
-	ReplaceSymbol(type, name, defaultValue, local, desc, mask, linkid, nolink);
+	replace_symbol(type, name, defaultvalue, local, desc, mask, linkid, nolink);
 }
 
-void SymbolTable::ReplaceSymbol(const std::string& name) {
-	ReplaceSymbol(SymbolType::Int, name, true, "", 0, 0, true);
+void symbol_table::replace_symbol(const std::string& name) {
+	replace_symbol(symbol_type::integer, name, true, "", 0, 0, true);
 }
 
-const Symbol& SymbolTable::GetSymbol(size_t index) const {
+const symbol& symbol_table::get_symbol(size_t index) const {
 	if(index < symbols.size()) {
 		return symbols[index];
 	}
 	else {
-		throw UndefinedSymbolException();
+		throw undefined_symbol_exception();
 	}
 }
 
-const Symbol& SymbolTable::GetSymbol(const std::string& name) const {
+const symbol& symbol_table::get_symbol(const std::string& name) const {
 	auto it = symbolMap.find(name);
 	if(it != symbolMap.end()) {
-		return GetSymbol(it->second);
+		return get_symbol(it->second);
 	}
 	else {
-		throw UndefinedSymbolException();
+		throw undefined_symbol_exception();
 	}
 }
 
-bool SymbolTable::IsSymbolDefined(size_t index) const {
+bool symbol_table::is_symbol_defined(size_t index) const {
 	return index < symbols.size();
 }
 
-bool SymbolTable::IsSymbolDefined(const std::string& name) const {
+bool symbol_table::is_symbol_defined(const std::string& name) const {
 	auto it = symbolMap.find(name);
 	return it != symbolMap.end();
 }
 
-const char* SymbolTable::AddString(const std::string& str) {
+const char* symbol_table::add_string(const std::string& str) {
 	strings.emplace_back(new std::string(str));
 	return strings.back()->data();
 }
 
-size_t SymbolTable::GetSymbolIndex(const std::string& name) const {
+size_t symbol_table::get_symbol_index(const std::string& name) const {
 	auto it = symbolMap.find(name);
 	if(it != symbolMap.end()) {
 		return it->second;
 	}
 	else {
-		throw UndefinedSymbolException();
+		throw undefined_symbol_exception();
 	}
 }

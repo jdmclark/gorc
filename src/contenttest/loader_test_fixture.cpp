@@ -2,18 +2,18 @@
 #include <fstream>
 
 LoaderTestFixture::LoaderTestFixture(const boost::filesystem::path& BasePath)
-	: nfs(BasePath), FileSystem(nfs), ContentManager(Report, FileSystem), Compiler(VerbTable) {
-	CreateMockCogVerbs();
+	: nfs(BasePath), FileSystem(nfs), contentmanager(report, FileSystem), compiler(verb_table) {
+	CreateMockCogverbs();
 	return;
 }
 
-LoaderTestFixture::LoaderTestFixture(const Gorc::Content::FileSystem& fs)
-	: nfs(""), FileSystem(fs), ContentManager(Report, FileSystem), Compiler(VerbTable) {
-	CreateMockCogVerbs();
+LoaderTestFixture::LoaderTestFixture(const gorc::content::filesystem& fs)
+	: nfs(""), FileSystem(fs), contentmanager(report, FileSystem), compiler(verb_table) {
+	CreateMockCogverbs();
 	return;
 }
 
-void LoaderTestFixture::CreateMockCogVerbs() {
+void LoaderTestFixture::CreateMockCogverbs() {
 	// Macros for building mock verbs
 #define V_PARAM_0
 #define V_PARAM_1 int
@@ -27,11 +27,11 @@ void LoaderTestFixture::CreateMockCogVerbs() {
 #define V_PARAM_9 int, V_PARAM_8
 #define V_PARAM_10 int, V_PARAM_9
 
-#define VERB_VOID(x, y) VerbTable.AddVerb<void, y>(x, [](V_PARAM_##y){});
-#define VERB_INT(x, y) VerbTable.AddVerb<int, y>(x, [](V_PARAM_##y) -> int { return 0; });
-#define VERB_BOOL(x, y) VerbTable.AddVerb<bool, y>(x, [](V_PARAM_##y) -> bool { return false; });
+#define VERB_VOID(x, y) verb_table.add_verb<void, y>(x, [](V_PARAM_##y){});
+#define VERB_INT(x, y) verb_table.add_verb<int, y>(x, [](V_PARAM_##y) -> int { return 0; });
+#define VERB_BOOL(x, y) verb_table.add_verb<bool, y>(x, [](V_PARAM_##y) -> bool { return false; });
 
-#define CONST(x, y) ConstantTable.insert(std::make_pair(x, Gorc::Cog::VM::Value(static_cast<int>(y))));
+#define CONST(x, y) ConstantTable.insert(std::make_pair(x, gorc::cog::vm::value(static_cast<int>(y))));
 	// Build mock verb table for characteristic testing.
 
 	VERB_VOID("aiclearmode", 2);
@@ -513,12 +513,12 @@ void LoaderTestFixture::CreateMockCogVerbs() {
 }
 
 void LoaderTestFixture::PrintErrors() const {
-	for(const auto& error : Report) {
+	for(const auto& error : report) {
 		NullUnit::Test_Reporter->CaseExpectationFail(
 				NullUnit::Test_Suite_Name,
 				NullUnit::Test_Case_Name,
 				static_cast<std::string>(error),
-				error.Location.filename.generic_string(),
-				error.Location.first_line);
+				error.location.filename.generic_string(),
+				error.location.first_line);
 	}
 }

@@ -2,27 +2,27 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Cog {
-namespace Symbols {
+namespace gorc {
+namespace cog {
+namespace symbols {
 
-enum class SymbolType : uint8_t {
-	Ai,
-	Cog,
-	Flex,
-	Float,
-	Int,
-	Keyframe,
-	Material,
-	Message,
-	Model,
-	Sector,
-	Sound,
-	String,
-	Surface,
-	Template,
-	Thing,
-	Vector
+enum class symbol_type : uint8_t {
+	ai,
+	cog,
+	flex,
+	floating,
+	integer,
+	keyframe,
+	material,
+	message,
+	model,
+	sector,
+	sound,
+	string,
+	surface,
+	thing_template,
+	thing,
+	vector
 };
 
 }

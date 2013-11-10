@@ -4,13 +4,13 @@
 #include "content/asset.h"
 #include "content/loaders/shader_loader.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Shader : public Asset {
+class shader : public asset {
 public:
-	using Loader = Loaders::ShaderLoader;
+	using loader = loaders::shader_loader;
 
 	GLuint program;
 };

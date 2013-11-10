@@ -3,13 +3,13 @@
 #include "animation_frame.h"
 #include <vector>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class AnimationNode {
+class animation_node {
 public:
-	std::vector<AnimationFrame> Frames;
+	std::vector<animation_frame> frames;
 };
 
 }

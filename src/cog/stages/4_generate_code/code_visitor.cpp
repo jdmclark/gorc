@@ -4,137 +4,137 @@
 
 #include <boost/format.hpp>
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::GenerateCode::CodeVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::generate_code::code_visitor;
 
-CodeVisitor::CodeVisitor(int& nextLabelNumber, IR::Printer& printer,
-	Diagnostics::Report& report, const std::string breakLabel)
-	: AST::Visitor("Stage4::CodeVisitor", report), Printer(printer),
+code_visitor::code_visitor(int& nextLabelNumber, ir::printer& printer,
+	diagnostics::report& report, const std::string breakLabel)
+	: ast::visitor("Stage4::CodeVisitor", report), Printer(printer),
 	  nextLabelNumber(nextLabelNumber), BreakLabel(breakLabel) {
 	return;
 }
 
-std::string CodeVisitor::GenerateLabel(const std::string& prefix) {
+std::string code_visitor::generate_label(const std::string& prefix) {
 	int num = nextLabelNumber++;
 	return boost::str(boost::format("%s%03d") % prefix % num);
 }
 
-void CodeVisitor::VisitCompoundStatement(CompoundStatement& s) {
-	for(auto& stmt : *s.Code) {
-		stmt->Accept(*this);
+void code_visitor::visit_compound_statement(compound_statement& s) {
+	for(auto& stmt : *s.code) {
+		stmt->accept(*this);
 	}
 }
 
-void CodeVisitor::VisitEmptyStatement(EmptyStatement& s) {
+void code_visitor::visit_empty_statement(empty_statement& s) {
 	return;
 }
 
-void CodeVisitor::VisitExpressionStatement(ExpressionStatement& s) {
-	NonValuedExpressionVisitor v(Printer, Report);
-	s.Expression->Accept(v);
+void code_visitor::visit_expression_statement(expression_statement& s) {
+	non_valued_expression_visitor v(Printer, report);
+	s.expression->accept(v);
 }
 
-void CodeVisitor::VisitBreakStatement(BreakStatement& s) {
-	Printer.Jmp(BreakLabel);
+void code_visitor::visit_break_statement(break_statement& s) {
+	Printer.jmp(BreakLabel);
 }
 
-void CodeVisitor::VisitReturnStatement(ReturnStatement& s) {
-	Printer.Ret();
+void code_visitor::visit_return_statement(return_statement& s) {
+	Printer.ret();
 }
 
-void CodeVisitor::VisitCallStatement(CallStatement& s) {
-	Printer.Jal(s.Label);
+void code_visitor::visit_call_statement(call_statement& s) {
+	Printer.jal(s.label);
 }
 
-void CodeVisitor::VisitIfStatement(IfStatement& s) {
-	std::string endlabel = GenerateLabel("B");
+void code_visitor::visit_if_statement(if_statement& s) {
+	std::string endlabel = generate_label("B");
 
-	ExpressionVisitor v(Printer, Report);
-	s.Condition->Accept(v);
-	Printer.Bf(endlabel);
+	expression_visitor v(Printer, report);
+	s.condition->accept(v);
+	Printer.bf(endlabel);
 
-	s.Code->Accept(*this);
+	s.code->accept(*this);
 
-	Printer.Label(endlabel);
+	Printer.label(endlabel);
 }
 
-void CodeVisitor::VisitIfElseStatement(IfElseStatement& s) {
-	std::string elselabel = GenerateLabel("B");
-	std::string endlabel = GenerateLabel("B");
+void code_visitor::visit_if_else_statement(if_else_statement& s) {
+	std::string elselabel = generate_label("B");
+	std::string endlabel = generate_label("B");
 
-	ExpressionVisitor v(Printer, Report);
-	s.Condition->Accept(v);
+	expression_visitor v(Printer, report);
+	s.condition->accept(v);
 
-	Printer.Bf(elselabel);
+	Printer.bf(elselabel);
 
-	s.Code->Accept(*this);
-	Printer.Jmp(endlabel);
+	s.code->accept(*this);
+	Printer.jmp(endlabel);
 
-	Printer.Label(elselabel);
-	s.ElseCode->Accept(*this);
+	Printer.label(elselabel);
+	s.else_code->accept(*this);
 
-	Printer.Label(endlabel);
+	Printer.label(endlabel);
 }
 
-void CodeVisitor::VisitWhileStatement(WhileStatement& s) {
-	std::string bodybeginlabel = GenerateLabel("L");
-	std::string breaklabel = GenerateLabel("L");
+void code_visitor::visit_while_statement(while_statement& s) {
+	std::string bodybeginlabel = generate_label("L");
+	std::string breaklabel = generate_label("L");
 
-	ExpressionVisitor v(Printer, Report);
-	s.Condition->Accept(v);
-	Printer.Bf(breaklabel);
+	expression_visitor v(Printer, report);
+	s.condition->accept(v);
+	Printer.bf(breaklabel);
 
-	Printer.Label(bodybeginlabel);
+	Printer.label(bodybeginlabel);
 
-	CodeVisitor cv(nextLabelNumber, Printer, Report, breaklabel);
-	s.Code->Accept(cv);
+	code_visitor cv(nextLabelNumber, Printer, report, breaklabel);
+	s.code->accept(cv);
 
-	s.Condition->Accept(v);
-	Printer.Bt(bodybeginlabel);
+	s.condition->accept(v);
+	Printer.bt(bodybeginlabel);
 
-	Printer.Label(breaklabel);
+	Printer.label(breaklabel);
 }
 
-void CodeVisitor::VisitDoStatement(DoStatement& s) {
-	std::string bodybeginlabel = GenerateLabel("L");
-	std::string breaklabel = GenerateLabel("L");
+void code_visitor::visit_do_statement(do_statement& s) {
+	std::string bodybeginlabel = generate_label("L");
+	std::string breaklabel = generate_label("L");
 
-	Printer.Label(bodybeginlabel);
-	CodeVisitor cv(nextLabelNumber, Printer, Report, breaklabel);
-	s.Code->Accept(cv);
+	Printer.label(bodybeginlabel);
+	code_visitor cv(nextLabelNumber, Printer, report, breaklabel);
+	s.code->accept(cv);
 
-	ExpressionVisitor v(Printer, Report);
-	s.Condition->Accept(v);
-	Printer.Bt(bodybeginlabel);
+	expression_visitor v(Printer, report);
+	s.condition->accept(v);
+	Printer.bt(bodybeginlabel);
 
-	Printer.Label(breaklabel);
+	Printer.label(breaklabel);
 }
 
-void CodeVisitor::VisitForStatement(ForStatement& s) {
-	std::string bodybeginlabel = GenerateLabel("L");
-	std::string breaklabel = GenerateLabel("L");
+void code_visitor::visit_for_statement(for_statement& s) {
+	std::string bodybeginlabel = generate_label("L");
+	std::string breaklabel = generate_label("L");
 
-	NonValuedExpressionVisitor nv(Printer, Report);
-	ExpressionVisitor v(Printer, Report);
+	non_valued_expression_visitor nv(Printer, report);
+	expression_visitor v(Printer, report);
 
-	s.Initializer->Accept(nv);
+	s.initializer->accept(nv);
 
-	s.Condition->Accept(v);
-	Printer.Bf(breaklabel);
+	s.condition->accept(v);
+	Printer.bf(breaklabel);
 
-	Printer.Label(bodybeginlabel);
-	CodeVisitor cv(nextLabelNumber, Printer, Report, breaklabel);
-	s.Code->Accept(cv);
+	Printer.label(bodybeginlabel);
+	code_visitor cv(nextLabelNumber, Printer, report, breaklabel);
+	s.code->accept(cv);
 
-	s.Incrementer->Accept(nv);
+	s.incrementer->accept(nv);
 
-	s.Condition->Accept(v);
-	Printer.Bt(bodybeginlabel);
+	s.condition->accept(v);
+	Printer.bt(bodybeginlabel);
 
-	Printer.Label(breaklabel);
+	Printer.label(breaklabel);
 }
 
-void CodeVisitor::VisitLabeledStatement(LabeledStatement& s) {
-	Printer.Label(s.Label);
-	s.Code->Accept(*this);
+void code_visitor::visit_labeled_statement(labeled_statement& s) {
+	Printer.label(s.label);
+	s.code->accept(*this);
 }

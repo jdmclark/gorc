@@ -1,20 +1,20 @@
 #pragma once
 
-#include "content/flags/puppetsubmodetype.h"
+#include "content/flags/puppet_submode_type.h"
 #include "puppet_submode.h"
 #include <unordered_map>
 #include <array>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class PuppetMode {
+class puppet_mode {
 public:
-	std::array<PuppetSubmode, 64> Submodes;
+	std::array<puppet_submode, 64> submodes;
 
-	inline const PuppetSubmode& GetSubmode(Flags::PuppetSubmodeType type) const {
-		return Submodes[static_cast<unsigned int>(type)];
+	inline const puppet_submode& get_submode(flags::puppet_submode_type type) const {
+		return submodes[static_cast<unsigned int>(type)];
 	}
 };
 

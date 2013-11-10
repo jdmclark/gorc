@@ -1,20 +1,20 @@
 #include "lval_expression_visitor.h"
 #include "expression_visitor.h"
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::GenerateCode::LValueExpressionVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::generate_code::lvalue_expression_visitor;
 
-LValueExpressionVisitor::LValueExpressionVisitor(IR::Printer& printer, Diagnostics::Report& report)
-	: AST::Visitor("Stage5::LValueExpressionVisitor", report), Printer(printer) {
+lvalue_expression_visitor::lvalue_expression_visitor(ir::printer& printer, diagnostics::report& report)
+	: ast::visitor("Stage5::LvalueExpressionVisitor", report), Printer(printer) {
 	return;
 }
 
-void LValueExpressionVisitor::VisitIdentifierExpression(IdentifierExpression& e) {
-	Printer.Store(e.Identifier);
+void lvalue_expression_visitor::visit_identifier_expression(identifier_expression& e) {
+	Printer.store(e.identifier);
 }
 
-void LValueExpressionVisitor::VisitSubscriptExpression(SubscriptExpression& e) {
-	ExpressionVisitor v(Printer, Report);
-	e.Index->Accept(v);
-	Printer.StoreI(e.Base);
+void lvalue_expression_visitor::visit_subscript_expression(subscript_expression& e) {
+	expression_visitor v(Printer, report);
+	e.index->accept(v);
+	Printer.storei(e.base);
 }

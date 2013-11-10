@@ -24,6 +24,5 @@ Requirements
 * Glew
 * [Boost](http://boost.org)
 * [NullUnit](http://github.com/jdmclark/nullunit)
-* [Bullet](http://bulletphysics.org)
 * Dark Forces II (for running test cases)
 

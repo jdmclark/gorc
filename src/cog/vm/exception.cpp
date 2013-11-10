@@ -1,5 +1,5 @@
 #include "exception.h"
 
-const char* Gorc::Cog::VM::CodeBufferOverflowException::what() const throw() {
+const char* gorc::cog::vm::code_buffer_overflow_exception::what() const throw() {
 	return "code buffer overflow";
 }

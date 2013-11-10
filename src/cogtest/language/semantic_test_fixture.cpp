@@ -1,27 +1,27 @@
 #include "semantic_test_fixture.h"
 #include "cog/stages/stages.h"
-#include "framework/io/nativefile.h"
+#include "framework/io/native_file.h"
 #include <fstream>
 
 void SemanticTestFixture::ParseFile(const boost::filesystem::path& filename) {
-	Gorc::Cog::AST::Factory astFactory;
+	gorc::cog::ast::factory astFactory;
 
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> file;
+	std::unique_ptr<gorc::io::read_only_file> file;
 	try {
-		file = FileSystem.Open(filename);
+		file = FileSystem.open(filename);
 	}
 	catch(const std::exception& e) {
-		Report.AddCriticalError("SemanticTestFixture", "could not open file");
+		report.add_critical_error("SemanticTestFixture", "could not open file");
 		return;
 	}
 
-	Gorc::Text::Source source(*file);
+	gorc::text::source source(*file);
 
-	Gorc::Cog::AST::TranslationUnit* ast = Gorc::Cog::Stages::GenerateAST::GenerateAST(source, Report, astFactory);
+	gorc::cog::ast::translation_unit* ast = gorc::cog::stages::generate_ast::generate_ast(source, report, astFactory);
 
-	if(Report.GetErrorCount() != 0) {
+	if(report.get_error_count() != 0) {
 		return;
 	}
 
-	Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(ast, SymbolTable, ConstantTable, VerbTable, Report);
+	gorc::cog::stages::semantic_analysis::semantic_analysis(ast, symbol_table, ConstantTable, verb_table, report);
 }

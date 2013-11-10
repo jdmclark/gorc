@@ -1,33 +1,33 @@
 #pragma once
 
 #include "framework/math/vector.h"
-#include "framework/flagset.h"
+#include "framework/utility/flag_set.h"
 #include "framework/text/tokenizer.h"
-#include "framework/flagset.h"
+#include "framework/utility/flag_set.h"
 #include "cog/compiler.h"
-#include "content/flags/inventoryflag.h"
+#include "content/flags/inventory_flag.h"
 #include "script.h"
 #include <string>
 #include <memory>
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class Manager;
+class manager;
 
-namespace Assets {
+namespace assets {
 
-class InventoryBin {
+class inventory_bin {
 public:
-	std::string Name;
-	int BinId;
-	int MinValue;
-	int MaxValue;
-	FlagSet<Flags::InventoryFlag> Flags;
+	std::string name;
+	int bin_id;
+	int min_value;
+	int max_value;
+	flag_set<flags::inventory_flag> flags;
 
-	Script const* Cog = nullptr;
+	script const* cog = nullptr;
 
-	void ParseArgs(Text::Tokenizer& tok, Manager& manager, const Cog::Compiler& compiler, Diagnostics::Report& report);
+	void parse_args(text::tokenizer& tok, manager& manager, const cog::compiler& compiler, diagnostics::report& report);
 };
 
 }

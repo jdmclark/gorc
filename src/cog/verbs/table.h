@@ -12,59 +12,59 @@
 #include "cog/vm/value.h"
 #include "verb.h"
 #include "exception.h"
-#include "verbbinder.h"
-#include "verbid.h"
+#include "verb_binder.h"
+#include "verb_id.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Verbs {
+namespace gorc {
+namespace cog {
+namespace verbs {
 
-class VerbTable {
+class verb_table {
 private:
-	typedef VM::Value V;
+	typedef vm::value V;
 
-	std::vector<std::unique_ptr<BaseVerb>> verbs;
+	std::vector<std::unique_ptr<base_verb>> verbs;
 	std::unordered_map<std::string, size_t> verb_dict;
 
 public:
-	inline VerbId GetVerb(const std::string& name) const {
+	inline verb_id get_verb(const std::string& name) const {
 		auto it = verb_dict.find(name);
 		if(it == verb_dict.end()) {
-			throw UndefinedVerbException();
+			throw undefined_verb_exception();
 		}
 
 		return it->second;
 	}
 
-	inline size_t ParameterCount(VerbId id) const {
-		return verbs[id.id]->ParameterCount();
+	inline size_t parameter_count(verb_id id) const {
+		return verbs[id.id]->parameter_count();
 	}
 
-	inline VM::Type ReturnType(VerbId id) const {
-		return verbs[id.id]->ReturnType();
+	inline vm::type return_type(verb_id id) const {
+		return verbs[id.id]->return_type();
 	}
 
-	inline V Invoke(VerbId id, std::stack<V>& stack) const {
-		return verbs[id.id]->Invoke(stack);
+	inline V invoke(verb_id id, std::stack<V>& stack) const {
+		return verbs[id.id]->invoke(stack);
 	}
 
-	inline bool IsVerbDefined(const std::string& name) const {
+	inline bool is_verb_defined(const std::string& name) const {
 		auto it = verb_dict.find(name);
 		return it != verb_dict.end();
 	}
 
-	template <typename ResultType, int Arity, typename T> void AddVerb(const std::string& name, T fn) {
+	template <typename ResultType, int Arity, typename T> void add_verb(const std::string& name, T fn) {
 		auto it = verb_dict.find(name);
 		if(it != verb_dict.end()) {
-			throw VerbRedefinitionException();
+			throw verb_redefinition_exception();
 		}
 
 		verb_dict.insert(std::make_pair(name, verbs.size()));
-		verbs.push_back(std::unique_ptr<BaseVerb>(new Verb<ResultType, Arity, T>(fn)));
+		verbs.push_back(std::unique_ptr<base_verb>(new verb<ResultType, Arity, T>(fn)));
 	}
 
-	template <typename T> void AddVerb(const std::string& name, T fn) {
-		AddVerb<typename boost::function_types::result_type<T>::type,
+	template <typename T> void add_verb(const std::string& name, T fn) {
+		add_verb<typename boost::function_types::result_type<T>::type,
 			boost::function_types::function_arity<T>::value, T>(name, fn);
 	}
 };

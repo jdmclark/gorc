@@ -3,40 +3,40 @@
 #include "framework/diagnostics/helper.h"
 #include "framework/io/exception.h"
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ColormapLoader::AssetRootPath = { "misc/cmp" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp" };
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ColormapLoader::Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Content::Assets::Colormap> cmp(new Content::Assets::Colormap());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<content::assets::colormap> cmp(new content::assets::colormap());
 
 	char magic[4];
-	file.Read(magic, sizeof(char) * 4);
+	file.read(magic, sizeof(char) * 4);
 
 	// Check magic and version
-	if(strncmp(magic, "CMP ", 4) != 0 || file.Read<uint32_t>() != 0x1E) {
-		Diagnostics::Helper::FileCorrupt(report, "ColormapLoader::Deserialize",
-				Diagnostics::ErrorLocation(file.Filename, 0, 0, 0, 0));
-		throw IO::FileCorruptException();
+	if(strncmp(magic, "CMP ", 4) != 0 || file.read<uint32_t>() != 0x1E) {
+		diagnostics::helper::file_corrupt(report, "ColormapLoader::Deserialize",
+				diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+		throw io::file_corrupt_exception();
 	}
 
-	bool hasTransparency = (file.Read<uint32_t>() != 0);
+	bool hasTransparency = (file.read<uint32_t>() != 0);
 
-	file.Seek(52); // Skip padding/unknowns.
+	file.seek(52); // Skip padding/unknowns.
 
 	// Read color tables, 24-bit RGB.
 	uint8_t colorbytes[768];
-	file.Read(colorbytes, sizeof(uint8_t) * 768);
+	file.read(colorbytes, sizeof(uint8_t) * 768);
 
 	uint8_t* cb_idx = colorbytes;
 	for(size_t i = 0; i < 256; ++i, cb_idx += 3) {
-		cmp->SetColor(i, Math::Vec(cb_idx[0], cb_idx[1], cb_idx[2]));
+		cmp->set_color(i, make_vector(cb_idx[0], cb_idx[1], cb_idx[2]));
 	}
 
 	// Read first (darkest) light level table to generate texture light data.
 	uint8_t lightbytes[256];
-	file.Read(lightbytes, sizeof(uint8_t) * 256);
+	file.read(lightbytes, sizeof(uint8_t) * 256);
 	for(size_t i = 0; i < 256; ++i) {
-		cmp->SetExtra(i, cmp->GetColor(lightbytes[i]));
+		cmp->set_extra(i, cmp->get_color(lightbytes[i]));
 	}
 
-	return std::unique_ptr<Asset>(std::move(cmp));
+	return std::unique_ptr<asset>(std::move(cmp));
 }

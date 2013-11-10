@@ -1,51 +1,55 @@
 #pragma once
 
-#include "content/flags/soundflag.h"
+#include "content/flags/sound_flag.h"
 #include "content/assets/sound.h"
-#include "framework/flagset.h"
+#include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 #include <SFML/Audio.hpp>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
 
-class LevelModel;
-class Thing;
+class level_model;
+class thing;
 
-namespace Sounds {
+namespace sounds {
 
-class Sound {
+class sound {
 private:
-	sf::Sound sound;
+	sf::Sound internal_sound;
 	bool expired;
 
 	int thing;
 	bool update_position;
+	float actual_min_rad;
+	float actual_max_rad;
 
-	void PlayAmbient(const Content::Assets::Sound& sound, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
-	void PlayVoice(const Content::Assets::Sound& sound, float volume, FlagSet<Flags::SoundFlag> flags);
-	void PlayPositional(const Content::Assets::Sound& sound, const Math::Vector<3>& position, float volume, float minrad, float maxrad,
-			FlagSet<Flags::SoundFlag> flags);
+	void play_ambient(const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
+	void play_voice(const content::assets::sound& sound, float volume, flag_set<flags::sound_flag> flags);
+	void play_positional(const content::assets::sound& sound, const vector<3>& position, float volume, float minrad, float maxrad,
+			flag_set<flags::sound_flag> flags);
 
 public:
-	void PlaySoundLocal(const Content::Assets::Sound& sound, float volume, float panning, FlagSet<Flags::SoundFlag> flags);
-	void PlaySoundPos(const Content::Assets::Sound& sound, const Math::Vector<3>& pos, float volume,
-			float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
-	void PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, int thing, float volume,
-			float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags);
+	void play_sound_local(const level_model& model, const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
+	void play_sound_pos(const level_model& model, const content::assets::sound& sound, const vector<3>& pos, float volume,
+			float minrad, float maxrad, flag_set<flags::sound_flag> flags);
+	void play_sound_thing(const level_model& model, const content::assets::sound& sound, int thing, float volume,
+			float minrad, float maxrad, flag_set<flags::sound_flag> flags);
 
-	void SetPitch(float pitch, float delay);
-	void SetVolume(float volume, float delay);
-	void Stop();
-	void Stop(float delay);
+	void set_pitch(float pitch, float delay);
+	void set_volume(float volume, float delay);
+	void stop();
+	void stop(float delay);
 
-	void Update(double dt, const LevelModel& model);
+	void update(double dt, const level_model& model);
 
-	inline bool GetExpired() {
+	inline bool get_expired() {
 		return expired;
 	}
+
+	~sound();
 };
 
 }

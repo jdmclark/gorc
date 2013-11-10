@@ -1,91 +1,91 @@
 #include "expression_visitor.h"
 
-using namespace Gorc::Cog::AST;
-using Gorc::Cog::Stages::ConstantFolding::ExpressionVisitor;
+using namespace gorc::cog::ast;
+using gorc::cog::stages::constant_folding::expression_visitor;
 
-ExpressionVisitor::ExpressionVisitor(AST::Factory& factory, Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, VM::Value>& constantTable, Diagnostics::Report& report)
-	: AST::Visitor("Stage3::ExpressionVisitor", report), Factory(factory), SymbolTable(symbolTable), ConstantTable(constantTable) {
+expression_visitor::expression_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, vm::value>& constantTable, diagnostics::report& report)
+	: ast::visitor("Stage3::ExpressionVisitor", report), Factory(factory), symbol_table(symbolTable), ConstantTable(constantTable) {
 	return;
 }
 
-void ExpressionVisitor::VisitStringLiteralExpression(StringLiteralExpression& e) {
+void expression_visitor::visit_string_literal_expression(string_literal_expression& e) {
 	visitedExpression = &e;
 	isConstant = true;
-	constantValue = VM::Value(SymbolTable.AddString(e.Value));
+	constantvalue = vm::value(symbol_table.add_string(e.value));
 }
 
-void ExpressionVisitor::VisitIntegerLiteralExpression(IntegerLiteralExpression& e) {
+void expression_visitor::visit_integer_literal_expression(integer_literal_expression& e) {
 	visitedExpression = &e;
 	isConstant = true;
-	constantValue = VM::Value(e.Value);
+	constantvalue = vm::value(e.value);
 }
 
-void ExpressionVisitor::VisitFloatLiteralExpression(FloatLiteralExpression& e) {
+void expression_visitor::visit_float_literal_expression(float_literal_expression& e) {
 	visitedExpression = &e;
 	isConstant = true;
-	constantValue = VM::Value(e.Value);
+	constantvalue = vm::value(e.value);
 }
 
-void ExpressionVisitor::VisitVectorLiteralExpression(VectorLiteralExpression& e) {
+void expression_visitor::visit_vector_literal_expression(vector_literal_expression& e) {
 	visitedExpression = &e;
 	isConstant = true;
-	constantValue = VM::Value(Math::Vec(e.X, e.Y, e.Z));
+	constantvalue = vm::value(make_vector(e.x, e.y, e.z));
 }
 
-void ExpressionVisitor::VisitIdentifierExpression(IdentifierExpression& e) {
+void expression_visitor::visit_identifier_expression(identifier_expression& e) {
 	visitedExpression = &e;
 
-	auto it = ConstantTable.find(e.Identifier);
+	auto it = ConstantTable.find(e.identifier);
 	if(it != ConstantTable.end()) {
 		isConstant = true;
-		constantValue = it->second;
+		constantvalue = it->second;
 	}
 	else {
 		isConstant = false;
 	}
 }
 
-void ExpressionVisitor::VisitSubscriptExpression(SubscriptExpression& e) {
+void expression_visitor::visit_subscript_expression(subscript_expression& e) {
 	visitedExpression = &e;
 	isConstant = false;
 
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	e.Index->Accept(v);
-	e.Index = v.GetSubstitution();
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	e.index->accept(v);
+	e.index = v.get_substitution();
 }
 
-void ExpressionVisitor::VisitMethodCallExpression(MethodCallExpression& e) {
+void expression_visitor::visit_method_call_expression(method_call_expression& e) {
 	visitedExpression = &e;
 	isConstant = false;
 
-	for(size_t i = 0; i < e.Arguments->size(); ++i) {
-		ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-		(*e.Arguments)[i]->Accept(v);
-		(*e.Arguments)[i] = v.GetSubstitution();
+	for(size_t i = 0; i < e.arguments->size(); ++i) {
+		expression_visitor v(Factory, symbol_table, ConstantTable, report);
+		(*e.arguments)[i]->accept(v);
+		(*e.arguments)[i] = v.get_substitution();
 	}
 }
 
-void ExpressionVisitor::VisitUnaryExpression(UnaryExpression& e) {
+void expression_visitor::visit_unary_expression(unary_expression& e) {
 	visitedExpression = &e;
 
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	e.Base->Accept(v);
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	e.base->accept(v);
 
-	if(v.IsConstant()) {
+	if(v.is_constant()) {
 		isConstant = true;
 
-		switch(e.Operator) {
-		case UnaryOperator::Plus:
-			constantValue = +v.GetConstantValue();
+		switch(e.op) {
+		case unary_operator::plus:
+			constantvalue = +v.get_constant_value();
 			break;
 
-		case UnaryOperator::Minus:
-			constantValue = -v.GetConstantValue();
+		case unary_operator::minus:
+			constantvalue = -v.get_constant_value();
 			break;
 
-		case UnaryOperator::Not:
-			constantValue = !v.GetConstantValue();
+		case unary_operator::logical_not:
+			constantvalue = !v.get_constant_value();
 			break;
 		}
 	}
@@ -94,124 +94,124 @@ void ExpressionVisitor::VisitUnaryExpression(UnaryExpression& e) {
 	}
 }
 
-void ExpressionVisitor::VisitInfixExpression(InfixExpression& e) {
+void expression_visitor::visit_infix_expression(infix_expression& e) {
 	visitedExpression = &e;
 
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	e.Left->Accept(v);
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	e.left->accept(v);
 
-	ExpressionVisitor w(Factory, SymbolTable, ConstantTable, Report);
-	e.Right->Accept(w);
+	expression_visitor w(Factory, symbol_table, ConstantTable, report);
+	e.right->accept(w);
 
-	if(v.IsConstant() && w.IsConstant()) {
+	if(v.is_constant() && w.is_constant()) {
 		isConstant = true;
 
-		switch(e.Operator) {
-		case InfixOperator::Addition:
-			constantValue = v.GetConstantValue() + w.GetConstantValue();
+		switch(e.op) {
+		case infix_operator::addition:
+			constantvalue = v.get_constant_value() + w.get_constant_value();
 			break;
 
-		case InfixOperator::Subtraction:
-			constantValue = v.GetConstantValue() - w.GetConstantValue();
+		case infix_operator::subtraction:
+			constantvalue = v.get_constant_value() - w.get_constant_value();
 			break;
 
-		case InfixOperator::Multiplication:
-			constantValue = v.GetConstantValue() * w.GetConstantValue();
+		case infix_operator::multiplication:
+			constantvalue = v.get_constant_value() * w.get_constant_value();
 			break;
 
-		case InfixOperator::Division:
-			constantValue = v.GetConstantValue() / w.GetConstantValue();
+		case infix_operator::division:
+			constantvalue = v.get_constant_value() / w.get_constant_value();
 			break;
 
-		case InfixOperator::Modulo:
-			constantValue = v.GetConstantValue() % w.GetConstantValue();
+		case infix_operator::modulo:
+			constantvalue = v.get_constant_value() % w.get_constant_value();
 			break;
 
-		case InfixOperator::Greater:
-			constantValue = v.GetConstantValue() > w.GetConstantValue();
+		case infix_operator::greater:
+			constantvalue = v.get_constant_value() > w.get_constant_value();
 			break;
 
-		case InfixOperator::GreaterEqual:
-			constantValue = v.GetConstantValue() >= w.GetConstantValue();
+		case infix_operator::greater_equal:
+			constantvalue = v.get_constant_value() >= w.get_constant_value();
 			break;
 
-		case InfixOperator::Less:
-			constantValue = v.GetConstantValue() < w.GetConstantValue();
+		case infix_operator::less:
+			constantvalue = v.get_constant_value() < w.get_constant_value();
 			break;
 
-		case InfixOperator::LessEqual:
-			constantValue = v.GetConstantValue() <= w.GetConstantValue();
+		case infix_operator::less_equal:
+			constantvalue = v.get_constant_value() <= w.get_constant_value();
 			break;
 
-		case InfixOperator::Equal:
-			constantValue = v.GetConstantValue() == w.GetConstantValue();
+		case infix_operator::equal:
+			constantvalue = v.get_constant_value() == w.get_constant_value();
 			break;
 
-		case InfixOperator::NotEqual:
-			constantValue = v.GetConstantValue() != w.GetConstantValue();
+		case infix_operator::not_equal:
+			constantvalue = v.get_constant_value() != w.get_constant_value();
 			break;
 
-		case InfixOperator::And:
-			constantValue = v.GetConstantValue() & w.GetConstantValue();
+		case infix_operator::bitwise_and:
+			constantvalue = v.get_constant_value() & w.get_constant_value();
 			break;
 
-		case InfixOperator::Or:
-			constantValue = v.GetConstantValue() | w.GetConstantValue();
+		case infix_operator::bitwise_or:
+			constantvalue = v.get_constant_value() | w.get_constant_value();
 			break;
 
-		case InfixOperator::Xor:
-			constantValue = v.GetConstantValue() ^ w.GetConstantValue();
+		case infix_operator::bitwise_xor:
+			constantvalue = v.get_constant_value() ^ w.get_constant_value();
 			break;
 
-		case InfixOperator::LogicalAnd:
-			constantValue = v.GetConstantValue() && w.GetConstantValue();
+		case infix_operator::logical_and:
+			constantvalue = v.get_constant_value() && w.get_constant_value();
 			break;
 
-		case InfixOperator::LogicalOr:
-			constantValue = v.GetConstantValue() || w.GetConstantValue();
+		case infix_operator::logical_or:
+			constantvalue = v.get_constant_value() || w.get_constant_value();
 			break;
 		}
 	}
 	else {
 		isConstant = false;
 
-		e.Left = v.GetSubstitution();
-		e.Right = w.GetSubstitution();
+		e.left = v.get_substitution();
+		e.right = w.get_substitution();
 	}
 }
 
-void ExpressionVisitor::VisitAssignmentExpression(AssignmentExpression& e) {
+void expression_visitor::visit_assignment_expression(assignment_expression& e) {
 	visitedExpression = &e;
 	isConstant = false;
 
-	ExpressionVisitor w(Factory, SymbolTable, ConstantTable, Report);
-	e.Target->Accept(w);
+	expression_visitor w(Factory, symbol_table, ConstantTable, report);
+	e.target->accept(w);
 
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
-	e.Value->Accept(v);
-	e.Value = v.GetSubstitution();
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
+	e.value->accept(v);
+	e.value = v.get_substitution();
 }
 
-void ExpressionVisitor::VisitCommaExpression(CommaExpression& e) {
+void expression_visitor::visit_comma_expression(comma_expression& e) {
 	visitedExpression = &e;
 	isConstant = false;
 
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
 	
-	e.Left->Accept(v);
-	e.Left = v.GetSubstitution();
+	e.left->accept(v);
+	e.left = v.get_substitution();
 
-	e.Right->Accept(v);
-	e.Right = v.GetSubstitution();
+	e.right->accept(v);
+	e.right = v.get_substitution();
 }
 
-void ExpressionVisitor::VisitForOptionalExpression(ForOptionalExpression& e) {
+void expression_visitor::visit_for_optional_expression(for_optional_expression& e) {
 	return;
 }
 
-void ExpressionVisitor::VisitForExpression(ForExpression& e) {
-	ExpressionVisitor v(Factory, SymbolTable, ConstantTable, Report);
+void expression_visitor::visit_for_expression(for_expression& e) {
+	expression_visitor v(Factory, symbol_table, ConstantTable, report);
 
-	e.Condition->Accept(v);
-	e.Condition = v.GetSubstitution();
+	e.condition->accept(v);
+	e.condition = v.get_substitution();
 }

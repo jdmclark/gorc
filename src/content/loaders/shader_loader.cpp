@@ -5,13 +5,13 @@
 #include <vector>
 #include <cstdint>
 
-const std::vector<boost::filesystem::path> Gorc::Content::Loaders::ShaderLoader::AssetRootPath = { "misc/glsl" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::shader_loader::asset_root_path = { "misc/glsl" };
 
-std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ShaderLoader::Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) {
-	std::unique_ptr<Content::Assets::Shader> frag(new Content::Assets::Shader());
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+	std::unique_ptr<content::assets::shader> frag(new content::assets::shader());
 
-	std::vector<char> shader_text(file.GetSize() + 1, '\0');
-	file.Read(shader_text.data(), file.GetSize());
+	std::vector<char> shader_text(file.get_size() + 1, '\0');
+	file.read(shader_text.data(), file.get_size());
 
 	const char* vshader[2] = { "#define VERTEXPROGRAM\n", shader_text.data() };
 	const char* fshader[2] = { "#define FRAGMENTPROGRAM\n", shader_text.data() };
@@ -36,7 +36,7 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ShaderLoader::Dese
 		std::vector<char> err_msg(err_len, '\0');
 		glGetShaderInfoLog(vertexShaderObject, err_len, NULL, err_msg.data());
 
-		report.AddError("ShaderLoader", err_msg.data(), Diagnostics::ErrorLocation(file.Filename, 0, 0, 0, 0));
+		report.add_error("ShaderLoader", err_msg.data(), diagnostics::error_location(file.Filename, 0, 0, 0, 0));
 	}
 
 	glGetShaderiv(fragmentShaderObject, GL_COMPILE_STATUS, &result);
@@ -48,11 +48,11 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ShaderLoader::Dese
 		std::vector<char> err_msg(err_len, '\0');
 		glGetShaderInfoLog(fragmentShaderObject, err_len, NULL, err_msg.data());
 
-		report.AddError("ShaderLoader", err_msg.data(), Diagnostics::ErrorLocation(file.Filename, 0, 0, 0, 0));
+		report.add_error("ShaderLoader", err_msg.data(), diagnostics::error_location(file.Filename, 0, 0, 0, 0));
 	}
 
 	if(failed) {
-		throw IO::FileCorruptException();
+		throw io::file_corrupt_exception();
 	}
 
 	auto programObject = glCreateProgram();
@@ -69,11 +69,11 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ShaderLoader::Dese
 			std::vector<char> err_msg(err_len, '\0');
 			glGetProgramInfoLog(programObject, err_len, NULL, err_msg.data());
 
-			report.AddError("ShaderLoader", err_msg.data(), Diagnostics::ErrorLocation(file.Filename, 0, 0, 0, 0));
+			report.add_error("ShaderLoader", err_msg.data(), diagnostics::error_location(file.Filename, 0, 0, 0, 0));
 		}
 
 	if(failed) {
-		throw IO::FileCorruptException();
+		throw io::file_corrupt_exception();
 	}
 
 	glDeleteShader(vertexShaderObject);
@@ -81,5 +81,5 @@ std::unique_ptr<Gorc::Content::Asset> Gorc::Content::Loaders::ShaderLoader::Dese
 
 	frag->program = programObject;
 
-	return std::unique_ptr<Asset>(std::move(frag));
+	return std::unique_ptr<asset>(std::move(frag));
 }

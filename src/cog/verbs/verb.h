@@ -2,74 +2,74 @@
 
 #include "cog/vm/type.h"
 #include "cog/vm/value.h"
-#include "verbbinder.h"
+#include "verb_binder.h"
 #include <stack>
 #include <functional>
 #include <boost/function_types/result_type.hpp>
 #include <boost/function_types/function_arity.hpp>
 
-namespace Gorc {
-namespace Cog {
-namespace Verbs {
+namespace gorc {
+namespace cog {
+namespace verbs {
 
 template <typename T> struct helper_get_vm_type { };
 
 template <> struct helper_get_vm_type<void> {
-	static const VM::Type Type = VM::Type::Void;
+	static const vm::type type = vm::type::nothing;
 };
 
 template <> struct helper_get_vm_type<int> {
-	static const VM::Type Type = VM::Type::Integer;
+	static const vm::type type = vm::type::integer;
 };
 
 template <> struct helper_get_vm_type<float> {
-	static const VM::Type Type = VM::Type::Float;
+	static const vm::type type = vm::type::floating;
 };
 
 template <> struct helper_get_vm_type<bool> {
-	static const VM::Type Type = VM::Type::Boolean;
+	static const vm::type type = vm::type::boolean;
 };
 
-template <> struct helper_get_vm_type<Math::Vector<3>> {
-	static const VM::Type Type = VM::Type::Vector;
+template <> struct helper_get_vm_type<vector<3>> {
+	static const vm::type type = vm::type::vector;
 };
 
-template <> struct helper_get_vm_type<VM::Value> {
-	static const VM::Type Type = VM::Type::Dynamic;
+template <> struct helper_get_vm_type<vm::value> {
+	static const vm::type type = vm::type::dynamic;
 };
 
-class BaseVerb {
+class base_verb {
 private:
 	const size_t parameterCount;
-	const VM::Type returnType;
+	const vm::type returnType;
 
 public:
-	BaseVerb(VM::Type returnType, size_t parameterCount);
-	virtual ~BaseVerb();
+	base_verb(vm::type returnType, size_t parameterCount);
+	virtual ~base_verb();
 
-	inline VM::Type ReturnType() const {
+	inline vm::type return_type() const {
 		return returnType;
 	}
 
-	inline size_t ParameterCount() const {
+	inline size_t parameter_count() const {
 		return parameterCount;
 	}
 
-	virtual VM::Value Invoke(std::stack<VM::Value>& stack) const = 0;
+	virtual vm::value invoke(std::stack<vm::value>& stack) const = 0;
 };
 
-template <typename ResultType, int Arity, typename F> class Verb : public BaseVerb {
+template <typename ResultType, int Arity, typename F> class verb : public base_verb {
 private:
 	F functor;
 
 public:
-	Verb(F functor) : BaseVerb(helper_get_vm_type<ResultType>::Type, Arity), functor(functor) {
+	verb(F functor) : base_verb(helper_get_vm_type<ResultType>::type, Arity), functor(functor) {
 		return;
 	}
 
-	VM::Value Invoke(std::stack<VM::Value>& stack) const {
-		VerbBinder<ResultType, Arity> binder;
-		return binder.Invoke(stack, functor);
+	vm::value invoke(std::stack<vm::value>& stack) const {
+		verb_binder<ResultType, Arity> binder;
+		return binder.invoke(stack, functor);
 	}
 };
 

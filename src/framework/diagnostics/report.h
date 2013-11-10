@@ -1,22 +1,22 @@
 #pragma once
 
-#include "errorlocation.h"
+#include "error_location.h"
 
 #include <string>
 
-namespace Gorc {
-namespace Diagnostics {
+namespace gorc {
+namespace diagnostics {
 
-class Report {
+class report {
 public:
-	virtual ~Report();
+	virtual ~report();
 
-	virtual void AddError(const std::string& stage, const std::string& reason, const ErrorLocation& location) = 0;
-	virtual void AddWarning(const std::string& stage, const std::string& reason, const ErrorLocation& location) = 0;
-	virtual void AddCriticalError(const std::string& stage, const std::string& reason) = 0;
+	virtual void add_error(const std::string& stage, const std::string& reason, const error_location& location) = 0;
+	virtual void add_warning(const std::string& stage, const std::string& reason, const error_location& location) = 0;
+	virtual void add_critical_error(const std::string& stage, const std::string& reason) = 0;
 
-	virtual unsigned int GetErrorCount() const = 0;
-	virtual unsigned int GetWarningCount() const = 0;
+	virtual unsigned int get_error_count() const = 0;
+	virtual unsigned int get_warning_count() const = 0;
 };
 
 }

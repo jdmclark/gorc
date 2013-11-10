@@ -1,3 +1,5 @@
+#version 130
+
 #ifdef VERTEXPROGRAM
 
 uniform mat4 projection_matrix;
@@ -10,7 +12,9 @@ void main() {
 	gl_FrontColor = gl_Color;
 }
 
-#else if FRAGMENTPROGRAM
+#endif
+
+#ifdef FRAGMENTPROGRAM
 
 uniform sampler2D diffuse;
 uniform sampler2D light;
@@ -27,4 +31,3 @@ void main() {
 }
 
 #endif
-

@@ -4,18 +4,18 @@
 #include "framework/io/exception.h"
 #include <boost/format.hpp>
 
-Gorc::Content::Manager::Manager(Diagnostics::Report& report, const FileSystem& fs)
+gorc::content::manager::manager(diagnostics::report& report, const filesystem& fs)
 	: report(report), fs(fs) {
 	return;
 }
 
-std::tuple<int, Gorc::Content::Asset*> Gorc::Content::Manager::InternalLoad(const boost::filesystem::path& name,
-		const std::vector<boost::filesystem::path>& basepaths, Loader& loader) {
-	std::unique_ptr<IO::ReadOnlyFile> file;
+std::tuple<int, gorc::content::asset*> gorc::content::manager::InternalLoad(const boost::filesystem::path& name,
+		const std::vector<boost::filesystem::path>& basepaths, loader& loader) {
+	std::unique_ptr<io::read_only_file> file;
 
 	for(const auto& root : basepaths) {
 		try {
-			file = fs.Open(root / name);
+			file = fs.open(root / name);
 			break;
 		}
 		catch(...) {
@@ -24,17 +24,17 @@ std::tuple<int, Gorc::Content::Asset*> Gorc::Content::Manager::InternalLoad(cons
 	}
 
 	if(!file) {
-		Diagnostics::Helper::FileNotFound(report, "ContentManager", name.generic_string());
-		throw IO::FileNotFoundException();
+		diagnostics::helper::file_not_found(report, "contentmanager", name.generic_string());
+		throw io::file_not_found_exception();
 	}
 
 	try {
-		assets.push_back(loader.Deserialize(*file, *this, report));
+		assets.push_back(loader.deserialize(*file, *this, report));
 		asset_map.insert(std::make_pair(name.generic_string(), assets.size() - 1));
 		return std::make_tuple(assets.size() - 1, assets.back().get());
 	}
 	catch(const std::exception&) {
-		Diagnostics::Helper::CouldNotLoadFile(report, "ContentManager", file->Filename.generic_string());
+		diagnostics::helper::could_not_load_file(report, "contentmanager", file->Filename.generic_string());
 		throw;
 	}
 }

@@ -1,101 +1,122 @@
 #include "sound.h"
-#include "game/world/level/levelmodel.h"
+#include "game/world/level/level_model.h"
+#include "framework/math/util.h"
 
-void Gorc::Game::World::Level::Sounds::Sound::PlayAmbient(const Content::Assets::Sound& buffer, float volume, float panning, FlagSet<Flags::SoundFlag> flags) {
+void gorc::game::world::level::sounds::sound::play_ambient(const content::assets::sound& buffer, float volume, float panning, flag_set<flags::sound_flag> flags) {
 	expired = false;
 	update_position = false;
 
-	sound.SetBuffer(buffer.Buffer);
-	sound.SetPosition(panning, 0.0f, 0.0f);
-	sound.SetRelativeToListener(true);
-	sound.SetVolume(volume * 100.0f);
-	sound.SetLoop(flags & Flags::SoundFlag::Loops);
-	sound.SetPitch(1.0f);
-	sound.Play();
+	internal_sound.setBuffer(buffer.buffer);
+	internal_sound.setPosition(panning, 0.0f, 0.0f);
+	internal_sound.setRelativeToListener(true);
+	internal_sound.setVolume(volume * 100.0f);
+	internal_sound.setLoop(flags & flags::sound_flag::Loops);
+	internal_sound.setPitch(1.0f);
+	internal_sound.setAttenuation(0.0f);
+	internal_sound.setMinDistance(1.0f);
+	internal_sound.play();
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::PlayVoice(const Content::Assets::Sound& buffer, float volume, FlagSet<Flags::SoundFlag> flags) {
+void gorc::game::world::level::sounds::sound::play_voice(const content::assets::sound& buffer, float volume, flag_set<flags::sound_flag> flags) {
 	expired = false;
 	update_position = false;
 
-	sound.SetBuffer(buffer.Buffer);
-	sound.SetPosition(0.0f, 0.0f, 1.0f);
-	sound.SetRelativeToListener(true);
-	sound.SetVolume(volume * 100.0f);
-	sound.SetLoop(flags & Flags::SoundFlag::Loops);
-	sound.SetPitch(1.0f);
-	sound.Play();
+	internal_sound.setBuffer(buffer.buffer);
+	internal_sound.setPosition(0.0f, 0.0f, 1.0f);
+	internal_sound.setRelativeToListener(true);
+	internal_sound.setVolume(volume * 100.0f);
+	internal_sound.setLoop(flags & flags::sound_flag::Loops);
+	internal_sound.setPitch(1.0f);
+	internal_sound.setAttenuation(0.0f);
+	internal_sound.setMinDistance(1.0f);
+	internal_sound.play();
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::PlayPositional(const Content::Assets::Sound& buffer, const Math::Vector<3>& position,
-		float volume, float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
+void gorc::game::world::level::sounds::sound::play_positional(const content::assets::sound& buffer, const vector<3>& position,
+		float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
 	expired = false;
 
 	// TODO: Handle ambient flag.
 
-	float actual_min_rad = std::min(minrad, maxrad);
-	float actual_max_rad = std::max(minrad, maxrad);
+	actual_min_rad = std::min(minrad, maxrad);
+	actual_max_rad = std::max(minrad, maxrad);
 
-	sound.SetBuffer(buffer.Buffer);
-	sound.SetPosition(Math::Get<0>(position), Math::Get<1>(position), Math::Get<2>(position));
-	sound.SetRelativeToListener(false);
-	sound.SetVolume(volume * 100.0f);
-	sound.SetLoop(flags & Flags::SoundFlag::Loops);
-	sound.SetMinDistance(actual_min_rad);
-	sound.SetAttenuation(2.5f);
-	sound.SetPitch(1.0f);
-	sound.Play();
+	internal_sound.setBuffer(buffer.buffer);
+	internal_sound.setPosition(get<0>(position), get<2>(position), get<1>(position));
+	internal_sound.setRelativeToListener(false);
+	internal_sound.setVolume(volume * 100.0f);
+	internal_sound.setLoop(flags & flags::sound_flag::Loops);
+	internal_sound.setMinDistance(actual_min_rad);
+	internal_sound.setAttenuation(0.0f);
+	internal_sound.setPitch(1.0f);
+	internal_sound.play();
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::PlaySoundLocal(const Content::Assets::Sound& sound, float volume, float panning,
-		FlagSet<Flags::SoundFlag> flags) {
-	if(flags & Flags::SoundFlag::Voice) {
-		PlayVoice(sound, volume, flags);
+void gorc::game::world::level::sounds::sound::play_sound_local(const level_model& model, const content::assets::sound& sound, float volume,
+		float panning, flag_set<flags::sound_flag> flags) {
+	if(flags & flags::sound_flag::Voice) {
+		play_voice(sound, volume, flags);
 	}
 	else {
-		PlayAmbient(sound, volume, panning, flags);
+		play_ambient(sound, volume, panning, flags);
 	}
+
+	update(0.0, model);
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::PlaySoundPos(const Content::Assets::Sound& sound, const Math::Vector<3>& pos, float volume,
-		float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
+void gorc::game::world::level::sounds::sound::play_sound_pos(const level_model& model, const content::assets::sound& sound,
+		const vector<3>& pos, float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
 	update_position = false;
-	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
+	play_positional(sound, pos, volume, minrad, maxrad, flags);
+
+	update(0.0, model);
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::PlaySoundThing(const LevelModel& model, const Content::Assets::Sound& sound, int thing, float volume,
-		float minrad, float maxrad, FlagSet<Flags::SoundFlag> flags) {
+void gorc::game::world::level::sounds::sound::play_sound_thing(const level_model& model, const content::assets::sound& sound,
+		int thing, float volume, float minrad, float maxrad, flag_set<flags::sound_flag> flags) {
 	this->thing = thing;
-	update_position = (flags & Flags::SoundFlag::ThingOriginMovesWithThing);
+	update_position = (flags & flags::sound_flag::ThingOriginMovesWithThing);
 
-	Math::Vector<3> pos = model.Things[thing].Position;
-	PlayPositional(sound, pos, volume, minrad, maxrad, flags);
+	vector<3> pos = model.things[thing].position;
+	play_positional(sound, pos, volume, minrad, maxrad, flags);
+
+	update(0.0, model);
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::SetPitch(float pitch, float delay) {
+void gorc::game::world::level::sounds::sound::set_pitch(float pitch, float delay) {
 	// TODO: Implement delay
-	sound.SetPitch(pitch);
+	internal_sound.setPitch(pitch);
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::SetVolume(float volume, float delay) {
+void gorc::game::world::level::sounds::sound::set_volume(float volume, float delay) {
 	// TODO: Implement delay
-	sound.SetVolume(volume * 100.0f);
+	internal_sound.setVolume(volume * 100.0f);
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::Stop() {
-	sound.Stop();
+void gorc::game::world::level::sounds::sound::stop() {
+	internal_sound.stop();
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::Stop(float delay) {
+void gorc::game::world::level::sounds::sound::stop(float delay) {
 	// TODO: Implement delay
-	sound.Stop();
+	internal_sound.stop();
 }
 
-void Gorc::Game::World::Level::Sounds::Sound::Update(double dt, const LevelModel& model) {
+void gorc::game::world::level::sounds::sound::update(double dt, const level_model& model) {
 	if(update_position) {
-		Math::Vector<3> pos = model.Things[thing].Position;
-		sound.SetPosition(Math::Get<0>(pos), Math::Get<1>(pos), Math::Get<2>(pos));
+		vector<3> pos = model.things[thing].position;
+		internal_sound.setPosition(get<0>(pos), get<2>(pos), get<1>(pos));
+
+		auto sound_dist = length(model.camera_position - pos);
+		float attenuation = (actual_min_rad != actual_max_rad) ? ((sound_dist - actual_max_rad) / (actual_min_rad - actual_max_rad)) : 1.0f;
+		attenuation = clamp(attenuation, 0.0f, 1.0f);
+
+		internal_sound.setVolume(attenuation * 100.0f);
 	}
 
-	expired = (sound.GetStatus() != sf::Sound::Playing);
+	expired = (internal_sound.getStatus() != sf::Sound::Playing);
+}
+
+gorc::game::world::level::sounds::sound::~sound() {
+	internal_sound.stop();
 }

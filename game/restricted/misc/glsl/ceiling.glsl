@@ -1,3 +1,5 @@
+#version 130
+
 uniform vec3 ceiling_sky_offset;
 uniform sampler2D diffuse;
 uniform vec4 sector_tint;
@@ -26,11 +28,13 @@ void main() {
 	ceiling_sky_point = model_view_matrix * vec4(0.0, 0.0, ceiling_sky_offset.z, 1.0);
 }
 
-#else if FRAGMENTPROGRAM
+#endif
+
+#ifdef FRAGMENTPROGRAM
 
 void ceiling_sky_texture_coordinates(out vec2 tex_coords) {
 	float sky_t = dot(ceiling_sky_point, ceiling_sky_normal) / dot(ceiling_sky_view_position, ceiling_sky_normal);
-	vec3 out_intersection = (ceiling_sky_view_position * sky_t) - ceiling_sky_point;
+	vec4 out_intersection = (ceiling_sky_view_position * sky_t) - ceiling_sky_point;
 	
 	tex_coords = vec2(dot(out_intersection, ceiling_sky_u), dot(out_intersection, ceiling_sky_v));
 }
@@ -39,7 +43,8 @@ void main() {
 	vec2 tex_coords;
 	ceiling_sky_texture_coordinates(tex_coords);
 	tex_coords += ceiling_sky_offset.xy;
-	tex_coords *= 16.0 / textureSize2D(diffuse, 0);
+	vec2 tex_sz = textureSize(diffuse, 0);
+	tex_coords = vec2(tex_coords.x * 16.0 / tex_sz.x, tex_coords.y * 16.0 / tex_sz.y);
 	
 	vec4 diffuse = texture2D(diffuse, tex_coords);
 	vec4 diffuse_color = diffuse;

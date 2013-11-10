@@ -1,18 +1,18 @@
 #pragma once
 
-#include "framework/event/eventbus.h"
+#include "framework/event/event_bus.h"
 
-namespace Gorc {
-namespace Place {
+namespace gorc {
+namespace place {
 
-class Presenter {
+class presenter {
 public:
-	virtual ~Presenter();
+	virtual ~presenter();
 
-	virtual void Start(Event::EventBus& eventBus) = 0;
+	virtual void start(event::event_bus& eventBus) = 0;
 
-	virtual bool CanStop();
-	virtual void Stop();
+	virtual bool can_stop();
+	virtual void stop();
 };
 
 }

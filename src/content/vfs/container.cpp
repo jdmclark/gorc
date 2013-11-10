@@ -1,5 +1,5 @@
 #include "container.h"
 
-Gorc::Content::VFS::Container::~Container() {
+gorc::content::vfs::container::~container() {
 	return;
 }

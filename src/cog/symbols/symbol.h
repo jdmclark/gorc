@@ -4,25 +4,24 @@
 #include "cog/vm/value.h"
 #include <string>
 
-namespace Gorc {
-namespace Cog {
-namespace Symbols {
+namespace gorc {
+namespace cog {
+namespace symbols {
 
-class Symbol
-{
+class symbol {
 public:
-	const SymbolType Type;
-	const std::string Name;
+	const symbol_type type;
+	const std::string name;
 
-	const VM::Value DefaultValue;
+	const vm::value default_value;
 
-	const bool Local;
-	const std::string Desc;
-	const int Mask;
-	const int Linkid;
-	const bool Nolink;
+	const bool local;
+	const std::string desc;
+	const int mask;
+	const int link_id;
+	const bool no_link;
 
-	Symbol(SymbolType type, const std::string& name, const VM::Value& defaultValue,
+	symbol(symbol_type type, const std::string& name, const vm::value& defaultvalue,
 		bool local, const std::string& desc, int mask, int linkid, bool nolink);
 };
 

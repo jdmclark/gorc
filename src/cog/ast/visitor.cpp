@@ -1,20 +1,20 @@
 #include "visitor.h"
 #include "framework/diagnostics/helper.h"
 
-Gorc::Cog::AST::Visitor::Visitor(const std::string& name, Diagnostics::Report& report)
-	: VisitorName(name), Report(report)
+gorc::cog::ast::visitor::visitor(const std::string& name, diagnostics::report& report)
+	: visitor_name(name), report(report)
 {
 	return;
 }
 
-Gorc::Cog::AST::Visitor::~Visitor()
+gorc::cog::ast::visitor::~visitor()
 {
 	return;
 }
 
-void Gorc::Cog::AST::Visitor::DefaultAction(const std::string& action, Node& n)
+void gorc::cog::ast::visitor::default_action(const std::string& action, node& n)
 {
-	Diagnostics::Helper::FeatureNotImplemented(Report, VisitorName, action);
+	diagnostics::helper::feature_not_implemented(report, visitor_name, action);
 }
 
 ASTCLASS_ALL(AVDEFAULTACTION)

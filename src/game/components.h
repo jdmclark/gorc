@@ -3,61 +3,62 @@
 #include <GL/glew.h>
 
 #include "framework/diagnostics/report.h"
-#include "framework/event/eventbus.h"
-#include "framework/place/placecontroller.h"
+#include "framework/event/event_bus.h"
+#include "framework/place/place_controller.h"
+#include "framework/utility/randomizer.h"
 
-#include "content/vfs/virtualfilesystem.h"
+#include "content/vfs/virtual_filesystem.h"
 
 #include "cog/verbs/table.h"
 #include "cog/compiler.h"
 
-#include "game/viewframe.h"
+#include "game/view_frame.h"
 
 #include "game/screen/place.h"
-#include "game/screen/action/actionview.h"
+#include "game/screen/action/action_view.h"
 
 #include "game/world/place.h"
-#include "game/world/nothing/nothingview.h"
-#include "game/world/level/levelview.h"
-#include "game/world/level/levelpresenter.h"
+#include "game/world/nothing/nothing_view.h"
+#include "game/world/level/level_view.h"
+#include "game/world/level/level_presenter.h"
 
 #include <SFML/Window.hpp>
 #include <memory>
 
-namespace Gorc {
-namespace Game {
+namespace gorc {
+namespace game {
 
-class Components {
+class components {
 public:
-	Diagnostics::Report& Report;
-	Event::EventBus& EventBus;
-	sf::Window& Window;
-	const sf::Input& Input;
+	diagnostics::report& report;
+	event::event_bus& event_bus;
+	sf::Window& window;
+	randomizer randomizer;
 
-	Content::VFS::VirtualFileSystem& FileSystem;
+	content::vfs::virtual_filesystem& filesystem;
 
-	Cog::Verbs::VerbTable& VerbTable;
-	Cog::Compiler& Compiler;
+	cog::verbs::verb_table& verb_table;
+	cog::compiler& compiler;
 
-	Place::PlaceController<Screen::Place>& ScreenPlaceController;
-	Place::PlaceController<World::Place>& WorldPlaceController;
+	place::place_controller<screen::place>& screen_place_controller;
+	place::place_controller<world::place>& world_place_controller;
 
-	ViewFrame& ScreenViewFrame;
-	ViewFrame& WorldViewFrame;
+	view_frame& screen_view_frame;
+	view_frame& world_view_frame;
 
-	Screen::Action::ActionView& ActionView;
+	screen::action::action_view& action_view;
 
-	World::Nothing::NothingView& NothingView;
-	World::Level::LevelView& LevelView;
+	world::nothing::nothing_view& nothing_view;
+	world::level::level_view& level_view;
 
-	World::Level::LevelPresenter* CurrentLevelPresenter = nullptr;
+	world::level::level_presenter* current_level_presenter = nullptr;
 
-	Components(Diagnostics::Report& Report, Event::EventBus& EventBus, sf::Window& Window, const sf::Input& Input,
-			Content::VFS::VirtualFileSystem& FileSystem, Cog::Verbs::VerbTable& VerbTable, Cog::Compiler& Compiler,
-			Place::PlaceController<Screen::Place>& ScreenPlaceController, Place::PlaceController<World::Place>& WorldPlaceController,
-			ViewFrame& ScreenViewFrame, ViewFrame& WorldViewFrame,
-			Screen::Action::ActionView& ActionView,
-			World::Nothing::NothingView& NothingView, World::Level::LevelView& LevelView);
+	components(diagnostics::report& report, event::event_bus& EventBus, sf::Window& Window,
+			content::vfs::virtual_filesystem& FileSystem, cog::verbs::verb_table& verb_table, cog::compiler& compiler,
+			place::place_controller<screen::place>& ScreenPlaceController, place::place_controller<world::place>& WorldPlaceController,
+			view_frame& ScreenViewFrame, view_frame& WorldViewFrame,
+			screen::action::action_view& ActionView,
+			world::nothing::nothing_view& nothing_view, world::level::level_view& level_view);
 };
 
 }

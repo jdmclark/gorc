@@ -1,12 +1,12 @@
 #include "instance.h"
 #include "script.h"
 
-Gorc::Cog::Instance::Instance(const Gorc::Cog::Script& Script)
-	: Script(Script) {
+gorc::cog::instance::instance(const gorc::cog::script& script)
+	: script(script) {
 	return;
 }
 
-void Gorc::Cog::Instance::Call(Verbs::VerbTable& verbTable, VM::VirtualMachine& vm, MessageId message) {
-	size_t jump_target = Script.JumpTable.GetTarget(message);
-	vm.Execute(Heap, Script.Code, jump_target, verbTable);
+void gorc::cog::instance::call(verbs::verb_table& verbTable, vm::virtual_machine& vm, message_id message) {
+	size_t jump_target = script.jump_table.get_target(message);
+	vm.execute(heap, script.code, jump_target, verbTable);
 }

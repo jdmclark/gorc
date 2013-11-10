@@ -8,22 +8,22 @@
 #include "content/loaders/inventory_loader.h"
 #include "inventory_bin.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Inventory : public Asset {
+class inventory : public asset {
 public:
-	using Loader = Loaders::InventoryLoader;
+	using loader = loaders::inventory_loader;
 
-	std::unordered_map<std::string, int> BinMap;
-	std::unordered_map<int, InventoryBin> Bins;
+	std::unordered_map<std::string, int> bin_map;
+	std::unordered_map<int, inventory_bin> bins;
 
-	inline const InventoryBin& GetBin(const std::string& name) const {
-		auto it = BinMap.find(name);
-		if(it != BinMap.end()) {
-			auto jt = Bins.find(it->second);
-			if(jt != Bins.end()) {
+	inline const inventory_bin& get_bin(const std::string& name) const {
+		auto it = bin_map.find(name);
+		if(it != bin_map.end()) {
+			auto jt = bins.find(it->second);
+			if(jt != bins.end()) {
 				return jt->second;
 			}
 		}
@@ -31,21 +31,21 @@ public:
 		throw std::exception();
 	}
 
-	inline const InventoryBin& GetBin(int id) const {
-		auto it = Bins.find(id);
-		if(it != Bins.end()) {
+	inline const inventory_bin& get_bin(int id) const {
+		auto it = bins.find(id);
+		if(it != bins.end()) {
 			return it->second;
 		}
 
 		throw std::exception();
 	}
 
-	inline auto begin() const -> decltype(Bins.begin()) {
-		return Bins.begin();
+	inline auto begin() const -> decltype(bins.begin()) {
+		return bins.begin();
 	}
 
-	inline auto end() const -> decltype(Bins.end()) {
-		return Bins.end();
+	inline auto end() const -> decltype(bins.end()) {
+		return bins.end();
 	}
 };
 

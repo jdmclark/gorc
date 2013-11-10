@@ -1,21 +1,21 @@
 #include "syntactic_test_fixture.h"
 #include "cog/stages/stages.h"
-#include "framework/io/nativefile.h"
+#include "framework/io/native_file.h"
 #include <fstream>
 
 void SyntacticTestFixture::ParseFile(const boost::filesystem::path& filename) {
-	Gorc::Cog::AST::Factory astFactory;
+	gorc::cog::ast::factory astFactory;
 
-	std::unique_ptr<Gorc::IO::ReadOnlyFile> file;
+	std::unique_ptr<gorc::io::read_only_file> file;
 	try {
-		file = FileSystem.Open(filename);
+		file = FileSystem.open(filename);
 	}
 	catch(const std::exception& e) {
-		Report.AddCriticalError("SyntacticTestFixture", "could not open file");
+		report.add_critical_error("SyntacticTestFixture", "could not open file");
 		return;
 	}
 
-	Gorc::Text::Source source(*file);
+	gorc::text::source source(*file);
 
-	Gorc::Cog::Stages::GenerateAST::GenerateAST(source, Report, astFactory);
+	gorc::cog::stages::generate_ast::generate_ast(source, report, astFactory);
 }

@@ -2,18 +2,18 @@
 #include "content/assets/shader.h"
 #include "components.h"
 
-#include "framework/events/printevent.h"
-#include "framework/events/exitingevent.h"
-#include "framework/events/exitevent.h"
-#include "framework/events/shutdownevent.h"
-#include "game/events/windowfocusevent.h"
-#include "framework/place/placecontroller.h"
+#include "framework/events/print_event.h"
+#include "framework/events/exiting_event.h"
+#include "framework/events/exit_event.h"
+#include "framework/events/shutdown_event.h"
+#include "game/events/window_focus_event.h"
+#include "framework/place/place_controller.h"
 
-#include "game/screen/presentermapper.h"
-#include "game/world/presentermapper.h"
+#include "game/screen/presenter_mapper.h"
+#include "game/world/presenter_mapper.h"
 
-#include "game/screen/action/actionplace.h"
-#include "game/world/level/levelplace.h"
+#include "game/screen/action/action_place.h"
+#include "game/world/level/level_place.h"
 
 #include <iostream>
 #include <cmath>
@@ -22,20 +22,28 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "framework/diagnostics/streamreport.h"
+#include "framework/diagnostics/stream_report.h"
 #include "content/manager.h"
 #include "content/assets/level.h"
 #include "cog/compiler.h"
 
 #include <iostream>
 
-using namespace Gorc;
+using namespace gorc;
 
 int main(int argc, char** argv) {
-	// Create window and OpenGL context.
-	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc");
-	Window.UseVerticalSync(true);
-	Window.SetActive();
+	if(argc != 3) {
+		std::cout << "Usage: game \"Episode Name\" levelfilename.jkl" << std::endl;
+		return 0;
+	}
+
+	std::string episode = argv[1];
+	std::string levelfilename = argv[2];
+
+	// create window and OpenGL context.
+	sf::Window Window(sf::VideoMode(1280, 720, 32), "Gorc", sf::Style::Default, sf::ContextSettings(24, 8, 0));
+	Window.setVerticalSyncEnabled(true);
+	Window.setActive();
 
 	// Initialize GLEW.
 	GLenum err = glewInit();
@@ -44,109 +52,107 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	const sf::Input& Input = Window.GetInput();
+	diagnostics::stream_report report(std::cout);
+	event::event_bus event_bus;
+	content::vfs::virtual_filesystem FileSystem("game/restricted",
+			"game/resource", "game/episode", report);
 
-	Diagnostics::StreamReport Report(std::cout);
-	Event::EventBus EventBus;
-	Content::VFS::VirtualFileSystem FileSystem("game/restricted",
-			"game/resource", "game/episode", Report);
+	auto systemcontentmanager = std::make_shared<content::manager>(report, FileSystem);
 
-	auto systemContentManager = std::make_shared<Content::Manager>(Report, FileSystem);
+	cog::verbs::verb_table verb_table;
+	cog::compiler compiler(verb_table);
 
-	Cog::Verbs::VerbTable VerbTable;
-	Cog::Compiler Compiler(VerbTable);
+	game::screen::presenter_mapper ScreenPresenterMapper;
+	place::place_controller<game::screen::place> ScreenPlaceController(event_bus, ScreenPresenterMapper);
 
-	Game::Screen::PresenterMapper ScreenPresenterMapper;
-	Place::PlaceController<Game::Screen::Place> ScreenPlaceController(EventBus, ScreenPresenterMapper);
+	game::world::presenter_mapper WorldPresenterMapper;
+	place::place_controller<game::world::place> WorldPlaceController(event_bus, WorldPresenterMapper);
 
-	Game::World::PresenterMapper WorldPresenterMapper;
-	Place::PlaceController<Game::World::Place> WorldPlaceController(EventBus, WorldPresenterMapper);
+	game::view_frame ScreenViewFrame(Window);
+	game::view_frame WorldViewFrame(Window);
 
-	Game::ViewFrame ScreenViewFrame(Window);
-	Game::ViewFrame WorldViewFrame(Window);
+	game::screen::action::action_view ActionView;
 
-	Game::Screen::Action::ActionView ActionView;
+	game::world::nothing::nothing_view nothing_view;
+	game::world::level::level_view level_view(*systemcontentmanager);
 
-	Game::World::Nothing::NothingView NothingView;
-	Game::World::Level::LevelView LevelView(*systemContentManager);
-
-	Game::Components Components(Report, EventBus, Window, Input, FileSystem, VerbTable, Compiler,
+	game::components Components(report, event_bus, Window, FileSystem, verb_table, compiler,
 			ScreenPlaceController, WorldPlaceController, ScreenViewFrame, WorldViewFrame,
-			ActionView, NothingView, LevelView);
+			ActionView, nothing_view, level_view);
 
-	ScreenPresenterMapper.SetComponents(Components);
-	WorldPresenterMapper.SetComponents(Components);
+	ScreenPresenterMapper.set_components(Components);
+	WorldPresenterMapper.set_components(Components);
 
 	// Register verbs
-	Game::World::Level::LevelPresenter::RegisterVerbs(VerbTable, Components);
+	game::world::level::level_presenter::register_verbs(verb_table, Components);
 
 	bool running = true;
 
 	// Register core event handlers
-	EventBus.AddHandler<Events::PrintEvent>([](Events::PrintEvent& e) {
+	event_bus.add_handler<events::print_event>([](events::print_event& e) {
 		std::cout << e.message << std::endl;
 	});
 
-	EventBus.AddHandler<Events::ExitEvent>([&EventBus, &running](Events::ExitEvent& e) {
+	event_bus.add_handler<events::exit_event>([&event_bus, &running](events::exit_event& e) {
 		// A component has requested an application exit.
 		// Check if components can quit.
-		Events::ExitingEvent exitingEvent;
-		EventBus.FireEvent(exitingEvent);
+		events::exiting_event exitingEvent;
+		event_bus.fire_event(exitingEvent);
 
-		if(exitingEvent.Cancel) {
+		if(exitingEvent.cancel) {
 			return;
 		}
 
 		// All components can quit. Request shutdown.
-		Events::ShutdownEvent shutdownEvent;
-		EventBus.FireEvent(shutdownEvent);
+		events::shutdown_event shutdownEvent;
+		event_bus.fire_event(shutdownEvent);
 
 		running = false;
 	});
 
 	// HACK: Set current episode to The Force Within.
-	for(size_t i = 0; i < FileSystem.GetEpisodeCount(); ++i) {
-		if(boost::iequals(FileSystem.GetEpisode(i).GetEpisodeName(), "The Force Within")) {
-			FileSystem.SetEpisode(i);
+	for(size_t i = 0; i < FileSystem.get_episode_count(); ++i) {
+		if(boost::iequals(FileSystem.get_episode(i).get_episode_name(), episode)) {
+			FileSystem.set_episode(i);
 		}
 	}
 
 	// HACK: Set current level to 01narshadda.jkl.
-	auto contentManager = std::make_shared<Content::Manager>(Report, FileSystem);
-	const auto& lev = contentManager->Load<Content::Assets::Level>("01narshadda.jkl", Compiler);
-	WorldPlaceController.GoTo(Game::World::Level::LevelPlace(contentManager, lev));
+	auto contentmanager = std::make_shared<content::manager>(report, FileSystem);
+	const auto& lev = contentmanager->load<content::assets::level>(levelfilename, compiler);
+	WorldPlaceController.go_to(game::world::level::level_place(contentmanager, lev));
 
-	ScreenPlaceController.GoTo(Game::Screen::Action::ActionPlace());
+	ScreenPlaceController.go_to(game::screen::action::action_place());
 	// END HACK
 
-	// Game loop:
+	// game loop:
 	sf::Clock clock;
 	double gameplayAccumulator = 0.0;
 	double gameplayElapsedTime = 0.0;
 
 	sf::Event event;
 	while(running) {
-		while(Window.GetEvent(event)) {
-			switch(event.Type) {
+		while(Window.pollEvent(event)) {
+			switch(event.type) {
 			case sf::Event::Closed: {
-				Events::ExitEvent exitEvent;
-				EventBus.FireEvent(exitEvent);
+				events::exit_event exitEvent;
+				event_bus.fire_event(exitEvent);
 			}
 			break;
 
 			case sf::Event::Resized:
-				glViewport(0, 0, event.Size.Width, event.Size.Height);
+				glViewport(0, 0, event.size.width, event.size.height);
 				break;
 
 			case sf::Event::LostFocus: {
-				Game::Events::WindowFocusEvent focusEvent(false);
-				EventBus.FireEvent(focusEvent);
+				game::events::window_focus_event focusEvent(false);
+				event_bus.fire_event(focusEvent);
 			}
 			break;
 
 			case sf::Event::GainedFocus: {
-				Game::Events::WindowFocusEvent focusEvent(true);
-				EventBus.FireEvent(focusEvent);
+				game::events::window_focus_event focusEvent(true);
+				event_bus.fire_event(focusEvent);
 			}
 			break;
 
@@ -155,20 +161,20 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		Window.SetActive();
+		Window.setActive();
 
-		double currentTime = clock.GetElapsedTime();
-		clock.Reset();
+		double currentTime = clock.getElapsedTime().asSeconds();
+		clock.restart();
 
 		gameplayElapsedTime += currentTime;
 		gameplayAccumulator += currentTime;
 
-		while(gameplayAccumulator >= GameplayTick) {
-			gameplayAccumulator -= GameplayTick;
+		while(gameplayAccumulator >= gameplay_tick) {
+			gameplayAccumulator -= gameplay_tick;
 
-			// Update simulation.
-			WorldViewFrame.Update(GameplayTick);
-			ScreenViewFrame.Update(GameplayTick);
+			// update simulation.
+			WorldViewFrame.update(gameplay_tick);
+			ScreenViewFrame.update(gameplay_tick);
 		}
 
 		// TODO: Render here
@@ -176,10 +182,10 @@ int main(int argc, char** argv) {
 		glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		WorldViewFrame.Draw(currentTime);
-		ScreenViewFrame.Draw(currentTime);
+		WorldViewFrame.draw(currentTime);
+		ScreenViewFrame.draw(currentTime);
 
-		Window.Display();
+		Window.display();
 	}
 
 	return 0;

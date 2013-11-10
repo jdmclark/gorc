@@ -7,7 +7,7 @@
 
 class JklTestFixture : public LoaderTestFixture {
 public:
-	JklTestFixture() : LoaderTestFixture(VfsSingleton::Get()) {
+	JklTestFixture() : LoaderTestFixture(VfsSingleton::get()) {
 		return;
 	}
 };
@@ -16,9 +16,9 @@ BeginSuiteFixture(JklTest, JklTestFixture);
 
 Case(jk_01narshadda_test) {
 	VfsSingleton::SetEpisode("The Force Within");
-	auto lev = TryLoad<Gorc::Content::Assets::Level>("01narshadda.jkl", Compiler);
+	auto lev = TryLoad<gorc::content::assets::level>("01narshadda.jkl", compiler);
 
-	AssertResult(2, 682);
+	AssertResult(2, 611);
 }
 
 EndSuite(JklTest);

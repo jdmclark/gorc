@@ -5,7 +5,7 @@
 %error-verbose
 %verbose
 %lex-param { void* scanner }
-%parse-param { Gorc::Cog::Grammar::Instance* instance }
+%parse-param { gorc::cog::grammar::instance* instance }
 
 %expect 1
 %expect-rr 0
@@ -13,7 +13,7 @@
 %code requires {
 	#include "framework/text/location.h"
 	#define YYLTYPE YYLTYPE
-	typedef Gorc::Text::Location YYLTYPE;
+	typedef gorc::text::location YYLTYPE;
 	
 	#define YYLLOC_DEFAULT(Cur, Rhs, N)                        \
      do                                                        \
@@ -47,22 +47,22 @@
 	int integer;
 	float floating;
 
-	Gorc::Cog::AST::SymbolField* symbol_field;
-	Gorc::Cog::AST::SymbolExtension* symbol_extension;
-	std::vector<Gorc::Cog::AST::SymbolExtension*>* symbol_extension_list;
-	Gorc::Cog::AST::Symbol* symbol;
-	std::vector<Gorc::Cog::AST::Symbol*>* symbol_list;
+	gorc::cog::ast::symbol_field* symbol_field;
+	gorc::cog::ast::symbol_extension* symbol_extension;
+	std::vector<gorc::cog::ast::symbol_extension*>* symbol_extension_list;
+	gorc::cog::ast::symbol* symbol;
+	std::vector<gorc::cog::ast::symbol*>* symbol_list;
 
-	Gorc::Cog::AST::UnaryOperator unary_operator;
-	Gorc::Cog::AST::InfixOperator infix_operator;
-	Gorc::Cog::AST::Expression* expression;
-	std::vector<Gorc::Cog::AST::Expression*>* expression_list;
+	gorc::cog::ast::unary_operator unary_operator;
+	gorc::cog::ast::infix_operator infix_operator;
+	gorc::cog::ast::expression* expression;
+	std::vector<gorc::cog::ast::expression*>* expression_list;
 
-	Gorc::Cog::AST::Statement* statement;
-	std::vector<Gorc::Cog::AST::Statement*>* statement_list;
-	Gorc::Cog::AST::ForOptionalExpression* for_optional_expression;
+	gorc::cog::ast::statement* statement;
+	std::vector<gorc::cog::ast::statement*>* statement_list;
+	gorc::cog::ast::for_optional_expression* for_optional_expression;
 
-	Gorc::Cog::AST::TranslationUnit* translation_unit;
+	gorc::cog::ast::translation_unit* translation_unit;
 }
 
 /* Main keyword tokens */
@@ -112,17 +112,17 @@
 %start translation_unit
 
 %{
-	using namespace Gorc::Cog;
-	using namespace Gorc::Cog::AST;
+	using namespace gorc::cog;
+	using namespace gorc::cog::ast;
 	
-	int yylex(YYSTYPE* lvalp, Gorc::Text::Location* llocp, void* scanner);
+	int yylex(YYSTYPE* lvalp, gorc::text::location* llocp, void* scanner);
 	
-	void yyerror(Gorc::Text::Location* llocp, Gorc::Cog::Grammar::Instance* instance, const char* err) {
-		instance->Report.AddError("parser", err, *llocp);
+	void yyerror(gorc::text::location* llocp, gorc::cog::grammar::instance* instance, const char* err) {
+		instance->report.add_error("parser", err, *llocp);
 	}
 	
-	#define scanner instance->GetScanner()
-	#define ast instance->Factory
+	#define scanner instance->get_scanner()
+	#define ast instance->factory
 %}
 
 %%
@@ -131,33 +131,33 @@
 symbol_field
 	: STRING_FRAGMENT
 		{
-			$$ = ast.MakeStringFragmentField($1, @$);
+			$$ = ast.make<string_fragment_field>(@$, $1);
 		}
 	| INTEGER_LITERAL
 		{
-			$$ = ast.MakeIntegerField($1, @$);
+			$$ = ast.make<integer_field>(@$, $1);
 		}
 	| FLOAT_LITERAL
 		{
-			$$ = ast.MakeFloatField($1, @$);
+			$$ = ast.make<float_field>(@$, $1);
 		}
 	;
 
 symbol_extension
 	: IDENTIFIER
 		{
-			$$ = ast.MakeBareExtension($1, @$);
+			$$ = ast.make<bare_extension>(@$, $1);
 		}
 	| IDENTIFIER '=' symbol_field
 		{
-			$$ = ast.MakeValuedExtension($1, $3, @$);
+			$$ = ast.make<valued_extension>(@$, $1, $3);
 		}
 	;
 
 symbol_extension_seq
 	: symbol_extension
 		{
-			$$ = ast.MakeList($1);
+			$$ = ast.make_list($1);
 		}
 	| symbol_extension_seq symbol_extension
 		{
@@ -169,7 +169,7 @@ symbol_extension_seq
 symbol_extension_part
 	: /* Blank */
 		{
-			$$ = ast.MakeList<SymbolExtension>();
+			$$ = ast.make_list<symbol_extension>();
 		}
 	| symbol_extension_seq
 		{
@@ -180,11 +180,11 @@ symbol_extension_part
 symbol
 	: IDENTIFIER IDENTIFIER symbol_extension_part ENDLINE
 		{
-			$$ = ast.MakeSymbol($1, $2, $3, @$);
+			$$ = ast.make<symbol>(@$, $1, $2, $3);
 		}
 	| IDENTIFIER IDENTIFIER '=' symbol_field symbol_extension_part ENDLINE
 		{
-			$$ = ast.MakeValuedSymbol($1, $2, $5, $4, @$);
+			$$ = ast.make<valued_symbol>(@$, $1, $2, $5, $4);
 		}
 	| ENDLINE
 		{
@@ -197,11 +197,11 @@ symbol_seq
 		{
 			if($1 == nullptr)
 			{
-				$$ = ast.MakeList<Symbol>();
+				$$ = ast.make_list<symbol>();
 			}
 			else
 			{
-				$$ = ast.MakeList($1);
+				$$ = ast.make_list($1);
 			}
 		}
 	| symbol_seq symbol
@@ -218,7 +218,7 @@ symbol_seq
 symbol_section
 	:
 		{
-			$$ = ast.MakeList<Symbol>();
+			$$ = ast.make_list<symbol>();
 		}
 	| symbol_seq
 		{
@@ -230,7 +230,7 @@ symbol_section
 argument_expression_list
 	: assignment_expression
 		{
-			$$ = ast.MakeList($1);
+			$$ = ast.make_list($1);
 		}
 	| argument_expression_list ',' assignment_expression
 		{
@@ -269,23 +269,23 @@ vector_component
 literal_expression
 	: STRING_LITERAL
 		{
-			$$ = ast.MakeStringLiteralExpression($1, @$);
+			$$ = ast.make<string_literal_expression>(@$, $1);
 		}
 	| INTEGER_LITERAL
 		{
-			$$ = ast.MakeIntegerLiteralExpression($1, @$);
+			$$ = ast.make<integer_literal_expression>(@$, $1);
 		}
 	| FLOAT_LITERAL
 		{
-			$$ = ast.MakeFloatLiteralExpression($1, @$);
+			$$ = ast.make<float_literal_expression>(@$, $1);
 		}
 	| '\'' vector_component vector_component vector_component '\''
 		{
-			$$ = ast.MakeVectorLiteralExpression($2, $3, $4, @$);
+			$$ = ast.make<vector_literal_expression>(@$, $2, $3, $4);
 		}
 	| '\'' vector_component ',' vector_component ',' vector_component '\''
 		{
-			$$ = ast.MakeVectorLiteralExpression($2, $4, $6, @$);
+			$$ = ast.make<vector_literal_expression>(@$, $2, $4, $6);
 		}
 	;
 
@@ -300,7 +300,7 @@ primary_expression
 		}
 	| IDENTIFIER
 		{
-			$$ = ast.MakeIdentifierExpression($1, @$);
+			$$ = ast.make<identifier_expression>(@$, $1);
 		}
 	;
 
@@ -311,30 +311,30 @@ postfix_expression
 		}
 	| IDENTIFIER '[' expression ']'
 		{
-			$$ = ast.MakeSubscriptExpression($1, $3, @$);
+			$$ = ast.make<subscript_expression>(@$, $1, $3);
 		}
 	| IDENTIFIER '(' ')'
 		{
-			$$ = ast.MakeMethodCallExpression($1, ast.MakeList<Expression>(), @$);
+			$$ = ast.make<method_call_expression>(@$, $1, ast.make_list<expression>());
 		}
 	| IDENTIFIER '(' argument_expression_list ')'
 		{
-			$$ = ast.MakeMethodCallExpression($1, $3, @$);
+			$$ = ast.make<method_call_expression>(@$, $1, $3);
 		}
 	;
 
 unary_operator
 	: '+'
 		{
-			$$ = UnaryOperator::Plus;
+			$$ = unary_operator::plus;
 		}
 	| '-'
 		{
-			$$ = UnaryOperator::Minus;
+			$$ = unary_operator::minus;
 		}
 	| '!'
 		{
-			$$ = UnaryOperator::Not;
+			$$ = unary_operator::logical_not;
 		}
 	;
 
@@ -345,22 +345,22 @@ unary_expression
 		}
 	| unary_operator unary_expression
 		{
-			$$ = ast.MakeUnaryExpression($2, $1, @$);
+			$$ = ast.make<unary_expression>(@$, $2, $1);
 		}
 	;
 
 multiplicative_operator
 	: '*'
 		{
-			$$ = InfixOperator::Multiplication;
+			$$ = infix_operator::multiplication;
 		}
 	| '/'
 		{
-			$$ = InfixOperator::Division;
+			$$ = infix_operator::division;
 		}
 	| '%'
 		{
-			$$ = InfixOperator::Modulo;
+			$$ = infix_operator::modulo;
 		}
 	;
 
@@ -371,18 +371,18 @@ multiplicative_expression
 		}
 	| multiplicative_expression multiplicative_operator unary_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, $2, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, $2);
 		}
 	;
 
 additive_operator
 	: '+'
 		{
-			$$ = InfixOperator::Addition;
+			$$ = infix_operator::addition;
 		}
 	| '-'
 		{
-			$$ = InfixOperator::Subtraction;
+			$$ = infix_operator::subtraction;
 		}
 	;
 
@@ -393,26 +393,26 @@ additive_expression
 		}
 	| additive_expression additive_operator multiplicative_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, $2, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, $2);
 		}
 	;
 
 relational_operator
 	: GE_OP
 		{
-			$$ = InfixOperator::GreaterEqual;
+			$$ = infix_operator::greater_equal;
 		}
 	| LE_OP
 		{
-			$$ = InfixOperator::LessEqual;
+			$$ = infix_operator::less_equal;
 		}
 	| '>'
 		{
-			$$ = InfixOperator::Greater;
+			$$ = infix_operator::greater;
 		}
 	| '<'
 		{
-			$$ = InfixOperator::Less;
+			$$ = infix_operator::less;
 		}
 	;
 
@@ -423,18 +423,18 @@ relational_expression
 		}
 	| relational_expression relational_operator additive_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, $2, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, $2);
 		}
 	;
 
 equality_operator
 	: EQ_OP
 		{
-			$$ = InfixOperator::Equal;
+			$$ = infix_operator::equal;
 		}
 	| NE_OP
 		{
-			$$ = InfixOperator::NotEqual;
+			$$ = infix_operator::not_equal;
 		}
 	;
 
@@ -445,7 +445,7 @@ equality_expression
 		}
 	| equality_expression equality_operator relational_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, $2, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, $2);
 		}
 	;
 
@@ -456,7 +456,7 @@ and_expression
 		}
 	| and_expression '&' equality_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, InfixOperator::And, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, infix_operator::bitwise_and);
 		}
 	;
 
@@ -467,7 +467,7 @@ exclusive_or_expression
 		}
 	| exclusive_or_expression '^' and_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, InfixOperator::Xor, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, infix_operator::bitwise_xor);
 		}
 	;
 
@@ -478,7 +478,7 @@ inclusive_or_expression
 		}
 	| inclusive_or_expression '|' exclusive_or_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, InfixOperator::Or, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, infix_operator::bitwise_or);
 		}
 	;
 
@@ -489,7 +489,7 @@ logical_and_expression
 		}
 	| logical_and_expression LOGICAL_AND_OP inclusive_or_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, InfixOperator::LogicalAnd, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, infix_operator::logical_and);
 		}
 	;
 
@@ -500,7 +500,7 @@ logical_or_expression
 		}
 	| logical_or_expression LOGICAL_OR_OP logical_and_expression
 		{
-			$$ = ast.MakeInfixExpression($1, $3, InfixOperator::LogicalOr, @$);
+			$$ = ast.make<infix_expression>(@$, $1, $3, infix_operator::logical_or);
 		}
 	;
 
@@ -511,7 +511,7 @@ assignment_expression
 		}
 	| unary_expression '=' assignment_expression
 		{
-			$$ = ast.MakeAssignmentExpression($1, $3, @$);
+			$$ = ast.make<assignment_expression>(@$, $1, $3);
 		}
 	;
 
@@ -522,7 +522,7 @@ expression
 		}
 	| expression ',' assignment_expression
 		{
-			$$ = ast.MakeCommaExpression($1, $3, @$);
+			$$ = ast.make<comma_expression>(@$, $1, $3);
 		}
 	;
 
@@ -530,7 +530,7 @@ expression
 statement_seq
 	: statement
 		{
-			$$ = ast.MakeList($1);
+			$$ = ast.make_list($1);
 		}
 	| statement_seq statement
 		{
@@ -542,81 +542,81 @@ statement_seq
 compound_statement
 	: '{' '}'
 		{
-			$$ = ast.MakeCompoundStatement(ast.MakeList<Statement>(), @$);
+			$$ = ast.make<compound_statement>(@$, ast.make_list<statement>());
 		}
 	| '{' statement_seq '}'
 		{
-			$$ = ast.MakeCompoundStatement($2, @$);
+			$$ = ast.make<compound_statement>(@$, $2);
 		}
 	;
 
 expression_statement
 	: expression ';'
 		{
-			$$ = ast.MakeExpressionStatement($1, @$);
+			$$ = ast.make<expression_statement>(@$, $1);
 		}
 	| ';'
 		{
-			$$ = ast.MakeEmptyStatement(@$);
+			$$ = ast.make<empty_statement>(@$);
 		}
 	;
 
 jump_statement
 	: BREAK ';'
 		{
-			$$ = ast.MakeBreakStatement(@$);
+			$$ = ast.make<break_statement>(@$);
 		}
 	| RETURN ';'
 		{
-			$$ = ast.MakeReturnStatement(@$);
+			$$ = ast.make<return_statement>(@$);
 		}
 	| CALL IDENTIFIER ';'
 		{
-			$$ = ast.MakeCallStatement($2, @$);
+			$$ = ast.make<call_statement>(@$, $2);
 		}
 	;
 
 selection_statement
 	: IF '(' expression ')' statement
 		{
-			$$ = ast.MakeIfStatement($3, $5, @$);
+			$$ = ast.make<if_statement>(@$, $3, $5);
 		}
 	| IF '(' expression ')' statement ELSE statement
 		{
-			$$ = ast.MakeIfElseStatement($3, $5, $7, @$);
+			$$ = ast.make<if_else_statement>(@$, $3, $5, $7);
 		}
 	;
 
 for_optional_expression
 	:
 		{
-			$$ = ast.MakeForOptionalExpression(@$);
+			$$ = ast.make<for_optional_expression>(@$);
 		}
 	| expression
 		{
-			$$ = ast.MakeForExpression($1, @$);
+			$$ = ast.make<for_expression>(@$, $1);
 		}
 	;
 
 iteration_statement
 	: WHILE '(' expression ')' statement
 		{
-			$$ = ast.MakeWhileStatement($3, $5, @$);
+			$$ = ast.make<while_statement>(@$, $3, $5);
 		}
 	| DO statement WHILE '(' expression ')' ';'
 		{
-			$$ = ast.MakeDoStatement($2, $5, @$);
+			$$ = ast.make<do_statement>(@$, $2, $5);
 		}
 	| FOR '(' for_optional_expression ';' for_optional_expression ';' for_optional_expression ')' statement
 		{
-			$$ = ast.MakeForStatement($3, $5, $7, $9, @$);
+			$$ = ast.make<for_statement>(@$, $3, $5, $7, $9);
 		}
 	;
 
 labeled_statement
 	: IDENTIFIER ':' statement
 		{
-			$$ = ast.MakeLabeledStatement($1, $3, @$);
+			$$ = ast.make<labeled_statement>(@$, $1, $3);
 		}
 	;
 
@@ -651,7 +651,7 @@ statement
 code_section
 	:
 		{
-			$$ = ast.MakeList<Statement>();
+			$$ = ast.make_list<statement>();
 		}
 	| statement_seq
 		{
@@ -663,10 +663,10 @@ code_section
 translation_unit
 	: SYMBOLS symbol_section END CODE code_section END
 		{
-			instance->SetReturnValue($$ = ast.MakeTranslationUnit(0, $2, $5, @$));
+			instance->set_return_value($$ = ast.make<translation_unit>(@$, 0, $2, $5));
 		}
 	| FLAGS '=' INTEGER_LITERAL SYMBOLS symbol_section END CODE code_section END
 		{
-			instance->SetReturnValue($$ = ast.MakeTranslationUnit($3, $5, $8, @$));
+			instance->set_return_value($$ = ast.make<translation_unit>(@$, $3, $5, $8));
 		}
 	;

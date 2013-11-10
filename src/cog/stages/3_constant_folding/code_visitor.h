@@ -8,22 +8,22 @@
 #include <string>
 #include <unordered_map>
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace ConstantFolding {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace constant_folding {
 
-class CodeVisitor : public AST::Visitor
+class code_visitor : public ast::visitor
 {
 protected:
-	AST::Factory& Factory;
-	Symbols::SymbolTable& SymbolTable;
-	const std::unordered_map<std::string, VM::Value>& ConstantTable;
+	ast::factory& Factory;
+	symbols::symbol_table& symbol_table;
+	const std::unordered_map<std::string, vm::value>& ConstantTable;
 
 public:
-	CodeVisitor(AST::Factory& factory, Symbols::SymbolTable& symbolTable,
-		const std::unordered_map<std::string, VM::Value>& constantTable,
-		Diagnostics::Report& report);
+	code_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
+		const std::unordered_map<std::string, vm::value>& constantTable,
+		diagnostics::report& report);
 
 private:
 	ASTCLASS_STATEMENT(AVPROTO);

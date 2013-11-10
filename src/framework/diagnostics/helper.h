@@ -2,60 +2,60 @@
 
 #include "report.h"
 
-namespace Gorc {
-namespace Diagnostics {
-namespace Helper {
+namespace gorc {
+namespace diagnostics {
+namespace helper {
 
-// Compiler internal errors
-void FeatureNotImplemented(Report& report, const std::string& visitorname, const std::string& action);
-void FileNotFound(Report& report, const std::string& visitorname, const std::string& filename);
-void CouldNotLoadFile(Report& report, const std::string& visitorname, const std::string& filename);
+// compiler internal errors
+void feature_not_implemented(report& report, const std::string& visitorname, const std::string& action);
+void file_not_found(report& report, const std::string& visitorname, const std::string& filename);
+void could_not_load_file(report& report, const std::string& visitorname, const std::string& filename);
 
-// Compiler lexical errors
-void UnrecognizedInput(Report& report, const std::string& input, const ErrorLocation& location);
-void EofInStringLiteral(Report& Report, const ErrorLocation& location);
-void UnknownEscapeSequence(Report& report, const std::string& sequence, const ErrorLocation& location);
-void UnescapedNewlineInString(Report& report, const ErrorLocation& location);
+// compiler lexical errors
+void unrecognized_input(report& report, const std::string& input, const error_location& location);
+void eof_in_string_literal(report& report, const error_location& location);
+void unknown_escape_sequence(report& report, const std::string& sequence, const error_location& location);
+void unescaped_newline_in_string(report& report, const error_location& location);
 
-// Compiler semantic errors
-void UnknownType(Report& report, const std::string& visitorname, const std::string& type, const ErrorLocation& location);
-void IllegalAssignment(Report& report, const std::string& visitorname, const ErrorLocation& location);
-void TypeMismatch(Report& report, const std::string& visitorname, const ErrorLocation& location);
-void UnknownExtension(Report& report, const std::string& visitorname, const std::string& extension, const ErrorLocation& location);
-void IllegalExtensionAssignment(Report& report, const std::string& visitorname, const std::string& extension, const ErrorLocation& location);
-void ExtensionTypeMismatch(Report& report, const std::string& visitorname, const std::string& extension, const ErrorLocation& location);
-void SymbolRedefinition(Report& report, const std::string& visitorname, const std::string& name, const ErrorLocation& location);
-void ExtensionRedefinition(Report& report, const std::string& visitorname, const std::string& extension, const ErrorLocation& location);
-void ExtensionValueMissing(Report& report, const std::string& visitorname, const std::string& extension, const ErrorLocation& location);
-void IllegalExtension(Report& Report, const std::string& visitorname, const std::string& extension, const ErrorLocation& location);
-void BreakOutsideLoop(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void LabelInsideBlock(Report& Report, const std::string& visitorname, const std::string& labelname, const ErrorLocation& location);
-void UnknownVerb(Report& Report, const std::string& visitorname, const std::string& verbname, const ErrorLocation& location);
-void InvalidArgumentCount(Report& Report, const std::string& visitorname, const std::string& verbname, int wanted, int found, const ErrorLocation& location);
-void UndefinedSymbol(Report& Report, const std::string& visitorname, const std::string& symbolname, const ErrorLocation& location);
-void IllegalVoidResult(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void ResultNotBoolean(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void CallToUnusedLabel(Report& Report, const std::string& visitorname, const std::string& labelname, const ErrorLocation& location);
-void LabelRedefinition(Report& Report, const std::string& visitorname, const std::string& labelname, const ErrorLocation& location);
-void MissingExport(Report& Report, const std::string& visitorname, const std::string& labelname, const ErrorLocation& location);
-void AssignToRValue(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void UndefinedArrayBase(Report& Report, const std::string& visitorname, const std::string& symbolname, const ErrorLocation& location);
+// compiler semantic errors
+void unknown_type(report& report, const std::string& visitorname, const std::string& type, const error_location& location);
+void illegal_assignment(report& report, const std::string& visitorname, const error_location& location);
+void type_mismatch(report& report, const std::string& visitorname, const error_location& location);
+void unknown_extension(report& report, const std::string& visitorname, const std::string& extension, const error_location& location);
+void illegal_extension_assignment(report& report, const std::string& visitorname, const std::string& extension, const error_location& location);
+void extension_type_mismatch(report& report, const std::string& visitorname, const std::string& extension, const error_location& location);
+void symbol_redefinition(report& report, const std::string& visitorname, const std::string& name, const error_location& location);
+void extension_redefinition(report& report, const std::string& visitorname, const std::string& extension, const error_location& location);
+void extension_value_missing(report& report, const std::string& visitorname, const std::string& extension, const error_location& location);
+void illegal_extension(report& report, const std::string& visitorname, const std::string& extension, const error_location& location);
+void break_outside_loop(report& report, const std::string& visitorname, const error_location& location);
+void label_inside_block(report& report, const std::string& visitorname, const std::string& labelname, const error_location& location);
+void unknown_verb(report& report, const std::string& visitorname, const std::string& verbname, const error_location& location);
+void invalid_argument_count(report& report, const std::string& visitorname, const std::string& verbname, int wanted, int found, const error_location& location);
+void undefined_symbol(report& report, const std::string& visitorname, const std::string& symbolname, const error_location& location);
+void illegal_void_result(report& report, const std::string& visitorname, const error_location& location);
+void result_not_boolean(report& report, const std::string& visitorname, const error_location& location);
+void call_to_unused_label(report& report, const std::string& visitorname, const std::string& labelname, const error_location& location);
+void label_redefinition(report& report, const std::string& visitorname, const std::string& labelname, const error_location& location);
+void missing_export(report& report, const std::string& visitorname, const std::string& labelname, const error_location& location);
+void assign_to_rvalue(report& report, const std::string& visitorname, const error_location& location);
+void undefined_array_base(report& report, const std::string& visitorname, const std::string& symbolname, const error_location& location);
 
 // Other file errors
-void FileCorrupt(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void ExpectedNumber(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void ExpectedPunctuator(Report& Report, const std::string& visitorname, const std::string& found, const std::string& expected, const ErrorLocation& location);
-void ExpectedIdentifier(Report& Report, const std::string& visitorname, const std::string& found, const std::string& expected, const ErrorLocation& location);
-void ExpectedFilename(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void ExpectedString(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void ExpectedLabel(Report& Report, const std::string& visitorname, const std::string& found, const std::string& expected, const ErrorLocation& location);
-void ExpectedEndOfFile(Report& Report, const std::string& visitorname, const std::string& found, const ErrorLocation& location);
-void UnexpectedEndOfFileInString(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void UnexpectedEndOfLineInString(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void Expected(Report& Report, const std::string& visitorname, const std::string& expected, const ErrorLocation& location);
-void UnexpectedEndOfFile(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void UnexpectedEndOfLine(Report& Report, const std::string& visitorname, const ErrorLocation& location);
-void TemplateRedefinition(Report& Report, const std::string& visitorname, const std::string& tplname, const ErrorLocation& location);
+void file_corrupt(report& report, const std::string& visitorname, const error_location& location);
+void expected_number(report& report, const std::string& visitorname, const error_location& location);
+void expected_punctuator(report& report, const std::string& visitorname, const std::string& found, const std::string& expected, const error_location& location);
+void expected_identifier(report& report, const std::string& visitorname, const std::string& found, const std::string& expected, const error_location& location);
+void expected_filename(report& report, const std::string& visitorname, const error_location& location);
+void expected_string(report& report, const std::string& visitorname, const error_location& location);
+void expected_label(report& report, const std::string& visitorname, const std::string& found, const std::string& expected, const error_location& location);
+void expected_end_of_file(report& report, const std::string& visitorname, const std::string& found, const error_location& location);
+void unexpected_end_of_file_in_string(report& report, const std::string& visitorname, const error_location& location);
+void unexpected_end_of_line_in_string(report& report, const std::string& visitorname, const error_location& location);
+void expected(report& report, const std::string& visitorname, const std::string& expected, const error_location& location);
+void unexpected_end_of_file(report& report, const std::string& visitorname, const error_location& location);
+void unexpected_end_of_line(report& report, const std::string& visitorname, const error_location& location);
+void template_redefinition(report& report, const std::string& visitorname, const std::string& tplname, const error_location& location);
 
 }
 }

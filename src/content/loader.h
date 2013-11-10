@@ -1,20 +1,20 @@
 #pragma once
 
 #include "framework/diagnostics/report.h"
-#include "framework/io/readonlyfile.h"
+#include "framework/io/read_only_file.h"
 #include "asset.h"
 #include <memory>
 
-namespace Gorc {
-namespace Content {
+namespace gorc {
+namespace content {
 
-class Manager;
+class manager;
 
-class Loader {
+class loader {
 public:
-	virtual ~Loader();
+	virtual ~loader();
 
-	virtual std::unique_ptr<Asset> Deserialize(IO::ReadOnlyFile& file, Manager& manager, Diagnostics::Report& report) = 0;
+	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) = 0;
 };
 
 }

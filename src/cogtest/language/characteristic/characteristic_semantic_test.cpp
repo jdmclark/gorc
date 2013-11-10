@@ -3,13 +3,13 @@
 #include <fstream>
 
 #include "cogtest/language/semantic_test_fixture.h"
-#include "cog/messageid.h"
+#include "cog/message_id.h"
 #include "vfssingleton.h"
 
 class CharacteristicSemanticTestFixture : public SemanticTestFixture {
 public:
 	CharacteristicSemanticTestFixture()
-		: SemanticTestFixture(VfsSingleton::Get()) {
+		: SemanticTestFixture(VfsSingleton::get()) {
 		// Macros for building mock verbs
 #define V_PARAM_0
 #define V_PARAM_1 int
@@ -23,11 +23,11 @@ public:
 #define V_PARAM_9 int, V_PARAM_8
 #define V_PARAM_10 int, V_PARAM_9
 
-#define VERB_VOID(x, y) VerbTable.AddVerb<void, y>(x, [](V_PARAM_##y){});
-#define VERB_INT(x, y) VerbTable.AddVerb<int, y>(x, [](V_PARAM_##y) -> int { return 0; });
-#define VERB_BOOL(x, y) VerbTable.AddVerb<bool, y>(x, [](V_PARAM_##y) -> bool { return false; });
+#define VERB_VOID(x, y) verb_table.add_verb<void, y>(x, [](V_PARAM_##y){});
+#define VERB_INT(x, y) verb_table.add_verb<int, y>(x, [](V_PARAM_##y) -> int { return 0; });
+#define VERB_BOOL(x, y) verb_table.add_verb<bool, y>(x, [](V_PARAM_##y) -> bool { return false; });
 
-#define CONST(x, y) ConstantTable.insert(std::make_pair(x, Gorc::Cog::VM::Value(static_cast<int>(y))));
+#define CONST(x, y) ConstantTable.insert(std::make_pair(x, gorc::cog::vm::value(static_cast<int>(y))));
 
 		// Build mock verb table for characteristic testing.
 
@@ -510,48 +510,48 @@ public:
 
 		// Add message IDs to the constant table.
 
-		CONST("activate", Gorc::Cog::MessageId::Activated);
-		CONST("activated", Gorc::Cog::MessageId::Activated);
-		CONST("aievent", Gorc::Cog::MessageId::AiEvent);
-		CONST("arrived", Gorc::Cog::MessageId::Arrived);
-		CONST("autoselect", Gorc::Cog::MessageId::Autoselect);
-		CONST("blocked", Gorc::Cog::MessageId::Blocked);
-		CONST("changed", Gorc::Cog::MessageId::Changed);
-		CONST("created", Gorc::Cog::MessageId::Created);
-		CONST("crossed", Gorc::Cog::MessageId::Crossed);
-		CONST("damaged", Gorc::Cog::MessageId::Damaged);
-		CONST("deactivated", Gorc::Cog::MessageId::Deactivated);
-		CONST("deselected", Gorc::Cog::MessageId::Deselected);
-		CONST("entered", Gorc::Cog::MessageId::Entered);
-		CONST("exited", Gorc::Cog::MessageId::Exited);
-		CONST("fire", Gorc::Cog::MessageId::Fire);
-		CONST("global0", Gorc::Cog::MessageId::Global0);
-		CONST("join", Gorc::Cog::MessageId::Join);
-		CONST("killed", Gorc::Cog::MessageId::Killed);
-		CONST("leave", Gorc::Cog::MessageId::Leave);
-		CONST("loading", Gorc::Cog::MessageId::Loading);
-		CONST("newplayer", Gorc::Cog::MessageId::NewPlayer);
-		CONST("pulse", Gorc::Cog::MessageId::Pulse);
-		CONST("removed", Gorc::Cog::MessageId::Removed);
-		CONST("respawn", Gorc::Cog::MessageId::Respawn);
-		CONST("selected", Gorc::Cog::MessageId::Selected);
-		CONST("shutdown", Gorc::Cog::MessageId::Shutdown);
-		CONST("sighted", Gorc::Cog::MessageId::Sighted);
-		CONST("skill", Gorc::Cog::MessageId::Skill);
-		CONST("splash", Gorc::Cog::MessageId::Splash);
-		CONST("startup", Gorc::Cog::MessageId::Startup);
-		CONST("taken", Gorc::Cog::MessageId::Taken);
-		CONST("timer", Gorc::Cog::MessageId::Timer);
-		CONST("touched", Gorc::Cog::MessageId::Touched);
-		CONST("trigger", Gorc::Cog::MessageId::Trigger);
-		CONST("user0", Gorc::Cog::MessageId::User0);
-		CONST("user1", Gorc::Cog::MessageId::User1);
-		CONST("user2", Gorc::Cog::MessageId::User2);
-		CONST("user3", Gorc::Cog::MessageId::User3);
-		CONST("user4", Gorc::Cog::MessageId::User4);
-		CONST("user5", Gorc::Cog::MessageId::User5);
-		CONST("user6", Gorc::Cog::MessageId::User6);
-		CONST("user7", Gorc::Cog::MessageId::User7);
+		CONST("activate", gorc::cog::message_id::activated);
+		CONST("activated", gorc::cog::message_id::activated);
+		CONST("aievent", gorc::cog::message_id::ai_event);
+		CONST("arrived", gorc::cog::message_id::arrived);
+		CONST("autoselect", gorc::cog::message_id::autoselect);
+		CONST("blocked", gorc::cog::message_id::blocked);
+		CONST("changed", gorc::cog::message_id::changed);
+		CONST("created", gorc::cog::message_id::created);
+		CONST("crossed", gorc::cog::message_id::crossed);
+		CONST("damaged", gorc::cog::message_id::damaged);
+		CONST("deactivated", gorc::cog::message_id::deactivated);
+		CONST("deselected", gorc::cog::message_id::deselected);
+		CONST("entered", gorc::cog::message_id::entered);
+		CONST("exited", gorc::cog::message_id::exited);
+		CONST("fire", gorc::cog::message_id::fire);
+		CONST("global0", gorc::cog::message_id::global0);
+		CONST("join", gorc::cog::message_id::join);
+		CONST("killed", gorc::cog::message_id::killed);
+		CONST("leave", gorc::cog::message_id::leave);
+		CONST("loading", gorc::cog::message_id::loading);
+		CONST("newplayer", gorc::cog::message_id::new_player);
+		CONST("pulse", gorc::cog::message_id::pulse);
+		CONST("removed", gorc::cog::message_id::removed);
+		CONST("respawn", gorc::cog::message_id::respawn);
+		CONST("selected", gorc::cog::message_id::selected);
+		CONST("shutdown", gorc::cog::message_id::shutdown);
+		CONST("sighted", gorc::cog::message_id::sighted);
+		CONST("skill", gorc::cog::message_id::skill);
+		CONST("splash", gorc::cog::message_id::splash);
+		CONST("startup", gorc::cog::message_id::startup);
+		CONST("taken", gorc::cog::message_id::taken);
+		CONST("timer", gorc::cog::message_id::timer);
+		CONST("touched", gorc::cog::message_id::touched);
+		CONST("trigger", gorc::cog::message_id::trigger);
+		CONST("user0", gorc::cog::message_id::user0);
+		CONST("user1", gorc::cog::message_id::user1);
+		CONST("user2", gorc::cog::message_id::user2);
+		CONST("user3", gorc::cog::message_id::user3);
+		CONST("user4", gorc::cog::message_id::user4);
+		CONST("user5", gorc::cog::message_id::user5);
+		CONST("user6", gorc::cog::message_id::user6);
+		CONST("user7", gorc::cog::message_id::user7);
 
 		return;
 	}

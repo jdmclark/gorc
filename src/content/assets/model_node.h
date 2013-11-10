@@ -1,28 +1,28 @@
 #pragma once
 
-#include "content/flags/meshnodetype.h"
-#include "framework/flagset.h"
+#include "content/flags/mesh_node_type.h"
+#include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 #include <string>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class ModelNode {
+class model_node {
 public:
-	FlagSet<Flags::MeshNodeType> Type;
-	int Mesh;
-	int Parent;
-	int Child;
-	int Sibling;
-	int NumChildren;
+	flag_set<flags::mesh_node_type> type;
+	int mesh;
+	int parent;
+	int child;
+	int sibling;
+	int num_children;
 
-	Math::Vector<3> Offset;
-	Math::Vector<3> Rotation;
-	Math::Vector<3> Pivot;
+	vector<3> offset;
+	vector<3> rotation;
+	vector<3> pivot;
 
-	std::string Name;
+	std::string name;
 };
 
 }

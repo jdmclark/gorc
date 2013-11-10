@@ -7,22 +7,22 @@
 #include <unordered_set>
 #include <string>
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace SemanticAnalysis {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace semantic_analysis {
 
-class SymbolVisitor : public AST::Visitor
+class symbol_visitor : public ast::visitor
 {
 protected:
-	Symbols::SymbolTable& SymbolTable;
+	symbols::symbol_table& symbol_table;
 	const std::unordered_set<std::string>& SeenLabels;
 
 public:
-	SymbolVisitor(Symbols::SymbolTable& st, const std::unordered_set<std::string>& SeenLabels, Diagnostics::Report& report);
+	symbol_visitor(symbols::symbol_table& st, const std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
 
 private:
-	Symbols::SymbolType GetType(AST::Symbol& symbol);
+	symbols::symbol_type get_type(ast::symbol& symbol);
 
 	ASTCLASS_SYMBOL(AVPROTO);
 };

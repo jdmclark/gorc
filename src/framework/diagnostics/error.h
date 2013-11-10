@@ -1,21 +1,21 @@
 #pragma once
 
-#include "errorlevel.h"
-#include "errorlocation.h"
+#include "error_level.h"
+#include "error_location.h"
 
 #include <string>
 
-namespace Gorc {
-namespace Diagnostics {
+namespace gorc {
+namespace diagnostics {
 
-class Error {
+class error {
 public:
-	const ErrorLevel Level;
-	const std::string Stage;
-	const std::string Reason;
-	const ErrorLocation Location;
+	const error_level level;
+	const std::string stage;
+	const std::string reason;
+	const error_location location;
 
-	Error(ErrorLevel level, const std::string& stage, const std::string& reason, const ErrorLocation& errorLocation);
+	error(error_level level, const std::string& stage, const std::string& reason, const error_location& errorLocation);
 
 	operator std::string() const;
 };

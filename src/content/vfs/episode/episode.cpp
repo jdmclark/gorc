@@ -7,73 +7,73 @@
 #include "framework/diagnostics/helper.h"
 #include <boost/algorithm/string.hpp>
 
-Gorc::Content::VFS::Episode::Episode::Episode(IO::ReadOnlyFile& file, Diagnostics::Report& report) {
-	Text::Source src(file);
-	Text::Tokenizer tok(src, report);
-	Text::Token t;
+gorc::content::vfs::episode::episode::episode(io::read_only_file& file, diagnostics::report& report) {
+	text::source src(file);
+	text::tokenizer tok(src, report);
+	text::token t;
 
-	EpisodeName = tok.GetStringLiteral();
+	EpisodeName = tok.get_string_literal();
 
-	tok.AssertIdentifier("TYPE");
-	Type = static_cast<EpisodeType>(tok.GetNumber<int>());
+	tok.assert_identifier("TYPE");
+	type = static_cast<episode_type>(tok.get_number<int>());
 
-	tok.AssertIdentifier("SEQ");
-	int nEntries = tok.GetNumber<int>();
+	tok.assert_identifier("SEQ");
+	int nEntries = tok.get_number<int>();
 
 	while(true) {
-		tok.GetToken(t);
-		if(t.Type == Text::TokenType::EndOfFile) {
-			Diagnostics::Helper::UnexpectedEndOfFile(report, "episode", t.Location);
+		tok.get_token(t);
+		if(t.type == text::token_type::end_of_file) {
+			diagnostics::helper::unexpected_end_of_file(report, "episode", t.location);
 			return;
 		}
-		else if(t.Type == Text::TokenType::Identifier && t.Value == "end") {
+		else if(t.type == text::token_type::identifier && t.value == "end") {
 			return;
 		}
-		else if(t.Type == Text::TokenType::Integer) {
-			int number = t.GetNumericValue<int>();
-			tok.AssertPunctuator(":");
-			int disc = tok.GetNumber<int>();
-			int level = tok.GetNumber<int>();
+		else if(t.type == text::token_type::integer) {
+			int number = t.get_numeric_value<int>();
+			tok.assert_punctuator(":");
+			int disc = tok.get_number<int>();
+			int level = tok.get_number<int>();
 
-			EntryType entryType;
+			entry_type entryType;
 
-			std::string entryToken = tok.GetIdentifier();
+			std::string entryToken = tok.get_identifier();
 			if(boost::iequals(entryToken, "CUT")) {
-				entryType = EntryType::Cutscene;
+				entryType = entry_type::cutscene;
 			}
 			else if(boost::iequals(entryToken, "LEVEL")) {
-				entryType = EntryType::Level;
+				entryType = entry_type::level;
 			}
 			else if(boost::iequals(entryToken, "DECIDE")) {
-				entryType = EntryType::Decision;
+				entryType = entry_type::decision;
 			}
 			else {
-				report.AddError("episode", "unrecognized episode entry type", tok.GetInternalTokenLocation());
-				throw IO::FileCorruptException();
+				report.add_error("episode", "unrecognized episode entry type", tok.get_internal_token_location());
+				throw io::file_corrupt_exception();
 			}
 
-			std::string filename = tok.GetSpaceDelimitedString();
-			int lightpow = tok.GetNumber<int>();
-			int darkpow = tok.GetNumber<int>();
-			int gotoa = tok.GetNumber<int>();
-			int gotob = tok.GetNumber<int>();
+			std::string filename = tok.get_space_delimited_string();
+			int lightpow = tok.get_number<int>();
+			int darkpow = tok.get_number<int>();
+			int gotoa = tok.get_number<int>();
+			int gotob = tok.get_number<int>();
 
 			entryMap.insert(std::make_pair(number, entries.size()));
 			entries.emplace_back(number, disc, level, entryType, filename, lightpow, darkpow, gotoa, gotob);
 		}
 		else {
-			Diagnostics::Helper::Expected(report, "episode", "entry number or end", t.Location);
-			throw IO::FileCorruptException();
+			diagnostics::helper::expected(report, "episode", "entry number or end", t.location);
+			throw io::file_corrupt_exception();
 		}
 	}
 
 	return;
 }
 
-const Gorc::Content::VFS::Episode::Entry& Gorc::Content::VFS::Episode::Episode::GetEntry(int LineNumber) const {
+const gorc::content::vfs::episode::entry& gorc::content::vfs::episode::episode::get_entry(int LineNumber) const {
 	auto it = entryMap.find(LineNumber);
 	if(it == entryMap.end()) {
-		throw LineDoesNotExistException();
+		throw line_does_not_exist_exception();
 	}
 
 	return entries[it->second];

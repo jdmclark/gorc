@@ -1,18 +1,18 @@
 #include "source.h"
 
-Gorc::Text::Source::Source(Gorc::IO::ReadOnlyFile& file)
-	: index(0), Filename(file.Filename.generic_string()) {
-	size_t fsize = file.GetSize();
+gorc::text::source::source(gorc::io::read_only_file& file)
+	: index(0), filename(file.Filename.generic_string()) {
+	size_t fsize = file.get_size();
 	if(fsize == 0) {
 		return;
 	}
 
 	buffer.resize(fsize, 0);
-	file.Read(&buffer[0], fsize);
+	file.read(&buffer[0], fsize);
 }
 
-Gorc::Text::Source::Source(const std::string& str)
-	: index(0), Filename("internal buffer") {
+gorc::text::source::source(const std::string& str)
+	: index(0), filename("internal buffer") {
 	buffer.assign(str.begin(), str.end());
 	return;
 }

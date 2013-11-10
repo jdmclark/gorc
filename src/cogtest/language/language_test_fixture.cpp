@@ -7,18 +7,18 @@ LanguageTestFixture::LanguageTestFixture(const boost::filesystem::path& BasePath
 	return;
 }
 
-LanguageTestFixture::LanguageTestFixture(const Gorc::Content::FileSystem& fs)
+LanguageTestFixture::LanguageTestFixture(const gorc::content::filesystem& fs)
 	: nfs(""), FileSystem(fs) {
 	return;
 }
 
 void LanguageTestFixture::PrintErrors() const {
-	for(const auto& error : Report) {
+	for(const auto& error : report) {
 		NullUnit::Test_Reporter->CaseExpectationFail(
 				NullUnit::Test_Suite_Name,
 				NullUnit::Test_Case_Name,
 				static_cast<std::string>(error),
-				error.Location.filename.generic_string(),
-				error.Location.first_line);
+				error.location.filename.generic_string(),
+				error.location.first_line);
 	}
 }

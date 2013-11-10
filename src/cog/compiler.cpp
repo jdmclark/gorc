@@ -2,97 +2,97 @@
 #include "framework/text/source.h"
 #include "cog/stages/stages.h"
 #include "cog/ast/factory.h"
-#include "cog/ir/codeprinter.h"
+#include "cog/ir/code_printer.h"
 #include "framework/io/exception.h"
 
-void Gorc::Cog::Compiler::AddMessageId(const std::string& name, MessageId value) {
+void gorc::cog::compiler::add_message_id(const std::string& name, message_id value) {
 	MessageTable.insert(std::make_pair(name, value));
 	ConstantTable.insert(std::make_pair(name, static_cast<int>(value)));
 }
 
-void Gorc::Cog::Compiler::PopulateTables() {
-	AddMessageId("activate", MessageId::Activated);
-	AddMessageId("activated", MessageId::Activated);
-	AddMessageId("aievent", MessageId::AiEvent);
-	AddMessageId("arrived", MessageId::Arrived);
-	AddMessageId("autoselect", MessageId::Autoselect);
-	AddMessageId("blocked", MessageId::Blocked);
-	AddMessageId("changed", MessageId::Changed);
-	AddMessageId("created", MessageId::Created);
-	AddMessageId("crossed", MessageId::Crossed);
-	AddMessageId("damaged", MessageId::Damaged);
-	AddMessageId("deactivated", MessageId::Deactivated);
-	AddMessageId("deselected", MessageId::Deselected);
-	AddMessageId("entered", MessageId::Entered);
-	AddMessageId("exited", MessageId::Exited);
-	AddMessageId("fire", MessageId::Fire);
-	AddMessageId("global0", MessageId::Global0);
-	AddMessageId("join", MessageId::Join);
-	AddMessageId("killed", MessageId::Killed);
-	AddMessageId("leave", MessageId::Leave);
-	AddMessageId("loading", MessageId::Loading);
-	AddMessageId("newplayer", MessageId::NewPlayer);
-	AddMessageId("pulse", MessageId::Pulse);
-	AddMessageId("removed", MessageId::Removed);
-	AddMessageId("respawn", MessageId::Respawn);
-	AddMessageId("selected", MessageId::Selected);
-	AddMessageId("shutdown", MessageId::Shutdown);
-	AddMessageId("sighted", MessageId::Sighted);
-	AddMessageId("skill", MessageId::Skill);
-	AddMessageId("splash", MessageId::Splash);
-	AddMessageId("startup", MessageId::Startup);
-	AddMessageId("taken", MessageId::Taken);
-	AddMessageId("timer", MessageId::Timer);
-	AddMessageId("touched", MessageId::Touched);
-	AddMessageId("trigger", MessageId::Trigger);
-	AddMessageId("user0", MessageId::User0);
-	AddMessageId("user1", MessageId::User1);
-	AddMessageId("user2", MessageId::User2);
-	AddMessageId("user3", MessageId::User3);
-	AddMessageId("user4", MessageId::User4);
-	AddMessageId("user5", MessageId::User5);
-	AddMessageId("user6", MessageId::User6);
-	AddMessageId("user7", MessageId::User7);
+void gorc::cog::compiler::populate_tables() {
+	add_message_id("activate", message_id::activated);
+	add_message_id("activated", message_id::activated);
+	add_message_id("aievent", message_id::ai_event);
+	add_message_id("arrived", message_id::arrived);
+	add_message_id("autoselect", message_id::autoselect);
+	add_message_id("blocked", message_id::blocked);
+	add_message_id("changed", message_id::changed);
+	add_message_id("created", message_id::created);
+	add_message_id("crossed", message_id::crossed);
+	add_message_id("damaged", message_id::damaged);
+	add_message_id("deactivated", message_id::deactivated);
+	add_message_id("deselected", message_id::deselected);
+	add_message_id("entered", message_id::entered);
+	add_message_id("exited", message_id::exited);
+	add_message_id("fire", message_id::fire);
+	add_message_id("global0", message_id::global0);
+	add_message_id("join", message_id::join);
+	add_message_id("killed", message_id::killed);
+	add_message_id("leave", message_id::leave);
+	add_message_id("loading", message_id::loading);
+	add_message_id("newplayer", message_id::new_player);
+	add_message_id("pulse", message_id::pulse);
+	add_message_id("removed", message_id::removed);
+	add_message_id("respawn", message_id::respawn);
+	add_message_id("selected", message_id::selected);
+	add_message_id("shutdown", message_id::shutdown);
+	add_message_id("sighted", message_id::sighted);
+	add_message_id("skill", message_id::skill);
+	add_message_id("splash", message_id::splash);
+	add_message_id("startup", message_id::startup);
+	add_message_id("taken", message_id::taken);
+	add_message_id("timer", message_id::timer);
+	add_message_id("touched", message_id::touched);
+	add_message_id("trigger", message_id::trigger);
+	add_message_id("user0", message_id::user0);
+	add_message_id("user1", message_id::user1);
+	add_message_id("user2", message_id::user2);
+	add_message_id("user3", message_id::user3);
+	add_message_id("user4", message_id::user4);
+	add_message_id("user5", message_id::user5);
+	add_message_id("user6", message_id::user6);
+	add_message_id("user7", message_id::user7);
 
 	return;
 }
 
-Gorc::Cog::Compiler::Compiler(Verbs::VerbTable& vt)
-	: VerbTable(vt) {
-	PopulateTables();
+gorc::cog::compiler::compiler(verbs::verb_table& vt)
+	: verb_table(vt) {
+	populate_tables();
 }
 
-void Gorc::Cog::Compiler::Compile(IO::ReadOnlyFile& file, Script& output, Diagnostics::Report& report) const {
-	unsigned int prevErrorCount = report.GetErrorCount();
+void gorc::cog::compiler::compile(io::read_only_file& file, script& output, diagnostics::report& report) const {
+	unsigned int prevErrorCount = report.get_error_count();
 
-	AST::Factory astFactory;
-	Text::Source source(file);
+	ast::factory astFactory;
+	text::source source(file);
 
-	AST::TranslationUnit* ast = Stages::GenerateAST::GenerateAST(source, report, astFactory);
+	ast::translation_unit* ast = stages::generate_ast::generate_ast(source, report, astFactory);
 
-	if(report.GetErrorCount() != prevErrorCount) {
-		throw IO::FileCorruptException();
+	if(report.get_error_count() != prevErrorCount) {
+		throw io::file_corrupt_exception();
 	}
 
-	Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(ast, output.SymbolTable, ConstantTable, VerbTable, report);
+	gorc::cog::stages::semantic_analysis::semantic_analysis(ast, output.symbol_table, ConstantTable, verb_table, report);
 
-	if(report.GetErrorCount() != prevErrorCount) {
-		throw IO::FileCorruptException();
+	if(report.get_error_count() != prevErrorCount) {
+		throw io::file_corrupt_exception();
 	}
 
-	Gorc::Cog::Stages::ConstantFolding::ConstantFolding(astFactory, ast, output.SymbolTable, ConstantTable, report);
+	gorc::cog::stages::constant_folding::constant_folding(astFactory, ast, output.symbol_table, ConstantTable, report);
 
-	if(report.GetErrorCount() != prevErrorCount) {
-		throw IO::FileCorruptException();
+	if(report.get_error_count() != prevErrorCount) {
+		throw io::file_corrupt_exception();
 	}
 
-	IR::CodePrinter printer(output.Code, output.SymbolTable, MessageTable, VerbTable, output.JumpTable);
+	ir::code_printer printer(output.code, output.symbol_table, MessageTable, verb_table, output.jump_table);
 
-	Gorc::Cog::Stages::GenerateCode::GenerateCode(ast, printer, report);
+	gorc::cog::stages::generate_code::generate_code(ast, printer, report);
 
-	if(report.GetErrorCount() != prevErrorCount) {
-		throw IO::FileCorruptException();
+	if(report.get_error_count() != prevErrorCount) {
+		throw io::file_corrupt_exception();
 	}
 
-	output.Flags = FlagSet<Flags::CogFlag> { ast->Flags };
+	output.flags = flag_set<flags::cog_flag> { ast->flags };
 }

@@ -2,20 +2,31 @@
 
 #include <memory>
 
-namespace Gorc {
-namespace Game {
-namespace World {
-namespace Level {
-namespace Animations {
+namespace gorc {
+namespace game {
+namespace world {
+namespace level {
+namespace animations {
 
-class Animation {
+class animation {
+private:
+	int id = -1;
+
 public:
-	bool Expired = false;
+	bool expired = false;
 
-	virtual ~Animation();
+	virtual ~animation();
 
-	virtual void Update(double dt) = 0;
-	virtual void Stop();
+	inline void set_id(int id) {
+		this->id = id;
+	}
+
+	inline int get_id() const {
+		return id;
+	}
+
+	virtual void update(double dt) = 0;
+	virtual void stop();
 };
 
 }

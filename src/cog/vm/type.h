@@ -2,18 +2,18 @@
 
 #include <cstdint>
 
-namespace Gorc {
-namespace Cog {
-namespace VM {
+namespace gorc {
+namespace cog {
+namespace vm {
 
-enum class Type : uint8_t {
-	Void,
-	Integer,
-	Float,
-	Boolean,
-	String,
-	Vector,
-	Dynamic
+enum class type : uint8_t {
+	nothing,
+	integer,
+	floating,
+	boolean,
+	string,
+	vector,
+	dynamic
 };
 
 }

@@ -3,23 +3,23 @@
 #include "content/asset.h"
 #include "puppet_mode.h"
 #include "content/loaders/puppet_loader.h"
-#include "content/flags/puppetmodetype.h"
+#include "content/flags/puppet_mode_type.h"
 #include <array>
 #include <unordered_map>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Puppet : public Asset {
+class puppet : public asset {
 public:
-	using Loader = Loaders::PuppetLoader;
+	using loader = loaders::puppet_loader;
 
-	std::array<PuppetMode, 6> Modes;
-	std::unordered_map<int, int> JointMap;
+	std::array<puppet_mode, 6> modes;
+	std::unordered_map<int, int> joint_map;
 
-	inline const PuppetMode& GetMode(Flags::PuppetModeType mode) const {
-		return Modes[static_cast<unsigned int>(mode)];
+	inline const puppet_mode& get_mode(flags::puppet_mode_type mode) const {
+		return modes[static_cast<unsigned int>(mode)];
 	}
 };
 

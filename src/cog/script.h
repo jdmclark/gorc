@@ -1,23 +1,23 @@
 #pragma once
 
 #include "cog/symbols/table.h"
-#include "cog/vm/jumptable.h"
-#include "cog/vm/codebuffer.h"
-#include "cog/flags/cogflag.h"
-#include "framework/flagset.h"
+#include "cog/vm/jump_table.h"
+#include "cog/vm/code_buffer.h"
+#include "cog/flags/cog_flag.h"
+#include "framework/utility/flag_set.h"
 #include <memory>
 
-namespace Gorc {
-namespace Cog {
+namespace gorc {
+namespace cog {
 
-class Script {
+class script {
 public:
-	Script();
+	script();
 
-	FlagSet<Flags::CogFlag> Flags;
-	Symbols::SymbolTable SymbolTable;
-	VM::JumpTable JumpTable;
-	VM::CodeBuffer Code;
+	flag_set<flags::cog_flag> flags;
+	symbols::symbol_table symbol_table;
+	vm::jump_table jump_table;
+	vm::code_buffer code;
 };
 
 }

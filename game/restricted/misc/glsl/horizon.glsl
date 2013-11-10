@@ -1,3 +1,5 @@
+#version 130
+
 #ifdef VERTEXPROGRAM
 
 uniform mat4 projection_matrix;
@@ -10,7 +12,9 @@ void main() {
 	gl_FrontColor = gl_Color;
 }
 
-#else if FRAGMENTPROGRAM
+#endif
+
+#ifdef FRAGMENTPROGRAM
 
 uniform sampler2D diffuse;
 uniform vec4 sector_tint;
@@ -18,7 +22,7 @@ uniform vec2 screen_size;
 uniform vec3 horizon_sky_offset;
 
 void horizon_sky_texture_coordinates(in vec4 vScreenPos, out vec2 tex_coords) {
-	vec2 vTexCoord = vScreenPos * horizon_sky_offset.z / screen_size.x;
+	vec2 vTexCoord = vScreenPos.xy * horizon_sky_offset.z / screen_size.x;
 	
 	vTexCoord.x += horizon_sky_offset.x;
 	vTexCoord.y += horizon_sky_offset.y;
@@ -40,4 +44,3 @@ void main() {
 }
 
 #endif
-

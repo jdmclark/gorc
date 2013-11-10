@@ -1,5 +1,5 @@
 #include "script.h"
 
-Gorc::Cog::Script::Script() {
+gorc::cog::script::script() {
 	return;
 }

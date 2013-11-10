@@ -1,13 +1,13 @@
 #include "presenter.h"
 
-Gorc::Place::Presenter::~Presenter() {
+gorc::place::presenter::~presenter() {
 	return;
 }
 
-bool Gorc::Place::Presenter::CanStop() {
+bool gorc::place::presenter::can_stop() {
 	return true;
 }
 
-void Gorc::Place::Presenter::Stop() {
+void gorc::place::presenter::stop() {
 	return;
 }

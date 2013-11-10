@@ -2,6 +2,6 @@
 
 #include <exception>
 
-namespace Gorc {
-class Exception : public std::exception { };
+namespace gorc {
+class exception : public std::exception { };
 }

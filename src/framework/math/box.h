@@ -1,110 +1,89 @@
 #pragma once
 
-#include <algorithm>
 #include "vector.h"
+#include <array>
+#include <tuple>
 
-namespace Gorc {
-namespace Math {
+namespace gorc {
+inline namespace math {
 
-template <size_t d, typename F = float> class Box {
-private:
-	std::array<std::tuple<F, F>, d> range;
+template <size_t n, typename F = float> class box {
+	template <size_t m, size_t o, typename G> friend std::tuple<G, G> get_range(const box<o, G>&);
+	template <size_t m, size_t o, typename G> friend G get_size(const box<o, G>&);
 
 public:
-	using iterator = decltype(range.begin());
-	using const_iterator = decltype(range.cbegin());
+	vector<n, F> v0, v1;
 
-	iterator begin() {
-		return range.begin();
-	}
+	constexpr box() { }
+	constexpr box(const vector<n, F>& v0, const vector<n, F>& v1) : v0(v0), v1(v1) { }
 
-	const_iterator begin() const {
-		return range.begin();
-	}
+	bool contains(const vector<n, F>& v) {
+		auto it = v0.begin();
+		auto jt = v1.begin();
+		auto rt = v.begin();
 
-	const_iterator cbegin() const {
-		return range.cbegin();
-	}
-
-	iterator end() {
-		return range.end();
-	}
-
-	const_iterator end() const {
-		return range.end();
-	}
-
-	const_iterator cend() const {
-		return range.cend();
-	}
-
-	Box() {
-		return;
-	}
-
-	Box(const Vector<d, F>& v, const Vector<d, F>& w) {
-		auto kt = range.begin();
-		for(auto it = v.begin(), jt = w.begin(); it != v.end(); ++it, ++jt, ++kt) {
-			auto min = std::min(*it, *jt);
-			auto max = std::max(*it, *jt);
-			*kt = std::make_tuple(min, max);
-		}
-		return;
-	}
-
-	template <unsigned int e> F Size() const {
-		const auto& col = std::get<e>(range);
-		return std::get<1>(col) - std::get<0>(col);
-	}
-
-	template <typename G> operator Box<d, G>() const {
-		Box<d, G> rv;
-		auto it = begin();
-		auto jt = rv.begin();
-		for( ; it != end(); ++it, ++jt) {
-			*jt = std::make_tuple(static_cast<G>(std::get<0>(*it)), static_cast<G>(std::get<1>(*it)));
+		for(; it != v0.end(); ++it, ++jt, ++rt) {
+			if(*rt < *it || *rt > *jt) {
+				return false;
+			}
 		}
 
-		return rv;
+		return true;
 	}
 
-	Box<d, F> operator+(const Box<d, F>& box) const {
-		Box<d, F> rv;
-		auto rv_it = rv.begin();
-		for(auto it = begin(), jt = box.begin(); it != end(); ++rv_it, ++it, ++jt) {
-			*rv_it = std::make_tuple(std::min(std::get<0>(*it), std::get<0>(*jt)),
-					std::max(std::get<1>(*it), std::get<1>(*jt)));
+	box operator+(const vector<n, F>& v) const {
+		return box(v0 + v, v1 + v);
+	}
+
+	box operator-(const vector<n, F>& v) const {
+		return box(v0 - v, v1 - v);
+	}
+
+	bool operator==(const box& b) const {
+		return v0 == b.v0 && v1 == b.v1;
+	}
+
+	bool operator!=(const box& b) const {
+		return v0 != b.v0 || v1 != b.v1;
+	}
+
+	box operator&(const box& b) const {
+		vector<n> nv0, nv1;
+
+		auto v0_it = v0.begin(), v1_it = v1.begin(), b0_it = b.v0.begin(), b1_it = b.v1.begin();
+		auto nv0_it = nv0.begin(), nv1_it = nv1.begin();
+		for(; v0_it != v0.end(); ++v0_it, ++v1_it, ++b0_it, ++b1_it, ++nv0_it, ++nv1_it) {
+			*nv0_it = std::max(*v0_it, *b0_it);
+			*nv1_it = std::min(*v1_it, *b1_it);
 		}
 
-		return rv;
+		return box(nv0, nv1);
+	}
+
+	bool overlaps(const box& b) const {
+		auto v0_it = v0.begin(), v1_it = v1.begin(), b0_it = b.v0.begin(), b1_it = b.v1.begin();
+		for(; v0_it != v0.end(); ++v0_it, ++v1_it, ++b0_it, ++b1_it) {
+			if(*v1_it < *b0_it || *v0_it > *b1_it) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 };
 
-template <size_t d, typename F> bool BoxesOverlap(const Box<d, F>& a, const Box<d, F>& b) {
-	for(auto it = a.begin(), jt = b.begin(); it != a.end(); ++it, ++jt) {
-		// Cases: A entirely to left of B, A overlaps B from left,
-		// A inside B, A overlaps B from right, A entirely to right of B.
-		// Only care about first and last cases.
-		if(std::get<1>(*it) < std::get<0>(*jt) || std::get<0>(*it) > std::get<1>(*jt)) {
-			return false;
-		}
-	}
-
-	return true;
+template <size_t n, typename T> inline constexpr box<n, T> make_box(const vector<n, T>& v0, const vector<n, T>& v1) {
+	return box<n, T>(v0, v1);
 }
 
-template <size_t d, typename F> Box<d, F> Intersect(const Box<d, F>& a, const Box<d, F>& b) {
-	Vector<d, F> min = Zero<d>(std::numeric_limits<F>::lowest());
-	Vector<d, F> max = Zero<d>(std::numeric_limits<F>::max());
+template <size_t m, size_t n, typename T> std::tuple<T, T> get_range(const box<n, T>& box) {
+	static_assert(m < n, "box dimension out of bounds");
+	return std::make_tuple(get<m>(box.v0), get<m>(box.v1));
+}
 
-	auto a_val = a.begin(), b_val = b.begin();
-	auto min_val = min.begin(), max_val = max.begin();
-	for(; a_val != a.end(); ++a_val, ++b_val, ++min_val, ++max_val) {
-		*min_val = std::max(std::get<0>(*a_val), std::get<0>(*b_val));
-		*max_val = std::min(std::get<1>(*a_val), std::get<1>(*b_val));
-	}
-
-	return Box<d, F>(min, max);
+template <size_t m, size_t n, typename T> T get_size(const box<n, T>& box) {
+	static_assert(m < n, "box dimension out of bounds");
+	return get<m>(box.v1) - get<m>(box.v0);
 }
 
 }

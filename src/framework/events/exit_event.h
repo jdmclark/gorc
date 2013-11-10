@@ -1,0 +1,14 @@
+#pragma once
+
+#include <string>
+
+namespace gorc {
+namespace events {
+
+class exit_event {
+public:
+	static const std::string& get_event_type();
+};
+
+}
+}

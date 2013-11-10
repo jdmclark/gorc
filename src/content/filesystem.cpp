@@ -1,5 +1,5 @@
 #include "filesystem.h"
 
-Gorc::Content::FileSystem::~FileSystem() {
+gorc::content::filesystem::~filesystem() {
 	return;
 }

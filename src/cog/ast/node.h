@@ -7,302 +7,362 @@
 
 #define ASTVISITOR_ACCEPT_ABSTRACT							\
 	public:													\
-	virtual void Accept(Gorc::Cog::AST::Visitor& v) = 0;	\
+	virtual void accept(gorc::cog::ast::visitor& v) = 0;	\
 	private:
 
 #define ASTVISITOR_ACCEPT									\
 	public:													\
-	virtual void Accept(Gorc::Cog::AST::Visitor& v);		\
+	virtual void accept(gorc::cog::ast::visitor& v);		\
 	private:
 
 #define ASTVISITOR_ACCEPT_IMPL( x )							\
-	void Gorc::Cog::AST::x::Accept(Visitor& v) {			\
-		v.Visit##x(*this);									\
+	void gorc::cog::ast::x::accept(visitor& v) {			\
+		v.visit_##x(*this);									\
 		return;												\
 	}
 
-namespace Gorc {
-namespace Cog {
-namespace AST {
+namespace gorc {
+namespace cog {
+namespace ast {
 
-enum class UnaryOperator {
-	Plus,
-	Minus,
-	Not
+enum class unary_operator {
+	plus,
+	minus,
+	logical_not
 };
 
-enum class InfixOperator {
-	Addition,
-	Subtraction,
-	Multiplication,
-	Division,
-	Modulo,
+enum class infix_operator {
+	addition,
+	subtraction,
+	multiplication,
+	division,
+	modulo,
 
-	Greater,
-	GreaterEqual,
-	Less,
-	LessEqual,
-	Equal,
-	NotEqual,
+	greater,
+	greater_equal,
+	less,
+	less_equal,
+	equal,
+	not_equal,
 
-	And,
-	Or,
-	Xor,
+	bitwise_and,
+	bitwise_or,
+	bitwise_xor,
 
-	LogicalAnd,
-	LogicalOr
+	logical_and,
+	logical_or
 };
 
-class Visitor;
+class visitor;
 
-class Node {
+class node {
 	ASTVISITOR_ACCEPT_ABSTRACT
 protected:
-	Node();
+	node();
 
 public:
-	virtual ~Node();
+	virtual ~node();
 
-	Text::Location Location;
+	text::location location;
 };
 
 /* Symbol section */
 
-class SymbolField : public Node {
+class symbol_field : public node {
 	ASTVISITOR_ACCEPT_ABSTRACT
 public:
 };
 
-class StringFragmentField : public SymbolField {
+class string_fragment_field : public symbol_field {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Value;
+	std::string value;
+
+	string_fragment_field(const std::string& value);
 };
 
-class IntegerField : public SymbolField {
+class integer_field : public symbol_field {
 	ASTVISITOR_ACCEPT
 public:
-	int Value;
+	int value;
+
+	integer_field(int value);
 };
 
-class FloatField : public SymbolField {
+class float_field : public symbol_field {
 	ASTVISITOR_ACCEPT
 public:
-	float Value;
+	float value;
+
+	float_field(float value);
 };
 
-class SymbolExtension : public Node {
+class symbol_extension : public node {
 	ASTVISITOR_ACCEPT_ABSTRACT
 public:
 };
 
-class BareExtension : public SymbolExtension {
+class bare_extension : public symbol_extension {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Name;
+	std::string name;
+
+	bare_extension(const std::string& name);
 };
 
-class ValuedExtension : public BareExtension {
+class valued_extension : public bare_extension {
 	ASTVISITOR_ACCEPT
 public:
-	SymbolField* Value;
+	symbol_field* value;
+
+	valued_extension(const std::string& name, symbol_field* value);
 };
 
-class Symbol : public Node {
+class symbol : public node {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Type;
-	std::string Name;
-	std::vector<SymbolExtension*>* Extensions;
+	std::string type;
+	std::string name;
+	std::vector<symbol_extension*>* extensions;
+
+	symbol(const std::string& type, const std::string& name, std::vector<symbol_extension*>* extensions);
 };
 
-class ValuedSymbol : public Symbol {
+class valued_symbol : public symbol {
 	ASTVISITOR_ACCEPT
 public:
-	SymbolField* Value;
+	symbol_field* value;
+
+	valued_symbol(const std::string& type, const std::string& name, std::vector<symbol_extension*>* extensions, symbol_field* value);
 };
 
 /* Expressions */
-class Expression : public Node {
+class expression : public node {
 	ASTVISITOR_ACCEPT_ABSTRACT
 };
 
-class StringLiteralExpression : public Expression {
+class string_literal_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Value;
+	std::string value;
+
+	string_literal_expression(const std::string& value);
 };
 
-class IntegerLiteralExpression : public Expression {
+class integer_literal_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	int Value;
+	int value;
+
+	integer_literal_expression(int value);
 };
 
-class FloatLiteralExpression : public Expression {
+class float_literal_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	float Value;
+	float value;
+
+	float_literal_expression(float value);
 };
 
-class VectorLiteralExpression : public Expression {
+class vector_literal_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	float X, Y, Z;
+	float x, y, z;
+
+	vector_literal_expression(float x, float y, float z);
 };
 
-class ConstantValueExpression : public Expression {
+class constant_value_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	VM::Value Value;
+	vm::value value;
+
+	constant_value_expression(vm::value value);
 };
 
-class IdentifierExpression : public Expression {
+class identifier_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Identifier;
+	std::string identifier;
+
+	identifier_expression(const std::string& identifier);
 };
 
-class SubscriptExpression : public Expression {
+class subscript_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Base;
-	Expression* Index;
+	std::string base;
+	expression* index;
+
+	subscript_expression(const std::string& base, expression* index);
 };
 
-class MethodCallExpression : public Expression {
+class method_call_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Base;
-	std::vector<Expression*>* Arguments;
+	std::string base;
+	std::vector<expression*>* arguments;
+
+	method_call_expression(const std::string& base, std::vector<expression*>* arguments);
 };
 
-class UnaryExpression : public Expression {
+class unary_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Base;
-	UnaryOperator Operator;
+	expression* base;
+	unary_operator op;
+
+	unary_expression(expression* base, unary_operator op);
 };
 
-class InfixExpression : public Expression {
+class infix_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Left;
-	Expression* Right;
-	InfixOperator Operator;
+	expression* left;
+	expression* right;
+	infix_operator op;
+
+	infix_expression(expression* left, expression* right, infix_operator op);
 };
 
-class AssignmentExpression : public Expression {
+class assignment_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Target;
-	Expression* Value;
+	expression* target;
+	expression* value;
+
+	assignment_expression(expression* target, expression* value);
 };
 
-class CommaExpression : public Expression {
+class comma_expression : public expression {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Left;
-	Expression* Right;
+	expression* left;
+	expression* right;
+
+	comma_expression(expression* left, expression* right);
 };
 
 /* Statements */
-class Statement : public Node {
+class statement : public node {
 	ASTVISITOR_ACCEPT_ABSTRACT
 };
 
-class CompoundStatement : public Statement {
+class compound_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	std::vector<Statement*>* Code;
+	std::vector<statement*>* code;
+
+	compound_statement(std::vector<statement*>* code);
 };
 
-class EmptyStatement : public Statement {
+class empty_statement : public statement {
 	ASTVISITOR_ACCEPT
 };
 
-class ExpressionStatement : public Statement {
-	ASTVISITOR_ACCEPT
-public:
-	Expression* Expression;
-};
-
-class BreakStatement : public Statement {
-	ASTVISITOR_ACCEPT
-};
-
-class ReturnStatement : public Statement {
-	ASTVISITOR_ACCEPT
-};
-
-class CallStatement : public Statement {
+class expression_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Label;
+	expression* expression;
+
+	expression_statement(class expression* expression);
 };
 
-class IfStatement : public Statement {
+class break_statement : public statement {
+	ASTVISITOR_ACCEPT
+};
+
+class return_statement : public statement {
+	ASTVISITOR_ACCEPT
+};
+
+class call_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Condition;
-	Statement* Code;
+	std::string label;
+
+	call_statement(const std::string& label);
 };
 
-class IfElseStatement : public Statement {
+class if_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Condition;
-	Statement* Code;
-	Statement* ElseCode;
+	expression* condition;
+	statement* code;
+
+	if_statement(expression* condition, statement* code);
 };
 
-class WhileStatement : public Statement {
+class if_else_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Condition;
-	Statement* Code;
+	expression* condition;
+	statement* code;
+	statement* else_code;
+
+	if_else_statement(expression* condition, statement* code, statement* else_code);
 };
 
-class DoStatement : public Statement {
+class while_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	Statement* Code;
-	Expression* Condition;
+	expression* condition;
+	statement* code;
+
+	while_statement(expression* condition, statement* code);
 };
 
-class ForOptionalExpression : public Node {
-	ASTVISITOR_ACCEPT
-};
-
-class ForExpression : public ForOptionalExpression {
+class do_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	Expression* Condition;
+	statement* code;
+	expression* condition;
+
+	do_statement(statement* code, expression* condition);
 };
 
-class ForStatement : public Statement {
+class for_optional_expression : public node {
 	ASTVISITOR_ACCEPT
-public:
-	ForOptionalExpression* Initializer;
-	ForOptionalExpression* Condition;
-	ForOptionalExpression* Incrementer;
-	Statement* Code;
 };
 
-class LabeledStatement : public Statement {
+class for_expression : public for_optional_expression {
 	ASTVISITOR_ACCEPT
 public:
-	std::string Label;
-	Statement* Code;
+	expression* condition;
+
+	for_expression(expression* condition);
+};
+
+class for_statement : public statement {
+	ASTVISITOR_ACCEPT
+public:
+	for_optional_expression* initializer;
+	for_optional_expression* condition;
+	for_optional_expression* incrementer;
+	statement* code;
+
+	for_statement(for_optional_expression* initializer, for_optional_expression* condition, for_optional_expression* incrementer, statement* code);
+};
+
+class labeled_statement : public statement {
+	ASTVISITOR_ACCEPT
+public:
+	std::string label;
+	statement* code;
+
+	labeled_statement(const std::string& label, statement* code);
 };
 
 /* Translation unit */
-class TranslationUnit : public Node {
+class translation_unit : public node {
 	ASTVISITOR_ACCEPT
 public:
-	unsigned int Flags;
-	std::vector<Symbol*>* Symbols;
-	std::vector<Statement*>* Code;
+	unsigned int flags;
+	std::vector<symbol*>* symbols;
+	std::vector<statement*>* code;
+
+	translation_unit(unsigned int flags, std::vector<symbol*>* symbols, std::vector<statement*>* code);
 };
 
 }

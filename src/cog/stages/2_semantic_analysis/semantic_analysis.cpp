@@ -9,24 +9,24 @@
 
 #include "cog/stages/stages.h"
 
-void Gorc::Cog::Stages::SemanticAnalysis::SemanticAnalysis(AST::TranslationUnit* ast, Symbols::SymbolTable& symbolTable,
-	const std::unordered_map<std::string, VM::Value>& constantTable, Verbs::VerbTable& verbTable, Diagnostics::Report& report) {
+void gorc::cog::stages::semantic_analysis::semantic_analysis(ast::translation_unit* ast, symbols::symbol_table& symbolTable,
+	const std::unordered_map<std::string, vm::value>& constantTable, verbs::verb_table& verbTable, diagnostics::report& report) {
 	std::unordered_set<std::string> seenLabels;
-	LabelVisitor labelVisitor(seenLabels, report);
+	label_visitor labelVisitor(seenLabels, report);
 
-	for(auto& stmt : *ast->Code) {
-		stmt->Accept(labelVisitor);
+	for(auto& stmt : *ast->code) {
+		stmt->accept(labelVisitor);
 	}
 
-	SymbolVisitor symbolVisitor(symbolTable, seenLabels, report);
+	symbol_visitor symbolVisitor(symbolTable, seenLabels, report);
 
-	for(auto& symbol : *ast->Symbols) {
-		symbol->Accept(symbolVisitor);
+	for(auto& symbol : *ast->symbols) {
+		symbol->accept(symbolVisitor);
 	}
 
-	CodeVisitor codeVisitor(symbolTable, constantTable, verbTable, seenLabels, report);
+	code_visitor codeVisitor(symbolTable, constantTable, verbTable, seenLabels, report);
 
-	for(auto& stmt : *ast->Code) {
-		stmt->Accept(codeVisitor);
+	for(auto& stmt : *ast->code) {
+		stmt->accept(codeVisitor);
 	}
 }

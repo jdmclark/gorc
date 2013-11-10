@@ -1,210 +1,847 @@
 #pragma once
 
 #include "vector.h"
+#include "util.h"
 #include <array>
-#include <algorithm>
-#include <iostream>
 
-namespace Gorc {
-namespace Math {
+namespace gorc {
+inline namespace math {
 
-template <typename F = float> class Matrix {
+template <size_t m, typename G> class matrix_row_vector;
+template <size_t m, typename G> class matrix_col_vector;
+template <size_t m, typename G> class matrix_row_vector_iterator;
+template <size_t m, typename G> class matrix_row_element_iterator;
+template <size_t m, typename G> class matrix_col_vector_iterator;
+template <size_t m, typename G> class matrix_col_element_iterator;
+template <size_t m, typename G> class matrix_row_vector_const_iterator;
+template <size_t m, typename G> class matrix_row_element_const_iterator;
+template <size_t m, typename G> class matrix_col_vector_const_iterator;
+template <size_t m, typename G> class matrix_col_element_const_iterator;
+
+template <size_t n, typename F = float> class matrix {
+	template <unsigned int i, unsigned int j, size_t m, typename G> friend G& get(matrix<m, G>&);
+	template <unsigned int i, unsigned int j, size_t m, typename G> friend G get(const matrix<m, G>&);
+	template <size_t m, typename G, typename... H> friend matrix<m, G> make_matrix(H&&...);
+	template <size_t m, typename G> friend const G* make_opengl_matrix(const matrix<m, G>&);
+	template <size_t m, typename G> friend matrix<m, G> make_scale_matrix(const vector<m, G>&);
+
+	template <size_t m, typename G> friend class matrix_row_vector;
+	template <size_t m, typename G> friend class matrix_col_vector;
+	template <size_t m, typename G> friend class matrix_row_vector_iterator;
+	template <size_t m, typename G> friend class matrix_row_element_iterator;
+	template <size_t m, typename G> friend class matrix_col_vector_iterator;
+	template <size_t m, typename G> friend class matrix_col_element_iterator;
+	template <size_t m, typename G> friend class matrix_row_vector_const_iterator;
+	template <size_t m, typename G> friend class matrix_row_element_const_iterator;
+	template <size_t m, typename G> friend class matrix_col_vector_const_iterator;
+	template <size_t m, typename G> friend class matrix_col_element_const_iterator;
+
 private:
-	static constexpr F deg2rad = 0.0174532925;
-	F data[4][4];
+	F data[n][n];
 
-public:
-	Matrix() {
-		return;
-	}
-
-	Matrix(F const* gl_matrix) {
-		std::copy(gl_matrix, gl_matrix + 16, data);
-	}
-
-	F* GetOpenGLMatrix() {
-		return &data[0][0];
-	}
-
-	const F* GetOpenGLMatrix() const {
-		return &data[0][0];
-	}
-
-	F GetValue(int i, int j) const {
+	inline F& get(unsigned int i, unsigned int j) {
 		return data[j][i];
 	}
 
-	void SetValue(int i, int j, F value) {
-		data[j][i] = value;
+	inline F get(unsigned int i, unsigned int j) const {
+		return data[j][i];
 	}
 
-	static Matrix MakeIdentityMatrix() {
-		Matrix rv;
-		for(int i = 0; i < 4; ++i) {
-			for(int j = 0; j < 4; ++j) {
-				rv.data[i][j] = (i == j) ? 1 : 0;
+	matrix() {
+		return;
+	}
+
+public:
+	matrix transpose() const {
+		matrix rv;
+		for(unsigned int i = 0; i < n; ++i) {
+			for(unsigned int j = 0; j < n; ++j) {
+				rv.get(i, j) = get(j, i);
 			}
 		}
 
 		return rv;
 	}
 
-	static Matrix MakeFrustumMatrix(float left, float right, float bottom, float top, float znear, float zfar) {
-		Matrix rv;
-
-		float temp, temp2, temp3, temp4;
-		temp = 2.0f * znear;
-		temp2 = right - left;
-		temp3 = top - bottom;
-		temp4 = zfar - znear;
-
-		rv.data[0][0] = temp / temp2;
-		rv.data[0][1] = 0;
-		rv.data[0][2] = 0;
-		rv.data[0][3] = 0;
-
-		rv.data[1][0] = 0;
-		rv.data[1][1] = temp / temp3;
-		rv.data[1][2] = 0;
-		rv.data[1][3] = 0;
-
-		rv.data[2][0] = (right + left) / temp2;
-		rv.data[2][1] = (top + bottom) / temp3;
-		rv.data[2][2] = (-zfar - znear) / temp4;
-		rv.data[2][3] = -1.0;
-
-		rv.data[3][0] = 0;
-		rv.data[3][1] = 0;
-		rv.data[3][2] = (-temp * zfar) / temp4;
-		rv.data[3][3] = 0;
-
-		return rv;
-	}
-
-	static Matrix MakePerspectiveMatrix(float fovyInDegrees, float aspectRatio, float znear, float zfar) {
-		float ymax = znear * std::tan(fovyInDegrees * deg2rad * 0.5);
-		float xmax = ymax * aspectRatio;
-		return MakeFrustumMatrix(-xmax, xmax, -ymax, ymax, znear, zfar);
-	}
-
-	static Matrix MakeTranslationMatrix(const Vector<3, F>& translation) {
-		Matrix rv;
-
-		for(int i = 0; i < 4; ++i) {
-			for(int j = 0; j < 4; ++j) {
-				rv.data[i][j] = (i == j) ? 1 : 0;
+	inline matrix operator+(const matrix& m) const {
+		matrix rv;
+		for(unsigned int i = 0; i < n; ++i) {
+			for(unsigned int j = 0; j < n; ++j) {
+				rv.get(i, j) = get(i, j) + m.get(i, j);
 			}
 		}
-
-		rv.data[3][0] = Get<0>(translation);
-		rv.data[3][1] = Get<1>(translation);
-		rv.data[3][2] = Get<2>(translation);
-
 		return rv;
 	}
 
-	static Matrix MakeLookMatrix(const Vector<3, F>& camera_position, const Vector<3, F>& camera_look, const Vector<3, F>& old_camera_up) {
-		auto camera_side = Cross(camera_look, old_camera_up);
-		auto camera_up = Cross(camera_side, camera_look);
-
-		Matrix rv;
-
-		rv.data[0][0] = Get<0>(camera_side);
-		rv.data[0][1] = Get<0>(camera_up);
-		rv.data[0][2] = -Get<0>(camera_look);
-		rv.data[0][3] = 0;
-
-		rv.data[1][0] = Get<1>(camera_side);
-		rv.data[1][1] = Get<1>(camera_up);
-		rv.data[1][2] = -Get<1>(camera_look);
-		rv.data[1][3] = 0;
-
-		rv.data[2][0] = Get<2>(camera_side);
-		rv.data[2][1] = Get<2>(camera_up);
-		rv.data[2][2] = -Get<2>(camera_look);
-		rv.data[2][3] = 0;
-
-		rv.data[3][0] = 0;
-		rv.data[3][1] = 0;
-		rv.data[3][2] = 0;
-		rv.data[3][3] = 1;
-
-		return rv * MakeTranslationMatrix(-camera_position);
-	}
-
-	static Matrix MakeRotationMatrix(F angle, const Math::Vector<3, F>& axis) {
-		Matrix rv;
-
-		F ax = Get<0>(axis);
-		F ay = Get<1>(axis);
-		F az = Get<2>(axis);
-
-		F cost = std::cos(angle * deg2rad);
-		F sint = std::sin(angle * deg2rad);
-		F icost = 1 - cost;
-
-		rv.data[0][0] = cost + ax * ax * icost;
-		rv.data[0][1] = ax * ay * icost + az * sint;
-		rv.data[0][2] = ax * az * icost - ay * sint;
-		rv.data[0][3] = 0;
-
-		rv.data[1][0] = ax * ay * icost - az * sint;
-		rv.data[1][1] = cost + ay * ay * icost;
-		rv.data[1][2] = ay * az * icost + ax * sint;
-		rv.data[1][3] = 0;
-
-		rv.data[2][0] = ax * az * icost + ay * sint;
-		rv.data[2][1] = ay * az * icost - ax * sint;
-		rv.data[2][2] = cost + az * az * icost;
-		rv.data[2][3] = 0;
-
-		rv.data[3][0] = 0;
-		rv.data[3][1] = 0;
-		rv.data[3][2] = 0;
-		rv.data[3][3] = 1;
-
+	inline matrix operator-(const matrix& m) const {
+		matrix rv;
+		for(unsigned int i = 0; i < n; ++i) {
+			for(unsigned int j = 0; j < n; ++j) {
+				rv.get(i, j) = get(i, j) - m.get(i, j);
+			}
+		}
 		return rv;
 	}
 
-	Matrix operator*(const Matrix& m) const {
-		Matrix rv;
-
-		for(size_t j = 0; j < 4; ++j) {
-			for(size_t i = 0; i < 4; ++i) {
-				rv.data[j][i] = 0;
-				for(size_t k = 0; k < 4; ++k) {
-					rv.data[j][i] += data[k][i] * m.data[j][k];
+	inline matrix operator*(const matrix& m) const {
+		matrix rv;
+		for(unsigned int i = 0; i < n; ++i) {
+			for(unsigned int j = 0; j < n; ++j) {
+				rv.get(i, j) = 0;
+				for(unsigned int r = 0; r < n; ++r) {
+					rv.get(i, j) += get(i, r) * m.get(r, j);
 				}
 			}
 		}
-
 		return rv;
 	}
 
-	Matrix operator+(const Matrix& m) const {
-		Matrix rv;
-
-		for(size_t j = 0; j < 4; ++j) {
-			for(size_t i = 0; i < 4; ++i) {
-				rv.data[j][i] = data[j][i] + m.data[j][i];
+	inline vector<n, F> operator*(const vector<n, F>& v) const {
+		auto rv = make_zero_vector<n, F>();
+		auto rt = rv.begin();
+		for(unsigned int i = 0; i < n; ++i, ++rt) {
+			*rt = 0;
+			auto it = v.begin();
+			for(unsigned int j = 0; j < n; ++j, ++it) {
+				*rt += get(i, j) * (*it);
 			}
 		}
 
 		return rv;
 	}
 
-	Matrix Transpose() const {
-		Matrix rv;
+	inline vector<n - 1, F> transform(const vector<n - 1, F>& v) const {
+		auto rv = make_zero_vector<n - 1, F>();
+		auto rt = rv.begin();
+		for(unsigned int i = 0; i < n - 1; ++i, ++rt) {
+			*rt = 0;
+			auto it = v.begin();
+			for(unsigned int j = 0; j < n - 1; ++j, ++it) {
+				*rt += get(i, j) * (*it);
+			}
 
-		for(size_t j = 0; j < 4; ++j) {
-			for(size_t i = 0; i < 4; ++i) {
-				rv.data[j][i] = data[i][j];
+			*rt += get(i, n - 1);
+		}
+
+		return rv;
+	}
+
+	inline vector<n - 1, F> transform_normal(const vector<n - 1, F>& v) const {
+		auto rv = make_zero_vector<n - 1, F>();
+		auto rt = rv.begin();
+		for(unsigned int i = 0; i < n - 1; ++i, ++rt) {
+			*rt = 0;
+			auto it = v.begin();
+			for(unsigned int j = 0; j < n - 1; ++j, ++it) {
+				*rt += get(i, j) * (*it);
 			}
 		}
 
 		return rv;
+	}
+
+	inline matrix_row_vector_iterator<n, F> row_begin() {
+		return matrix_row_vector_iterator<n, F>(*this, 0);
+	}
+
+	inline matrix_row_vector_iterator<n, F> row_end() {
+		return matrix_row_vector_iterator<n, F>(*this, n);
+	}
+
+	inline matrix_col_vector_iterator<n, F> col_begin() {
+		return matrix_col_vector_iterator<n, F>(*this, 0);
+	}
+
+	inline matrix_col_vector_iterator<n, F> col_end() {
+		return matrix_col_vector_iterator<n, F>(*this, n);
+	}
+
+	inline matrix_row_vector_const_iterator<n, F> row_begin() const {
+		return matrix_row_vector_const_iterator<n, F>(*this, 0);
+	}
+
+	inline matrix_row_vector_const_iterator<n, F> row_end() const {
+		return matrix_row_vector_const_iterator<n, F>(*this, n);
+	}
+
+	inline matrix_col_vector_const_iterator<n, F> col_begin() const {
+		return matrix_col_vector_const_iterator<n, F>(*this, 0);
+	}
+
+	inline matrix_col_vector_const_iterator<n, F> col_end() const {
+		return matrix_col_vector_const_iterator<n, F>(*this, n);
 	}
 };
+
+template <size_t n, typename F> class matrix_row_vector {
+private:
+	matrix<n, F>& mat;
+	int row;
+
+public:
+	matrix_row_vector(matrix<n, F>& mat, int row) : mat(mat), row(row) {
+		return;
+	}
+
+	const matrix_row_vector& operator=(const vector<n, F>& vec) {
+		auto vt = vec.begin();
+		for(size_t i = 0; i < n; ++i, ++vt) {
+			mat.get(row, i) = *vt;
+		}
+
+		return *this;
+	}
+};
+
+template <size_t n, typename F> class matrix_col_vector {
+private:
+	matrix<n, F>& mat;
+	int col;
+
+public:
+	matrix_col_vector(matrix<n, F>& mat, int col) : mat(mat), col(col) {
+		return;
+	}
+
+	const matrix_col_vector& operator=(const vector<n, F>& vec) {
+		auto vt = vec.begin();
+		for(size_t i = 0; i < n; ++i, ++vt) {
+			mat.get(i, col) = *vt;
+		}
+
+		return *this;
+	}
+};
+
+template <size_t n, typename F> class matrix_row_element_iterator {
+private:
+	matrix<n, F>& mat;
+	int row = 0;
+	int col = 0;
+
+public:
+	matrix_row_element_iterator(matrix<n, F>& mat, int row, int col) : mat(mat), row(row), col(col) {
+		return;
+	}
+
+	inline matrix_row_element_iterator operator++(int) {
+		return matrix_row_element_iterator(mat, row, col++);
+	}
+
+	inline matrix_row_element_iterator operator++() {
+		++col;
+		return *this;
+	}
+
+	inline matrix_row_element_iterator operator--(int) {
+		return matrix_row_element_iterator(mat, row, col--);
+	}
+
+	inline matrix_row_element_iterator& operator--() {
+		--col;
+		return *this;
+	}
+
+	inline matrix_row_element_iterator operator+(int v) const {
+		return matrix_row_element_iterator(mat, row, col + v);
+	}
+
+	inline matrix_row_element_iterator operator-(int v) const {
+		return matrix_row_element_iterator(mat, row, col - v);
+	}
+
+	inline const matrix_row_element_iterator& operator+=(int v) const {
+		col += v;
+		return *this;
+	}
+
+	inline const matrix_row_element_iterator& operator-=(int v) const {
+		col -= v;
+		return *this;
+	}
+
+	inline F& operator*() {
+		return mat.get(row, col);
+	}
+
+	inline bool operator==(const matrix_row_element_iterator& it) const {
+		return it.row == row && it.col == col;
+	}
+
+	inline bool operator!=(const matrix_row_element_iterator& it) const {
+		return it.row != row || it.col != col;
+	}
+};
+
+template <size_t n, typename F> class matrix_row_vector_iterator {
+private:
+	matrix<n, F>& mat;
+	int row = 0;
+
+public:
+	matrix_row_vector_iterator(matrix<n, F>& mat, int row) : mat(mat), row(row) {
+		return;
+	}
+
+	inline matrix_row_vector_iterator operator++(int) {
+		return matrix_row_vector_iterator(mat, row++);
+	}
+
+	inline matrix_row_vector_iterator& operator++() {
+		++row;
+		return *this;
+	}
+
+	inline matrix_row_vector_iterator operator--(int) {
+		return matrix_row_vector_iterator(mat, row--);
+	}
+
+	inline matrix_row_vector_iterator& operator--() {
+		--row;
+		return *this;
+	}
+
+	inline matrix_row_vector_iterator operator+(int v) const {
+		return matrix_row_vector_iterator(mat, row + v);
+	}
+
+	inline matrix_row_vector_iterator operator-(int v) const {
+		return matrix_row_vector_iterator(mat, row - v);
+	}
+
+	inline const matrix_row_vector_iterator& operator+=(int v) const {
+		row += v;
+		return *this;
+	}
+
+	inline const matrix_row_vector_iterator& operator-=(int v) const {
+		row -= v;
+		return *this;
+	}
+
+	inline matrix_row_vector<n, F> operator*() {
+		return matrix_row_vector<n, F>(mat, row);
+	}
+
+	inline matrix_row_element_iterator<n, F> begin() {
+		return matrix_row_element_iterator<n, F>(mat, row, 0);
+	}
+
+	inline matrix_row_element_iterator<n, F> end() {
+		return matrix_row_element_iterator<n, F>(mat, row, n);
+	}
+
+	inline bool operator==(const matrix_row_vector_iterator& it) const {
+		return it.row == row;
+	}
+
+	inline bool operator!=(const matrix_row_vector_iterator& it) const {
+		return it.row != row;
+	}
+};
+
+template <size_t n, typename F> class matrix_col_element_iterator {
+private:
+	matrix<n, F>& mat;
+	int row = 0;
+	int col = 0;
+
+public:
+	matrix_col_element_iterator(matrix<n, F>& mat, int row, int col) : mat(mat), row(row), col(col) {
+		return;
+	}
+
+	inline matrix_col_element_iterator operator++(int) {
+		return matrix_col_element_iterator(mat, row++, col);
+	}
+
+	inline matrix_col_element_iterator operator++() {
+		++row;
+		return *this;
+	}
+
+	inline matrix_col_element_iterator operator--(int) {
+		return matrix_col_element_iterator(mat, row--, col);
+	}
+
+	inline matrix_col_element_iterator& operator--() {
+		--row;
+		return *this;
+	}
+
+	inline matrix_col_element_iterator operator+(int v) const {
+		return matrix_col_element_iterator(mat, row + v, col);
+	}
+
+	inline matrix_col_element_iterator operator-(int v) const {
+		return matrix_col_element_iterator(mat, row - v, col);
+	}
+
+	inline const matrix_col_element_iterator& operator+=(int v) const {
+		row += v;
+		return *this;
+	}
+
+	inline const matrix_col_element_iterator& operator-=(int v) const {
+		row -= v;
+		return *this;
+	}
+
+	inline F& operator*() {
+		return mat.get(row, col);
+	}
+
+	inline bool operator==(const matrix_col_element_iterator& it) const {
+		return it.row == row && it.col == col;
+	}
+
+	inline bool operator!=(const matrix_col_element_iterator& it) const {
+		return it.row != row || it.col != col;
+	}
+};
+
+template <size_t n, typename F> class matrix_col_vector_iterator {
+private:
+	matrix<n, F>& mat;
+	int col = 0;
+
+public:
+	matrix_col_vector_iterator(matrix<n, F>& mat, int col) : mat(mat), col(col) {
+		return;
+	}
+
+	inline matrix_col_vector_iterator operator++(int) {
+		return matrix_col_vector_iterator(mat, col++);
+	}
+
+	inline matrix_col_vector_iterator& operator++() {
+		++col;
+		return *this;
+	}
+
+	inline matrix_col_vector_iterator operator--(int) {
+		return matrix_col_vector_iterator(mat, col--);
+	}
+
+	inline matrix_col_vector_iterator& operator--() {
+		--col;
+		return *this;
+	}
+
+	inline matrix_col_vector_iterator operator+(int v) const {
+		return matrix_col_vector_iterator(mat, col + v);
+	}
+
+	inline matrix_col_vector_iterator operator-(int v) const {
+		return matrix_col_vector_iterator(mat, col - v);
+	}
+
+	inline const matrix_col_vector_iterator& operator+=(int v) const {
+		col += v;
+		return *this;
+	}
+
+	inline const matrix_col_vector_iterator& operator-=(int v) const {
+		col -= v;
+		return *this;
+	}
+
+	inline matrix_col_vector<n, F> operator*() {
+		return matrix_col_vector<n, F>(mat, col);
+	}
+
+	inline matrix_col_element_iterator<n, F> begin() {
+		return matrix_col_element_iterator<n, F>(mat, 0, col);
+	}
+
+	inline matrix_col_element_iterator<n, F> end() {
+		return matrix_col_element_iterator<n, F>(mat, n, col);
+	}
+
+	inline bool operator==(const matrix_col_vector_iterator& it) const {
+		return it.col == col;
+	}
+
+	inline bool operator!=(const matrix_col_vector_iterator& it) const {
+		return it.col != col;
+	}
+};
+
+template <size_t n, typename F> class matrix_row_element_const_iterator {
+private:
+	const matrix<n, F>& mat;
+	int row = 0;
+	int col = 0;
+
+public:
+	matrix_row_element_const_iterator(const matrix<n, F>& mat, int row, int col) : mat(mat), row(row), col(col) {
+		return;
+	}
+
+	inline matrix_row_element_const_iterator operator++(int) {
+		return matrix_row_element_const_iterator(mat, row, col++);
+	}
+
+	inline matrix_row_element_const_iterator operator++() {
+		++col;
+		return *this;
+	}
+
+	inline matrix_row_element_const_iterator operator--(int) {
+		return matrix_row_element_const_iterator(mat, row, col--);
+	}
+
+	inline matrix_row_element_const_iterator& operator--() {
+		--col;
+		return *this;
+	}
+
+	inline matrix_row_element_const_iterator operator+(int v) const {
+		return matrix_row_element_const_iterator(mat, row, col + v);
+	}
+
+	inline matrix_row_element_const_iterator operator-(int v) const {
+		return matrix_row_element_const_iterator(mat, row, col - v);
+	}
+
+	inline const matrix_row_element_const_iterator& operator+=(int v) const {
+		col += v;
+		return *this;
+	}
+
+	inline const matrix_row_element_const_iterator& operator-=(int v) const {
+		col -= v;
+		return *this;
+	}
+
+	inline F& operator*() {
+		return mat.get(row, col);
+	}
+
+	inline bool operator==(const matrix_row_element_const_iterator& it) const {
+		return it.row == row && it.col == col;
+	}
+
+	inline bool operator!=(const matrix_row_element_const_iterator& it) const {
+		return it.row != row || it.col != col;
+	}
+};
+
+template <size_t n, typename F> class matrix_row_vector_const_iterator {
+private:
+	const matrix<n, F>& mat;
+	int row = 0;
+
+public:
+	matrix_row_vector_const_iterator(const matrix<n, F>& mat, int row) : mat(mat), row(row) {
+		return;
+	}
+
+	inline matrix_row_vector_const_iterator operator++(int) {
+		return matrix_row_vector_const_iterator(mat, row++);
+	}
+
+	inline matrix_row_vector_const_iterator& operator++() {
+		++row;
+		return *this;
+	}
+
+	inline matrix_row_vector_const_iterator operator--(int) {
+		return matrix_row_vector_const_iterator(mat, row--);
+	}
+
+	inline matrix_row_vector_const_iterator& operator--() {
+		--row;
+		return *this;
+	}
+
+	inline matrix_row_vector_const_iterator operator+(int v) const {
+		return matrix_row_vector_const_iterator(mat, row + v);
+	}
+
+	inline matrix_row_vector_const_iterator operator-(int v) const {
+		return matrix_row_vector_const_iterator(mat, row - v);
+	}
+
+	inline const matrix_row_vector_const_iterator& operator+=(int v) const {
+		row += v;
+		return *this;
+	}
+
+	inline const matrix_row_vector_const_iterator& operator-=(int v) const {
+		row -= v;
+		return *this;
+	}
+
+	inline matrix_row_element_const_iterator<n, F> begin() {
+		return matrix_row_element_const_iterator<n, F>(mat, row, 0);
+	}
+
+	inline matrix_row_element_const_iterator<n, F> end() {
+		return matrix_row_element_const_iterator<n, F>(mat, row, n);
+	}
+
+	inline bool operator==(const matrix_row_vector_const_iterator& it) const {
+		return it.row == row;
+	}
+
+	inline bool operator!=(const matrix_row_vector_const_iterator& it) const {
+		return it.row != row;
+	}
+};
+
+template <size_t n, typename F> class matrix_col_element_const_iterator {
+private:
+	const matrix<n, F>& mat;
+	int row = 0;
+	int col = 0;
+
+public:
+	matrix_col_element_const_iterator(const matrix<n, F>& mat, int row, int col) : mat(mat), row(row), col(col) {
+		return;
+	}
+
+	inline matrix_col_element_const_iterator operator++(int) {
+		return matrix_col_element_const_iterator(mat, row++, col);
+	}
+
+	inline matrix_col_element_const_iterator operator++() {
+		++row;
+		return *this;
+	}
+
+	inline matrix_col_element_const_iterator operator--(int) {
+		return matrix_col_element_const_iterator(mat, row--, col);
+	}
+
+	inline matrix_col_element_const_iterator& operator--() {
+		--row;
+		return *this;
+	}
+
+	inline matrix_col_element_const_iterator operator+(int v) const {
+		return matrix_col_element_const_iterator(mat, row + v, col);
+	}
+
+	inline matrix_col_element_const_iterator operator-(int v) const {
+		return matrix_col_element_const_iterator(mat, row - v, col);
+	}
+
+	inline const matrix_col_element_const_iterator& operator+=(int v) const {
+		row += v;
+		return *this;
+	}
+
+	inline const matrix_col_element_const_iterator& operator-=(int v) const {
+		row -= v;
+		return *this;
+	}
+
+	inline F& operator*() {
+		return mat.get(row, col);
+	}
+
+	inline bool operator==(const matrix_col_element_const_iterator& it) const {
+		return it.row == row && it.col == col;
+	}
+
+	inline bool operator!=(const matrix_col_element_const_iterator& it) const {
+		return it.row != row || it.col != col;
+	}
+};
+
+template <size_t n, typename F> class matrix_col_vector_const_iterator {
+private:
+	const matrix<n, F>& mat;
+	int col = 0;
+
+public:
+	matrix_col_vector_const_iterator(const matrix<n, F>& mat, int col) : mat(mat), col(col) {
+		return;
+	}
+
+	inline matrix_col_vector_const_iterator operator++(int) {
+		return matrix_col_vector_const_iterator(mat, col++);
+	}
+
+	inline matrix_col_vector_const_iterator& operator++() {
+		++col;
+		return *this;
+	}
+
+	inline matrix_col_vector_const_iterator& operator--(int) {
+		return matrix_col_vector_const_iterator(mat, col--);
+	}
+
+	inline matrix_col_vector_const_iterator& operator--() {
+		--col;
+		return *this;
+	}
+
+	inline matrix_col_vector_const_iterator operator+(int v) const {
+		return matrix_col_vector_const_iterator(mat, col + v);
+	}
+
+	inline matrix_col_vector_const_iterator operator-(int v) const {
+		return matrix_col_vector_const_iterator(mat, col - v);
+	}
+
+	inline const matrix_col_vector_const_iterator& operator+=(int v) const {
+		col += v;
+		return *this;
+	}
+
+	inline const matrix_col_vector_const_iterator& operator-=(int v) const {
+		col -= v;
+		return *this;
+	}
+
+	inline matrix_col_element_const_iterator<n, F> begin() {
+		return matrix_col_element_const_iterator<n, F>(mat, 0, col);
+	}
+
+	inline matrix_col_element_const_iterator<n, F> end() {
+		return matrix_col_element_const_iterator<n, F>(mat, n, col);
+	}
+
+	inline bool operator==(const matrix_col_vector_const_iterator& it) const {
+		return it.col == col;
+	}
+
+	inline bool operator!=(const matrix_col_vector_const_iterator& it) const {
+		return it.col != col;
+	}
+};
+
+template <unsigned int i, unsigned int j, size_t n, typename F> F& get(matrix<n, F>& matrix) {
+	static_assert(i < n, "row index out of bounds");
+	static_assert(j < n, "column index out of bounds");
+	return matrix.get(i, j);
+}
+
+template <unsigned int i, unsigned int j, size_t n, typename F> F get(const matrix<n, F>& matrix) {
+	static_assert(i < n, "row index out of bounds");
+	static_assert(j < n, "column index out of bounds");
+	return matrix.get(i, j);
+}
+
+template <size_t n, typename F, typename G, typename... H> void apply_row(matrix_row_vector_iterator<n, F> it, G&& row0, H&&... rows) {
+	*it = row0;
+	apply_row(++it, std::forward<H>(rows)...);
+}
+
+template <size_t n, typename F, typename G> void apply_row(matrix_row_vector_iterator<n, F> it, G&& row0) {
+	*it = row0;
+}
+
+template <size_t n, typename F, typename... G> matrix<n, F> make_matrix(G&&... rows) {
+	static_assert(sizeof...(G) == n, "row count mismatch");
+
+	matrix<n, F> rv;
+	apply_row(rv.row_begin(), std::forward<G>(rows)...);
+
+	return rv;
+}
+
+template <size_t n, typename F> const F* make_opengl_matrix(const matrix<n, F>& matrix) {
+	return &matrix.data[0][0];
+}
+
+template <size_t n, typename F = float> matrix<n, F> make_scale_matrix(const vector<n, F>& amt) {
+	matrix<n, F> rv;
+	auto kt = amt.begin();
+	auto it = rv.row_begin();
+	for(unsigned int i = 0; i < n; ++i) {
+
+		auto jt = it.begin();
+		for(unsigned int j = 0; j < n; ++j) {
+			*jt = (i == j) ? *kt : 0;
+
+			++jt;
+		}
+
+		++it;
+		++kt;
+	}
+
+	return rv;
+}
+
+template <size_t n, typename F = float> matrix<n, F> make_identity_matrix() {
+	return make_scale_matrix(make_fill_vector<n, F>(1));
+}
+
+template <typename F> matrix<4, F> make_frustum_matrix(F left, F right, F bottom, F top, F znear, F zfar) {
+	float temp, temp2, temp3, temp4;
+	temp = 2.0f * znear;
+	temp2 = right - left;
+	temp3 = top - bottom;
+	temp4 = zfar - znear;
+
+	return make_matrix<4, F>(
+			make_vector<F>(temp / temp2, 		0, 				(right + left) / temp2, 		0 ),
+			make_vector<F>(0, 					temp / temp3, 	(top + bottom) / temp3, 		0 ),
+			make_vector<F>(0, 					0, 				(-zfar - znear) / temp4, 		(-temp * zfar) / temp4 ),
+			make_vector<F>(0,					0, 				-1.0, 							0 ));
+}
+
+template <typename F> matrix<4, F> make_perspective_matrix(F fovy_in_degrees, F aspect_ratio, F znear, F zfar) {
+	F ymax = znear * std::tan(to_radians(fovy_in_degrees) * 0.5);
+	F xmax = ymax * aspect_ratio;
+	return make_frustum_matrix(-xmax, xmax, -ymax, ymax, znear, zfar);
+}
+
+template <typename F> matrix<4, F> make_orthographic_matrix(F left, F right, F bottom, F top, F znear, F zfar) {
+	return make_matrix<4, F>(
+		make_vector<F>(F(2) / (right - left), 	0, 						0, 						-(right + left) / (right - left)),
+		make_vector<F>(0, 						F(2) / (top - bottom), 	0, 						-(top + bottom) / (top - bottom)),
+		make_vector<F>(0, 						0, 						-F(2) / (zfar - znear), -(zfar + znear) / (zfar - znear)),
+		make_vector<F>(0, 						0, 						0,						1)
+	);
+}
+
+template <size_t n, typename F> matrix<n + 1, F> make_translation_matrix(const vector<n, F>& translation) {
+	auto rv = make_identity_matrix<n + 1, F>();
+
+	*(rv.col_end() - 1) = extend_vector<n + 1, F>(translation, static_cast<F>(1));
+
+	return rv;
+}
+
+template <typename F> matrix<4, F> make_look_matrix(const vector<3, F>& camera_position, const vector<3, F>& camera_look, const vector<3, F>& camera_up) {
+	auto camera_side = cross(camera_look, camera_up);
+	auto new_camera_up = cross(camera_side, camera_look);
+
+	return make_matrix<4, F>(
+			extend_vector<4, F>(camera_side, 0),
+			extend_vector<4, F>(new_camera_up, 0),
+			extend_vector<4, F>(-camera_look, 0),
+			make_vector<F>(0, 0, 0, 1)) * make_translation_matrix(-camera_position);
+}
+
+template <typename F> matrix<4, F> make_rotation_matrix(F angle, const vector<3, F>& axis) {
+	F ax = get<0>(axis);
+	F ay = get<1>(axis);
+	F az = get<2>(axis);
+
+	F cost = std::cos(to_radians(angle));
+	F sint = std::sin(to_radians(angle));
+	F icost = 1 - cost;
+
+	return make_matrix<4, F>(
+			make_vector<F>(cost + ax*ax*icost,		ax*ay*icost - az*sint,		ax*az*icost + ay*sint,		0),
+			make_vector<F>(ax*ay*icost + az*sint,	cost + ay*ay*icost,			ay*az*icost - ax*sint,		0),
+			make_vector<F>(ax*az*icost - ay*sint,	ay*az*icost + ax*sint,		cost + az*az*icost,			0),
+			make_vector<F>(0,						0,							0,							1));
+}
+
+template <typename F> matrix<4, F> make_shadow_bias_matrix() {
+	return make_matrix<4, F>(
+			make_vector<F>(0.5, 0.0, 0.0, 0.5),
+			make_vector<F>(0.0, 0.5, 0.0, 0.5),
+			make_vector<F>(0.0, 0.0, 0.5, 0.5),
+			make_vector<F>(0.0, 0.0, 0.0, 1.0));
+}
 
 }
 }

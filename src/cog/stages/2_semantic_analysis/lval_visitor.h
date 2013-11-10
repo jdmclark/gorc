@@ -4,26 +4,26 @@
 #include "cog/symbols/table.h"
 #include "cog/verbs/table.h"
 
-namespace Gorc {
-namespace Cog {
-namespace Stages {
-namespace SemanticAnalysis {
+namespace gorc {
+namespace cog {
+namespace stages {
+namespace semantic_analysis {
 
-class LValueVisitor : public AST::Visitor {
+class lvalue_visitor : public ast::visitor {
 protected:
-	Symbols::SymbolTable& SymbolTable;
-	const std::unordered_map<std::string, VM::Value>& ConstantTable;
-	Verbs::VerbTable& VerbTable;
+	symbols::symbol_table& symbol_table;
+	const std::unordered_map<std::string, vm::value>& ConstantTable;
+	verbs::verb_table& verb_table;
 
-	void DefaultAction(const std::string& action, AST::Node& n);
+	void default_action(const std::string& action, ast::node& n);
 
 public:
-	LValueVisitor(Symbols::SymbolTable& st, const std::unordered_map<std::string, VM::Value>& ct,
-		Verbs::VerbTable& vt, Diagnostics::Report& report);
+	lvalue_visitor(symbols::symbol_table& st, const std::unordered_map<std::string, vm::value>& ct,
+		verbs::verb_table& vt, diagnostics::report& report);
 
 private:
-	AVPROTO(IdentifierExpression);
-	AVPROTO(SubscriptExpression);
+	AVPROTO(identifier_expression);
+	AVPROTO(subscript_expression);
 };
 
 }

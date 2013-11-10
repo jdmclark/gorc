@@ -19,11 +19,11 @@
 	#include <sstream>
 	#include <boost/format.hpp>
 	
-	using namespace Gorc::Cog;
-	#define YY_EXTRA_TYPE Grammar::Instance*
+	using namespace gorc::cog;
+	#define YY_EXTRA_TYPE grammar::instance*
 	
 	#define YY_USER_ACTION {											\
-		yylloc->filename = yyextra->GetFilename();						\
+		yylloc->filename = yyextra->get_filename();						\
 		if(yylloc->first_line != (unsigned int)yylineno) yycolumn = 1;	\
 		yylloc->first_line = yylloc->last_line = yylineno;				\
 		yylloc->first_column = yycolumn;								\
@@ -32,7 +32,7 @@
 	}
 	
 	#define YY_INPUT(buf, result, max_size) {							\
-		buf[0] = yyextra->GetNext();									\
+		buf[0] = yyextra->get_next();									\
 		if(buf[0] == '\0') result = YY_NULL;							\
 		else result = 1;												\
 	}
@@ -57,42 +57,42 @@ E			[Ee][+-]?{D}+
 
 %%
 
-<LINE_COMMENT>\n			{ yy_pop_state(yyextra->GetScanner()); yycolumn = 1; }
+<LINE_COMMENT>\n			{ yy_pop_state(yyextra->get_scanner()); yycolumn = 1; }
 <LINE_COMMENT>.				/* eat non-terminal input */
 
 <SYMBOL_FIELD>{
 	[+-]?0x{H}+				{
-								yy_pop_state(yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
 								yylval->integer = parse_hex_int(yytext);
 								return INTEGER_LITERAL;
 							}
 
 	[+-]?{D}+				{
-								yy_pop_state(yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
 								yylval->integer = atoi(yytext);
 								return INTEGER_LITERAL;
 							}
 
 	[+-]?{D}+{E}			{
-								yy_pop_state(yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
 								yylval->floating = static_cast<float>(atof(yytext));
 								return FLOAT_LITERAL;
 							}
 
 	[+-]?{D}*"."{D}+({E})?	{
-								yy_pop_state(yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
 								yylval->floating = static_cast<float>(atof(yytext));
 								return FLOAT_LITERAL;
 							}
 
 	[+-]?{D}+"."{D}*({E})?	{
-								yy_pop_state(yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
 								yylval->floating = static_cast<float>(atof(yytext));
 								return FLOAT_LITERAL;
 							}
 
 	[^[:space:]^=]+			{
-								yy_pop_state(yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
 								yylval->string = strdup(yytext);
 								return STRING_FRAGMENT;
 							}
@@ -102,24 +102,24 @@ E			[Ee][+-]?{D}+
 
 <SYMBOL_SECTION,SYMBOL_DEF,SYMBOL_DEF_ASSIGN,SYMBOL_EXT_SECTION>{
 	"#"|"//"				{
-								yy_pop_state(yyextra->GetScanner());
-								yy_push_state(SYMBOL_SECTION, yyextra->GetScanner());
-								yy_push_state(LINE_COMMENT, yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
+								yy_push_state(SYMBOL_SECTION, yyextra->get_scanner());
+								yy_push_state(LINE_COMMENT, yyextra->get_scanner());
 								return ENDLINE;
 							}
 
-	"end"					{ yy_pop_state(yyextra->GetScanner()); return END; }
+	"end"					{ yy_pop_state(yyextra->get_scanner()); return END; }
 
 	"="						{
-								yy_pop_state(yyextra->GetScanner());
-								yy_push_state(SYMBOL_EXT_SECTION, yyextra->GetScanner());
-								yy_push_state(SYMBOL_FIELD, yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
+								yy_push_state(SYMBOL_EXT_SECTION, yyextra->get_scanner());
+								yy_push_state(SYMBOL_FIELD, yyextra->get_scanner());
 								return '=';
 							}
 
 	"\n"					{
-								yy_pop_state(yyextra->GetScanner());
-								yy_push_state(SYMBOL_SECTION, yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
+								yy_push_state(SYMBOL_SECTION, yyextra->get_scanner());
 								return ENDLINE;
 							}
 
@@ -132,60 +132,60 @@ E			[Ee][+-]?{D}+
 }
 
 <SYMBOL_DEF_ASSIGN>{L}({L}|{D})*	{
-								yy_pop_state(yyextra->GetScanner());
-								yy_push_state(SYMBOL_EXT_SECTION, yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
+								yy_push_state(SYMBOL_EXT_SECTION, yyextra->get_scanner());
 								yylval->string = strdup(yytext);
 								return IDENTIFIER;
 							}
 
 <SYMBOL_DEF>{L}({L}|{D})*	{
-								yy_pop_state(yyextra->GetScanner());
-								yy_push_state(SYMBOL_DEF_ASSIGN, yyextra->GetScanner());
+								yy_pop_state(yyextra->get_scanner());
+								yy_push_state(SYMBOL_DEF_ASSIGN, yyextra->get_scanner());
 								yylval->string = strdup(yytext);
 								return IDENTIFIER;
 							}
 
 <SYMBOL_SECTION>{L}({L}|{D})*	{
-									yy_pop_state(yyextra->GetScanner());
-									yy_push_state(SYMBOL_DEF, yyextra->GetScanner());
+									yy_pop_state(yyextra->get_scanner());
+									yy_push_state(SYMBOL_DEF, yyextra->get_scanner());
 									yylval->string = strdup(yytext);
 									return IDENTIFIER;
 								}
 
 <STRING>{
 	<<EOF>>					{
-								Gorc::Diagnostics::Helper::EofInStringLiteral(yyextra->Report, *yylloc);
+								gorc::diagnostics::helper::eof_in_string_literal(yyextra->report, *yylloc);
 							}
 
 	\"						{
-								yy_pop_state(yyextra->GetScanner());
-								yylval->string = strdup(yyextra->TokenBuffer.c_str());
+								yy_pop_state(yyextra->get_scanner());
+								yylval->string = strdup(yyextra->token_buffer.c_str());
 								return STRING_LITERAL;
 							}
 
 	\n						{
-								Gorc::Diagnostics::Helper::UnescapedNewlineInString(yyextra->Report, *yylloc);
+								gorc::diagnostics::helper::unescaped_newline_in_string(yyextra->report, *yylloc);
 							}
 
 	\\\n					/* Consume escaped newlines */
 
-	\\["\\]					{ yyextra->TokenBuffer.push_back(yytext[1]); }
+	\\["\\]					{ yyextra->token_buffer.push_back(yytext[1]); }
 
-	\\n						{ yyextra->TokenBuffer.push_back('\n'); }
+	\\n						{ yyextra->token_buffer.push_back('\n'); }
 
 	\\.						{
-								Gorc::Diagnostics::Helper::UnknownEscapeSequence(yyextra->Report, yytext, *yylloc);
+								gorc::diagnostics::helper::unknown_escape_sequence(yyextra->report, yytext, *yylloc);
 							}
 
-	.						{ yyextra->TokenBuffer.append(yytext); }
+	.						{ yyextra->token_buffer.append(yytext); }
 }
 
 <CODE_SECTION>{
-	"#"						{ yy_push_state(LINE_COMMENT, yyextra->GetScanner()); }
-	"//"					{ yy_push_state(LINE_COMMENT, yyextra->GetScanner()); }
-	"end"					{ yy_pop_state(yyextra->GetScanner()); return END; }
+	"#"						{ yy_push_state(LINE_COMMENT, yyextra->get_scanner()); }
+	"//"					{ yy_push_state(LINE_COMMENT, yyextra->get_scanner()); }
+	"end"					{ yy_pop_state(yyextra->get_scanner()); return END; }
 
-	\"						{ yy_push_state(STRING, yyextra->GetScanner()); yyextra->TokenBuffer.clear(); }
+	\"						{ yy_push_state(STRING, yyextra->get_scanner()); yyextra->token_buffer.clear(); }
 
 	"break"					{ return BREAK; }
 	"call"					{ return CALL; }
@@ -247,20 +247,20 @@ E			[Ee][+-]?{D}+
 }
 
 <INITIAL>{
-	"#"						{ yy_push_state(LINE_COMMENT, yyextra->GetScanner()); }
+	"#"						{ yy_push_state(LINE_COMMENT, yyextra->get_scanner()); }
 	
 	"flags"					{ return FLAGS; }
 	"="						{ return '='; }
 	0x{H}+					{ yylval->integer = parse_hex_int(yytext); return INTEGER_LITERAL; }
 	
-	"symbols"				{ yy_push_state(SYMBOL_SECTION, yyextra->GetScanner()); return SYMBOLS; }
-	"code"					{ yy_push_state(CODE_SECTION, yyextra->GetScanner()); return CODE; }
+	"symbols"				{ yy_push_state(SYMBOL_SECTION, yyextra->get_scanner()); return SYMBOLS; }
+	"code"					{ yy_push_state(CODE_SECTION, yyextra->get_scanner()); return CODE; }
 
 	[[:space:]]				/* Ignore whitespace */
 }
 
 <INITIAL,SYMBOL_FIELD,SYMBOL_SECTION,SYMBOL_DEF,SYMBOL_DEF_ASSIGN,SYMBOL_EXT_SECTION,CODE_SECTION>.		{
-								Gorc::Diagnostics::Helper::UnrecognizedInput(yyextra->Report,
+								gorc::diagnostics::helper::unrecognized_input(yyextra->report,
 									boost::str(boost::format("unrecognized input \'%s\'") % yytext), *yylloc);
 							}
 
@@ -324,13 +324,13 @@ int parse_hex_int(char* str)
 	}
 }
 
-void Gorc::Cog::Grammar::Instance::InitScanner()
+void gorc::cog::grammar::instance::init_scanner()
 {
 	yylex_init(&scanner);
 	yyset_extra(this, scanner);
 }
 
-void Gorc::Cog::Grammar::Instance::DestroyScanner()
+void gorc::cog::grammar::instance::destroy_scanner()
 {
 	yylex_destroy(scanner);
 }

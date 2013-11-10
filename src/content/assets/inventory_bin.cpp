@@ -6,23 +6,23 @@
 #include <functional>
 #include <type_traits>
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-using InventoryBinParameterParser = std::function<void(InventoryBin&, Text::Tokenizer&, Content::Manager&, const Cog::Compiler&, Diagnostics::Report&)>;
+using InventoryBinParameterParser = std::function<void(inventory_bin&, text::tokenizer&, content::manager&, const cog::compiler&, diagnostics::report&)>;
 
-void InventoryBinCogParser(InventoryBin& tpl, Text::Tokenizer& tok, Content::Manager& manager, const Cog::Compiler& compiler, Diagnostics::Report& report) {
-	std::string fn = tok.GetSpaceDelimitedString();
+void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content::manager& manager, const cog::compiler& compiler, diagnostics::report& report) {
+	std::string fn = tok.get_space_delimited_string();
 	if(boost::iequals(fn, "none")) {
-		tpl.Cog = nullptr;
+		tpl.cog = nullptr;
 	}
 	else {
 		try {
-			tpl.Cog = &manager.Load<Script>(fn, compiler);
+			tpl.cog = &manager.load<script>(fn, compiler);
 		}
 		catch(...) {
-			tpl.Cog = nullptr;
+			tpl.cog = nullptr;
 		}
 	}
 }
@@ -35,25 +35,25 @@ static const std::unordered_map<std::string, InventoryBinParameterParser> Invent
 }
 }
 
-void Gorc::Content::Assets::InventoryBin::ParseArgs(Text::Tokenizer& tok, Content::Manager& manager, const Cog::Compiler& compiler, Diagnostics::Report& report) {
-	bool oldReportEOL = tok.GetReportEOL();
-	tok.SetReportEOL(true);
+void gorc::content::assets::inventory_bin::parse_args(text::tokenizer& tok, content::manager& manager, const cog::compiler& compiler, diagnostics::report& report) {
+	bool oldReportEOL = tok.get_report_eol();
+	tok.set_report_eol(true);
 
-	Text::Token t;
+	text::token t;
 	while(true) {
-		tok.GetToken(t);
+		tok.get_token(t);
 
-		if(t.Type == Text::TokenType::EndOfFile || t.Type == Text::TokenType::EndOfLine) {
+		if(t.type == text::token_type::end_of_file || t.type == text::token_type::end_of_line) {
 			break;
 		}
 		else {
-			tok.AssertPunctuator("=");
+			tok.assert_punctuator("=");
 
-			std::transform(t.Value.begin(), t.Value.end(), t.Value.begin(), tolower);
-			auto it = InventoryBinParameterParserMap.find(t.Value);
+			std::transform(t.value.begin(), t.value.end(), t.value.begin(), tolower);
+			auto it = InventoryBinParameterParserMap.find(t.value);
 			if(it == InventoryBinParameterParserMap.end()) {
-				report.AddWarning("InventoryBin::ParseArgs", boost::str(boost::format("unrecognized bin param \'%s\'") % t.Value), t.Location);
-				tok.GetSpaceDelimitedString();
+				report.add_warning("InventoryBin::ParseArgs", boost::str(boost::format("unrecognized bin param \'%s\'") % t.value), t.location);
+				tok.get_space_delimited_string();
 			}
 			else {
 				it->second(*this, tok, manager, compiler, report);
@@ -61,5 +61,5 @@ void Gorc::Content::Assets::InventoryBin::ParseArgs(Text::Tokenizer& tok, Conten
 		}
 	}
 
-	tok.SetReportEOL(oldReportEOL);
+	tok.set_report_eol(oldReportEOL);
 }

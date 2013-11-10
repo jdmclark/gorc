@@ -1,19 +1,19 @@
 #pragma once
 
-namespace Gorc {
-namespace Cog {
-namespace Constants {
+namespace gorc {
+namespace cog {
+namespace constants {
 
-const int DefaultInt = -1;
-const float DefaultFloat = 0.0f;
-extern const char* DefaultString;
+const int default_int = -1;
+const float default_float = 0.0f;
+extern const char* default_string;
 
-const int DefaultLinkId = 0xFFFFFFFF;
+const int default_link_id = 0xFFFFFFFF;
 
-const int DefaultMask = 0xFFFFFFFF;
-const int DefaultSectorMask = 0x400;
-const int DefaultSurfaceMask = 0x400;
-const int DefaultThingMask = 0x404;
+const int default_mask = 0xFFFFFFFF;
+const int default_sector_mask = 0x400;
+const int default_surface_mask = 0x400;
+const int default_thing_mask = 0x404;
 
 }
 }

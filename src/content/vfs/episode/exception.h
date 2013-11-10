@@ -2,13 +2,13 @@
 
 #include "framework/exception.h"
 
-namespace Gorc {
-namespace Content {
-namespace VFS {
-namespace Episode {
+namespace gorc {
+namespace content {
+namespace vfs {
+namespace episode {
 
-class EpisodeException : public Exception { };
-class LineDoesNotExistException : public Exception { };
+class episode_exception : public exception { };
+class line_does_not_exist_exception : public exception { };
 
 }
 }

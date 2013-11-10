@@ -2,30 +2,30 @@
 
 #include "content/asset.h"
 #include "content/loaders/sprite_loader.h"
-#include "content/flags/geometrymode.h"
-#include "content/flags/lightmode.h"
-#include "content/flags/texturemode.h"
+#include "content/flags/geometry_mode.h"
+#include "content/flags/light_mode.h"
+#include "content/flags/texture_mode.h"
 #include "framework/math/vector.h"
 
 #include "material.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Sprite : public Asset {
+class sprite : public asset {
 public:
-	using Loader = Loaders::SpriteLoader;
+	using loader = loaders::sprite_loader;
 
-	const Material* Material;
-	int Type;
-	float Width;
-	float Height;
-	Flags::GeometryMode GeometryMode;
-	Flags::LightMode LightMode;
-	Flags::TextureMode TextureMode;
-	float ExtraLight;
-	Math::Vector<3> Offset;
+	const material* material;
+	int type;
+	float width;
+	float height;
+	flags::geometry_mode geometry_mode;
+	flags::light_mode light_mode;
+	flags::texture_mode texture_mode;
+	float extra_light;
+	vector<3> offset;
 };
 
 }

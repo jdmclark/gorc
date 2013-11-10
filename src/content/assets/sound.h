@@ -4,15 +4,15 @@
 #include "content/asset.h"
 #include "content/loaders/sound_loader.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class Sound : public Asset {
+class sound : public asset {
 public:
-	using Loader = Loaders::SoundLoader;
+	using loader = loaders::sound_loader;
 
-	sf::SoundBuffer Buffer;
+	sf::SoundBuffer buffer;
 };
 
 }

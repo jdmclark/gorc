@@ -1,18 +1,18 @@
 #pragma once
 
 #include "sound.h"
-#include "content/flags/soundflag.h"
-#include "content/flags/soundsubclasstype.h"
-#include "framework/flagset.h"
+#include "content/flags/sound_flag.h"
+#include "content/flags/sound_subclass_type.h"
+#include "framework/utility/flag_set.h"
 
-namespace Gorc {
-namespace Content {
-namespace Assets {
+namespace gorc {
+namespace content {
+namespace assets {
 
-class SoundSubclass {
+class sound_subclass {
 public:
 	int sound = -1;
-	FlagSet<Flags::SoundFlag> flags;
+	flag_set<flags::sound_flag> flags;
 	float min_radius = 1.0f;
 	float max_radius = 4.0f;
 	float max_volume = 1.0f;
