@@ -202,7 +202,8 @@ void gorc::game::world::level::level_presenter::translate_camera(const vector<3>
 	cam_vel += get<1>(amt) * model->camera_look;
 	cam_vel = cam_vel * 1.2f;
 
-	model->camera_velocity = cam_vel;
+	get<0>(model->camera_velocity) = get<0>(cam_vel);
+	get<1>(model->camera_velocity) = get<1>(cam_vel);
 }
 
 void gorc::game::world::level::level_presenter::yaw_camera(double amt) {

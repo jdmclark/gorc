@@ -87,11 +87,44 @@ private:
 		physics::sphere sphere;
 	} physics_anim_node_visitor;
 
+	class segment_query_node_visitor {
+	private:
+		physics_presenter& presenter;
+		std::stack<matrix<4>> matrices;
+		matrix<4> current_matrix = make_identity_matrix<4>();
+
+	public:
+		segment_query_node_visitor(physics_presenter& presenter);
+
+		inline void push_matrix() {
+			matrices.push(current_matrix);
+		}
+
+		inline void pop_matrix() {
+			current_matrix = matrices.top();
+			matrices.pop();
+		}
+
+		inline void concatenate_matrix(const matrix<4>& mat) {
+			current_matrix = current_matrix * mat;
+		}
+
+		void visit_mesh(const content::assets::model& model, int mesh_id);
+
+		segment cam_segment;
+		vector<3> closest_contact;
+		vector<3> closest_contact_normal;
+		bool has_closest_contact;
+		float closest_contact_distance;
+	} segment_query_anim_node_visitor;
+
 public:
 	physics_presenter(level_presenter& presenter);
 
 	void start(level_model& model);
 	void update(double dt);
+
+	maybe<contact> thing_segment_query(int thing_id, const vector<3>& direction);
 
 	static void register_verbs(cog::verbs::verb_table&, components&);
 };

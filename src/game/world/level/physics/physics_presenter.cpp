@@ -11,7 +11,8 @@
 using namespace gorc::game::world::level::physics;
 
 physics_presenter::physics_presenter(level_presenter& presenter)
-	: presenter(presenter), model(nullptr), physics_anim_node_visitor(*this, physics_thing_resting_manifolds, physics_touched_thing_pairs) {
+	: presenter(presenter), model(nullptr), physics_anim_node_visitor(*this, physics_thing_resting_manifolds, physics_touched_thing_pairs),
+	  segment_query_anim_node_visitor(*this) {
 	return;
 }
 
@@ -79,7 +80,8 @@ void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::
 					vector<3> nrm_vel = nrm * ((sphere.radius / face_nearest_dist) - 1.0f);
 
 					resting_manifolds.emplace_back(face_nearest_point, (sphere.position - face_nearest_point) / face_nearest_dist,
-							contact_pos_vel + nrm_vel, visited_thing_id);
+							contact_pos_vel + nrm_vel);
+					resting_manifolds.back().contact_thing_id = make_maybe(visited_thing_id);
 				}
 				physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
 			}
@@ -153,6 +155,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 				if(surf_nearest_dist <= sphere.radius) {
 					physics_thing_resting_manifolds.emplace_back(surf_nearest_point, (sphere.position - surf_nearest_point) / surf_nearest_dist,
 							surface.normal * ((sphere.radius / surf_nearest_dist) - 1.0f));
+					physics_thing_resting_manifolds.back().contact_surface_id = make_maybe(i);
 					physics_touched_surface_pairs.emplace(current_thing_id, i);
 				}
 			}
@@ -181,7 +184,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 		// Skip things too far away
 		auto vec_to = sphere.position - col_thing.position;
 		auto vec_to_len = length(vec_to);
-		if(vec_to_len > col_thing.move_size + sphere.radius) {
+		if(vec_to_len > (col_thing.size + sphere.radius)) {
 			continue;
 		}
 
@@ -201,7 +204,8 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 						contact_point_vel = get_thing_path_moving_point_velocity(col_thing_id, contact_point);
 					}
 
-					physics_thing_resting_manifolds.emplace_back(contact_point, vec_to / vec_to_len, contact_point_vel, col_thing_id);
+					physics_thing_resting_manifolds.emplace_back(contact_point, vec_to / vec_to_len, contact_point_vel);
+					physics_thing_resting_manifolds.back().contact_thing_id = make_maybe(col_thing_id);
 				}
 
 				physics_touched_thing_pairs.emplace(std::min(current_thing_id, col_thing_id), std::max(current_thing_id, col_thing_id));
@@ -222,12 +226,22 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 }
 
 void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt) {
+	// TODO: Move somewhere more appropriate.
 	thing.orientation = thing.orientation + thing.ang_vel * static_cast<float>(dt);
-	thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
+	//thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
 
-	if(thing.physics_flags & flags::physics_flag::has_gravity) {
+	if(thing.physics_flags & flags::physics_flag::has_gravity && static_cast<int>(thing.attach_flags) == 0) {
 		thing.vel = thing.vel + make_vector(0.0f, 0.0f, -1.0f) * model->header.world_gravity * static_cast<float>(dt);
 	}
+
+	auto this_frame_only_vel = make_zero_vector<3, float>();
+	if((thing.attach_flags & flags::attach_flag::AttachedToThing) || (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
+		const auto& parent_thing = model->things[thing.attached_thing];
+		this_frame_only_vel = (parent_thing.position - thing.prev_attached_thing_position) / dt;
+		thing.prev_attached_thing_position = parent_thing.position;
+	}
+
+	thing.vel += this_frame_only_vel;
 
 	// Only perform collision detection for player, actor, and weapon types.
 	if(thing.type != flags::thing_type::Actor && thing.type != flags::thing_type::Player && thing.type != flags::thing_type::Weapon) {
@@ -351,6 +365,8 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 
 		dt_remaining -= dt_step;
 	}
+
+	thing.vel -= this_frame_only_vel;
 }
 
 void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, double dt) {
@@ -370,7 +386,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 	float dist_len = length(targetPosition - currentPosition);
 	float alpha = rate_factor * dt * thing.path_move_speed / dist_len;
 	if(alpha >= 1.0f || dist_len == 0.0f) {
-		thing.position = targetPosition;
+		presenter.adjust_thing_pos(thing_id, targetPosition);
 		thing.orientation = targetOrientation;
 
 		// Arrived at next frame. Advance to next.
@@ -393,7 +409,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 		}
 	}
 	else {
-		thing.position = lerp(thing.position, targetPosition, alpha);
+		presenter.adjust_thing_pos(thing_id, lerp(thing.position, targetPosition, alpha));
 		thing.orientation = lerp(thing.orientation, targetOrientation, alpha);
 	}
 }
@@ -465,6 +481,11 @@ void physics_presenter::update(double dt) {
 		else if(thing.path_moving) {
 			update_thing_path_moving(thing.get_id(), thing, dt);
 		}
+		else if(thing.attach_flags & flags::attach_flag::AttachedToThing) {
+			const auto& parent_thing = model->things[thing.attached_thing];
+			presenter.adjust_thing_pos(thing.get_id(), thing.position + (parent_thing.position - thing.prev_attached_thing_position));
+			thing.prev_attached_thing_position = parent_thing.position;
+		}
 	}
 
 	// Dispatch touched messages
@@ -482,6 +503,140 @@ void physics_presenter::update(double dt) {
 		model->things[thing_a_id].controller->touched_thing(thing_a_id, thing_b_id);
 		model->things[thing_b_id].controller->touched_thing(thing_b_id, thing_a_id);
 	}
+}
+
+physics_presenter::segment_query_node_visitor::segment_query_node_visitor(physics_presenter& presenter)
+	: presenter(presenter) {
+	return;
+}
+
+void physics_presenter::segment_query_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id) {
+	const auto& mesh = model.geosets.front().meshes[mesh_id];
+
+	for(const auto& face : mesh.faces) {
+		auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, mesh, face, current_matrix);
+		vector<3> nearest_point;
+		if(maybe_nearest_point >> nearest_point) {
+			auto dist = length(nearest_point - std::get<0>(cam_segment));
+			if(dist < closest_contact_distance) {
+				closest_contact_distance = dist;
+				has_closest_contact = true;
+				closest_contact = nearest_point;
+				closest_contact_normal = current_matrix.transform_normal(face.normal);
+			}
+		}
+	}
+}
+
+gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction) {
+	// Search for closest thing-ray intersection.
+	float query_radius = length(direction);
+	const auto& current_thing = model->things[current_thing_id];
+	segment cam_segment = std::make_tuple(current_thing.position, current_thing.position + direction);
+
+	float closest_contact_distance = std::numeric_limits<float>::max();
+	bool has_contact = false;
+	int closest_contact_thing_id = -1;
+	int closest_contact_surface_id = -1;
+	vector<3> closest_contact_position;
+	vector<3> closest_contact_normal;
+
+	// Find contact among sectors.
+	// Get list of sectors within thing influence.
+	auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
+	for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
+		const auto& sector = model->sectors[it->second];
+
+		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+			const auto& surface = model->surfaces[i];
+
+			if(!physics_surface_needs_collision_response(current_thing_id, i)) {
+				continue;
+			}
+
+			auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
+			vector<3> nearest_point;
+			if(maybe_nearest_point >> nearest_point) {
+				auto dist = length(nearest_point - std::get<0>(cam_segment));
+				if(dist < closest_contact_distance) {
+					closest_contact_distance = dist;
+					has_contact = true;
+					closest_contact_surface_id = i;
+					closest_contact_position = nearest_point;
+					closest_contact_normal = surface.normal;
+				}
+			}
+		}
+	}
+
+	// Find contact among things.
+	// Get list of things within thing influence.
+	physics_overlapping_things.clear();
+	for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
+		auto influenced_thing_range = physics_broadphase_sector_things.equal_range(it->second);
+		for(auto jt = std::get<0>(influenced_thing_range); jt != std::get<1>(influenced_thing_range); ++jt) {
+			physics_overlapping_things.emplace(jt->second);
+		}
+	}
+
+	for(auto col_thing_id : physics_overlapping_things) {
+		auto& col_thing = model->things[col_thing_id];
+
+		if(col_thing.get_id() == current_thing_id || !physics_thing_needs_collision_response(current_thing_id, col_thing_id)) {
+			continue;
+		}
+
+		if(col_thing.collide == flags::collide_type::sphere) {
+			auto maybe_int = segment_sphere_intersection(cam_segment, sphere(col_thing.position, col_thing.size));
+			vector<3> int_point;
+			if(maybe_int >> int_point) {
+				// Sphere intersected.
+				float col_dist = length(int_point - std::get<0>(cam_segment));
+				if(col_dist < closest_contact_distance) {
+					closest_contact_distance = col_dist;
+					has_contact = true;
+					closest_contact_surface_id = -1;
+					closest_contact_thing_id = col_thing_id;
+					closest_contact_normal = normalize(int_point - col_thing.position);
+					closest_contact_position = int_point;
+				}
+			}
+		}
+		else if(col_thing.collide == flags::collide_type::face) {
+			if(!col_thing.model_3d) {
+				continue;
+			}
+
+			segment_query_anim_node_visitor.cam_segment = cam_segment;
+			segment_query_anim_node_visitor.closest_contact_distance = closest_contact_distance;
+			segment_query_anim_node_visitor.has_closest_contact = false;
+			presenter.key_presenter.visit_mesh_hierarchy(segment_query_anim_node_visitor, col_thing);
+
+			if(segment_query_anim_node_visitor.has_closest_contact) {
+				closest_contact_distance = segment_query_anim_node_visitor.closest_contact_distance;
+				has_contact = true;
+				closest_contact_surface_id = -1;
+				closest_contact_thing_id = col_thing_id;
+				closest_contact_normal = segment_query_anim_node_visitor.closest_contact_normal;
+				closest_contact_position = segment_query_anim_node_visitor.closest_contact;
+			}
+		}
+	}
+
+	if(has_contact) {
+		contact new_contact(closest_contact_position, closest_contact_normal, make_zero_vector<3, float>());
+		if(closest_contact_surface_id >= 0) {
+			new_contact.contact_surface_id = make_maybe(closest_contact_surface_id);
+		}
+
+		if(closest_contact_thing_id >= 0) {
+			new_contact.contact_thing_id = make_maybe(closest_contact_thing_id);
+		}
+
+		return make_maybe(new_contact);
+	}
+
+	return maybe<contact>();
 }
 
 void physics_presenter::register_verbs(cog::verbs::verb_table& verbTable, components& components) {

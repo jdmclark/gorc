@@ -1,6 +1,8 @@
 #pragma once
 
 #include "thing_controller.h"
+#include "game/world/level/physics/contact.h"
+#include "framework/utility/maybe.h"
 
 namespace gorc {
 namespace game {
@@ -21,8 +23,6 @@ enum class standing_material {
 	very_deep_water
 };
 
-class filtered_closest_ray_callback;
-
 class character_controller : public thing_controller {
 private:
 	standing_material get_standing_material(thing& thing);
@@ -30,12 +30,15 @@ private:
 	void play_running_animation(int thing_id, thing& thing, double speed);
 	void play_standing_animation(int thing_id, thing& thing);
 
-	void run_falling_sweep(int thing_id, thing& thing, double dt);
-	void run_walking_sweep(int thing_id, thing& thing, double dt);
+	maybe<physics::contact> run_falling_sweep(int thing_id, thing& thing, double dt);
+	maybe<physics::contact> run_walking_sweep(int thing_id, thing& thing, double dt);
 
 	void update_falling(int thing_id, thing& thing, double dt);
-	void update_standing_on_surface(int thing_id, thing& thing, double dt);
-	void update_standing_on_thing(int thing_id, thing& thing, double dt);
+	void update_standing(int thing_id, thing& thing, double dt);
+	bool step_on_surface(int thing_id, thing& thing, unsigned int surf_id, const physics::contact& rrcb);
+	bool step_on_thing(int thing_id, thing& thing, int step_thing_id, const physics::contact& rrcb);
+	void land_on_surface(int thing_id, thing& thing, unsigned int surf_id, const physics::contact& rrcb);
+	void land_on_thing(int thing_id, thing& thing, int land_thing_id, const physics::contact& rrcb);
 	void jump(int thing_id, thing& thing);
 	void jump_from_surface(int thing_id, thing& thing, unsigned int surf_id);
 	void jump_from_thing(int thing_id, thing& thing, int jump_thing_id);

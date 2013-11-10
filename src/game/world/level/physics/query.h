@@ -44,6 +44,44 @@ template <typename VertexProvider, typename EdgeProvider> bool point_inside_surf
 	return true;
 }
 
+template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> segment_surface_intersection_point(const segment& segment,
+		const VertexProvider& level, const EdgeProvider& surface, const matrix<4>& trns) {
+	// Check for point
+	auto nrm = trns.transform_normal(surface.normal);
+	auto p = trns.transform(level.vertices[std::get<0>(surface.vertices[0])]);
+	auto u = dot(nrm, p - std::get<0>(segment)) / dot(nrm, std::get<1>(segment) - std::get<0>(segment));
+	if(u < 0.0f || u > 1.0f) {
+		return maybe<vector<3>>();
+	}
+
+	// Check for thing path passing through surface polygon.
+	auto sp = lerp(std::get<0>(segment), std::get<1>(segment), u);
+	if(point_inside_surface(sp, level, surface, trns)) {
+		return make_maybe(sp);
+	}
+
+	return maybe<vector<3>>();
+}
+
+template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> segment_surface_intersection_point(const segment& segment,
+		const VertexProvider& level, const EdgeProvider& surface) {
+	// Check for point
+	auto nrm = surface.normal;
+	auto p = level.vertices[std::get<0>(surface.vertices[0])];
+	auto u = dot(nrm, p - std::get<0>(segment)) / dot(nrm, std::get<1>(segment) - std::get<0>(segment));
+	if(u < 0.0f || u > 1.0f) {
+		return maybe<vector<3>>();
+	}
+
+	// Check for thing path passing through surface polygon.
+	auto sp = lerp(std::get<0>(segment), std::get<1>(segment), u);
+	if(point_inside_surface(sp, level, surface)) {
+		return make_maybe(sp);
+	}
+
+	return maybe<vector<3>>();
+}
+
 template <typename VertexProvider, typename EdgeProvider> bool segment_surface_intersection(const segment& segment,
 		const VertexProvider& level, const EdgeProvider& surface, const matrix<4>& trns) {
 	// Check for point
@@ -195,6 +233,45 @@ template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sph
 	}
 
 	return make_maybe((sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u);
+}
+
+inline maybe<vector<3>> segment_sphere_intersection(const segment& segment, const sphere& sphere) {
+	auto v = std::get<1>(segment) - std::get<0>(segment);
+	auto w = std::get<0>(segment) - sphere.position;
+
+	auto a = dot(v, v);
+	auto b = -2.0f * dot(v, w);
+	auto c = dot(w, w) - (sphere.radius * sphere.radius);
+
+	// (-b pm sqrt(b^2-4ac)) / 2a
+	auto det = b * b - 4.0f * a * c;
+	if(det <= 0.0f) {
+		return maybe<vector<3>>();
+	}
+
+	auto sqrt_det = sqrt(det);
+	auto sol_a = (-b + sqrt_det) / (2.0f * a);
+	auto sol_b = (-b - sqrt_det) / (2.0f * a);
+
+	bool has_sol = false;
+	float selected_sol;
+
+	if(sol_a >= 0.0f && sol_a <= 1.0f) {
+		has_sol = true;
+		selected_sol = sol_a;
+	}
+
+	if((!has_sol || sol_b < sol_a) && sol_b >= 0.0f && sol_b <= 1.0f) {
+		has_sol = true;
+		selected_sol = sol_b;
+	}
+
+	if(has_sol) {
+		return make_maybe(lerp(std::get<0>(segment), std::get<1>(segment), selected_sol));
+	}
+	else {
+		return maybe<vector<3>>();
+	}
 }
 
 }

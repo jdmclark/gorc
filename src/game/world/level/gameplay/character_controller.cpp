@@ -71,8 +71,243 @@ gorc::game::world::level::gameplay::standing_material gorc::game::world::level::
 	}
 }
 
+gorc::maybe<gorc::game::world::level::physics::contact> gorc::game::world::level::gameplay::character_controller::run_falling_sweep(int thing_id, thing& thing,
+                double dt) {
+	// Test for collision between legs and ground
+	auto leg_height = thing.model_3d->insert_offset;
+	return presenter.physics_presenter.thing_segment_query(thing_id, -leg_height);
+}
+
+gorc::maybe<gorc::game::world::level::physics::contact> gorc::game::world::level::gameplay::character_controller::run_walking_sweep(int thing_id, thing& thing,
+		double dt) {
+	// Test for collision between legs and ground.
+	auto leg_height = thing.model_3d->insert_offset * 1.50f;
+	return presenter.physics_presenter.thing_segment_query(thing_id, -leg_height);
+}
+
+void gorc::game::world::level::gameplay::character_controller::update_falling(int thing_id, thing& thing, double dt) {
+	auto maybe_contact = run_falling_sweep(thing_id, thing, dt);
+
+	auto applied_thrust = thing.thrust;
+	get<2>(applied_thrust) = 0.0f;
+	thing.vel = thing.vel + applied_thrust * dt;
+
+	play_standing_animation(thing_id, thing);
+
+	maybe_contact.if_set([this, &thing, thing_id](const physics::contact& contact) {
+		// Check if attached surface/thing has changed.
+		int attachment_id;
+		if(contact.contact_surface_id >> attachment_id) {
+			land_on_surface(thing_id, thing, attachment_id, contact);
+		}
+		else if(contact.contact_thing_id >> attachment_id) {
+			land_on_thing(thing_id, thing, attachment_id, contact);
+		}
+	});
+}
+
+void gorc::game::world::level::gameplay::character_controller::update_standing(int thing_id, thing& thing, double dt) {
+	auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
+
+	maybe_contact.if_else_set([this, &thing, thing_id, dt](const physics::contact& contact) {
+		// Check if attached surface/thing has changed.
+		int attachment_id;
+		if(contact.contact_surface_id >> attachment_id && attachment_id != thing.attached_surface) {
+			// Player has landed on a new surface.
+			step_on_surface(thing_id, thing, attachment_id, contact);
+		}
+		else if(contact.contact_thing_id >> attachment_id && attachment_id != thing.attached_thing) {
+			// Player has landed on a new thing.
+			step_on_thing(thing_id, thing, attachment_id, contact);
+		}
+
+		if(get<2>(thing.thrust) > 0.0f) {
+			jump(thing_id, thing);
+		}
+		else {
+			// Accelerate body along surface
+			auto hit_world = contact.position;
+			auto hit_normal = contact.normal;
+			auto player_new_vel = thing.thrust - hit_normal * dot(thing.thrust, hit_normal);
+			auto new_vel = player_new_vel;
+
+			if(contact.contact_surface_id >> attachment_id) {
+				new_vel += presenter.model->surfaces[attachment_id].thrust;
+			}
+			else if(contact.contact_thing_id >> attachment_id) {
+				//new_vel += (presenter.model->things[attachment_id].position - thing.prev_attached_thing_position) / dt;
+				//thing.prev_attached_thing_position = presenter.model->things[attachment_id].position;
+			}
+
+			// Accelerate body toward standing position
+			float dist = dot(hit_normal, thing.position - hit_world);
+			auto hover_position = hit_world + thing.model_3d->insert_offset;
+			new_vel += (hover_position - thing.position) * 20.0f;
+
+			thing.vel = new_vel;
+
+			// Update idle animation
+			float player_new_vel_len = length(player_new_vel);
+			if(player_new_vel_len > 0.0f) {
+				play_running_animation(thing_id, thing, player_new_vel_len * 20.0f);
+			}
+			else {
+				play_standing_animation(thing_id, thing);
+			}
+		}
+	},
+	[&thing] {
+		// Player is falling again.
+		thing.attach_flags = flag_set<flags::attach_flag>();
+	});
+}
+
+bool gorc::game::world::level::gameplay::character_controller::step_on_surface(int thing_id, thing& thing, unsigned int surf_id,
+                const physics::contact& rrcb) {
+	const auto& surface = presenter.model->surfaces[surf_id];
+	if(surface.flags & flags::surface_flag::Floor) {
+		thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToWorldSurface };
+		thing.attached_surface = surf_id;
+		return true;
+	}
+	else {
+		thing.attach_flags = flag_set<flags::attach_flag>();
+		return false;
+	}
+
+	// Player has landed.
+	//presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
+}
+
+bool gorc::game::world::level::gameplay::character_controller::step_on_thing(int thing_id, thing& thing, int land_thing_id,
+                const physics::contact& rrcb) {
+	const auto& attach_thing = presenter.model->things[land_thing_id];
+	if(attach_thing.flags & flags::thing_flag::CanStandOn) {
+		thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToThingFace };
+		thing.attached_thing = land_thing_id;
+		thing.prev_attached_thing_position = presenter.model->things[land_thing_id].position;
+		return true;
+	}
+	else {
+		thing.attach_flags = flag_set<flags::attach_flag>();
+		return false;
+	}
+
+	// Player has landed.
+	//presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
+}
+
+void gorc::game::world::level::gameplay::character_controller::land_on_surface(int thing_id, thing& thing, unsigned int surf_id,
+                const physics::contact& rrcb) {
+	if(!step_on_surface(thing_id, thing, surf_id, rrcb)) {
+		return;
+	}
+
+	const auto& surf = presenter.model->surfaces[surf_id];
+
+	flags::sound_subclass_type subclass = flags::sound_subclass_type::LandHard;
+	if(surf.flags & flags::surface_flag::Metal) {
+		subclass = flags::sound_subclass_type::LandMetal;
+	}
+	else if(surf.flags & flags::surface_flag::Dirt) {
+		subclass = flags::sound_subclass_type::LandEarth;
+	}
+	else if(surf.flags & flags::surface_flag::ShallowWater) {
+		subclass = flags::sound_subclass_type::LandPuddle;
+	}
+	else if(surf.flags & flags::surface_flag::DeepWater) {
+		subclass = flags::sound_subclass_type::LandWater;
+	}
+	else if(surf.flags & flags::surface_flag::VeryDeepWater) {
+		subclass = flags::sound_subclass_type::LandWater;
+	}
+
+	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+}
+
+void gorc::game::world::level::gameplay::character_controller::land_on_thing(int thing_id, thing& thing, int land_thing_id,
+                const physics::contact& rrcb) {
+	if(!step_on_thing(thing_id, thing, land_thing_id, rrcb)) {
+		return;
+	}
+
+	flag_set<flags::thing_flag> flags = presenter.model->things[land_thing_id].flags;
+
+	flags::sound_subclass_type subclass = flags::sound_subclass_type::LandHard;
+	if(flags & flags::thing_flag::Metal) {
+		subclass = flags::sound_subclass_type::LandMetal;
+	}
+	else if(flags & flags::thing_flag::Dirt) {
+		subclass = flags::sound_subclass_type::LandEarth;
+	}
+
+	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+}
+
+void gorc::game::world::level::gameplay::character_controller::jump(int thing_id, thing& thing) {
+	if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
+		jump_from_surface(thing_id, thing, thing.attached_surface);
+	}
+	else if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
+		jump_from_thing(thing_id, thing, thing.attached_thing);
+	}
+}
+
+void gorc::game::world::level::gameplay::character_controller::jump_from_surface(int thing_id, thing& thing, unsigned int surf_id) {
+	thing.attach_flags = flag_set<flags::attach_flag>();
+	thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
+
+	const auto& surf = presenter.model->surfaces[surf_id];
+
+	flags::sound_subclass_type subclass = flags::sound_subclass_type::Jump;
+	if(surf.flags & flags::surface_flag::Metal) {
+		subclass = flags::sound_subclass_type::JumpMetal;
+	}
+	else if(surf.flags & flags::surface_flag::Dirt) {
+		subclass = flags::sound_subclass_type::JumpEarth;
+	}
+	else if(surf.flags & flags::surface_flag::ShallowWater) {
+		subclass = flags::sound_subclass_type::JumpWater;
+	}
+	else if(surf.flags & flags::surface_flag::DeepWater) {
+		subclass = flags::sound_subclass_type::JumpWater;
+	}
+	else if(surf.flags & flags::surface_flag::VeryDeepWater) {
+		subclass = flags::sound_subclass_type::JumpWater;
+	}
+
+	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+}
+
+void gorc::game::world::level::gameplay::character_controller::jump_from_thing(int thing_id, thing& thing, int jump_thing_id) {
+	thing.attach_flags = flag_set<flags::attach_flag>();
+	thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
+
+	flag_set<flags::thing_flag> flags = presenter.model->things[jump_thing_id].flags;
+
+	flags::sound_subclass_type subclass = flags::sound_subclass_type::Jump;
+	if(flags & flags::thing_flag::Metal) {
+		subclass = flags::sound_subclass_type::JumpMetal;
+	}
+	else if(flags & flags::thing_flag::Dirt) {
+		subclass = flags::sound_subclass_type::JumpEarth;
+	}
+
+	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+}
+
 void gorc::game::world::level::gameplay::character_controller::update(int thing_id, double dt) {
 	thing_controller::update(thing_id, dt);
+
+	thing& thing = presenter.model->things[thing_id];
+
+	// Update actor state
+	if(static_cast<int>(thing.attach_flags)) {
+		update_standing(thing_id, thing, dt);
+	}
+	else {
+		update_falling(thing_id, thing, dt);
+	}
 }
 
 void gorc::game::world::level::gameplay::character_controller::create_controller_data(int thing_id) {
