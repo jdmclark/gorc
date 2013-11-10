@@ -493,6 +493,10 @@ void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const
 		concatenate_matrix(make_translation_matrix(thing.position + offset));
 
 		matrix<4> new_model = view_matrix.transpose();
+		get<3, 0>(new_model) = 0.0f;
+		get<3, 1>(new_model) = 0.0f;
+		get<3, 2>(new_model) = 0.0f;
+		get<3, 3>(new_model) = 1.0f;
 		concatenate_matrix(new_model);
 
 		update_shader_model_matrix();

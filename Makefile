@@ -40,7 +40,7 @@ OBJ_PATH = $(BASE_PATH)/obj
 BIN_PATH = $(BASE_PATH)/bin
 
 CPPFLAGS = -I$(SRC_PATH)
-CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -g
+CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -O3
 
 MODULES = $(LIB_MODULES) $(TEST_MODULES) $(BIN_MODULES)
 
