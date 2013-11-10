@@ -13,6 +13,18 @@ Instructions
 * Optional: Rip the CD audio to the `game/restricted/music/1` and `game/restricted/music/2` subdirectories in OGG format.
 * Run `make` from the project root.
 
+Controls
+--------
+
+* W,A,S,D: Move player
+* Space: Jump
+* Left mouse: Shoot bryarbolt
+* E: Activate surface/thing
+* G: Give all inventory items
+* F1: Activate fieldlight (requires batteries)
+* R: Teleport to next walkplayer.
+* Esc: Quit
+
 Requirements
 ------------
 
@@ -20,7 +32,7 @@ Requirements
 * GNU Make
 * Flex 2.5
 * Bison 2.5
-* SFML 1.6
+* SFML 2.1
 * Glew
 * [Boost](http://boost.org)
 * [NullUnit](http://github.com/jdmclark/nullunit)
