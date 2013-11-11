@@ -20,7 +20,11 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::d
 
 	bool hasTransparency = (file.read<uint32_t>() != 0);
 
-	file.seek(52); // Skip padding/unknowns.
+	get<0>(cmp->tint_color) = file.read<float>();
+	get<1>(cmp->tint_color) = file.read<float>();
+	get<2>(cmp->tint_color) = file.read<float>();
+
+	file.seek(40); // Skip padding/unknowns.
 
 	// Read color tables, 24-bit RGB.
 	uint8_t colorbytes[768];

@@ -4,10 +4,13 @@
 #include "framework/math/box.h"
 #include "sound.h"
 #include "content/flags/sector_flag.h"
+#include "framework/utility/maybe.h"
 
 namespace gorc {
 namespace content {
 namespace assets {
+
+class colormap;
 
 class level_sector {
 public:
@@ -15,7 +18,8 @@ public:
 	flag_set<flags::sector_flag> flags;
 	float ambient_light;
 	float extra_light;
-	size_t color_map;
+	size_t colormap_id;
+	maybe<colormap const*> colormap;
 	vector<3> tint;
 	box<3> bounding_box;
 	box<3> collide_box;

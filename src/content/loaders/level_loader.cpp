@@ -126,7 +126,7 @@ void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, manager& ma
 void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
 	text::token t;
 
-	tok.assert_identifier("world");
+	tok.assert_identifier("World");
 	tok.assert_identifier("Colormaps");
 
 	size_t num_colormaps = tok.get_number<size_t>();
@@ -141,7 +141,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		}
 	}
 
-	tok.assert_identifier("world");
+	tok.assert_identifier("World");
 	tok.assert_identifier("Vertices");
 
 	size_t num_vertices = tok.get_number<size_t>();
@@ -157,9 +157,9 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		lev.vertices.push_back(make_vector(x, y, z));
 	}
 
-	tok.assert_identifier("world");
-	tok.assert_identifier("texture");
-	tok.assert_identifier("vertices");
+	tok.assert_identifier("World");
+	tok.assert_identifier("Texture");
+	tok.assert_identifier("Vertices");
 
 	size_t num_tex_vert = tok.get_number<size_t>();
 
@@ -173,8 +173,8 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		lev.texture_vertices.push_back(make_vector(u, v));
 	}
 
-	tok.assert_identifier("world");
-	tok.assert_identifier("adjoins");
+	tok.assert_identifier("World");
+	tok.assert_identifier("Adjoins");
 
 	size_t num_adjoins = tok.get_number<size_t>();
 
@@ -191,8 +191,8 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
 		lev.adjoins.push_back(adj);
 	}
 
-	tok.assert_identifier("world");
-	tok.assert_identifier("surfaces");
+	tok.assert_identifier("World");
+	tok.assert_identifier("Surfaces");
 
 	size_t num_surfaces = tok.get_number<size_t>();
 
@@ -273,7 +273,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
 				sec.extra_light = tok.get_number<float>();
 			}
 			else if(boost::iequals(t.value, "colormap")) {
-				sec.color_map = tok.get_number<size_t>();
+				sec.colormap_id = tok.get_number<size_t>();
 			}
 			else if(boost::iequals(t.value, "tint")) {
 				float r = tok.get_number<float>();
@@ -512,7 +512,7 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, manager& manag
 			float pitch = tok.get_number<float>();
 			float yaw = tok.get_number<float>();
 			float roll = tok.get_number<float>();
-			unsigned int sector = tok.get_number<unsigned int>();
+			int sector = tok.get_number<int>();
 
 			auto base_it = lev.template_map.find(tpl_name);
 			if(base_it == lev.template_map.end()) {
@@ -577,8 +577,12 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
 		}
 	}
 
-	// Calculate axis-aligned bounding box for each sector;
+	// Calculate axis-aligned bounding box for each sector and assign colormap pointer.
 	for(auto& sec : lev.sectors) {
+		if(sec.colormap_id >= 0) {
+			sec.colormap = make_maybe(lev.colormaps[sec.colormap_id]);
+		}
+
 		vector<3> min_aabb = make_fill_vector<3>(std::numeric_limits<float>::max());
 		vector<3> max_aabb = make_fill_vector<3>(std::numeric_limits<float>::lowest());
 

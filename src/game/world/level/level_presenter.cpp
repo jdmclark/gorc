@@ -424,6 +424,11 @@ void gorc::game::world::level::level_presenter::set_sector_adjoins(int sector_id
 	}
 }
 
+void gorc::game::world::level::level_presenter::set_sector_colormap(int sector_id, int colormap) {
+	auto& sector = model->sectors[sector_id];
+	sector.colormap = make_maybe(&place.contentmanager->get_asset<content::assets::colormap>(colormap));
+}
+
 void gorc::game::world::level::level_presenter::set_sector_light(int sector_id, float value, float delay) {
 	// TODO: create animation to implement delay feature.
 	content::assets::level_sector& sector = model->sectors[sector_id];
@@ -770,7 +775,7 @@ void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_
 	});
 
 	verbTable.add_verb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
-		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
+		components.current_level_presenter->set_sector_colormap(sector_id, colormap);
 	});
 
 	verbTable.add_verb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
@@ -778,7 +783,7 @@ void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_
 	});
 
 	verbTable.add_verb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
-		// Deliberately do nothing. (Colormaps not used after a level is loaded.)
+		components.current_level_presenter->set_sector_colormap(sector_id, colormap);
 	});
 
 	verbTable.add_verb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {

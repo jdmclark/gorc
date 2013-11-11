@@ -381,32 +381,41 @@ void gorc::game::world::level::level_view::draw_surface(unsigned int surf_num, c
 
 		glBegin(GL_TRIANGLES);
 
+		auto sector_tint = make_zero_vector<3, float>();
+		content::assets::colormap const* sector_cmp;
+		if(sector.colormap >> sector_cmp) {
+			sector_tint = sector_cmp->tint_color;
+		}
+
 		vector<3> first_geo = lev.vertices[std::get<0>(surface.vertices[0])];
 		vector<2> first_tex = lev.texture_vertices[std::get<1>(surface.vertices[0])] + surface.texture_offset;
 		float first_intensity = std::get<2>(surface.vertices[0]) + sector.extra_light + surface.extra_light;
+		auto first_color = extend_vector<4>(sector_tint * first_intensity, alpha);
 
 		for(size_t i = 2; i < surface.vertices.size(); ++i) {
 			vector<3> second_geo = lev.vertices[std::get<0>(surface.vertices[i - 1])];
 			vector<2> second_tex = lev.texture_vertices[std::get<1>(surface.vertices[i - 1])] + surface.texture_offset;
 			float second_intensity = std::get<2>(surface.vertices[i - 1]) + sector.extra_light + surface.extra_light;
+			auto second_color = extend_vector<4>(sector_tint * second_intensity, alpha);
 
 			vector<3> third_geo = lev.vertices[std::get<0>(surface.vertices[i])];
 			vector<2> third_tex = lev.texture_vertices[std::get<1>(surface.vertices[i])] + surface.texture_offset;
 			float third_intensity = std::get<2>(surface.vertices[i]) + sector.extra_light + surface.extra_light;
+			auto third_color = extend_vector<4>(sector_tint * third_intensity, alpha);
 
 			apply(glNormal3f, surface.normal);
 			glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
-			glColor4f(first_intensity, first_intensity, first_intensity, alpha);
+			apply(glColor4f, first_color);
 			apply(glVertex3f, first_geo);
 
 			apply(glNormal3f, surface.normal);
 			glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
-			glColor4f(second_intensity, second_intensity, second_intensity, alpha);
+			apply(glColor4f, second_color);
 			apply(glVertex3f, second_geo);
 
 			apply(glNormal3f, surface.normal);
 			glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
-			glColor4f(third_intensity, third_intensity, third_intensity, alpha);
+			apply(glColor4f, third_color);
 			apply(glVertex3f, third_geo);
 		}
 
@@ -414,8 +423,8 @@ void gorc::game::world::level::level_view::draw_surface(unsigned int surf_num, c
 	}
 }
 
-gorc::game::world::level::level_view::mesh_node_visitor::mesh_node_visitor(float sector_light, level_view& view)
-	: sector_light(sector_light), view(view) {
+gorc::game::world::level::level_view::mesh_node_visitor::mesh_node_visitor(const vector<4>& sector_color, level_view& view)
+	: sector_color(sector_color), view(view) {
 	return;
 }
 
@@ -430,10 +439,16 @@ void gorc::game::world::level::level_view::mesh_node_visitor::visit_mesh(const c
 			vector<2> tex_scale = make_vector(1.0f / static_cast<float>(material->width),
 					1.0f / static_cast<float>(material->height));
 
-			float light = sector_light + face.extra_light;
+			float light = face.extra_light;
 			if(face.light == flags::light_mode::FullyLit || mesh.light == flags::light_mode::FullyLit) {
 				light = 1.0f;
 			}
+
+			auto extra_lit_color = sector_color;
+			for(float& ch : extra_lit_color) {
+				ch = clamp(ch + light, 0.0f, 1.0f);
+			}
+			get<3>(extra_lit_color) = alpha;
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, material->cels[0].diffuse);
@@ -446,32 +461,29 @@ void gorc::game::world::level::level_view::mesh_node_visitor::visit_mesh(const c
 			vector<3> first_geo = mesh.vertices[std::get<0>(face.vertices[0])];
 			vector<2> first_tex = mesh.texture_vertices[std::get<1>(face.vertices[0])];
 			vector<3> first_normal = mesh.vertex_normals[std::get<0>(face.vertices[0])];
-			float first_intensity = light;
 
 			for(size_t i = 2; i < face.vertices.size(); ++i) {
 				vector<3> second_geo = mesh.vertices[std::get<0>(face.vertices[i - 1])];
 				vector<2> second_tex = mesh.texture_vertices[std::get<1>(face.vertices[i - 1])];
 				vector<3> second_normal = mesh.vertex_normals[std::get<0>(face.vertices[i - 1])];
-				float second_intensity = light;
 
 				vector<3> third_geo = mesh.vertices[std::get<0>(face.vertices[i])];
 				vector<2> third_tex = mesh.texture_vertices[std::get<1>(face.vertices[i])];
 				vector<3> third_normal = mesh.vertex_normals[std::get<0>(face.vertices[i])];
-				float third_intensity = light;
 
 				apply(glNormal3f, first_normal);
 				glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
-				glColor4f(first_intensity, first_intensity, first_intensity, alpha);
+				apply(glColor4f, extra_lit_color);
 				apply(glVertex3f, first_geo);
 
 				apply(glNormal3f, second_normal);
 				glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
-				glColor4f(second_intensity, second_intensity, second_intensity, alpha);
+				apply(glColor4f, extra_lit_color);
 				apply(glVertex3f, second_geo);
 
 				apply(glNormal3f, third_normal);
 				glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
-				glColor4f(third_intensity, third_intensity, third_intensity, alpha);
+				apply(glColor4f, extra_lit_color);
 				apply(glVertex3f, third_geo);
 			}
 
@@ -562,11 +574,18 @@ void gorc::game::world::level::level_view::draw_thing(const thing& thing) {
 		return;
 	}
 
-	float sector_light = currentModel->sectors[thing.sector].ambient_light
-			+ currentModel->sectors[thing.sector].extra_light;
+	const auto& current_sector = currentModel->sectors[thing.sector];
+	auto sector_color = make_fill_vector<3, float>(1.0f);
+	content::assets::colormap const* sec_cmp;
+	if(current_sector.colormap >> sec_cmp) {
+		sector_color = sec_cmp->tint_color;
+	}
+
+	float sector_light = current_sector.ambient_light + current_sector.extra_light;
+	auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
 	if(thing.model_3d) {
-		mesh_node_visitor v(sector_light, *this);
+		mesh_node_visitor v(lit_sector_color, *this);
 		currentPresenter->key_presenter.visit_mesh_hierarchy(v, thing);
 	}
 	else if(thing.sprite) {

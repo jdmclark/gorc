@@ -18,6 +18,8 @@ private:
 public:
 	using loader = loaders::colormap_loader;
 
+	vector<3, float> tint_color;
+
 	inline void set_color(uint8_t index, const vector<3, uint8_t>& new_color) {
 		color[index] = new_color;
 	}

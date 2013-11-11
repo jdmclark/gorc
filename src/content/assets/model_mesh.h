@@ -10,7 +10,7 @@ namespace assets {
 
 class model_mesh {
 public:
-	unsigned int index;
+	int index;
 	std::string name;
 	float radius;
 	flags::geometry_mode geo;

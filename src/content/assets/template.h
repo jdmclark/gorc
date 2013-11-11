@@ -31,7 +31,7 @@ namespace assets {
 class thing_template {
 public:
 	// General fields
-	unsigned int sector;
+	int sector;
 	vector<3> position;
 	vector<3> orientation;
 	vector<3> thrust;

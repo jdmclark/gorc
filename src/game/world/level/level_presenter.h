@@ -109,6 +109,7 @@ public:
 
 	// sector verbs
 	void set_sector_adjoins(int sector_id, bool state);
+	void set_sector_colormap(int sector_id, int colormap);
 	void set_sector_light(int sector_id, float value, float delay);
 	void set_sector_thrust(int sector_id, const vector<3>& thrust);
 	void set_sector_tint(int sector_id, const vector<3>& color);

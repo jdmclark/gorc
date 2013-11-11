@@ -254,7 +254,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 	}
 
 	double dt_remaining = dt;
-	double dt_step = 0.25 * static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
+	double dt_step = 0.125 * static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
 
 	int loop_ct = 0;
 

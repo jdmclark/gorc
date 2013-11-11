@@ -116,11 +116,11 @@ public:
 
 	class mesh_node_visitor {
 	private:
-		float sector_light;
+		vector<4> sector_color;
 		level_view& view;
 
 	public:
-		mesh_node_visitor(float sector_light, level_view& view);
+		mesh_node_visitor(const vector<4>& sector_color, level_view& view);
 
 		inline void concatenate_matrix(const matrix<4>& mat) {
 			view.concatenate_matrix(mat);
