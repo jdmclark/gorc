@@ -42,7 +42,7 @@ void gorc::game::world::level::sounds::sound::play_positional(const content::ass
 	actual_max_rad = std::max(minrad, maxrad);
 
 	internal_sound.setBuffer(buffer.buffer);
-	internal_sound.setPosition(get<0>(position), get<2>(position), get<1>(position));
+	internal_sound.setPosition(get<0>(position), get<2>(position), -get<1>(position));
 	internal_sound.setRelativeToListener(false);
 	internal_sound.setVolume(volume * 100.0f);
 	internal_sound.setLoop(flags & flags::sound_flag::Loops);
@@ -105,7 +105,7 @@ void gorc::game::world::level::sounds::sound::stop(float delay) {
 void gorc::game::world::level::sounds::sound::update(double dt, const level_model& model) {
 	if(update_position) {
 		vector<3> pos = model.things[thing].position;
-		internal_sound.setPosition(get<0>(pos), get<2>(pos), get<1>(pos));
+		internal_sound.setPosition(get<0>(pos), get<2>(pos), -get<1>(pos));
 
 		auto sound_dist = length(model.camera_position - pos);
 		float attenuation = (actual_min_rad != actual_max_rad) ? ((sound_dist - actual_max_rad) / (actual_min_rad - actual_max_rad)) : 1.0f;
