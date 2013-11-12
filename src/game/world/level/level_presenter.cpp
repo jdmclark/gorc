@@ -35,6 +35,9 @@ void gorc::game::world::level::level_presenter::start(event::event_bus& eventBus
 	components.level_view.set_level_model(model.get());
 	components.world_view_frame.set_view(components.level_view);
 
+	// Update all components
+	update(0.0);
+
 	// Send startup and loading messages
 	script_presenter.send_message_to_all(cog::message_id::loading, -1, -1, flags::message_type::nothing);
 
@@ -87,13 +90,13 @@ void gorc::game::world::level::level_presenter::initialize_world() {
 }
 
 void gorc::game::world::level::level_presenter::update(double dt) {
+	camera_presenter.update(dt);
 	animation_presenter.update(dt);
 	script_presenter.update(dt);
 	sound_presenter.update(dt);
 	key_presenter.update(dt);
 	inventory_presenter.update(dt);
 	physics_presenter.update(dt);
-	camera_presenter.update(dt);
 
 	// update things
 	for(auto& thing : model->things) {
@@ -643,6 +646,7 @@ void gorc::game::world::level::level_presenter::set_thing_light(int thing_id, fl
 }
 
 void gorc::game::world::level::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, class components& components) {
+	camera::camera_presenter::register_verbs(verbTable, components);
 	animations::animation_presenter::register_verbs(verbTable, components);
 	scripts::script_presenter::register_verbs(verbTable, components);
 	sounds::sound_presenter::register_verbs(verbTable, components);

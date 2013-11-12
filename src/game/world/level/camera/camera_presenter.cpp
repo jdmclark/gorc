@@ -137,7 +137,7 @@ void gorc::game::world::level::camera::camera_presenter::register_verbs(cog::ver
 		components.current_level_presenter->camera_presenter.set_current_camera(camera_id);
 	});
 
-	verbTable.add_verb<void, 4>("setpovshake", [&components](const vector<3>& pos_offset, const vector<3>& ang_offset, float pos_reset_speed, float ang_reset_speed) {
+	verbTable.add_verb<void, 4>("setpovshake", [&components](vector<3> pos_offset, vector<3> ang_offset, float pos_reset_speed, float ang_reset_speed) {
 		components.current_level_presenter->camera_presenter.set_pov_shake(pos_offset, ang_offset, pos_reset_speed, ang_reset_speed);
 	});
 }
