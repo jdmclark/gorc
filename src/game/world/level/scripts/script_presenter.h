@@ -92,6 +92,8 @@ public:
 		master_cog = cog;
 	}
 
+	int get_self_cog() const;
+
 	static void register_verbs(cog::verbs::verb_table&, class components&);
 };
 

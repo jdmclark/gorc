@@ -29,8 +29,7 @@ void gorc::game::world::level::level_view::update(double dt) {
 }
 
 void gorc::game::world::level::level_view::compute_visible_sectors(const box<2, int>& view_size) {
-	unsigned int current_camera_sector_id = currentModel->camera_sector;
-	const auto& camera_pos = currentModel->camera_position;
+	const auto& cam = currentModel->camera_model.current_computed_state;
 
 	std::array<double, 16> proj_matrix;
 	std::array<double, 16> view_matrix;
@@ -50,8 +49,8 @@ void gorc::game::world::level::level_view::compute_visible_sectors(const box<2, 
 
 	sector_visited_scratch.clear();
 	sector_vis_scratch.clear();
-	sector_vis_scratch.emplace(current_camera_sector_id);
-	do_sector_vis(current_camera_sector_id, proj_matrix, view_matrix, viewport, adj_bbox, camera_pos, currentModel->camera_look);
+	sector_vis_scratch.emplace(cam.containing_sector);
+	do_sector_vis(cam.containing_sector, proj_matrix, view_matrix, viewport, adj_bbox, cam.position, cam.look);
 }
 
 void gorc::game::world::level::level_view::do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
@@ -149,7 +148,7 @@ void gorc::game::world::level::level_view::record_visible_special_surfaces() {
 		}
 	}
 
-	const auto& cam_pos = currentModel->camera_position;
+	const auto& cam_pos = currentModel->camera_model.current_computed_state.position;
 
 	// Compute distances to translucent surfaces
 	for(auto& surf_tuple : translucent_surfaces_scratch) {
@@ -171,7 +170,7 @@ void gorc::game::world::level::level_view::record_visible_special_surfaces() {
 void gorc::game::world::level::level_view::record_visible_things() {
 	for(auto& thing : currentModel->things) {
 		if(sector_vis_scratch.find(thing.sector) != sector_vis_scratch.end()) {
-			visible_thing_scratch.emplace_back(thing.get_id(), length(thing.position - currentModel->camera_position));
+			visible_thing_scratch.emplace_back(thing.get_id(), length(thing.position - currentModel->camera_model.current_computed_state.position));
 
 			if(!(thing.flags & flags::thing_flag::Sighted)) {
 				// thing has been sighted for first time. Fire sighted event.
@@ -215,7 +214,7 @@ void gorc::game::world::level::level_view::draw_visible_sky_surfaces(const box<2
 	if(!horizon_sky_surfaces_scratch.empty()) {
 		set_current_shader(horizonShader, sector_tint,
 				currentModel->header.horizon_sky_offset, currentModel->header.horizon_pixels_per_rev,
-				currentModel->header.horizon_distance, view_size, currentModel->camera_look);
+				currentModel->header.horizon_distance, view_size, currentModel->camera_model.current_computed_state.look);
 
 		for(auto surf_tuple : horizon_sky_surfaces_scratch) {
 			draw_surface(std::get<1>(surf_tuple), currentModel->sectors[std::get<0>(surf_tuple)], 1.0f);
@@ -239,7 +238,7 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 		if(std::get<1>(*thing_it) <= std::get<2>(*surf_it)) {
 			glDepthMask(GL_TRUE);
 			glDisable(GL_CULL_FACE);
-			draw_thing(currentModel->things[std::get<0>(*thing_it)]);
+			draw_thing(currentModel->things[std::get<0>(*thing_it)], std::get<0>(*thing_it));
 			++thing_it;
 		}
 		else {
@@ -254,7 +253,7 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 	glDepthMask(GL_TRUE);
 	glDisable(GL_CULL_FACE);
 	while(thing_it != visible_thing_scratch.end()) {
-		draw_thing(currentModel->things[std::get<0>(*thing_it)]);
+		draw_thing(currentModel->things[std::get<0>(*thing_it)], std::get<0>(*thing_it));
 		++thing_it;
 	}
 
@@ -269,6 +268,8 @@ void gorc::game::world::level::level_view::draw_visible_translucent_surfaces_and
 
 void gorc::game::world::level::level_view::draw(double dt, const box<2, int>& view_size) {
 	if(currentModel) {
+		const auto& cam = currentModel->camera_model.current_computed_state;
+
 		glDisable(GL_STENCIL_TEST);
 		glDisable(GL_ALPHA_TEST);
 		glEnable(GL_DEPTH_TEST);
@@ -291,7 +292,7 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, int>& vi
 		double aspect = static_cast<double>(get_size<0>(view_size)) / static_cast<double>(get_size<1>(view_size));
 
 		projection_matrix = make_perspective_matrix(70.0f, static_cast<float>(aspect), 0.001f, 1000.0f);
-		view_matrix = make_look_matrix(currentModel->camera_position, currentModel->camera_look, currentModel->camera_up);
+		view_matrix = make_look_matrix(cam.position, cam.look, cam.up);
 
 		while(!model_matrix_stack.empty()) {
 			model_matrix_stack.pop();
@@ -304,7 +305,7 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, int>& vi
 		record_visible_things();
 
 		// Prepare for rendering ordinary surfaces
-		auto sector_tint = currentModel->sectors[currentModel->camera_sector].tint;
+		auto sector_tint = currentModel->sectors[cam.containing_sector].tint;
 		sector_tint = (sector_tint * length(sector_tint)) + (currentModel->dynamic_tint * (1.0f - length(sector_tint)));
 
 		set_current_shader(surfaceShader, sector_tint);
@@ -339,7 +340,8 @@ void gorc::game::world::level::level_view::draw(double dt, const box<2, int>& vi
 				continue;
 			}
 
-			set_current_shader(lightShader, thing.position + thing.light_offset, currentModel->camera_position, light, light);
+			set_current_shader(lightShader, thing.position + orient_direction_vector(thing.light_offset, thing.orient),
+					cam.position, light, light);
 
 			draw_visible_diffuse_surfaces();
 			draw_visible_translucent_surfaces_and_things();
@@ -499,9 +501,10 @@ void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const
 			light = 1.0f;
 		}
 
-		vector<3> offset = cross(currentModel->camera_look, currentModel->camera_up) * get<0>(sprite.offset) +
-				currentModel->camera_look * get<1>(sprite.offset) +
-				currentModel->camera_up * get<2>(sprite.offset);
+		const auto& cam = currentModel->camera_model.current_computed_state;
+		vector<3> offset = cross(cam.look, cam.up) * get<0>(sprite.offset) +
+				cam.look * get<1>(sprite.offset) +
+				cam.up * get<2>(sprite.offset);
 		concatenate_matrix(make_translation_matrix(thing.position + offset));
 
 		matrix<4> new_model = view_matrix.transpose();
@@ -569,8 +572,8 @@ void gorc::game::world::level::level_view::draw_sprite(const thing& thing, const
 	}
 }
 
-void gorc::game::world::level::level_view::draw_thing(const thing& thing) {
-	if(thing.flags & flags::thing_flag::Invisible) {
+void gorc::game::world::level::level_view::draw_thing(const thing& thing, int thing_id) {
+	if(thing.flags & flags::thing_flag::Invisible || thing_id == currentModel->camera_model.current_computed_state.focus_not_drawn_thing) {
 		return;
 	}
 

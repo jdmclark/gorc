@@ -82,7 +82,7 @@ private:
 
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
 	void draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light);
-	void draw_thing(const thing& thing);
+	void draw_thing(const thing& thing, int thing_id);
 
 public:
 	level_view(content::manager& shadercontentmanager);

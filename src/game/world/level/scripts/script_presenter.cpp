@@ -499,6 +499,10 @@ void gorc::game::world::level::scripts::script_presenter::capture_thing(int thin
 	levelModel->things[thing_id].capture_cog = model->running_cog_state.top().instance_id;
 }
 
+int gorc::game::world::level::scripts::script_presenter::get_self_cog() const {
+	return model->running_cog_state.top().instance_id;
+}
+
 void gorc::game::world::level::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, class components& components) {
 	verbTable.add_verb<int, 1>("getparam", [&components](int param_num) {
 		return components.current_level_presenter->script_presenter.get_param(param_num);
@@ -568,6 +572,10 @@ void gorc::game::world::level::scripts::script_presenter::register_verbs(cog::ve
 
 	verbTable.add_verb<int, 0>("getmastercog", [&components] {
 		return components.current_level_presenter->script_presenter.get_master_cog();
+	});
+
+	verbTable.add_verb<int, 0>("getselfcog", [&components] {
+		return components.current_level_presenter->script_presenter.get_self_cog();
 	});
 
 	verbTable.add_verb<void, 1>("setmastercog", [&components](int cog) {

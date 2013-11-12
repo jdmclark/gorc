@@ -209,7 +209,7 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 bool point_inside_sector(const vector<3>& position, const level_model& level_model, const content::assets::level_sector& sec);
 
 void segment_adjoin_path(const segment& segment, const level_model& level_model, const content::assets::level_sector& initial_sector,
-		std::vector<std::tuple<unsigned int, unsigned int>>& path);
+		std::vector<std::tuple<int, int>>& path);
 
 template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sphere_plane_collision_time(const swept_sphere& sphere,
 		const VertexProvider& level, const EdgeProvider& surface, const matrix<4>& trns) {

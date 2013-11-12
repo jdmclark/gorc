@@ -526,7 +526,7 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, manager& manag
 			lev.things.emplace_back(lev.templates[base_it->second]);
 			lev.things.back().sector = sector;
 			lev.things.back().position = make_vector(x, y, z);
-			lev.things.back().orientation = make_vector(pitch, yaw, roll);
+			lev.things.back().orient = make_vector(pitch, yaw, roll);
 			lev.things.back().parse_args(tok, manager, *lev.master_colormap, compiler, lev.template_map, report);
 		}
 	}

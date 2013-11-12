@@ -38,14 +38,6 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 		components.current_level_presenter->respawn();
 	}
 
-	if(space_key_down && !sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-		space_key_down = false;
-	}
-	else if(!space_key_down && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-		space_key_down = true;
-		components.current_level_presenter->jump();
-	}
-
 	if(z_key_down && !sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
 		z_key_down = false;
 	}
@@ -65,10 +57,18 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 	int player = components.current_level_presenter->get_local_player_thing();
 	if(f1_key_down && !sf::Keyboard::isKeyPressed(sf::Keyboard::F1)) {
 		f1_key_down = false;
-		components.current_level_presenter->inventory_presenter.on_item_hotkey_released(player, 42);
 	}
 	else if(!f1_key_down && sf::Keyboard::isKeyPressed(sf::Keyboard::F1)) {
 		f1_key_down = true;
+		components.current_level_presenter->camera_presenter.cycle_camera();
+	}
+
+	if(f2_key_down && !sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
+		f2_key_down = false;
+		components.current_level_presenter->inventory_presenter.on_item_hotkey_released(player, 42);
+	}
+	else if(!f2_key_down && sf::Keyboard::isKeyPressed(sf::Keyboard::F2)) {
+		f2_key_down = true;
 		components.current_level_presenter->inventory_presenter.on_item_hotkey_pressed(player, 42);
 	}
 
@@ -89,7 +89,7 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 				static_cast<double>(sf::Mouse::getPosition(components.window).y)) - ScreenCenter) / get<0>(ScreenCenter);
 		sf::Mouse::setPosition(sf::Vector2i(components.window.getSize().x / 2, components.window.getSize().y / 2), components.window);
 
-		auto CameraRotation = -CursorPos * 320.0 * dt;
+		auto CameraRotation = -CursorPos * 20000.0 * dt;
 
 		components.current_level_presenter->yaw_camera(get<0>(CameraRotation));
 		components.current_level_presenter->pitch_camera(get<1>(CameraRotation));
@@ -121,4 +121,12 @@ void gorc::game::screen::action::action_presenter::update(double dt) {
 	}
 
 	components.current_level_presenter->translate_camera(Translate);
+
+	if(space_key_down && !sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+		space_key_down = false;
+	}
+	else if(!space_key_down && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+		space_key_down = true;
+		components.current_level_presenter->jump();
+	}
 }

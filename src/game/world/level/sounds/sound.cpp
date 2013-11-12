@@ -107,7 +107,7 @@ void gorc::game::world::level::sounds::sound::update(double dt, const level_mode
 		vector<3> pos = model.things[thing].position;
 		internal_sound.setPosition(get<0>(pos), get<2>(pos), -get<1>(pos));
 
-		auto sound_dist = length(model.camera_position - pos);
+		auto sound_dist = length(model.camera_model.current_computed_state.position - pos);
 		float attenuation = (actual_min_rad != actual_max_rad) ? ((sound_dist - actual_max_rad) / (actual_min_rad - actual_max_rad)) : 1.0f;
 		attenuation = clamp(attenuation, 0.0f, 1.0f);
 

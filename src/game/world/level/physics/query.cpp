@@ -16,7 +16,7 @@ bool gorc::game::world::level::physics::point_inside_sector(const vector<3>& pos
 }
 
 void gorc::game::world::level::physics::segment_adjoin_path(const segment& segment, const level_model& level,
-		const content::assets::level_sector& initial_sector, std::vector<std::tuple<unsigned int, unsigned int>>& path) {
+		const content::assets::level_sector& initial_sector, std::vector<std::tuple<int, int>>& path) {
 	path.clear();
 
 	auto segment_dir = std::get<1>(segment) - std::get<0>(segment);

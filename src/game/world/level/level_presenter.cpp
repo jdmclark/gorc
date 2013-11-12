@@ -8,7 +8,7 @@ using namespace gorc::math;
 gorc::game::world::level::level_presenter::level_presenter(class components& components, const level_place& place)
 	: components(components), place(place),
 	  physics_presenter(*this), script_presenter(components), sound_presenter(*place.contentmanager),
-	  key_presenter(*place.contentmanager), inventory_presenter(*this),
+	  key_presenter(*place.contentmanager), inventory_presenter(*this), camera_presenter(*this),
 	  actor_controller(*this), player_controller(*this), cog_controller(*this), ghost_controller(*this),
 	  item_controller(*this), corpse_controller(*this), weapon_controller(*this) {
 
@@ -21,6 +21,7 @@ void gorc::game::world::level::level_presenter::start(event::event_bus& eventBus
 	model = std::unique_ptr<level_model>(new level_model(*place.contentmanager, components.compiler, place.level,
 			place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler)));
 
+	camera_presenter.start(*model, model->camera_model);
 	physics_presenter.start(*model);
 	animation_presenter.start(*model, model->animation_model);
 	script_presenter.start(*model, model->script_model);
@@ -48,22 +49,21 @@ void gorc::game::world::level::level_presenter::initialize_world() {
 		if(thing.type == flags::thing_type::Player) {
 			// Add player spawn point and create ghost thing to fill ID.
 			model->spawn_points.push_back(&thing);
-			create_thing("none", thing.sector, thing.position, thing.orientation);
+			create_thing("none", thing.sector, thing.position, thing.orient);
 		}
 		else {
-			create_thing(thing, thing.sector, thing.position, thing.orientation);
+			create_thing(thing, thing.sector, thing.position, thing.orient);
 		}
 	}
 
 	// HACK: Spawn camera thing
 	model->current_spawn_point = 0;
-	model->camera_thing_id = create_thing(*model->spawn_points[model->current_spawn_point], model->spawn_points[model->current_spawn_point]->sector,
-			model->spawn_points[model->current_spawn_point]->position, model->spawn_points[model->current_spawn_point]->orientation);
-	auto& camera_thing = model->things[model->camera_thing_id];
-	camera_thing.flags += flags::thing_flag::Invisible;
+	model->local_player_thing_id = create_thing(*model->spawn_points[model->current_spawn_point], model->spawn_points[model->current_spawn_point]->sector,
+			model->spawn_points[model->current_spawn_point]->position, model->spawn_points[model->current_spawn_point]->orient);
 
-	model->camera_position = camera_thing.position;
-	model->camera_sector = model->spawn_points[model->current_spawn_point]->sector;
+	// Set camera focus to current local player thing.
+	camera_presenter.set_camera_focus(0, model->local_player_thing_id);
+	camera_presenter.set_camera_focus(1, model->local_player_thing_id);
 
 	// create bin script instances.
 	for(const auto& bin_tuple : model->inventory_model.base_inventory) {
@@ -93,14 +93,12 @@ void gorc::game::world::level::level_presenter::update(double dt) {
 	key_presenter.update(dt);
 	inventory_presenter.update(dt);
 	physics_presenter.update(dt);
+	camera_presenter.update(dt);
 
 	// update things
 	for(auto& thing : model->things) {
 		thing.controller->update(thing.get_id(), dt);
 	}
-
-	// update camera position
-	update_camera();
 
 	// update dynamic tint, game time.
 	model->game_time += dt;
@@ -178,86 +176,44 @@ void gorc::game::world::level::level_presenter::update_thing_sector(int thing_id
 	}
 }
 
-void gorc::game::world::level::level_presenter::update_camera() {
-	if(need_respawn) {
-		do_respawn();
-	}
-
-	thing& camera = model->things[model->camera_thing_id];
-	camera.thrust = model->camera_velocity;
-	model->camera_velocity = make_zero_vector<3, float>();
-
-	// update camera with eye offset
-	auto p0 = camera.position;
-	auto p1 = camera.position + camera.eye_offset;
-	physics::segment_adjoin_path(physics::segment(p0, p1), *model, model->sectors[camera.sector], update_path_sector_scratch);
-	model->camera_sector = std::get<0>(update_path_sector_scratch.back());
-	model->camera_position = p1;
-}
-
 void gorc::game::world::level::level_presenter::translate_camera(const vector<3>& amt) {
-	vector<3> cam_vel = make_zero_vector<3, float>();
-	cam_vel += get<0>(amt) * cross(model->camera_look, model->camera_up);
-	cam_vel += get<2>(amt) * model->camera_up;
-	cam_vel += get<1>(amt) * model->camera_look;
-	cam_vel = cam_vel * 1.2f;
-
-	get<0>(model->camera_velocity) = get<0>(cam_vel);
-	get<1>(model->camera_velocity) = get<1>(cam_vel);
+	auto& player = model->things[model->local_player_thing_id];
+	player.thrust = orient_direction_vector(amt, make_vector(0.0f, get<1>(player.orient), get<2>(player.orient)));
 }
 
 void gorc::game::world::level::level_presenter::yaw_camera(double amt) {
-	float sint = std::sin(amt);
-	float cost = std::cos(amt);
-
-	vector<3> NewLook = make_vector(
-			cost * get<0>(model->camera_look) - sint * get<1>(model->camera_look),
-			sint * get<0>(model->camera_look) + cost * get<1>(model->camera_look),
-			get<2>(model->camera_look));
-	vector<3> NewUp = make_vector(
-			cost * get<0>(model->camera_up) - sint * get<1>(model->camera_up),
-			sint * get<0>(model->camera_up) + cost * get<1>(model->camera_up),
-			get<2>(model->camera_up));
-
-	model->camera_look = normalize(NewLook);
-	model->camera_up = normalize(NewUp);
+	auto& player = model->things[model->local_player_thing_id];
+	get<1>(player.orient) += amt;
 }
 
 void gorc::game::world::level::level_presenter::pitch_camera(double amt) {
-	float sint = std::sin(amt);
-	float cost = std::cos(amt);
-
-	vector<3> NewUp = (-sint * model->camera_look) + (cost * model->camera_up);
-	vector<3> NewLook = (cost * model->camera_look) + (sint * model->camera_up);
-	model->camera_up = normalize(NewUp);
-	model->camera_look = normalize(NewLook);
+	auto& player = model->things[model->local_player_thing_id];
+	player.head_pitch = clamp(player.head_pitch + static_cast<float>(amt), player.min_head_pitch, player.max_head_pitch);
 }
 
-void gorc::game::world::level::level_presenter::do_respawn() {
-	need_respawn = false;
-
+void gorc::game::world::level::level_presenter::respawn() {
 	++model->current_spawn_point;
 	model->current_spawn_point = model->current_spawn_point % model->spawn_points.size();
 
-	thing& cameraThing = model->things[model->camera_thing_id];
+	thing& cameraThing = model->things[model->local_player_thing_id];
 	cameraThing.sector = model->spawn_points[model->current_spawn_point]->sector;
 	cameraThing.position = model->spawn_points[model->current_spawn_point]->position;
 	cameraThing.attach_flags = flag_set<flags::attach_flag>();
 	cameraThing.vel = make_zero_vector<3, float>();
 }
 
-void gorc::game::world::level::level_presenter::respawn() {
-	need_respawn = true;
-}
-
 void gorc::game::world::level::level_presenter::jump() {
-	get<2>(model->camera_velocity) = 1.6f;
+	auto& player = model->things[model->local_player_thing_id];
+	get<2>(player.thrust) = player.jump_speed;
 }
 
 void gorc::game::world::level::level_presenter::activate() {
 	// TODO: Implement actual surface and thing activation
 
-	vector<3> camera_position = model->camera_position;
+	auto& player = model->things[model->local_player_thing_id];
+	auto player_look_orient = make_vector(player.head_pitch, get<1>(player.orient), get<2>(player.orient));
+	vector<3> camera_position = player.position + orient_direction_vector(player.eye_offset, player_look_orient);
+	auto camera_look = orient_direction_vector(make_vector(0.0f, 1.0f, 0.0f), player_look_orient);
 
 	int best_surf_candidate = -1;
 	float best_surf_dist = 0.25f;
@@ -269,7 +225,7 @@ void gorc::game::world::level::level_presenter::activate() {
 		const content::assets::level_surface& surf = model->surfaces[i];
 		if((surf.adjoin >= 0 && (model->adjoins[surf.adjoin].flags & flags::adjoin_flag::AllowMovement))
 				|| !(surf.flags & flags::surface_flag::CogLinked)
-				|| dot(surf.normal, model->camera_look) >= 0.0f) {
+				|| dot(surf.normal, camera_look) >= 0.0f) {
 			continue;
 		}
 
@@ -284,12 +240,12 @@ void gorc::game::world::level::level_presenter::activate() {
 	}
 
 	for(auto& thing : model->things) {
-		if(thing.get_id() == model->camera_thing_id) {
+		if(thing.get_id() == model->local_player_thing_id) {
 			continue;
 		}
 
 		auto dir_vec = thing.position - camera_position;
-		if(!(thing.flags & flags::thing_flag::CogLinked) || dot(dir_vec, model->camera_look) <= 0.0f) {
+		if(!(thing.flags & flags::thing_flag::CogLinked) || dot(dir_vec, camera_look) <= 0.0f) {
 			continue;
 		}
 
@@ -304,11 +260,11 @@ void gorc::game::world::level::level_presenter::activate() {
 
 	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
 		script_presenter.send_message_to_linked(cog::message_id::activated, best_surf_candidate, flags::message_type::surface,
-				model->camera_thing_id, flags::message_type::thing);
+				model->local_player_thing_id, flags::message_type::thing);
 	}
 	else if(best_thing_candidate >= 0) {
 		script_presenter.send_message_to_linked(cog::message_id::activated, best_thing_candidate, flags::message_type::thing,
-				model->camera_thing_id, flags::message_type::thing);
+				model->local_player_thing_id, flags::message_type::thing);
 		sound_presenter.play_sound_class(best_thing_candidate, flags::sound_subclass_type::Activate);
 	}
 }
@@ -317,23 +273,23 @@ void gorc::game::world::level::level_presenter::damage() {
 	// TODO: Temporary code to fire a bryar bolt.
 
 	// Calculate orientation from camera look.
-	float bolt_yaw = to_degrees(std::atan2(get<1>(model->camera_look), get<0>(model->camera_look)));
-	float bolt_pitch = to_degrees(std::acos(dot(make_vector(0.0f, 0.0f, 1.0f), model->camera_look)));
+	const auto& player = model->things[model->local_player_thing_id];
 
-	const auto& player_thing = model->things[model->camera_thing_id];
+	float bolt_yaw = get<1>(player.orient);
+	float bolt_pitch = player.head_pitch;
 
-	int bolt_thing = create_thing("+bryarbolt", player_thing.sector, player_thing.position, make_vector(90.0f - bolt_pitch, bolt_yaw - 90.0f, 0.0f));
+	int bolt_thing = create_thing("+bryarbolt", player.sector, player.position, make_vector(bolt_pitch, bolt_yaw, 0.0f));
 
 	const auto& bolt_thing_ref = model->things[bolt_thing];
-	vector<3> bolt_offset = player_thing.position + model->camera_look * (player_thing.size * 2.0f + bolt_thing_ref.size);
+	vector<3> bolt_offset = player.position +
+			orient_direction_vector(make_vector(0.0f, 1.0f, 0.0f), make_vector(bolt_pitch, bolt_yaw, 0.0f)) * (player.size * 2.0f + bolt_thing_ref.size);
 
 	adjust_thing_pos(bolt_thing, bolt_offset);
 
 	auto& thing = model->things[bolt_thing];
 
 	// Rotate velocity.
-	thing.vel = (make_rotation_matrix(bolt_yaw - 90.0f, make_vector(0.0f, 0.0f, 1.0f)) * make_rotation_matrix(90.0f - bolt_pitch, make_vector(1.0f, 0.0f, 0.0f)))
-			.transform_normal(thing.vel);
+	thing.vel = orient_direction_vector(thing.vel, make_vector(bolt_pitch, bolt_yaw, 0.0f));
 }
 
 void gorc::game::world::level::level_presenter::thing_sighted(int thing_id) {
@@ -403,7 +359,7 @@ void gorc::game::world::level::level_presenter::take_item(int thing_id, int play
 
 // Player verbs
 int gorc::game::world::level::level_presenter::get_local_player_thing() {
-	return model->camera_thing_id;
+	return model->local_player_thing_id;
 }
 
 // sector verbs
@@ -496,7 +452,7 @@ int gorc::game::world::level::level_presenter::create_thing(const content::asset
 	new_thing.object_data.thing_id = new_thing.get_id();
 	new_thing.sector = sector_num;
 	new_thing.position = pos;
-	new_thing.orientation = orient;
+	new_thing.orient = orient;
 	new_thing.controller = &get_thing_controller(new_thing.type);
 
 	new_thing.controller->create_controller_data(new_thing.get_id());
@@ -539,7 +495,7 @@ void gorc::game::world::level::level_presenter::adjust_thing_pos(int thing_id, c
 void gorc::game::world::level::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const vector<3>& new_orient, int new_sector) {
 	thing& thing = model->things[thing_id];
 	thing.position = new_pos;
-	thing.orientation = new_orient;
+	thing.orient = new_orient;
 	thing.sector = new_sector;
 }
 
@@ -554,7 +510,7 @@ void gorc::game::world::level::level_presenter::attach_thing_to_thing(int thing_
 
 int gorc::game::world::level::level_presenter::create_thing_at_thing(int tpl_id, int thing_id) {
 	thing& referencedThing = model->things[thing_id];
-	int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orientation);
+	int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orient);
 	thing& new_thing = model->things[new_thing_id];
 
 	new_thing.path_moving = false;

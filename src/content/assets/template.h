@@ -33,8 +33,6 @@ public:
 	// General fields
 	int sector;
 	vector<3> position;
-	vector<3> orientation;
-	vector<3> thrust;
 
 	flag_set<flags::actor_flag> actor_flags;
 	vector<3> ang_vel;
@@ -47,24 +45,33 @@ public:
 	flag_set<flags::thing_flag> flags;
 	int flesh_hit = 0;
 	std::vector<std::tuple<vector<3>, vector<3>>> frames;
+	float head_pitch = 0.0f;
 	float health = 100.0f;
 	float height = 0.18f;
+	float jump_speed = 1.50f;
 	float light = 0.0f;
 	float light_intensity = 0.0f;
 	vector<3> light_offset;
 	float mass = 2.0f;
+	float max_head_pitch = 80.0f;
 	float max_health = 100.0f;
 	float max_light = 1.0f;
+	float max_rot_thrust = 180.0f;
 	float max_rot_vel = 200.0f;
+	float max_thrust = 2.00f;
 	float max_vel = 1.0f;
+	float min_head_pitch = -80.0f;
 	model const* model_3d = nullptr;
 	flags::move_type move = flags::move_type::none;
 	float move_size = 0.05f;
+	vector<3> orient;
 	flag_set<flags::physics_flag> physics_flags;
 	puppet const* puppet = nullptr;
+	vector<3> rot_thrust;
 	float size = 0.05f;
 	soundclass const* sound_class = nullptr;
 	sprite const* sprite = nullptr;
+	vector<3> thrust;
 	float timer = 0.0f;
 	flags::thing_type type = flags::thing_type::ghost;
 	vector<3> vel;

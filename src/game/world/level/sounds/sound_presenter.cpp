@@ -16,12 +16,13 @@ void gorc::game::world::level::sounds::sound_presenter::start(level_model& level
 
 void gorc::game::world::level::sounds::sound_presenter::update(double dt) {
 	// update listener
-	auto camera_position = levelModel->camera_position;
-	auto listener_target = levelModel->camera_look;
+	const auto& cam = levelModel->camera_model.current_computed_state;
+	auto camera_position = cam.position;
+	auto listener_target = cam.look;
 	sf::Listener::setDirection(get<0>(listener_target), get<2>(listener_target), -get<1>(listener_target));
 	sf::Listener::setPosition(get<0>(camera_position), get<2>(camera_position), -get<1>(camera_position));
 	// TODO: Handle camera orientation (not properly implemented in SFML).
-	const auto& player_sec = levelModel->sectors[levelModel->camera_sector];
+	const auto& player_sec = levelModel->sectors[cam.containing_sector];
 	set_ambient_sound(player_sec.ambient_sound, player_sec.ambient_sound_volume);
 
 	// update sounds

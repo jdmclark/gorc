@@ -101,9 +101,9 @@ public:
 	template <typename T, typename U> void visit_mesh_hierarchy(T& visitor, const U& thing) {
 		visitor.push_matrix();
 		visitor.concatenate_matrix(make_translation_matrix(thing.position)
-				* make_rotation_matrix(get<1>(thing.orientation), make_vector(0.0f, 0.0f, 1.0f))
-				* make_rotation_matrix(get<0>(thing.orientation), make_vector(1.0f, 0.0f, 0.0f))
-				* make_rotation_matrix(get<2>(thing.orientation), make_vector(0.0f, 1.0f, 0.0f)));
+				* make_rotation_matrix(get<1>(thing.orient), make_vector(0.0f, 0.0f, 1.0f))
+				* make_rotation_matrix(get<0>(thing.orient), make_vector(1.0f, 0.0f, 0.0f))
+				* make_rotation_matrix(get<2>(thing.orient), make_vector(0.0f, 1.0f, 0.0f)));
 
 		visit_mesh_node(visitor, thing, 0);
 

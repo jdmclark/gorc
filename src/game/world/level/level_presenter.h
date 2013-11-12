@@ -16,6 +16,7 @@
 #include "game/world/level/scripts/script_presenter.h"
 #include "game/world/level/sounds/sound_presenter.h"
 #include "game/world/level/keys/key_presenter.h"
+#include "game/world/level/camera/camera_presenter.h"
 #include "game/world/level/gameplay/inventory_presenter.h"
 #include "game/world/level/gameplay/actor_controller.h"
 #include "game/world/level/gameplay/player_controller.h"
@@ -41,7 +42,7 @@ class thing;
 class level_presenter : public gorc::place::presenter {
 private:
 	// Scratch space
-	std::vector<std::tuple<unsigned int, unsigned int>> update_path_sector_scratch;
+	std::vector<std::tuple<int, int>> update_path_sector_scratch;
 
 	components& components;
 	level_place place;
@@ -49,12 +50,8 @@ private:
 	void initialize_world();
 
 	void update_thing_sector(int thing_id, thing& thing, const vector<3>& oldThingPosition);
-	void update_camera();
 
 	gameplay::thing_controller& get_thing_controller(flags::thing_type type);
-
-	bool need_respawn = false;
-	void do_respawn();
 
 public:
 	std::unique_ptr<level_model> model;
@@ -65,6 +62,7 @@ public:
 	sounds::sound_presenter sound_presenter;
 	keys::key_presenter key_presenter;
 	gameplay::inventory_presenter inventory_presenter;
+	camera::camera_presenter camera_presenter;
 
 	gameplay::actor_controller actor_controller;
 	gameplay::player_controller player_controller;

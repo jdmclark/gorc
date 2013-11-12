@@ -126,7 +126,7 @@ public:
 	void start(level_model& model);
 	void update(double dt);
 
-	maybe<contact> thing_segment_query(int thing_id, const vector<3>& direction);
+	maybe<contact> thing_segment_query(int thing_id, const vector<3>& direction, const maybe<contact>& previous_contact = maybe<contact>());
 
 	static void register_verbs(cog::verbs::verb_table&, components&);
 };

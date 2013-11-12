@@ -12,6 +12,7 @@
 #include "game/world/level/sounds/sound_model.h"
 #include "game/world/level/keys/key_model.h"
 #include "game/world/level/gameplay/inventory_model.h"
+#include "game/world/level/camera/camera_model.h"
 #include <vector>
 
 namespace gorc {
@@ -32,15 +33,11 @@ public:
 	sounds::sound_model sound_model;
 	keys::key_model key_model;
 	gameplay::inventory_model inventory_model;
+	camera::camera_model camera_model;
 
 	pool<thing> things;
 
-	int camera_thing_id;
-	unsigned int camera_sector;
-	vector<3> camera_position;
-	vector<3> camera_look = make_vector(0.0f, 1.0f, 0.0f);
-	vector<3> camera_up = make_vector(0.0f, 0.0f, 1.0f);
-	vector<3> camera_velocity = make_vector(0.0f, 0.0f, 0.0f);
+	int local_player_thing_id;
 
 	std::vector<content::assets::thing_template const*> spawn_points;
 	unsigned int current_spawn_point = 0;

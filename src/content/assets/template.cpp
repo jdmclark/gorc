@@ -29,7 +29,7 @@ static const std::unordered_map<std::string, flags::move_type> MoveTypeMap {
 	{ "path", flags::move_type::Path }
 };
 
-template <typename T> void TemplateParametervalueMapper(const std::unordered_map<std::string, T>& map, T& value,
+template <typename T> void tpl_value_mapper(const std::unordered_map<std::string, T>& map, T& value,
 		const T& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
 	std::string key = tok.get_space_delimited_string();
 	std::transform(key.begin(), key.end(), key.begin(), tolower);
@@ -44,7 +44,7 @@ template <typename T> void TemplateParametervalueMapper(const std::unordered_map
 	}
 }
 
-template <typename T> void TemplateParameterNumberMapper(T& value, const T& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
+template <typename T> void tpl_number_mapper(T& value, const T& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
 	text::token t;
 	tok.get_token(t);
 
@@ -57,7 +57,7 @@ template <typename T> void TemplateParameterNumberMapper(T& value, const T& defa
 	}
 }
 
-template <typename T> void TemplateParameterEnumMapper(T& value, const T& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
+template <typename T> void tpl_enum_mapper(T& value, const T& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
 	text::token t;
 	tok.get_token(t);
 
@@ -70,7 +70,7 @@ template <typename T> void TemplateParameterEnumMapper(T& value, const T& defaul
 	}
 }
 
-template <typename T> void TemplateParameterFlagMapper(flag_set<T>& value, const flag_set<T>& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
+template <typename T> void tpl_flag_mapper(flag_set<T>& value, const flag_set<T>& defaultvalue, text::tokenizer& tok, diagnostics::report& report) {
 	text::token t;
 	tok.get_token(t);
 
@@ -83,7 +83,7 @@ template <typename T> void TemplateParameterFlagMapper(flag_set<T>& value, const
 	}
 }
 
-void TemplateParameterVectorMapper(vector<3>& value, text::tokenizer& tok) {
+void tpl_vector_mapper(vector<3>& value, text::tokenizer& tok) {
 	tok.assert_punctuator("(");
 	get<0>(value) = tok.get_number<float>();
 	tok.assert_punctuator("/");
@@ -93,7 +93,7 @@ void TemplateParameterVectorMapper(vector<3>& value, text::tokenizer& tok) {
 	tok.assert_punctuator(")");
 }
 
-void TemplateParameterTemplateMapper(int& value, int defaultvalue, const std::unordered_map<std::string, int>& templates,
+void tpl_template_mapper(int& value, int defaultvalue, const std::unordered_map<std::string, int>& templates,
 		text::tokenizer& tok, diagnostics::report& report) {
 	std::string tpl_name = tok.get_space_delimited_string();
 	std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
@@ -108,7 +108,7 @@ void TemplateParameterTemplateMapper(int& value, int defaultvalue, const std::un
 	}
 }
 
-template <typename T, typename... U> void TemplateAssetLoader(T const*& value, text::tokenizer& tok, content::manager& manager, U... args) {
+template <typename T, typename... U> void tpl_asset_loader(T const*& value, text::tokenizer& tok, content::manager& manager, U... args) {
 	std::string fn = tok.get_space_delimited_string();
 	if(boost::iequals(fn, "none")) {
 		value = nullptr;
@@ -123,7 +123,7 @@ template <typename T, typename... U> void TemplateAssetLoader(T const*& value, t
 	}
 }
 
-void TemplateAddFrame(thing_template& tpl, text::tokenizer& tok) {
+void tpl_add_frame(thing_template& tpl, text::tokenizer& tok) {
 	tok.assert_punctuator("(");
 	float x = tok.get_number<float>();
 	tok.assert_punctuator("/");
@@ -155,38 +155,47 @@ using TemplateParameterParser = std::function<void(thing_template&, text::tokeni
 		const cog::compiler&, const std::unordered_map<std::string, int>& templates, diagnostics::report&)>;
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
-	{ "actorflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.actor_flags, flag_set<flags::actor_flag>(), tok, report); }},
-	{ "angvel", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.ang_vel, tok); }},
-	{ "cog", [](TPP_ARGS) { TemplateAssetLoader(tpl.cog, tok, content, compiler); }},
-	{ "collide", [](TPP_ARGS) { TemplateParameterEnumMapper(tpl.collide, flags::collide_type::none, tok, report); }},
-	{ "creatething", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.create_thing, 0, templates, tok, report); }},
-	{ "explode", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.explode, 0, templates, tok, report); }},
-	{ "eyeoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.eye_offset, tok); }},
-	{ "fleshhit", [](TPP_ARGS) { TemplateParameterTemplateMapper(tpl.flesh_hit, 0, templates, tok, report); }},
-	{ "frame", [](TPP_ARGS) { TemplateAddFrame(tpl, tok); }},
-	{ "health", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.health, 100.0f, tok, report); }},
-	{ "height", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.height, 0.18f, tok, report); }},
-	{ "light", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.light, 0.0f, tok, report); }},
-	{ "lightintensity", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.light_intensity, 0.0f, tok, report); }},
-	{ "lightoffset", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.light_offset, tok); }},
-	{ "mass", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.mass, 2.0f, tok, report); }},
-	{ "maxhealth", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.max_health, 100.0f, tok, report); }},
-	{ "maxlight", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.light, 1.0f, tok, report); }},
-	{ "maxrotvel", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.max_rot_vel, 200.0f, tok, report); }},
-	{ "maxvel", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.max_vel, 1.0f, tok, report); }},
-	{ "model3d", [](TPP_ARGS) { TemplateAssetLoader(tpl.model_3d, tok, content, colormap); }},
-	{ "move", [](TPP_ARGS) { TemplateParametervalueMapper(MoveTypeMap, tpl.move, flags::move_type::none, tok, report); }},
-	{ "movesize", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.move_size, 0.05f, tok, report); }},
+	{ "actorflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.actor_flags, flag_set<flags::actor_flag>(), tok, report); }},
+	{ "angvel", [](TPP_ARGS) { tpl_vector_mapper(tpl.ang_vel, tok); }},
+	{ "cog", [](TPP_ARGS) { tpl_asset_loader(tpl.cog, tok, content, compiler); }},
+	{ "collide", [](TPP_ARGS) { tpl_enum_mapper(tpl.collide, flags::collide_type::none, tok, report); }},
+	{ "creatething", [](TPP_ARGS) { tpl_template_mapper(tpl.create_thing, 0, templates, tok, report); }},
+	{ "explode", [](TPP_ARGS) { tpl_template_mapper(tpl.explode, 0, templates, tok, report); }},
+	{ "eyeoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.eye_offset, tok); }},
+	{ "fleshhit", [](TPP_ARGS) { tpl_template_mapper(tpl.flesh_hit, 0, templates, tok, report); }},
+	{ "frame", [](TPP_ARGS) { tpl_add_frame(tpl, tok); }},
+	{ "headpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.head_pitch, 0.0f, tok, report); }},
+	{ "health", [](TPP_ARGS) { tpl_number_mapper(tpl.health, 100.0f, tok, report); }},
+	{ "height", [](TPP_ARGS) { tpl_number_mapper(tpl.height, 0.18f, tok, report); }},
+	{ "jumpspeed", [](TPP_ARGS) { tpl_number_mapper(tpl.jump_speed, 1.5f, tok, report); }},
+	{ "light", [](TPP_ARGS) { tpl_number_mapper(tpl.light, 0.0f, tok, report); }},
+	{ "lightintensity", [](TPP_ARGS) { tpl_number_mapper(tpl.light_intensity, 0.0f, tok, report); }},
+	{ "lightoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.light_offset, tok); }},
+	{ "mass", [](TPP_ARGS) { tpl_number_mapper(tpl.mass, 2.0f, tok, report); }},
+	{ "maxheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.max_head_pitch, 80.0f, tok, report); }},
+	{ "maxhealth", [](TPP_ARGS) { tpl_number_mapper(tpl.max_health, 100.0f, tok, report); }},
+	{ "maxlight", [](TPP_ARGS) { tpl_number_mapper(tpl.light, 1.0f, tok, report); }},
+	{ "maxrotthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_thrust, 180.0f, tok, report); }},
+	{ "maxrotvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_vel, 200.0f, tok, report); }},
+	{ "maxthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_thrust, 2.00f, tok, report); }},
+	{ "maxvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_vel, 1.0f, tok, report); }},
+	{ "minheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.min_head_pitch, -80.0f, tok, report); }},
+	{ "model3d", [](TPP_ARGS) { tpl_asset_loader(tpl.model_3d, tok, content, colormap); }},
+	{ "move", [](TPP_ARGS) { tpl_value_mapper(MoveTypeMap, tpl.move, flags::move_type::none, tok, report); }},
+	{ "movesize", [](TPP_ARGS) { tpl_number_mapper(tpl.move_size, 0.05f, tok, report); }},
 	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.get_number<int>(); }},
-	{ "physflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.physics_flags, flag_set<flags::physics_flag>(), tok, report); }},
-	{ "puppet", [](TPP_ARGS) { TemplateAssetLoader(tpl.puppet, tok, content); }},
-	{ "size", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.size, 0.05f, tok, report); }},
-	{ "soundclass", [](TPP_ARGS) { TemplateAssetLoader(tpl.sound_class, tok, content); }},
-	{ "sprite", [](TPP_ARGS) { TemplateAssetLoader(tpl.sprite, tok, content, colormap); }},
-	{ "thingflags", [](TPP_ARGS) { TemplateParameterFlagMapper(tpl.flags, flag_set<flags::thing_flag>(), tok, report); }},
-	{ "timer", [](TPP_ARGS) { TemplateParameterNumberMapper(tpl.timer, 0.0f, tok, report); }},
-	{ "type", [](TPP_ARGS) { TemplateParametervalueMapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, tok, report); }},
-	{ "vel", [](TPP_ARGS) { TemplateParameterVectorMapper(tpl.vel, tok); }}
+	{ "orient", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, tok); }},
+	{ "physflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.physics_flags, flag_set<flags::physics_flag>(), tok, report); }},
+	{ "puppet", [](TPP_ARGS) { tpl_asset_loader(tpl.puppet, tok, content); }},
+	{ "rotthrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.rot_thrust, tok); }},
+	{ "size", [](TPP_ARGS) { tpl_number_mapper(tpl.size, 0.05f, tok, report); }},
+	{ "soundclass", [](TPP_ARGS) { tpl_asset_loader(tpl.sound_class, tok, content); }},
+	{ "sprite", [](TPP_ARGS) { tpl_asset_loader(tpl.sprite, tok, content, colormap); }},
+	{ "thingflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.flags, flag_set<flags::thing_flag>(), tok, report); }},
+	{ "thrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.thrust, tok); }},
+	{ "timer", [](TPP_ARGS) { tpl_number_mapper(tpl.timer, 0.0f, tok, report); }},
+	{ "type", [](TPP_ARGS) { tpl_value_mapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, tok, report); }},
+	{ "vel", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, tok); }}
 };
 
 #undef TPP_ARGS

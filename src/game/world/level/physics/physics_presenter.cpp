@@ -227,11 +227,33 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 
 void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt) {
 	// TODO: Move somewhere more appropriate.
-	thing.orientation = thing.orientation + thing.ang_vel * static_cast<float>(dt);
+	thing.orient = thing.orient + thing.ang_vel * static_cast<float>(dt);
 	//thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
+
+	// Clamp thrusts.
+	thing.rot_thrust = clamp_length(thing.rot_thrust, 0.0f, thing.max_rot_thrust);
+	//thing.thrust = clamp_length(thing.thrust, 0.0f, thing.max_thrust);
+
+	// Apply thrusts.
+	if(thing.physics_flags & flags::physics_flag::uses_angular_thrust_to_rotate) {
+		thing.ang_vel = thing.ang_vel + thing.rot_thrust * static_cast<float>(dt);
+	}
 
 	if(thing.physics_flags & flags::physics_flag::has_gravity && static_cast<int>(thing.attach_flags) == 0) {
 		thing.vel = thing.vel + make_vector(0.0f, 0.0f, -1.0f) * model->header.world_gravity * static_cast<float>(dt);
+	}
+
+	// TODO: Linear thrust
+
+	// Clamp vel.
+	// TODO: Must be some unknown flag. Objects move way too slowly.
+	//thing.vel = clamp_length(thing.vel, 0.0f, thing.max_vel);
+	thing.ang_vel = clamp_length(thing.ang_vel, 0.0f, thing.max_rot_vel);
+
+	// Apply vels.
+
+	if(thing.physics_flags & flags::physics_flag::uses_rotational_velocity) {
+		thing.orient = thing.orient + thing.ang_vel * static_cast<float>(dt);
 	}
 
 	auto this_frame_only_vel = make_zero_vector<3, float>();
@@ -379,7 +401,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 	vector<3> targetOrientation = std::get<1>(target_position_tuple);
 
 	vector<3> currentPosition = thing.position;
-	vector<3> currentOrientation = thing.orientation;
+	vector<3> currentOrientation = thing.orient;
 
 	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 	// Use a magic multiple to correct it.
@@ -387,7 +409,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 	float alpha = rate_factor * dt * thing.path_move_speed / dist_len;
 	if(alpha >= 1.0f || dist_len == 0.0f) {
 		presenter.adjust_thing_pos(thing_id, targetPosition);
-		thing.orientation = targetOrientation;
+		thing.orient = targetOrientation;
 
 		// Arrived at next frame. Advance to next.
 		thing.current_frame = thing.next_frame;
@@ -410,7 +432,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 	}
 	else {
 		presenter.adjust_thing_pos(thing_id, lerp(thing.position, targetPosition, alpha));
-		thing.orientation = lerp(thing.orientation, targetOrientation, alpha);
+		thing.orient = lerp(thing.orient, targetOrientation, alpha);
 	}
 }
 
@@ -423,7 +445,7 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 		vector<3> targetOrientation = std::get<1>(target_position_tuple);
 
 		vector<3> currentPosition = thing.position;
-		vector<3> currentOrientation = thing.orientation;
+		vector<3> currentOrientation = thing.orient;
 
 		// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 		// Use a magic multiple to correct it.
@@ -431,7 +453,7 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 		float alpha = rate_factor * thing.path_move_speed / dist_len;
 
 		auto delta_position = lerp(thing.position, targetPosition, alpha);
-		auto delta_orientation = lerp(thing.orientation, targetOrientation, alpha);
+		auto delta_orientation = lerp(thing.orient, targetOrientation, alpha);
 
 		// Rotate rel_point into object space
 		auto rel_point_rotated = (
@@ -528,7 +550,7 @@ void physics_presenter::segment_query_node_visitor::visit_mesh(const content::as
 	}
 }
 
-gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction) {
+gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction, const maybe<contact>& prev_contact) {
 	// Search for closest thing-ray intersection.
 	float query_radius = length(direction);
 	const auto& current_thing = model->things[current_thing_id];
@@ -540,6 +562,15 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	int closest_contact_surface_id = -1;
 	vector<3> closest_contact_position;
 	vector<3> closest_contact_normal;
+
+	prev_contact.if_set([&](const contact& prev_ct) {
+		closest_contact_distance = length(prev_ct.position - current_thing.position);
+		has_contact = true;
+		prev_ct.contact_thing_id >> closest_contact_thing_id;
+		prev_ct.contact_surface_id >> closest_contact_surface_id;
+		closest_contact_position = prev_ct.position;
+		closest_contact_normal = prev_ct.normal;
+	});
 
 	// Find contact among sectors.
 	// Get list of sectors within thing influence.

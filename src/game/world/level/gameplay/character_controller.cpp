@@ -73,16 +73,46 @@ gorc::game::world::level::gameplay::standing_material gorc::game::world::level::
 
 gorc::maybe<gorc::game::world::level::physics::contact> gorc::game::world::level::gameplay::character_controller::run_falling_sweep(int thing_id, thing& thing,
                 double dt) {
-	// Test for collision between legs and ground
+	// Test for collision between legs and ground using multiple tests
 	auto leg_height = thing.model_3d->insert_offset;
-	return presenter.physics_presenter.thing_segment_query(thing_id, -leg_height);
+
+	maybe<physics::contact> contact;
+
+	contact = presenter.physics_presenter.thing_segment_query(thing_id, -leg_height, contact);
+	if(contact) {
+		return contact;
+	}
+
+	// TODO: Revisit character controller falling sweep.
+	/*for(int i = 0; i < 8; ++i) {
+		float a = static_cast<float>(i) * 0.7853981633974483f;
+		auto leg_offset = (-leg_height) + make_vector<float>(-sin(a), cos(a), 0.0f) * thing.size;
+		contact = presenter.physics_presenter.thing_segment_query(thing_id, leg_offset, contact);
+	}*/
+
+	return contact;
 }
 
 gorc::maybe<gorc::game::world::level::physics::contact> gorc::game::world::level::gameplay::character_controller::run_walking_sweep(int thing_id, thing& thing,
 		double dt) {
-	// Test for collision between legs and ground.
+	// Test for collision between legs and ground using multiple tests
 	auto leg_height = thing.model_3d->insert_offset * 1.50f;
-	return presenter.physics_presenter.thing_segment_query(thing_id, -leg_height);
+
+	maybe<physics::contact> contact;
+
+	contact = presenter.physics_presenter.thing_segment_query(thing_id, -leg_height, contact);
+	if(contact) {
+		return contact;
+	}
+
+	// TODO: Revisit character controller walking sweep.
+	/*for(int i = 0; i < 8; ++i) {
+		float a = static_cast<float>(i) * 0.7853981633974483f;
+		auto leg_offset = (-leg_height) + make_vector<float>(-sin(a), cos(a), 0.0f) * thing.size;
+		contact = presenter.physics_presenter.thing_segment_query(thing_id, leg_offset, contact);
+	}*/
+
+	return contact;
 }
 
 void gorc::game::world::level::gameplay::character_controller::update_falling(int thing_id, thing& thing, double dt) {
