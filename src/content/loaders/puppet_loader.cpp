@@ -1,6 +1,6 @@
 #include "puppet_loader.h"
 #include "content/assets/puppet.h"
-#include "content/manager.h"
+#include "framework/content/manager.h"
 
 #include <unordered_map>
 #include <string>
@@ -109,7 +109,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::puppet_loader::par
 			}
 			else {
 				assets::puppet_submode& submode = mode->submodes[static_cast<unsigned int>(it->second)];
-				submode.animation = &manager.load<assets::animation>(tok.get_space_delimited_string());
+				submode.anim = &manager.load<assets::animation>(tok.get_space_delimited_string());
 				submode.flags = flag_set<flags::key_flag>(tok.get_number<unsigned int>());
 				submode.lo_priority = tok.get_number<unsigned int>();
 				submode.hi_priority = tok.get_number<unsigned int>();

@@ -13,7 +13,7 @@ void event_bus::add_child(event_bus* child) {
 }
 
 void event_bus::remove_child(event_bus* child) {
-	children.erase(std::remove_if(children.begin(), children.end(), [child](event_bus* em) { return em == child; }), children.end());
+	children.erase(std::remove_if(children.begin(), children.end(), [&child](event_bus* em) { return em == child; }), children.end());
 }
 
 event_bus::event_bus() : parent(nullptr) {
@@ -28,9 +28,5 @@ event_bus::event_bus(event_bus* parent) : parent(parent) {
 event_bus::~event_bus() {
 	if(parent != nullptr) {
 		parent->remove_child(this);
-	}
-
-	for(auto pair : handlers) {
-		delete pair.second;
 	}
 }

@@ -1,6 +1,6 @@
 #include <nullunit/nullunit.h>
 #include "framework/event/event_bus.h"
-#include "framework/events/print_event.h"
+#include "framework/events/print.h"
 
 using namespace gorc;
 
@@ -17,13 +17,13 @@ Case(fire_event) {
 
 	Test_Assert_Eq(call_ct, 0);
 
-	events::print_event e("Test Message");
+	events::print e("Test Message");
 
 	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 0);
 
-	eventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
+	eventBus.add_handler<events::print>([&call_ct](events::print& e) {
 		++call_ct;
 	});
 
@@ -31,7 +31,7 @@ Case(fire_event) {
 
 	Test_Assert_Eq(call_ct, 1);
 
-	eventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
+	eventBus.add_handler<events::print>([&call_ct](events::print& e) {
 		++call_ct;
 	});
 
@@ -48,13 +48,13 @@ Case(ChildFireEvent) {
 
 	Test_Assert_Eq(call_ct, 0);
 
-	events::print_event e("Test Message");
+	events::print e("Test Message");
 
 	eventBus.fire_event(e);
 
 	Test_Assert_Eq(call_ct, 0);
 
-	parentEventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
+	parentEventBus.add_handler<events::print>([&call_ct](events::print& e) {
 		++call_ct;
 	});
 
@@ -62,7 +62,7 @@ Case(ChildFireEvent) {
 
 	Test_Assert_Eq(call_ct, 1);
 
-	eventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
+	eventBus.add_handler<events::print>([&call_ct](events::print& e) {
 		++call_ct;
 	});
 
@@ -79,13 +79,13 @@ Case(ChildDetachFireEvent) {
 
 	Test_Assert_Eq(call_ct, 0);
 
-	events::print_event e("Test Message");
+	events::print e("Test Message");
 
 	eventBus->fire_event(e);
 
 	Test_Assert_Eq(call_ct, 0);
 
-	parentEventBus.add_handler<events::print_event>([&call_ct](events::print_event& e) {
+	parentEventBus.add_handler<events::print>([&call_ct](events::print& e) {
 		++call_ct;
 	});
 
@@ -93,7 +93,7 @@ Case(ChildDetachFireEvent) {
 
 	Test_Assert_Eq(call_ct, 1);
 
-	eventBus->add_handler<events::print_event>([&call_ct](events::print_event& e) {
+	eventBus->add_handler<events::print>([&call_ct](events::print& e) {
 		++call_ct;
 	});
 
@@ -117,20 +117,20 @@ Case(CallMemberFunction) {
 			return;
 		}
 
-		void HandlePrintEvent(events::print_event& e) {
+		void HandlePrintEvent(events::print& e) {
 			++i;
 		}
 	} someClass;
 
 	event::event_bus eventBus;
 
-	events::print_event e("Test message");
+	events::print e("Test message");
 
 	eventBus.fire_event(e);
 
 	Test_Assert_Eq(someClass.i, 0);
 
-	eventBus.add_handler<events::print_event>(std::bind(&SomeClass::HandlePrintEvent, &someClass, std::placeholders::_1));
+	eventBus.add_handler<events::print>(std::bind(&SomeClass::HandlePrintEvent, &someClass, std::placeholders::_1));
 
 	eventBus.fire_event(e);
 

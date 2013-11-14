@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sound.h"
+#include "framework/content/assets/sound.h"
 #include "content/flags/sound_flag.h"
 #include "content/flags/sound_subclass_type.h"
 #include "framework/utility/flag_set.h"

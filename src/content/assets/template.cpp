@@ -1,7 +1,7 @@
 #include "template.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "content/manager.h"
+#include "framework/content/manager.h"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>
@@ -186,11 +186,11 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.get_number<int>(); }},
 	{ "orient", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, tok); }},
 	{ "physflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.physics_flags, flag_set<flags::physics_flag>(), tok, report); }},
-	{ "puppet", [](TPP_ARGS) { tpl_asset_loader(tpl.puppet, tok, content); }},
+	{ "puppet", [](TPP_ARGS) { tpl_asset_loader(tpl.pup, tok, content); }},
 	{ "rotthrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.rot_thrust, tok); }},
 	{ "size", [](TPP_ARGS) { tpl_number_mapper(tpl.size, 0.05f, tok, report); }},
 	{ "soundclass", [](TPP_ARGS) { tpl_asset_loader(tpl.sound_class, tok, content); }},
-	{ "sprite", [](TPP_ARGS) { tpl_asset_loader(tpl.sprite, tok, content, colormap); }},
+	{ "sprite", [](TPP_ARGS) { tpl_asset_loader(tpl.spr, tok, content, colormap); }},
 	{ "thingflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.flags, flag_set<flags::thing_flag>(), tok, report); }},
 	{ "thrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.thrust, tok); }},
 	{ "timer", [](TPP_ARGS) { tpl_number_mapper(tpl.timer, 0.0f, tok, report); }},

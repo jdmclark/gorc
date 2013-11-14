@@ -94,7 +94,7 @@ compound_statement::compound_statement(std::vector<statement*>* code) : code(cod
 	return;
 }
 
-expression_statement::expression_statement(class expression* expression) : expression(expression) {
+expression_statement::expression_statement(expression* expr) : expr(expr) {
 	return;
 }
 

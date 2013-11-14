@@ -264,9 +264,9 @@ class empty_statement : public statement {
 class expression_statement : public statement {
 	ASTVISITOR_ACCEPT
 public:
-	expression* expression;
+	expression* expr;
 
-	expression_statement(class expression* expression);
+	expression_statement(expression* expr);
 };
 
 class break_statement : public statement {

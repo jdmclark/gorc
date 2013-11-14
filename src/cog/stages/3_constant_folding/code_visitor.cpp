@@ -24,8 +24,8 @@ void code_visitor::visit_empty_statement(empty_statement& s) {
 
 void code_visitor::visit_expression_statement(expression_statement& s) {
 	expression_visitor v(Factory, symbol_table, ConstantTable, report);
-	s.expression->accept(v);
-	s.expression = v.get_substitution();
+	s.expr->accept(v);
+	s.expr = v.get_substitution();
 }
 
 void code_visitor::visit_break_statement(break_statement& s) {

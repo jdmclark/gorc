@@ -31,7 +31,7 @@ void code_visitor::visit_empty_statement(empty_statement& s) {
 
 void code_visitor::visit_expression_statement(expression_statement& s) {
 	non_valued_expression_visitor v(Printer, report);
-	s.expression->accept(v);
+	s.expr->accept(v);
 }
 
 void code_visitor::visit_break_statement(break_statement& s) {

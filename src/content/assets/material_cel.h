@@ -1,7 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <memory>
+#include "framework/content/assets/texture.h"
 
 namespace gorc {
 namespace content {
@@ -9,13 +8,11 @@ namespace assets {
 
 class material_cel {
 public:
-	GLuint diffuse;
-	GLuint light;
+	texture diffuse, light;
 
-	material_cel(GLuint diffuse, GLuint Light);
+	material_cel(GLuint diffuse, GLuint light, const box<2, int>& m_size);
 	material_cel(const material_cel&) = delete;
-	material_cel(material_cel&&);
-	~material_cel();
+	material_cel(material_cel&&) = default;
 };
 
 }

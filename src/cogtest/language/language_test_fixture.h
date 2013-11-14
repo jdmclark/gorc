@@ -4,8 +4,8 @@
 #include <boost/filesystem/path.hpp>
 #include <vector>
 
-#include "content/filesystem.h"
-#include "content/native_filesystem.h"
+#include "framework/content/filesystem.h"
+#include "framework/content/native_filesystem.h"
 #include "framework/diagnostics/stored_report.h"
 #include "cog/grammar/instance.h"
 

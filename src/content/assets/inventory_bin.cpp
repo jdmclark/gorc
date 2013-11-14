@@ -1,7 +1,7 @@
 #include "inventory_bin.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "content/manager.h"
+#include "framework/content/manager.h"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>

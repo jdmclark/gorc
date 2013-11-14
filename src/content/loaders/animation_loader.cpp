@@ -1,6 +1,6 @@
 #include "animation_loader.h"
 #include "content/assets/animation.h"
-#include "content/manager.h"
+#include "framework/content/manager.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>

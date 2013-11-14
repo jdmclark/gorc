@@ -11,8 +11,7 @@ LIB_MODULES = framework cog content
 TEST_MODULES = frameworktest cogtest contenttest
 BIN_MODULES = game ungob
 
-framework_LIBRARIES = boost_filesystem boost_system
-content_LIBRARIES = GLEW GL sfml-audio sfml-graphics sfml-window sfml-system
+framework_LIBRARIES = GLEW GL GLU sfml-audio sfml-graphics sfml-window sfml-system boost_system boost_filesystem
 content_DEPENDENCIES = cog framework
 
 cog_DEPENDENCIES = framework
@@ -24,7 +23,6 @@ cogtest_DEPENDENCIES = cog framework content
 contenttest_DEPENDENCIES = cog framework content
 
 game_DEPENDENCIES = framework cog content
-game_LIBRARIES = GL GLU
 
 ungob_DEPENDENCIES = framework cog content
 
@@ -40,7 +38,7 @@ OBJ_PATH = $(BASE_PATH)/obj
 BIN_PATH = $(BASE_PATH)/bin
 
 CPPFLAGS = -I$(SRC_PATH)
-CXXFLAGS = -std=c++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -O3
+CXXFLAGS = -std=gnu++11 -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-missing-braces -O3
 
 MODULES = $(LIB_MODULES) $(TEST_MODULES) $(BIN_MODULES)
 

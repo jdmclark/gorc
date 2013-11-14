@@ -123,8 +123,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
 	if(header.type == 0) {
 		// Color mat
-		mat->width = 16;
-		mat->height = 16;
+		mat->size = make_box(make_vector(0, 0), make_vector(16, 16));
 
 		for(int32_t i = 0; i < header.MatRecordCount; ++i) {
 			MaterialColorRecordHeader colorRecord;
@@ -159,7 +158,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
 			auto light = LoadMaterialFromMemory(16, 16, buffer);
 
-			mat->cels.emplace_back(diffuse, light);
+			mat->cels.emplace_back(diffuse, light, mat->size);
 		}
 	}
 	else if(header.type == 2) {
@@ -176,8 +175,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 			MaterialtextureDataHeader dataheader;
 			file.read(&dataheader, sizeof(MaterialtextureDataHeader));
 
-			mat->width = dataheader.SizeX;
-			mat->height = dataheader.SizeY;
+			mat->size = make_box(make_vector(0, 0), make_vector(dataheader.SizeX, dataheader.SizeY));
 
 			if(header.BitDepth == 8) {
 				// Process 8-bit texture with extra light information.
@@ -212,7 +210,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
 				auto light = LoadMaterialFromMemory(dataheader.SizeX, dataheader.SizeY, col_buffer.data());
 
-				mat->cels.emplace_back(diffuse, light);
+				mat->cels.emplace_back(diffuse, light, mat->size);
 
 				// Skip past mipmaps:
 				for(size_t np = 1; np < dataheader.MipmapCount; ++np) {

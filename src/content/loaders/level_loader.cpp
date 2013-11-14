@@ -1,7 +1,8 @@
 #include "level_loader.h"
 #include "content/assets/level.h"
-#include "content/manager.h"
+#include "framework/content/manager.h"
 #include "content/constants.h"
+#include "framework/math/vector.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>
@@ -370,7 +371,7 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, manager& manager
 
 			tok.set_report_eol(true);
 
-			for(const cog::symbols::symbol& symbol : script->script.symbol_table) {
+			for(const cog::symbols::symbol& symbol : script->cogscript.symbol_table) {
 				if(!symbol.local) {
 					switch(symbol.type) {
 					case cog::symbols::symbol_type::ai:
@@ -580,7 +581,7 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
 	// Calculate axis-aligned bounding box for each sector and assign colormap pointer.
 	for(auto& sec : lev.sectors) {
 		if(sec.colormap_id >= 0) {
-			sec.colormap = make_maybe(lev.colormaps[sec.colormap_id]);
+			sec.cmp = make_maybe(lev.colormaps[sec.colormap_id]);
 		}
 
 		vector<3> min_aabb = make_fill_vector<3>(std::numeric_limits<float>::max());

@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include "framework/math/vector.h"
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/inventory_loader.h"
 #include "inventory_bin.h"
 

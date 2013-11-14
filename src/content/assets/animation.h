@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/animation_loader.h"
 #include "content/flags/key_flag.h"
 #include "content/flags/key_marker_type.h"

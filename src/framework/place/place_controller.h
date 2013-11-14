@@ -1,42 +1,46 @@
 #pragma once
 
 #include <memory>
-#include "presenter_mapper.h"
 #include "framework/event/event_bus.h"
+#include "framework/utility/maybe.h"
 
 namespace gorc {
 namespace place {
 
-template <typename T> class place_controller {
+template <typename PresenterT, typename MapperT> class place_controller {
 private:
-	event::event_bus& eventBus;
-	presenter_mapper<T>& presenterMapper;
+	event::event_bus& bus;
+	const MapperT& mapper;
 
-	std::unique_ptr<event::event_bus> currentChildEventBus;
-	std::unique_ptr<presenter> currentPresenter;
+	std::unique_ptr<event::event_bus> current_child_bus;
+	std::unique_ptr<PresenterT> curr_presenter;
 
 public:
-	place_controller(event::event_bus& eventBus, presenter_mapper<T>& presenterMapper)
-		: eventBus(eventBus), presenterMapper(presenterMapper) {
+	place_controller(event::event_bus& bus, const MapperT& mapper)
+		: bus(bus), mapper(mapper) {
 		return;
 	}
 
-	void go_to(const T& place) {
-		if(currentPresenter) {
-			if(!currentPresenter->can_stop()) {
+	template <typename PlaceT> void go_to(const PlaceT& place) {
+		if(curr_presenter) {
+			if(!curr_presenter->can_stop()) {
 				// Abort
 				return;
 			}
 
-			currentPresenter->stop();
+			curr_presenter->stop();
 		}
 
-		currentChildEventBus = std::unique_ptr<event::event_bus>(new event::event_bus(&eventBus));
-		currentPresenter = presenterMapper.get_presenter(place);
+		current_child_bus = make_unique<event::event_bus>(&bus);
+		curr_presenter = mapper.get_presenter(place);
 
-		if(currentPresenter) {
-			currentPresenter->start(*currentChildEventBus);
+		if(curr_presenter) {
+			curr_presenter->start(*current_child_bus);
 		}
+	}
+
+	maybe<PresenterT*> current_presenter() const {
+		return make_maybe(curr_presenter.get());
 	}
 };
 

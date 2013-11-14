@@ -1,24 +1,6 @@
 #include "material_cel.h"
 
-gorc::content::assets::material_cel::material_cel(GLuint diffuse, GLuint Light)
-	: diffuse(diffuse), light(Light) {
+gorc::content::assets::material_cel::material_cel(GLuint diffuse, GLuint light, const box<2, int>& m_size)
+	: diffuse(diffuse, m_size), light(light, m_size) {
 	return;
-}
-
-gorc::content::assets::material_cel::material_cel(material_cel&& mc) {
-	diffuse = mc.diffuse;
-	mc.diffuse = 0;
-
-	light = mc.light;
-	mc.light = 0;
-}
-
-gorc::content::assets::material_cel::~material_cel() {
-	if(diffuse) {
-		glDeleteTextures(1, &diffuse);
-	}
-
-	if(light) {
-		glDeleteTextures(1, &light);
-	}
 }

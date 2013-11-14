@@ -2,7 +2,7 @@
 
 #include "framework/math/vector.h"
 #include "framework/math/box.h"
-#include "sound.h"
+#include "framework/content/assets/sound.h"
 #include "content/flags/sector_flag.h"
 #include "framework/utility/maybe.h"
 
@@ -19,7 +19,7 @@ public:
 	float ambient_light;
 	float extra_light;
 	size_t colormap_id;
-	maybe<colormap const*> colormap;
+	maybe<colormap const*> cmp;
 	vector<3> tint;
 	box<3> bounding_box;
 	box<3> collide_box;

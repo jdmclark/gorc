@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/soundclass_loader.h"
 #include "soundsubclass.h"
 #include <array>

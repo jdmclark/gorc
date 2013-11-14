@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/sprite_loader.h"
 #include "content/flags/geometry_mode.h"
 #include "content/flags/light_mode.h"
@@ -17,7 +17,7 @@ class sprite : public asset {
 public:
 	using loader = loaders::sprite_loader;
 
-	const material* material;
+	const material* mat;
 	int type;
 	float width;
 	float height;

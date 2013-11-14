@@ -11,11 +11,11 @@
 using gorc::content::vfs::vfsmap;
 
 gorc::content::vfs::virtual_filesystem::vfs_episode::vfs_episode(io::read_only_file& file, std::unique_ptr<class container>& cnt, diagnostics::report& report)
-	: container(std::move(cnt)) {
+	: cntr(std::move(cnt)) {
 	Episode = std::unique_ptr<episode::episode>(new episode::episode(file, report));
 
-	for(size_t i = 0; i < container->file_count(); ++i) {
-		const virtual_file& vf = container->get_virtual_file(i);
+	for(size_t i = 0; i < cntr->file_count(); ++i) {
+		const virtual_file& vf = cntr->get_virtual_file(i);
 		std::string fn = vf.get_filename().generic_string();
 		std::transform(fn.begin(), fn.end(), fn.begin(), tolower);
 		FileMap.insert(std::make_pair(fn, &vf));

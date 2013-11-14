@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/script_loader.h"
 #include "cog/script.h"
 #include "cog/instance.h"
@@ -24,7 +24,7 @@ class script : public asset {
 public:
 	using loader = loaders::script_loader;
 
-	cog::script script;
+	cog::script cogscript;
 };
 
 }

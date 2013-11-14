@@ -2,7 +2,7 @@
 #include "content/assets/sprite.h"
 #include "framework/diagnostics/helper.h"
 #include "framework/io/exception.h"
-#include "content/manager.h"
+#include "framework/content/manager.h"
 #include <boost/format.hpp>
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::sprite_loader::asset_root_path = { "misc/spr" };
@@ -15,7 +15,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::sprite_loader::par
 		content::manager& manager, diagnostics::report& report) {
 	std::unique_ptr<content::assets::sprite> spr(new content::assets::sprite());
 
-	spr->material = &manager.load<assets::material>(t.get_space_delimited_string(), colormap);
+	spr->mat = &manager.load<assets::material>(t.get_space_delimited_string(), colormap);
 	spr->type = t.get_number<int>();
 	spr->width = t.get_number<float>();
 	spr->height = t.get_number<float>();

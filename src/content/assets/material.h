@@ -12,7 +12,7 @@ class material : public asset {
 public:
 	using loader = loaders::material_loader;
 
-	unsigned int width, height;
+	box<2, int> size;
 	std::vector<material_cel> cels;
 };
 

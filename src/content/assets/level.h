@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/level_loader.h"
 
 #include "framework/math/vector.h"

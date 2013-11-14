@@ -5,7 +5,7 @@
 #include "virtual_file.h"
 #include "container.h"
 #include "content/vfs/episode/episode.h"
-#include "content/filesystem.h"
+#include "framework/content/filesystem.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>
@@ -20,7 +20,7 @@ class virtual_filesystem : public filesystem {
 private:
 	class vfs_episode {
 	private:
-		std::unique_ptr<container> container;
+		std::unique_ptr<container> cntr;
 		vfsmap FileMap;
 		std::unique_ptr<episode::episode> Episode;
 
@@ -39,7 +39,7 @@ private:
 	bool hasgamePath;
 
 	std::vector<std::unique_ptr<vfs_episode>> episodes;
-	vfs_episode* currentEpisode;
+	vfs_episode* currentEpisode = nullptr;
 
 	vfsmap RestrictedFileMap;
 	vfsmap ResourceFileMap;

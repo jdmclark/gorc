@@ -66,11 +66,11 @@ public:
 	float move_size = 0.05f;
 	vector<3> orient;
 	flag_set<flags::physics_flag> physics_flags;
-	puppet const* puppet = nullptr;
+	puppet const* pup = nullptr;
 	vector<3> rot_thrust;
 	float size = 0.05f;
 	soundclass const* sound_class = nullptr;
-	sprite const* sprite = nullptr;
+	sprite const* spr = nullptr;
 	vector<3> thrust;
 	float timer = 0.0f;
 	flags::thing_type type = flags::thing_type::ghost;

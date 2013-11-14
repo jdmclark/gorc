@@ -4,10 +4,10 @@
 #include <boost/filesystem/path.hpp>
 #include <vector>
 
-#include "content/filesystem.h"
-#include "content/native_filesystem.h"
+#include "framework/content/filesystem.h"
+#include "framework/content/native_filesystem.h"
 #include "framework/diagnostics/stored_report.h"
-#include "content/manager.h"
+#include "framework/content/manager.h"
 #include "cog/compiler.h"
 
 class LoaderTestFixture : public NullUnit::Fixture {

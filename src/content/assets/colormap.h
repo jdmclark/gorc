@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 #include "framework/math/vector.h"
-#include "content/asset.h"
+#include "framework/content/asset.h"
 #include "content/loaders/colormap_loader.h"
 
 namespace gorc {

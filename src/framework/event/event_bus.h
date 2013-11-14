@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include "framework/utility/make_unique.h"
 
 namespace gorc {
 namespace event {
@@ -21,8 +22,8 @@ private:
 	};
 
 	event_bus* parent;
-	std::unordered_map<std::string, event_bus_handler_container*> handlers;
-	std::vector<event_bus*> children;
+	std::unordered_map<std::string, std::unique_ptr<event_bus_handler_container>> handlers;
+	std::vector<event_bus*> children, children_scratch;
 
 	void add_child(event_bus* child);
 	void remove_child(event_bus* child);
@@ -31,13 +32,11 @@ private:
 		auto type = T::get_event_type();
 		auto it = handlers.find(type);
 		if(it == handlers.end()) {
-			auto nv = new event_bus_handler_container_impl<T>();
-			handlers.insert(std::make_pair(type, nv));
-			return nv->handlers;
+			return reinterpret_cast<event_bus_handler_container_impl<T>*>(std::get<0>(handlers.emplace(type,
+					make_unique<event_bus_handler_container_impl<T>>()))->second.get())->handlers;
 		}
 		else {
-			auto hc = reinterpret_cast<event_bus_handler_container_impl<T>*>(it->second);
-			return hc->handlers;
+			return reinterpret_cast<event_bus_handler_container_impl<T>*>(it->second.get())->handlers;
 		}
 	}
 
@@ -47,19 +46,28 @@ private:
 			eh(event);
 		}
 
-		std::vector<event_bus*> tchildren(children);
+		children_scratch = children;
 
-		for(auto child : tchildren) {
+		for(auto child : children_scratch) {
 			child->dispatch_event(event);
 		}
 	}
 
 public:
 	event_bus();
-	event_bus(event_bus* parent);
+	explicit event_bus(event_bus* parent);
 	~event_bus();
 
 	template <typename T> void fire_event(T& event) {
+		if(parent == nullptr) {
+			dispatch_event(event);
+			return;
+		}
+
+		parent->dispatch_event(event);
+	}
+
+	template <typename T> void fire_event(const T& event) {
 		if(parent == nullptr) {
 			dispatch_event(event);
 			return;
