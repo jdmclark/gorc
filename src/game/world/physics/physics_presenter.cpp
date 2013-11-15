@@ -220,7 +220,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 			physics_anim_node_visitor.sphere = sphere;
 			physics_anim_node_visitor.visited_thing_id = col_thing_id;
 			physics_anim_node_visitor.moving_thing_id = current_thing_id;
-			presenter.key_presenter.visit_mesh_hierarchy(physics_anim_node_visitor, col_thing);
+			presenter.key_presenter.visit_mesh_hierarchy(physics_anim_node_visitor, *col_thing.model_3d, col_thing.position, col_thing.orient, col_thing.attached_key_mix);
 		}
 	}
 }
@@ -653,7 +653,8 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 			segment_query_anim_node_visitor.cam_segment = cam_segment;
 			segment_query_anim_node_visitor.closest_contact_distance = closest_contact_distance;
 			segment_query_anim_node_visitor.has_closest_contact = false;
-			presenter.key_presenter.visit_mesh_hierarchy(segment_query_anim_node_visitor, col_thing);
+			presenter.key_presenter.visit_mesh_hierarchy(segment_query_anim_node_visitor, *col_thing.model_3d, col_thing.position,
+					col_thing.orient, col_thing.attached_key_mix);
 
 			if(segment_query_anim_node_visitor.has_closest_contact) {
 				closest_contact_distance = segment_query_anim_node_visitor.closest_contact_distance;

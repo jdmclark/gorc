@@ -341,9 +341,61 @@ void gorc::game::world::level_view::draw(const time& time, const box<2, int>& vi
 			draw_visible_translucent_surfaces_and_things();
 		}
 
+		// Draw POV model:
+		glDepthMask(GL_TRUE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		set_current_shader(surfaceShader, sector_tint);
+		draw_pov_model();
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_TRUE);
 
+		for(const auto& light_thing : visible_thing_scratch) {
+			const auto& thing = currentModel->things[std::get<0>(light_thing)];
+
+			float light = thing.light + ((thing.actor_flags & flags::actor_flag::HasFieldlight) ? thing.light_intensity : 0.0f);
+
+			if(light <= 0.0f) {
+				continue;
+			}
+
+			set_current_shader(lightShader, thing.position + orient_direction_vector(thing.light_offset, thing.orient),
+					cam.position, light, light);
+
+			draw_pov_model();
+		}
+
+		glDepthMask(GL_TRUE);
 		glDisable(GL_DEPTH_TEST);
+	}
+}
+
+void gorc::game::world::level_view::draw_pov_model() {
+	// Draw POV model.
+	const auto& cam = currentModel->camera_model.current_computed_state;
+
+	if(cam.draw_pov_model) {
+		auto const* pov_model = currentModel->camera_model.pov_model;
+		if(pov_model) {
+			const auto& thing = currentModel->things[currentPresenter->get_local_player_thing()];
+			const auto& current_sector = currentModel->sectors[thing.sector];
+			auto sector_color = make_fill_vector<3, float>(1.0f);
+			content::assets::colormap const* sec_cmp;
+			if(current_sector.cmp >> sec_cmp) {
+				sector_color = sec_cmp->tint_color;
+			}
+
+			float sector_light = current_sector.ambient_light + current_sector.extra_light;
+			auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
+
+			mesh_node_visitor v(lit_sector_color, *this);
+			currentPresenter->key_presenter.visit_mesh_hierarchy(v, *pov_model, thing.position + orient_direction_vector(thing.eye_offset,
+					make_vector(thing.head_pitch, get<1>(thing.orient), get<2>(thing.orient))),
+					make_vector(thing.head_pitch + 90.0f, get<1>(thing.orient), get<2>(thing.orient)), -1);
+		}
 	}
 }
 
@@ -580,7 +632,7 @@ void gorc::game::world::level_view::draw_thing(const thing& thing, int thing_id)
 
 	if(thing.model_3d) {
 		mesh_node_visitor v(lit_sector_color, *this);
-		currentPresenter->key_presenter.visit_mesh_hierarchy(v, thing);
+		currentPresenter->key_presenter.visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix);
 	}
 	else if(thing.spr) {
 		push_matrix();

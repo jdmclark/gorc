@@ -78,6 +78,7 @@ private:
 	void draw_visible_diffuse_surfaces();
 	void draw_visible_sky_surfaces(const box<2, int>& screen_size, const vector<3>& sector_tint);
 	void draw_visible_translucent_surfaces_and_things();
+	void draw_pov_model();
 
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
 	void draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light);

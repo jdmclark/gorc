@@ -7,6 +7,13 @@
 #include <vector>
 
 namespace gorc {
+
+namespace content {
+namespace assets {
+class model;
+}
+}
+
 namespace game {
 namespace world {
 namespace camera {
@@ -21,6 +28,8 @@ public:
 
 	int current_camera = 0;
 	current_camera_state current_computed_state;
+
+	content::assets::model const* pov_model = nullptr;
 };
 
 }

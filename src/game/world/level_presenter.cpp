@@ -7,7 +7,7 @@
 using namespace gorc::math;
 
 gorc::game::world::level_presenter::level_presenter(application& components, const level_place& place)
-	: components(components), place(place),
+	: components(components), place(place), contentmanager(place.contentmanager),
 	  physics_presenter(*this), script_presenter(components), sound_presenter(*place.contentmanager),
 	  key_presenter(*place.contentmanager), inventory_presenter(*this), camera_presenter(*this),
 	  actor_controller(*this), player_controller(*this), cog_controller(*this), ghost_controller(*this),
@@ -20,8 +20,8 @@ void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
 	model = std::unique_ptr<level_model>(new level_model(*place.contentmanager, components.compiler, place.level,
 			place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler)));
 
-	camera_presenter.start(*model, model->camera_model);
 	physics_presenter.start(*model);
+	camera_presenter.start(*model, model->camera_model);
 	animation_presenter.start(*model, model->animation_model);
 	script_presenter.start(*model, model->script_model);
 	sound_presenter.start(*model, model->sound_model);
@@ -87,16 +87,20 @@ void gorc::game::world::level_presenter::initialize_world() {
 			script_presenter.create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
 		}
 	}
+
+	// HACK: Set pov model and waggle to bryar.
+	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryv.3do", *model->level.master_colormap));
+	camera_presenter.jk_set_waggle(get_local_player_thing(), make_vector(10.0f, 7.0f, 0.0f), 350.0f);
 }
 
 void gorc::game::world::level_presenter::update(double dt) {
+	physics_presenter.update(dt);
 	camera_presenter.update(dt);
 	animation_presenter.update(dt);
 	script_presenter.update(dt);
 	sound_presenter.update(dt);
 	key_presenter.update(dt);
 	inventory_presenter.update(dt);
-	physics_presenter.update(dt);
 
 	// update things
 	for(auto& thing : model->things) {

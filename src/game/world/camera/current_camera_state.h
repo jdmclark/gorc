@@ -14,6 +14,7 @@ public:
 	vector<3> up;
 	int containing_sector;
 	int focus_not_drawn_thing;
+	bool draw_pov_model;
 };
 
 }

@@ -70,6 +70,8 @@ void gorc::game::world::camera::camera_presenter::update(double dt) {
 	else {
 		cam.focus_not_drawn_thing = selected_camera.focus;
 	}
+
+	cam.draw_pov_model = selected_camera.draw_pov_model;
 }
 
 void gorc::game::world::camera::camera_presenter::cycle_camera() {
@@ -108,6 +110,19 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
 	internal_cam.angle_reset_speed = ang_reset_speed;
 }
 
+void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int player, int model_id) {
+	if(model_id >= 0) {
+		model->pov_model = &presenter.contentmanager->get_asset<content::assets::model>(model_id);
+	}
+	else {
+		model->pov_model = nullptr;
+	}
+}
+
+void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, const vector<3>& move_vec, float speed) {
+	// TODO
+}
+
 void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
 	verbTable.add_verb<void, 0>("cyclecamera", [&components]() {
 		components.current_level_presenter->camera_presenter.cycle_camera();
@@ -139,5 +154,13 @@ void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::ver
 
 	verbTable.add_verb<void, 4>("setpovshake", [&components](vector<3> pos_offset, vector<3> ang_offset, float pos_reset_speed, float ang_reset_speed) {
 		components.current_level_presenter->camera_presenter.set_pov_shake(pos_offset, ang_offset, pos_reset_speed, ang_reset_speed);
+	});
+
+	verbTable.add_verb<void, 2>("jksetpovmodel", [&components](int player, int model_id) {
+		components.current_level_presenter->camera_presenter.jk_set_pov_model(player, model_id);
+	});
+
+	verbTable.add_verb<void, 3>("jksetwaggle", [&components](int player, vector<3> move_vec, float speed) {
+		components.current_level_presenter->camera_presenter.jk_set_waggle(player, move_vec, speed);
 	});
 }

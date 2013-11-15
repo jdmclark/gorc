@@ -61,21 +61,20 @@ public:
 	static void register_verbs(cog::verbs::verb_table&, application&);
 
 private:
-	template <typename T, typename U> void visit_mesh_node(T& visitor, const U& thing, int mesh_id) {
+	template <typename T> void visit_mesh_node(T& visitor, const content::assets::model& obj, int attached_key_mix, int mesh_id) {
 		if(mesh_id < 0) {
 			return;
 		}
 
-		const content::assets::model& model = *thing.model_3d;
-		const content::assets::model_node& node = model.hierarchy_nodes[mesh_id];
+		const content::assets::model_node& node = obj.hierarchy_nodes[mesh_id];
 
 		visitor.push_matrix();
 
 		vector<3> anim_translate = make_zero_vector<3, float>();
 		vector<3> anim_rotate = make_zero_vector<3, float>();
 
-		if(thing.attached_key_mix >= 0) {
-			std::tie(anim_translate, anim_rotate) = get_node_frame(thing.attached_key_mix, mesh_id, node.type);
+		if(attached_key_mix >= 0) {
+			std::tie(anim_translate, anim_rotate) = get_node_frame(attached_key_mix, mesh_id, node.type);
 		}
 		else {
 			anim_translate = node.offset;
@@ -89,28 +88,29 @@ private:
 				* make_translation_matrix(node.pivot));
 
 		if(node.mesh >= 0) {
-			visitor.visit_mesh(model, node.mesh);
+			visitor.visit_mesh(obj, node.mesh);
 		}
 
 		visitor.concatenate_matrix(make_translation_matrix(-node.pivot));
 
-		visit_mesh_node(visitor, thing, node.child);
+		visit_mesh_node(visitor, obj, attached_key_mix, node.child);
 
 		visitor.pop_matrix();
 
-		visit_mesh_node(visitor, thing, node.sibling);
+		visit_mesh_node(visitor, obj, attached_key_mix, node.sibling);
 	}
 
 public:
 
-	template <typename T, typename U> void visit_mesh_hierarchy(T& visitor, const U& thing) {
+	template <typename T> void visit_mesh_hierarchy(T& visitor, const content::assets::model& obj,
+			const vector<3>& base_position, const vector<3>& base_orientation, int attached_key_mix) {
 		visitor.push_matrix();
-		visitor.concatenate_matrix(make_translation_matrix(thing.position)
-				* make_rotation_matrix(get<1>(thing.orient), make_vector(0.0f, 0.0f, 1.0f))
-				* make_rotation_matrix(get<0>(thing.orient), make_vector(1.0f, 0.0f, 0.0f))
-				* make_rotation_matrix(get<2>(thing.orient), make_vector(0.0f, 1.0f, 0.0f)));
+		visitor.concatenate_matrix(make_translation_matrix(base_position)
+				* make_rotation_matrix(get<1>(base_orientation), make_vector(0.0f, 0.0f, 1.0f))
+				* make_rotation_matrix(get<0>(base_orientation), make_vector(1.0f, 0.0f, 0.0f))
+				* make_rotation_matrix(get<2>(base_orientation), make_vector(0.0f, 1.0f, 0.0f)));
 
-		visit_mesh_node(visitor, thing, 0);
+		visit_mesh_node(visitor, obj, attached_key_mix, 0);
 
 		visitor.pop_matrix();
 	}

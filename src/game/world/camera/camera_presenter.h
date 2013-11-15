@@ -53,6 +53,9 @@ public:
 	void set_current_camera(int camera_id);
 	void set_pov_shake(const vector<3>& pos_offset, const vector<3>& ang_offset, float pos_reset_speed, float ang_reset_speed);
 
+	void jk_set_pov_model(int player, int model);
+	void jk_set_waggle(int player, const vector<3>& move_vec, float speed);
+
 	static void register_verbs(cog::verbs::verb_table&, application&);
 };
 
