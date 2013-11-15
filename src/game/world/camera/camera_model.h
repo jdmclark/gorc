@@ -30,6 +30,7 @@ public:
 	current_camera_state current_computed_state;
 
 	content::assets::model const* pov_model = nullptr;
+	int pov_key_mix_id = -1;
 };
 
 }

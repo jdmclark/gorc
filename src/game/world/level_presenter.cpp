@@ -21,11 +21,11 @@ void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
 			place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler)));
 
 	physics_presenter.start(*model);
+	key_presenter.start(*model, model->key_model);
 	camera_presenter.start(*model, model->camera_model);
 	animation_presenter.start(*model, model->animation_model);
 	script_presenter.start(*model, model->script_model);
 	sound_presenter.start(*model, model->sound_model);
-	key_presenter.start(*model, model->key_model);
 	inventory_presenter.start(*model, model->inventory_model);
 
 	initialize_world();
@@ -89,8 +89,10 @@ void gorc::game::world::level_presenter::initialize_world() {
 	}
 
 	// HACK: Set pov model and waggle to bryar.
-	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryv.3do", *model->level.master_colormap));
+	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("conv.3do", *model->level.master_colormap));
 	camera_presenter.jk_set_waggle(get_local_player_thing(), make_vector(10.0f, 7.0f, 0.0f), 350.0f);
+
+	key_presenter.play_mix_key(model->camera_model.pov_key_mix_id, contentmanager->load_id<content::assets::animation>("convmnt.key"), 0, flag_set<flags::key_flag>(0x14));
 }
 
 void gorc::game::world::level_presenter::update(double dt) {
@@ -185,7 +187,7 @@ void gorc::game::world::level_presenter::update_thing_sector(int thing_id, thing
 
 void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) {
 	auto& player = model->things[model->local_player_thing_id];
-	player.thrust = orient_direction_vector(amt, make_vector(0.0f, get<1>(player.orient), get<2>(player.orient)));
+	player.thrust = orient_direction_vector(amt, make_vector(0.0f, get<1>(player.orient), 0.0f));
 }
 
 void gorc::game::world::level_presenter::yaw_camera(double amt) {

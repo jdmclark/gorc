@@ -26,14 +26,13 @@ void gorc::game::world::sounds::sound_presenter::update(double dt) {
 	const auto& player_sec = levelModel->sectors[cam.containing_sector];
 	set_ambient_sound(player_sec.ambient_sound, player_sec.ambient_sound_volume);
 
-	// update sounds
+	// Update sounds
 	for(auto& sound : model->sounds) {
 		sound.update(dt, *levelModel);
 	}
 
 	for(auto& sound : model->sounds) {
 		if(sound.get_expired()) {
-			sound.stop();
 			model->sounds.erase(sound);
 		}
 	}
@@ -155,7 +154,6 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(int channel, float d
 	if(channel >= 0) {
 		sound& sound = model->sounds[channel];
 		sound.stop(delay);
-		model->sounds.erase(channel);
 	}
 }
 

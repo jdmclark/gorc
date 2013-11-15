@@ -28,6 +28,9 @@ void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel,
 	external_camera.draw_focus = true;
 	external_camera.draw_pov_model = false;
 	external_camera.base_offset = make_vector(0.0f, -0.2f, 0.0125f);
+
+	// Create POV animation key mix.
+	model.pov_key_mix_id = presenter.key_presenter.create_key_mix();
 }
 
 void gorc::game::world::camera::camera_presenter::update(double dt) {
@@ -123,6 +126,14 @@ void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, cons
 	// TODO
 }
 
+int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags) {
+	return presenter.key_presenter.play_mix_key(model->pov_key_mix_id, key, priority, flags);
+}
+
+void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int player, int key_id, float delay) {
+	presenter.key_presenter.stop_key(-1, key_id, delay);
+}
+
 void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
 	verbTable.add_verb<void, 0>("cyclecamera", [&components]() {
 		components.current_level_presenter->camera_presenter.cycle_camera();
@@ -162,5 +173,13 @@ void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::ver
 
 	verbTable.add_verb<void, 3>("jksetwaggle", [&components](int player, vector<3> move_vec, float speed) {
 		components.current_level_presenter->camera_presenter.jk_set_waggle(player, move_vec, speed);
+	});
+
+	verbTable.add_verb<int, 4>("jkplaypovkey", [&components](int player, int key, int priority, int key_flags) {
+		return components.current_level_presenter->camera_presenter.jk_play_pov_key(player, key, priority, flag_set<flags::key_flag>(key_flags));
+	});
+
+	verbTable.add_verb<void, 3>("jkstoppovkey", [&components](int player, int key, float delay) {
+		components.current_level_presenter->camera_presenter.jk_stop_pov_key(player, key, delay);
 	});
 }

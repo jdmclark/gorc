@@ -59,6 +59,17 @@ int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {
 }
 
 void gorc::game::world::keys::key_presenter::update(double dt) {
+	// Expunge expired keys.
+	for(auto& key : model->keys) {
+		if(key.expiration_time > 0.0f) {
+			key.expiration_time -= dt;
+
+			if(key.expiration_time <= 0.0f) {
+				model->keys.erase(key);
+			}
+		}
+	}
+
 	// Reset mix priorities.
 	for(auto& mix : model->mixes) {
 		mix.body.priority = mix.high.priority = mix.low.priority = std::numeric_limits<int>::lowest();
@@ -174,10 +185,8 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
 	return std::make_tuple(position, orientation);
 }
 
-int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
+int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
 		int priority, flag_set<flags::key_flag> flags) {
-	int mix_id = GetThingMixId(thing_id);
-
 	auto& state = model->keys.emplace();
 
 	state.animation = &contentmanager.get_asset<content::assets::animation>(key);
@@ -189,6 +198,11 @@ int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
 	state.speed = 1.0;
 
 	return state.get_id();
+}
+
+int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
+		int priority, flag_set<flags::key_flag> flags) {
+	return play_mix_key(GetThingMixId(thing_id), key, priority, flags);
 }
 
 int gorc::game::world::keys::key_presenter::play_puppet_key(int thing_id,
@@ -213,8 +227,28 @@ int gorc::game::world::keys::key_presenter::play_puppet_key(int thing_id,
 	return state.get_id();
 }
 
+void gorc::game::world::keys::key_presenter::stop_key(int thing_id, int key_id, float delay) {
+	if(delay <= 0.0f) {
+		// Immediately remove.
+		model->keys.erase(key_id);
+	}
+	else {
+		auto& key = model->keys[key_id];
+		key.expiration_time = delay;
+	}
+}
+
+int gorc::game::world::keys::key_presenter::create_key_mix() {
+	auto mix = model->mixes.emplace();
+	return mix.get_id();
+}
+
 void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
 	verbTable.add_verb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
 		return components.current_level_presenter->key_presenter.play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
+	});
+
+	verbTable.add_verb<void, 3>("stopkey", [&components](int thing, int key, float delay) {
+		components.current_level_presenter->key_presenter.stop_key(thing, key, delay);
 	});
 }

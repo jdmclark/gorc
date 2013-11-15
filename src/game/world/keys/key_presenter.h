@@ -55,8 +55,12 @@ public:
 
 	std::tuple<vector<3>, vector<3>> get_node_frame(int mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
 
+	int create_key_mix();
+
+	int play_mix_key(int mix_id, int key, int priority, flag_set<flags::key_flag> flags);
 	int play_key(int thing_id, int key, int priority, flag_set<flags::key_flag> flags);
 	int play_puppet_key(int thing_id, flags::puppet_mode_type major_mode, flags::puppet_submode_type minor_mode);
+	void stop_key(int thing_id, int key, float delay);
 
 	static void register_verbs(cog::verbs::verb_table&, application&);
 

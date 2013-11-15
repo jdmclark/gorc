@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <tuple>
+#include "framework/utility/flag_set.h"
+#include "content/flags/key_flag.h"
 
 namespace gorc {
 
@@ -55,6 +57,8 @@ public:
 
 	void jk_set_pov_model(int player, int model);
 	void jk_set_waggle(int player, const vector<3>& move_vec, float speed);
+	int jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags);
+	void jk_stop_pov_key(int player, int key_id, float delay);
 
 	static void register_verbs(cog::verbs::verb_table&, application&);
 };

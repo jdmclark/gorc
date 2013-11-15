@@ -17,6 +17,7 @@ public:
 	double current_frame;
 	double speed;
 	flag_set<flags::key_flag> flags;
+	float expiration_time = 0.0f;
 
 	int high_priority, low_priority, body_priority;
 };
