@@ -17,7 +17,7 @@
 #include "game/world/sounds/sound_presenter.h"
 #include "game/world/keys/key_presenter.h"
 #include "game/world/camera/camera_presenter.h"
-#include "game/world/gameplay/inventory_presenter.h"
+#include "game/world/inventory/inventory_presenter.h"
 #include "game/world/gameplay/actor_controller.h"
 #include "game/world/gameplay/player_controller.h"
 #include "game/world/gameplay/cog_controller.h"
@@ -61,7 +61,7 @@ public:
 	scripts::script_presenter script_presenter;
 	sounds::sound_presenter sound_presenter;
 	keys::key_presenter key_presenter;
-	gameplay::inventory_presenter inventory_presenter;
+	inventory::inventory_presenter inventory_presenter;
 	camera::camera_presenter camera_presenter;
 
 	gameplay::actor_controller actor_controller;
@@ -158,6 +158,9 @@ public:
 	flags::thing_type get_thing_type(int thing_id);
 	void set_thing_type(int thing_id, flags::thing_type type);
 	void set_thing_light(int thing_id, float light, float fade_time);
+
+	// weapon verbs
+	void jk_set_weapon_mesh(int player, int model);
 
 	static void register_verbs(cog::verbs::verb_table&, application&);
 };

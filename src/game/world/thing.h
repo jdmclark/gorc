@@ -45,6 +45,8 @@ public:
 
 	int parent_thing = -1;
 
+	content::assets::model const* weapon_mesh = nullptr;
+
 	thing() = default;
 	thing(const content::assets::thing_template& tpl);
 };

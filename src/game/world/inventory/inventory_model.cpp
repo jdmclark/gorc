@@ -1,6 +1,6 @@
 #include "inventory_model.h"
 
-using namespace gorc::game::world::gameplay;
+using namespace gorc::game::world::inventory;
 
 player_inventory_model::player_inventory_model(const content::assets::inventory& BaseInventory)
 	: BaseInventory(BaseInventory) {

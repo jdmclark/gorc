@@ -11,7 +11,7 @@
 #include "game/world/scripts/script_model.h"
 #include "game/world/sounds/sound_model.h"
 #include "game/world/keys/key_model.h"
-#include "game/world/gameplay/inventory_model.h"
+#include "game/world/inventory/inventory_model.h"
 #include "game/world/camera/camera_model.h"
 #include <vector>
 
@@ -31,7 +31,7 @@ public:
 	scripts::script_model script_model;
 	sounds::sound_model sound_model;
 	keys::key_model key_model;
-	gameplay::inventory_model inventory_model;
+	inventory::inventory_model inventory_model;
 	camera::camera_model camera_model;
 
 	pool<thing> things;

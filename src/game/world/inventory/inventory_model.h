@@ -6,7 +6,7 @@
 namespace gorc {
 namespace game {
 namespace world {
-namespace gameplay {
+namespace inventory {
 
 class player_bin_model {
 public:

@@ -14,7 +14,7 @@ namespace world {
 class level_model;
 class level_presenter;
 
-namespace gameplay {
+namespace inventory {
 
 class inventory_model;
 

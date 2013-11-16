@@ -142,11 +142,13 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 	maybe_contact.if_else_set([this, &thing, thing_id, dt](const physics::contact& contact) {
 		// Check if attached surface/thing has changed.
 		int attachment_id;
-		if(contact.contact_surface_id >> attachment_id && attachment_id != thing.attached_surface) {
+		if(contact.contact_surface_id >> attachment_id &&
+				(!(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) || attachment_id != thing.attached_surface)) {
 			// Player has landed on a new surface.
 			step_on_surface(thing_id, thing, attachment_id, contact);
 		}
-		else if(contact.contact_thing_id >> attachment_id && attachment_id != thing.attached_thing) {
+		else if(contact.contact_thing_id >> attachment_id &&
+				(!(thing.attach_flags & flags::attach_flag::AttachedToThingFace) || attachment_id != thing.attached_thing)) {
 			// Player has landed on a new thing.
 			step_on_thing(thing_id, thing, attachment_id, contact);
 		}

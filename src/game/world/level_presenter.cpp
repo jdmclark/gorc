@@ -89,10 +89,11 @@ void gorc::game::world::level_presenter::initialize_world() {
 	}
 
 	// HACK: Set pov model and waggle to bryar.
-	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("conv.3do", *model->level.master_colormap));
+	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryv.3do", *model->level.master_colormap));
 	camera_presenter.jk_set_waggle(get_local_player_thing(), make_vector(10.0f, 7.0f, 0.0f), 350.0f);
+	jk_set_weapon_mesh(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryg.3do", *model->level.master_colormap));
 
-	key_presenter.play_mix_key(model->camera_model.pov_key_mix_id, contentmanager->load_id<content::assets::animation>("convmnt.key"), 0, flag_set<flags::key_flag>(0x14));
+	key_presenter.play_mix_key(model->camera_model.pov_key_mix_id, contentmanager->load_id<content::assets::animation>("bryvmnt.key"), 0, flag_set<flags::key_flag>(0x14));
 }
 
 void gorc::game::world::level_presenter::update(double dt) {
@@ -693,13 +694,26 @@ void gorc::game::world::level_presenter::set_thing_light(int thing_id, float lig
 	thing.light = light;
 }
 
+// weapon verbs
+
+void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh) {
+	auto& thing = model->things[player];
+
+	if(mesh >= 0) {
+		thing.weapon_mesh = &contentmanager->get_asset<content::assets::model>(mesh);
+	}
+	else {
+		thing.weapon_mesh = nullptr;
+	}
+}
+
 void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
 	camera::camera_presenter::register_verbs(verbTable, components);
 	animations::animation_presenter::register_verbs(verbTable, components);
 	scripts::script_presenter::register_verbs(verbTable, components);
 	sounds::sound_presenter::register_verbs(verbTable, components);
 	keys::key_presenter::register_verbs(verbTable, components);
-	gameplay::inventory_presenter::register_verbs(verbTable, components);
+	inventory::inventory_presenter::register_verbs(verbTable, components);
 
 	// Color verbs
 	verbTable.add_verb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {
@@ -926,5 +940,10 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
 	verbTable.add_verb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
 		components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
+	});
+
+	// weapon verbs
+	verbTable.add_verb<void, 2>("jksetweaponmesh", [&components](int thing_id, int mesh_id) {
+		components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
 	});
 }
