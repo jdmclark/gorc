@@ -92,7 +92,7 @@ private:
 				* make_translation_matrix(node.pivot));
 
 		if(node.mesh >= 0) {
-			visitor.visit_mesh(obj, node.mesh);
+			visitor.visit_mesh(obj, node.mesh, mesh_id);
 		}
 
 		visitor.concatenate_matrix(make_translation_matrix(-node.pivot));

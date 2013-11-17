@@ -3,10 +3,26 @@
 #include "game/world/level_model.h"
 #include "game/constants.h"
 
+gorc::flags::puppet_mode_type gorc::game::world::gameplay::character_controller::get_puppet_mode(thing& thing) {
+	bool is_underwater = (presenter.model->sectors[thing.sector].flags & flags::sector_flag::Underwater);
+
+	switch(thing.armed_mode) {
+	default:
+	case flags::armed_mode::unarmed:
+		return is_underwater? flags::puppet_mode_type::swimming_unarmed : flags::puppet_mode_type::unarmed;
+
+	case flags::armed_mode::armed:
+		return is_underwater? flags::puppet_mode_type::swimming_armed : flags::puppet_mode_type::armed;
+
+	case flags::armed_mode::saber:
+		return is_underwater? flags::puppet_mode_type::swimming_saber : flags::puppet_mode_type::saber;
+	}
+}
+
 void gorc::game::world::gameplay::character_controller::play_running_animation(int thing_id, thing& thing, double speed) {
 	if(thing.actor_walk_animation >= 0) {
 		keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-		const content::assets::puppet_submode& submode = thing.pup->get_mode(flags::puppet_mode_type::Default).get_submode(flags::puppet_submode_type::Run);
+		const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(flags::puppet_submode_type::Run);
 		if(keyState.animation != submode.anim) {
 			keyState.animation_time = 0.0;
 		}
@@ -22,7 +38,7 @@ void gorc::game::world::gameplay::character_controller::play_running_animation(i
 void gorc::game::world::gameplay::character_controller::play_standing_animation(int thing_id, thing& thing) {
 	if(thing.actor_walk_animation >= 0) {
 		keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-		const content::assets::puppet_submode& submode = thing.pup->get_mode(flags::puppet_mode_type::Default).get_submode(flags::puppet_submode_type::Stand);
+		const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(flags::puppet_submode_type::Stand);
 		keyState.speed = 1.0;
 		keyState.animation = submode.anim;
 		keyState.high_priority = submode.hi_priority;
@@ -332,6 +348,7 @@ void gorc::game::world::gameplay::character_controller::update(int thing_id, dou
 	thing_controller::update(thing_id, dt);
 
 	thing& thing = presenter.model->things[thing_id];
+	thing.puppet_mode = get_puppet_mode(thing);
 
 	// Update actor state
 	if(static_cast<int>(thing.attach_flags)) {
@@ -347,7 +364,7 @@ void gorc::game::world::gameplay::character_controller::create_controller_data(i
 
 	// HACK: Initialize actor walk animation
 	if(new_thing.pup) {
-		new_thing.actor_walk_animation = presenter.key_presenter.play_puppet_key(thing_id, flags::puppet_mode_type::Default, flags::puppet_submode_type::Stand);
+		new_thing.actor_walk_animation = presenter.key_presenter.play_puppet_key(thing_id, get_puppet_mode(new_thing), flags::puppet_submode_type::Stand);
 		keys::key_state& keyState = presenter.model->key_model.keys[new_thing.actor_walk_animation];
 		keyState.flags = flag_set<flags::key_flag>();
 	}

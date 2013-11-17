@@ -92,6 +92,7 @@ void gorc::game::world::level_presenter::initialize_world() {
 	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryv.3do", *model->level.master_colormap));
 	camera_presenter.jk_set_waggle(get_local_player_thing(), make_vector(10.0f, 7.0f, 0.0f), 350.0f);
 	jk_set_weapon_mesh(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryg.3do", *model->level.master_colormap));
+	set_armed_mode(get_local_player_thing(), flags::armed_mode::armed);
 
 	key_presenter.play_mix_key(model->camera_model.pov_key_mix_id, contentmanager->load_id<content::assets::animation>("bryvmnt.key"), 0, flag_set<flags::key_flag>(0x14));
 }
@@ -593,13 +594,13 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
 			// TODO: thing is dead. Reset to corpse
 			set_thing_type(thing_id, flags::thing_type::Corpse);
 			if(referencedThing.pup) {
-				key_presenter.play_puppet_key(thing_id, flags::puppet_mode_type::Default, flags::puppet_submode_type::Death);
+				key_presenter.play_puppet_key(thing_id, referencedThing.puppet_mode, flags::puppet_submode_type::Death);
 			}
 		}
 		else {
 			sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::HurtSpecial);
 			if(referencedThing.pup) {
-				key_presenter.play_puppet_key(thing_id, flags::puppet_mode_type::Default, flags::puppet_submode_type::Hit);
+				key_presenter.play_puppet_key(thing_id, referencedThing.puppet_mode, flags::puppet_submode_type::Hit);
 			}
 		}
 	}
@@ -705,6 +706,10 @@ void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh
 	else {
 		thing.weapon_mesh = nullptr;
 	}
+}
+
+void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed_mode mode) {
+	model->things[player].armed_mode = mode;
 }
 
 void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
@@ -945,5 +950,9 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	// weapon verbs
 	verbTable.add_verb<void, 2>("jksetweaponmesh", [&components](int thing_id, int mesh_id) {
 		components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
+	});
+
+	verbTable.add_verb<void, 2>("setarmedmode", [&components](int player, int mode) {
+		components.current_level_presenter->set_armed_mode(player, flags::armed_mode(mode));
 	});
 }

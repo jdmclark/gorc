@@ -161,6 +161,7 @@ public:
 
 	// weapon verbs
 	void jk_set_weapon_mesh(int player, int model);
+	void set_armed_mode(int player, flags::armed_mode mode);
 
 	static void register_verbs(cog::verbs::verb_table&, application&);
 };

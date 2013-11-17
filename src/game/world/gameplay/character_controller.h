@@ -3,6 +3,7 @@
 #include "thing_controller.h"
 #include "game/world/physics/contact.h"
 #include "framework/utility/maybe.h"
+#include "content/flags/puppet_mode_type.h"
 
 namespace gorc {
 namespace game {
@@ -24,6 +25,7 @@ enum class standing_material {
 
 class character_controller : public thing_controller {
 private:
+	flags::puppet_mode_type get_puppet_mode(thing& thing);
 	standing_material get_standing_material(thing& thing);
 
 	void play_running_animation(int thing_id, thing& thing, double speed);

@@ -117,9 +117,10 @@ public:
 	private:
 		vector<4> sector_color;
 		level_view& view;
+		content::assets::model const* weapon_mesh;
 
 	public:
-		mesh_node_visitor(const vector<4>& sector_color, level_view& view);
+		mesh_node_visitor(const vector<4>& sector_color, level_view& view, content::assets::model const* weapon_mesh);
 
 		inline void concatenate_matrix(const matrix<4>& mat) {
 			view.concatenate_matrix(mat);
@@ -135,7 +136,7 @@ public:
 			view.update_shader_model_matrix();
 		}
 
-		void visit_mesh(const content::assets::model& model, int mesh_id);
+		void visit_mesh(const content::assets::model& model, int mesh_id, int node_id);
 	};
 };
 

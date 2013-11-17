@@ -64,7 +64,7 @@ physics_presenter::physics_node_visitor::physics_node_visitor(physics_presenter&
 	return;
 }
 
-void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id) {
+void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
 	const auto& mesh = model.geosets.front().meshes[mesh_id];
 
 	for(const auto& face : mesh.faces) {
@@ -532,7 +532,7 @@ physics_presenter::segment_query_node_visitor::segment_query_node_visitor(physic
 	return;
 }
 
-void physics_presenter::segment_query_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id) {
+void physics_presenter::segment_query_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
 	const auto& mesh = model.geosets.front().meshes[mesh_id];
 
 	for(const auto& face : mesh.faces) {

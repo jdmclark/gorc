@@ -82,7 +82,7 @@ private:
 			current_matrix = current_matrix * mat;
 		}
 
-		void visit_mesh(const content::assets::model& model, int mesh_id);
+		void visit_mesh(const content::assets::model& model, int mesh_id, int node_id);
 
 		bool needs_response;
 		int moving_thing_id;
@@ -112,7 +112,7 @@ private:
 			current_matrix = current_matrix * mat;
 		}
 
-		void visit_mesh(const content::assets::model& model, int mesh_id);
+		void visit_mesh(const content::assets::model& model, int mesh_id, int node_id);
 
 		segment cam_segment;
 		vector<3> closest_contact;

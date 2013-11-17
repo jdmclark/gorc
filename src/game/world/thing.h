@@ -4,6 +4,7 @@
 #include "gameplay/thing_controller.h"
 #include "physics/object_data.h"
 #include "framework/utility/maybe.h"
+#include "content/flags/armed_mode.h"
 #include <memory>
 
 namespace gorc {
@@ -46,6 +47,9 @@ public:
 	int parent_thing = -1;
 
 	content::assets::model const* weapon_mesh = nullptr;
+
+	flags::armed_mode armed_mode = flags::armed_mode::unarmed;
+	flags::puppet_mode_type puppet_mode = flags::puppet_mode_type::unarmed;
 
 	thing() = default;
 	thing(const content::assets::thing_template& tpl);
