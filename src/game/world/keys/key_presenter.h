@@ -9,6 +9,7 @@
 #include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 #include "framework/math/matrix.h"
+#include "content/assets/puppet.h"
 
 namespace gorc {
 
@@ -65,7 +66,8 @@ public:
 	static void register_verbs(cog::verbs::verb_table&, application&);
 
 private:
-	template <typename T> void visit_mesh_node(T& visitor, const content::assets::model& obj, int attached_key_mix, int mesh_id) {
+	template <typename T> void visit_mesh_node(T& visitor, const content::assets::model& obj, int attached_key_mix, int mesh_id,
+			content::assets::puppet const* puppet_file, float head_pitch) {
 		if(mesh_id < 0) {
 			return;
 		}
@@ -85,6 +87,19 @@ private:
 			anim_rotate = node.rotation;
 		}
 
+		// Add head pitch to anim_rotate:
+		if(puppet_file &&
+				(mesh_id == puppet_file->get_joint(flags::puppet_joint_type::head)
+				|| mesh_id == puppet_file->get_joint(flags::puppet_joint_type::neck)
+				|| mesh_id == puppet_file->get_joint(flags::puppet_joint_type::torso)
+				|| mesh_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_aiming_joint)
+				|| mesh_id == puppet_file->get_joint(flags::puppet_joint_type::secondary_weapon_aiming_joint)
+				|| mesh_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)
+				|| mesh_id == puppet_file->get_joint(flags::puppet_joint_type::secondary_weapon_fire)
+				)) {
+			get<0>(anim_rotate) += head_pitch / 3.0f;
+		}
+
 		visitor.concatenate_matrix(make_translation_matrix(anim_translate)
 				* make_rotation_matrix(get<1>(anim_rotate), make_vector(0.0f, 0.0f, 1.0f))
 				* make_rotation_matrix(get<0>(anim_rotate), make_vector(1.0f, 0.0f, 0.0f))
@@ -97,24 +112,25 @@ private:
 
 		visitor.concatenate_matrix(make_translation_matrix(-node.pivot));
 
-		visit_mesh_node(visitor, obj, attached_key_mix, node.child);
+		visit_mesh_node(visitor, obj, attached_key_mix, node.child, puppet_file, head_pitch);
 
 		visitor.pop_matrix();
 
-		visit_mesh_node(visitor, obj, attached_key_mix, node.sibling);
+		visit_mesh_node(visitor, obj, attached_key_mix, node.sibling, puppet_file, head_pitch);
 	}
 
 public:
 
 	template <typename T> void visit_mesh_hierarchy(T& visitor, const content::assets::model& obj,
-			const vector<3>& base_position, const vector<3>& base_orientation, int attached_key_mix) {
+			const vector<3>& base_position, const vector<3>& base_orientation, int attached_key_mix,
+			content::assets::puppet const* puppet_file = nullptr, float head_pitch = 0.0f) {
 		visitor.push_matrix();
 		visitor.concatenate_matrix(make_translation_matrix(base_position)
 				* make_rotation_matrix(get<1>(base_orientation), make_vector(0.0f, 0.0f, 1.0f))
 				* make_rotation_matrix(get<0>(base_orientation), make_vector(1.0f, 0.0f, 0.0f))
 				* make_rotation_matrix(get<2>(base_orientation), make_vector(0.0f, 1.0f, 0.0f)));
 
-		visit_mesh_node(visitor, obj, attached_key_mix, 0);
+		visit_mesh_node(visitor, obj, attached_key_mix, 0, puppet_file, head_pitch);
 
 		visitor.pop_matrix();
 	}

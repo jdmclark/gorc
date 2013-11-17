@@ -391,7 +391,7 @@ void gorc::game::world::level_view::draw_pov_model() {
 			float sector_light = current_sector.ambient_light + current_sector.extra_light;
 			auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
-			mesh_node_visitor v(lit_sector_color, *this, nullptr);
+			mesh_node_visitor v(lit_sector_color, *this, nullptr, nullptr);
 			auto pov_orient = make_vector(thing.head_pitch, get<1>(thing.orient), get<2>(thing.orient));
 			currentPresenter->key_presenter.visit_mesh_hierarchy(v, *pov_model, thing.position,
 					//+ orient_direction_vector(pov_model->insert_offset, pov_orient),
@@ -472,8 +472,8 @@ void gorc::game::world::level_view::draw_surface(unsigned int surf_num, const co
 }
 
 gorc::game::world::level_view::mesh_node_visitor::mesh_node_visitor(const vector<4>& sector_color, level_view& view,
-		content::assets::model const* weapon_mesh)
-	: sector_color(sector_color), view(view), weapon_mesh(weapon_mesh) {
+		content::assets::model const* weapon_mesh, content::assets::puppet const* puppet_file)
+	: sector_color(sector_color), view(view), weapon_mesh(weapon_mesh), puppet_file(puppet_file) {
 	return;
 }
 
@@ -540,8 +540,8 @@ void gorc::game::world::level_view::mesh_node_visitor::visit_mesh(const content:
 	}
 
 	// TODO: This is a hack. Replace after finding out how weapon mesh is really supposed to be inserted.
-	if(node_id == 12 && weapon_mesh) {
-		mesh_node_visitor weapon_mesh_node_visitor(sector_color, view, nullptr);
+	if(weapon_mesh && puppet_file && node_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)) {
+		mesh_node_visitor weapon_mesh_node_visitor(sector_color, view, nullptr, nullptr);
 		view.currentPresenter->key_presenter.visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh, make_zero_vector<3, float>(),
 				make_zero_vector<3, float>(), -1);
 	}
@@ -640,8 +640,9 @@ void gorc::game::world::level_view::draw_thing(const thing& thing, int thing_id)
 	auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
 	if(thing.model_3d) {
-		mesh_node_visitor v(lit_sector_color, *this, thing.weapon_mesh);
-		currentPresenter->key_presenter.visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix);
+		mesh_node_visitor v(lit_sector_color, *this, thing.weapon_mesh, thing.pup);
+		currentPresenter->key_presenter.visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix,
+				thing.pup, thing.head_pitch);
 	}
 	else if(thing.spr) {
 		push_matrix();

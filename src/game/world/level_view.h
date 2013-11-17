@@ -27,6 +27,7 @@ class shader;
 class model;
 class animation;
 class sprite;
+class puppet;
 }
 }
 
@@ -118,9 +119,11 @@ public:
 		vector<4> sector_color;
 		level_view& view;
 		content::assets::model const* weapon_mesh;
+		content::assets::puppet const* puppet_file;
 
 	public:
-		mesh_node_visitor(const vector<4>& sector_color, level_view& view, content::assets::model const* weapon_mesh);
+		mesh_node_visitor(const vector<4>& sector_color, level_view& view, content::assets::model const* weapon_mesh,
+				content::assets::puppet const* puppet_file);
 
 		inline void concatenate_matrix(const matrix<4>& mat) {
 			view.concatenate_matrix(mat);

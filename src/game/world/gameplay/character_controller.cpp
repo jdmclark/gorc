@@ -251,6 +251,8 @@ void gorc::game::world::gameplay::character_controller::land_on_surface(int thin
 		return;
 	}
 
+	//presenter.key_presenter.play_puppet_key(thing_id, thing.puppet_mode, flags::puppet_submode_type::Land);
+
 	const auto& surf = presenter.model->surfaces[surf_id];
 
 	flags::sound_subclass_type subclass = flags::sound_subclass_type::LandHard;
@@ -278,6 +280,8 @@ void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_
 	if(!step_on_thing(thing_id, thing, land_thing_id, rrcb)) {
 		return;
 	}
+
+	//presenter.key_presenter.play_puppet_key(thing_id, thing.puppet_mode, flags::puppet_submode_type::Land);
 
 	flag_set<flags::thing_flag> flags = presenter.model->things[land_thing_id].flags;
 
