@@ -40,6 +40,8 @@ public:
 	void start(level_model& levelModel, sound_model& soundModel);
 	void update(double dt);
 
+	void expunge_thing_sounds(int thing_id);
+
 	void set_ambient_sound(content::assets::sound const* sound, float volume);
 	void play_foley_loop_class(int thing, flags::sound_subclass_type subclass);
 	void stop_foley_loop(int thing);

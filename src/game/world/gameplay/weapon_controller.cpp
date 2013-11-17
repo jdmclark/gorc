@@ -2,12 +2,6 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 
-void gorc::game::world::gameplay::weapon_controller::create_controller_data(int thing_id) {
-	thing_controller::create_controller_data(thing_id);
-
-	return;
-}
-
 void gorc::game::world::gameplay::weapon_controller::touched_thing(int thing_id, int touched_thing_id) {
 	thing_controller::touched_thing(thing_id, touched_thing_id);
 

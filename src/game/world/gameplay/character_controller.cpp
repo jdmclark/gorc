@@ -19,10 +19,14 @@ gorc::flags::puppet_mode_type gorc::game::world::gameplay::character_controller:
 	}
 }
 
-void gorc::game::world::gameplay::character_controller::play_running_animation(int thing_id, thing& thing, double speed) {
+void gorc::game::world::gameplay::character_controller::set_walk_animation(thing& thing, flags::puppet_submode_type type, float speed) {
 	if(thing.actor_walk_animation >= 0) {
 		keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-		const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(flags::puppet_submode_type::Run);
+		const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(type);
+		if(!keyState.animation) {
+			return;
+		}
+
 		if(keyState.animation != submode.anim) {
 			keyState.animation_time = 0.0;
 		}
@@ -35,15 +39,90 @@ void gorc::game::world::gameplay::character_controller::play_running_animation(i
 	}
 }
 
-void gorc::game::world::gameplay::character_controller::play_standing_animation(int thing_id, thing& thing) {
+bool gorc::game::world::gameplay::character_controller::is_walk_animation_mode(thing& thing, flags::puppet_submode_type type) {
 	if(thing.actor_walk_animation >= 0) {
 		keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-		const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(flags::puppet_submode_type::Stand);
-		keyState.speed = 1.0;
-		keyState.animation = submode.anim;
-		keyState.high_priority = submode.hi_priority;
-		keyState.low_priority = submode.lo_priority;
-		keyState.flags = flag_set<flags::key_flag>();
+		const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(type);
+		return keyState.animation == submode.anim;
+	}
+
+	return false;
+}
+
+void gorc::game::world::gameplay::character_controller::set_walk_animation_speed(thing& thing, float speed) {
+	if(thing.actor_walk_animation >= 0) {
+		keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
+		keyState.speed = speed;
+	}
+}
+
+void gorc::game::world::gameplay::character_controller::play_falling_animation(int thing_id, thing& thing) {
+	if(dot(thing.vel, make_vector(0.0f, 0.0f, -1.0f))) {
+		// Player's trajectory has reached apogee.
+		set_walk_animation(thing, flags::puppet_submode_type::Drop, 1.0f);
+	}
+}
+
+void gorc::game::world::gameplay::character_controller::play_standing_animation(int thing_id, thing& thing) {
+	auto oriented_vel = orient_direction_vector(thing.vel, -thing.orient);
+	auto run_length = length(thing.vel);
+
+	auto vel_fb = get<1>(oriented_vel);
+	auto vel_lr = get<0>(oriented_vel);
+	auto turn_rate = get<1>(thing.ang_vel);
+
+	float run_anim_speed = run_length * 20.0f;
+	float turn_anim_speed = abs(turn_rate) / 360.0f;
+
+	if(thing.physics_flags & flags::physics_flag::is_crouching) {
+		if(abs(turn_rate) > 0.0001f) {
+			set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, turn_anim_speed * 20.0f);
+		}
+		else if(vel_fb >= 0.0f || abs(vel_lr) > abs(vel_fb)) {
+			set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, run_anim_speed);
+		}
+		else {
+			set_walk_animation(thing, flags::puppet_submode_type::CrouchBack, run_anim_speed);
+		}
+	}
+	else {
+		if(run_length < 0.001f) {
+			// Idle or turning.
+			if(turn_rate > 10.0f) {
+				// Turning left
+				set_walk_animation(thing, flags::puppet_submode_type::TurnLeft, turn_anim_speed);
+			}
+			else if(turn_rate < -10.0f) {
+				// Turning right
+				set_walk_animation(thing, flags::puppet_submode_type::TurnRight, turn_anim_speed);
+			}
+			else if(abs(turn_rate) < 0.001f) {
+				set_walk_animation(thing, flags::puppet_submode_type::Stand, 1.0f);
+			}
+			else if(!is_walk_animation_mode(thing, flags::puppet_submode_type::Stand)) {
+				set_walk_animation_speed(thing, turn_anim_speed);
+			}
+		}
+		else if(abs(vel_lr) > abs(vel_fb)) {
+			// Strafing left or right
+			if(vel_lr >= 0.0f) {
+				set_walk_animation(thing, flags::puppet_submode_type::StrafeLeft, run_anim_speed);
+			}
+			else {
+				set_walk_animation(thing, flags::puppet_submode_type::StrafeRight, run_anim_speed);
+			}
+		}
+		else if(vel_fb > 0.5f) {
+			// Running forward
+			set_walk_animation(thing, flags::puppet_submode_type::Run, run_anim_speed);
+		}
+		else if(vel_fb > 0.0f) {
+			set_walk_animation(thing, flags::puppet_submode_type::Walk, run_anim_speed);
+		}
+		else {
+			// Walking backwards
+			set_walk_animation(thing, flags::puppet_submode_type::WalkBack, run_anim_speed);
+		}
 	}
 }
 
@@ -92,6 +171,11 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
 	// Test for collision between legs and ground using multiple tests
 	auto leg_height = thing.model_3d->insert_offset;
 
+	if(dot(-leg_height, thing.vel) < 0.0f) {
+		// Thing is moving away from feet. Don't check.
+		return maybe<physics::contact>();
+	}
+
 	maybe<physics::contact> contact;
 
 	contact = presenter.physics_presenter.thing_segment_query(thing_id, -leg_height, contact);
@@ -138,7 +222,7 @@ void gorc::game::world::gameplay::character_controller::update_falling(int thing
 	get<2>(applied_thrust) = 0.0f;
 	thing.vel = thing.vel + applied_thrust * dt;
 
-	play_standing_animation(thing_id, thing);
+	play_falling_animation(thing_id, thing);
 
 	maybe_contact.if_set([this, &thing, thing_id](const physics::contact& contact) {
 		// Check if attached surface/thing has changed.
@@ -182,26 +266,24 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 			if(contact.contact_surface_id >> attachment_id) {
 				new_vel += presenter.model->surfaces[attachment_id].thrust;
 			}
-			else if(contact.contact_thing_id >> attachment_id) {
-				//new_vel += (presenter.model->things[attachment_id].position - thing.prev_attached_thing_position) / dt;
-				//thing.prev_attached_thing_position = presenter.model->things[attachment_id].position;
-			}
 
 			// Accelerate body toward standing position
-			float dist = dot(hit_normal, thing.position - hit_world);
-			auto hover_position = hit_world + thing.model_3d->insert_offset;
-			new_vel += (hover_position - thing.position) * 20.0f;
+			if(thing.physics_flags & flags::physics_flag::is_crouching) {
+				float dist = dot(hit_normal, thing.position - hit_world);
+				auto io_nrm = normalize(thing.model_3d->insert_offset);
+				auto hover_position = hit_world + io_nrm * (thing.size + 0.01f);
+				new_vel += (hover_position - thing.position) * 20.0f;
+			}
+			else {
+				float dist = dot(hit_normal, thing.position - hit_world);
+				auto hover_position = hit_world + thing.model_3d->insert_offset;
+				new_vel += (hover_position - thing.position) * 20.0f;
+			}
 
 			thing.vel = new_vel;
 
 			// Update idle animation
-			float player_new_vel_len = length(player_new_vel);
-			if(player_new_vel_len > 0.0f) {
-				play_running_animation(thing_id, thing, player_new_vel_len * 20.0f);
-			}
-			else {
-				play_standing_animation(thing_id, thing);
-			}
+			play_standing_animation(thing_id, thing);
 		}
 	},
 	[&thing] {
@@ -251,7 +333,7 @@ void gorc::game::world::gameplay::character_controller::land_on_surface(int thin
 		return;
 	}
 
-	//presenter.key_presenter.play_puppet_key(thing_id, thing.puppet_mode, flags::puppet_submode_type::Land);
+	presenter.key_presenter.play_mode(thing_id, flags::puppet_submode_type::Land);
 
 	const auto& surf = presenter.model->surfaces[surf_id];
 
@@ -281,7 +363,7 @@ void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_
 		return;
 	}
 
-	//presenter.key_presenter.play_puppet_key(thing_id, thing.puppet_mode, flags::puppet_submode_type::Land);
+	presenter.key_presenter.play_mode(thing_id, flags::puppet_submode_type::Land);
 
 	flag_set<flags::thing_flag> flags = presenter.model->things[land_thing_id].flags;
 
@@ -302,6 +384,13 @@ void gorc::game::world::gameplay::character_controller::jump(int thing_id, thing
 	}
 	else if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
 		jump_from_thing(thing_id, thing, thing.attached_thing);
+	}
+
+	if(thing.physics_flags & flags::physics_flag::is_crouching) {
+		set_walk_animation(thing, flags::puppet_submode_type::Leap, 1.0f);
+	}
+	else {
+		set_walk_animation(thing, flags::puppet_submode_type::Rising, 1.0f);
 	}
 }
 
@@ -364,17 +453,31 @@ void gorc::game::world::gameplay::character_controller::update(int thing_id, dou
 }
 
 void gorc::game::world::gameplay::character_controller::create_controller_data(int thing_id) {
+	thing_controller::create_controller_data(thing_id);
+
 	auto& new_thing = presenter.model->things[thing_id];
 
 	// HACK: Initialize actor walk animation
 	if(new_thing.pup) {
-		new_thing.actor_walk_animation = presenter.key_presenter.play_puppet_key(thing_id, get_puppet_mode(new_thing), flags::puppet_submode_type::Stand);
-		keys::key_state& keyState = presenter.model->key_model.keys[new_thing.actor_walk_animation];
-		keyState.flags = flag_set<flags::key_flag>();
+		new_thing.actor_walk_animation = presenter.key_presenter.play_mode(thing_id, flags::puppet_submode_type::Stand);
 	}
 	else {
 		new_thing.actor_walk_animation = -1;
 	}
+
+	if(new_thing.actor_walk_animation >= 0) {
+		keys::key_state& keyState = presenter.model->key_model.keys[new_thing.actor_walk_animation];
+		keyState.flags = flag_set<flags::key_flag>();
+	}
+}
+
+void gorc::game::world::gameplay::character_controller::remove_controller_data(int thing_id) {
+	auto& thing = presenter.model->things[thing_id];
+	if(thing.actor_walk_animation >= 0) {
+		presenter.key_presenter.stop_key(thing_id, thing.actor_walk_animation, 0.0f);
+	}
+
+	thing_controller::remove_controller_data(thing_id);
 }
 
 void gorc::game::world::gameplay::character_controller::handle_animation_marker(int thing_id, flags::key_marker_type marker) {

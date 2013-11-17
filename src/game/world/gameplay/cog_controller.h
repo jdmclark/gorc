@@ -15,7 +15,6 @@ public:
 	using thing_controller::thing_controller;
 
 	virtual void update(int thing_id, double dt) override;
-	virtual void create_controller_data(int thing_id) override;
 };
 
 }

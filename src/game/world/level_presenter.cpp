@@ -194,7 +194,8 @@ void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) 
 
 void gorc::game::world::level_presenter::yaw_camera(double amt) {
 	auto& player = model->things[model->local_player_thing_id];
-	get<1>(player.orient) += amt;
+	get<1>(player.ang_vel) = amt * 60.0f;
+	//get<1>(player.orient) += amt;
 }
 
 void gorc::game::world::level_presenter::pitch_camera(double amt) {
@@ -301,6 +302,16 @@ void gorc::game::world::level_presenter::damage() {
 
 	// Rotate velocity.
 	thing.vel = orient_direction_vector(thing.vel, make_vector(bolt_pitch, bolt_yaw, 0.0f));
+}
+
+void gorc::game::world::level_presenter::crouch(bool is_crouched) {
+	auto& player = model->things[model->local_player_thing_id];
+	if(is_crouched) {
+		player.physics_flags += flags::physics_flag::is_crouching;
+	}
+	else {
+		player.physics_flags -= flags::physics_flag::is_crouching;
+	}
 }
 
 void gorc::game::world::level_presenter::thing_sighted(int thing_id) {
@@ -594,13 +605,13 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
 			// TODO: thing is dead. Reset to corpse
 			set_thing_type(thing_id, flags::thing_type::Corpse);
 			if(referencedThing.pup) {
-				key_presenter.play_puppet_key(thing_id, referencedThing.puppet_mode, flags::puppet_submode_type::Death);
+				key_presenter.play_mode(thing_id, flags::puppet_submode_type::Death);
 			}
 		}
 		else {
 			sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::HurtSpecial);
 			if(referencedThing.pup) {
-				key_presenter.play_puppet_key(thing_id, referencedThing.puppet_mode, flags::puppet_submode_type::Hit);
+				key_presenter.play_mode(thing_id, flags::puppet_submode_type::Hit);
 			}
 		}
 	}
@@ -620,8 +631,13 @@ void gorc::game::world::level_presenter::destroy_thing(int thing_id) {
 		}
 	}
 
-	// TODO: Clean up components owned by thing (animations, key mixes, sounds).
+	// Remove controller data
 	model->things[thing_id].controller->remove_controller_data(thing_id);
+
+	// Expunge associated resources.
+	sound_presenter.expunge_thing_sounds(thing_id);
+	key_presenter.expunge_thing_animations(thing_id);
+
 	model->things.erase(thing_id);
 }
 
@@ -719,6 +735,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	sounds::sound_presenter::register_verbs(verbTable, components);
 	keys::key_presenter::register_verbs(verbTable, components);
 	inventory::inventory_presenter::register_verbs(verbTable, components);
+	physics::physics_presenter::register_verbs(verbTable, components);
 
 	// Color verbs
 	verbTable.add_verb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {

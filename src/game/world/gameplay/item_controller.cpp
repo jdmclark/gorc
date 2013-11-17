@@ -2,12 +2,6 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 
-void gorc::game::world::gameplay::item_controller::create_controller_data(int thing_id) {
-	thing_controller::create_controller_data(thing_id);
-
-	return;
-}
-
 void gorc::game::world::gameplay::item_controller::taken(int thing_id, int player_id) {
 	auto& player_thing = presenter.model->things[player_id];
 	if(player_thing.type != flags::thing_type::Player) {

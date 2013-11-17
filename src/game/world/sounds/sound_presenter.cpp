@@ -40,6 +40,18 @@ void gorc::game::world::sounds::sound_presenter::update(double dt) {
 	model->ambient_music.update(dt);
 }
 
+void gorc::game::world::sounds::sound_presenter::expunge_thing_sounds(int thing_id) {
+	stop_foley_loop(thing_id);
+
+	for(auto& sound : model->sounds) {
+		if(sound.is_attached_to_thing(thing_id)) {
+			sound.stop();
+		}
+	}
+
+	update(0.0);
+}
+
 void gorc::game::world::sounds::sound_presenter::set_ambient_sound(content::assets::sound const* sound, float volume) {
 	if(&sound->buffer == model->ambient_sound.getBuffer() && model->ambient_sound.getStatus() != sf::Sound::Stopped) {
 		model->ambient_sound.setVolume(volume * 100.0f);

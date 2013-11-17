@@ -54,13 +54,17 @@ public:
 	void start(level_model& levelModel, key_model& model);
 	void update(double dt);
 
+	void expunge_thing_animations(int thing_id);
+
+	std::tuple<vector<3>, vector<3>> get_animation_frame(const content::assets::animation& anim, int node_id, double frame) const;
 	std::tuple<vector<3>, vector<3>> get_node_frame(int mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
 
 	int create_key_mix();
 
+	float get_key_len(int key_id);
 	int play_mix_key(int mix_id, int key, int priority, flag_set<flags::key_flag> flags);
 	int play_key(int thing_id, int key, int priority, flag_set<flags::key_flag> flags);
-	int play_puppet_key(int thing_id, flags::puppet_mode_type major_mode, flags::puppet_submode_type minor_mode);
+	int play_mode(int thing_id, flags::puppet_submode_type submode);
 	void stop_key(int thing_id, int key, float delay);
 
 	static void register_verbs(cog::verbs::verb_table&, application&);

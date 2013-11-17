@@ -94,7 +94,15 @@ public:
 			return data;
 		}
 
+		inline element const* begin() const {
+			return data;
+		}
+
 		inline element* end() {
+			return data + page_size;
+		}
+
+		inline element const* end() const {
 			return data + page_size;
 		}
 	};
@@ -256,6 +264,19 @@ public:
 
 	size_t size() const {
 		return pages.size() * page_size;
+	}
+
+	size_t count() const {
+		size_t ct = 0;
+		for(const auto& page : pages) {
+			for(const auto& em : page) {
+				if(em.pool_element_initialized) {
+					++ct;
+				}
+			}
+		}
+
+		return ct;
 	}
 };
 

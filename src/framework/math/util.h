@@ -11,6 +11,30 @@ template <typename T, typename F> T lerp(const T& a, const T& b, F alpha) {
 	return (1 - alpha) * a + alpha * b;
 }
 
+template <typename F> F clerp(F a, F b, F alpha) {
+	// Normalize A and B.
+	auto nrm_a = fmod(fmod(a, 360.0f) + 360.0f, 360.0f);
+	auto nrm_b = fmod(fmod(b, 360.0f) + 360.0f, 360.0f);
+
+	// Compute the minimum angle between A and B.
+	if(abs(nrm_a - nrm_b) <= 180.0f) {
+		// A and B are less than 180 degrees apart.
+		return lerp(nrm_a, nrm_b, alpha);
+	}
+	else if(nrm_a < nrm_b) {
+		// A and B are more than 180 degrees apart.
+		nrm_a += 360.0f;
+		auto res = lerp(nrm_a, nrm_b, alpha);
+		return fmod(fmod(res, 360.0f) + 360.0f, 360.0f);
+	}
+	else {
+		// A and B are more than 180 degrees apart.
+		nrm_b += 360.0f;
+		auto res = lerp(nrm_a, nrm_b, alpha);
+		return fmod(fmod(res, 360.0f) + 360.0f, 360.0f);
+	}
+}
+
 template <typename T> T clamp(T value, T min, T max) {
 	return std::max(min, std::min(value, max));
 }

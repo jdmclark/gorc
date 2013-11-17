@@ -4,6 +4,7 @@
 #include "game/world/physics/contact.h"
 #include "framework/utility/maybe.h"
 #include "content/flags/puppet_mode_type.h"
+#include "content/flags/puppet_submode_type.h"
 
 namespace gorc {
 namespace game {
@@ -28,7 +29,10 @@ private:
 	flags::puppet_mode_type get_puppet_mode(thing& thing);
 	standing_material get_standing_material(thing& thing);
 
-	void play_running_animation(int thing_id, thing& thing, double speed);
+	void set_walk_animation(thing& thing, flags::puppet_submode_type type, float speed);
+	bool is_walk_animation_mode(thing& thing, flags::puppet_submode_type type);
+	void set_walk_animation_speed(thing& thing, float speed);
+	void play_falling_animation(int thing_id, thing& thing);
 	void play_standing_animation(int thing_id, thing& thing);
 
 	maybe<physics::contact> run_falling_sweep(int thing_id, thing& thing, double dt);
@@ -49,6 +53,7 @@ public:
 
 	virtual void update(int thing_id, double dt) override;
 	virtual void create_controller_data(int thing_id) override;
+	virtual void remove_controller_data(int thing_id) override;
 	virtual void handle_animation_marker(int thing_id, flags::key_marker_type marker) override;
 
 	void play_left_run_footstep(int thing_id);

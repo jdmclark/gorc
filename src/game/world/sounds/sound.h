@@ -60,6 +60,10 @@ public:
 		return expired;
 	}
 
+	inline bool is_attached_to_thing(int thing_id) {
+		return update_position && thing == thing_id;
+	}
+
 	~sound();
 };
 

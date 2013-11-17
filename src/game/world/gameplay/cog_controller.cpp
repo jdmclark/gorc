@@ -18,7 +18,3 @@ void gorc::game::world::gameplay::cog_controller::update(int thing_id, double dt
 //		thing.prev_attached_thing_position = attached_thing.position;
 //	}
 }
-
-void gorc::game::world::gameplay::cog_controller::create_controller_data(int thing_id) {
-	return;
-}

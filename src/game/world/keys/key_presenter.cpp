@@ -70,9 +70,24 @@ void gorc::game::world::keys::key_presenter::update(double dt) {
 		}
 	}
 
-	// Reset mix priorities.
+	// Reset mix priorities and decrement prev-blend
 	for(auto& mix : model->mixes) {
 		mix.body.priority = mix.high.priority = mix.low.priority = std::numeric_limits<int>::lowest();
+
+		mix.high.prev_frame_blend -= dt * 2.0;
+		if(mix.high.prev_frame_blend <= 0.0) {
+			mix.high.prev_animation = nullptr;
+		}
+
+		mix.low.prev_frame_blend -= dt * 2.0;
+		if(mix.low.prev_frame_blend <= 0.0) {
+			mix.low.prev_animation = nullptr;
+		}
+
+		mix.body.prev_frame_blend -= dt * 2.0;
+		if(mix.body.prev_frame_blend <= 0.0) {
+			mix.body.prev_animation = nullptr;
+		}
 	}
 
 	// update animation frames
@@ -118,23 +133,88 @@ void gorc::game::world::keys::key_presenter::update(double dt) {
 
 		// Apply mix
 		if(key.high_priority >= mix.high.priority) {
+			if(mix.high.animation != key.animation) {
+				mix.high.prev_animation = mix.high.animation;
+				mix.high.prev_frame = mix.high.frame;
+				mix.high.prev_frame_blend = 0.5;
+			}
+
 			mix.high.animation = key.animation;
 			mix.high.frame = key.current_frame;
 			mix.high.priority = key.high_priority;
 		}
 
 		if(key.low_priority >= mix.low.priority) {
+			if(mix.low.animation != key.animation) {
+				mix.low.prev_animation = mix.low.animation;
+				mix.low.prev_frame = mix.low.frame;
+				mix.low.prev_frame_blend = 0.5;
+			}
+
 			mix.low.animation = key.animation;
 			mix.low.frame = key.current_frame;
 			mix.low.priority = key.low_priority;
 		}
 
 		if(key.body_priority >= mix.body.priority) {
+			if(mix.body.animation != key.animation) {
+				mix.body.prev_animation = mix.body.animation;
+				mix.body.prev_frame = mix.body.frame;
+				mix.body.prev_frame_blend = 0.5;
+			}
+
 			mix.body.animation = key.animation;
 			mix.body.frame = key.current_frame;
 			mix.body.priority = key.body_priority;
 		}
 	}
+}
+
+void gorc::game::world::keys::key_presenter::expunge_thing_animations(int thing_id) {
+	auto& thing = levelModel->things[thing_id];
+	if(thing.attached_key_mix >= 0) {
+		for(auto& key : model->keys) {
+			if(key.mix_id == thing.attached_key_mix) {
+				stop_key(thing_id, key.get_id(), 0.0f);
+			}
+		}
+
+		// Remove key mix
+		model->mixes.erase(thing.attached_key_mix);
+	}
+}
+
+std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_animation_frame(const content::assets::animation& anim,
+		int node_id, double frame) const {
+	if(anim.nodes.size() <= node_id || anim.nodes[node_id].frames.empty()) {
+		// Abort if there are no frames to interpolate.
+		return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
+	}
+
+	const auto& anim_node = anim.nodes[node_id];
+
+	int actual_frame = static_cast<int>(std::floor(frame));
+
+	// Convert anim_time into a frame number
+	auto comp_fn = [](int tgt_fr, const content::assets::animation_frame& fr) {
+		return fr.frame > tgt_fr;
+	};
+
+	// Find frame immediately after desired frame, then back off.
+	auto it = std::upper_bound(anim_node.frames.begin(), anim_node.frames.end(), actual_frame, comp_fn);
+	if(it == anim_node.frames.begin()) {
+		it = anim_node.frames.end() - 1;
+	}
+	else {
+		--it;
+	}
+
+	float remaining_frame_time = static_cast<float>(frame) - static_cast<float>(it->frame);
+
+	auto position = it->position + remaining_frame_time * it->delta_position;
+	auto orientation = it->orientation + remaining_frame_time * it->delta_orientation;
+
+	return std::make_tuple(position, orientation);
 }
 
 std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_node_frame(int mix_id,
@@ -153,36 +233,32 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
 		mix_level = &mix.body;
 	}
 
-	if(!mix_level->animation || mix_level->animation->nodes.size() <= node_id ||
-			mix_level->animation->nodes[node_id].frames.empty()) {
+	if(!mix_level->animation) {
 		// Abort if there are no frames to interpolate.
 		return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
 	}
 
-	const auto& anim_node = mix_level->animation->nodes[node_id];
+	auto frame = get_animation_frame(*mix_level->animation, node_id, mix_level->frame);
 
-	int actual_frame = static_cast<int>(std::floor(mix_level->frame));
-
-	// Convert anim_time into a frame number
-	auto comp_fn = [](int tgt_fr, const content::assets::animation_frame& fr) {
-		return fr.frame > tgt_fr;
-	};
-
-	// Find frame immediately after desired frame, then back off.
-	auto it = std::upper_bound(anim_node.frames.begin(), anim_node.frames.end(), actual_frame, comp_fn);
-	if(it == anim_node.frames.begin()) {
-		it = anim_node.frames.end() - 1;
+	// Mix in prev frame.
+	if(mix_level->prev_animation) {
+		auto alpha = static_cast<float>(mix_level->prev_frame_blend);
+		auto mix_frame = get_animation_frame(*mix_level->prev_animation, node_id, mix_level->prev_frame);
+		auto fr_orient = get<1>(frame);
+		auto mx_orient = get<1>(mix_frame);
+		auto combined_orient = make_vector(clerp(get<0>(fr_orient), get<0>(mx_orient), alpha),
+				clerp(get<1>(fr_orient), get<1>(mx_orient), alpha),
+				clerp(get<2>(fr_orient), get<2>(mx_orient), alpha));
+		return std::make_tuple(lerp(get<0>(frame), get<0>(mix_frame), alpha), combined_orient);
 	}
 	else {
-		--it;
+		return frame;
 	}
+}
 
-	float remaining_frame_time = static_cast<float>(mix_level->frame) - static_cast<float>(it->frame);
-
-	auto position = it->position + remaining_frame_time * it->delta_position;
-	auto orientation = it->orientation + remaining_frame_time * it->delta_orientation;
-
-	return std::make_tuple(position, orientation);
+float gorc::game::world::keys::key_presenter::get_key_len(int key_id) {
+	auto& key = contentmanager.get_asset<content::assets::animation>(key_id);
+	return static_cast<float>(key.frame_count) / static_cast<float>(key.framerate);
 }
 
 int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
@@ -205,14 +281,19 @@ int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
 	return play_mix_key(GetThingMixId(thing_id), key, priority, flags);
 }
 
-int gorc::game::world::keys::key_presenter::play_puppet_key(int thing_id,
-		flags::puppet_mode_type major_mode, flags::puppet_submode_type minor_mode) {
-	int mix_id = GetThingMixId(thing_id);
+int gorc::game::world::keys::key_presenter::play_mode(int thing_id, flags::puppet_submode_type minor_mode) {
 	auto& thing = levelModel->things[thing_id];
+	if(!thing.pup) {
+		return -1;
+	}
 
+	const auto& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(minor_mode);
+	if(!submode.anim) {
+		return -1;
+	}
+
+	int mix_id = GetThingMixId(thing_id);
 	auto& state = model->keys.emplace();
-
-	const content::assets::puppet_submode& submode = thing.pup->get_mode(major_mode).get_submode(minor_mode);
 
 	state.animation = submode.anim;
 	state.high_priority = submode.hi_priority;
@@ -244,8 +325,16 @@ int gorc::game::world::keys::key_presenter::create_key_mix() {
 }
 
 void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+	verbTable.add_verb<float, 1>("getkeylen", [&components](int key_id) {
+		return components.current_level_presenter->key_presenter.get_key_len(key_id);
+	});
+
 	verbTable.add_verb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
 		return components.current_level_presenter->key_presenter.play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
+	});
+
+	verbTable.add_verb<int, 2>("playmode", [&components](int thing_id, int submode) {
+		return components.current_level_presenter->key_presenter.play_mode(thing_id, static_cast<flags::puppet_submode_type>(submode));
 	});
 
 	verbTable.add_verb<void, 3>("stopkey", [&components](int thing, int key, float delay) {

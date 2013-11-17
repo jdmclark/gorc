@@ -109,6 +109,10 @@ void gorc::game::action::action_presenter::on_keyboard_key_down(const time& time
 		app.current_level_presenter->jump();
 		break;
 
+	case sf::Keyboard::LControl:
+		app.current_level_presenter->crouch(true);
+		break;
+
 	default:
 		break;
 	}
@@ -118,6 +122,10 @@ void gorc::game::action::action_presenter::on_keyboard_key_up(const time& time, 
 	switch(k) {
 	case sf::Keyboard::F2:
 		app.current_level_presenter->inventory_presenter.on_item_hotkey_released(app.current_level_presenter->get_local_player_thing(), 42);
+		break;
+
+	case sf::Keyboard::LControl:
+		app.current_level_presenter->crouch(false);
 		break;
 
 	default:
