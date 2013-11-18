@@ -473,7 +473,9 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 	return make_zero_vector<3, float>();
 }
 
-void physics_presenter::update(double dt) {
+void physics_presenter::update(const time& time) {
+	double dt = time;
+
 	physics_touched_thing_pairs.clear();
 	physics_touched_surface_pairs.clear();
 

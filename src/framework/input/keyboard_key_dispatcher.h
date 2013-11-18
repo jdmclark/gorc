@@ -17,7 +17,7 @@ public:
 	double pressed_time = 0.0;
 };
 
-template <typename ViewT> class keyboard_key_dispatcher {
+template <typename ViewT, bool do_repeat = true> class keyboard_key_dispatcher {
 private:
 	ViewT& view;
 	std::array<gui_input_keyboard_key_state, sf::Keyboard::KeyCount> key_state;
@@ -46,7 +46,7 @@ public:
 				cur_state.pressed = true;
 				cur_state.pressed_time = 0.0;
 			}
-			else if(cur_state.pressed && is_now_pressed) {
+			else if(cur_state.pressed && is_now_pressed && do_repeat) {
 				// Handle keyboard repeat
 				cur_state.pressed_time += time;
 

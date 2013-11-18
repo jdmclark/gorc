@@ -5,6 +5,7 @@
 #include "content/flags/sound_subclass_type.h"
 #include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
+#include "framework/utility/time.h"
 
 namespace gorc {
 namespace content {
@@ -38,7 +39,7 @@ public:
 	sound_presenter(content::manager&);
 
 	void start(level_model& levelModel, sound_model& soundModel);
-	void update(double dt);
+	void update(const time& time);
 
 	void expunge_thing_sounds(int thing_id);
 

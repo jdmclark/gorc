@@ -3,6 +3,7 @@
 #include "game/flags/message_type.h"
 #include "script_model.h"
 #include "cog/vm/virtual_machine.h"
+#include "framework/utility/time.h"
 
 namespace gorc {
 namespace content {
@@ -44,7 +45,7 @@ public:
 	script_presenter(application& components);
 
 	void start(level_model& levelModel, script_model& scriptModel);
-	void update(double dt);
+	void update(const time& time);
 
 	void run_waiting_cogs();
 

@@ -58,7 +58,9 @@ int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {
 	return thing.attached_key_mix;
 }
 
-void gorc::game::world::keys::key_presenter::update(double dt) {
+void gorc::game::world::keys::key_presenter::update(const time& time) {
+	double dt = time;
+
 	// Expunge expired keys.
 	for(auto& key : model->keys) {
 		if(key.expiration_time > 0.0f) {

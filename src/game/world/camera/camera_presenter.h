@@ -44,7 +44,7 @@ public:
 	camera_presenter(level_presenter& presenter);
 
 	void start(level_model& levelmodel, camera_model& model);
-	void update(double dt);
+	void update(const time& time);
 
 	void cycle_camera();
 	int get_camera_state_flags();

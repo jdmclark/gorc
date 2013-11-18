@@ -125,7 +125,7 @@ public:
 	physics_presenter(level_presenter& presenter);
 
 	void start(level_model& model);
-	void update(double dt);
+	void update(const time& time);
 
 	maybe<contact> thing_segment_query(int thing_id, const vector<3>& direction, const maybe<contact>& previous_contact = maybe<contact>());
 

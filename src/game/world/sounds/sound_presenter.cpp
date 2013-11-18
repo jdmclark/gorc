@@ -15,7 +15,7 @@ void gorc::game::world::sounds::sound_presenter::start(level_model& levelModel, 
 	this->model = &soundModel;
 }
 
-void gorc::game::world::sounds::sound_presenter::update(double dt) {
+void gorc::game::world::sounds::sound_presenter::update(const time& time) {
 	// update listener
 	const auto& cam = levelModel->camera_model.current_computed_state;
 	auto camera_position = cam.position;
@@ -28,7 +28,7 @@ void gorc::game::world::sounds::sound_presenter::update(double dt) {
 
 	// Update sounds
 	for(auto& sound : model->sounds) {
-		sound.update(dt, *levelModel);
+		sound.update(time, *levelModel);
 	}
 
 	for(auto& sound : model->sounds) {
@@ -37,7 +37,7 @@ void gorc::game::world::sounds::sound_presenter::update(double dt) {
 		}
 	}
 
-	model->ambient_music.update(dt);
+	model->ambient_music.update(time);
 }
 
 void gorc::game::world::sounds::sound_presenter::expunge_thing_sounds(int thing_id) {
@@ -49,7 +49,7 @@ void gorc::game::world::sounds::sound_presenter::expunge_thing_sounds(int thing_
 		}
 	}
 
-	update(0.0);
+	update(time(0, 0.0));
 }
 
 void gorc::game::world::sounds::sound_presenter::set_ambient_sound(content::assets::sound const* sound, float volume) {

@@ -16,9 +16,9 @@ void animation_presenter::start(level_model& levelModel, animation_model& model)
 	this->model = &model;
 }
 
-void animation_presenter::update(double dt) {
+void animation_presenter::update(const time& time) {
 	for(auto& entity : model->animations) {
-			entity->update(dt);
+			entity->update(time);
 	}
 
 	for(auto& anim : model->animations) {

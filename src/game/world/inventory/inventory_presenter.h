@@ -1,5 +1,7 @@
 #pragma once
 
+#include "framework/utility/time.h"
+
 namespace gorc {
 namespace cog {
 namespace verbs {
@@ -28,7 +30,7 @@ public:
 	inventory_presenter(level_presenter& presenter);
 
 	void start(level_model& levelModel, inventory_model& model);
-	void update(double dt);
+	void update(const time& time);
 
 	void change_inv(int player, int bin, int amount);
 	int get_inv_cog(int player, int bin);

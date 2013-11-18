@@ -34,7 +34,7 @@ private:
 
 public:
 	void start(level_model& levelModel, animation_model& model);
-	void update(double dt);
+	void update(const time& time);
 
 	int surface_anim(int surface, float rate, flag_set<flags::AnimFlag> flags);
 	int get_surface_anim(int surface);

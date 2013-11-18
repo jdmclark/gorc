@@ -36,7 +36,7 @@ void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
 	components.views.set_layer(view_layer::world, *components.level_view);
 
 	// Update all components
-	update(0.0);
+	update(time(0, 0.0));
 
 	// Send startup and loading messages
 	script_presenter.send_message_to_all(cog::message_id::loading, -1, -1, flags::message_type::nothing);
@@ -97,14 +97,16 @@ void gorc::game::world::level_presenter::initialize_world() {
 	key_presenter.play_mix_key(model->camera_model.pov_key_mix_id, contentmanager->load_id<content::assets::animation>("bryvmnt.key"), 0, flag_set<flags::key_flag>(0x14));
 }
 
-void gorc::game::world::level_presenter::update(double dt) {
-	physics_presenter.update(dt);
-	camera_presenter.update(dt);
-	animation_presenter.update(dt);
-	script_presenter.update(dt);
-	sound_presenter.update(dt);
-	key_presenter.update(dt);
-	inventory_presenter.update(dt);
+void gorc::game::world::level_presenter::update(const time& time) {
+	double dt = time;
+
+	physics_presenter.update(time);
+	camera_presenter.update(time);
+	animation_presenter.update(time);
+	script_presenter.update(time);
+	sound_presenter.update(time);
+	key_presenter.update(time);
+	inventory_presenter.update(time);
 
 	// update things
 	for(auto& thing : model->things) {

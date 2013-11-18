@@ -31,6 +31,10 @@ public:
 
 	content::assets::model const* pov_model = nullptr;
 	int pov_key_mix_id = -1;
+
+	vector<3> waggle = make_zero_vector<3, float>();
+	float waggle_speed = 0.0f;
+	double waggle_time = 0.0;
 };
 
 }

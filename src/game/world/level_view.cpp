@@ -393,9 +393,9 @@ void gorc::game::world::level_view::draw_pov_model() {
 
 			mesh_node_visitor v(lit_sector_color, *this, nullptr, nullptr);
 			auto pov_orient = make_vector(thing.head_pitch, get<1>(thing.orient), get<2>(thing.orient));
+			auto pov_model_offset = cam.pov_model_offset + pov_orient;
 			currentPresenter->key_presenter.visit_mesh_hierarchy(v, *pov_model, thing.position,
-					//+ orient_direction_vector(pov_model->insert_offset, pov_orient),
-					make_vector(0.0f, 0.0f, 0.0f) + pov_orient, currentModel->camera_model.pov_key_mix_id);
+					pov_model_offset, currentModel->camera_model.pov_key_mix_id);
 		}
 	}
 }

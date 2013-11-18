@@ -171,9 +171,8 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
 	// Test for collision between legs and ground using multiple tests
 	auto leg_height = thing.model_3d->insert_offset;
 
-	if(dot(-leg_height, thing.vel) < 0.0f) {
-		// Thing is moving away from feet. Don't check.
-		return maybe<physics::contact>();
+	if(thing.physics_flags & flags::physics_flag::is_crouching) {
+		leg_height = normalize(leg_height) * thing.size;
 	}
 
 	maybe<physics::contact> contact;

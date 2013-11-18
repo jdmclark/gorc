@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/place/presenter.h"
+#include "framework/utility/time.h"
 #include "game/application.h"
 #include "level_place.h"
 #include "cog/vm/virtual_machine.h"
@@ -75,7 +76,7 @@ public:
 	level_presenter(application& components, const level_place& place);
 
 	void start(event::event_bus& eventBus);
-	void update(double dt);
+	void update(const time& time);
 
 	void translate_camera(const vector<3>& amt);
 	void yaw_camera(double amt);

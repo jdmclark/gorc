@@ -14,7 +14,9 @@ void gorc::game::world::scripts::script_presenter::start(level_model& levelModel
 	model = &scriptModel;
 }
 
-void gorc::game::world::scripts::script_presenter::update(double dt) {
+void gorc::game::world::scripts::script_presenter::update(const time& time) {
+	double dt = time;
+
 	// update cogs
 	for(unsigned int i = 0; i < model->cogs.size(); ++i) {
 		auto& cog = model->cogs[i];

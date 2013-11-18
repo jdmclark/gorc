@@ -17,7 +17,7 @@ private:
 	bool window_has_focus = true;
 	application& app;
 	input::passthrough_input_adapter<action_presenter> input_adapter;
-	input::keyboard_key_dispatcher<action_presenter> key_dispatcher;
+	input::keyboard_key_dispatcher<action_presenter, false> key_dispatcher;
 	input::mouse_click_dispatcher<action_presenter> click_dispatcher;
 
 public:

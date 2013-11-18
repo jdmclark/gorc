@@ -16,8 +16,8 @@ void gorc::game::world::inventory::inventory_presenter::start(level_model& level
 	return;
 }
 
-void gorc::game::world::inventory::inventory_presenter::update(double dt) {
-	model->mod_all_cooldowns(-dt);
+void gorc::game::world::inventory::inventory_presenter::update(const time& time) {
+	model->mod_all_cooldowns(-time);
 }
 
 void gorc::game::world::inventory::inventory_presenter::change_inv(int player, int bin, int amount) {

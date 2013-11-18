@@ -33,7 +33,7 @@ void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel,
 	model.pov_key_mix_id = presenter.key_presenter.create_key_mix();
 }
 
-void gorc::game::world::camera::camera_presenter::update(double dt) {
+void gorc::game::world::camera::camera_presenter::update(const time& time) {
 	for(auto& camera_state : model->cameras) {
 		camera_state.angle_offset = camera_state.angle_offset - clamp_length(camera_state.angle_offset, 0.0f, camera_state.angle_reset_speed);
 		camera_state.pos_offset = camera_state.pos_offset - clamp_length(camera_state.pos_offset, 0.0f, camera_state.pos_reset_speed);
@@ -75,6 +75,17 @@ void gorc::game::world::camera::camera_presenter::update(double dt) {
 	}
 
 	cam.draw_pov_model = selected_camera.draw_pov_model;
+
+	// Calculate pov model waggle.
+	const auto& player_thing = levelmodel->things[presenter.get_local_player_thing()];
+	auto player_speed = length(make_vector(get<0>(player_thing.vel), get<1>(player_thing.vel))) / player_thing.max_vel;
+	float actual_waggle_speed = player_speed * model->waggle_speed * time * (1.0f / 60.0f);
+	model->waggle_time += actual_waggle_speed;
+	float waggle_up = -cos(model->waggle_time * 2.0);
+	float waggle_left = sin(model->waggle_time);
+	auto new_offset = player_speed * make_vector(waggle_up * get<0>(model->waggle) * (9.0f / 16.0f),
+			waggle_left * get<1>(model->waggle) * (16.0f / 9.0f), waggle_up * get<2>(model->waggle));
+	cam.pov_model_offset = lerp(cam.pov_model_offset, new_offset, 0.1f);
 }
 
 void gorc::game::world::camera::camera_presenter::cycle_camera() {
@@ -123,7 +134,8 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int player, i
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, const vector<3>& move_vec, float speed) {
-	// TODO
+	model->waggle = move_vec;
+	model->waggle_speed = speed;
 }
 
 int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags) {

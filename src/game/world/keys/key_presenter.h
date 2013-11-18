@@ -52,7 +52,7 @@ public:
 	key_presenter(content::manager& contentmanager);
 
 	void start(level_model& levelModel, key_model& model);
-	void update(double dt);
+	void update(const time& time);
 
 	void expunge_thing_animations(int thing_id);
 
