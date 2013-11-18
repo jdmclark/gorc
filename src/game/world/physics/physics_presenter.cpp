@@ -276,7 +276,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 	}
 
 	double dt_remaining = dt;
-	double dt_step = 0.125 * static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
+	double dt_step = 0.5 * static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
 
 	int loop_ct = 0;
 
@@ -404,30 +404,70 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 }
 
 void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, double dt) {
-	if(thing.move != flags::move_type::Path || !thing.path_moving || thing.is_blocked) {
+	if(thing.move != flags::move_type::Path || thing.is_blocked) {
 		return;
 	}
 
-	auto target_position_tuple = thing.frames[thing.next_frame];
-	vector<3> targetPosition = std::get<0>(target_position_tuple);
-	vector<3> targetOrientation = std::get<1>(target_position_tuple);
+	if(thing.path_moving) {
+		auto target_position_tuple = thing.frames[thing.next_frame];
+		vector<3> targetPosition = std::get<0>(target_position_tuple);
+		vector<3> targetOrientation = std::get<1>(target_position_tuple);
 
-	vector<3> currentPosition = thing.position;
-	vector<3> currentOrientation = thing.orient;
+		vector<3> currentPosition = thing.position;
+		vector<3> currentOrientation = thing.orient;
 
-	// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
-	// Use a magic multiple to correct it.
-	float dist_len = length(targetPosition - currentPosition);
-	float alpha = rate_factor * dt * thing.path_move_speed / dist_len;
-	if(alpha >= 1.0f || dist_len == 0.0f) {
-		presenter.adjust_thing_pos(thing_id, targetPosition);
-		thing.orient = targetOrientation;
+		// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
+		// Use a magic multiple to correct it.
+		float dist_len = length(targetPosition - currentPosition);
+		float alpha = rate_factor * dt * thing.path_move_speed / dist_len;
+		if(alpha >= 1.0f || dist_len == 0.0f) {
+			presenter.adjust_thing_pos(thing_id, targetPosition);
+			thing.orient = targetOrientation;
 
-		// Arrived at next frame. Advance to next.
-		thing.current_frame = thing.next_frame;
-		if(thing.current_frame == thing.goal_frame) {
-			thing.path_moving = false;
-			thing.path_move_speed = 0.0f;
+			// Arrived at next frame. Advance to next.
+			thing.current_frame = thing.next_frame;
+			if(thing.current_frame == thing.goal_frame) {
+				thing.path_moving = false;
+				thing.path_move_speed = 0.0f;
+				presenter.sound_presenter.stop_foley_loop(thing_id);
+				presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
+
+				// Dispatch cog messages and resume cogs which are waiting for stop.
+				presenter.script_presenter.send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
+				presenter.script_presenter.resume_wait_for_stop(thing_id);
+			}
+			else if(thing.current_frame < thing.goal_frame) {
+				thing.next_frame = thing.current_frame + 1;
+			}
+			else {
+				thing.next_frame = thing.current_frame - 1;
+			}
+		}
+		else {
+			presenter.adjust_thing_pos(thing_id, lerp(thing.position, targetPosition, alpha));
+			thing.orient = lerp(thing.orient, targetOrientation, alpha);
+		}
+	}
+	else if(thing.rotatepivot_moving) {
+		float alpha = dt / thing.path_move_speed;
+
+		if(thing.path_move_time >= thing.path_move_speed) {
+
+			thing.rotatepivot_moving = false;
+
+			vector<3> frame_pos, frame_orient;
+			std::tie(frame_pos, frame_orient) = thing.frames[thing.goal_frame];
+
+			if(thing.rotatepivot_longway) {
+				frame_orient = -frame_orient;
+			}
+
+			auto angle = frame_orient * (thing.path_move_speed - thing.path_move_time + dt) / thing.path_move_speed;
+			auto new_pos = orient_direction_vector(thing.position - frame_pos, angle) + frame_pos;
+
+			thing.orient += angle;
+			presenter.adjust_thing_pos(thing_id, new_pos);
+
 			presenter.sound_presenter.stop_foley_loop(thing_id);
 			presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
 
@@ -435,16 +475,23 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 			presenter.script_presenter.send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
 			presenter.script_presenter.resume_wait_for_stop(thing_id);
 		}
-		else if(thing.current_frame < thing.goal_frame) {
-			thing.next_frame = thing.current_frame + 1;
-		}
 		else {
-			thing.next_frame = thing.current_frame - 1;
+			vector<3> frame_pos, frame_orient;
+			std::tie(frame_pos, frame_orient) = thing.frames[thing.goal_frame];
+
+			if(thing.rotatepivot_longway) {
+				frame_orient = -frame_orient;
+			}
+
+			auto angle = frame_orient * alpha;
+
+			auto new_pos = orient_direction_vector(thing.position - frame_pos, angle) + frame_pos;
+
+			thing.orient += angle;
+			presenter.adjust_thing_pos(thing_id, new_pos);
+
+			thing.path_move_time += dt;
 		}
-	}
-	else {
-		presenter.adjust_thing_pos(thing_id, lerp(thing.position, targetPosition, alpha));
-		thing.orient = lerp(thing.orient, targetOrientation, alpha);
 	}
 }
 
@@ -469,9 +516,9 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 
 		// Rotate rel_point into object space
 		auto rel_point_rotated = (
-				make_rotation_matrix(get<2>(-currentOrientation), make_vector(0.0f, 1.0f, 0.0f))
+				make_rotation_matrix(get<1>(-currentOrientation), make_vector(0.0f, 0.0f, 1.0f))
 				* make_rotation_matrix(get<0>(-currentOrientation), make_vector(1.0f, 0.0f, 0.0f))
-				* make_rotation_matrix(get<1>(-currentOrientation), make_vector(0.0f, 0.0f, 1.0f))
+				* make_rotation_matrix(get<2>(-currentOrientation), make_vector(0.0f, 1.0f, 0.0f))
 				* make_translation_matrix(-currentPosition)).transform(rel_point);
 
 		auto rel_v = (make_translation_matrix(delta_position)
@@ -481,6 +528,21 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 			).transform(rel_point_rotated) - rel_point;
 		return rel_v;
 	}
+	else if(thing.move == flags::move_type::Path && thing.rotatepivot_moving && !thing.is_blocked) {
+		vector<3> frame_pos, frame_orient;
+		std::tie(frame_pos, frame_orient) = thing.frames[thing.goal_frame];
+		auto angle = frame_orient / thing.path_move_speed;
+
+		auto obj_space_rel_point = rel_point - thing.position;
+		obj_space_rel_point = orient_direction_vector(obj_space_rel_point, angle);
+
+		auto pivot_space_rel_point = (obj_space_rel_point + thing.position) - frame_pos;
+		pivot_space_rel_point = orient_direction_vector(pivot_space_rel_point, angle);
+
+		auto new_rel_point = pivot_space_rel_point + frame_pos;
+		return new_rel_point - rel_point;
+	}
+
 
 	return make_zero_vector<3, float>();
 }
@@ -510,11 +572,11 @@ void physics_presenter::update(const time& time) {
 
 	// - Send blocked message to all blocked things; else, update path.
 	for(auto& thing : model->things) {
-		if(thing.is_blocked && thing.path_moving) {
+		if(thing.is_blocked && (thing.path_moving || thing.rotatepivot_moving)) {
 			presenter.script_presenter.send_message_to_linked(cog::message_id::blocked, thing.get_id(), flags::message_type::thing,
 					-1, flags::message_type::nothing);
 		}
-		else if(thing.path_moving) {
+		else if(thing.path_moving || thing.rotatepivot_moving) {
 			update_thing_path_moving(thing.get_id(), thing, dt);
 		}
 		else if(thing.attach_flags & flags::attach_flag::AttachedToThing) {

@@ -266,62 +266,8 @@ E			[Ee][+-]?{D}+
 
 %%
 
-int parse_hex_int(char* str)
-{
-	if(str[0] == '\0' || str[1] == '\0') return 0;
-
-	int i = 0;
-	while(str[i] != '\0' && isspace(str[i]))
-	{
-		++i;
-	}
-
-	bool is_negative = false;
-	if(str[i] == '+')
-	{
-		++i;
-	}
-	else if(str[i] == '-')
-	{
-		is_negative = true;
-		++i;
-	}
-
-	if(str[i] != '0')
-	{
-		return 0;
-	}
-
-	++i;
-
-	if(str[i] != 'x' && str[i] != 'X')
-	{
-		return 0;
-	}
-
-	++i;
-
-	int retval = 0;
-	while(str[i] != '\0')
-	{
-		retval <<= 4;
-		retval += str[i] & 0xF;
-		if(str[i] & 0x40)
-		{
-			retval += 10;
-		}
-
-		++i;
-	}
-
-	if(is_negative)
-	{
-		return -retval;
-	}
-	else
-	{
-		return retval;
-	}
+int parse_hex_int(char* str) {
+	return static_cast<int>(strtol(str, nullptr, 0));
 }
 
 void gorc::cog::grammar::instance::init_scanner()

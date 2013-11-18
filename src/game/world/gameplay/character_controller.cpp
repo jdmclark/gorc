@@ -285,8 +285,19 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 			play_standing_animation(thing_id, thing);
 		}
 	},
-	[&thing] {
+	[&thing, thing_id, this] {
 		// Player is falling again.
+		if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
+			presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
+					thing.attached_thing, flags::message_type::thing,
+					thing_id, flags::message_type::thing);
+		}
+		else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
+			presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
+					thing.attached_surface, flags::message_type::surface,
+					thing_id, flags::message_type::thing);
+		}
+
 		thing.attach_flags = flag_set<flags::attach_flag>();
 	});
 }
@@ -297,6 +308,10 @@ bool gorc::game::world::gameplay::character_controller::step_on_surface(int thin
 	if(surface.flags & flags::surface_flag::Floor) {
 		thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToWorldSurface };
 		thing.attached_surface = surf_id;
+
+		presenter.script_presenter.send_message_to_linked(cog::message_id::entered,
+				surf_id, flags::message_type::surface,
+				thing_id, flags::message_type::thing);
 		return true;
 	}
 	else {
@@ -315,6 +330,10 @@ bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_
 		thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToThingFace };
 		thing.attached_thing = land_thing_id;
 		thing.prev_attached_thing_position = presenter.model->things[land_thing_id].position;
+
+		presenter.script_presenter.send_message_to_linked(cog::message_id::entered,
+				land_thing_id, flags::message_type::thing,
+				thing_id, flags::message_type::thing);
 		return true;
 	}
 	else {

@@ -35,6 +35,12 @@ template <typename F> F clerp(F a, F b, F alpha) {
 	}
 }
 
+template <typename F> vector<3, F> clerp(const vector<3, F>& a, const vector<3, F>& b, F alpha) {
+	return make_vector(clerp(get<0>(a), get<0>(b), alpha),
+			clerp(get<1>(a), get<1>(b), alpha),
+			clerp(get<2>(a), get<2>(b), alpha));
+}
+
 template <typename T> T clamp(T value, T min, T max) {
 	return std::max(min, std::min(value, max));
 }

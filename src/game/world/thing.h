@@ -26,10 +26,13 @@ public:
 	gameplay::thing_controller* controller;
 	physics::thing_object_data object_data;
 
+	bool rotatepivot_moving = false;
 	bool path_moving = false;
+	bool rotatepivot_longway = false;
 	int current_frame = 0;
 	int next_frame = 0;
 	int goal_frame = 0;
+	float path_move_time = 0.0f;
 	float path_move_speed = 0.0f;
 	bool is_blocked = false;
 

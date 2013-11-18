@@ -84,7 +84,7 @@ const std::unordered_map<std::string, flags::sound_subclass_type> SubclassMap {
 	{ "hitmetal", flags::sound_subclass_type::HitMetal },
 	{ "hitearth", flags::sound_subclass_type::HitEarth },
 
-	{ "deflected", flags::sound_subclass_type::Deflected },
+	{ "deflected", flags::sound_subclass_type::deflected },
 
 	{ "scrapehard", flags::sound_subclass_type::ScrapeHard },
 	{ "scrapemetal", flags::sound_subclass_type::ScrapeMetal },

@@ -652,7 +652,7 @@ Case(jk_09_pipedoor_c) {
 Case(jk_10_powercore) {
 	VfsSingleton::SetEpisode("The Force Within");
 	ParseFile("cog/10_powercore.cog");
-	AssertResult(2, 0);
+	AssertResult(0, 0);
 }
 
 Case(jk_12_endlevel) {
@@ -742,13 +742,13 @@ Case(jk_c1_ctfcallback) {
 Case(jk_c2_dualforcefield) {
 	VfsSingleton::SetEpisode("Jedi Capture the Flag");
 	ParseFile("cog/c2_dualforcefield.cog");
-	AssertResult(0, 1);
+	AssertResult(0, 0);
 }
 
 Case(jk_c2_simpleforcefield) {
 	VfsSingleton::SetEpisode("Jedi Capture the Flag");
 	ParseFile("cog/c2_simpleforcefield.cog");
-	AssertResult(0, 2);
+	AssertResult(0, 1);
 }
 
 Case(jk_c3_fanspuzzle) {

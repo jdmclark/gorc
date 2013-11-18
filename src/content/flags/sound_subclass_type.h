@@ -74,7 +74,7 @@ enum class sound_subclass_type {
 	HitMetal,
 	HitEarth,
 
-	Deflected,
+	deflected,
 
 	ScrapeHard,
 	ScrapeMetal,

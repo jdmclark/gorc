@@ -46,12 +46,13 @@ public:
 	place::place_controller<PresenterT, MapperT> place_controller;
 
 	application(const std::string& title, const MapperT& place_mapper, diagnostics::report& report, const content::filesystem& filesystem,
-			const box<2, int>& window_size = make_box(make_vector(0, 0), make_vector(1280, 720)),
+			const box<2, int>& window_size = make_box(make_vector(0, 0), make_vector(1280, 720)), bool windowed = true,
 			double gameplay_timestep = (1.0 / 60.0))
 		: report(report), filesystem(filesystem), master_content_manager(report, filesystem),
 		  gameplay_timestep_ms(static_cast<uint32_t>(gameplay_timestep * 1000.0)),
 		  gameplay_timestep(gameplay_timestep),
-		  window(sf::VideoMode(get_size<0>(window_size), get_size<1>(window_size), 32), title, sf::Style::Default, sf::ContextSettings(24, 8, 0)),
+		  window(sf::VideoMode(get_size<0>(window_size), get_size<1>(window_size), 32), title, windowed ? sf::Style::Default : sf::Style::Fullscreen,
+				  sf::ContextSettings(24, 8, 0)),
 		  views(window), place_controller(event_bus, place_mapper) {
 		window.setActive(true);
 		window.setVerticalSyncEnabled(true);

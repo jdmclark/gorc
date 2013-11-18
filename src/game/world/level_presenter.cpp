@@ -154,29 +154,45 @@ void gorc::game::world::level_presenter::update_thing_sector(int thing_id, thing
 	// Fire messages along path.
 	unsigned int first_adjoin = std::get<1>(update_path_sector_scratch.front());
 	if(model->surfaces[first_adjoin].flags & flags::surface_flag::CogLinked) {
-		script_presenter.send_message_to_linked(cog::message_id::crossed, first_adjoin, flags::message_type::surface,
-				static_cast<int>(thing_id), flags::message_type::thing);
+		script_presenter.send_message_to_linked(cog::message_id::crossed,
+				first_adjoin, flags::message_type::surface,
+				thing_id, flags::message_type::thing);
 	}
 
 	for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
+		if(model->sectors[thing.sector].flags & flags::sector_flag::CogLinked) {
+			script_presenter.send_message_to_linked(cog::message_id::exited,
+					thing.sector, flags::message_type::sector,
+					thing_id, flags::message_type::thing);
+		}
+
 		unsigned int sec_id = std::get<0>(update_path_sector_scratch[i]);
 		thing.sector = sec_id;
 		if(model->sectors[sec_id].flags & flags::sector_flag::CogLinked) {
-			script_presenter.send_message_to_linked(cog::message_id::entered, sec_id, flags::message_type::sector,
+			script_presenter.send_message_to_linked(cog::message_id::entered,
+					sec_id, flags::message_type::sector,
 					static_cast<int>(thing_id), flags::message_type::thing);
 		}
 
 		unsigned int surf_id = std::get<1>(update_path_sector_scratch[i]);
 		if(model->surfaces[surf_id].flags & flags::surface_flag::CogLinked) {
-			script_presenter.send_message_to_linked(cog::message_id::crossed, surf_id, flags::message_type::surface,
+			script_presenter.send_message_to_linked(cog::message_id::crossed,
+					surf_id, flags::message_type::surface,
 					static_cast<int>(thing_id), flags::message_type::thing);
 		}
+	}
+
+	if(model->sectors[thing.sector].flags & flags::sector_flag::CogLinked) {
+		script_presenter.send_message_to_linked(cog::message_id::exited,
+				thing.sector, flags::message_type::sector,
+				thing_id, flags::message_type::thing);
 	}
 
 	unsigned int last_sector = std::get<0>(update_path_sector_scratch.back());
 	thing.sector = last_sector;
 	if(model->sectors[last_sector].flags & flags::sector_flag::CogLinked) {
-		script_presenter.send_message_to_linked(cog::message_id::entered, last_sector, flags::message_type::sector,
+		script_presenter.send_message_to_linked(cog::message_id::entered,
+				last_sector, flags::message_type::sector,
 				static_cast<int>(thing_id), flags::message_type::thing);
 	}
 }
@@ -359,6 +375,20 @@ void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, 
 
 	referenced_thing.path_move_speed = speed;
 	referenced_thing.path_moving = true;
+	referenced_thing.rotatepivot_moving = false;
+	sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StartMove);
+	sound_presenter.play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
+}
+
+void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, float time) {
+	thing& referenced_thing = model->things[thing_id];
+	referenced_thing.path_moving = false;
+	referenced_thing.rotatepivot_moving = true;
+	referenced_thing.current_frame = 0;
+	referenced_thing.goal_frame = frame;
+	referenced_thing.path_move_speed = (time == 0.0) ? 1.0f : abs(time);
+	referenced_thing.path_move_time = 0.0f;
+	referenced_thing.rotatepivot_longway = time < 0.0f;
 	sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StartMove);
 	sound_presenter.play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
 }
@@ -384,6 +414,38 @@ int gorc::game::world::level_presenter::get_local_player_thing() {
 }
 
 // sector verbs
+void gorc::game::world::level_presenter::clear_sector_flags(int sector_id, flag_set<flags::sector_flag> flags) {
+	model->sectors[sector_id].flags -= flags;
+}
+
+int gorc::game::world::level_presenter::first_thing_in_sector(int sector_id) {
+	for(auto& thing : model->things) {
+		if(thing.sector == sector_id) {
+			return thing.get_id();
+		}
+	}
+
+	return -1;
+}
+
+int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
+	int sector_id = model->things[thing_id].sector;
+
+	for(auto& thing : model->things) {
+		if(thing.sector == sector_id && thing.get_id() > thing_id) {
+			return thing.get_id();
+		}
+	}
+
+	return -1;
+}
+
+void gorc::game::world::level_presenter::sector_sound(int sector_id, int sound, float volume) {
+	auto& sector = model->sectors[sector_id];
+	sector.ambient_sound = &contentmanager->get_asset<content::assets::sound>(sound);
+	sector.ambient_sound_volume = volume;
+}
+
 void gorc::game::world::level_presenter::set_sector_adjoins(int sector_id, bool state) {
 	content::assets::level_sector& sector = model->sectors[sector_id];
 	for(unsigned int i = 0; i < sector.surface_count; ++i) {
@@ -451,6 +513,10 @@ void gorc::game::world::level_presenter::set_adjoin_flags(int surface, flag_set<
 
 void gorc::game::world::level_presenter::set_face_geo_mode(int surface, flags::geometry_mode geo_mode) {
 	model->surfaces[surface].geometry_mode = geo_mode;
+}
+
+void gorc::game::world::level_presenter::set_face_type(int surface, flag_set<flags::face_flag> face_flags) {
+	model->surfaces[surface].face_type_flags += face_flags;
 }
 
 void gorc::game::world::level_presenter::set_surface_flags(int surface, flag_set<flags::surface_flag> flags) {
@@ -642,6 +708,11 @@ gorc::vector<3> gorc::game::world::level_presenter::get_thing_pos(int thing_id) 
 	return referenced_thing.position;
 }
 
+void gorc::game::world::level_presenter::heal_thing(int thing_id, float amount) {
+	thing& referencedThing = model->things[thing_id];
+	referencedThing.health = clamp(referencedThing.health + amount, 0.0f, referencedThing.max_health);
+}
+
 bool gorc::game::world::level_presenter::is_thing_moving(int thing_id) {
 	// TODO: Temporary hack implementation pending new physics implementation.
 	thing& referencedThing = model->things[thing_id];
@@ -760,6 +831,10 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 		return components.current_level_presenter->move_to_frame(thing, frame, speed);
 	});
 
+	verbTable.add_verb<void, 3>("rotatepivot", [&components](int thing_id, int frame, float time) {
+		components.current_level_presenter->rotate_pivot(thing_id, frame, time);
+	});
+
 	// level verbs
 	verbTable.add_verb<float, 0>("getgametime", [&components] {
 		return components.current_level_presenter->get_game_time();
@@ -816,12 +891,28 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	});
 
 	// sector verbs
+	verbTable.add_verb<void, 2>("clearsectorflags", [&components](int sector_id, int flags) {
+		components.current_level_presenter->clear_sector_flags(sector_id, flag_set<flags::sector_flag>(flags));
+	});
+
+	verbTable.add_verb<int, 1>("firstthinginsector", [&components](int sector_id) {
+		return components.current_level_presenter->first_thing_in_sector(sector_id);
+	});
+
+	verbTable.add_verb<int, 1>("nextthinginsector", [&components](int thing_id) {
+		return components.current_level_presenter->next_thing_in_sector(thing_id);
+	});
+
 	verbTable.add_verb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
 		components.current_level_presenter->set_sector_adjoins(sector_id, state);
 	});
 
 	verbTable.add_verb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
 		components.current_level_presenter->set_sector_light(sector_id, light, delay);
+	});
+
+	verbTable.add_verb<void, 3>("sectorsound", [&components](int sector_id, int sound, float volume) {
+		components.current_level_presenter->sector_sound(sector_id, sound, volume);
 	});
 
 	verbTable.add_verb<void, 3>("sectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
@@ -869,8 +960,16 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 		components.current_level_presenter->set_face_geo_mode(surface, static_cast<flags::geometry_mode>(mode));
 	});
 
+	verbTable.add_verb<void, 2>("setfacetype", [&components](int surface, int flags) {
+		components.current_level_presenter->set_face_type(surface, flag_set<flags::face_flag>(flags));
+	});
+
 	verbTable.add_verb<void, 2>("setsurfaceflags", [&components](int surface, int flags) {
 		components.current_level_presenter->set_surface_flags(surface, flag_set<flags::surface_flag>(flags));
+	});
+
+	verbTable.add_verb<void, 2>("setsurfacemat", [&components](int surface, int mat) {
+		// TODO: Not implemented for now. Architecturally inconvenient.
 	});
 
 	verbTable.add_verb<vector<3>, 1>("surfacecenter", [&components](int surface) {
@@ -917,6 +1016,10 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
 	verbTable.add_verb<vector<3>, 1>("getthingpos", [&components](int thing_id) {
 		return components.current_level_presenter->get_thing_pos(thing_id);
+	});
+
+	verbTable.add_verb<void, 2>("healthing", [&components](int thing_id, float amount) {
+		components.current_level_presenter->heal_thing(thing_id, amount);
 	});
 
 	verbTable.add_verb<bool, 1>("isthingmoving", [&components](int thing_id) {

@@ -6,9 +6,8 @@
 
 gorc::game::application::application(content::vfs::virtual_filesystem& vfs, diagnostics::report& report,
 		const std::string& episode_name, const std::string& level_name)
-	: gorc::application<view_layer, presenter, presenter_mapper>("Gorc", mapper, report, vfs), mapper(*this),
-	  input_episodename(episode_name), input_levelname(level_name),
-	  virtual_filesystem(vfs), compiler(verb_table) {
+	: gorc::application<view_layer, presenter, presenter_mapper>("Gorc", mapper, report, vfs, make_box(make_vector(0, 0), make_vector(1280, 720)), true),
+	  mapper(*this), input_episodename(episode_name), input_levelname(level_name), virtual_filesystem(vfs), compiler(verb_table) {
 	return;
 }
 

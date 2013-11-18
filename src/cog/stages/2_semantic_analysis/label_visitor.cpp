@@ -68,4 +68,6 @@ void label_visitor::visit_labeled_statement(labeled_statement& s) {
 	else {
 		SeenLabels.insert(s.label);
 	}
+
+	s.code->accept(*this);
 }

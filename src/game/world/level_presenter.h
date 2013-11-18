@@ -99,6 +99,7 @@ public:
 	int get_cur_frame(int thing_id);
 	void jump_to_frame(int thing_id, int frame, int sector);
 	void move_to_frame(int thing_id, int frame, float speed);
+	void rotate_pivot(int thing_id, int frame, float time);
 
 	// Level verbs
 	float get_game_time();
@@ -111,6 +112,10 @@ public:
 	int get_local_player_thing();
 
 	// sector verbs
+	void clear_sector_flags(int sector_id, flag_set<flags::sector_flag> flags);
+	int first_thing_in_sector(int sector_id);
+	int next_thing_in_sector(int thing_id);
+	void sector_sound(int sector_id, int sound, float volume);
 	void set_sector_adjoins(int sector_id, bool state);
 	void set_sector_colormap(int sector_id, int colormap);
 	void set_sector_light(int sector_id, float value, float delay);
@@ -122,6 +127,7 @@ public:
 	vector<3> get_surface_center(int surface);
 	void set_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags);
 	void set_face_geo_mode(int surface, flags::geometry_mode mode);
+	void set_face_type(int surface, flag_set<flags::face_flag> flags);
 	void set_surface_flags(int surface, flag_set<flags::surface_flag> flags);
 
 	// System verbs
@@ -141,6 +147,7 @@ public:
 	void destroy_thing(int thing_id);
 	void detach_thing(int thing_id);
 	vector<3> get_thing_pos(int thing_id);
+	void heal_thing(int thing_id, float health);
 	bool is_thing_moving(int thing_id);
 
 	void adjust_thing_pos(int thing_id, const vector<3>& new_pos);
