@@ -87,14 +87,6 @@ void gorc::game::world::level_presenter::initialize_world() {
 			script_presenter.create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
 		}
 	}
-
-	// HACK: Set pov model and waggle to bryar.
-	camera_presenter.jk_set_pov_model(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryv.3do", *model->level.master_colormap));
-	camera_presenter.jk_set_waggle(get_local_player_thing(), make_vector(10.0f, 7.0f, 0.0f), 350.0f);
-	jk_set_weapon_mesh(get_local_player_thing(), contentmanager->load_id<content::assets::model>("bryg.3do", *model->level.master_colormap));
-	set_armed_mode(get_local_player_thing(), flags::armed_mode::armed);
-
-	key_presenter.play_mix_key(model->camera_model.pov_key_mix_id, contentmanager->load_id<content::assets::animation>("bryvmnt.key"), 0, flag_set<flags::key_flag>(0x14));
 }
 
 void gorc::game::world::level_presenter::update(const time& time) {
@@ -518,7 +510,7 @@ int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int
 		const vector<3>& offset_vec, const vector<3>& error_vec, float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovy) {
 	const auto& parent_thing = model->things[parent_thing_id];
 
-	const auto& parent_look_orient = make_vector(parent_thing.head_pitch, get<1>(parent_thing.orient), get<2>(parent_thing.orient));
+	const auto& parent_look_orient = make_vector(parent_thing.head_pitch, get<1>(parent_thing.orient), get<2>(parent_thing.orient)) + error_vec;
 
 	int new_thing = create_thing(tpl_id, parent_thing.sector, parent_thing.position, parent_look_orient);
 	auto& created_thing = model->things[new_thing];
@@ -531,14 +523,12 @@ int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int
 
 	// TODO: Deal with error vec, autoaim fov.
 
-	// TODO: Temporary code to fire a bryar bolt.
-
 	if(fire_sound_id >= 0) {
-		// TODO: Play fire sound
+		sound_presenter.play_sound_pos(fire_sound_id, created_thing.position, 1.0f, -1.0f, -1.0f, flag_set<flags::sound_flag>());
 	}
 
 	if(puppet_submode_id >= 0) {
-		// TODO: Play key on parent thing.
+		key_presenter.play_mode(parent_thing_id, static_cast<flags::puppet_submode_type>(puppet_submode_id));
 	}
 
 	return new_thing;
@@ -592,7 +582,7 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
 	return new_thing_id;
 }
 
-float gorc::game::world::level_presenter::damage_thing(int thing_id, float damage, flag_set<flags::DamageFlag> flags, int damager_id) {
+float gorc::game::world::level_presenter::damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id) {
 	script_presenter.send_message_to_linked(cog::message_id::damaged, static_cast<int>(thing_id), flags::message_type::thing,
 			damager_id, flags::message_type::thing, damage, static_cast<int>(flags));
 
@@ -676,6 +666,10 @@ void gorc::game::world::level_presenter::clear_thing_flags(int thing_id, flag_se
 
 gorc::flag_set<gorc::flags::actor_flag> gorc::game::world::level_presenter::get_actor_flags(int thing_id) {
 	return model->things[thing_id].actor_flags;
+}
+
+void gorc::game::world::level_presenter::jk_clear_flags(int thing_id, flag_set<flags::jk_flag> flags) {
+	model->things[thing_id].jk_flags -= flags;
 }
 
 void gorc::game::world::level_presenter::set_actor_flags(int thing_id, flag_set<flags::actor_flag> flags) {
@@ -784,6 +778,11 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	verbTable.add_verb<int, 0>("getdifficulty", [] {
 		// TODO: Add actual difficulty setting.
 		return static_cast<int>(flags::difficulty_mode::medium);
+	});
+
+	verbTable.add_verb<int, 0>("getautoswitch", [] {
+		// TODO: Add actual autoswitch code.
+		return 0x3;
 	});
 
 	verbTable.add_verb<int, 0>("ismulti", [] {
@@ -905,7 +904,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	});
 
 	verbTable.add_verb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
-		return components.current_level_presenter->damage_thing(thing_id, damage, flag_set<flags::DamageFlag>(flags), damager_id);
+		return components.current_level_presenter->damage_thing(thing_id, damage, flag_set<flags::damage_flag>(flags), damager_id);
 	});
 
 	verbTable.add_verb<void, 1>("destroything", [&components](int thing_id) {
@@ -941,6 +940,10 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 		return static_cast<int>(components.current_level_presenter->get_actor_flags(thing_id));
 	});
 
+	verbTable.add_verb<void, 2>("jkclearflags", [&components](int thing_id, int flags) {
+		components.current_level_presenter->jk_clear_flags(thing_id, flag_set<flags::jk_flag>(flags));
+	});
+
 	verbTable.add_verb<void, 2>("setactorflags", [&components](int thing_id, int flags) {
 		components.current_level_presenter->set_actor_flags(thing_id, flag_set<flags::actor_flag>(flags));
 	});
@@ -964,6 +967,19 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
 	verbTable.add_verb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
 		components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
+	});
+
+	// vector verbs
+	verbTable.add_verb<vector<3>, 0>("randvec", [&components] {
+		return make_vector<float>(components.randomizer * 2.0 - 1.0, components.randomizer * 2.0 - 1.0, components.randomizer * 2.0 - 1.0);
+	});
+
+	verbTable.add_verb<vector<3>, 2>("vectorscale", [](vector<3> vec, float fac) {
+		return vec * fac;
+	});
+
+	verbTable.add_verb<vector<3>, 3>("vectorset", [](float x, float y, float z) {
+		return make_vector(x, y, z);
 	});
 
 	// weapon verbs

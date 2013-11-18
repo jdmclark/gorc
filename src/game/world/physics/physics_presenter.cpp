@@ -47,12 +47,10 @@ bool physics_presenter::physics_thing_needs_collision_response(int moving_thing_
 	auto ct_type = collision_thing.type;
 
 	return (mt_type == flags::thing_type::Actor ||
-			mt_type == flags::thing_type::Weapon ||
 			mt_type == flags::thing_type::Debris ||
 			mt_type == flags::thing_type::cog ||
 			mt_type == flags::thing_type::Player) &&
 			(ct_type == flags::thing_type::Actor ||
-			ct_type == flags::thing_type::Weapon ||
 			ct_type == flags::thing_type::Debris ||
 			ct_type == flags::thing_type::cog ||
 			ct_type == flags::thing_type::Player);
@@ -164,6 +162,8 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 }
 
 void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id) {
+	auto& current_thing = model->things[current_thing_id];
+
 	// Get list of things within thing influence.
 	physics_overlapping_things.clear();
 	auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
@@ -293,6 +293,8 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 
 		vector<3> prev_thing_vel = thing.vel;
 
+		bool influenced_by_manifolds = false;
+
 		// Add 'towards' velocities from resting contacts, projected into manifold direction.
 		for(const auto& manifold : physics_thing_resting_manifolds) {
 			auto man_vel_len = dot(manifold.velocity, manifold.normal);
@@ -308,6 +310,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 			auto amt_in_man_vel = vel_dot / man_vel_len;
 
 			if(amt_in_man_vel < man_vel_len) {
+				influenced_by_manifolds = true;
 				prev_thing_vel += (man_vel_len - amt_in_man_vel) * (man_vel / man_vel_len);
 			}
 		}
@@ -327,6 +330,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 					if(vel_man_vel_dot <= 0.0f) {
 						// Object is being stopped.
 						new_computed_vel -= vel_dot * manifold.normal;
+						influenced_by_manifolds = true;
 					}
 					else {
 						// Object is possibly being slowed.
@@ -336,6 +340,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 						if(nrm_man_vel_dot > manifold_vel_len) {
 							// Object is being slowed.
 							new_computed_vel -= nrm_manifold_vel * (nrm_man_vel_dot - manifold_vel_len);
+							influenced_by_manifolds = true;
 						}
 					}
 				}
@@ -353,13 +358,20 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 			}
 		}
 
-		if(!reject_vel) {
-			thing.vel = prev_thing_vel;
-			presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * this_step_dt);
+		// HACK: if thing is projectile and there is a valid resting manifold,
+		// stop at the current position and process collisions.
+		if(thing.type == flags::thing_type::Weapon && (influenced_by_manifolds || reject_vel)) {
+			break;
 		}
 		else {
-			thing.vel = make_zero_vector<3, float>();
-			break;
+			if(!reject_vel) {
+				thing.vel = prev_thing_vel;
+				presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * this_step_dt);
+			}
+			else {
+				thing.vel = make_zero_vector<3, float>();
+				break;
+			}
 		}
 
 		// Check vel to make sure all valid resting velocities are still applied.

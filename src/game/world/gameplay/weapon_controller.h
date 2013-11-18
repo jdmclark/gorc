@@ -13,6 +13,8 @@ public:
 
 	virtual void touched_thing(int thing_id, int touched_thing_id) override;
 	virtual void touched_surface(int thing_id, int touched_surface_id) override;
+
+	virtual void update(int thing_id, double dt) override;
 };
 
 }

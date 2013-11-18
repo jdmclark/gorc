@@ -12,6 +12,7 @@
 #include "content/flags/attach_flag.h"
 #include "content/flags/actor_flag.h"
 #include "content/flags/physics_flag.h"
+#include "content/flags/damage_flag.h"
 #include "model.h"
 #include "soundclass.h"
 #include "colormap.h"
@@ -40,6 +41,8 @@ public:
 	script const* cog = nullptr;
 	flags::collide_type collide = flags::collide_type::none;
 	int create_thing = 0;
+	float damage = 0.0f;
+	flag_set<flags::damage_flag> damage_class;
 	int explode = 0;
 	vector<3> eye_offset;
 	flag_set<flags::thing_flag> flags;
@@ -60,6 +63,7 @@ public:
 	float max_rot_vel = 200.0f;
 	float max_thrust = 2.00f;
 	float max_vel = 1.0f;
+	float min_damage = 0.0f;
 	float min_head_pitch = -80.0f;
 	model const* model_3d = nullptr;
 	flags::move_type move = flags::move_type::none;
@@ -74,6 +78,7 @@ public:
 	vector<3> thrust;
 	float timer = 0.0f;
 	flags::thing_type type = flags::thing_type::ghost;
+	int type_flags = 0x0;
 	vector<3> vel;
 
 	void parse_args(text::tokenizer& tok, manager& manager, const colormap& cmp, const cog::compiler& compiler,

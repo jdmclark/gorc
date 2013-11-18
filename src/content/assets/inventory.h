@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include "framework/math/vector.h"
 #include "framework/content/asset.h"
 #include "content/loaders/inventory_loader.h"
@@ -17,7 +18,7 @@ public:
 	using loader = loaders::inventory_loader;
 
 	std::unordered_map<std::string, int> bin_map;
-	std::unordered_map<int, inventory_bin> bins;
+	std::map<int, inventory_bin> bins;
 
 	inline const inventory_bin& get_bin(const std::string& name) const {
 		auto it = bin_map.find(name);

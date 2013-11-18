@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/utility/time.h"
+#include "content/flags/autoselect_mode.h"
 
 namespace gorc {
 namespace cog {
@@ -44,8 +45,22 @@ public:
 	void set_inv_activated(int player, int bin, bool value);
 	void set_inv_available(int player, int bin, bool value);
 
+	void activate_weapon(int player, float firewait, int fire_mode);
+	int autoselect_weapon(int player, flags::autoselect_mode select_mode);
+	void change_fire_rate(int player, float firewait);
+	float deactivate_weapon(int player, int fire_mode);
+	int get_cur_weapon(int player);
+	int get_cur_weapon_mode();
+	void select_weapon(int player, int weap_bin);
+	void set_cur_inv_weapon(int player, int bin_num);
+	void set_cur_weapon(int player, int weap_num);
+	void set_mount_wait(int player, float wait);
+
 	void on_item_hotkey_pressed(int player, int bin);
 	void on_item_hotkey_released(int player, int bin);
+
+	void on_weapon_fire_pressed(int player, int mode);
+	void on_weapon_fire_released(int player, int mode);
 
 	static void register_verbs(cog::verbs::verb_table& verbTable, application&);
 };

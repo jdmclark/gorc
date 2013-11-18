@@ -18,6 +18,7 @@ public:
 	double speed;
 	flag_set<flags::key_flag> flags;
 	float expiration_time = 0.0f;
+	unsigned int creation_timestamp = 0;
 
 	int high_priority, low_priority, body_priority;
 };

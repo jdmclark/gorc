@@ -22,6 +22,9 @@ void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content::ma
 			tpl.cog = &manager.load<script>(fn, compiler);
 		}
 		catch(...) {
+			report.add_warning("InventoryBin::CogParser",
+					boost::str(boost::format("could not load %s for bin %d") % fn % tpl.bin_id),
+					tok.get_internal_token_location());
 			tpl.cog = nullptr;
 		}
 	}

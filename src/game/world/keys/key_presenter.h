@@ -66,6 +66,7 @@ public:
 	int play_key(int thing_id, int key, int priority, flag_set<flags::key_flag> flags);
 	int play_mode(int thing_id, flags::puppet_submode_type submode);
 	void stop_key(int thing_id, int key, float delay);
+	void stop_all_mix_keys(int mix);
 
 	static void register_verbs(cog::verbs::verb_table&, application&);
 

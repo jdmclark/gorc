@@ -160,6 +160,8 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "cog", [](TPP_ARGS) { tpl_asset_loader(tpl.cog, tok, content, compiler); }},
 	{ "collide", [](TPP_ARGS) { tpl_enum_mapper(tpl.collide, flags::collide_type::none, tok, report); }},
 	{ "creatething", [](TPP_ARGS) { tpl_template_mapper(tpl.create_thing, 0, templates, tok, report); }},
+	{ "damage", [](TPP_ARGS) { tpl_number_mapper(tpl.damage, 0.0f, tok, report); }},
+	{ "damageclass", [](TPP_ARGS) { tpl_flag_mapper(tpl.damage_class, flag_set<flags::damage_flag>(), tok, report); }},
 	{ "explode", [](TPP_ARGS) { tpl_template_mapper(tpl.explode, 0, templates, tok, report); }},
 	{ "eyeoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.eye_offset, tok); }},
 	{ "fleshhit", [](TPP_ARGS) { tpl_template_mapper(tpl.flesh_hit, 0, templates, tok, report); }},
@@ -179,6 +181,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "maxrotvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_vel, 200.0f, tok, report); }},
 	{ "maxthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_thrust, 2.00f, tok, report); }},
 	{ "maxvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_vel, 1.0f, tok, report); }},
+	{ "mindamage", [](TPP_ARGS) { tpl_number_mapper(tpl.min_damage, 0.0f, tok, report); }},
 	{ "minheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.min_head_pitch, -80.0f, tok, report); }},
 	{ "model3d", [](TPP_ARGS) { tpl_asset_loader(tpl.model_3d, tok, content, colormap); }},
 	{ "move", [](TPP_ARGS) { tpl_value_mapper(MoveTypeMap, tpl.move, flags::move_type::none, tok, report); }},
@@ -195,6 +198,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "thrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.thrust, tok); }},
 	{ "timer", [](TPP_ARGS) { tpl_number_mapper(tpl.timer, 0.0f, tok, report); }},
 	{ "type", [](TPP_ARGS) { tpl_value_mapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, tok, report); }},
+	{ "typeflags", [](TPP_ARGS) { tpl_number_mapper(tpl.type_flags, 0, tok, report); }},
 	{ "vel", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, tok); }}
 };
 

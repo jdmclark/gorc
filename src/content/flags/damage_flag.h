@@ -3,13 +3,13 @@
 namespace gorc {
 namespace flags {
 
-enum class DamageFlag {
-	Impact							= 0x1,
-	Energy							= 0x2,
-	Explosion						= 0x4,
-	Force							= 0x8,
-	Saber							= 0x10,
-	Drowning						= 0x20
+enum class damage_flag {
+	impact							= 0x1,
+	energy							= 0x2,
+	explosion						= 0x4,
+	force							= 0x8,
+	saber							= 0x10,
+	drowning						= 0x20
 };
 
 }

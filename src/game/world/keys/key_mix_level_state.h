@@ -16,6 +16,7 @@ public:
 	content::assets::animation const* animation = nullptr;
 	double frame;
 	int priority;
+	unsigned int key_timestamp;
 };
 
 }

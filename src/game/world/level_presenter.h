@@ -137,7 +137,7 @@ public:
 
 	void attach_thing_to_thing(int thing_id, int base_id);
 	int create_thing_at_thing(int tpl_id, int thing_id);
-	float damage_thing(int thing_id, float damage, flag_set<flags::DamageFlag> flags, int damager_id);
+	float damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id);
 	void destroy_thing(int thing_id);
 	void detach_thing(int thing_id);
 	vector<3> get_thing_pos(int thing_id);
@@ -151,6 +151,8 @@ public:
 	void clear_thing_flags(int thing_id, flag_set<flags::thing_flag> flags);
 
 	flag_set<flags::actor_flag> get_actor_flags(int thing_id);
+
+	void jk_clear_flags(int thing_id, flag_set<flags::jk_flag> flags);
 
 	void set_actor_flags(int thing_id, flag_set<flags::actor_flag> flags);
 

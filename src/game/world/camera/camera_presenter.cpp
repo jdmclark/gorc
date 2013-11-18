@@ -34,11 +34,6 @@ void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel,
 }
 
 void gorc::game::world::camera::camera_presenter::update(const time& time) {
-	for(auto& camera_state : model->cameras) {
-		camera_state.angle_offset = camera_state.angle_offset - clamp_length(camera_state.angle_offset, 0.0f, camera_state.angle_reset_speed);
-		camera_state.pos_offset = camera_state.pos_offset - clamp_length(camera_state.pos_offset, 0.0f, camera_state.pos_reset_speed);
-	}
-
 	auto& selected_camera = model->cameras[model->current_camera];
 	auto& cam = model->current_computed_state;
 
@@ -86,6 +81,11 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
 	auto new_offset = player_speed * make_vector(waggle_up * get<0>(model->waggle) * (9.0f / 16.0f),
 			waggle_left * get<1>(model->waggle) * (16.0f / 9.0f), waggle_up * get<2>(model->waggle));
 	cam.pov_model_offset = lerp(cam.pov_model_offset, new_offset, 0.1f);
+
+	for(auto& camera_state : model->cameras) {
+		camera_state.angle_offset = camera_state.angle_offset - clamp_length(camera_state.angle_offset, 0.0f, camera_state.angle_reset_speed * static_cast<float>(time));
+		camera_state.pos_offset = camera_state.pos_offset - clamp_length(camera_state.pos_offset, 0.0f, camera_state.pos_reset_speed * static_cast<float>(time));
+	}
 }
 
 void gorc::game::world::camera::camera_presenter::cycle_camera() {
@@ -131,6 +131,8 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int player, i
 	else {
 		model->pov_model = nullptr;
 	}
+
+	presenter.key_presenter.stop_all_mix_keys(model->pov_key_mix_id);
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, const vector<3>& move_vec, float speed) {

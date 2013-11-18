@@ -336,7 +336,7 @@ gorc::cog::vm::value gorc::game::world::scripts::script_presenter::send_message(
 		int SourceRef, flags::message_type SourceType,
 		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
 	if(InstanceId < 0) {
-		return 0;
+		return -1;
 	}
 
 	auto& instance = std::get<0>(model->cogs[InstanceId]);
@@ -352,7 +352,7 @@ gorc::cog::vm::value gorc::game::world::scripts::script_presenter::send_message(
 		return rex_val;
 	}
 
-	return 0;
+	return -1;
 }
 
 void gorc::game::world::scripts::script_presenter::send_message_to_all(cog::message_id message,

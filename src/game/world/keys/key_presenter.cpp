@@ -134,7 +134,7 @@ void gorc::game::world::keys::key_presenter::update(const time& time) {
 		}
 
 		// Apply mix
-		if(key.high_priority >= mix.high.priority) {
+		if(key.high_priority > mix.high.priority || (key.high_priority == mix.high.priority && key.creation_timestamp > mix.high.key_timestamp)) {
 			if(mix.high.animation != key.animation) {
 				mix.high.prev_animation = mix.high.animation;
 				mix.high.prev_frame = mix.high.frame;
@@ -144,9 +144,10 @@ void gorc::game::world::keys::key_presenter::update(const time& time) {
 			mix.high.animation = key.animation;
 			mix.high.frame = key.current_frame;
 			mix.high.priority = key.high_priority;
+			mix.high.key_timestamp = key.creation_timestamp;
 		}
 
-		if(key.low_priority >= mix.low.priority) {
+		if(key.low_priority > mix.low.priority || (key.low_priority == mix.low.priority && key.creation_timestamp > mix.low.key_timestamp)) {
 			if(mix.low.animation != key.animation) {
 				mix.low.prev_animation = mix.low.animation;
 				mix.low.prev_frame = mix.low.frame;
@@ -156,9 +157,10 @@ void gorc::game::world::keys::key_presenter::update(const time& time) {
 			mix.low.animation = key.animation;
 			mix.low.frame = key.current_frame;
 			mix.low.priority = key.low_priority;
+			mix.low.key_timestamp = key.creation_timestamp;
 		}
 
-		if(key.body_priority >= mix.body.priority) {
+		if(key.body_priority > mix.body.priority || (key.body_priority == mix.body.priority && key.creation_timestamp > mix.body.key_timestamp)) {
 			if(mix.body.animation != key.animation) {
 				mix.body.prev_animation = mix.body.animation;
 				mix.body.prev_frame = mix.body.frame;
@@ -168,6 +170,7 @@ void gorc::game::world::keys::key_presenter::update(const time& time) {
 			mix.body.animation = key.animation;
 			mix.body.frame = key.current_frame;
 			mix.body.priority = key.body_priority;
+			mix.body.key_timestamp = key.creation_timestamp;
 		}
 	}
 }
@@ -274,6 +277,7 @@ int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
 	state.mix_id = mix_id;
 	state.flags = flags;
 	state.speed = 1.0;
+	state.creation_timestamp = model->key_creation_counter++;
 
 	return state.get_id();
 }
@@ -306,6 +310,7 @@ int gorc::game::world::keys::key_presenter::play_mode(int thing_id, flags::puppe
 	state.mix_id = mix_id;
 	state.flags = submode.flags;
 	state.speed = 1.0;
+	state.creation_timestamp = model->key_creation_counter++;
 
 	return state.get_id();
 }
@@ -318,6 +323,14 @@ void gorc::game::world::keys::key_presenter::stop_key(int thing_id, int key_id, 
 	else {
 		auto& key = model->keys[key_id];
 		key.expiration_time = delay;
+	}
+}
+
+void gorc::game::world::keys::key_presenter::stop_all_mix_keys(int mix) {
+	for(auto& key : model->keys) {
+		if(key.mix_id == mix) {
+			stop_key(-1, key.get_id(), 0.0f);
+		}
 	}
 }
 
