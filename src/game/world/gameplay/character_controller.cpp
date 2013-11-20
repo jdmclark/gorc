@@ -286,20 +286,24 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 		}
 	},
 	[&thing, thing_id, this] {
-		// Player is falling again.
-		if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
-			presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
-					thing.attached_thing, flags::message_type::thing,
-					thing_id, flags::message_type::thing);
-		}
-		else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
-			presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
-					thing.attached_surface, flags::message_type::surface,
-					thing_id, flags::message_type::thing);
-		}
-
-		thing.attach_flags = flag_set<flags::attach_flag>();
+		set_is_falling(thing_id, thing);
 	});
+}
+
+void gorc::game::world::gameplay::character_controller::set_is_falling(int thing_id, thing& thing) {
+	// Player is falling again.
+	if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
+		presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
+				thing.attached_thing, flags::message_type::thing,
+				thing_id, flags::message_type::thing);
+	}
+	else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
+		presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
+				thing.attached_surface, flags::message_type::surface,
+				thing_id, flags::message_type::thing);
+	}
+
+	thing.attach_flags = flag_set<flags::attach_flag>();
 }
 
 bool gorc::game::world::gameplay::character_controller::step_on_surface(int thing_id, thing& thing, unsigned int surf_id,
@@ -315,7 +319,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_surface(int thin
 		return true;
 	}
 	else {
-		thing.attach_flags = flag_set<flags::attach_flag>();
+		set_is_falling(thing_id, thing);
 		return false;
 	}
 
@@ -337,7 +341,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_
 		return true;
 	}
 	else {
-		thing.attach_flags = flag_set<flags::attach_flag>();
+		set_is_falling(thing_id, thing);
 		return false;
 	}
 
@@ -413,7 +417,7 @@ void gorc::game::world::gameplay::character_controller::jump(int thing_id, thing
 }
 
 void gorc::game::world::gameplay::character_controller::jump_from_surface(int thing_id, thing& thing, unsigned int surf_id) {
-	thing.attach_flags = flag_set<flags::attach_flag>();
+	set_is_falling(thing_id, thing);
 	thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 
 	const auto& surf = presenter.model->surfaces[surf_id];
@@ -439,7 +443,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_surface(int th
 }
 
 void gorc::game::world::gameplay::character_controller::jump_from_thing(int thing_id, thing& thing, int jump_thing_id) {
-	thing.attach_flags = flag_set<flags::attach_flag>();
+	set_is_falling(thing_id, thing);
 	thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 
 	flag_set<flags::thing_flag> flags = presenter.model->things[jump_thing_id].flags;

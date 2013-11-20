@@ -157,7 +157,10 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 			break;
 
 		case cog::symbols::symbol_type::thing_template: {
-			auto it = levelModel->level.template_map.find(static_cast<const char*>(*jt));
+			// Convert template name to lowercase for matching.
+			std::string tpl_name(static_cast<const char*>(*jt));
+			std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
+			auto it = levelModel->level.template_map.find(tpl_name);
 			if(it == levelModel->level.template_map.end()) {
 				// TODO: thing_template not found, report error.
 				(*jt) = -1;

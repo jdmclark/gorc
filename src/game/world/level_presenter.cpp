@@ -229,89 +229,51 @@ void gorc::game::world::level_presenter::jump() {
 	get<2>(player.thrust) = player.jump_speed;
 }
 
-void gorc::game::world::level_presenter::activate() {
-	// TODO: Implement actual surface and thing activation
-
+void gorc::game::world::level_presenter::fly() {
 	auto& player = model->things[model->local_player_thing_id];
-	auto player_look_orient = make_vector(player.head_pitch, get<1>(player.orient), get<2>(player.orient));
-	vector<3> camera_position = player.position + orient_direction_vector(player.eye_offset, player_look_orient);
-	auto camera_look = orient_direction_vector(make_vector(0.0f, 1.0f, 0.0f), player_look_orient);
+	get<2>(player.vel) += 0.1f;
+}
 
-	int best_surf_candidate = -1;
-	float best_surf_dist = 0.25f;
+void gorc::game::world::level_presenter::activate() {
+	auto& player = model->things[model->local_player_thing_id];
 
-	int best_thing_candidate = -1;
-	float best_thing_dist = 0.25f;
+	const auto& cam = model->camera_model.current_computed_state;
+	auto activate_contact = physics_presenter.segment_query(physics::segment(cam.position, cam.position + cam.look * 0.5f),
+			cam.containing_sector, get_local_player_thing());
 
-	for(size_t i = 0; i < model->surfaces.size(); ++i) {
-		const content::assets::level_surface& surf = model->surfaces[i];
-		if((surf.adjoin >= 0 && (model->adjoins[surf.adjoin].flags & flags::adjoin_flag::AllowMovement))
-				|| !(surf.flags & flags::surface_flag::CogLinked)
-				|| dot(surf.normal, camera_look) >= 0.0f) {
-			continue;
-		}
+	activate_contact.if_set([this](const physics::contact& contact) {
+		contact.contact_surface_id.if_set([this](int contact_surface_id) {
+			script_presenter.send_message_to_linked(cog::message_id::activated,
+					contact_surface_id, flags::message_type::surface,
+					model->local_player_thing_id, flags::message_type::thing);
+		});
 
-		for(const auto& vx : surf.vertices) {
-			float new_dist = length(camera_position - model->level.vertices[std::get<0>(vx)]);
-			if(new_dist < best_surf_dist) {
-				best_surf_candidate = i;
-				best_surf_dist = new_dist;
-				break;
-			}
-		}
-	}
-
-	for(auto& thing : model->things) {
-		if(thing.get_id() == model->local_player_thing_id) {
-			continue;
-		}
-
-		auto dir_vec = thing.position - camera_position;
-		if(!(thing.flags & flags::thing_flag::CogLinked) || dot(dir_vec, camera_look) <= 0.0f) {
-			continue;
-		}
-
-		float dir_len = length(dir_vec);
-		if(dir_len >= best_thing_dist) {
-			continue;
-		}
-
-		best_thing_candidate = thing.get_id();
-		best_thing_dist = dir_len;
-	}
-
-	if(best_surf_candidate >= 0 && best_surf_dist <= best_thing_dist) {
-		script_presenter.send_message_to_linked(cog::message_id::activated, best_surf_candidate, flags::message_type::surface,
-				model->local_player_thing_id, flags::message_type::thing);
-	}
-	else if(best_thing_candidate >= 0) {
-		script_presenter.send_message_to_linked(cog::message_id::activated, best_thing_candidate, flags::message_type::thing,
-				model->local_player_thing_id, flags::message_type::thing);
-		sound_presenter.play_sound_class(best_thing_candidate, flags::sound_subclass_type::Activate);
-	}
+		contact.contact_thing_id.if_set([this](int contact_thing_id) {
+			script_presenter.send_message_to_linked(cog::message_id::activated, contact_thing_id, flags::message_type::thing,
+					model->local_player_thing_id, flags::message_type::thing);
+			sound_presenter.play_sound_class(contact_thing_id, flags::sound_subclass_type::Activate);
+		});
+	});
 }
 
 void gorc::game::world::level_presenter::damage() {
-	// TODO: Temporary code to fire a bryar bolt.
+	auto& player = model->things[model->local_player_thing_id];
 
-	// Calculate orientation from camera look.
-	const auto& player = model->things[model->local_player_thing_id];
+	const auto& cam = model->camera_model.current_computed_state;
+	auto activate_contact = physics_presenter.segment_query(physics::segment(cam.position, cam.position + cam.look * 0.5f),
+			cam.containing_sector, get_local_player_thing());
 
-	float bolt_yaw = get<1>(player.orient);
-	float bolt_pitch = player.head_pitch;
+	activate_contact.if_set([this](const physics::contact& contact) {
+		contact.contact_surface_id.if_set([this](int contact_surface_id) {
+			script_presenter.send_message_to_linked(cog::message_id::damaged, contact_surface_id, flags::message_type::surface,
+					model->local_player_thing_id, flags::message_type::thing, 1000, static_cast<int>(flags::damage_flag::saber));
+		});
 
-	int bolt_thing = create_thing("+bryarbolt", player.sector, player.position, make_vector(bolt_pitch, bolt_yaw, 0.0f));
-
-	const auto& bolt_thing_ref = model->things[bolt_thing];
-	vector<3> bolt_offset = player.position +
-			orient_direction_vector(make_vector(0.0f, 1.0f, 0.0f), make_vector(bolt_pitch, bolt_yaw, 0.0f)) * (player.size * 2.0f + bolt_thing_ref.size);
-
-	adjust_thing_pos(bolt_thing, bolt_offset);
-
-	auto& thing = model->things[bolt_thing];
-
-	// Rotate velocity.
-	thing.vel = orient_direction_vector(thing.vel, make_vector(bolt_pitch, bolt_yaw, 0.0f));
+		contact.contact_thing_id.if_set([this](int contact_thing_id) {
+			damage_thing(contact_thing_id, 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
+					model->local_player_thing_id);
+		});
+	});
 }
 
 void gorc::game::world::level_presenter::crouch(bool is_crouched) {
@@ -555,6 +517,11 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
 
 int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int sector_num,
 		const vector<3>& pos, const vector<3>& orientation) {
+	if(tpl_id < 0) {
+		// TODO: thing_template not found. report error.
+		return -1;
+	}
+
 	return create_thing(model->level.templates[tpl_id], sector_num, pos, orientation);
 }
 
@@ -624,6 +591,11 @@ void gorc::game::world::level_presenter::attach_thing_to_thing(int thing_id, int
 }
 
 int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int thing_id) {
+	if(tpl_id < 0) {
+		// TODO: No template. Report error.
+		return -1;
+	}
+
 	thing& referencedThing = model->things[thing_id];
 	int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orient);
 	thing& new_thing = model->things[new_thing_id];

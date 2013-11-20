@@ -64,6 +64,10 @@ void gorc::game::action::action_presenter::handle_keyboard_input(const time& tim
 		Translate = make_zero_vector<3, float>();
 	}
 
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
+		app.current_level_presenter->fly();
+	}
+
 	app.current_level_presenter->translate_camera(Translate);
 
 	key_dispatcher.handle_keyboard_input(time);
@@ -105,6 +109,10 @@ void gorc::game::action::action_presenter::on_keyboard_key_down(const time& time
 
 	case sf::Keyboard::E:
 		app.current_level_presenter->activate();
+		break;
+
+	case sf::Keyboard::Z:
+		app.current_level_presenter->damage();
 		break;
 
 	case sf::Keyboard::F1:

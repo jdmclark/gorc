@@ -47,6 +47,7 @@ private:
 	void jump(int thing_id, thing& thing);
 	void jump_from_surface(int thing_id, thing& thing, unsigned int surf_id);
 	void jump_from_thing(int thing_id, thing& thing, int jump_thing_id);
+	void set_is_falling(int thing_id, thing& thing);
 
 public:
 	using thing_controller::thing_controller;

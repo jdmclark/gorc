@@ -85,6 +85,7 @@ public:
 	void jump();
 	void activate();
 	void damage();
+	void fly();
 	void crouch(bool is_crouched);
 
 	void thing_sighted(int thing_id);

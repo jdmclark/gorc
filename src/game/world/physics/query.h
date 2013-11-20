@@ -239,7 +239,7 @@ inline maybe<vector<3>> segment_sphere_intersection(const segment& segment, cons
 	auto w = std::get<0>(segment) - sphere.position;
 
 	auto a = dot(v, v);
-	auto b = -2.0f * dot(v, w);
+	auto b = 2.0f * dot(v, w);
 	auto c = dot(w, w) - (sphere.radius * sphere.radius);
 
 	// (-b pm sqrt(b^2-4ac)) / 2a

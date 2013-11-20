@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <boost/integer/static_log2.hpp>
+#include <cassert>
 
 namespace gorc {
 inline namespace utility {
@@ -131,6 +132,9 @@ private:
 	element& get_pool_object(int index) {
 		unsigned int page_num = index >> page_number_shift;
 		unsigned int item_num = index & page_offset_mask;
+
+		assert(page_num >= 0 && page_num < pages.size() && "page num out of bounds");
+		assert(item_num >= 0 && item_num < page_size && "item num out of bounds");
 
 		return pages[page_num][item_num];
 	}

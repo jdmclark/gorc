@@ -626,11 +626,9 @@ void physics_presenter::segment_query_node_visitor::visit_mesh(const content::as
 	}
 }
 
-gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction, const maybe<contact>& prev_contact) {
+gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment, int initial_sector, int ray_cast_thing, const maybe<contact>& prev_contact) {
 	// Search for closest thing-ray intersection.
-	float query_radius = length(direction);
-	const auto& current_thing = model->things[current_thing_id];
-	segment cam_segment = std::make_tuple(current_thing.position, current_thing.position + direction);
+	float query_radius = length(std::get<1>(cam_segment) - std::get<0>(cam_segment));
 
 	float closest_contact_distance = std::numeric_limits<float>::max();
 	bool has_contact = false;
@@ -640,7 +638,7 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	vector<3> closest_contact_normal;
 
 	prev_contact.if_set([&](const contact& prev_ct) {
-		closest_contact_distance = length(prev_ct.position - current_thing.position);
+		closest_contact_distance = length(prev_ct.position - std::get<0>(cam_segment));
 		has_contact = true;
 		prev_ct.contact_thing_id >> closest_contact_thing_id;
 		prev_ct.contact_surface_id >> closest_contact_surface_id;
@@ -652,7 +650,7 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	// Get list of sectors within thing influence.
 	segment_query_closed_sectors.clear();
 	segment_query_open_sectors.clear();
-	segment_query_open_sectors.emplace_back(current_thing.sector);
+	segment_query_open_sectors.emplace_back(initial_sector);
 	while(!segment_query_open_sectors.empty()) {
 		int current_sector = segment_query_open_sectors.back();
 		segment_query_open_sectors.pop_back();
@@ -671,7 +669,7 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 			auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
 			vector<3> nearest_point;
 			if(maybe_nearest_point >> nearest_point) {
-				if(physics_surface_needs_collision_response(current_thing_id, i)) {
+				if(physics_surface_needs_collision_response(ray_cast_thing, i)) {
 					auto dist = length(nearest_point - std::get<0>(cam_segment));
 					if(dist < closest_contact_distance) {
 						closest_contact_distance = dist;
@@ -701,7 +699,7 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	for(auto col_thing_id : physics_overlapping_things) {
 		auto& col_thing = model->things[col_thing_id];
 
-		if(col_thing.get_id() == current_thing_id || !physics_thing_needs_collision_response(current_thing_id, col_thing_id)) {
+		if(col_thing.get_id() == ray_cast_thing || !physics_thing_needs_collision_response(ray_cast_thing, col_thing_id)) {
 			continue;
 		}
 
@@ -757,6 +755,11 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	}
 
 	return maybe<contact>();
+}
+
+gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction, const maybe<contact>& prev_contact) {
+	const auto& current_thing = model->things[current_thing_id];
+	return segment_query(segment(current_thing.position, current_thing.position + direction), current_thing.sector, current_thing_id, prev_contact);
 }
 
 void physics_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
