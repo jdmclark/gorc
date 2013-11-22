@@ -5,6 +5,7 @@
 #include "framework/utility/maybe.h"
 #include "content/flags/puppet_mode_type.h"
 #include "content/flags/puppet_submode_type.h"
+#include "content/flags/sound_subclass_type.h"
 
 namespace gorc {
 namespace game {
@@ -29,6 +30,13 @@ private:
 	flags::puppet_mode_type get_puppet_mode(thing& thing);
 	standing_material get_standing_material(thing& thing);
 
+	flags::sound_subclass_type get_left_run_subclass_type(int thing_id);
+	flags::sound_subclass_type get_right_run_subclass_type(int thing_id);
+	flags::sound_subclass_type get_left_walk_subclass_type(int thing_id);
+	flags::sound_subclass_type get_right_walk_subclass_type(int thing_id);
+	flags::sound_subclass_type get_jump_subclass_type(int thing_id);
+	flags::sound_subclass_type get_land_subclass_type(int thing_id);
+
 	void set_walk_animation(thing& thing, flags::puppet_submode_type type, float speed);
 	bool is_walk_animation_mode(thing& thing, flags::puppet_submode_type type);
 	void set_walk_animation_speed(thing& thing, float speed);
@@ -49,6 +57,11 @@ private:
 	void jump_from_thing(int thing_id, thing& thing, int jump_thing_id);
 	void set_is_falling(int thing_id, thing& thing);
 
+	void play_left_run_footstep(int thing_id);
+	void play_right_run_footstep(int thing_id);
+	void play_left_walk_footstep(int thing_id);
+	void play_right_walk_footstep(int thing_id);
+
 public:
 	using thing_controller::thing_controller;
 
@@ -56,9 +69,6 @@ public:
 	virtual void create_controller_data(int thing_id) override;
 	virtual void remove_controller_data(int thing_id) override;
 	virtual void handle_animation_marker(int thing_id, flags::key_marker_type marker) override;
-
-	void play_left_run_footstep(int thing_id);
-	void play_right_run_footstep(int thing_id);
 };
 
 }

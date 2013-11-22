@@ -2,6 +2,81 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 #include "game/constants.h"
+#include <unordered_map>
+#include <type_traits>
+
+namespace gorc {
+namespace game {
+namespace world {
+namespace gameplay {
+
+/* none,
+	hard,
+	dirt,
+	metal,
+	shallow_water,
+	deep_water,
+	very_deep_water*/
+
+template <typename T> class enum_hasher {
+	std::hash<typename std::underlying_type<T>::type> hasher;
+
+public:
+	size_t operator()(T value) const {
+		return hasher(static_cast<typename std::underlying_type<T>::type>(value));
+	}
+};
+
+const std::unordered_map<standing_material, flags::sound_subclass_type, enum_hasher<standing_material>> character_left_run_map {
+	{ standing_material::none, flags::sound_subclass_type::LRunHard },
+	{ standing_material::hard, flags::sound_subclass_type::LRunHard },
+	{ standing_material::dirt, flags::sound_subclass_type::LRunEarth },
+	{ standing_material::metal, flags::sound_subclass_type::LRunMetal },
+	{ standing_material::shallow_water, flags::sound_subclass_type::LRunPuddle },
+	{ standing_material::deep_water, flags::sound_subclass_type::LRunWater },
+	{ standing_material::very_deep_water, flags::sound_subclass_type::LRunWater },
+};
+
+const std::unordered_map<standing_material, flags::sound_subclass_type, enum_hasher<standing_material>> character_right_run_map {
+	{ standing_material::none, flags::sound_subclass_type::RRunHard },
+	{ standing_material::hard, flags::sound_subclass_type::RRunHard },
+	{ standing_material::dirt, flags::sound_subclass_type::RRunEarth },
+	{ standing_material::metal, flags::sound_subclass_type::RRunMetal },
+	{ standing_material::shallow_water, flags::sound_subclass_type::RRunPuddle },
+	{ standing_material::deep_water, flags::sound_subclass_type::RRunWater },
+	{ standing_material::very_deep_water, flags::sound_subclass_type::RRunWater },
+};
+
+const std::unordered_map<standing_material, flags::sound_subclass_type, enum_hasher<standing_material>> character_left_walk_map {
+	{ standing_material::none, flags::sound_subclass_type::LWalkHard },
+	{ standing_material::hard, flags::sound_subclass_type::LWalkHard },
+	{ standing_material::dirt, flags::sound_subclass_type::LWalkEarth },
+	{ standing_material::metal, flags::sound_subclass_type::LWalkMetal },
+	{ standing_material::shallow_water, flags::sound_subclass_type::LWalkPuddle },
+	{ standing_material::deep_water, flags::sound_subclass_type::LWalkWater },
+	{ standing_material::very_deep_water, flags::sound_subclass_type::LWalkWater },
+};
+
+const std::unordered_map<standing_material, flags::sound_subclass_type, enum_hasher<standing_material>> character_right_walk_map {
+	{ standing_material::none, flags::sound_subclass_type::RWalkHard },
+	{ standing_material::hard, flags::sound_subclass_type::RWalkHard },
+	{ standing_material::dirt, flags::sound_subclass_type::RWalkEarth },
+	{ standing_material::metal, flags::sound_subclass_type::RWalkMetal },
+	{ standing_material::shallow_water, flags::sound_subclass_type::RWalkPuddle },
+	{ standing_material::deep_water, flags::sound_subclass_type::RWalkWater },
+	{ standing_material::very_deep_water, flags::sound_subclass_type::RWalkWater },
+};
+
+template <typename T, typename U> auto map_get(const T& map, U key) -> decltype(map.find(key)->second) {
+	auto it = map.find(key);
+	assert(it != map.end());
+	return it->second;
+}
+
+}
+}
+}
+}
 
 gorc::flags::puppet_mode_type gorc::game::world::gameplay::character_controller::get_puppet_mode(thing& thing) {
 	bool is_underwater = (presenter.model->sectors[thing.sector].flags & flags::sector_flag::Underwater);
@@ -223,34 +298,36 @@ void gorc::game::world::gameplay::character_controller::update_falling(int thing
 
 	play_falling_animation(thing_id, thing);
 
-	maybe_contact.if_set([this, &thing, thing_id](const physics::contact& contact) {
+	if_set(maybe_contact, then_do, [this, &thing, thing_id](const physics::contact& contact) {
 		// Check if attached surface/thing has changed.
-		int attachment_id;
-		if(contact.contact_surface_id >> attachment_id) {
+		if_set(contact.contact_surface_id, then_do, [this, thing_id, &thing, &contact](int attachment_id) {
 			land_on_surface(thing_id, thing, attachment_id, contact);
-		}
-		else if(contact.contact_thing_id >> attachment_id) {
+		});
+
+		if_set(contact.contact_thing_id, then_do, [this, &thing, thing_id, &contact](int attachment_id) {
 			land_on_thing(thing_id, thing, attachment_id, contact);
-		}
+		});
 	});
 }
 
 void gorc::game::world::gameplay::character_controller::update_standing(int thing_id, thing& thing, double dt) {
 	auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
 
-	maybe_contact.if_else_set([this, &thing, thing_id, dt](const physics::contact& contact) {
+	if_set(maybe_contact, then_do, [this, &thing, thing_id, dt](const physics::contact& contact) {
 		// Check if attached surface/thing has changed.
-		int attachment_id;
-		if(contact.contact_surface_id >> attachment_id &&
-				(!(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) || attachment_id != thing.attached_surface)) {
-			// Player has landed on a new surface.
-			step_on_surface(thing_id, thing, attachment_id, contact);
-		}
-		else if(contact.contact_thing_id >> attachment_id &&
-				(!(thing.attach_flags & flags::attach_flag::AttachedToThingFace) || attachment_id != thing.attached_thing)) {
-			// Player has landed on a new thing.
-			step_on_thing(thing_id, thing, attachment_id, contact);
-		}
+		if_set(contact.contact_surface_id, then_do, [this, thing_id, &thing, &contact](int attachment_id) {
+			if(!(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) || attachment_id != thing.attached_surface) {
+				// Player has landed on a new surface.
+				step_on_surface(thing_id, thing, attachment_id, contact);
+			}
+		});
+
+		if_set(contact.contact_thing_id, then_do, [this, &thing, thing_id, &contact](int attachment_id) {
+			if(!(thing.attach_flags & flags::attach_flag::AttachedToThingFace) || attachment_id != thing.attached_thing) {
+				// Player has landed on a new thing.
+				step_on_thing(thing_id, thing, attachment_id, contact);
+			}
+		});
 
 		if(get<2>(thing.thrust) > 0.0f) {
 			jump(thing_id, thing);
@@ -262,9 +339,9 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 			auto player_new_vel = thing.thrust - hit_normal * dot(thing.thrust, hit_normal);
 			auto new_vel = player_new_vel;
 
-			if(contact.contact_surface_id >> attachment_id) {
+			if_set(contact.contact_surface_id, then_do, [&new_vel, this](int attachment_id) {
 				new_vel += presenter.model->surfaces[attachment_id].thrust;
-			}
+			});
 
 			// Accelerate body toward standing position
 			if(thing.physics_flags & flags::physics_flag::is_crouching) {
@@ -285,7 +362,7 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 			play_standing_animation(thing_id, thing);
 		}
 	},
-	[&thing, thing_id, this] {
+	else_do, [&thing, thing_id, this] {
 		set_is_falling(thing_id, thing);
 	});
 }
@@ -503,77 +580,23 @@ void gorc::game::world::gameplay::character_controller::remove_controller_data(i
 }
 
 void gorc::game::world::gameplay::character_controller::handle_animation_marker(int thing_id, flags::key_marker_type marker) {
+	auto& thing = presenter.model->things[thing_id];
+
 	switch(marker) {
 	case flags::key_marker_type::LeftRunFootstep:
-		play_left_run_footstep(thing_id);
+		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_left_run_map, get_standing_material(thing)));
 		break;
 
 	case flags::key_marker_type::RightRunFootstep:
-		play_right_run_footstep(thing_id);
-		break;
-	}
-}
-
-void gorc::game::world::gameplay::character_controller::play_left_run_footstep(int thing_id) {
-	auto& thing = presenter.model->things[thing_id];
-	standing_material mat = get_standing_material(thing);
-
-	switch(mat) {
-	case standing_material::metal:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::LRunMetal);
+		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_right_run_map, get_standing_material(thing)));
 		break;
 
-	case standing_material::dirt:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::LRunEarth);
+	case flags::key_marker_type::LeftFootstep:
+		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_left_walk_map, get_standing_material(thing)));
 		break;
 
-	case standing_material::shallow_water:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::LRunPuddle);
-		break;
-
-	case standing_material::deep_water:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::LRunWater);
-		break;
-
-	case standing_material::very_deep_water:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::LRunWater);
-		break;
-
-	default:
-	case standing_material::hard:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::LRunHard);
-		break;
-	}
-}
-
-void gorc::game::world::gameplay::character_controller::play_right_run_footstep(int thing_id) {
-	auto& thing = presenter.model->things[thing_id];
-	standing_material mat = get_standing_material(thing);
-
-	switch(mat) {
-	case standing_material::metal:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::RRunMetal);
-		break;
-
-	case standing_material::dirt:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::RRunEarth);
-		break;
-
-	case standing_material::shallow_water:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::RRunPuddle);
-		break;
-
-	case standing_material::deep_water:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::RRunWater);
-		break;
-
-	case standing_material::very_deep_water:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::RRunWater);
-		break;
-
-	default:
-	case standing_material::hard:
-		presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::RRunHard);
+	case flags::key_marker_type::RightFootstep:
+		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_right_walk_map, get_standing_material(thing)));
 		break;
 	}
 }

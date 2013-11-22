@@ -26,6 +26,7 @@ public:
 	gameplay::thing_controller* controller;
 	physics::thing_object_data object_data;
 
+	bool path_moving_paused = false;
 	bool rotatepivot_moving = false;
 	bool path_moving = false;
 	bool rotatepivot_longway = false;

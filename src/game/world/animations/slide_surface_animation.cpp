@@ -8,7 +8,7 @@ gorc::game::world::animations::slide_surface_animation::slide_surface_animation(
 		const vector<3>& direction, int anim_num)
 	: model(model), surface(surface), direction(direction) {
 	auto& surf = model.surfaces[surface];
-	model.surfaces[surface].surface_anim = make_maybe(this);
+	model.surfaces[surface].surface_anim = this;
 
 	// Compute texture basis.
 	auto dnsb0 = model.level.vertices[std::get<0>(surf.vertices[1])] - model.level.vertices[std::get<0>(surf.vertices[0])];

@@ -5,7 +5,7 @@ gorc::game::world::animations::surface_light_animation::surface_light_animation(
 		float end_light, float change_time, int anim_num)
 	: model(model), surface(surface), start_light(start_light), end_light(end_light), change_time(change_time), anim_time(0.0) {
 	model.surfaces[surface].extra_light = start_light;
-	model.surfaces[surface].surface_anim = make_maybe(this);
+	model.surfaces[surface].surface_anim = this;
 	return;
 }
 

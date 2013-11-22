@@ -50,16 +50,16 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> segme
 	auto p = trns.transform(level.vertices[std::get<0>(surface.vertices[0])]);
 	auto u = dot(nrm, p - std::get<0>(segment)) / dot(nrm, std::get<1>(segment) - std::get<0>(segment));
 	if(u < 0.0f || u > 1.0f) {
-		return maybe<vector<3>>();
+		return nothing;
 	}
 
 	// Check for thing path passing through surface polygon.
 	auto sp = lerp(std::get<0>(segment), std::get<1>(segment), u);
 	if(point_inside_surface(sp, level, surface, trns)) {
-		return make_maybe(sp);
+		return sp;
 	}
 
-	return maybe<vector<3>>();
+	return nothing;
 }
 
 template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> segment_surface_intersection_point(const segment& segment,
@@ -69,16 +69,16 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> segme
 	auto p = level.vertices[std::get<0>(surface.vertices[0])];
 	auto u = dot(nrm, p - std::get<0>(segment)) / dot(nrm, std::get<1>(segment) - std::get<0>(segment));
 	if(u < 0.0f || u > 1.0f) {
-		return maybe<vector<3>>();
+		return nothing;
 	}
 
 	// Check for thing path passing through surface polygon.
 	auto sp = lerp(std::get<0>(segment), std::get<1>(segment), u);
 	if(point_inside_surface(sp, level, surface)) {
-		return make_maybe(sp);
+		return sp;
 	}
 
-	return maybe<vector<3>>();
+	return nothing;
 }
 
 template <typename VertexProvider, typename EdgeProvider> bool segment_surface_intersection(const segment& segment,
@@ -118,12 +118,12 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 	auto v = origin - p;
 	auto plane_dist = dot(nrm, v);
 	if(plane_dist < 0.0f || plane_dist > max_dist) {
-		return maybe<vector<3>>();
+		return nothing;
 	}
 
 	auto pp = (v - nrm * plane_dist) + p;
 	if(point_inside_surface(pp, level, surface, trns)) {
-		return make_maybe(pp);
+		return pp;
 	}
 
 	// Check edges
@@ -155,7 +155,7 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 		}
 	}
 
-	return make_maybe(closest_point);
+	return closest_point;
 }
 
 template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bounded_closest_point_on_surface(const vector<3>& origin,
@@ -165,12 +165,12 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 	auto v = origin - p;
 	auto plane_dist = dot(nrm, v);
 	if(plane_dist < 0.0f || plane_dist > max_dist) {
-		return maybe<vector<3>>();
+		return nothing;
 	}
 
 	auto pp = (v - nrm * plane_dist) + p;
 	if(point_inside_surface(pp, level, surface)) {
-		return make_maybe(pp);
+		return pp;
 	}
 
 	// Check edges
@@ -202,7 +202,7 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 		}
 	}
 
-	return make_maybe(closest_point);
+	return closest_point;
 }
 
 bool point_inside_sector(const vector<3>& position, const level_model& level_model, const content::assets::level_sector& sec);
@@ -216,10 +216,10 @@ template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sph
 	auto p = trns.transform(level.vertices[std::get<0>(surface.vertices[0])]);
 	auto u = dot(std::get<1>(sphere.position) - std::get<0>(sphere.position), nrm);
 	if(u >= 0.0f) {
-		return maybe<float>();
+		return nothing;
 	}
 
-	return make_maybe((sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u);
+	return (sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u;
 }
 
 template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sphere_plane_collision_time(const swept_sphere& sphere,
@@ -228,10 +228,10 @@ template <typename VertexProvider, typename EdgeProvider> maybe<float> swept_sph
 	auto p = level.vertices[std::get<0>(surface.vertices[0])];
 	auto u = dot(std::get<1>(sphere.position) - std::get<0>(sphere.position), nrm);
 	if(u >= 0.0f) {
-		return maybe<float>();
+		return nothing;
 	}
 
-	return make_maybe((sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u);
+	return (sphere.radius - dot(std::get<0>(sphere.position) - p, nrm)) / u;
 }
 
 inline maybe<vector<3>> segment_sphere_intersection(const segment& segment, const sphere& sphere) {
@@ -245,7 +245,7 @@ inline maybe<vector<3>> segment_sphere_intersection(const segment& segment, cons
 	// (-b pm sqrt(b^2-4ac)) / 2a
 	auto det = b * b - 4.0f * a * c;
 	if(det <= 0.0f) {
-		return maybe<vector<3>>();
+		return nothing;
 	}
 
 	auto sqrt_det = sqrt(det);
@@ -266,10 +266,10 @@ inline maybe<vector<3>> segment_sphere_intersection(const segment& segment, cons
 	}
 
 	if(has_sol) {
-		return make_maybe(lerp(std::get<0>(segment), std::get<1>(segment), selected_sol));
+		return lerp(std::get<0>(segment), std::get<1>(segment), selected_sol);
 	}
 	else {
-		return maybe<vector<3>>();
+		return nothing;
 	}
 }
 

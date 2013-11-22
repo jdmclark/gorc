@@ -145,10 +145,9 @@ private:
 
 		views.handle_input(time, mouse_pos);
 
-		PresenterT* curr_presenter;
-		if(place_controller.current_presenter() >> curr_presenter) {
-			curr_presenter->update(time);
-		}
+		if_set(place_controller.current_presenter(), then_do, [&time] (PresenterT& curr_presenter) {
+			curr_presenter.update(time);
+		});
 
 		update(time, view_size);
 	}

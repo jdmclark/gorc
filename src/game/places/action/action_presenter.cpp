@@ -8,7 +8,7 @@ gorc::game::action::action_presenter::action_presenter(application& app)
 }
 
 void gorc::game::action::action_presenter::start(event::event_bus& bus) {
-	app.action_view->set_presenter(make_maybe(this));
+	app.action_view->set_presenter(this);
 	app.views.set_layer(view_layer::screen, *app.action_view);
 
 	bus.add_handler<events::window_focus>([this](events::window_focus& evt) {

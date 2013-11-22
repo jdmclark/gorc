@@ -91,7 +91,7 @@ E			[Ee][+-]?{D}+
 								return FLOAT_LITERAL;
 							}
 
-	[^[:space:]^=]+			{
+	[^[:space:]^=^,]+		{
 								yy_pop_state(yyextra->get_scanner());
 								yylval->string = strdup(yytext);
 								return STRING_FRAGMENT;

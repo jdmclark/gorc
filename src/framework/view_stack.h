@@ -23,31 +23,29 @@ public:
 	}
 
 	void set_layer(LayerIdT index, view& value) {
-		views[static_cast<LayerIdUT>(index)] = make_maybe(&value);
+		views[static_cast<LayerIdUT>(index)] = &value;
 		value.resize(view_size);
 	}
 
 	void clear_layer(LayerIdT index) {
-		views[static_cast<LayerIdUT>(index)] = maybe<view*>();
+		views[static_cast<LayerIdUT>(index)] = nothing;
 		resize(view_size);
 	}
 
 	void resize(const box<2, int>& view_size) {
 		this->view_size = view_size;
 		for(const auto& view_pair : views) {
-			view* v = nullptr;
-			if(view_pair.second >> v) {
-				v->resize(view_size);
-			}
+			if_set(std::get<1>(view_pair), then_do, [&view_size](view& v) {
+				v.resize(view_size);
+			});
 		}
 	}
 
 	void draw(const time& time, const box<2, int>& view_size, graphics::render_target& target) const {
 		for(const auto& view_pair : views) {
-			view* v = nullptr;
-			if(view_pair.second >> v) {
-				v->draw(time, view_size, target);
-			}
+			if_set(std::get<1>(view_pair), then_do, [&](view& v) {
+				v.draw(time, view_size, target);
+			});
 		}
 	}
 
@@ -56,50 +54,47 @@ public:
 		maybe<input::input_adapter*> keyboard_input_target;
 
 		for(auto& view_pair : views) {
-			view* v;
-			input::input_adapter* input_adapter;
-			if(view_pair.second >> v && v->get_input_adapter() >> input_adapter) {
-				input_adapter->set_mouse_cursor_position(time, cursor_pos);
+			if_set(std::get<1>(view_pair), then_do, [&](view& v) {
+				if_set(v.get_input_adapter(), then_do, [&](input::input_adapter& input_adapter) {
+					input_adapter.set_mouse_cursor_position(time, cursor_pos);
 
-				if(input_adapter->wants_mouse_focus()) {
-					mouse_input_target = make_maybe(input_adapter);
-				}
+					if(input_adapter.wants_mouse_focus()) {
+						mouse_input_target = &input_adapter;
+					}
 
-				if(input_adapter->wants_keyboard_focus()) {
-					keyboard_input_target = make_maybe(input_adapter);
-				}
-			}
+					if(input_adapter.wants_keyboard_focus()) {
+						keyboard_input_target = &input_adapter;
+					}
+				});
+			});
 		}
 
-		input::input_adapter* mouse_input_adapter;
-		if(mouse_input_target >> mouse_input_adapter) {
-			window.setMouseCursorVisible(!mouse_input_adapter->hide_mouse_cursor());
-			mouse_input_adapter->handle_mouse_input(time);
-		}
+		if_set(mouse_input_target, then_do, [this, &time](input::input_adapter& mouse_input_adapter) {
+			window.setMouseCursorVisible(!mouse_input_adapter.hide_mouse_cursor());
+			mouse_input_adapter.handle_mouse_input(time);
+		});
 
-		input::input_adapter* keyboard_input_adapter;
-		if(keyboard_input_target >> keyboard_input_adapter) {
-			keyboard_input_adapter->handle_keyboard_input(time);
-		}
+		if_set(keyboard_input_target, then_do, [this, &time](input::input_adapter& keyboard_input_adapter) {
+			keyboard_input_adapter.handle_keyboard_input(time);
+		});
 	}
 
 	void handle_text(const time& time, char ch) {
 		maybe<input::input_adapter*> keyboard_input_target;
 
 		for(auto& view_pair : views) {
-			view* v;
-			input::input_adapter* input_adapter;
-			if(view_pair.second >> v && v->get_input_adapter() >> input_adapter) {
-				if(input_adapter->wants_keyboard_focus()) {
-					keyboard_input_target = make_maybe(input_adapter);
-				}
-			}
+			if_set(std::get<1>(view_pair), then_do, [&](view& v) {
+				if_set(v.get_input_adapter(), then_do, [&](input::input_adapter& input_adapter) {
+					if(input_adapter.wants_keyboard_focus()) {
+						keyboard_input_target = &input_adapter;
+					}
+				});
+			});
 		}
 
-		input::input_adapter* keyboard_input_adapter;
-		if(keyboard_input_target >> keyboard_input_adapter) {
-			keyboard_input_adapter->handle_text_input(time, ch);
-		}
+		if_set(keyboard_input_target, then_do, [&](input::input_adapter& keyboard_input_adapter) {
+			keyboard_input_adapter.handle_text_input(time, ch);
+		});
 	}
 };
 

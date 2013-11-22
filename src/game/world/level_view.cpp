@@ -383,10 +383,9 @@ void gorc::game::world::level_view::draw_pov_model() {
 			const auto& thing = currentModel->things[currentPresenter->get_local_player_thing()];
 			const auto& current_sector = currentModel->sectors[thing.sector];
 			auto sector_color = make_fill_vector<3, float>(1.0f);
-			content::assets::colormap const* sec_cmp;
-			if(current_sector.cmp >> sec_cmp) {
-				sector_color = sec_cmp->tint_color;
-			}
+			if_set(current_sector.cmp, then_do, [&sector_color](const content::assets::colormap& cmp) {
+				sector_color = cmp.tint_color;
+			});
 
 			float sector_light = current_sector.ambient_light + current_sector.extra_light;
 			auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
@@ -430,10 +429,9 @@ void gorc::game::world::level_view::draw_surface(unsigned int surf_num, const co
 		glBegin(GL_TRIANGLES);
 
 		auto sector_tint = make_zero_vector<3, float>();
-		content::assets::colormap const* sector_cmp;
-		if(sector.cmp >> sector_cmp) {
-			sector_tint = sector_cmp->tint_color;
-		}
+		if_set(sector.cmp, then_do, [&sector_tint](const content::assets::colormap& cmp) {
+			sector_tint = cmp.tint_color;
+		});
 
 		vector<3> first_geo = lev.vertices[std::get<0>(surface.vertices[0])];
 		vector<2> first_tex = lev.texture_vertices[std::get<1>(surface.vertices[0])] + surface.texture_offset;
@@ -631,10 +629,9 @@ void gorc::game::world::level_view::draw_thing(const thing& thing, int thing_id)
 
 	const auto& current_sector = currentModel->sectors[thing.sector];
 	auto sector_color = make_fill_vector<3, float>(1.0f);
-	content::assets::colormap const* sec_cmp;
-	if(current_sector.cmp >> sec_cmp) {
-		sector_color = sec_cmp->tint_color;
-	}
+	if_set(current_sector.cmp, then_do, [&sector_color](const content::assets::colormap& cmp) {
+		sector_color = cmp.tint_color;
+	});
 
 	float sector_light = current_sector.ambient_light + current_sector.extra_light;
 	auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);

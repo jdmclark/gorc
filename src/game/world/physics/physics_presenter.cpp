@@ -68,8 +68,7 @@ void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::
 	for(const auto& face : mesh.faces) {
 		auto maybe_face_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, mesh, face, current_matrix, sphere.radius);
 
-		vector<3> face_nearest_point;
-		if(maybe_face_nearest_point >> face_nearest_point) {
+		if_set(maybe_face_nearest_point, then_do, [this, &face](const vector<3>& face_nearest_point) {
 			auto face_nearest_dist = length(sphere.position - face_nearest_point);
 			if(face_nearest_dist <= sphere.radius) {
 				if(needs_response) {
@@ -79,11 +78,11 @@ void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::
 
 					resting_manifolds.emplace_back(face_nearest_point, (sphere.position - face_nearest_point) / face_nearest_dist,
 							contact_pos_vel + nrm_vel);
-					resting_manifolds.back().contact_thing_id = make_maybe(visited_thing_id);
+					resting_manifolds.back().contact_thing_id = visited_thing_id;
 				}
 				physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
 			}
-		}
+		});
 	}
 }
 
@@ -146,17 +145,16 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 			}
 
 			auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, model->level, surface, sphere.radius);
-			vector<3> surf_nearest_point;
-			if(maybe_surf_nearest_point >> surf_nearest_point) {
+			if_set(maybe_surf_nearest_point, then_do, [&](const vector<3>& surf_nearest_point) {
 				auto surf_nearest_dist = length(sphere.position - surf_nearest_point);
 
 				if(surf_nearest_dist <= sphere.radius) {
 					physics_thing_resting_manifolds.emplace_back(surf_nearest_point, (sphere.position - surf_nearest_point) / surf_nearest_dist,
 							surface.normal * ((sphere.radius / surf_nearest_dist) - 1.0f));
-					physics_thing_resting_manifolds.back().contact_surface_id = make_maybe(i);
+					physics_thing_resting_manifolds.back().contact_surface_id = i;
 					physics_touched_surface_pairs.emplace(current_thing_id, i);
 				}
-			}
+			});
 		}
 	}
 }
@@ -205,7 +203,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 					}
 
 					physics_thing_resting_manifolds.emplace_back(contact_point, vec_to / vec_to_len, contact_point_vel);
-					physics_thing_resting_manifolds.back().contact_thing_id = make_maybe(col_thing_id);
+					physics_thing_resting_manifolds.back().contact_thing_id = col_thing_id;
 				}
 
 				physics_touched_thing_pairs.emplace(std::min(current_thing_id, col_thing_id), std::max(current_thing_id, col_thing_id));
@@ -390,7 +388,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 
 			if(amt_in_man_vel < man_vel_len) {
 				// Thing is blocked.
-				manifold.contact_thing_id.if_set([this](int contact_thing_id) {
+				if_set(manifold.contact_thing_id, then_do, [this](int contact_thing_id) {
 						auto& contact_thing = model->things[contact_thing_id];
 						contact_thing.is_blocked = true;
 				});
@@ -404,7 +402,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 }
 
 void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, double dt) {
-	if(thing.move != flags::move_type::Path || thing.is_blocked) {
+	if(thing.move != flags::move_type::Path || thing.is_blocked || thing.path_moving_paused) {
 		return;
 	}
 
@@ -498,7 +496,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thing_id, const vector<3>& rel_point) {
 	auto& thing = model->things[thing_id];
 
-	if(thing.move == flags::move_type::Path && thing.path_moving && !thing.is_blocked) {
+	if(thing.move == flags::move_type::Path && thing.path_moving && !thing.is_blocked && !thing.path_moving_paused) {
 		auto target_position_tuple = thing.frames[thing.next_frame];
 		vector<3> targetPosition = std::get<0>(target_position_tuple);
 		vector<3> targetOrientation = std::get<1>(target_position_tuple);
@@ -528,7 +526,7 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 			).transform(rel_point_rotated) - rel_point;
 		return rel_v;
 	}
-	else if(thing.move == flags::move_type::Path && thing.rotatepivot_moving && !thing.is_blocked) {
+	else if(thing.move == flags::move_type::Path && thing.rotatepivot_moving && !thing.is_blocked && !thing.path_moving_paused) {
 		vector<3> frame_pos, frame_orient;
 		std::tie(frame_pos, frame_orient) = thing.frames[thing.goal_frame];
 		auto angle = frame_orient / thing.path_move_speed;
@@ -613,8 +611,7 @@ void physics_presenter::segment_query_node_visitor::visit_mesh(const content::as
 
 	for(const auto& face : mesh.faces) {
 		auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, mesh, face, current_matrix);
-		vector<3> nearest_point;
-		if(maybe_nearest_point >> nearest_point) {
+		if_set(maybe_nearest_point, then_do, [&](const vector<3>& nearest_point) {
 			auto dist = length(nearest_point - std::get<0>(cam_segment));
 			if(dist < closest_contact_distance) {
 				closest_contact_distance = dist;
@@ -622,7 +619,7 @@ void physics_presenter::segment_query_node_visitor::visit_mesh(const content::as
 				closest_contact = nearest_point;
 				closest_contact_normal = current_matrix.transform_normal(face.normal);
 			}
-		}
+		});
 	}
 }
 
@@ -637,11 +634,11 @@ gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment
 	vector<3> closest_contact_position;
 	vector<3> closest_contact_normal;
 
-	prev_contact.if_set([&](const contact& prev_ct) {
+	if_set(prev_contact, then_do, [&](const contact& prev_ct) {
 		closest_contact_distance = length(prev_ct.position - std::get<0>(cam_segment));
 		has_contact = true;
-		prev_ct.contact_thing_id >> closest_contact_thing_id;
-		prev_ct.contact_surface_id >> closest_contact_surface_id;
+		if_set(prev_ct.contact_thing_id, then_do, [&closest_contact_thing_id](int c) { closest_contact_thing_id = c; });
+		if_set(prev_ct.contact_surface_id, then_do, [&closest_contact_surface_id](int c) { closest_contact_surface_id = c; });
 		closest_contact_position = prev_ct.position;
 		closest_contact_normal = prev_ct.normal;
 	});
@@ -667,8 +664,7 @@ gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment
 			const auto& surface = model->surfaces[i];
 
 			auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
-			vector<3> nearest_point;
-			if(maybe_nearest_point >> nearest_point) {
+			if_set(maybe_nearest_point, then_do, [&](const vector<3>& nearest_point) {
 				if(physics_surface_needs_collision_response(ray_cast_thing, i)) {
 					auto dist = length(nearest_point - std::get<0>(cam_segment));
 					if(dist < closest_contact_distance) {
@@ -682,7 +678,7 @@ gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment
 				else if(surface.adjoin >= 0) {
 					segment_query_open_sectors.push_back(surface.adjoined_sector);
 				}
-			}
+			});
 		}
 	}
 
@@ -705,8 +701,7 @@ gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment
 
 		if(col_thing.collide == flags::collide_type::sphere) {
 			auto maybe_int = segment_sphere_intersection(cam_segment, sphere(col_thing.position, col_thing.size));
-			vector<3> int_point;
-			if(maybe_int >> int_point) {
+			if_set(maybe_int, then_do, [&](const vector<3>& int_point) {
 				// Sphere intersected.
 				float col_dist = length(int_point - std::get<0>(cam_segment));
 				if(col_dist < closest_contact_distance) {
@@ -717,7 +712,7 @@ gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment
 					closest_contact_normal = normalize(int_point - col_thing.position);
 					closest_contact_position = int_point;
 				}
-			}
+			});
 		}
 		else if(col_thing.collide == flags::collide_type::face) {
 			if(!col_thing.model_3d) {
@@ -744,17 +739,17 @@ gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment
 	if(has_contact) {
 		contact new_contact(closest_contact_position, closest_contact_normal, make_zero_vector<3, float>());
 		if(closest_contact_surface_id >= 0) {
-			new_contact.contact_surface_id = make_maybe(closest_contact_surface_id);
+			new_contact.contact_surface_id = closest_contact_surface_id;
 		}
 
 		if(closest_contact_thing_id >= 0) {
-			new_contact.contact_thing_id = make_maybe(closest_contact_thing_id);
+			new_contact.contact_thing_id = closest_contact_thing_id;
 		}
 
-		return make_maybe(new_contact);
+		return new_contact;
 	}
 
-	return maybe<contact>();
+	return nothing;
 }
 
 gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction, const maybe<contact>& prev_contact) {

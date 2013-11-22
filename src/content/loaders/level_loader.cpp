@@ -581,7 +581,7 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
 	// Calculate axis-aligned bounding box for each sector and assign colormap pointer.
 	for(auto& sec : lev.sectors) {
 		if(sec.colormap_id >= 0) {
-			sec.cmp = make_maybe(lev.colormaps[sec.colormap_id]);
+			sec.cmp = lev.colormaps[sec.colormap_id];
 		}
 
 		vector<3> min_aabb = make_fill_vector<3>(std::numeric_limits<float>::max());

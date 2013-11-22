@@ -25,6 +25,8 @@ private:
 	presenter_mapper mapper;
 	clear_screen_view clear_view;
 
+	void register_verbs();
+
 public:
 	const std::string input_episodename;
 	const std::string input_levelname;

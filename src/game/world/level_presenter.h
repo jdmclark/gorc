@@ -100,11 +100,14 @@ public:
 	int get_cur_frame(int thing_id);
 	void jump_to_frame(int thing_id, int frame, int sector);
 	void move_to_frame(int thing_id, int frame, float speed);
+	void path_move_pause(int thing_id);
+	void path_move_resume(int thing_id);
 	void rotate_pivot(int thing_id, int frame, float time);
 
 	// Level verbs
 	float get_game_time();
 	float get_level_time();
+	void jk_end_level(bool success);
 
 	// Misc verbs
 	void take_item(int thing_id, int player_id);
@@ -115,10 +118,12 @@ public:
 	// sector verbs
 	void clear_sector_flags(int sector_id, flag_set<flags::sector_flag> flags);
 	int first_thing_in_sector(int sector_id);
+	flag_set<flags::sector_flag> get_sector_flags(int sector_id);
 	int next_thing_in_sector(int thing_id);
 	void sector_sound(int sector_id, int sound, float volume);
 	void set_sector_adjoins(int sector_id, bool state);
 	void set_sector_colormap(int sector_id, int colormap);
+	void set_sector_flags(int sector_id, flag_set<flags::sector_flag> flags);
 	void set_sector_light(int sector_id, float value, float delay);
 	void set_sector_thrust(int sector_id, const vector<3>& thrust);
 	void set_sector_tint(int sector_id, const vector<3>& color);
@@ -163,6 +168,7 @@ public:
 	void jk_clear_flags(int thing_id, flag_set<flags::jk_flag> flags);
 
 	void set_actor_flags(int thing_id, flag_set<flags::actor_flag> flags);
+	void set_thing_flags(int thing_id, flag_set<flags::thing_flag> flags);
 
 	// thing property verbs
 	int get_thing_parent(int thing_id);

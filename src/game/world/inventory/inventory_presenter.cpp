@@ -261,6 +261,14 @@ void gorc::game::world::inventory::inventory_presenter::on_weapon_fire_released(
 	}
 }
 
+void gorc::game::world::inventory::inventory_presenter::clear_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags) {
+	set_inv(player, 100 + goal, static_cast<int>(flag_set<flags::goal_flag>(get_inv(player, 100 + goal)) - flags));
+}
+
+void gorc::game::world::inventory::inventory_presenter::set_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags) {
+	set_inv(player, 100 + goal, static_cast<int>(flag_set<flags::goal_flag>(get_inv(player, 100 + goal)) + flags));
+}
+
 void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
 	verbTable.add_verb<void, 3>("changeinv", [&components](int player, int bin, int amount) {
 		components.current_level_presenter->inventory_presenter.change_inv(player, bin, amount);
@@ -349,5 +357,13 @@ void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verb
 
 	verbTable.add_verb<void, 2>("setmountwait", [&components](int player, float delay) {
 		components.current_level_presenter->inventory_presenter.set_mount_wait(player, delay);
+	});
+
+	verbTable.add_verb<void, 3>("cleargoalflags", [&components](int player, int goal, int flags) {
+		components.current_level_presenter->inventory_presenter.clear_goal_flags(player, goal, flag_set<flags::goal_flag>(flags));
+	});
+
+	verbTable.add_verb<void, 3>("setgoalflags", [&components](int player, int goal, int flags) {
+		components.current_level_presenter->inventory_presenter.set_goal_flags(player, goal, flag_set<flags::goal_flag>(flags));
 	});
 }

@@ -40,7 +40,7 @@ public:
 	}
 
 	maybe<PresenterT*> current_presenter() const {
-		return make_maybe(curr_presenter.get());
+		return curr_presenter.get();
 	}
 };
 

@@ -2,6 +2,8 @@
 
 #include "framework/utility/time.h"
 #include "content/flags/autoselect_mode.h"
+#include "content/flags/goal_flag.h"
+#include "framework/utility/flag_set.h"
 
 namespace gorc {
 namespace cog {
@@ -61,6 +63,9 @@ public:
 
 	void on_weapon_fire_pressed(int player, int mode);
 	void on_weapon_fire_released(int player, int mode);
+
+	void clear_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags);
+	void set_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags);
 
 	static void register_verbs(cog::verbs::verb_table& verbTable, application&);
 };

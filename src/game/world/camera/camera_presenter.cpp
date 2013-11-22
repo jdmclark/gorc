@@ -47,9 +47,9 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
 	contact = presenter.physics_presenter.thing_segment_query(selected_camera.focus, true_offset, contact);
 
 	auto true_desired_position = focus_thing.position + true_offset;
-	contact.if_set([&true_desired_position, &focus_thing] (const physics::contact& cnt) {
-		// Bring back by some small radius - 0.015?
-		true_desired_position = cnt.position + normalize(focus_thing.position - cnt.position) * 0.015f;
+	if_set(contact, then_do, [&true_desired_position, &focus_thing](const physics::contact& cnt) {
+		// Bring back by some small radius - 0.02?
+		true_desired_position = cnt.position + normalize(focus_thing.position - cnt.position) * 0.02f;
 	});
 
 	// Calculate sector containing camera

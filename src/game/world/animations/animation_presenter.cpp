@@ -37,7 +37,12 @@ int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::A
 }
 
 int animation_presenter::get_surface_anim(int surface) {
-	return levelModel->surfaces[surface].surface_anim.if_set([](const animation& anim) { return anim.get_id(); }, -1);
+	int return_value = -1;
+	if_set(levelModel->surfaces[surface].surface_anim, then_do, [&return_value](const animation& anim) {
+		return_value = anim.get_id();
+	});
+
+	return return_value;
 }
 
 void animation_presenter::stop_anim(int anim) {
