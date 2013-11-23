@@ -786,7 +786,7 @@ template <typename F> matrix<4, F> make_frustum_matrix(F left, F right, F bottom
 }
 
 template <typename F> matrix<4, F> make_perspective_matrix(F fovy_in_degrees, F aspect_ratio, F znear, F zfar) {
-	F ymax = znear * std::tan(to_radians(fovy_in_degrees) * 0.5);
+	F ymax = znear * tan(to_radians(fovy_in_degrees) * 0.5);
 	F xmax = ymax * aspect_ratio;
 	return make_frustum_matrix(-xmax, xmax, -ymax, ymax, znear, zfar);
 }
@@ -824,8 +824,8 @@ template <typename F> matrix<4, F> make_rotation_matrix(F angle, const vector<3,
 	F ay = get<1>(axis);
 	F az = get<2>(axis);
 
-	F cost = std::cos(to_radians(angle));
-	F sint = std::sin(to_radians(angle));
+	F cost = cos(to_radians(angle));
+	F sint = sin(to_radians(angle));
 	F icost = 1 - cost;
 
 	return make_matrix<4, F>(

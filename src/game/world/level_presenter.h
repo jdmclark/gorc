@@ -140,9 +140,9 @@ public:
 	int load_sound(const char* sound);
 
 	// thing action verbs
-	int create_thing(const content::assets::thing_template& tpl, unsigned int sector_num, const vector<3>& pos, const vector<3>& orientation);
-	int create_thing(const std::string& tpl_name, unsigned int sector_num, const vector<3>& pos, const vector<3>& orientation);
-	int create_thing(int tpl_id, unsigned int sector_num, const vector<3>& pos, const vector<3>& orientation);
+	int create_thing(const content::assets::thing_template& tpl, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
+	int create_thing(const std::string& tpl_name, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
+	int create_thing(int tpl_id, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
 
 	int fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
 			float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovz);
@@ -157,7 +157,7 @@ public:
 	bool is_thing_moving(int thing_id);
 
 	void adjust_thing_pos(int thing_id, const vector<3>& new_pos);
-	void set_thing_pos(int thing_id, const vector<3>& new_pos, const vector<3>& new_orient, int new_sector);
+	void set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, int new_sector);
 
 	// thing flag verbs
 	void clear_actor_flags(int thing_id, flag_set<flags::actor_flag> flags);

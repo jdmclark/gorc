@@ -38,9 +38,10 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
 	auto& cam = model->current_computed_state;
 
 	const auto& focus_thing = levelmodel->things[selected_camera.focus];
-	const auto focus_thing_orient = make_vector(focus_thing.head_pitch, get<1>(focus_thing.orient), get<2>(focus_thing.orient));
+	const auto focus_thing_orient = focus_thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), focus_thing.head_pitch)
+			* make_euler(selected_camera.angle_offset);
 
-	auto true_offset = orient_direction_vector(focus_thing.eye_offset + selected_camera.base_offset + selected_camera.pos_offset, focus_thing_orient);
+	auto true_offset = focus_thing_orient.transform(focus_thing.eye_offset + selected_camera.base_offset + selected_camera.pos_offset);
 
 	// Cast offset vector into world to detect collisions.
 	maybe<physics::contact> contact;
@@ -59,8 +60,8 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
 	cam.position = true_desired_position;
 
 	// Jiggle look and up by pov shake.
-	cam.look = orient_direction_vector(make_vector(0.0f, 1.0f, 0.0f), selected_camera.angle_offset + focus_thing_orient);
-	cam.up = orient_direction_vector(make_vector(0.0f, 0.0f, 1.0f), selected_camera.angle_offset + focus_thing_orient);
+	cam.look = focus_thing_orient.transform(make_vector(0.0f, 1.0f, 0.0f));
+	cam.up = focus_thing_orient.transform(make_vector(0.0f, 0.0f, 1.0f));
 
 	if(selected_camera.draw_focus) {
 		cam.focus_not_drawn_thing = -1;

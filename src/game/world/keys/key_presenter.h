@@ -10,6 +10,7 @@
 #include "framework/math/vector.h"
 #include "framework/math/matrix.h"
 #include "content/assets/puppet.h"
+#include "framework/math/quaternion.h"
 
 namespace gorc {
 
@@ -127,13 +128,11 @@ private:
 public:
 
 	template <typename T> void visit_mesh_hierarchy(T& visitor, const content::assets::model& obj,
-			const vector<3>& base_position, const vector<3>& base_orientation, int attached_key_mix,
+			const vector<3>& base_position, const quaternion<float>& base_orientation, int attached_key_mix,
 			content::assets::puppet const* puppet_file = nullptr, float head_pitch = 0.0f) {
 		visitor.push_matrix();
 		visitor.concatenate_matrix(make_translation_matrix(base_position)
-				* make_rotation_matrix(get<1>(base_orientation), make_vector(0.0f, 0.0f, 1.0f))
-				* make_rotation_matrix(get<0>(base_orientation), make_vector(1.0f, 0.0f, 0.0f))
-				* make_rotation_matrix(get<2>(base_orientation), make_vector(0.0f, 1.0f, 0.0f)));
+				* convert_to_rotation_matrix(base_orientation));
 
 		visit_mesh_node(visitor, obj, attached_key_mix, 0, puppet_file, head_pitch);
 

@@ -28,8 +28,8 @@ public:
 	vector<3> center;
 	float radius;
 	std::vector<size_t> vertices;
-	size_t first_surface;
-	size_t surface_count;
+	int first_surface;
+	int surface_count;
 	vector<3> thrust;
 };
 

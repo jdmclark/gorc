@@ -93,6 +93,14 @@ void tpl_vector_mapper(vector<3>& value, text::tokenizer& tok) {
 	tok.assert_punctuator(")");
 }
 
+void tpl_quaternion_mapper(quaternion<float>& value, text::tokenizer& tok) {
+	vector<3> v;
+	tpl_vector_mapper(v, tok);
+
+	// Convert orientation vector into quaternion:
+	value = make_euler(v);
+}
+
 void tpl_template_mapper(int& value, int defaultvalue, const std::unordered_map<std::string, int>& templates,
 		text::tokenizer& tok, diagnostics::report& report) {
 	std::string tpl_name = tok.get_space_delimited_string();
@@ -187,7 +195,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 	{ "move", [](TPP_ARGS) { tpl_value_mapper(MoveTypeMap, tpl.move, flags::move_type::none, tok, report); }},
 	{ "movesize", [](TPP_ARGS) { tpl_number_mapper(tpl.move_size, 0.05f, tok, report); }},
 	{ "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.get_number<int>(); }},
-	{ "orient", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, tok); }},
+	{ "orient", [](TPP_ARGS) { tpl_quaternion_mapper(tpl.orient, tok); }},
 	{ "physflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.physics_flags, flag_set<flags::physics_flag>(), tok, report); }},
 	{ "puppet", [](TPP_ARGS) { tpl_asset_loader(tpl.pup, tok, content); }},
 	{ "rotthrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.rot_thrust, tok); }},

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework/math/vector.h"
+#include "framework/math/quaternion.h"
 #include "framework/utility/flag_set.h"
 #include "framework/text/tokenizer.h"
 #include "framework/utility/flag_set.h"
@@ -68,7 +69,7 @@ public:
 	model const* model_3d = nullptr;
 	flags::move_type move = flags::move_type::none;
 	float move_size = 0.05f;
-	vector<3> orient;
+	quaternion<float> orient;
 	flag_set<flags::physics_flag> physics_flags;
 	puppet const* pup = nullptr;
 	vector<3> rot_thrust;

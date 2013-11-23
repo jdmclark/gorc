@@ -52,7 +52,7 @@ void gorc::game::world::level_view::do_sector_vis(unsigned int sec_num, const st
 	sector_visited_scratch.emplace(sec_num);
 
 	const auto& sector = currentModel->sectors[sec_num];
-	for(unsigned int i = 0; i < sector.surface_count; ++i) {
+	for(int i = 0; i < sector.surface_count; ++i) {
 		const auto& surface = currentModel->surfaces[sector.first_surface + i];
 
 		const vector<3>& surf_vx_pos = currentModel->level.vertices[std::get<0>(surface.vertices.front())];
@@ -123,7 +123,7 @@ void gorc::game::world::level_view::record_visible_special_surfaces() {
 	for(auto sec_num : sector_vis_scratch) {
 		const content::assets::level_sector& sector = currentModel->sectors[sec_num];
 
-		for(size_t i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = currentModel->surfaces[i];
 
 			if(surface.geometry_mode == flags::geometry_mode::NotDrawn) {
@@ -187,7 +187,7 @@ void gorc::game::world::level_view::draw_visible_diffuse_surfaces() {
 	for(auto sec_num : sector_vis_scratch) {
 		const content::assets::level_sector& sector = currentModel->sectors[sec_num];
 
-		for(size_t i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
+		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = currentModel->surfaces[i];
 
 			if(surface.geometry_mode == flags::geometry_mode::NotDrawn
@@ -334,7 +334,7 @@ void gorc::game::world::level_view::draw(const time& time, const box<2, int>& vi
 				continue;
 			}
 
-			set_current_shader(lightShader, thing.position + orient_direction_vector(thing.light_offset, thing.orient),
+			set_current_shader(lightShader, thing.position + thing.orient.transform(thing.light_offset),
 					cam.position, light, light);
 
 			draw_visible_diffuse_surfaces();
@@ -362,7 +362,7 @@ void gorc::game::world::level_view::draw(const time& time, const box<2, int>& vi
 				continue;
 			}
 
-			set_current_shader(lightShader, thing.position + orient_direction_vector(thing.light_offset, thing.orient),
+			set_current_shader(lightShader, thing.position + thing.orient.transform(thing.light_offset),
 					cam.position, light, light);
 
 			draw_pov_model();
@@ -391,8 +391,8 @@ void gorc::game::world::level_view::draw_pov_model() {
 			auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
 			mesh_node_visitor v(lit_sector_color, *this, nullptr, nullptr);
-			auto pov_orient = make_vector(thing.head_pitch, get<1>(thing.orient), get<2>(thing.orient));
-			auto pov_model_offset = cam.pov_model_offset + pov_orient;
+			auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
+			auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
 			currentPresenter->key_presenter.visit_mesh_hierarchy(v, *pov_model, thing.position,
 					pov_model_offset, currentModel->camera_model.pov_key_mix_id);
 		}
@@ -541,7 +541,7 @@ void gorc::game::world::level_view::mesh_node_visitor::visit_mesh(const content:
 	if(weapon_mesh && puppet_file && node_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)) {
 		mesh_node_visitor weapon_mesh_node_visitor(sector_color, view, nullptr, nullptr);
 		view.currentPresenter->key_presenter.visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh, make_zero_vector<3, float>(),
-				make_zero_vector<3, float>(), -1);
+				quaternion<float>(), -1);
 	}
 }
 

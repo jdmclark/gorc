@@ -139,7 +139,7 @@ void gorc::game::world::gameplay::character_controller::play_falling_animation(i
 }
 
 void gorc::game::world::gameplay::character_controller::play_standing_animation(int thing_id, thing& thing) {
-	auto oriented_vel = orient_direction_vector(thing.vel, -thing.orient);
+	auto oriented_vel = invert(thing.orient).transform(thing.vel);
 	auto run_length = length(thing.vel);
 
 	auto vel_fb = get<1>(oriented_vel);
@@ -147,13 +147,13 @@ void gorc::game::world::gameplay::character_controller::play_standing_animation(
 	auto turn_rate = get<1>(thing.ang_vel);
 
 	float run_anim_speed = run_length * 20.0f;
-	float turn_anim_speed = abs(turn_rate) / 360.0f;
+	float turn_anim_speed = fabs(turn_rate) / 360.0f;
 
 	if(thing.physics_flags & flags::physics_flag::is_crouching) {
-		if(abs(turn_rate) > 0.0001f) {
+		if(fabs(turn_rate) > 0.0001f) {
 			set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, turn_anim_speed * 20.0f);
 		}
-		else if(vel_fb >= 0.0f || abs(vel_lr) > abs(vel_fb)) {
+		else if(vel_fb >= 0.0f || fabs(vel_lr) > fabs(vel_fb)) {
 			set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, run_anim_speed);
 		}
 		else {
@@ -163,28 +163,28 @@ void gorc::game::world::gameplay::character_controller::play_standing_animation(
 	else {
 		if(run_length < 0.001f) {
 			// Idle or turning.
-			if(turn_rate > 10.0f) {
-				// Turning left
-				set_walk_animation(thing, flags::puppet_submode_type::TurnLeft, turn_anim_speed);
-			}
-			else if(turn_rate < -10.0f) {
+			if(turn_rate > 60.0f) {
 				// Turning right
 				set_walk_animation(thing, flags::puppet_submode_type::TurnRight, turn_anim_speed);
 			}
-			else if(abs(turn_rate) < 0.001f) {
+			else if(turn_rate < -60.0f) {
+				// Turning left
+				set_walk_animation(thing, flags::puppet_submode_type::TurnLeft, turn_anim_speed);
+			}
+			else if(fabs(turn_rate) < 0.001f) {
 				set_walk_animation(thing, flags::puppet_submode_type::Stand, 1.0f);
 			}
 			else if(!is_walk_animation_mode(thing, flags::puppet_submode_type::Stand)) {
 				set_walk_animation_speed(thing, turn_anim_speed);
 			}
 		}
-		else if(abs(vel_lr) > abs(vel_fb)) {
+		else if(fabs(vel_lr) > fabs(vel_fb)) {
 			// Strafing left or right
 			if(vel_lr >= 0.0f) {
-				set_walk_animation(thing, flags::puppet_submode_type::StrafeLeft, run_anim_speed);
+				set_walk_animation(thing, flags::puppet_submode_type::StrafeRight, run_anim_speed);
 			}
 			else {
-				set_walk_animation(thing, flags::puppet_submode_type::StrafeRight, run_anim_speed);
+				set_walk_animation(thing, flags::puppet_submode_type::StrafeLeft, run_anim_speed);
 			}
 		}
 		else if(vel_fb > 0.5f) {

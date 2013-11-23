@@ -76,10 +76,10 @@ void gorc::game::world::horizon_shader::activate(const vector<3>& current_sector
 	float horizons_per_rev = std::ceil(horizon_pixels_per_rev / 256.0f);
 	float horizon_scale = 128.0f / horizon_distance;
 
-	float yaw_revs = std::atan2(get<0>(camera_look), get<1>(camera_look)) / 6.28318f;
+	float yaw_revs = atan2(get<0>(camera_look), get<1>(camera_look)) / 6.28318f;
 	get<0>(horizon_start_offset) += yaw_revs * horizons_per_rev;
 
-	float pitch_revs = std::acos(dot(camera_look, make_vector(0.0f, 0.0f, 1.0f))) * 0.5f + 1.0f;
+	float pitch_revs = acos(dot(camera_look, make_vector(0.0f, 0.0f, 1.0f))) * 0.5f + 1.0f;
 	get<1>(horizon_start_offset) -= pitch_revs;
 
 	std::array<float, 3> offset = { get<0>(horizon_start_offset), get<1>(horizon_start_offset), horizon_scale };

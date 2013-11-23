@@ -17,7 +17,7 @@ namespace physics {
 
 template <typename VertexProvider, typename EdgeProvider> bool point_inside_surface(const vector<3>& sp,
 		const VertexProvider& level, const EdgeProvider& surface, const matrix<4>& trns) {
-	for(int i = surface.vertices.size() - 1, j = 0; j < surface.vertices.size(); i = j++) {
+	for(unsigned int i = surface.vertices.size() - 1, j = 0; j < surface.vertices.size(); i = j++) {
 		auto p0 = trns.transform(level.vertices[std::get<0>(surface.vertices[i])]);
 		auto edge = trns.transform(level.vertices[std::get<0>(surface.vertices[j])]) - p0;
 		auto edge_normal = cross(trns.transform_normal(surface.normal), edge);
@@ -31,7 +31,7 @@ template <typename VertexProvider, typename EdgeProvider> bool point_inside_surf
 
 template <typename VertexProvider, typename EdgeProvider> bool point_inside_surface(const vector<3>& sp,
 		const VertexProvider& level, const EdgeProvider& surface) {
-	for(int i = surface.vertices.size() - 1, j = 0; j < surface.vertices.size(); i = j++) {
+	for(unsigned int i = surface.vertices.size() - 1, j = 0; j < surface.vertices.size(); i = j++) {
 		auto p0 = level.vertices[std::get<0>(surface.vertices[i])];
 		auto edge = level.vertices[std::get<0>(surface.vertices[j])] - p0;
 		auto edge_normal = cross(surface.normal, edge);
@@ -130,7 +130,7 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 	float closest_dist = std::numeric_limits<float>::max();
 	vector<3> closest_point;
 
-	for(int p0 = surface.vertices.size() - 1, p1 = 0; p1 < surface.vertices.size(); p0 = p1++) {
+	for(unsigned int p0 = surface.vertices.size() - 1, p1 = 0; p1 < surface.vertices.size(); p0 = p1++) {
 		auto vp0 = trns.transform(level.vertices[std::get<0>(surface.vertices[p0])]);
 		auto vp1 = trns.transform(level.vertices[std::get<0>(surface.vertices[p1])]);
 		auto lv = vp1 - vp0;
@@ -177,7 +177,7 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 	float closest_dist = std::numeric_limits<float>::max();
 	vector<3> closest_point;
 
-	for(int p0 = surface.vertices.size() - 1, p1 = 0; p1 < surface.vertices.size(); p0 = p1++) {
+	for(unsigned int p0 = surface.vertices.size() - 1, p1 = 0; p1 < surface.vertices.size(); p0 = p1++) {
 		auto vp0 = level.vertices[std::get<0>(surface.vertices[p0])];
 		auto vp1 = level.vertices[std::get<0>(surface.vertices[p1])];
 		auto lv = vp1 - vp0;

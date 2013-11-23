@@ -324,8 +324,8 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
 				}
 			}
 			else if(boost::iequals(t.value, "surfaces")) {
-				sec.first_surface = tok.get_number<size_t>();
-				sec.surface_count = tok.get_number<size_t>();
+				sec.first_surface = tok.get_number<int>();
+				sec.surface_count = tok.get_number<int>();
 				break;
 			}
 			else {
@@ -527,7 +527,7 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, manager& manag
 			lev.things.emplace_back(lev.templates[base_it->second]);
 			lev.things.back().sector = sector;
 			lev.things.back().position = make_vector(x, y, z);
-			lev.things.back().orient = make_vector(pitch, yaw, roll);
+			lev.things.back().orient = make_euler(make_vector(pitch, yaw, roll));
 			lev.things.back().parse_args(tok, manager, *lev.master_colormap, compiler, lev.template_map, report);
 		}
 	}
@@ -563,7 +563,7 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
 			int mirror_adj = lev.adjoins[surf.adjoin].mirror;
 			for(const auto& sec : lev.sectors) {
 				bool found = false;
-				for(size_t i = sec.first_surface; i < sec.first_surface + sec.surface_count; ++i) {
+				for(int i = sec.first_surface; i < sec.first_surface + sec.surface_count; ++i) {
 					if(lev.surfaces[i].adjoin == mirror_adj) {
 						found = true;
 						surf.adjoined_sector = sec.number;

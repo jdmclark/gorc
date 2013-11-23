@@ -3,7 +3,7 @@
 
 bool gorc::game::world::physics::point_inside_sector(const vector<3>& position, const level_model& model,
 		const gorc::content::assets::level_sector& sec) {
-	for(size_t i =  sec.first_surface; i < sec.first_surface + sec.surface_count; ++i) {
+	for(int i = sec.first_surface; i < sec.first_surface + sec.surface_count; ++i) {
 		const auto& surf = model.level.surfaces[i];
 		const auto& p = model.level.vertices[std::get<0>(surf.vertices[0])];
 

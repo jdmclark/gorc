@@ -200,7 +200,10 @@ void gorc::game::world::level_presenter::update_thing_sector(int thing_id, thing
 
 void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) {
 	auto& player = model->things[model->local_player_thing_id];
-	player.thrust = orient_direction_vector(amt, make_vector(0.0f, get<1>(player.orient), 0.0f));
+	player.thrust = player.orient.transform(amt);
+
+	// TODO: Handle this in character controller or in physics presenter.
+	get<2>(player.thrust) = 0.0f;
 }
 
 void gorc::game::world::level_presenter::yaw_camera(double amt) {
@@ -319,7 +322,7 @@ int gorc::game::world::level_presenter::get_cur_frame(int thing_id) {
 void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
 	thing& referenced_thing = model->things[thing_id];
 	auto& referenced_frame = referenced_thing.frames[frame];
-	set_thing_pos(thing_id, std::get<0>(referenced_frame), std::get<1>(referenced_frame), sector);
+	set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
 }
 
 void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, float speed) {
@@ -436,7 +439,7 @@ void gorc::game::world::level_presenter::sector_sound(int sector_id, int sound, 
 
 void gorc::game::world::level_presenter::set_sector_adjoins(int sector_id, bool state) {
 	content::assets::level_sector& sector = model->sectors[sector_id];
-	for(unsigned int i = 0; i < sector.surface_count; ++i) {
+	for(int i = 0; i < sector.surface_count; ++i) {
 		content::assets::level_surface& surface = model->surfaces[i + sector.first_surface];
 		if(surface.adjoin >= 0) {
 			content::assets::level_adjoin& adjoin = model->adjoins[surface.adjoin];
@@ -524,7 +527,7 @@ int gorc::game::world::level_presenter::load_sound(const char* fn) {
 // thing action verbs
 
 int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
-		const vector<3>& pos, const vector<3>& orient) {
+		const vector<3>& pos, const quaternion<float>& orient) {
 	// Initialize thing properties
 	auto& new_thing = model->things.emplace(tpl);
 
@@ -546,7 +549,7 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
 }
 
 int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int sector_num,
-		const vector<3>& pos, const vector<3>& orientation) {
+		const vector<3>& pos, const quaternion<float>& orientation) {
 	if(tpl_id < 0) {
 		// TODO: thing_template not found. report error.
 		return -1;
@@ -556,7 +559,7 @@ int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int se
 }
 
 int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name, unsigned int sector_num,
-		const vector<3>& pos, const vector<3>& orientation) {
+		const vector<3>& pos, const quaternion<float>& orientation) {
 	std::string temp;
 	std::transform(tpl_name.begin(), tpl_name.end(), std::back_inserter(temp), tolower);
 	auto it = model->level.template_map.find(temp);
@@ -573,16 +576,16 @@ int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int
 		const vector<3>& offset_vec, const vector<3>& error_vec, float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovy) {
 	const auto& parent_thing = model->things[parent_thing_id];
 
-	const auto& parent_look_orient = make_vector(parent_thing.head_pitch, get<1>(parent_thing.orient), get<2>(parent_thing.orient)) + error_vec;
+	const auto& parent_look_orient = parent_thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), parent_thing.head_pitch) * make_euler(error_vec);
 
 	int new_thing = create_thing(tpl_id, parent_thing.sector, parent_thing.position, parent_look_orient);
 	auto& created_thing = model->things[new_thing];
 
 	created_thing.parent_thing = parent_thing_id;
-	adjust_thing_pos(new_thing, created_thing.position + orient_direction_vector(offset_vec, parent_look_orient));
+	adjust_thing_pos(new_thing, created_thing.position + parent_look_orient.transform(offset_vec));
 
 	// TODO: Don't orient velocity, let flags handle it.
-	created_thing.vel = orient_direction_vector(created_thing.vel, parent_look_orient);
+	created_thing.vel = parent_look_orient.transform(created_thing.vel);
 
 	// TODO: Deal with error vec, autoaim fov.
 
@@ -604,7 +607,7 @@ void gorc::game::world::level_presenter::adjust_thing_pos(int thing_id, const ve
 	update_thing_sector(thing_id, thing, old_pos);
 }
 
-void gorc::game::world::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const vector<3>& new_orient, int new_sector) {
+void gorc::game::world::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, int new_sector) {
 	thing& thing = model->things[thing_id];
 	thing.position = new_pos;
 	thing.orient = new_orient;

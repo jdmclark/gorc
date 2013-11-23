@@ -225,11 +225,10 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 
 void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt) {
 	// TODO: Move somewhere more appropriate.
-	thing.orient = thing.orient + thing.ang_vel * static_cast<float>(dt);
 	//thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
 
 	// Clamp thrusts.
-	thing.rot_thrust = clamp_length(thing.rot_thrust, 0.0f, thing.max_rot_thrust);
+	//thing.rot_thrust = clamp_length(thing.rot_thrust, 0.0f, thing.max_rot_thrust);
 	//thing.thrust = clamp_length(thing.thrust, 0.0f, thing.max_thrust);
 
 	// Apply thrusts.
@@ -246,13 +245,14 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 	// Clamp vel.
 	// TODO: Must be some unknown flag. Objects move way too slowly.
 	//thing.vel = clamp_length(thing.vel, 0.0f, thing.max_vel);
-	thing.ang_vel = clamp_length(thing.ang_vel, 0.0f, thing.max_rot_vel);
+	//thing.ang_vel = clamp_length(thing.ang_vel, 0.0f, thing.max_rot_vel);
 
 	// Apply vels.
 
-	if(thing.physics_flags & flags::physics_flag::uses_rotational_velocity) {
-		thing.orient = thing.orient + thing.ang_vel * static_cast<float>(dt);
-	}
+	// TODO: Confirm that flag 0x200 is correctly documented.
+	//if(thing.physics_flags & flags::physics_flag::uses_rotational_velocity) {
+	thing.orient *= make_euler(thing.ang_vel * static_cast<float>(dt));
+	//}
 
 	auto this_frame_only_vel = make_zero_vector<3, float>();
 	if((thing.attach_flags & flags::attach_flag::AttachedToThing) || (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
@@ -409,10 +409,10 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 	if(thing.path_moving) {
 		auto target_position_tuple = thing.frames[thing.next_frame];
 		vector<3> targetPosition = std::get<0>(target_position_tuple);
-		vector<3> targetOrientation = std::get<1>(target_position_tuple);
+		auto targetOrientation = make_euler(std::get<1>(target_position_tuple));
 
 		vector<3> currentPosition = thing.position;
-		vector<3> currentOrientation = thing.orient;
+		auto currentOrientation = thing.orient;
 
 		// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 		// Use a magic multiple to correct it.
@@ -443,7 +443,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 		}
 		else {
 			presenter.adjust_thing_pos(thing_id, lerp(thing.position, targetPosition, alpha));
-			thing.orient = lerp(thing.orient, targetOrientation, alpha);
+			thing.orient = slerp(thing.orient, targetOrientation, alpha);
 		}
 	}
 	else if(thing.rotatepivot_moving) {
@@ -460,10 +460,10 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 				frame_orient = -frame_orient;
 			}
 
-			auto angle = frame_orient * (thing.path_move_speed - thing.path_move_time + dt) / thing.path_move_speed;
-			auto new_pos = orient_direction_vector(thing.position - frame_pos, angle) + frame_pos;
+			auto angle = make_euler(frame_orient * (thing.path_move_speed - thing.path_move_time + dt) / thing.path_move_speed);
+			auto new_pos = angle.transform(thing.position - frame_pos) + frame_pos;
 
-			thing.orient += angle;
+			thing.orient = angle * thing.orient;
 			presenter.adjust_thing_pos(thing_id, new_pos);
 
 			presenter.sound_presenter.stop_foley_loop(thing_id);
@@ -481,11 +481,11 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 				frame_orient = -frame_orient;
 			}
 
-			auto angle = frame_orient * alpha;
+			auto angle = make_euler(frame_orient * alpha);
 
-			auto new_pos = orient_direction_vector(thing.position - frame_pos, angle) + frame_pos;
+			auto new_pos = angle.transform(thing.position - frame_pos) + frame_pos;
 
-			thing.orient += angle;
+			thing.orient = angle * thing.orient;
 			presenter.adjust_thing_pos(thing_id, new_pos);
 
 			thing.path_move_time += dt;
@@ -499,10 +499,10 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 	if(thing.move == flags::move_type::Path && thing.path_moving && !thing.is_blocked && !thing.path_moving_paused) {
 		auto target_position_tuple = thing.frames[thing.next_frame];
 		vector<3> targetPosition = std::get<0>(target_position_tuple);
-		vector<3> targetOrientation = std::get<1>(target_position_tuple);
+		auto targetOrientation = make_euler(std::get<1>(target_position_tuple));
 
 		vector<3> currentPosition = thing.position;
-		vector<3> currentOrientation = thing.orient;
+		auto currentOrientation = thing.orient;
 
 		// PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
 		// Use a magic multiple to correct it.
@@ -510,32 +510,28 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 		float alpha = rate_factor * thing.path_move_speed / dist_len;
 
 		auto delta_position = lerp(thing.position, targetPosition, alpha);
-		auto delta_orientation = lerp(thing.orient, targetOrientation, alpha);
+		auto delta_orientation = slerp(thing.orient, targetOrientation, alpha);
 
 		// Rotate rel_point into object space
 		auto rel_point_rotated = (
-				make_rotation_matrix(get<1>(-currentOrientation), make_vector(0.0f, 0.0f, 1.0f))
-				* make_rotation_matrix(get<0>(-currentOrientation), make_vector(1.0f, 0.0f, 0.0f))
-				* make_rotation_matrix(get<2>(-currentOrientation), make_vector(0.0f, 1.0f, 0.0f))
+				convert_to_rotation_matrix(invert(currentOrientation))
 				* make_translation_matrix(-currentPosition)).transform(rel_point);
 
 		auto rel_v = (make_translation_matrix(delta_position)
-			* make_rotation_matrix(get<1>(delta_orientation), make_vector(0.0f, 0.0f, 1.0f))
-			* make_rotation_matrix(get<0>(delta_orientation), make_vector(1.0f, 0.0f, 0.0f))
-			* make_rotation_matrix(get<2>(delta_orientation), make_vector(0.0f, 1.0f, 0.0f))
-			).transform(rel_point_rotated) - rel_point;
+				* convert_to_rotation_matrix(delta_orientation)
+				).transform(rel_point_rotated) - rel_point;
 		return rel_v;
 	}
 	else if(thing.move == flags::move_type::Path && thing.rotatepivot_moving && !thing.is_blocked && !thing.path_moving_paused) {
 		vector<3> frame_pos, frame_orient;
 		std::tie(frame_pos, frame_orient) = thing.frames[thing.goal_frame];
-		auto angle = frame_orient / thing.path_move_speed;
+		auto angle = make_euler(frame_orient / thing.path_move_speed);
 
 		auto obj_space_rel_point = rel_point - thing.position;
-		obj_space_rel_point = orient_direction_vector(obj_space_rel_point, angle);
+		obj_space_rel_point = invert(thing.orient).transform(obj_space_rel_point);
 
 		auto pivot_space_rel_point = (obj_space_rel_point + thing.position) - frame_pos;
-		pivot_space_rel_point = orient_direction_vector(pivot_space_rel_point, angle);
+		pivot_space_rel_point = thing.orient.transform(angle.transform(pivot_space_rel_point));
 
 		auto new_rel_point = pivot_space_rel_point + frame_pos;
 		return new_rel_point - rel_point;
