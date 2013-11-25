@@ -38,8 +38,9 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
 	auto& cam = model->current_computed_state;
 
 	const auto& focus_thing = levelmodel->things[selected_camera.focus];
-	const auto focus_thing_orient = focus_thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), focus_thing.head_pitch)
-			* make_euler(selected_camera.angle_offset);
+	const auto focus_thing_orient = focus_thing.orient
+			* make_euler(selected_camera.angle_offset)
+			* make_rotation(make_vector(1.0f, 0.0f, 0.0f), focus_thing.head_pitch);
 
 	auto true_offset = focus_thing_orient.transform(focus_thing.eye_offset + selected_camera.base_offset + selected_camera.pos_offset);
 

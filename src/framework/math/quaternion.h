@@ -31,7 +31,7 @@ public:
 	quaternion<F> operator*(const quaternion<F>& q2) const {
 		return quaternion<F>(make_vector(
 				get<0>(q) * get<0>(q2.q) - get<1>(q) * get<1>(q2.q) - get<2>(q) * get<2>(q2.q) - get<3>(q) * get<3>(q2.q),
-				get<1>(q) * get<0>(q2.q) + get<0>(q) * get<1>(q2.q) + get<2>(q) * get<3>(q2.q) - get<3>(q) * get<2>(q2.q),
+				get<0>(q) * get<1>(q2.q) + get<1>(q) * get<0>(q2.q) + get<2>(q) * get<3>(q2.q) - get<3>(q) * get<2>(q2.q),
 				get<0>(q) * get<2>(q2.q) - get<1>(q) * get<3>(q2.q) + get<2>(q) * get<0>(q2.q) + get<3>(q) * get<1>(q2.q),
 				get<0>(q) * get<3>(q2.q) + get<1>(q) * get<2>(q2.q) - get<2>(q) * get<1>(q2.q) + get<3>(q) * get<0>(q2.q)));
 	}
@@ -39,7 +39,7 @@ public:
 	const quaternion<F>& operator*=(const quaternion<F>& q2) {
 		q = make_vector(
 				get<0>(q) * get<0>(q2.q) - get<1>(q) * get<1>(q2.q) - get<2>(q) * get<2>(q2.q) - get<3>(q) * get<3>(q2.q),
-				get<1>(q) * get<0>(q2.q) + get<0>(q) * get<1>(q2.q) + get<2>(q) * get<3>(q2.q) - get<3>(q) * get<2>(q2.q),
+				get<0>(q) * get<1>(q2.q) + get<1>(q) * get<0>(q2.q) + get<2>(q) * get<3>(q2.q) - get<3>(q) * get<2>(q2.q),
 				get<0>(q) * get<2>(q2.q) - get<1>(q) * get<3>(q2.q) + get<2>(q) * get<0>(q2.q) + get<3>(q) * get<1>(q2.q),
 				get<0>(q) * get<3>(q2.q) + get<1>(q) * get<2>(q2.q) - get<2>(q) * get<1>(q2.q) + get<3>(q) * get<0>(q2.q));
 		return *this;

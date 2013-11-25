@@ -528,10 +528,10 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 		auto angle = make_euler(frame_orient / thing.path_move_speed);
 
 		auto obj_space_rel_point = rel_point - thing.position;
-		obj_space_rel_point = invert(thing.orient).transform(obj_space_rel_point);
+		obj_space_rel_point = angle.transform(obj_space_rel_point);
 
 		auto pivot_space_rel_point = (obj_space_rel_point + thing.position) - frame_pos;
-		pivot_space_rel_point = thing.orient.transform(angle.transform(pivot_space_rel_point));
+		pivot_space_rel_point = angle.transform(pivot_space_rel_point);
 
 		auto new_rel_point = pivot_space_rel_point + frame_pos;
 		return new_rel_point - rel_point;
