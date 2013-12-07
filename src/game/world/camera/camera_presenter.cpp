@@ -1,5 +1,5 @@
 #include "cog/verbs/table.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "camera_presenter.h"
 #include "game/world/level_presenter.h"
 #include "framework/math/util.h"
@@ -150,7 +150,7 @@ void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int player, in
 	presenter.key_presenter.stop_key(-1, key_id, delay);
 }
 
-void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<void, 0>("cyclecamera", [&components]() {
 		components.current_level_presenter->camera_presenter.cycle_camera();
 	});

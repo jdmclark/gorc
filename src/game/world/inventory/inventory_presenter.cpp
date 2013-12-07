@@ -2,7 +2,7 @@
 #include "game/world/level_model.h"
 #include "inventory_model.h"
 #include "cog/verbs/table.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "game/world/level_presenter.h"
 
 gorc::game::world::inventory::inventory_presenter::inventory_presenter(level_presenter& presenter)
@@ -269,7 +269,7 @@ void gorc::game::world::inventory::inventory_presenter::set_goal_flags(int playe
 	set_inv(player, 100 + goal, static_cast<int>(flag_set<flags::goal_flag>(get_inv(player, 100 + goal)) + flags));
 }
 
-void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<void, 3>("changeinv", [&components](int player, int bin, int amount) {
 		components.current_level_presenter->inventory_presenter.change_inv(player, bin, amount);
 	});

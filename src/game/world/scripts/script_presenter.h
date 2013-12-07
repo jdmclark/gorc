@@ -24,7 +24,7 @@ class virtual_machine;
 }
 
 namespace game {
-class application;
+class level_state;
 
 namespace world {
 class level_model;
@@ -35,14 +35,14 @@ class script_model;
 
 class script_presenter {
 private:
-	application& components;
+	level_state& components;
 	level_model* levelModel;
 	script_model* model;
 	cog::vm::virtual_machine VirtualMachine;
 	int master_cog = -1;
 
 public:
-	script_presenter(application& components);
+	script_presenter(level_state& curr_components);
 
 	void start(level_model& levelModel, script_model& scriptModel);
 	void update(const time& time);
@@ -94,7 +94,7 @@ public:
 
 	int get_self_cog() const;
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 
 }

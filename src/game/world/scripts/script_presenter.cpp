@@ -1,10 +1,10 @@
 #include "script_presenter.h"
 #include "script_model.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 
-gorc::game::world::scripts::script_presenter::script_presenter(application& components)
+gorc::game::world::scripts::script_presenter::script_presenter(level_state& components)
 	: components(components), levelModel(nullptr), model(nullptr) {
 	return;
 }
@@ -509,7 +509,7 @@ int gorc::game::world::scripts::script_presenter::get_self_cog() const {
 	return model->running_cog_state.top().instance_id;
 }
 
-void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<int, 1>("getparam", [&components](int param_num) {
 		return components.current_level_presenter->script_presenter.get_param(param_num);
 	});

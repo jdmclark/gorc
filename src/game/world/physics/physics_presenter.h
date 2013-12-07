@@ -3,6 +3,7 @@
 #include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 #include "game/world/thing.h"
+#include "framework/utility/time.h"
 #include "shape.h"
 #include "contact.h"
 #include <unordered_map>
@@ -21,7 +22,7 @@ class verb_table;
 
 namespace game {
 
-class application;
+class level_state;
 
 namespace world {
 
@@ -130,7 +131,7 @@ public:
 	maybe<contact> segment_query(const segment& s, int initial_sector, int ray_cast_thing, const maybe<contact>& previous_contact = maybe<contact>());
 	maybe<contact> thing_segment_query(int thing_id, const vector<3>& direction, const maybe<contact>& previous_contact = maybe<contact>());
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 
 }

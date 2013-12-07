@@ -6,7 +6,7 @@
 #include "framework/content/assets/shader.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 namespace world {
 
 class level_shader {

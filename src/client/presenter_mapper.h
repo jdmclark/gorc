@@ -4,7 +4,7 @@
 #include "places/action/action_place.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 
 class application;
 

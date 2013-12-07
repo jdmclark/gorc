@@ -4,6 +4,7 @@
 #include <tuple>
 #include "framework/utility/flag_set.h"
 #include "content/flags/key_flag.h"
+#include "framework/utility/time.h"
 
 namespace gorc {
 
@@ -19,7 +20,7 @@ class manager;
 
 namespace game {
 
-class application;
+class level_state;
 
 namespace world {
 
@@ -60,7 +61,7 @@ public:
 	int jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags);
 	void jk_stop_pov_key(int player, int key_id, float delay);
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 
 }

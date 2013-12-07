@@ -2,11 +2,11 @@
 #include "action_presenter.h"
 #include <iostream>
 
-gorc::game::action::action_view::action_view() {
+gorc::client::action::action_view::action_view() {
 	return;
 }
 
-gorc::maybe<gorc::input::input_adapter*> gorc::game::action::action_view::get_input_adapter() {
+gorc::maybe<gorc::input::input_adapter*> gorc::client::action::action_view::get_input_adapter() {
 	maybe<input::input_adapter*> rv;
 	if_set(presenter, then_do, [&rv](action_presenter& p) {
 		rv = &p.get_input_adapter();

@@ -13,7 +13,7 @@ class verb_table;
 }
 
 namespace game {
-class application;
+class level_state;
 
 namespace world {
 class level_model;
@@ -67,7 +67,7 @@ public:
 	void clear_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags);
 	void set_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags);
 
-	static void register_verbs(cog::verbs::verb_table& verbTable, application&);
+	static void register_verbs(cog::verbs::verb_table& verbTable, level_state&);
 };
 
 }

@@ -7,13 +7,14 @@
 #include "clear_screen_view.h"
 #include "places/action/action_view.h"
 #include "content/vfs/virtual_filesystem.h"
+#include "game/level_state.h"
 
 #include "framework/utility/randomizer.h"
 #include "cog/verbs/table.h"
 #include "cog/compiler.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 
 namespace world {
 class level_view;
@@ -32,15 +33,13 @@ public:
 	const std::string input_levelname;
 
 	content::vfs::virtual_filesystem& virtual_filesystem;
-	cog::verbs::verb_table verb_table;
-	cog::compiler compiler;
 
 	utility::randomizer randomizer;
 
 	std::unique_ptr<world::level_view> level_view;
 	std::unique_ptr<action::action_view> action_view;
 
-	std::unique_ptr<world::level_presenter> current_level_presenter;
+	game::level_state components;
 
 	application(content::vfs::virtual_filesystem& filesystem, diagnostics::report& report,
 			const std::string& input_episodename, const std::string& input_levelname);

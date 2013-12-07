@@ -19,7 +19,7 @@ class verb_table;
 }
 
 namespace game {
-class application;
+class level_state;
 
 namespace world {
 class level_model;
@@ -58,7 +58,7 @@ public:
 	void set_music_vol(float volume);
 	void stop_sound(int channel, float delay);
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 
 }

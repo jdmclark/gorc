@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 
 	gorc::diagnostics::stream_report report(std::cout);
 	gorc::content::vfs::virtual_filesystem fs("game/restricted", "game/resource", "game/episode", report);
-	gorc::game::application app(fs, report, episode_name, levelfile_name);
+	gorc::client::application app(fs, report, episode_name, levelfile_name);
 	app.run();
 	return 0;
 }

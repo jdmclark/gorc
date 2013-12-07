@@ -1,13 +1,14 @@
 #include "level_presenter.h"
 #include "level_model.h"
-#include "level_view.h"
 #include "game/constants.h"
 #include "physics/query.h"
 #include "framework/events/print.h"
+#include "framework/events/exit.h"
+#include "game/level_state.h"
 
 using namespace gorc::math;
 
-gorc::game::world::level_presenter::level_presenter(application& components, const level_place& place)
+gorc::game::world::level_presenter::level_presenter(level_state& components, const level_place& place)
 	: components(components), place(place), contentmanager(place.contentmanager),
 	  physics_presenter(*this), script_presenter(components), sound_presenter(*place.contentmanager),
 	  key_presenter(*place.contentmanager), inventory_presenter(*this), camera_presenter(*this),
@@ -18,6 +19,7 @@ gorc::game::world::level_presenter::level_presenter(application& components, con
 }
 
 void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
+	event_bus = &eventBus;
 	model = std::unique_ptr<level_model>(new level_model(*place.contentmanager, components.compiler, place.level,
 			place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler)));
 
@@ -30,11 +32,6 @@ void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
 	inventory_presenter.start(*model, model->inventory_model);
 
 	initialize_world();
-
-	components.level_view->set_presenter(this);
-	components.level_view->set_level_model(model.get());
-
-	components.views.set_layer(view_layer::world, *components.level_view);
 
 	// Update all components
 	update(time(0, 0.0));
@@ -380,13 +377,13 @@ float gorc::game::world::level_presenter::get_level_time() {
 
 void gorc::game::world::level_presenter::jk_end_level(bool success) {
 	if(success) {
-		components.event_bus.fire_event(events::print("Ending level - success"));
+		event_bus->fire_event(events::print("Ending level - success"));
 	}
 	else {
-		components.event_bus.fire_event(events::print("Ending level - failure"));
+		event_bus->fire_event(events::print("Ending level - failure"));
 	}
 
-	components.event_bus.fire_event(events::exit());
+	event_bus->fire_event(events::exit());
 }
 
 // Misc verbs
@@ -804,7 +801,7 @@ void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed
 	model->things[player].armed_mode = mode;
 }
 
-void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	camera::camera_presenter::register_verbs(verbTable, components);
 	animations::animation_presenter::register_verbs(verbTable, components);
 	scripts::script_presenter::register_verbs(verbTable, components);

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "game/presenter.h"
+#include "client/presenter.h"
 #include "framework/input/passthrough_input_adapter.h"
 #include "framework/input/keyboard_key_dispatcher.h"
 #include "framework/input/mouse_click_dispatcher.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 
 class application;
 
 namespace action {
 
-class action_presenter : public gorc::game::presenter {
+class action_presenter : public gorc::client::presenter {
 private:
 	bool window_has_focus = true;
 	application& app;

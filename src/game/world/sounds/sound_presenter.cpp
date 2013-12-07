@@ -1,6 +1,6 @@
 #include "sound_presenter.h"
 #include "game/world/level_model.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "framework/content/manager.h"
 #include "game/world/level_presenter.h"
 #include "sound_model.h"
@@ -169,7 +169,7 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(int channel, float d
 	}
 }
 
-void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<void, 3>("changesoundpitch", [&components](int channel, float pitch, float delay) {
 		components.current_level_presenter->sound_presenter.change_sound_pitch(channel, pitch, delay);
 	});

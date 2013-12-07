@@ -1,5 +1,5 @@
 #include "cog/verbs/table.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "physics_presenter.h"
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
@@ -753,5 +753,5 @@ gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id
 	return segment_query(segment(current_thing.position, current_thing.position + direction), current_thing.sector, current_thing_id, prev_contact);
 }
 
-void physics_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void physics_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 }

@@ -1,8 +1,8 @@
 #include "framework/content/assets/shader.h"
 #include "level_view.h"
-#include "level_presenter.h"
-#include "game/application.h"
-#include "level_model.h"
+#include "game/world/level_presenter.h"
+#include "client/application.h"
+#include "game/world/level_model.h"
 #include "content/assets/model.h"
 #include "content/assets/sprite.h"
 #include "content/constants.h"
@@ -13,7 +13,7 @@
 
 using namespace gorc::math;
 
-gorc::game::world::level_view::level_view(content::manager& contentmanager)
+gorc::client::world::level_view::level_view(content::manager& contentmanager)
 	: surfaceShader(contentmanager.load<content::assets::shader>("surface.glsl")),
 	  horizonShader(contentmanager.load<content::assets::shader>("horizon.glsl")),
 	  ceilingShader(contentmanager.load<content::assets::shader>("ceiling.glsl")),
@@ -22,7 +22,7 @@ gorc::game::world::level_view::level_view(content::manager& contentmanager)
 	return;
 }
 
-void gorc::game::world::level_view::compute_visible_sectors(const box<2, int>& view_size) {
+void gorc::client::world::level_view::compute_visible_sectors(const box<2, int>& view_size) {
 	const auto& cam = currentModel->camera_model.current_computed_state;
 
 	std::array<double, 16> proj_matrix;
@@ -47,7 +47,7 @@ void gorc::game::world::level_view::compute_visible_sectors(const box<2, int>& v
 	do_sector_vis(cam.containing_sector, proj_matrix, view_matrix, viewport, adj_bbox, cam.position, cam.look);
 }
 
-void gorc::game::world::level_view::do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
+void gorc::client::world::level_view::do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
 		const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look) {
 	sector_visited_scratch.emplace(sec_num);
 
@@ -117,7 +117,7 @@ void gorc::game::world::level_view::do_sector_vis(unsigned int sec_num, const st
 	sector_visited_scratch.erase(sec_num);
 }
 
-void gorc::game::world::level_view::record_visible_special_surfaces() {
+void gorc::client::world::level_view::record_visible_special_surfaces() {
 	const content::assets::level& lev = currentModel->level;
 
 	for(auto sec_num : sector_vis_scratch) {
@@ -161,7 +161,7 @@ void gorc::game::world::level_view::record_visible_special_surfaces() {
 	});
 }
 
-void gorc::game::world::level_view::record_visible_things() {
+void gorc::client::world::level_view::record_visible_things() {
 	for(auto& thing : currentModel->things) {
 		if(sector_vis_scratch.find(thing.sector) != sector_vis_scratch.end()) {
 			visible_thing_scratch.emplace_back(thing.get_id(), length(thing.position - currentModel->camera_model.current_computed_state.position));
@@ -180,7 +180,7 @@ void gorc::game::world::level_view::record_visible_things() {
 	});
 }
 
-void gorc::game::world::level_view::draw_visible_diffuse_surfaces() {
+void gorc::client::world::level_view::draw_visible_diffuse_surfaces() {
 	glDepthMask(GL_TRUE);
 	const content::assets::level& lev = currentModel->level;
 
@@ -202,7 +202,7 @@ void gorc::game::world::level_view::draw_visible_diffuse_surfaces() {
 	}
 }
 
-void gorc::game::world::level_view::draw_visible_sky_surfaces(const box<2, int>& view_size, const vector<3>& sector_tint) {
+void gorc::client::world::level_view::draw_visible_sky_surfaces(const box<2, int>& view_size, const vector<3>& sector_tint) {
 	glDepthMask(GL_TRUE);
 
 	if(!horizon_sky_surfaces_scratch.empty()) {
@@ -225,7 +225,7 @@ void gorc::game::world::level_view::draw_visible_sky_surfaces(const box<2, int>&
 	}
 }
 
-void gorc::game::world::level_view::draw_visible_translucent_surfaces_and_things() {
+void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_things() {
 	auto thing_it = visible_thing_scratch.begin();
 	auto surf_it = translucent_surfaces_scratch.begin();
 	while(thing_it != visible_thing_scratch.end() && surf_it != translucent_surfaces_scratch.end()) {
@@ -260,7 +260,7 @@ void gorc::game::world::level_view::draw_visible_translucent_surfaces_and_things
 	}
 }
 
-void gorc::game::world::level_view::draw(const time& time, const box<2, int>& view_size, graphics::render_target& render_target) {
+void gorc::client::world::level_view::draw(const time& time, const box<2, int>& view_size, graphics::render_target& render_target) {
 	if(currentModel) {
 		const auto& cam = currentModel->camera_model.current_computed_state;
 
@@ -373,7 +373,7 @@ void gorc::game::world::level_view::draw(const time& time, const box<2, int>& vi
 	}
 }
 
-void gorc::game::world::level_view::draw_pov_model() {
+void gorc::client::world::level_view::draw_pov_model() {
 	// Draw POV model.
 	const auto& cam = currentModel->camera_model.current_computed_state;
 
@@ -399,7 +399,7 @@ void gorc::game::world::level_view::draw_pov_model() {
 	}
 }
 
-void gorc::game::world::level_view::draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha) {
+void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha) {
 	const auto& surface = currentModel->surfaces[surf_num];
 	const auto& lev = currentModel->level;
 
@@ -469,13 +469,13 @@ void gorc::game::world::level_view::draw_surface(unsigned int surf_num, const co
 	}
 }
 
-gorc::game::world::level_view::mesh_node_visitor::mesh_node_visitor(const vector<4>& sector_color, level_view& view,
+gorc::client::world::level_view::mesh_node_visitor::mesh_node_visitor(const vector<4>& sector_color, level_view& view,
 		content::assets::model const* weapon_mesh, content::assets::puppet const* puppet_file)
 	: sector_color(sector_color), view(view), weapon_mesh(weapon_mesh), puppet_file(puppet_file) {
 	return;
 }
 
-void gorc::game::world::level_view::mesh_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
+void gorc::client::world::level_view::mesh_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
 	const content::assets::model_mesh& mesh = model.geosets.front().meshes[mesh_id];
 	for(const auto& face : mesh.faces) {
 		if(face.material >= 0) {
@@ -545,7 +545,7 @@ void gorc::game::world::level_view::mesh_node_visitor::visit_mesh(const content:
 	}
 }
 
-void gorc::game::world::level_view::draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light) {
+void gorc::client::world::level_view::draw_sprite(const game::world::thing& thing, const content::assets::sprite& sprite, float sector_light) {
 	if(sprite.mat) {
 		float light = sector_light + sprite.extra_light;
 		if(sprite.light_mode == flags::light_mode::FullyLit) {
@@ -622,7 +622,7 @@ void gorc::game::world::level_view::draw_sprite(const thing& thing, const conten
 	}
 }
 
-void gorc::game::world::level_view::draw_thing(const thing& thing, int thing_id) {
+void gorc::client::world::level_view::draw_thing(const game::world::thing& thing, int thing_id) {
 	if((thing.flags & flags::thing_flag::Invisible) || thing_id == currentModel->camera_model.current_computed_state.focus_not_drawn_thing) {
 		return;
 	}

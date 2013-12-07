@@ -1,7 +1,7 @@
 #pragma once
 
 namespace gorc {
-namespace game {
+namespace client {
 namespace action {
 
 class action_place {

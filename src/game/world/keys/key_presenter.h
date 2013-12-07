@@ -11,6 +11,7 @@
 #include "framework/math/matrix.h"
 #include "content/assets/puppet.h"
 #include "framework/math/quaternion.h"
+#include "framework/utility/time.h"
 
 namespace gorc {
 
@@ -26,7 +27,7 @@ class manager;
 
 namespace game {
 
-class application;
+class level_state;
 
 namespace world {
 
@@ -69,7 +70,7 @@ public:
 	void stop_key(int thing_id, int key, float delay);
 	void stop_all_mix_keys(int mix);
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 
 private:
 	template <typename T> void visit_mesh_node(T& visitor, const content::assets::model& obj, int attached_key_mix, int mesh_id,

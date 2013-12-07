@@ -1,22 +1,22 @@
 #include "application.h"
-#include "world/level_presenter.h"
-#include "world/level_model.h"
+#include "game/world/level_presenter.h"
+#include "game/world/level_model.h"
 #include "world/level_view.h"
 #include <boost/algorithm/string/predicate.hpp>
 #include "framework/events/print.h"
 
-gorc::game::application::application(content::vfs::virtual_filesystem& vfs, diagnostics::report& report,
+gorc::client::application::application(content::vfs::virtual_filesystem& vfs, diagnostics::report& report,
 		const std::string& episode_name, const std::string& level_name)
 	: gorc::application<view_layer, presenter, presenter_mapper>("Gorc", mapper, report, vfs, make_box(make_vector(0, 0), make_vector(1280, 720)), true),
-	  mapper(*this), input_episodename(episode_name), input_levelname(level_name), virtual_filesystem(vfs), compiler(verb_table) {
+	  mapper(*this), input_episodename(episode_name), input_levelname(level_name), virtual_filesystem(vfs) {
 	return;
 }
 
-gorc::game::application::~application() {
+gorc::client::application::~application() {
 	return;
 }
 
-void gorc::game::application::startup(event::event_bus& event_bus, content::manager& content) {
+void gorc::client::application::startup(event::event_bus& event_bus, content::manager& content) {
 	// Register handler to print messages.
 	event_bus.add_handler<events::print>([](const events::print& print) {
 		std::cout << print.message << std::endl;
@@ -39,26 +39,33 @@ void gorc::game::application::startup(event::event_bus& event_bus, content::mana
 
 	// HACK: Set current level to 01narshadda.jkl.
 	auto contentmanager = std::make_shared<content::manager>(report, filesystem);
-	const auto& lev = contentmanager->load<content::assets::level>(input_levelname, compiler);
+	const auto& lev = contentmanager->load<content::assets::level>(input_levelname, components.compiler);
 
 	// Start game:
-	current_level_presenter = make_unique<world::level_presenter>(*this, world::level_place(contentmanager, lev));
+	components.current_level_presenter = make_unique<game::world::level_presenter>(components, game::world::level_place(contentmanager, lev));
 	place_controller.go_to(action::action_place());
 
-	current_level_presenter->start(event_bus);
+	components.current_level_presenter->start(event_bus);
+
+	level_view->set_presenter(components.current_level_presenter.get());
+	level_view->set_level_model(components.current_level_presenter->model.get());
+
+	views.set_layer(view_layer::world, *level_view);
 
 	return;
 }
 
-void gorc::game::application::shutdown() {
+void gorc::client::application::shutdown() {
 	return;
 }
 
-void gorc::game::application::update(const time& time, const box<2, int>& view_size) {
-	current_level_presenter->update(time);
+void gorc::client::application::update(const time& time, const box<2, int>& view_size) {
+	components.current_level_presenter->update(time);
 }
 
-void gorc::game::application::register_verbs() {
+void gorc::client::application::register_verbs() {
+	auto& verb_table = components.verb_table;
+
 	// Register common, general-purpose verbs.
 
 	verb_table.add_verb<int, 2>("bitclear", [](int flag, int clear_flags) {
@@ -119,5 +126,5 @@ void gorc::game::application::register_verbs() {
 	verb_table.add_verb<float, 1>("vectory", [](vector<3> a) { return get<1>(a); });
 	verb_table.add_verb<float, 1>("vectorz", [](vector<3> a) { return get<2>(a); });
 
-	world::level_presenter::register_verbs(verb_table, *this);
+	game::world::level_presenter::register_verbs(verb_table, components);
 }

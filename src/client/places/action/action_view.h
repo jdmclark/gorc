@@ -3,7 +3,7 @@
 #include "framework/view.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 namespace action {
 
 class action_presenter;

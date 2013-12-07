@@ -1,7 +1,7 @@
 #pragma once
 
 namespace gorc {
-namespace game {
+namespace client {
 
 enum class view_layer {
 	clear_screen,

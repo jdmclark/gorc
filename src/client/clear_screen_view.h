@@ -3,7 +3,7 @@
 #include "framework/view.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 
 class clear_screen_view : public gorc::view {
 public:

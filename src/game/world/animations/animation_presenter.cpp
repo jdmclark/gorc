@@ -1,5 +1,5 @@
 #include "cog/verbs/table.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "animation_presenter.h"
 #include "animation_model.h"
 #include "game/world/level_model.h"
@@ -82,7 +82,7 @@ int animation_presenter::surface_light_anim(int surface, float start_light, floa
 	return ent.get_id();
 }
 
-void gorc::game::world::animations::animation_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::animations::animation_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<int, 1>("getsurfaceanim", [&components](int surface) {
 		return static_cast<int>(components.current_level_presenter->animation_presenter.get_surface_anim(surface));
 	});

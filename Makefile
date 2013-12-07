@@ -7,12 +7,13 @@
 # Module configuration #
 # ==================== #
 
-LIB_MODULES = framework cog content
+LIB_MODULES = framework cog content game
 TEST_MODULES = frameworktest cogtest contenttest
-BIN_MODULES = game ungob
+BIN_MODULES = client server ungob
 
 framework_LIBRARIES = GLEW GL GLU sfml-audio sfml-graphics sfml-window sfml-system boost_system boost_filesystem
 content_DEPENDENCIES = cog framework
+game_DEPENDENCIES = cog framework content
 
 cog_DEPENDENCIES = framework
 cog_SOURCE_FILES += $(SRC_PATH)/cog/grammar/lexer.cpp $(SRC_PATH)/cog/grammar/parser.cpp
@@ -22,7 +23,8 @@ frameworktest_DEPENDENCIES = framework
 cogtest_DEPENDENCIES = cog framework content
 contenttest_DEPENDENCIES = cog framework content
 
-game_DEPENDENCIES = framework cog content
+client_DEPENDENCIES = framework cog content game
+server_DEPENDENCIES = framework cog content game
 
 ungob_DEPENDENCIES = framework cog content
 

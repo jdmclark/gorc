@@ -1,5 +1,5 @@
 #include "cog/verbs/table.h"
-#include "game/application.h"
+#include "game/level_state.h"
 #include "key_presenter.h"
 #include "key_model.h"
 #include "game/world/level_model.h"
@@ -339,7 +339,7 @@ int gorc::game::world::keys::key_presenter::create_key_mix() {
 	return mix.get_id();
 }
 
-void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, application& components) {
+void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<float, 1>("getkeylen", [&components](int key_id) {
 		return components.current_level_presenter->key_presenter.get_key_len(key_id);
 	});

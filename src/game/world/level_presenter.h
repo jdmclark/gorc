@@ -2,7 +2,6 @@
 
 #include "framework/place/presenter.h"
 #include "framework/utility/time.h"
-#include "game/application.h"
 #include "level_place.h"
 #include "cog/vm/virtual_machine.h"
 #include "sounds/music.h"
@@ -34,6 +33,8 @@
 
 namespace gorc {
 namespace game {
+class level_state;
+
 namespace world {
 
 class level_model;
@@ -44,8 +45,9 @@ private:
 	// Scratch space
 	std::vector<std::tuple<int, int>> update_path_sector_scratch;
 
-	application& components;
+	level_state& components;
 	level_place place;
+	event::event_bus* event_bus;
 
 	void initialize_world();
 
@@ -73,7 +75,7 @@ public:
 	gameplay::corpse_controller corpse_controller;
 	gameplay::weapon_controller weapon_controller;
 
-	level_presenter(application& components, const level_place& place);
+	level_presenter(level_state& components, const level_place& place);
 
 	void start(event::event_bus& eventBus);
 	void update(const time& time);
@@ -181,7 +183,7 @@ public:
 	void jk_set_weapon_mesh(int player, int model);
 	void set_armed_mode(int player, flags::armed_mode mode);
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 
 }

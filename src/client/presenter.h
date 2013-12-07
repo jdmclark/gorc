@@ -3,7 +3,7 @@
 #include "framework/application_presenter.h"
 
 namespace gorc {
-namespace game {
+namespace client {
 
 using presenter = gorc::application_presenter;
 

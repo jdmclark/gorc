@@ -5,6 +5,7 @@
 #include "framework/utility/flag_set.h"
 #include "framework/math/vector.h"
 #include "framework/utility/pool.h"
+#include "framework/utility/time.h"
 
 namespace gorc {
 
@@ -17,7 +18,7 @@ class verb_table;
 
 namespace game {
 
-class application;
+class level_state;
 
 namespace world {
 
@@ -49,7 +50,7 @@ public:
 
 	int surface_light_anim(int surface_id, float start_light, float end_light, float change_time);
 
-	static void register_verbs(cog::verbs::verb_table&, application&);
+	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 
 }

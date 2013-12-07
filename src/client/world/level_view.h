@@ -32,14 +32,19 @@ class puppet;
 }
 
 namespace game {
-
-class components;
+class level_state;
 
 namespace world {
-
 class level_presenter;
 class level_model;
 class thing;
+}
+
+}
+
+namespace client {
+
+namespace world {
 
 class level_view : public view {
 private:
@@ -62,8 +67,8 @@ private:
 		shader.set_model_matrix(model_matrix_stack.top());
 	}
 
-	level_presenter* currentPresenter = nullptr;
-	level_model* currentModel = nullptr;
+	game::world::level_presenter* currentPresenter = nullptr;
+	game::world::level_model* currentModel = nullptr;
 	std::unordered_set<unsigned int> sector_vis_scratch;
 	std::unordered_set<unsigned int> sector_visited_scratch;
 	std::vector<std::tuple<unsigned int, unsigned int>> horizon_sky_surfaces_scratch;
@@ -82,17 +87,17 @@ private:
 	void draw_pov_model();
 
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
-	void draw_sprite(const thing& thing, const content::assets::sprite& sprite, float sector_light);
-	void draw_thing(const thing& thing, int thing_id);
+	void draw_sprite(const game::world::thing& thing, const content::assets::sprite& sprite, float sector_light);
+	void draw_thing(const game::world::thing& thing, int thing_id);
 
 public:
 	level_view(content::manager& shadercontentmanager);
 
-	inline void set_presenter(level_presenter* presenter) {
+	inline void set_presenter(game::world::level_presenter* presenter) {
 		currentPresenter = presenter;
 	}
 
-	inline void set_level_model(level_model* levelModel) {
+	inline void set_level_model(game::world::level_model* levelModel) {
 		currentModel = levelModel;
 	}
 
