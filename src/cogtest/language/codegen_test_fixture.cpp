@@ -132,7 +132,7 @@ void CodegenTestFixture::ParseFile(const boost::filesystem::path& filename) {
 	gorc::cog::vm::virtual_machine vm;
 
 	try {
-		vm.execute(inst->heap, inst->script.code, startupAddr, verb_table);
+		vm.execute(inst->heap, inst->script.code, startupAddr, verb_table, nullptr);
 	}
 	catch(const gorc::cog::vm::code_buffer_overflow_exception& e) {
 		report.add_critical_error("CodeGenTestFixture::ParseFile", "code buffer overflow");

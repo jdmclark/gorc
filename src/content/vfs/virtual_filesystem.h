@@ -9,6 +9,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <iosfwd>
 
 namespace gorc {
 namespace content {
@@ -76,6 +77,8 @@ public:
 	inline void clear_episode() {
 		currentEpisode = nullptr;
 	}
+
+	void list(std::ostream& str) const;
 };
 
 }

@@ -5,70 +5,15 @@
 #include "game/world/level_model.h"
 
 gorc::game::world::scripts::script_presenter::script_presenter(level_state& components)
-	: components(components), levelModel(nullptr), model(nullptr) {
+	: gorc::cog::scripts::script_presenter(components.verb_table), components(components), levelModel(nullptr), model(nullptr) {
 	return;
 }
 
 void gorc::game::world::scripts::script_presenter::start(level_model& levelModel, script_model& scriptModel) {
 	this->levelModel = &levelModel;
 	model = &scriptModel;
-}
 
-void gorc::game::world::scripts::script_presenter::update(const time& time) {
-	double dt = time;
-
-	// update cogs
-	for(unsigned int i = 0; i < model->cogs.size(); ++i) {
-		auto& cog = model->cogs[i];
-		cog::instance& inst = *std::get<0>(cog);
-		script_timer_state& timer_state = std::get<1>(cog);
-
-		if(timer_state.timer_remaining_time > 0.0) {
-			timer_state.timer_remaining_time -= dt;
-			if(timer_state.timer_remaining_time <= 0.0) {
-				timer_state.timer_remaining_time = 0.0;
-				send_message(i, cog::message_id::timer, -1, -1, flags::message_type::nothing);
-			}
-		}
-
-		if(timer_state.pulse_time > 0.0) {
-			timer_state.pulse_remaining_time -= dt;
-			if(timer_state.pulse_remaining_time <= 0.0) {
-				timer_state.pulse_remaining_time = timer_state.pulse_time;
-				send_message(i, cog::message_id::pulse, -1, -1, flags::message_type::nothing);
-			}
-		}
-	}
-
-	// Enqueue sleeping cogs
-	for(auto& cog : model->sleeping_cogs) {
-		std::get<0>(cog) -= dt;
-		if(std::get<0>(cog) <= 0.0) {
-			model->running_cog_state.push(std::get<1>(cog));
-			model->sleeping_cogs.erase(cog);
-		}
-	}
-
-	// Run sleeping cogs
-	run_waiting_cogs();
-
-	// update timers
-	for(auto& timer : model->timers) {
-		timer.delay -= dt;
-		if(timer.delay <= 0.0) {
-			send_message(timer.instance_id, cog::message_id::timer, timer.id, 0, flags::message_type::nothing,
-					0, flags::message_type::nothing, timer.param0, timer.param1);
-			model->timers.erase(timer.get_id());
-		}
-	}
-}
-
-void gorc::game::world::scripts::script_presenter::run_waiting_cogs() {
-	while(!model->running_cog_state.empty()) {
-		cog::instance& inst = *std::get<0>(model->cogs[model->running_cog_state.top().instance_id]);
-		VirtualMachine.execute(inst.heap, inst.script.code, model->running_cog_state.top().program_counter, components.verb_table);
-		model->running_cog_state.pop();
-	}
+	cog::scripts::script_presenter::start(scriptModel);
 }
 
 void gorc::game::world::scripts::script_presenter::resume_wait_for_stop(int wait_thing) {
@@ -86,7 +31,7 @@ void gorc::game::world::scripts::script_presenter::resume_wait_for_stop(int wait
 void gorc::game::world::scripts::script_presenter::create_level_dummy_instances(int count) {
 	// create empty, non-functional COG instances for padding out the list of level instances.
 	for(int i = 0; i < count; ++i) {
-		model->cogs.emplace_back(std::unique_ptr<cog::instance>(nullptr), script_timer_state());
+		model->cogs.emplace_back(std::unique_ptr<cog::instance>(nullptr), cog::scripts::script_timer_state());
 	}
 }
 
@@ -94,7 +39,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 		cog::compiler& compiler, const std::vector<cog::vm::value>& values) {
 	auto& cog_inst_pair = model->cogs[index];
 	std::get<0>(cog_inst_pair) = std::unique_ptr<cog::instance>(new cog::instance(script));
-	std::get<1>(cog_inst_pair) = script_timer_state();
+	std::get<1>(cog_inst_pair) = cog::scripts::script_timer_state();
 
 	cog::instance& inst = *std::get<0>(cog_inst_pair);
 
@@ -218,7 +163,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
 		return;
 	}
 
-	model->cogs.emplace_back(std::unique_ptr<cog::instance>(new cog::instance(script)), script_timer_state());
+	model->cogs.emplace_back(std::unique_ptr<cog::instance>(new cog::instance(script)), cog::scripts::script_timer_state());
 	cog::instance& inst = *std::get<0>(model->cogs.back());
 	model->global_script_instances.emplace(&script, model->cogs.size() - 1);
 
@@ -334,39 +279,6 @@ int gorc::game::world::scripts::script_presenter::get_global_cog_instance(cog::s
 	return -1;
 }
 
-gorc::cog::vm::value gorc::game::world::scripts::script_presenter::send_message(int InstanceId, cog::message_id message,
-		int SenderId, int SenderRef, flags::message_type SenderType,
-		int SourceRef, flags::message_type SourceType,
-		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
-	if(InstanceId < 0) {
-		return -1;
-	}
-
-	auto& instance = std::get<0>(model->cogs[InstanceId]);
-	if(instance) {
-		model->running_cog_state.emplace(InstanceId, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
-
-		instance->call(components.verb_table, VirtualMachine, message);
-
-		cog::vm::value rex_val = model->running_cog_state.top().returnex_value;
-
-		model->running_cog_state.pop();
-
-		return rex_val;
-	}
-
-	return -1;
-}
-
-void gorc::game::world::scripts::script_presenter::send_message_to_all(cog::message_id message,
-		int SenderId, int SenderRef, flags::message_type SenderType,
-		int SourceRef, flags::message_type SourceType,
-		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
-	for(unsigned int i = 0; i < model->cogs.size(); ++i) {
-		send_message(i, message, SenderId, SenderRef, SenderType, SourceRef, SourceType, Param0, Param1, Param2, Param3);
-	}
-}
-
 void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::message_id message,
 		int SenderRef, flags::message_type SenderType,
 		int SourceRef, flags::message_type SourceType,
@@ -458,39 +370,8 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
 	}
 }
 
-void gorc::game::world::scripts::script_presenter::set_pulse(float time) {
-	script_timer_state& state = std::get<1>(model->cogs[model->running_cog_state.top().instance_id]);
-	state.pulse_time = time;
-	state.pulse_remaining_time = time;
-}
-
-void gorc::game::world::scripts::script_presenter::set_timer(float time) {
-	std::get<1>(model->cogs[model->running_cog_state.top().instance_id]).timer_remaining_time = time;
-}
-
-void gorc::game::world::scripts::script_presenter::set_timer_ex(float time, int id, cog::vm::value param0, cog::vm::value param1) {
-	script_timer& timer = model->timers.emplace();
-	timer.instance_id = model->running_cog_state.top().instance_id;
-	timer.delay = time;
-	timer.id = id;
-	timer.param0 = param0;
-	timer.param1 = param1;
-}
-
-void gorc::game::world::scripts::script_presenter::sleep(float time) {
-	script_continuation continuation = model->running_cog_state.top();
-
-	continuation.program_counter = VirtualMachine.get_program_counter();
-
-	auto& sleep_tuple = model->sleeping_cogs.emplace();
-	std::get<0>(sleep_tuple) = time;
-	std::get<1>(sleep_tuple) = continuation;
-
-	VirtualMachine.abort();
-}
-
 void gorc::game::world::scripts::script_presenter::wait_for_stop(int thing) {
-	script_continuation continuation = model->running_cog_state.top();
+	cog::scripts::script_continuation continuation = model->running_cog_state.top();
 
 	continuation.program_counter = VirtualMachine.get_program_counter();
 
@@ -505,38 +386,7 @@ void gorc::game::world::scripts::script_presenter::capture_thing(int thing_id) {
 	levelModel->things[thing_id].capture_cog = model->running_cog_state.top().instance_id;
 }
 
-int gorc::game::world::scripts::script_presenter::get_self_cog() const {
-	return model->running_cog_state.top().instance_id;
-}
-
 void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
-	verbTable.add_verb<int, 1>("getparam", [&components](int param_num) {
-		return components.current_level_presenter->script_presenter.get_param(param_num);
-	});
-
-	verbTable.add_verb<int, 0>("getsenderid", [&components]{
-		return components.current_level_presenter->script_presenter.get_sender_id();
-	});
-
-	verbTable.add_verb<int, 0>("getsenderref", [&components]{
-		return components.current_level_presenter->script_presenter.get_sender_ref();
-	});
-
-	verbTable.add_verb<int, 0>("getsendertype", [&components]{
-		return components.current_level_presenter->script_presenter.get_sender_type();
-	});
-
-	verbTable.add_verb<int, 0>("getsourceref", [&components]{
-		return components.current_level_presenter->script_presenter.get_source_ref();
-	});
-
-	verbTable.add_verb<int, 0>("getsourcetype", [&components]{
-		return components.current_level_presenter->script_presenter.get_source_type();
-	});
-
-	verbTable.add_verb<void, 1>("returnex", [&components](cog::vm::value value) {
-		components.current_level_presenter->script_presenter.model->running_cog_state.top().returnex_value = value;
-	});
 
 	verbTable.add_verb<void, 2>("sendmessage", [&components](int cog_id, int message) {
 		components.current_level_presenter->script_presenter.send_message(cog_id, static_cast<cog::message_id>(message),
@@ -552,39 +402,11 @@ void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::ve
 				param0, param1, param2, param3);
 	});
 
-	verbTable.add_verb<void, 1>("setpulse", [&components](float time) {
-		components.current_level_presenter->script_presenter.set_pulse(time);
-	});
-
-	verbTable.add_verb<void, 1>("settimer", [&components](float time) {
-		components.current_level_presenter->script_presenter.set_timer(time);
-	});
-
-	verbTable.add_verb<void, 4>("settimerex", [&components](float time, int id, cog::vm::value param0, cog::vm::value param1) {
-		components.current_level_presenter->script_presenter.set_timer_ex(time, id, param0, param1);
-	});
-
-	verbTable.add_verb<void, 1>("sleep", [&components](float time) {
-		components.current_level_presenter->script_presenter.sleep(time);
-	});
-
 	verbTable.add_verb<void, 1>("waitforstop", [&components](int thing_id) {
 		components.current_level_presenter->script_presenter.wait_for_stop(thing_id);
 	});
 
 	verbTable.add_verb<void, 1>("capturething", [&components](int thing_id) {
 		components.current_level_presenter->script_presenter.capture_thing(thing_id);
-	});
-
-	verbTable.add_verb<int, 0>("getmastercog", [&components] {
-		return components.current_level_presenter->script_presenter.get_master_cog();
-	});
-
-	verbTable.add_verb<int, 0>("getselfcog", [&components] {
-		return components.current_level_presenter->script_presenter.get_self_cog();
-	});
-
-	verbTable.add_verb<void, 1>("setmastercog", [&components](int cog) {
-		components.current_level_presenter->script_presenter.set_master_cog(cog);
 	});
 }

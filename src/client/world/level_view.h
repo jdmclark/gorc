@@ -6,17 +6,11 @@
 #include "framework/utility/flag_set.h"
 #include "content/flags/key_flag.h"
 #include "level_shader.h"
+#include "cog/verbs/table.h"
 #include <stack>
 #include <unordered_set>
 
 namespace gorc {
-
-namespace cog {
-namespace verbs {
-class verb_table;
-}
-}
-
 namespace content {
 class manager;
 

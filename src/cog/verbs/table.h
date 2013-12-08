@@ -44,8 +44,8 @@ public:
 		return verbs[id.id]->return_type();
 	}
 
-	inline V invoke(verb_id id, std::stack<V>& stack) const {
-		return verbs[id.id]->invoke(stack);
+	inline V invoke(verb_id id, std::stack<V>& stack, void* system) const {
+		return verbs[id.id]->invoke(stack, system);
 	}
 
 	inline bool is_verb_defined(const std::string& name) const {
@@ -61,6 +61,16 @@ public:
 
 		verb_dict.insert(std::make_pair(name, verbs.size()));
 		verbs.push_back(std::unique_ptr<base_verb>(new verb<ResultType, Arity, T>(fn)));
+	}
+
+	template <typename ResultType, int Arity, typename SystemRefT, typename T> void add_system_verb(const std::string& name, T fn) {
+		auto it = verb_dict.find(name);
+		if(it != verb_dict.end()) {
+			throw verb_redefinition_exception();
+		}
+
+		verb_dict.insert(std::make_pair(name, verbs.size()));
+		verbs.push_back(std::unique_ptr<base_verb>(new system_verb<ResultType, Arity, SystemRefT, T>(fn)));
 	}
 
 	template <typename T> void add_verb(const std::string& name, T fn) {

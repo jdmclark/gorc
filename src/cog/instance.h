@@ -17,7 +17,7 @@ public:
 
 	instance(const cog::script& script);
 
-	void call(verbs::verb_table& verbTable, vm::virtual_machine& vm, message_id message);
+	void call(verbs::verb_table& verbTable, vm::virtual_machine& vm, message_id message, void* system);
 };
 
 }

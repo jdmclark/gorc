@@ -1,30 +1,15 @@
 #pragma once
 
-#include "script_instance.h"
-#include "script_continuation.h"
-#include "script_timer.h"
-#include "framework/utility/pool.h"
-#include <memory>
-#include <vector>
-#include <tuple>
-#include <unordered_map>
+#include "cog/scripts/script_model.h"
 
 namespace gorc {
 namespace game {
 namespace world {
-
-class thing;
-
 namespace scripts {
 
-class script_model {
+class script_model : public gorc::cog::scripts::script_model {
 public:
-	std::vector<script_instance> cogs;
-	std::unordered_map<cog::script const*, int> global_script_instances;
-	pool<std::tuple<double, script_continuation>, 8> sleeping_cogs;
-	pool<std::tuple<int, script_continuation>, 8> wait_for_stop_cogs;
-	std::stack<script_continuation> running_cog_state;
-	pool<script_timer> timers;
+	pool<std::tuple<int, gorc::cog::scripts::script_continuation>, 8> wait_for_stop_cogs;
 };
 
 }

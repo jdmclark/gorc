@@ -155,3 +155,23 @@ std::unique_ptr<gorc::io::read_only_file> gorc::content::vfs::virtual_filesystem
 	// Not found.
 	throw io::file_not_found_exception();
 }
+
+void gorc::content::vfs::virtual_filesystem::list(std::ostream& os) const {
+	for(const auto& f : RestrictedFileMap) {
+		os << f.first << std::endl;
+	}
+
+	if(currentEpisode != nullptr) {
+		for(const auto& f : *currentEpisode) {
+			os << f.first << std::endl;
+		}
+	}
+
+	for(const auto& f : gameFileMap) {
+		os << f.first << std::endl;
+	}
+
+	for(const auto& f : ResourceFileMap) {
+		os << f.first << std::endl;
+	}
+}

@@ -4,8 +4,7 @@
 #include "script_instance.h"
 
 namespace gorc {
-namespace game {
-namespace world {
+namespace cog {
 namespace scripts {
 
 class script_timer {
@@ -15,7 +14,6 @@ public:
 	cog::vm::value id, param0, param1;
 };
 
-}
 }
 }
 }

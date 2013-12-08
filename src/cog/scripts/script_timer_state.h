@@ -1,8 +1,8 @@
 #pragma once
 
 namespace gorc {
-namespace game {
-namespace world {
+namespace cog {
+namespace scripts {
 
 class script_timer_state {
 public:

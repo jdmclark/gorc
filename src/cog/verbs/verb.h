@@ -55,7 +55,7 @@ public:
 		return parameterCount;
 	}
 
-	virtual vm::value invoke(std::stack<vm::value>& stack) const = 0;
+	virtual vm::value invoke(std::stack<vm::value>& stack, void* system) const = 0;
 };
 
 template <typename ResultType, int Arity, typename F> class verb : public base_verb {
@@ -67,9 +67,24 @@ public:
 		return;
 	}
 
-	vm::value invoke(std::stack<vm::value>& stack) const {
+	vm::value invoke(std::stack<vm::value>& stack, void* system) const {
 		verb_binder<ResultType, Arity> binder;
 		return binder.invoke(stack, functor);
+	}
+};
+
+template <typename ResultType, int Arity, typename SystemRefT, typename F> class system_verb : public base_verb {
+private:
+	F functor;
+
+public:
+	system_verb(F functor) : base_verb(helper_get_vm_type<ResultType>::type, Arity), functor(functor) {
+		return;
+	}
+
+	vm::value invoke(std::stack<vm::value>& stack, void* system) const {
+		system_verb_binder<ResultType, Arity, SystemRefT> binder;
+		return binder.invoke(stack, *reinterpret_cast<SystemRefT*>(system), functor);
 	}
 };
 

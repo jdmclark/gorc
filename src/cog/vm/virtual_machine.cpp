@@ -2,7 +2,8 @@
 #include "code_buffer_read_stream.h"
 #include "opcode.h"
 
-void gorc::cog::vm::virtual_machine::execute(std::vector<value>& heap, const code_buffer& code, size_t pc, const verbs::verb_table& verbTable) {
+void gorc::cog::vm::virtual_machine::execute(std::vector<value>& heap, const code_buffer& code, size_t pc,
+		const verbs::verb_table& verbTable, void* system_ptr) {
 	allow_run = true;
 
 	code_buffer_read_stream stream(code);
@@ -61,7 +62,7 @@ void gorc::cog::vm::virtual_machine::execute(std::vector<value>& heap, const cod
 
 		case opcode::JAL: {
 				size_t addr = stream.read<size_t>();
-				execute(heap, code, addr, verbTable);
+				execute(heap, code, addr, verbTable, system_ptr);
 			}
 			break;
 
@@ -86,13 +87,13 @@ void gorc::cog::vm::virtual_machine::execute(std::vector<value>& heap, const cod
 		case opcode::CALL: {
 				verbs::verb_id verb = stream.read<verbs::verb_id>();
 				program_counter = stream.tell(); // Stash program counter for engine code.
-				verbTable.invoke(verb, stack);
+				verbTable.invoke(verb, stack, system_ptr);
 			}
 			break;
 
 		case opcode::CALLV: {
 				verbs::verb_id verb = stream.read<verbs::verb_id>();
-				push(verbTable.invoke(verb, stack));
+				push(verbTable.invoke(verb, stack, system_ptr));
 			}
 			break;
 

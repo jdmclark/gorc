@@ -126,5 +126,6 @@ void gorc::client::application::register_verbs() {
 	verb_table.add_verb<float, 1>("vectory", [](vector<3> a) { return get<1>(a); });
 	verb_table.add_verb<float, 1>("vectorz", [](vector<3> a) { return get<2>(a); });
 
+	cog::scripts::script_presenter::register_verbs(verb_table);
 	game::world::level_presenter::register_verbs(verb_table, components);
 }

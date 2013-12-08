@@ -59,7 +59,7 @@ Case(TestClass) {
 	verb_id id = table.get_verb("Test");
 
 	std::stack<value> stack;
-	int rvalue = table.invoke(id, stack);
+	int rvalue = table.invoke(id, stack, nullptr);
 
 	Test_Assert_Eq(rvalue, 5);
 }
@@ -160,7 +160,7 @@ Case(invoke) {
 	stack.push(5.0f);
 	stack.push(10);
 
-	Test_Assert_Eq(static_cast<float>(table.invoke(id, stack)), 50);
+	Test_Assert_Eq(static_cast<float>(table.invoke(id, stack, nullptr)), 50);
 }
 
 Case(VerbExists) {

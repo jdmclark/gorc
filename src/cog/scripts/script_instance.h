@@ -6,13 +6,11 @@
 #include <memory>
 
 namespace gorc {
-namespace game {
-namespace world {
+namespace cog {
 namespace scripts {
 
 using script_instance = std::tuple<std::unique_ptr<cog::instance>, script_timer_state>;
 
-}
 }
 }
 }

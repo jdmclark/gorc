@@ -17,7 +17,7 @@ private:
 	unsigned int program_counter;
 
 public:
-	void execute(std::vector<value>& heap, const code_buffer& code, size_t pc, const verbs::verb_table& verbTable);
+	void execute(std::vector<value>& heap, const code_buffer& code, size_t pc, const verbs::verb_table& verbTable, void* system_ptr);
 
 	inline void abort() {
 		allow_run = false;

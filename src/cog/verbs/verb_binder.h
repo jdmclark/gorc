@@ -12,6 +12,7 @@ namespace cog {
 namespace verbs {
 
 template <typename T, int n> class verb_binder;
+template <typename T, int n, typename SystemRefT> class system_verb_binder;
 
 #define GORC_CV_BINDER_ARG(n) vm::value v##n = stack.top(); stack.pop();
 
@@ -39,22 +40,30 @@ template <typename T, int n> class verb_binder;
 #define GORC_CV_BINDER_ARG_PASS_9 GORC_CV_BINDER_ARG_PASS_8, v9
 #define GORC_CV_BINDER_ARG_PASS_10 GORC_CV_BINDER_ARG_PASS_9, v10
 
+#define GORC_CV_SYS_BINDER_ARG_PASS_0 sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_1 v1, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_2 GORC_CV_BINDER_ARG_PASS_1, v2, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_3 GORC_CV_BINDER_ARG_PASS_2, v3, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_4 GORC_CV_BINDER_ARG_PASS_3, v4, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_5 GORC_CV_BINDER_ARG_PASS_4, v5, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_6 GORC_CV_BINDER_ARG_PASS_5, v6, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_7 GORC_CV_BINDER_ARG_PASS_6, v7, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_8 GORC_CV_BINDER_ARG_PASS_7, v8, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_9 GORC_CV_BINDER_ARG_PASS_8, v9, sys
+#define GORC_CV_SYS_BINDER_ARG_PASS_10 GORC_CV_BINDER_ARG_PASS_9, v10, sys
+
 #define GORC_CV_BINDER(n)																						\
-template <typename T> class verb_binder<T, n>																	\
-{																												\
+template <typename T> class verb_binder<T, n> {																	\
 public:																											\
-	template <typename U> vm::value invoke(std::stack<vm::value>& stack, U fn)									\
-	{																											\
+	template <typename U> vm::value invoke(std::stack<vm::value>& stack, U fn) {								\
 		GORC_CV_BINDER_ARGS_##n;																				\
-		return vm::value(fn(GORC_CV_BINDER_ARG_PASS_##n));															\
+		return vm::value(fn(GORC_CV_BINDER_ARG_PASS_##n));														\
 	}																											\
 };																												\
 																												\
-template <> class verb_binder<void, n>																			\
-{																												\
+template <> class verb_binder<void, n> {																		\
 public:																											\
-	template <typename U> vm::value invoke(std::stack<vm::value>& stack, U fn)									\
-	{																											\
+	template <typename U> vm::value invoke(std::stack<vm::value>& stack, U fn) {								\
 		GORC_CV_BINDER_ARGS_##n;																				\
 		fn(GORC_CV_BINDER_ARG_PASS_##n);																		\
 		return vm::value();																						\
@@ -72,6 +81,36 @@ GORC_CV_BINDER(7);
 GORC_CV_BINDER(8);
 GORC_CV_BINDER(9);
 GORC_CV_BINDER(10);
+
+#define GORC_CV_SYS_BINDER(n)																					\
+template <typename T, typename SystemRefT> class system_verb_binder<T, n, SystemRefT> {							\
+public:																											\
+	template <typename U> vm::value invoke(std::stack<vm::value>& stack, SystemRefT& sys, U fn) {				\
+		GORC_CV_BINDER_ARGS_##n;																				\
+		return vm::value(fn(GORC_CV_SYS_BINDER_ARG_PASS_##n));													\
+	}																											\
+};																												\
+																												\
+template <typename SystemRefT> class system_verb_binder<void, n, SystemRefT> {									\
+public:																											\
+	template <typename U> vm::value invoke(std::stack<vm::value>& stack, SystemRefT& sys, U fn) {				\
+		GORC_CV_BINDER_ARGS_##n;																				\
+		fn(GORC_CV_SYS_BINDER_ARG_PASS_##n);																	\
+		return vm::value();																						\
+	}																											\
+};
+
+GORC_CV_SYS_BINDER(0);
+GORC_CV_SYS_BINDER(1);
+GORC_CV_SYS_BINDER(2);
+GORC_CV_SYS_BINDER(3);
+GORC_CV_SYS_BINDER(4);
+GORC_CV_SYS_BINDER(5);
+GORC_CV_SYS_BINDER(6);
+GORC_CV_SYS_BINDER(7);
+GORC_CV_SYS_BINDER(8);
+GORC_CV_SYS_BINDER(9);
+GORC_CV_SYS_BINDER(10);
 
 }
 }

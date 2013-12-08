@@ -1,6 +1,6 @@
 #include "script_continuation.h"
 
-gorc::game::world::scripts::script_continuation::script_continuation(int InstanceId,
+gorc::cog::scripts::script_continuation::script_continuation(int InstanceId,
 		int SenderId, int SenderRef, flags::message_type SenderType,
 		int SourceRef, flags::message_type SourceType,
 		cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3,

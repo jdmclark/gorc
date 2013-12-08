@@ -1,13 +1,12 @@
 #pragma once
 
 #include "cog/vm/value.h"
-#include "game/flags/message_type.h"
+#include "cog/flags/message_type.h"
 #include "script_instance.h"
 #include <array>
 
 namespace gorc {
-namespace game {
-namespace world {
+namespace cog {
 namespace scripts {
 
 class script_continuation {
@@ -32,7 +31,6 @@ public:
 			unsigned int ProgramCounter = 0);
 };
 
-}
 }
 }
 }
