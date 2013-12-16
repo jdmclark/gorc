@@ -69,5 +69,29 @@ template <size_t n, typename F> vector<n, F> clamp_length(const vector<n, F>& va
 	}
 }
 
+inline vector<3, uint8_t> convert_rgb565(uint16_t value) {
+	uint8_t red, green, blue;
+
+	red = (value >> 11) & 0x1F;
+	green = (value >> 5) & 0x3F;
+	blue = (value >> 0) & 0x1F;
+
+	// Renormalize
+	red = static_cast<uint8_t>((static_cast<float>(red) / 31.0f) * 255.0f);
+	green = static_cast<uint8_t>((static_cast<float>(green) / 63.0f) * 255.0f);
+	blue = static_cast<uint8_t>((static_cast<float>(blue) / 31.0f) * 255.0f);
+
+	return make_vector(red, green, blue);
+}
+
+template <typename T> T next_power_of_two(T value) {
+	--value;
+	for(int i = 1; i < sizeof(value) * 8; ++i) {
+		value |= value >> i;
+	}
+	++value;
+	return value;
+}
+
 }
 }

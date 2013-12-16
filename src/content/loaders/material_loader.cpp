@@ -107,7 +107,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
 	// Check magic and version
 	if(strncmp(magic, "MAT ", 4) != 0 || file.read<uint32_t>() != 0x32) {
-		diagnostics::helper::file_corrupt(report, "ColormapLoader::Deserialize",
+		diagnostics::helper::file_corrupt(report, "material_loader::deserialize",
 				diagnostics::error_location(file.Filename, 0, 0, 0, 0));
 		throw io::file_corrupt_exception();
 	}
@@ -116,7 +116,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 	file.read(&header, sizeof(MaterialHeader));
 
 	if(header.BitDepth != 8) {
-		report.add_error("MaterialLoader::Deserialize", boost::str(boost::format("%d bit materials not supported") % header.BitDepth),
+		report.add_error("material_loader::deserialize", boost::str(boost::format("%d bit materials not supported") % header.BitDepth),
 				diagnostics::error_location(file.Filename, 0, 0, 0, 0));
 		throw io::file_corrupt_exception();
 	}

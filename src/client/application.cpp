@@ -22,13 +22,13 @@ void gorc::client::application::startup(event::event_bus& event_bus, content::ma
 		std::cout << print.message << std::endl;
 	});
 
+	hud_view = make_unique<class hud_view>(content);
 	level_view = make_unique<world::level_view>(content);
 	action_view = make_unique<action::action_view>();
 
 	register_verbs();
 
 	views.set_layer(view_layer::clear_screen, clear_view);
-	views.set_layer(view_layer::world, *level_view);
 
 	// HACK: Set current episode to The Force Within.
 	for(size_t i = 0; i < virtual_filesystem.get_episode_count(); ++i) {
@@ -51,6 +51,7 @@ void gorc::client::application::startup(event::event_bus& event_bus, content::ma
 	level_view->set_level_model(components.current_level_presenter->model.get());
 
 	views.set_layer(view_layer::world, *level_view);
+	views.set_layer(view_layer::hud, *hud_view);
 
 	return;
 }

@@ -5,6 +5,7 @@
 #include "presenter.h"
 #include "presenter_mapper.h"
 #include "clear_screen_view.h"
+#include "hud_view.h"
 #include "places/action/action_view.h"
 #include "content/vfs/virtual_filesystem.h"
 #include "game/level_state.h"
@@ -37,6 +38,7 @@ public:
 	utility::randomizer randomizer;
 
 	std::unique_ptr<world::level_view> level_view;
+	std::unique_ptr<hud_view> hud_view;
 	std::unique_ptr<action::action_view> action_view;
 
 	game::level_state components;

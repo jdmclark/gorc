@@ -51,8 +51,11 @@ void gorc::graphics::gui_renderer::end() {
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	glBegin(GL_TRIANGLES);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glActiveTexture(GL_TEXTURE0);
+
+	glBegin(GL_TRIANGLES);
 
 	content::assets::texture const* prev_texture = nullptr;
 	for(const auto& sprite : sprites) {

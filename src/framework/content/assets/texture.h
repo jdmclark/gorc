@@ -26,7 +26,7 @@ class texture : public asset {
 private:
 	void bind_texture() const;
 
-	GLuint data;
+	GLuint data = GL_INVALID_VALUE;
 	box<2, int> m_size = make_box(make_vector(0, 0), make_vector(0, 0));
 
 public:
@@ -39,6 +39,10 @@ public:
 
 	inline const box<2, int>& size() const {
 		return m_size;
+	}
+
+	inline GLuint get_data() const {
+		return data;
 	}
 };
 

@@ -1,3 +1,5 @@
+#version 130
+
 #ifdef VERTEXPROGRAM
 
 uniform mat4 projection_matrix;
@@ -21,6 +23,7 @@ void main() {
 	if(gl_FragColor.a < 0.5) {
 		discard;
 	}
+	gl_FragColor.a = 1.0;
 }
 
 #endif
