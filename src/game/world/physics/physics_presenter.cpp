@@ -6,6 +6,9 @@
 #include "game/constants.h"
 #include "framework/utility/pair_range.h"
 #include "framework/math/matrix.h"
+#include "game/world/scripts/script_presenter.h"
+#include "game/world/sounds/sound_presenter.h"
+#include "game/world/keys/key_presenter.h"
 #include "query.h"
 
 using namespace gorc::game::world::physics;
@@ -20,7 +23,7 @@ void physics_presenter::start(level_model& model) {
 	this->model = &model;
 }
 
-bool physics_presenter::physics_surface_needs_collision_response(int moving_thing_id, int surface_id) {
+bool physics_presenter::surface_needs_collision_response(int moving_thing_id, int surface_id) {
 	const auto& moving_thing = model->things[moving_thing_id];
 	const auto& surface = model->surfaces[surface_id];
 
@@ -39,7 +42,7 @@ bool physics_presenter::physics_surface_needs_collision_response(int moving_thin
 	return !surface_ethereal;
 }
 
-bool physics_presenter::physics_thing_needs_collision_response(int moving_thing_id, int collision_thing_id) {
+bool physics_presenter::thing_needs_collision_response(int moving_thing_id, int collision_thing_id) {
 	const auto& moving_thing = model->things[moving_thing_id];
 	const auto& collision_thing = model->things[collision_thing_id];
 
@@ -140,7 +143,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = model->surfaces[i];
 
-			if(!physics_surface_needs_collision_response(current_thing_id, i)) {
+			if(!surface_needs_collision_response(current_thing_id, i)) {
 				continue;
 			}
 
@@ -189,7 +192,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 		if(col_thing.collide == flags::collide_type::sphere) {
 			if(vec_to_len <= col_thing.size + sphere.radius) {
 				// Spheres colliding
-				if(physics_thing_needs_collision_response(current_thing_id, col_thing_id)) {
+				if(thing_needs_collision_response(current_thing_id, col_thing_id)) {
 					// Find contact point velocity:
 					vector<3> contact_normal = vec_to / vec_to_len;
 					vector<3> contact_point = col_thing.position + contact_normal * col_thing.size;
@@ -214,11 +217,11 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 				continue;
 			}
 
-			physics_anim_node_visitor.needs_response = physics_thing_needs_collision_response(current_thing_id, col_thing_id);
+			physics_anim_node_visitor.needs_response = thing_needs_collision_response(current_thing_id, col_thing_id);
 			physics_anim_node_visitor.sphere = sphere;
 			physics_anim_node_visitor.visited_thing_id = col_thing_id;
 			physics_anim_node_visitor.moving_thing_id = current_thing_id;
-			presenter.key_presenter.visit_mesh_hierarchy(physics_anim_node_visitor, *col_thing.model_3d, col_thing.position, col_thing.orient, col_thing.attached_key_mix);
+			presenter.key_presenter->visit_mesh_hierarchy(physics_anim_node_visitor, *col_thing.model_3d, col_thing.position, col_thing.orient, col_thing.attached_key_mix);
 		}
 	}
 }
@@ -427,12 +430,12 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 			if(thing.current_frame == thing.goal_frame) {
 				thing.path_moving = false;
 				thing.path_move_speed = 0.0f;
-				presenter.sound_presenter.stop_foley_loop(thing_id);
-				presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
+				presenter.sound_presenter->stop_foley_loop(thing_id);
+				presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
 
 				// Dispatch cog messages and resume cogs which are waiting for stop.
-				presenter.script_presenter.send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
-				presenter.script_presenter.resume_wait_for_stop(thing_id);
+				presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
+				presenter.script_presenter->resume_wait_for_stop(thing_id);
 			}
 			else if(thing.current_frame < thing.goal_frame) {
 				thing.next_frame = thing.current_frame + 1;
@@ -466,12 +469,12 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 			thing.orient = angle * thing.orient;
 			presenter.adjust_thing_pos(thing_id, new_pos);
 
-			presenter.sound_presenter.stop_foley_loop(thing_id);
-			presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
+			presenter.sound_presenter->stop_foley_loop(thing_id);
+			presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
 
 			// Dispatch cog messages and resume cogs which are waiting for stop.
-			presenter.script_presenter.send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
-			presenter.script_presenter.resume_wait_for_stop(thing_id);
+			presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
+			presenter.script_presenter->resume_wait_for_stop(thing_id);
 		}
 		else {
 			vector<3> frame_pos, frame_orient;
@@ -567,7 +570,7 @@ void physics_presenter::update(const time& time) {
 	// - Send blocked message to all blocked things; else, update path.
 	for(auto& thing : model->things) {
 		if(thing.is_blocked && (thing.path_moving || thing.rotatepivot_moving)) {
-			presenter.script_presenter.send_message_to_linked(cog::message_id::blocked, thing.get_id(), flags::message_type::thing,
+			presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, thing.get_id(), flags::message_type::thing,
 					-1, flags::message_type::nothing);
 		}
 		else if(thing.path_moving || thing.rotatepivot_moving) {
@@ -617,140 +620,6 @@ void physics_presenter::segment_query_node_visitor::visit_mesh(const content::as
 			}
 		});
 	}
-}
-
-gorc::maybe<contact> physics_presenter::segment_query(const segment& cam_segment, int initial_sector, int ray_cast_thing, const maybe<contact>& prev_contact) {
-	// Search for closest thing-ray intersection.
-	float query_radius = length(std::get<1>(cam_segment) - std::get<0>(cam_segment));
-
-	float closest_contact_distance = std::numeric_limits<float>::max();
-	bool has_contact = false;
-	int closest_contact_thing_id = -1;
-	int closest_contact_surface_id = -1;
-	vector<3> closest_contact_position;
-	vector<3> closest_contact_normal;
-
-	if_set(prev_contact, then_do, [&](const contact& prev_ct) {
-		closest_contact_distance = length(prev_ct.position - std::get<0>(cam_segment));
-		has_contact = true;
-		if_set(prev_ct.contact_thing_id, then_do, [&closest_contact_thing_id](int c) { closest_contact_thing_id = c; });
-		if_set(prev_ct.contact_surface_id, then_do, [&closest_contact_surface_id](int c) { closest_contact_surface_id = c; });
-		closest_contact_position = prev_ct.position;
-		closest_contact_normal = prev_ct.normal;
-	});
-
-	// Find contact among sectors.
-	// Get list of sectors within thing influence.
-	segment_query_closed_sectors.clear();
-	segment_query_open_sectors.clear();
-	segment_query_open_sectors.emplace_back(initial_sector);
-	while(!segment_query_open_sectors.empty()) {
-		int current_sector = segment_query_open_sectors.back();
-		segment_query_open_sectors.pop_back();
-
-		if(segment_query_closed_sectors.find(current_sector) != segment_query_closed_sectors.end()) {
-			continue;
-		}
-
-		segment_query_closed_sectors.emplace(current_sector);
-
-		const auto& sector = model->sectors[current_sector];
-
-		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
-			const auto& surface = model->surfaces[i];
-
-			auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
-			if_set(maybe_nearest_point, then_do, [&](const vector<3>& nearest_point) {
-				if(physics_surface_needs_collision_response(ray_cast_thing, i)) {
-					auto dist = length(nearest_point - std::get<0>(cam_segment));
-					if(dist < closest_contact_distance) {
-						closest_contact_distance = dist;
-						has_contact = true;
-						closest_contact_surface_id = i;
-						closest_contact_position = nearest_point;
-						closest_contact_normal = surface.normal;
-					}
-				}
-				else if(surface.adjoin >= 0) {
-					segment_query_open_sectors.push_back(surface.adjoined_sector);
-				}
-			});
-		}
-	}
-
-	// Find contact among things.
-	// Get list of things within thing influence.
-	physics_overlapping_things.clear();
-	for(auto sector_id : segment_query_closed_sectors) {
-		auto influenced_thing_range = physics_broadphase_sector_things.equal_range(sector_id);
-		for(auto jt = std::get<0>(influenced_thing_range); jt != std::get<1>(influenced_thing_range); ++jt) {
-			physics_overlapping_things.emplace(jt->second);
-		}
-	}
-
-	for(auto col_thing_id : physics_overlapping_things) {
-		auto& col_thing = model->things[col_thing_id];
-
-		if(col_thing.get_id() == ray_cast_thing || !physics_thing_needs_collision_response(ray_cast_thing, col_thing_id)) {
-			continue;
-		}
-
-		if(col_thing.collide == flags::collide_type::sphere) {
-			auto maybe_int = segment_sphere_intersection(cam_segment, sphere(col_thing.position, col_thing.size));
-			if_set(maybe_int, then_do, [&](const vector<3>& int_point) {
-				// Sphere intersected.
-				float col_dist = length(int_point - std::get<0>(cam_segment));
-				if(col_dist < closest_contact_distance) {
-					closest_contact_distance = col_dist;
-					has_contact = true;
-					closest_contact_surface_id = -1;
-					closest_contact_thing_id = col_thing_id;
-					closest_contact_normal = normalize(int_point - col_thing.position);
-					closest_contact_position = int_point;
-				}
-			});
-		}
-		else if(col_thing.collide == flags::collide_type::face) {
-			if(!col_thing.model_3d) {
-				continue;
-			}
-
-			segment_query_anim_node_visitor.cam_segment = cam_segment;
-			segment_query_anim_node_visitor.closest_contact_distance = closest_contact_distance;
-			segment_query_anim_node_visitor.has_closest_contact = false;
-			presenter.key_presenter.visit_mesh_hierarchy(segment_query_anim_node_visitor, *col_thing.model_3d, col_thing.position,
-					col_thing.orient, col_thing.attached_key_mix);
-
-			if(segment_query_anim_node_visitor.has_closest_contact) {
-				closest_contact_distance = segment_query_anim_node_visitor.closest_contact_distance;
-				has_contact = true;
-				closest_contact_surface_id = -1;
-				closest_contact_thing_id = col_thing_id;
-				closest_contact_normal = segment_query_anim_node_visitor.closest_contact_normal;
-				closest_contact_position = segment_query_anim_node_visitor.closest_contact;
-			}
-		}
-	}
-
-	if(has_contact) {
-		contact new_contact(closest_contact_position, closest_contact_normal, make_zero_vector<3, float>());
-		if(closest_contact_surface_id >= 0) {
-			new_contact.contact_surface_id = closest_contact_surface_id;
-		}
-
-		if(closest_contact_thing_id >= 0) {
-			new_contact.contact_thing_id = closest_contact_thing_id;
-		}
-
-		return new_contact;
-	}
-
-	return nothing;
-}
-
-gorc::maybe<contact> physics_presenter::thing_segment_query(int current_thing_id, const vector<3>& direction, const maybe<contact>& prev_contact) {
-	const auto& current_thing = model->things[current_thing_id];
-	return segment_query(segment(current_thing.position, current_thing.position + direction), current_thing.sector, current_thing_id, prev_contact);
 }
 
 void physics_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {

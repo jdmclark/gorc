@@ -1,8 +1,10 @@
 #include "hud_view.h"
 #include "content/assets/bitmap.h"
 #include "content/assets/colormap.h"
+#include "content/assets/sfont.h"
 #include "framework/content/assets/shader.h"
 #include "framework/gui/widgets/static_image.h"
+#include "framework/gui/widgets/static_text.h"
 
 gorc::client::hud_view::hud_view(content::manager& manager)
 	: gui_view(manager.load<content::assets::shader>("gui.glsl")) {
@@ -17,4 +19,10 @@ gorc::client::hud_view::hud_view(content::manager& manager)
 	auto& right = add_child<gui::widgets::static_image>(get_root(), statusright.cels[0].color, make_box(make_vector(0, 0), make_vector(59, 60)));
 	right.horizontal_align = gui::layout::horizontal_align_style::right;
 	right.vertical_align = gui::layout::vertical_align_style::bottom;
+
+	auto& msgfont = manager.load<content::assets::sfont>("msgfont16.sft", dfltcmp);
+
+	auto& message_label = add_child<gui::widgets::static_text>(get_root(), msgfont, "GORC TEST");
+	message_label.horizontal_align = gui::layout::horizontal_align_style::center;
+	message_label.vertical_align = gui::layout::vertical_align_style::top;
 }

@@ -2,6 +2,8 @@
 #include "game/level_state.h"
 #include "camera_presenter.h"
 #include "game/world/level_presenter.h"
+#include "game/world/keys/key_presenter.h"
+#include "game/world/physics/physics_presenter.h"
 #include "framework/math/util.h"
 #include "camera_model.h"
 #include "game/world/level_model.h"
@@ -30,7 +32,7 @@ void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel,
 	external_camera.base_offset = make_vector(0.0f, -0.2f, 0.0125f);
 
 	// Create POV animation key mix.
-	model.pov_key_mix_id = presenter.key_presenter.create_key_mix();
+	model.pov_key_mix_id = presenter.key_presenter->create_key_mix();
 }
 
 void gorc::game::world::camera::camera_presenter::update(const time& time) {
@@ -46,7 +48,15 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
 
 	// Cast offset vector into world to detect collisions.
 	maybe<physics::contact> contact;
-	contact = presenter.physics_presenter.thing_segment_query(selected_camera.focus, true_offset, contact);
+	contact = presenter.physics_presenter->thing_segment_query(selected_camera.focus, true_offset,
+			[&](int thing_id) {
+				auto t = presenter.model->things[thing_id].type;
+				return t == flags::thing_type::cog;
+			},
+			[&](int surf_id) {
+				return presenter.physics_presenter->surface_needs_collision_response(focus_thing.get_id(), surf_id);
+			},
+			contact);
 
 	auto true_desired_position = focus_thing.position + true_offset;
 	if_set(contact, then_do, [&true_desired_position, &focus_thing](const physics::contact& cnt) {
@@ -134,7 +144,7 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int player, i
 		model->pov_model = nullptr;
 	}
 
-	presenter.key_presenter.stop_all_mix_keys(model->pov_key_mix_id);
+	presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, const vector<3>& move_vec, float speed) {
@@ -143,59 +153,59 @@ void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, cons
 }
 
 int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags) {
-	return presenter.key_presenter.play_mix_key(model->pov_key_mix_id, key, priority, flags);
+	return presenter.key_presenter->play_mix_key(model->pov_key_mix_id, key, priority, flags);
 }
 
 void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int player, int key_id, float delay) {
-	presenter.key_presenter.stop_key(-1, key_id, delay);
+	presenter.key_presenter->stop_key(-1, key_id, delay);
 }
 
 void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<void, 0>("cyclecamera", [&components]() {
-		components.current_level_presenter->camera_presenter.cycle_camera();
+		components.current_level_presenter->camera_presenter->cycle_camera();
 	});
 
 	verbTable.add_verb<int, 0>("getcamerastateflags", [&components]() {
-		return components.current_level_presenter->camera_presenter.get_camera_state_flags();
+		return components.current_level_presenter->camera_presenter->get_camera_state_flags();
 	});
 
 	verbTable.add_verb<int, 0>("getcurrentcamera", [&components]() {
-		return components.current_level_presenter->camera_presenter.get_current_camera();
+		return components.current_level_presenter->camera_presenter->get_current_camera();
 	});
 
 	verbTable.add_verb<int, 1>("getprimaryfocus", [&components](int camera_id) {
-		return components.current_level_presenter->camera_presenter.get_primary_focus(camera_id);
+		return components.current_level_presenter->camera_presenter->get_primary_focus(camera_id);
 	});
 
 	verbTable.add_verb<void, 2>("setcamerafocus", [&components](int camera_id, int focus_thing_id) {
-		components.current_level_presenter->camera_presenter.set_camera_focus(camera_id, focus_thing_id);
+		components.current_level_presenter->camera_presenter->set_camera_focus(camera_id, focus_thing_id);
 	});
 
 	verbTable.add_verb<void, 1>("setcamerastateflags", [&components](int flags) {
-		components.current_level_presenter->camera_presenter.set_camera_state_flags(flags);
+		components.current_level_presenter->camera_presenter->set_camera_state_flags(flags);
 	});
 
 	verbTable.add_verb<void, 1>("setcurrentcamera", [&components](int camera_id) {
-		components.current_level_presenter->camera_presenter.set_current_camera(camera_id);
+		components.current_level_presenter->camera_presenter->set_current_camera(camera_id);
 	});
 
 	verbTable.add_verb<void, 4>("setpovshake", [&components](vector<3> pos_offset, vector<3> ang_offset, float pos_reset_speed, float ang_reset_speed) {
-		components.current_level_presenter->camera_presenter.set_pov_shake(pos_offset, ang_offset, pos_reset_speed, ang_reset_speed);
+		components.current_level_presenter->camera_presenter->set_pov_shake(pos_offset, ang_offset, pos_reset_speed, ang_reset_speed);
 	});
 
 	verbTable.add_verb<void, 2>("jksetpovmodel", [&components](int player, int model_id) {
-		components.current_level_presenter->camera_presenter.jk_set_pov_model(player, model_id);
+		components.current_level_presenter->camera_presenter->jk_set_pov_model(player, model_id);
 	});
 
 	verbTable.add_verb<void, 3>("jksetwaggle", [&components](int player, vector<3> move_vec, float speed) {
-		components.current_level_presenter->camera_presenter.jk_set_waggle(player, move_vec, speed);
+		components.current_level_presenter->camera_presenter->jk_set_waggle(player, move_vec, speed);
 	});
 
 	verbTable.add_verb<int, 4>("jkplaypovkey", [&components](int player, int key, int priority, int key_flags) {
-		return components.current_level_presenter->camera_presenter.jk_play_pov_key(player, key, priority, flag_set<flags::key_flag>(key_flags));
+		return components.current_level_presenter->camera_presenter->jk_play_pov_key(player, key, priority, flag_set<flags::key_flag>(key_flags));
 	});
 
 	verbTable.add_verb<void, 3>("jkstoppovkey", [&components](int player, int key, float delay) {
-		components.current_level_presenter->camera_presenter.jk_stop_pov_key(player, key, delay);
+		components.current_level_presenter->camera_presenter->jk_stop_pov_key(player, key, delay);
 	});
 }

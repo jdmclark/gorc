@@ -341,18 +341,18 @@ int gorc::game::world::keys::key_presenter::create_key_mix() {
 
 void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<float, 1>("getkeylen", [&components](int key_id) {
-		return components.current_level_presenter->key_presenter.get_key_len(key_id);
+		return components.current_level_presenter->key_presenter->get_key_len(key_id);
 	});
 
 	verbTable.add_verb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
-		return components.current_level_presenter->key_presenter.play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
+		return components.current_level_presenter->key_presenter->play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
 	});
 
 	verbTable.add_verb<int, 2>("playmode", [&components](int thing_id, int submode) {
-		return components.current_level_presenter->key_presenter.play_mode(thing_id, static_cast<flags::puppet_submode_type>(submode));
+		return components.current_level_presenter->key_presenter->play_mode(thing_id, static_cast<flags::puppet_submode_type>(submode));
 	});
 
 	verbTable.add_verb<void, 3>("stopkey", [&components](int thing, int key, float delay) {
-		components.current_level_presenter->key_presenter.stop_key(thing, key, delay);
+		components.current_level_presenter->key_presenter->stop_key(thing, key, delay);
 	});
 }

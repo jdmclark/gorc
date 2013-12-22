@@ -83,45 +83,50 @@ int animation_presenter::surface_light_anim(int surface, float start_light, floa
 }
 
 void gorc::game::world::animations::animation_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+	verbTable.add_verb<int, 3>("materialanim", [&components](int material, float cps, int flags) {
+		// TODO: Implement this verb when setsurfacematerial changes have been made.
+		return -1;
+	});
+
 	verbTable.add_verb<int, 1>("getsurfaceanim", [&components](int surface) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.get_surface_anim(surface));
+		return static_cast<int>(components.current_level_presenter->animation_presenter->get_surface_anim(surface));
 	});
 
 	verbTable.add_verb<void, 1>("stopsurfaceanim", [&components](int surface) {
-		components.current_level_presenter->animation_presenter.stop_anim(
-				components.current_level_presenter->animation_presenter.get_surface_anim(surface));
+		components.current_level_presenter->animation_presenter->stop_anim(
+				components.current_level_presenter->animation_presenter->get_surface_anim(surface));
 	});
 
 	verbTable.add_verb<int, 1>("getwallcel", [&components](int surface) {
-		return components.current_level_presenter->animation_presenter.get_surface_cel(surface);
+		return components.current_level_presenter->animation_presenter->get_surface_cel(surface);
 	});
 
 	verbTable.add_verb<int, 2>("setwallcel", [&components](int surface, int cel) {
-		components.current_level_presenter->animation_presenter.set_surface_cel(surface, cel);
+		components.current_level_presenter->animation_presenter->set_surface_cel(surface, cel);
 		return 1;
 	});
 
 	verbTable.add_verb<int, 3>("surfaceanim", [&components](int surface, float rate, int flags) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.surface_anim(surface, rate, flag_set<flags::AnimFlag>(flags)));
+		return static_cast<int>(components.current_level_presenter->animation_presenter->surface_anim(surface, rate, flag_set<flags::AnimFlag>(flags)));
 	});
 
 	verbTable.add_verb<int, 2>("slideceilingsky", [&components](float u_speed, float v_speed) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_ceiling_sky(u_speed, v_speed));
+		return static_cast<int>(components.current_level_presenter->animation_presenter->slide_ceiling_sky(u_speed, v_speed));
 	});
 
 	verbTable.add_verb<int, 3>("slidesurface", [&components](int surface, vector<3> direction, float speed) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, normalize(direction) * speed));
+		return static_cast<int>(components.current_level_presenter->animation_presenter->slide_surface(surface, normalize(direction) * speed));
 	});
 
 	verbTable.add_verb<int, 3>("slidewall", [&components](int surface, vector<3> direction, float speed) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.slide_surface(surface, normalize(direction) * speed));
+		return static_cast<int>(components.current_level_presenter->animation_presenter->slide_surface(surface, normalize(direction) * speed));
 	});
 
 	verbTable.add_verb<void, 1>("stopanim", [&components](int anim) {
-		components.current_level_presenter->animation_presenter.stop_anim(anim);
+		components.current_level_presenter->animation_presenter->stop_anim(anim);
 	});
 
 	verbTable.add_verb<int, 4>("surfacelightanim", [&components](int surface, float start_light, float end_light, float change_time) {
-		return static_cast<int>(components.current_level_presenter->animation_presenter.surface_light_anim(surface, start_light, end_light, change_time));
+		return static_cast<int>(components.current_level_presenter->animation_presenter->surface_light_anim(surface, start_light, end_light, change_time));
 	});
 }

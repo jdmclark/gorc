@@ -6,6 +6,7 @@
 #include "framework/utility/maybe.h"
 #include "content/flags/armed_mode.h"
 #include "content/flags/jk_flag.h"
+#include "content/flags/ai_mode_flag.h"
 #include <memory>
 
 namespace gorc {
@@ -37,6 +38,10 @@ public:
 	float path_move_speed = 0.0f;
 	bool is_blocked = false;
 
+	vector<3> ai_move_target;
+	vector<3> ai_look_target;
+	float ai_move_speed = 1.0;
+
 	maybe<sounds::sound*> current_foley_loop_channel;
 
 	int attached_surface = -1;
@@ -57,6 +62,7 @@ public:
 	flags::puppet_mode_type puppet_mode = flags::puppet_mode_type::unarmed;
 
 	flag_set<flags::jk_flag> jk_flags;
+	flag_set<flags::ai_mode_flag> ai_mode_flags;
 
 	thing() = default;
 	thing(const content::assets::thing_template& tpl);

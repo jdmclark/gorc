@@ -149,13 +149,22 @@ void gorc::cog::scripts::script_presenter::set_timer(float time) {
 	std::get<1>(model->cogs[model->running_cog_state.top().instance_id]).timer_remaining_time = time;
 }
 
-void gorc::cog::scripts::script_presenter::set_timer_ex(float time, int id, cog::vm::value param0, cog::vm::value param1) {
+void gorc::cog::scripts::script_presenter::set_timer_ex(float time, cog::vm::value id, cog::vm::value param0, cog::vm::value param1) {
 	script_timer& timer = model->timers.emplace();
 	timer.instance_id = model->running_cog_state.top().instance_id;
 	timer.delay = time;
 	timer.id = id;
 	timer.param0 = param0;
 	timer.param1 = param1;
+}
+
+void gorc::cog::scripts::script_presenter::kill_timer_ex(cog::vm::value id) {
+	for(auto& timer : model->timers) {
+		if(timer.instance_id == model->running_cog_state.top().instance_id && timer.id == id) {
+			model->timers.erase(timer);
+			return;
+		}
+	}
 }
 
 void gorc::cog::scripts::script_presenter::sleep(float time) {
@@ -213,6 +222,10 @@ void gorc::cog::scripts::script_presenter::register_verbs(cog::verbs::verb_table
 
 	verbTable.add_system_verb<void, 4, script_presenter>("settimerex", [](float time, int id, cog::vm::value param0, cog::vm::value param1, script_presenter& sp) {
 		sp.set_timer_ex(time, id, param0, param1);
+	});
+
+	verbTable.add_system_verb<void, 1, script_presenter>("killtimerex", [](int id, script_presenter& sp) {
+		sp.kill_timer_ex(id);
 	});
 
 	verbTable.add_system_verb<void, 1, script_presenter>("sleep", [](float time, script_presenter& sp) {

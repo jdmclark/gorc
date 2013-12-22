@@ -18,7 +18,7 @@ gorc::graphics::texture_render_target::texture_render_target(const box<2, int>& 
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, get_size<0>(size), get_size<1>(size));
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthbuffer_name);
 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_name, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_name, 0);
 
 	GLenum draw_buffers[2] = {GL_COLOR_ATTACHMENT0};
 	glDrawBuffers(1, draw_buffers);

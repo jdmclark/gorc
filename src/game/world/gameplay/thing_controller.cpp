@@ -3,6 +3,7 @@
 #include "game/world/level_model.h"
 #include "game/constants.h"
 #include "game/world/physics/query.h"
+#include "game/world/scripts/script_presenter.h"
 
 gorc::game::world::gameplay::thing_controller::thing_controller(level_presenter& presenter)
 	: presenter(presenter) {
@@ -41,7 +42,7 @@ void gorc::game::world::gameplay::thing_controller::taken(int thing_id, int play
 
 void gorc::game::world::gameplay::thing_controller::touched_thing(int thing_id, int touched_thing_id) {
 	// Dispatch touched cog message.
-	presenter.script_presenter.send_message_to_linked(cog::message_id::touched,
+	presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
 			thing_id, flags::message_type::thing,
 			touched_thing_id, flags::message_type::thing);
 	return;
@@ -49,7 +50,7 @@ void gorc::game::world::gameplay::thing_controller::touched_thing(int thing_id, 
 
 void gorc::game::world::gameplay::thing_controller::touched_surface(int thing_id, int touched_surface_id) {
 	// Dispatch touched message to surface.
-	presenter.script_presenter.send_message_to_linked(cog::message_id::touched,
+	presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
 			touched_surface_id, flags::message_type::surface,
 			thing_id, flags::message_type::thing);
 	return;

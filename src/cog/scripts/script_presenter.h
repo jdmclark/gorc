@@ -58,7 +58,8 @@ public:
 
 	void set_pulse(float time);
 	void set_timer(float time);
-	void set_timer_ex(float delay, int id, cog::vm::value param0, cog::vm::value param1);
+	void set_timer_ex(float delay, cog::vm::value id, cog::vm::value param0, cog::vm::value param1);
+	void kill_timer_ex(cog::vm::value id);
 	void sleep(float time);
 
 	inline int get_master_cog() const {

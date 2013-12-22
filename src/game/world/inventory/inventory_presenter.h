@@ -47,6 +47,7 @@ public:
 	void set_inv_activated(int player, int bin, bool value);
 	void set_inv_available(int player, int bin, bool value);
 
+	void assign_weapon(int player, int weap_bin);
 	void activate_weapon(int player, float firewait, int fire_mode);
 	int autoselect_weapon(int player, flags::autoselect_mode select_mode);
 	void change_fire_rate(int player, float firewait);

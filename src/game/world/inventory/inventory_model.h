@@ -34,6 +34,7 @@ private:
 public:
 	bool switching_weapons = false;
 	int next_weapon;
+	bool weap_assigned = false;
 	float mount_wait = 0.0f;
 
 	player_inventory_model(const content::assets::inventory& BaseInventory);

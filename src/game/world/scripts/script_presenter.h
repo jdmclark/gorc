@@ -36,11 +36,9 @@ class script_model;
 
 class script_presenter : public cog::scripts::script_presenter {
 private:
-	level_state& components;
 	level_model* levelModel;
 	script_model* model;
 	cog::vm::virtual_machine VirtualMachine;
-	int master_cog = -1;
 
 public:
 	script_presenter(level_state& curr_components);

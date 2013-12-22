@@ -171,34 +171,34 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(int channel, float d
 
 void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	verbTable.add_verb<void, 3>("changesoundpitch", [&components](int channel, float pitch, float delay) {
-		components.current_level_presenter->sound_presenter.change_sound_pitch(channel, pitch, delay);
+		components.current_level_presenter->sound_presenter->change_sound_pitch(channel, pitch, delay);
 	});
 
 	verbTable.add_verb<void, 3>("changesoundvol", [&components](int channel, float volume, float delay) {
-		components.current_level_presenter->sound_presenter.change_sound_vol(channel, volume, delay);
+		components.current_level_presenter->sound_presenter->change_sound_vol(channel, volume, delay);
 	});
 
 	verbTable.add_verb<void, 3>("playsong", [&components](int start, int end, int loopto) {
-		components.current_level_presenter->sound_presenter.play_song(start, end, loopto);
+		components.current_level_presenter->sound_presenter->play_song(start, end, loopto);
 	});
 
 	verbTable.add_verb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
-		return components.current_level_presenter->sound_presenter.play_sound_local(wav, volume, panning, flag_set<flags::sound_flag>(flags));
+		return components.current_level_presenter->sound_presenter->play_sound_local(wav, volume, panning, flag_set<flags::sound_flag>(flags));
 	});
 
 	verbTable.add_verb<int, 6>("playsoundpos", [&components](int wav, vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
-		return components.current_level_presenter->sound_presenter.play_sound_pos(wav, pos, volume, min_rad, max_rad, flag_set<flags::sound_flag>(flags));
+		return components.current_level_presenter->sound_presenter->play_sound_pos(wav, pos, volume, min_rad, max_rad, flag_set<flags::sound_flag>(flags));
 	});
 
 	verbTable.add_verb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
-		return components.current_level_presenter->sound_presenter.play_sound_thing(wav, thing, volume, min_rad, max_rad, flag_set<flags::sound_flag>(flags));
+		return components.current_level_presenter->sound_presenter->play_sound_thing(wav, thing, volume, min_rad, max_rad, flag_set<flags::sound_flag>(flags));
 	});
 
 	verbTable.add_verb<void, 1>("setmusicvol", [&components](float vol) {
-		components.current_level_presenter->sound_presenter.set_music_vol(vol);
+		components.current_level_presenter->sound_presenter->set_music_vol(vol);
 	});
 
 	verbTable.add_verb<void, 2>("stopsound", [&components](int channel, float delay) {
-		components.current_level_presenter->sound_presenter.stop_sound(channel, delay);
+		components.current_level_presenter->sound_presenter->stop_sound(channel, delay);
 	});
 }

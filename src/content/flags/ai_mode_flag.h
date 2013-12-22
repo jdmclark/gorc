@@ -3,18 +3,18 @@
 namespace gorc {
 namespace flags {
 
-enum class AiModeFlag {
-	MovingTowardDestination			= 0x1,
-	AttackingTarget					= 0x2,
-	SearchingForTarget				= 0x4,
-	TurningToFaceTarget				= 0x8,
-	HasMoveTarget					= 0x10,
-	HasFireTarget					= 0x20,
-	Ready							= 0x200,
-	HasLineOfSight					= 0x400,
-	Fleeing							= 0x800,
-	Passive							= 0x1000,
-	Disabled						= 0x2000
+enum class ai_mode_flag {
+	moving_toward_destination		= 0x1,
+	attacking_target				= 0x2,
+	searching_for_target			= 0x4,
+	turning_to_face_target			= 0x8,
+	has_move_target					= 0x10,
+	has_fire_target					= 0x20,
+	ready							= 0x200,
+	has_line_of_sight				= 0x400,
+	fleeing							= 0x800,
+	passive							= 0x1000,
+	disabled						= 0x2000
 };
 
 }

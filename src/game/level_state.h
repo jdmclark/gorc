@@ -2,11 +2,14 @@
 
 #include "cog/verbs/table.h"
 #include "cog/compiler.h"
-#include "game/world/level_presenter.h"
 #include <memory>
 
 namespace gorc {
 namespace game {
+
+namespace world {
+class level_presenter;
+}
 
 class level_state {
 public:

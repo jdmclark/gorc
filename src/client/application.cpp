@@ -1,6 +1,7 @@
 #include "application.h"
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
+#include "cog/scripts/script_presenter.h"
 #include "world/level_view.h"
 #include <boost/algorithm/string/predicate.hpp>
 #include "framework/events/print.h"

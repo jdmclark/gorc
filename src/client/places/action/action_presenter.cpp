@@ -1,6 +1,8 @@
 #include "action_presenter.h"
 #include "client/application.h"
 #include "game/world/level_presenter.h"
+#include "game/world/inventory/inventory_presenter.h"
+#include "game/world/camera/camera_presenter.h"
 
 gorc::client::action::action_presenter::action_presenter(application& app)
 	: app(app), input_adapter(*this), key_dispatcher(*this), click_dispatcher(*this) {
@@ -77,10 +79,10 @@ void gorc::client::action::action_presenter::on_mouse_button_down(const time& ti
 	int current_player = app.components.current_level_presenter->get_local_player_thing();
 
 	if(b == sf::Mouse::Left) {
-		app.components.current_level_presenter->inventory_presenter.on_weapon_fire_pressed(current_player, 0);
+		app.components.current_level_presenter->inventory_presenter->on_weapon_fire_pressed(current_player, 0);
 	}
 	else if(b == sf::Mouse::Right) {
-		app.components.current_level_presenter->inventory_presenter.on_weapon_fire_pressed(current_player, 1);
+		app.components.current_level_presenter->inventory_presenter->on_weapon_fire_pressed(current_player, 1);
 	}
 }
 
@@ -88,10 +90,10 @@ void gorc::client::action::action_presenter::on_mouse_button_up(const time& time
 	int current_player = app.components.current_level_presenter->get_local_player_thing();
 
 	if(b == sf::Mouse::Left) {
-		app.components.current_level_presenter->inventory_presenter.on_weapon_fire_released(current_player, 0);
+		app.components.current_level_presenter->inventory_presenter->on_weapon_fire_released(current_player, 0);
 	}
 	else if(b == sf::Mouse::Right) {
-		app.components.current_level_presenter->inventory_presenter.on_weapon_fire_released(current_player, 1);
+		app.components.current_level_presenter->inventory_presenter->on_weapon_fire_released(current_player, 1);
 	}
 }
 
@@ -116,22 +118,19 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const time& ti
 		break;
 
 	case sf::Keyboard::F1:
-		app.components.current_level_presenter->camera_presenter.cycle_camera();
+		app.components.current_level_presenter->camera_presenter->cycle_camera();
 		break;
 
 	case sf::Keyboard::F2:
-		app.components.current_level_presenter->inventory_presenter.on_item_hotkey_pressed(current_player, 42);
+		app.components.current_level_presenter->inventory_presenter->on_item_hotkey_pressed(current_player, 42);
 		break;
 
 	case sf::Keyboard::G:
 		// Give fieldlight batteries, bryar, strifle, xbow, repeater, and ammo.
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 13, 200);
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 2, 1);
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 3, 1);
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 5, 1);
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 6, 1);
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 11, 500);
-		app.components.current_level_presenter->inventory_presenter.set_inv(current_player, 12, 500);
+		for(int i = 1; i <= 15; ++i) {
+			auto bin_max = app.components.current_level_presenter->inventory_presenter->get_inv_max(current_player, i);
+			app.components.current_level_presenter->inventory_presenter->set_inv(current_player, i, bin_max);
+		}
 		break;
 
 	case sf::Keyboard::Space:
@@ -143,23 +142,43 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const time& ti
 		break;
 
 	case sf::Keyboard::Num1:
-		app.components.current_level_presenter->inventory_presenter.select_weapon(current_player, 1);
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 1);
 		break;
 
 	case sf::Keyboard::Num2:
-		app.components.current_level_presenter->inventory_presenter.select_weapon(current_player, 2);
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 2);
 		break;
 
 	case sf::Keyboard::Num3:
-		app.components.current_level_presenter->inventory_presenter.select_weapon(current_player, 3);
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 3);
+		break;
+
+	case sf::Keyboard::Num4:
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 4);
 		break;
 
 	case sf::Keyboard::Num5:
-		app.components.current_level_presenter->inventory_presenter.select_weapon(current_player, 5);
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 5);
 		break;
 
 	case sf::Keyboard::Num6:
-		app.components.current_level_presenter->inventory_presenter.select_weapon(current_player, 6);
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 6);
+		break;
+
+	case sf::Keyboard::Num7:
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 7);
+		break;
+
+	case sf::Keyboard::Num8:
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 8);
+		break;
+
+	case sf::Keyboard::Num9:
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 9);
+		break;
+
+	case sf::Keyboard::Num0:
+		app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 10);
 		break;
 
 	default:
@@ -170,7 +189,7 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const time& ti
 void gorc::client::action::action_presenter::on_keyboard_key_up(const time& time, sf::Keyboard::Key k, bool shift, bool ctrl, bool alt) {
 	switch(k) {
 	case sf::Keyboard::F2:
-		app.components.current_level_presenter->inventory_presenter.on_item_hotkey_released(app.components.current_level_presenter->get_local_player_thing(), 42);
+		app.components.current_level_presenter->inventory_presenter->on_item_hotkey_released(app.components.current_level_presenter->get_local_player_thing(), 42);
 		break;
 
 	case sf::Keyboard::LControl:

@@ -1,6 +1,7 @@
 #include "item_controller.h"
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
+#include "game/world/scripts/script_presenter.h"
 
 void gorc::game::world::gameplay::item_controller::taken(int thing_id, int player_id) {
 	auto& player_thing = presenter.model->things[player_id];
@@ -8,7 +9,7 @@ void gorc::game::world::gameplay::item_controller::taken(int thing_id, int playe
 		return;
 	}
 
-	presenter.script_presenter.send_message_to_linked(cog::message_id::taken,
+	presenter.script_presenter->send_message_to_linked(cog::message_id::taken,
 			thing_id, flags::message_type::thing,
 			player_id, flags::message_type::thing);
 

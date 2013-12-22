@@ -157,7 +157,8 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
 			}
 
 			mat->cels.emplace_back(load_bitmap_from_memory(adjusted_width, adjusted_height, &final_img[0]),
-					make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)));
+					make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)),
+					make_box(make_vector(0, 0), make_vector(std::get<0>(img), std::get<1>(img))));
 		}
 	}
 	else if(header.bit_depth == 16) {
@@ -209,7 +210,8 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
 			}
 
 			auto bm_handle = load_bitmap_from_memory(adjusted_width, adjusted_height, &final_img[0]);
-			mat->cels.emplace_back(bm_handle, make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)));
+			mat->cels.emplace_back(bm_handle, make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)),
+					make_box(make_vector(0, 0), make_vector(std::get<0>(img), std::get<1>(img))));
 		}
 	}
 	else {

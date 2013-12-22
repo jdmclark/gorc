@@ -2,6 +2,10 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 #include "game/constants.h"
+#include "game/world/scripts/script_presenter.h"
+#include "game/world/keys/key_presenter.h"
+#include "game/world/sounds/sound_presenter.h"
+#include "game/world/physics/physics_presenter.h"
 #include <unordered_map>
 #include <type_traits>
 
@@ -252,7 +256,9 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
 
 	maybe<physics::contact> contact;
 
-	contact = presenter.physics_presenter.thing_segment_query(thing_id, -leg_height, contact);
+	contact = presenter.physics_presenter->thing_segment_query(thing_id, -leg_height,
+			[&](int t) { return presenter.physics_presenter->thing_needs_collision_response(thing_id, t); },
+			[&](int s) { return presenter.physics_presenter->surface_needs_collision_response(thing_id, s); }, contact);
 	if(contact) {
 		return contact;
 	}
@@ -274,7 +280,9 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
 
 	maybe<physics::contact> contact;
 
-	contact = presenter.physics_presenter.thing_segment_query(thing_id, -leg_height, contact);
+	contact = presenter.physics_presenter->thing_segment_query(thing_id, -leg_height,
+			[&](int t) { return presenter.physics_presenter->thing_needs_collision_response(thing_id, t); },
+			[&](int s) { return presenter.physics_presenter->surface_needs_collision_response(thing_id, s); }, contact);
 	if(contact) {
 		return contact;
 	}
@@ -370,12 +378,12 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
 void gorc::game::world::gameplay::character_controller::set_is_falling(int thing_id, thing& thing) {
 	// Player is falling again.
 	if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
-		presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
+		presenter.script_presenter->send_message_to_linked(cog::message_id::exited,
 				thing.attached_thing, flags::message_type::thing,
 				thing_id, flags::message_type::thing);
 	}
 	else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
-		presenter.script_presenter.send_message_to_linked(cog::message_id::exited,
+		presenter.script_presenter->send_message_to_linked(cog::message_id::exited,
 				thing.attached_surface, flags::message_type::surface,
 				thing_id, flags::message_type::thing);
 	}
@@ -390,7 +398,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_surface(int thin
 		thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToWorldSurface };
 		thing.attached_surface = surf_id;
 
-		presenter.script_presenter.send_message_to_linked(cog::message_id::entered,
+		presenter.script_presenter->send_message_to_linked(cog::message_id::entered,
 				surf_id, flags::message_type::surface,
 				thing_id, flags::message_type::thing);
 		return true;
@@ -412,7 +420,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_
 		thing.attached_thing = land_thing_id;
 		thing.prev_attached_thing_position = presenter.model->things[land_thing_id].position;
 
-		presenter.script_presenter.send_message_to_linked(cog::message_id::entered,
+		presenter.script_presenter->send_message_to_linked(cog::message_id::entered,
 				land_thing_id, flags::message_type::thing,
 				thing_id, flags::message_type::thing);
 		return true;
@@ -432,7 +440,7 @@ void gorc::game::world::gameplay::character_controller::land_on_surface(int thin
 		return;
 	}
 
-	presenter.key_presenter.play_mode(thing_id, flags::puppet_submode_type::Land);
+	presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
 
 	const auto& surf = presenter.model->surfaces[surf_id];
 
@@ -453,7 +461,7 @@ void gorc::game::world::gameplay::character_controller::land_on_surface(int thin
 		subclass = flags::sound_subclass_type::LandWater;
 	}
 
-	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+	presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
 void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_id, thing& thing, int land_thing_id,
@@ -462,7 +470,7 @@ void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_
 		return;
 	}
 
-	presenter.key_presenter.play_mode(thing_id, flags::puppet_submode_type::Land);
+	presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
 
 	flag_set<flags::thing_flag> flags = presenter.model->things[land_thing_id].flags;
 
@@ -474,7 +482,7 @@ void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_
 		subclass = flags::sound_subclass_type::LandEarth;
 	}
 
-	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+	presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
 void gorc::game::world::gameplay::character_controller::jump(int thing_id, thing& thing) {
@@ -516,7 +524,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_surface(int th
 		subclass = flags::sound_subclass_type::JumpWater;
 	}
 
-	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+	presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
 void gorc::game::world::gameplay::character_controller::jump_from_thing(int thing_id, thing& thing, int jump_thing_id) {
@@ -533,7 +541,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_thing(int thin
 		subclass = flags::sound_subclass_type::JumpEarth;
 	}
 
-	presenter.sound_presenter.play_sound_class(thing_id, subclass);
+	presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
 void gorc::game::world::gameplay::character_controller::update(int thing_id, double dt) {
@@ -558,7 +566,7 @@ void gorc::game::world::gameplay::character_controller::create_controller_data(i
 
 	// HACK: Initialize actor walk animation
 	if(new_thing.pup) {
-		new_thing.actor_walk_animation = presenter.key_presenter.play_mode(thing_id, flags::puppet_submode_type::Stand);
+		new_thing.actor_walk_animation = presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Stand);
 	}
 	else {
 		new_thing.actor_walk_animation = -1;
@@ -573,7 +581,7 @@ void gorc::game::world::gameplay::character_controller::create_controller_data(i
 void gorc::game::world::gameplay::character_controller::remove_controller_data(int thing_id) {
 	auto& thing = presenter.model->things[thing_id];
 	if(thing.actor_walk_animation >= 0) {
-		presenter.key_presenter.stop_key(thing_id, thing.actor_walk_animation, 0.0f);
+		presenter.key_presenter->stop_key(thing_id, thing.actor_walk_animation, 0.0f);
 	}
 
 	thing_controller::remove_controller_data(thing_id);
@@ -584,19 +592,19 @@ void gorc::game::world::gameplay::character_controller::handle_animation_marker(
 
 	switch(marker) {
 	case flags::key_marker_type::LeftRunFootstep:
-		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_left_run_map, get_standing_material(thing)));
+		presenter.sound_presenter->play_sound_class(thing_id, map_get(character_left_run_map, get_standing_material(thing)));
 		break;
 
 	case flags::key_marker_type::RightRunFootstep:
-		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_right_run_map, get_standing_material(thing)));
+		presenter.sound_presenter->play_sound_class(thing_id, map_get(character_right_run_map, get_standing_material(thing)));
 		break;
 
 	case flags::key_marker_type::LeftFootstep:
-		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_left_walk_map, get_standing_material(thing)));
+		presenter.sound_presenter->play_sound_class(thing_id, map_get(character_left_walk_map, get_standing_material(thing)));
 		break;
 
 	case flags::key_marker_type::RightFootstep:
-		presenter.sound_presenter.play_sound_class(thing_id, map_get(character_right_walk_map, get_standing_material(thing)));
+		presenter.sound_presenter->play_sound_class(thing_id, map_get(character_right_walk_map, get_standing_material(thing)));
 		break;
 	}
 }

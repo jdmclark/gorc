@@ -3,6 +3,8 @@
 #include "game/world/level_presenter.h"
 #include "client/application.h"
 #include "game/world/level_model.h"
+#include "game/world/keys/key_presenter.h"
+#include "game/world/scripts/script_presenter.h"
 #include "content/assets/model.h"
 #include "content/assets/sprite.h"
 #include "content/constants.h"
@@ -58,6 +60,11 @@ void gorc::client::world::level_view::do_sector_vis(unsigned int sec_num, const 
 		const vector<3>& surf_vx_pos = currentModel->level.vertices[std::get<0>(surface.vertices.front())];
 
 		if(surface.adjoin < 0 || sector_visited_scratch.count(surface.adjoined_sector) > 0) {
+			continue;
+		}
+
+		const auto& adjoin = currentModel->adjoins[surface.adjoin];
+		if(!(adjoin.flags & flags::adjoin_flag::Visible)) {
 			continue;
 		}
 
@@ -393,7 +400,7 @@ void gorc::client::world::level_view::draw_pov_model() {
 			mesh_node_visitor v(lit_sector_color, *this, nullptr, nullptr);
 			auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
 			auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
-			currentPresenter->key_presenter.visit_mesh_hierarchy(v, *pov_model, thing.position,
+			currentPresenter->key_presenter->visit_mesh_hierarchy(v, *pov_model, thing.position,
 					pov_model_offset, currentModel->camera_model.pov_key_mix_id);
 		}
 	}
@@ -540,7 +547,7 @@ void gorc::client::world::level_view::mesh_node_visitor::visit_mesh(const conten
 	// TODO: This is a hack. Replace after finding out how weapon mesh is really supposed to be inserted.
 	if(weapon_mesh && puppet_file && node_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)) {
 		mesh_node_visitor weapon_mesh_node_visitor(sector_color, view, nullptr, nullptr);
-		view.currentPresenter->key_presenter.visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh, make_zero_vector<3, float>(),
+		view.currentPresenter->key_presenter->visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh, make_zero_vector<3, float>(),
 				quaternion<float>(), -1);
 	}
 }
@@ -638,7 +645,7 @@ void gorc::client::world::level_view::draw_thing(const game::world::thing& thing
 
 	if(thing.model_3d) {
 		mesh_node_visitor v(lit_sector_color, *this, thing.weapon_mesh, thing.pup);
-		currentPresenter->key_presenter.visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix,
+		currentPresenter->key_presenter->visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix,
 				thing.pup, thing.head_pitch);
 	}
 	else if(thing.spr) {

@@ -2,6 +2,8 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 #include "content/flags/weapon_flag.h"
+#include "game/world/scripts/script_presenter.h"
+#include "game/world/sounds/sound_presenter.h"
 
 void gorc::game::world::gameplay::weapon_controller::touched_thing(int thing_id, int touched_thing_id) {
 	thing_controller::touched_thing(thing_id, touched_thing_id);
@@ -59,7 +61,7 @@ void gorc::game::world::gameplay::weapon_controller::touched_surface(int thing_i
 			proj_flags -= flags::weapon_flag::does_not_affect_parent;
 			projectile.type_flags = static_cast<int>(proj_flags);
 			projectile.vel -= 2.0f * dot(projectile.vel, touched_surface.normal) * touched_surface.normal;
-			presenter.sound_presenter.play_sound_class(thing_id, flags::sound_subclass_type::deflected);
+			presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::deflected);
 		}
 		return;
 	}
@@ -71,7 +73,7 @@ void gorc::game::world::gameplay::weapon_controller::touched_surface(int thing_i
 		presenter.create_thing_at_thing(projectile.create_thing, thing_id);
 	}
 
-	presenter.script_presenter.send_message_to_linked(cog::message_id::damaged,
+	presenter.script_presenter->send_message_to_linked(cog::message_id::damaged,
 			touched_surface_id, flags::message_type::surface,
 			thing_id, flags::message_type::thing,
 			projectile.damage, static_cast<int>(projectile.damage_class));

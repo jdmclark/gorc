@@ -5,7 +5,7 @@
 #include "game/world/level_model.h"
 
 gorc::game::world::scripts::script_presenter::script_presenter(level_state& components)
-	: gorc::cog::scripts::script_presenter(components.verb_table), components(components), levelModel(nullptr), model(nullptr) {
+	: gorc::cog::scripts::script_presenter(components.verb_table), levelModel(nullptr), model(nullptr) {
 	return;
 }
 
@@ -359,7 +359,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
 		auto jt = inst.heap.begin();
 
 		for(; it != inst.script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
-			if(!it->no_link && it->type == expectedsymbol_type && static_cast<int>(*jt) == SenderRef
+			if(!it->no_link && !it->local && it->type == expectedsymbol_type && static_cast<int>(*jt) == SenderRef
 					&& (!source_mask || (it->mask & source_mask))) {
 				send_message(i, message,
 						it->link_id, SenderRef, SenderType, SourceRef, SourceType,
@@ -389,24 +389,24 @@ void gorc::game::world::scripts::script_presenter::capture_thing(int thing_id) {
 void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 
 	verbTable.add_verb<void, 2>("sendmessage", [&components](int cog_id, int message) {
-		components.current_level_presenter->script_presenter.send_message(cog_id, static_cast<cog::message_id>(message),
-				-1, components.current_level_presenter->script_presenter.model->running_cog_state.top().instance_id, flags::message_type::cog,
+		components.current_level_presenter->script_presenter->send_message(cog_id, static_cast<cog::message_id>(message),
+				-1, components.current_level_presenter->script_presenter->model->running_cog_state.top().instance_id, flags::message_type::cog,
 				static_cast<int>(components.current_level_presenter->get_local_player_thing()), flags::message_type::thing);
 	});
 
 	verbTable.add_verb<cog::vm::value, 6>("sendmessageex", [&components](int cog_id, int message,
 			cog::vm::value param0, cog::vm::value param1, cog::vm::value param2, cog::vm::value param3) {
-		return components.current_level_presenter->script_presenter.send_message(cog_id, static_cast<cog::message_id>(message),
-				-1, components.current_level_presenter->script_presenter.model->running_cog_state.top().instance_id, flags::message_type::cog,
+		return components.current_level_presenter->script_presenter->send_message(cog_id, static_cast<cog::message_id>(message),
+				-1, components.current_level_presenter->script_presenter->model->running_cog_state.top().instance_id, flags::message_type::cog,
 				static_cast<int>(components.current_level_presenter->get_local_player_thing()), flags::message_type::thing,
 				param0, param1, param2, param3);
 	});
 
 	verbTable.add_verb<void, 1>("waitforstop", [&components](int thing_id) {
-		components.current_level_presenter->script_presenter.wait_for_stop(thing_id);
+		components.current_level_presenter->script_presenter->wait_for_stop(thing_id);
 	});
 
 	verbTable.add_verb<void, 1>("capturething", [&components](int thing_id) {
-		components.current_level_presenter->script_presenter.capture_thing(thing_id);
+		components.current_level_presenter->script_presenter->capture_thing(thing_id);
 	});
 }
