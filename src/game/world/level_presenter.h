@@ -129,6 +129,10 @@ public:
 	void jk_end_level(bool success);
 
 	// Misc verbs
+	void jk_disable_saber(int thing_id);
+	void jk_enable_saber(int thing_id, float damage, float collide_length, float unknown);
+	void jk_set_saber_info(int thing_id, int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
+			int wall, int blood, int saber);
 	void take_item(int thing_id, int player_id);
 
 	// Player verbs
@@ -211,6 +215,7 @@ public:
 	// weapon verbs
 	void jk_set_weapon_mesh(int player, int model);
 	void set_armed_mode(int player, flags::armed_mode mode);
+	flags::puppet_mode_type get_major_mode(int player);
 
 	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };

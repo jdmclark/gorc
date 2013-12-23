@@ -557,6 +557,31 @@ void gorc::game::world::gameplay::character_controller::update(int thing_id, dou
 	else {
 		update_falling(thing_id, thing, dt);
 	}
+
+	// Update lightsaber state
+	if(thing.jk_flags & flags::jk_flag::has_saber) {
+		if(thing.jk_flags & flags::jk_flag::saber_igniting) {
+			thing.saber_drawn_length += fabs(thing.saber_drawn_length - thing.saber_length) * dt * 6.0f;
+			if(thing.saber_drawn_length >= thing.saber_length) {
+				thing.saber_drawn_length = thing.saber_length;
+				thing.jk_flags -= flags::jk_flag::saber_igniting;
+			}
+		}
+		else if(thing.jk_flags & flags::jk_flag::saber_shrinking) {
+			thing.saber_drawn_length -= thing.saber_drawn_length * dt * 6.0f;
+			if(thing.saber_drawn_length <= 0.0f) {
+				thing.saber_drawn_length = 0.0f;
+				thing.jk_flags -= flag_set<flags::jk_flag> { flags::jk_flag::saber_shrinking, flags::jk_flag::has_saber };
+			}
+		}
+		else {
+			thing.saber_drawn_length = thing.saber_length;
+		}
+	}
+	else {
+		thing.jk_flags -= flag_set<flags::jk_flag> { flags::jk_flag::saber_igniting, flags::jk_flag::saber_shrinking };
+		thing.saber_drawn_length = 0.0f;
+	}
 }
 
 void gorc::game::world::gameplay::character_controller::create_controller_data(int thing_id) {

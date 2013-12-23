@@ -5,6 +5,8 @@
 #include "framework/math/box.h"
 #include "framework/utility/flag_set.h"
 #include "content/flags/key_flag.h"
+#include "content/flags/geometry_mode.h"
+#include "content/flags/light_mode.h"
 #include "level_shader.h"
 #include "cog/verbs/table.h"
 #include <stack>
@@ -15,6 +17,7 @@ namespace content {
 class manager;
 
 namespace assets {
+class material;
 class thing_template;
 class level_sector;
 class shader;
@@ -81,6 +84,8 @@ private:
 	void draw_pov_model();
 
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
+	void draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
+			flags::geometry_mode geo, flags::light_mode light, float extra_light, const vector<3>& offset, float sector_light);
 	void draw_sprite(const game::world::thing& thing, const content::assets::sprite& sprite, float sector_light);
 	void draw_thing(const game::world::thing& thing, int thing_id);
 
@@ -119,10 +124,18 @@ public:
 		level_view& view;
 		content::assets::model const* weapon_mesh;
 		content::assets::puppet const* puppet_file;
+		bool draw_saber = false;
+		float saber_length = 0.0f;
+		float saber_base_radius = 0.0f;
+		float saber_tip_radius = 0.0f;
+		content::assets::material const* saber_blade;
+		content::assets::material const* saber_tip;
 
 	public:
 		mesh_node_visitor(const vector<4>& sector_color, level_view& view, content::assets::model const* weapon_mesh,
-				content::assets::puppet const* puppet_file);
+				content::assets::puppet const* puppet_file,
+				bool draw_saber = false, float saber_length = 0.0f, float saber_base_radius = 0.0f, float saber_tip_radius = 0.0f,
+				content::assets::material const* saber_blade = nullptr, content::assets::material const* saber_tip = nullptr);
 
 		inline void concatenate_matrix(const matrix<4>& mat) {
 			view.concatenate_matrix(mat);

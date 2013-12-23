@@ -61,6 +61,8 @@ public:
 	void wait_for_stop(int thing);
 	void capture_thing(int thing);
 
+	int get_thing_class_cog(int thing);
+
 	static void register_verbs(cog::verbs::verb_table&, level_state&);
 };
 

@@ -386,6 +386,15 @@ void gorc::game::world::scripts::script_presenter::capture_thing(int thing_id) {
 	levelModel->things[thing_id].capture_cog = model->running_cog_state.top().instance_id;
 }
 
+int gorc::game::world::scripts::script_presenter::get_thing_class_cog(int thing_id) {
+	const auto* classcog = levelModel->things[thing_id].cog;
+	if(classcog) {
+		return get_global_cog_instance(&classcog->cogscript);
+	}
+
+	return -1;
+}
+
 void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 
 	verbTable.add_verb<void, 2>("sendmessage", [&components](int cog_id, int message) {
@@ -408,5 +417,9 @@ void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::ve
 
 	verbTable.add_verb<void, 1>("capturething", [&components](int thing_id) {
 		components.current_level_presenter->script_presenter->capture_thing(thing_id);
+	});
+
+	verbTable.add_verb<int, 1>("getthingclasscog", [&components](int thing_id) {
+		return components.current_level_presenter->script_presenter->get_thing_class_cog(thing_id);
 	});
 }

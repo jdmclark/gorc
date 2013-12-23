@@ -64,6 +64,20 @@ public:
 	flag_set<flags::jk_flag> jk_flags;
 	flag_set<flags::ai_mode_flag> ai_mode_flags;
 
+	content::assets::material const* saber_side_mat = nullptr;
+	content::assets::material const* saber_tip_mat = nullptr;
+	float saber_base_rad = 0.003f;
+	float saber_tip_rad = 0.001f;
+	float saber_length = 0.1f;
+	float saber_drawn_length = 0.0f;
+	content::assets::thing_template const* saber_wall = nullptr;
+	content::assets::thing_template const* saber_blood = nullptr;
+	content::assets::thing_template const* saber_saber = nullptr;
+	bool saber_enabled = false;
+	float saber_damage = 0.0f;
+	float saber_collide_length = 0.0f;
+	float saber_unknown = 0.0f;
+
 	thing() = default;
 	thing(const content::assets::thing_template& tpl);
 };

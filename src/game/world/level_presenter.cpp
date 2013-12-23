@@ -276,14 +276,16 @@ void gorc::game::world::level_presenter::activate() {
 				return surf.flags & flags::surface_flag::CogLinked;
 			});
 
-	if_set(activate_contact, then_do, [this](const physics::contact& contact) {
+	if_set(activate_contact, then_do, [&](const physics::contact& contact) {
 		if_set(contact.contact_surface_id, then_do, [this](int contact_surface_id) {
+			std::cout << "ACTIVATE SURFACE: " << contact_surface_id << std::endl;
 			script_presenter->send_message_to_linked(cog::message_id::activated,
 					contact_surface_id, flags::message_type::surface,
 					model->local_player_thing_id, flags::message_type::thing);
 		});
 
-		if_set(contact.contact_thing_id, then_do, [this](int contact_thing_id) {
+		if_set(contact.contact_thing_id, then_do, [&](int contact_thing_id) {
+			std::cout << "ACTIVATE THING: " << contact_thing_id << std::endl;
 			script_presenter->send_message_to_linked(cog::message_id::activated, contact_thing_id, flags::message_type::thing,
 					model->local_player_thing_id, flags::message_type::thing);
 			sound_presenter->play_sound_class(contact_thing_id, flags::sound_subclass_type::Activate);
@@ -505,6 +507,38 @@ void gorc::game::world::level_presenter::jk_end_level(bool success) {
 }
 
 // Misc verbs
+void gorc::game::world::level_presenter::jk_disable_saber(int thing_id) {
+	auto& thing = model->things[thing_id];
+	thing.saber_enabled = false;
+	return;
+}
+
+void gorc::game::world::level_presenter::jk_enable_saber(int thing_id, float damage,
+		float collide_length, float unknown) {
+	auto& thing = model->things[thing_id];
+	thing.saber_enabled = true;
+	thing.saber_damage = damage;
+	thing.saber_collide_length = collide_length;
+	thing.saber_unknown = unknown;
+	return;
+}
+
+void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
+		int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
+		int wall, int blood, int saber) {
+	auto& thing = model->things[thing_id];
+
+	thing.saber_side_mat = &contentmanager->get_asset<content::assets::material>(side_mat);
+	thing.saber_tip_mat = &contentmanager->get_asset<content::assets::material>(tip_mat);
+	thing.saber_base_rad = base_rad;
+	thing.saber_tip_rad = tip_rad;
+	thing.saber_length = length;
+
+	thing.saber_wall = (wall >= 0) ? &model->level.templates[wall] : nullptr;
+	thing.saber_blood = (blood >= 0) ? &model->level.templates[blood] : nullptr;
+	thing.saber_saber = (saber >= 0) ? &model->level.templates[saber] : nullptr;
+}
+
 void gorc::game::world::level_presenter::take_item(int thing_id, int player_id) {
 	auto& thing = model->things[thing_id];
 	thing.controller->taken(thing_id, player_id);
@@ -852,9 +886,11 @@ bool gorc::game::world::level_presenter::is_thing_moving(int thing_id) {
 	thing& referencedThing = model->things[thing_id];
 	switch(referencedThing.move) {
 	case flags::move_type::physics:
-		return true;
+		return length(referencedThing.vel) > 0.0000001f;
 
 	case flags::move_type::Path:
+		return referencedThing.path_moving || referencedThing.rotatepivot_moving;
+
 	default:
 		return false;
 	}
@@ -973,6 +1009,11 @@ void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed
 	model->things[player].armed_mode = mode;
 }
 
+gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(int player) {
+	const auto& thing = model->things[player];
+	return thing.puppet_mode;
+}
+
 void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
 	camera::camera_presenter::register_verbs(verbTable, components);
 	animations::animation_presenter::register_verbs(verbTable, components);
@@ -1076,6 +1117,22 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	});
 
 	// Misc verbs
+	verbTable.add_verb<void, 1>("jkdisablesaber", [&components](int thing_id) {
+		components.current_level_presenter->jk_disable_saber(thing_id);
+	});
+
+	verbTable.add_verb<void, 4>("jkenablesaber", [&components](int thing_id, float damage,
+			float collide_length, float unknown) {
+		components.current_level_presenter->jk_enable_saber(thing_id, damage, collide_length, unknown);
+	});
+
+	verbTable.add_verb<void, 9>("jksetsaberinfo", [&components](int thing_id,
+			int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
+			int wall, int blood, int saber) {
+		components.current_level_presenter->jk_set_saber_info(thing_id, side_mat, tip_mat,
+				base_rad, tip_rad, length, wall, blood, saber);
+	});
+
 	verbTable.add_verb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
 		components.current_level_presenter->take_item(thing_id, player_id);
 	});
@@ -1094,6 +1151,11 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 	verbTable.add_verb<int, 0>("getautopickup", [] {
 		// TODO: Add actual autopickup code.
 		return 0xF;
+	});
+
+	verbTable.add_verb<int, 0>("jkgetsabercam", [] {
+		// TODO: Add actual sabercam code.
+		return 1;
 	});
 
 	verbTable.add_verb<int, 0>("ismulti", [] {
@@ -1369,6 +1431,11 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 		components.current_level_presenter->model->things[thing_id].vel += force;
 	});
 
+	verbTable.add_verb<vector<3>, 1>("getthingthrust", [&components](int thing_id) {
+		// TODO: Proper implementation
+		return components.current_level_presenter->model->things[thing_id].thrust;
+	});
+
 	// weapon verbs
 	verbTable.add_verb<void, 2>("jksetweaponmesh", [&components](int thing_id, int mesh_id) {
 		components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
@@ -1376,5 +1443,9 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
 	verbTable.add_verb<void, 2>("setarmedmode", [&components](int player, int mode) {
 		components.current_level_presenter->set_armed_mode(player, flags::armed_mode(mode));
+	});
+
+	verbTable.add_verb<int, 1>("getmajormode", [&components](int player) {
+		return static_cast<int>(components.current_level_presenter->get_major_mode(player));
 	});
 }

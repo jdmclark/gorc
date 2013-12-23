@@ -53,7 +53,7 @@ void symbol_table::replace_symbol(symbol_type type, const std::string& name,
 		break;
 
 	case symbol_type::integer:
-		defaultvalue = vm::value(-1);
+		defaultvalue = vm::value(0);
 		break;
 
 	case symbol_type::string:
