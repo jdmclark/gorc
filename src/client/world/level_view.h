@@ -83,6 +83,8 @@ private:
 	void draw_visible_translucent_surfaces_and_things();
 	void draw_pov_model();
 
+	void draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
+			float saber_length, float saber_base_radius, float saber_tip_radius);
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
 	void draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
 			flags::geometry_mode geo, flags::light_mode light, float extra_light, const vector<3>& offset, float sector_light);

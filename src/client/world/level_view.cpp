@@ -556,85 +556,90 @@ void gorc::client::world::level_view::mesh_node_visitor::visit_mesh(const conten
 	}
 
 	if(draw_saber && puppet_file && node_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)) {
-		view.draw_sprite(make_vector(0.0f, 0.0f, 0.0f), *saber_tip, 0, saber_base_radius * 2.0f, saber_base_radius * 2.0f,
-				flags::geometry_mode::Solid, flags::light_mode::FullyLit, 1.0f, make_zero_vector<3, float>(), 0.0f);
-		view.draw_sprite(make_vector(0.0f, 1.0f, 0.0f) * saber_length, *saber_tip, 0, saber_tip_radius * 2.0f, saber_tip_radius * 2.0f,
-				flags::geometry_mode::Solid, flags::light_mode::FullyLit, 1.0f, make_zero_vector<3, float>(), 0.0f);
-
-		// Draw saber blade:
-		push_matrix();
-
-		float light = 1.0f;
-
-		auto vmat = view.model_matrix_stack.top();
-
-		auto hilt_pos = vmat.transform(make_vector(0.0f, 0.0f, 0.0f));
-		auto blade_dir = normalize(vmat.transform_normal(make_vector(0.0f, 1.0f, 0.0f)));
-		auto blade_face = normalize(vmat.transform_normal(make_vector(0.0f, 0.0f, 1.0f)));
-		auto blade_opp = cross(blade_dir, blade_face);
-		auto cam_pos = view.currentModel->camera_model.current_computed_state.position;
-
-		// Project cam_pos into saber hilt plane
-		cam_pos = cam_pos - hilt_pos;
-		cam_pos = cam_pos - blade_dir * dot(cam_pos, blade_dir);
-		cam_pos = normalize(cam_pos);
-
-		// Change basis
-		float cam_pos_x = dot(blade_opp, cam_pos);
-		float cam_pos_y = dot(blade_face, cam_pos);
-
-		float angle = to_degrees(atan2f(cam_pos_x, cam_pos_y));
-		concatenate_matrix(make_rotation_matrix(angle, make_vector(0.0f, 1.0f, 0.0f)));
-
-		glActiveTexture(GL_TEXTURE0);
-		graphics::bind_texture(saber_blade->cels[0].diffuse);
-		glActiveTexture(GL_TEXTURE1);
-		graphics::bind_texture(saber_blade->cels[0].light);
-
-		vector<3> sprite_middle = make_zero_vector<3, float>();//sprite.Offset;
-		vector<3> horiz_off = make_vector(1.0f,0.0f,0.0f);
-		vector<3> vert_off = make_vector(0.0f,1.0f,0.0f) * saber_length;
-
-		vector<3> sprite_vx1 = sprite_middle + horiz_off * saber_tip_radius + vert_off;
-		vector<3> sprite_vx2 = sprite_middle + horiz_off * saber_base_radius;
-		vector<3> sprite_vx3 = sprite_middle - horiz_off * saber_base_radius;
-		vector<3> sprite_vx4 = sprite_middle - horiz_off * saber_tip_radius + vert_off;
-
-		vector<3> sprite_normal = make_vector(0.0f, 1.0f, 0.0f);
-
-		auto light_vec = make_vector(light, light, light, 1.0f);
-
-		glDepthMask(GL_FALSE);
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(1.0f, 1.0f);
-		glBegin(GL_QUADS);
-
-		apply(glNormal3f, sprite_normal);
-		glTexCoord2f(1,0);
-		apply(glColor4f, light_vec);
-		apply(glVertex3f, sprite_vx1);
-
-		apply(glNormal3f, sprite_normal);
-		glTexCoord2f(1,1);
-		apply(glColor4f, light_vec);
-		apply(glVertex3f, sprite_vx2);
-
-		apply(glNormal3f, sprite_normal);
-		glTexCoord2f(0,1);
-		apply(glColor4f, light_vec);
-		apply(glVertex3f, sprite_vx3);
-
-		apply(glNormal3f, sprite_normal);
-		glTexCoord2f(0,0);
-		apply(glColor4f, light_vec);
-		apply(glVertex3f, sprite_vx4);
-
-		glEnd();
-		glDepthMask(GL_TRUE);
-		glDisable(GL_POLYGON_OFFSET_FILL);
-
-		pop_matrix();
+		view.draw_saber(*saber_tip, *saber_blade, saber_length, saber_base_radius, saber_tip_radius);
 	}
+}
+
+void gorc::client::world::level_view::draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
+		float saber_length, float saber_base_radius, float saber_tip_radius) {
+	draw_sprite(make_vector(0.0f, 0.0f, 0.0f), saber_tip, 0, saber_base_radius * 2.0f, saber_base_radius * 2.0f,
+			flags::geometry_mode::Solid, flags::light_mode::FullyLit, 1.0f, make_zero_vector<3, float>(), 0.0f);
+	draw_sprite(make_vector(0.0f, 1.0f, 0.0f) * saber_length, saber_tip, 0, saber_tip_radius * 2.0f, saber_tip_radius * 2.0f,
+			flags::geometry_mode::Solid, flags::light_mode::FullyLit, 1.0f, make_zero_vector<3, float>(), 0.0f);
+
+	// Draw saber blade:
+	push_matrix();
+
+	float light = 1.0f;
+
+	auto vmat = model_matrix_stack.top();
+
+	auto hilt_pos = vmat.transform(make_vector(0.0f, 0.0f, 0.0f));
+	auto blade_dir = normalize(vmat.transform_normal(make_vector(0.0f, 1.0f, 0.0f)));
+	auto blade_face = normalize(vmat.transform_normal(make_vector(0.0f, 0.0f, 1.0f)));
+	auto blade_opp = cross(blade_dir, blade_face);
+	auto cam_pos = currentModel->camera_model.current_computed_state.position;
+
+	// Project cam_pos into saber hilt plane
+	cam_pos = cam_pos - hilt_pos;
+	cam_pos = cam_pos - blade_dir * dot(cam_pos, blade_dir);
+	cam_pos = normalize(cam_pos);
+
+	// Change basis
+	float cam_pos_x = dot(blade_opp, cam_pos);
+	float cam_pos_y = dot(blade_face, cam_pos);
+
+	float angle = to_degrees(atan2f(cam_pos_x, cam_pos_y));
+	concatenate_matrix(make_rotation_matrix(angle, make_vector(0.0f, 1.0f, 0.0f)));
+
+	glActiveTexture(GL_TEXTURE0);
+	graphics::bind_texture(saber_blade.cels[0].diffuse);
+	glActiveTexture(GL_TEXTURE1);
+	graphics::bind_texture(saber_blade.cels[0].light);
+
+	vector<3> sprite_middle = make_zero_vector<3, float>();//sprite.Offset;
+	vector<3> horiz_off = make_vector(1.0f,0.0f,0.0f);
+	vector<3> vert_off = make_vector(0.0f,1.0f,0.0f) * saber_length;
+
+	vector<3> sprite_vx1 = sprite_middle + horiz_off * saber_tip_radius + vert_off;
+	vector<3> sprite_vx2 = sprite_middle + horiz_off * saber_base_radius;
+	vector<3> sprite_vx3 = sprite_middle - horiz_off * saber_base_radius;
+	vector<3> sprite_vx4 = sprite_middle - horiz_off * saber_tip_radius + vert_off;
+
+	vector<3> sprite_normal = make_vector(0.0f, 1.0f, 0.0f);
+
+	auto light_vec = make_vector(light, light, light, 1.0f);
+
+	glDepthMask(GL_FALSE);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1.0f, 1.0f);
+	glBegin(GL_QUADS);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(1,0);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx1);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(1,1);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx2);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(0,1);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx3);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(0,0);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx4);
+
+	glEnd();
+	glDepthMask(GL_TRUE);
+	glDisable(GL_POLYGON_OFFSET_FILL);
+
+	pop_matrix();
 }
 
 void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
