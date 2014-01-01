@@ -1,5 +1,7 @@
 #include "framework/content/assets/shader.h"
 #include "level_view.h"
+#include "thing_mesh_node_visitor.h"
+#include "pov_mesh_node_visitor.h"
 #include "game/world/level_presenter.h"
 #include "client/application.h"
 #include "game/world/level_model.h"
@@ -133,7 +135,7 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = currentModel->surfaces[i];
 
-			if(surface.geometry_mode == flags::geometry_mode::NotDrawn) {
+			if(surface.geometry_mode == flags::geometry_mode::not_drawn) {
 				continue;
 			}
 
@@ -197,7 +199,7 @@ void gorc::client::world::level_view::draw_visible_diffuse_surfaces() {
 		for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
 			const auto& surface = currentModel->surfaces[i];
 
-			if(surface.geometry_mode == flags::geometry_mode::NotDrawn
+			if(surface.geometry_mode == flags::geometry_mode::not_drawn
 					|| surface.adjoin >= 0
 					|| (surface.flags & flags::surface_flag::HorizonSky)
 					|| (surface.flags & flags::surface_flag::CeilingSky)) {
@@ -397,7 +399,14 @@ void gorc::client::world::level_view::draw_pov_model() {
 			float sector_light = current_sector.ambient_light + current_sector.extra_light;
 			auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
-			mesh_node_visitor v(lit_sector_color, *this, nullptr, nullptr);
+			int saber_mesh_node = -1;
+			if(thing.jk_flags & flags::jk_flag::has_saber) {
+				saber_mesh_node = 5;
+			}
+
+			pov_mesh_node_visitor v(lit_sector_color, *this, saber_mesh_node,
+					thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
+					thing.saber_side_mat, thing.saber_tip_mat);
 			auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
 			auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
 			currentPresenter->key_presenter->visit_mesh_hierarchy(v, *pov_model, thing.position,
@@ -476,96 +485,14 @@ void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const 
 	}
 }
 
-gorc::client::world::level_view::mesh_node_visitor::mesh_node_visitor(const vector<4>& sector_color, level_view& view,
-		content::assets::model const* weapon_mesh, content::assets::puppet const* puppet_file, bool draw_saber,
-		float saber_length, float saber_base_radius, float saber_tip_radius, const content::assets::material* saber_blade,
-		const content::assets::material* saber_tip)
-	: sector_color(sector_color), view(view), weapon_mesh(weapon_mesh), puppet_file(puppet_file),
-	  draw_saber(draw_saber), saber_length(saber_length), saber_base_radius(saber_base_radius), saber_tip_radius(saber_tip_radius),
-	  saber_blade(saber_blade), saber_tip(saber_tip) {
-	return;
-}
-
-void gorc::client::world::level_view::mesh_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
-	const content::assets::model_mesh& mesh = model.geosets.front().meshes[mesh_id];
-	for(const auto& face : mesh.faces) {
-		if(face.material >= 0) {
-			const auto& material = model.materials[face.material];
-
-			float alpha = (face.type & flags::face_flag::Translucent) ? 0.5f : 1.0f;
-
-			vector<2> tex_scale = make_vector(1.0f / static_cast<float>(get_size<0>(material->size)),
-					1.0f / static_cast<float>(get_size<1>(material->size)));
-
-			float light = face.extra_light;
-			if(face.light == flags::light_mode::FullyLit || mesh.light == flags::light_mode::FullyLit) {
-				light = 1.0f;
-			}
-
-			auto extra_lit_color = sector_color;
-			for(float& ch : extra_lit_color) {
-				ch = clamp(ch + light, 0.0f, 1.0f);
-			}
-			get<3>(extra_lit_color) = alpha;
-
-			glActiveTexture(GL_TEXTURE0);
-			graphics::bind_texture(material->cels[0].diffuse);
-			glActiveTexture(GL_TEXTURE1);
-			graphics::bind_texture(material->cels[0].light);
-
-			glBegin(GL_TRIANGLES);
-
-			vector<3> first_geo = mesh.vertices[std::get<0>(face.vertices[0])];
-			vector<2> first_tex = mesh.texture_vertices[std::get<1>(face.vertices[0])];
-			vector<3> first_normal = mesh.vertex_normals[std::get<0>(face.vertices[0])];
-
-			for(size_t i = 2; i < face.vertices.size(); ++i) {
-				vector<3> second_geo = mesh.vertices[std::get<0>(face.vertices[i - 1])];
-				vector<2> second_tex = mesh.texture_vertices[std::get<1>(face.vertices[i - 1])];
-				vector<3> second_normal = mesh.vertex_normals[std::get<0>(face.vertices[i - 1])];
-
-				vector<3> third_geo = mesh.vertices[std::get<0>(face.vertices[i])];
-				vector<2> third_tex = mesh.texture_vertices[std::get<1>(face.vertices[i])];
-				vector<3> third_normal = mesh.vertex_normals[std::get<0>(face.vertices[i])];
-
-				apply(glNormal3f, first_normal);
-				glTexCoord2f(get<0>(first_tex) * get<0>(tex_scale), get<1>(first_tex) * get<1>(tex_scale));
-				apply(glColor4f, extra_lit_color);
-				apply(glVertex3f, first_geo);
-
-				apply(glNormal3f, second_normal);
-				glTexCoord2f(get<0>(second_tex) * get<0>(tex_scale), get<1>(second_tex) * get<1>(tex_scale));
-				apply(glColor4f, extra_lit_color);
-				apply(glVertex3f, second_geo);
-
-				apply(glNormal3f, third_normal);
-				glTexCoord2f(get<0>(third_tex) * get<0>(tex_scale), get<1>(third_tex) * get<1>(tex_scale));
-				apply(glColor4f, extra_lit_color);
-				apply(glVertex3f, third_geo);
-			}
-
-			glEnd();
-		}
-	}
-
-	// TODO: This is a hack. Replace after finding out how weapon mesh is really supposed to be inserted.
-	if(weapon_mesh && puppet_file && node_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)) {
-		mesh_node_visitor weapon_mesh_node_visitor(sector_color, view, nullptr, nullptr);
-		view.currentPresenter->key_presenter->visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh, make_zero_vector<3, float>(),
-				quaternion<float>(), -1);
-	}
-
-	if(draw_saber && puppet_file && node_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)) {
-		view.draw_saber(*saber_tip, *saber_blade, saber_length, saber_base_radius, saber_tip_radius);
-	}
-}
-
 void gorc::client::world::level_view::draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
 		float saber_length, float saber_base_radius, float saber_tip_radius) {
+	float tex_y = static_cast<float>(rand);
+
 	draw_sprite(make_vector(0.0f, 0.0f, 0.0f), saber_tip, 0, saber_base_radius * 2.0f, saber_base_radius * 2.0f,
-			flags::geometry_mode::Solid, flags::light_mode::FullyLit, 1.0f, make_zero_vector<3, float>(), 0.0f);
+			flags::geometry_mode::solid, flags::light_mode::fully_lit, 1.0f, make_zero_vector<3, float>(), 0.0f);
 	draw_sprite(make_vector(0.0f, 1.0f, 0.0f) * saber_length, saber_tip, 0, saber_tip_radius * 2.0f, saber_tip_radius * 2.0f,
-			flags::geometry_mode::Solid, flags::light_mode::FullyLit, 1.0f, make_zero_vector<3, float>(), 0.0f);
+			flags::geometry_mode::solid, flags::light_mode::fully_lit, 1.0f, make_zero_vector<3, float>(), 0.0f);
 
 	// Draw saber blade:
 	push_matrix();
@@ -598,8 +525,8 @@ void gorc::client::world::level_view::draw_saber(const content::assets::material
 	graphics::bind_texture(saber_blade.cels[0].light);
 
 	vector<3> sprite_middle = make_zero_vector<3, float>();//sprite.Offset;
-	vector<3> horiz_off = make_vector(1.0f,0.0f,0.0f);
-	vector<3> vert_off = make_vector(0.0f,1.0f,0.0f) * saber_length;
+	vector<3> horiz_off = make_vector(1.0f, 0.0f, 0.0f);
+	vector<3> vert_off = make_vector(0.0f, 1.0f, 0.0f) * saber_length;
 
 	vector<3> sprite_vx1 = sprite_middle + horiz_off * saber_tip_radius + vert_off;
 	vector<3> sprite_vx2 = sprite_middle + horiz_off * saber_base_radius;
@@ -616,24 +543,24 @@ void gorc::client::world::level_view::draw_saber(const content::assets::material
 	glBegin(GL_QUADS);
 
 	apply(glNormal3f, sprite_normal);
-	glTexCoord2f(1,0);
+	glTexCoord2f(1, tex_y);
 	apply(glColor4f, light_vec);
-	apply(glVertex3f, sprite_vx1);
+	apply(glVertex3f, sprite_vx4);
 
 	apply(glNormal3f, sprite_normal);
-	glTexCoord2f(1,1);
-	apply(glColor4f, light_vec);
-	apply(glVertex3f, sprite_vx2);
-
-	apply(glNormal3f, sprite_normal);
-	glTexCoord2f(0,1);
+	glTexCoord2f(1, 1.0f + tex_y);
 	apply(glColor4f, light_vec);
 	apply(glVertex3f, sprite_vx3);
 
 	apply(glNormal3f, sprite_normal);
-	glTexCoord2f(0,0);
+	glTexCoord2f(0, 1.0f + tex_y);
 	apply(glColor4f, light_vec);
-	apply(glVertex3f, sprite_vx4);
+	apply(glVertex3f, sprite_vx2);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(0, tex_y);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx1);
 
 	glEnd();
 	glDepthMask(GL_TRUE);
@@ -647,7 +574,7 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
 	push_matrix();
 
 	float light = sector_light + extra_light;
-	if(light_mode == flags::light_mode::FullyLit) {
+	if(light_mode == flags::light_mode::fully_lit) {
 		light = 1.0f;
 	}
 
@@ -685,6 +612,7 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
 	glDepthMask(GL_FALSE);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1.0f, 1.0f);
+
 	glBegin(GL_QUADS);
 
 	apply(glNormal3f, sprite_normal);
@@ -706,6 +634,26 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
 	glTexCoord2f(0,0);
 	apply(glColor4f, light_vec);
 	apply(glVertex3f, sprite_vx4);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(0,0);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx4);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(0,1);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx3);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(1,1);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx2);
+
+	apply(glNormal3f, sprite_normal);
+	glTexCoord2f(1,0);
+	apply(glColor4f, light_vec);
+	apply(glVertex3f, sprite_vx1);
 
 	glEnd();
 	glDepthMask(GL_TRUE);
@@ -748,8 +696,21 @@ void gorc::client::world::level_view::draw_thing(const game::world::thing& thing
 	auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
 	if(thing.model_3d) {
-		mesh_node_visitor v(lit_sector_color, *this, thing.weapon_mesh, thing.pup,
-				thing.jk_flags & flags::jk_flag::has_saber, thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
+		int weapon_mesh_node = -1;
+		int saber_mesh_node_a = -1;
+		int saber_mesh_node_b = -1;
+		if(thing.pup) {
+			weapon_mesh_node = thing.pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
+			if(thing.jk_flags & flags::jk_flag::has_saber) {
+				saber_mesh_node_a = thing.pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
+				if(thing.jk_flags & flags::jk_flag::has_two_sabers) {
+					saber_mesh_node_b = thing.pup->get_joint(flags::puppet_joint_type::secondary_weapon_fire);
+				}
+			}
+		}
+
+		thing_mesh_node_visitor v(lit_sector_color, *this, weapon_mesh_node, saber_mesh_node_a, saber_mesh_node_b,
+				thing.weapon_mesh, thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
 				thing.saber_side_mat, thing.saber_tip_mat);
 		currentPresenter->key_presenter->visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix,
 				thing.pup, thing.head_pitch);

@@ -4,6 +4,7 @@
 #include "framework/view.h"
 #include "framework/math/box.h"
 #include "framework/utility/flag_set.h"
+#include "framework/utility/randomizer.h"
 #include "content/flags/key_flag.h"
 #include "content/flags/geometry_mode.h"
 #include "content/flags/light_mode.h"
@@ -45,6 +46,7 @@ namespace world {
 
 class level_view : public view {
 private:
+	randomizer rand;
 	surface_shader surfaceShader;
 	horizon_shader horizonShader;
 	ceiling_shader ceilingShader;
@@ -83,11 +85,7 @@ private:
 	void draw_visible_translucent_surfaces_and_things();
 	void draw_pov_model();
 
-	void draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
-			float saber_length, float saber_base_radius, float saber_tip_radius);
 	void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
-	void draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
-			flags::geometry_mode geo, flags::light_mode light, float extra_light, const vector<3>& offset, float sector_light);
 	void draw_sprite(const game::world::thing& thing, const content::assets::sprite& sprite, float sector_light);
 	void draw_thing(const game::world::thing& thing, int thing_id);
 
@@ -96,6 +94,10 @@ public:
 
 	inline void set_presenter(game::world::level_presenter* presenter) {
 		currentPresenter = presenter;
+	}
+
+	inline game::world::level_presenter& get_presenter() const {
+		return *currentPresenter;
 	}
 
 	inline void set_level_model(game::world::level_model* levelModel) {
@@ -118,43 +120,13 @@ public:
 		model_matrix_stack.pop();
 	}
 
+	void draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
+			float saber_length, float saber_base_radius, float saber_tip_radius);
+
+	void draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
+			flags::geometry_mode geo, flags::light_mode light, float extra_light, const vector<3>& offset, float sector_light);
+
 	virtual void draw(const time& time, const box<2, int>& view_size, graphics::render_target& target) override;
-
-	class mesh_node_visitor {
-	private:
-		vector<4> sector_color;
-		level_view& view;
-		content::assets::model const* weapon_mesh;
-		content::assets::puppet const* puppet_file;
-		bool draw_saber = false;
-		float saber_length = 0.0f;
-		float saber_base_radius = 0.0f;
-		float saber_tip_radius = 0.0f;
-		content::assets::material const* saber_blade;
-		content::assets::material const* saber_tip;
-
-	public:
-		mesh_node_visitor(const vector<4>& sector_color, level_view& view, content::assets::model const* weapon_mesh,
-				content::assets::puppet const* puppet_file,
-				bool draw_saber = false, float saber_length = 0.0f, float saber_base_radius = 0.0f, float saber_tip_radius = 0.0f,
-				content::assets::material const* saber_blade = nullptr, content::assets::material const* saber_tip = nullptr);
-
-		inline void concatenate_matrix(const matrix<4>& mat) {
-			view.concatenate_matrix(mat);
-			view.update_shader_model_matrix();
-		}
-
-		inline void push_matrix() {
-			view.push_matrix();
-		}
-
-		inline void pop_matrix() {
-			view.pop_matrix();
-			view.update_shader_model_matrix();
-		}
-
-		void visit_mesh(const content::assets::model& model, int mesh_id, int node_id);
-	};
 };
 
 }

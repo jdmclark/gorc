@@ -418,7 +418,7 @@ bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_t
 			},
 			[&](int sid) {
 				auto& surf = model->surfaces[sid];
-				return surf.geometry_mode == flags::geometry_mode::Solid && !(surf.face_type_flags & flags::face_flag::Translucent);
+				return surf.geometry_mode == flags::geometry_mode::solid && !(surf.face_type_flags & flags::face_flag::Translucent);
 			});
 
 	bool rv = false;

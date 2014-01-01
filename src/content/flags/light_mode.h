@@ -4,12 +4,12 @@ namespace gorc {
 namespace flags {
 
 enum class light_mode {
-	FullyLit						= 0,
-	NotLit							= 1,
+	fully_lit						= 0,
+	not_lit							= 1,
 	diffuse							= 2,
-	Gouraud							= 3,
-	Gouraud2						= 4,
-	Gouraud3						= 5
+	gouraud							= 3,
+	gouraud2						= 4,
+	gouraud3						= 5
 };
 
 }
