@@ -10,10 +10,10 @@ namespace world {
 
 class level_place {
 public:
-	std::shared_ptr<content::manager> contentmanager;
-	const content::assets::level& level;
+    std::shared_ptr<content::manager> contentmanager;
+    const content::assets::level& level;
 
-	level_place(std::shared_ptr<content::manager> contentmanager, const content::assets::level& level);
+    level_place(std::shared_ptr<content::manager> contentmanager, const content::assets::level& level);
 };
 
 }

@@ -10,13 +10,13 @@ namespace generate_code {
 
 class expression_visitor : public ast::visitor {
 protected:
-	ir::printer& Printer;
+    ir::printer& Printer;
 
 public:
-	expression_visitor(ir::printer& printer, diagnostics::report& report);
+    expression_visitor(ir::printer& printer, diagnostics::report& report);
 
 private:
-	ASTCLASS_FINAL_EXPRESSION(AVPROTO);
+    ASTCLASS_FINAL_EXPRESSION(AVPROTO);
 };
 
 }

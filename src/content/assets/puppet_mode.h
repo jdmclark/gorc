@@ -11,11 +11,11 @@ namespace assets {
 
 class puppet_mode {
 public:
-	std::array<puppet_submode, 64> submodes;
+    std::array<puppet_submode, 64> submodes;
 
-	inline const puppet_submode& get_submode(flags::puppet_submode_type type) const {
-		return submodes[static_cast<unsigned int>(type)];
-	}
+    inline const puppet_submode& get_submode(flags::puppet_submode_type type) const {
+        return submodes[static_cast<unsigned int>(type)];
+    }
 };
 
 }

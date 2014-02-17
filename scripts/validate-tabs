@@ -1,0 +1,20 @@
+#!/bin/sh
+
+#
+# Check if source files use tabs instead of spaces
+#
+src_files=`git diff --cached --name-only | xargs stat -t -c "%n" 2>/dev/null | grep -E ".*\.(h|hpp|c|cpp)" | grep -v "(parser|lexer)\.(cpp|hpp)"`
+ 
+for f in $src_files; do
+    if grep -P "\t" $f 2>&1 1>/dev/null; then
+        files_containing_tab="$files_containing_tab $f"
+    fi
+done
+ 
+if [ -n "$files_containing_tab" ]; then
+    echo "The following source files contain tabs:"
+    for f in $files_containing_tab; do
+        echo "    $f"
+    done
+    exit 1
+fi

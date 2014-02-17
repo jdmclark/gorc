@@ -6,9 +6,9 @@ namespace vfs {
 namespace episode {
 
 enum class entry_type {
-	cutscene,
-	level,
-	decision
+    cutscene,
+    level,
+    decision
 };
 
 }

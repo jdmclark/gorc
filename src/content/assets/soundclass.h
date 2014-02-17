@@ -11,13 +11,13 @@ namespace assets {
 
 class soundclass : public asset {
 public:
-	using loader = loaders::soundclass_loader;
+    using loader = loaders::soundclass_loader;
 
-	std::array<sound_subclass, 128> subclasses;
+    std::array<sound_subclass, 128> subclasses;
 
-	inline const sound_subclass& get(flags::sound_subclass_type type) const {
-		return subclasses[static_cast<int>(type)];
-	}
+    inline const sound_subclass& get(flags::sound_subclass_type type) const {
+        return subclasses[static_cast<int>(type)];
+    }
 };
 
 }

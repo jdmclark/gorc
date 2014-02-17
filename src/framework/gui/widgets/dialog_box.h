@@ -14,12 +14,12 @@ namespace widgets {
 
 class dialog_box : public widget {
 private:
-	input_block_panel& background;
+    input_block_panel& background;
 
 protected:
-	frame& panel;
+    frame& panel;
 
-	dialog_box(gui_view&, const content::assets::texture& skin);
+    dialog_box(gui_view&, const content::assets::texture& skin);
 };
 
 }

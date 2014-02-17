@@ -9,7 +9,7 @@ namespace assets {
 
 class animation_node {
 public:
-	std::vector<animation_frame> frames;
+    std::vector<animation_frame> frames;
 };
 
 }

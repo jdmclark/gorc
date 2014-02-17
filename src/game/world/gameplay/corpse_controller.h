@@ -9,9 +9,9 @@ namespace gameplay {
 
 class corpse_controller : public thing_controller {
 public:
-	using thing_controller::thing_controller;
+    using thing_controller::thing_controller;
 
-	virtual void handle_animation_marker(int thing_id, flags::key_marker_type marker) override;
+    virtual void handle_animation_marker(int thing_id, flags::key_marker_type marker) override;
 };
 
 }

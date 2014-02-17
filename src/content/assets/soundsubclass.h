@@ -11,11 +11,11 @@ namespace assets {
 
 class sound_subclass {
 public:
-	int sound = -1;
-	flag_set<flags::sound_flag> flags;
-	float min_radius = 1.0f;
-	float max_radius = 4.0f;
-	float max_volume = 1.0f;
+    int sound = -1;
+    flag_set<flags::sound_flag> flags;
+    float min_radius = 1.0f;
+    float max_radius = 4.0f;
+    float max_volume = 1.0f;
 };
 
 }

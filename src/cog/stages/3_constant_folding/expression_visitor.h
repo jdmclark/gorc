@@ -15,39 +15,39 @@ namespace constant_folding {
 
 class expression_visitor : public ast::visitor {
 protected:
-	ast::factory& Factory;
-	symbols::symbol_table& symbol_table;
-	const std::unordered_map<std::string, vm::value>& ConstantTable;
+    ast::factory& Factory;
+    symbols::symbol_table& symbol_table;
+    const std::unordered_map<std::string, vm::value>& ConstantTable;
 
 private:
-	bool isConstant;
-	vm::value constantvalue;
-	ast::expression* visitedExpression;
+    bool isConstant;
+    vm::value constantvalue;
+    ast::expression* visitedExpression;
 
 public:
-	expression_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
-		const std::unordered_map<std::string, vm::value>& constantTable,
-		diagnostics::report& report);
+    expression_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
+        const std::unordered_map<std::string, vm::value>& constantTable,
+        diagnostics::report& report);
 
-	inline ast::expression* get_substitution() const {
-		if(isConstant) {
-			return Factory.make<ast::constant_value_expression>(visitedExpression->location, constantvalue);
-		}
-		else {
-			return visitedExpression;
-		}
-	}
+    inline ast::expression* get_substitution() const {
+        if(isConstant) {
+            return Factory.make<ast::constant_value_expression>(visitedExpression->location, constantvalue);
+        }
+        else {
+            return visitedExpression;
+        }
+    }
 
-	inline vm::value get_constant_value() const {
-		return constantvalue;
-	}
+    inline vm::value get_constant_value() const {
+        return constantvalue;
+    }
 
-	inline bool is_constant() const {
-		return isConstant;
-	}
+    inline bool is_constant() const {
+        return isConstant;
+    }
 
 private:
-	ASTCLASS_EXPRESSION(AVPROTO);
+    ASTCLASS_EXPRESSION(AVPROTO);
 };
 
 }

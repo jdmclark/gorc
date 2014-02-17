@@ -14,52 +14,52 @@ namespace content {
 namespace loaders {
 
 struct bitmap_header {
-	int32_t unknown1;
-	int32_t unknown2;
+    int32_t unknown1;
+    int32_t unknown2;
 
-	uint32_t pal_included;
-	uint32_t num_images;
+    uint32_t pal_included;
+    uint32_t num_images;
 
-	int32_t x_offset;
-	int32_t y_offset;
+    int32_t x_offset;
+    int32_t y_offset;
 
-	uint32_t transparent_color;
+    uint32_t transparent_color;
 
-	int32_t unknown3;
+    int32_t unknown3;
 
-	uint32_t bit_depth;
+    uint32_t bit_depth;
 
-	uint32_t blue_bits;
-	uint32_t green_bits;
-	uint32_t red_bits;
+    uint32_t blue_bits;
+    uint32_t green_bits;
+    uint32_t red_bits;
 
-	uint32_t red_shl;
-	uint32_t green_shl;
-	uint32_t blue_shl;
+    uint32_t red_shl;
+    uint32_t green_shl;
+    uint32_t blue_shl;
 
-	uint32_t unknowns[16];
+    uint32_t unknowns[16];
 };
 
 struct bitmap_image_header {
-	uint32_t width;
-	uint32_t height;
+    uint32_t width;
+    uint32_t height;
 };
 
 GLuint load_bitmap_from_memory(int width, int height, const uint8_t* data) {
-	GLuint texture_id = GL_INVALID_VALUE;
+    GLuint texture_id = GL_INVALID_VALUE;
 
-	glGenTextures(1, &texture_id);
-	glBindTexture(GL_TEXTURE_2D, texture_id);
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-	return texture_id;
+    return texture_id;
 }
 
 }
@@ -67,158 +67,158 @@ GLuint load_bitmap_from_memory(int width, int height, const uint8_t* data) {
 }
 
 gorc::content::loaders::bitmap_loader::bitmap_loader(const assets::colormap& colormap)
-	: pal_colormap(&colormap) {
-	return;
+    : pal_colormap(&colormap) {
+    return;
 }
 
 gorc::content::loaders::bitmap_loader::bitmap_loader(const assets::bitmap& bitmap)
-	: pal_bitmap(&bitmap) {
-	return;
+    : pal_bitmap(&bitmap) {
+    return;
 }
 
 gorc::vector<3, uint8_t> gorc::content::loaders::bitmap_loader::get_palette_color(uint8_t index) const {
-	if(pal_colormap) {
-		return pal_colormap->get_color(index);
-	}
-	else if(pal_bitmap) {
-		return pal_bitmap->get_color(index);
-	}
+    if(pal_colormap) {
+        return pal_colormap->get_color(index);
+    }
+    else if(pal_bitmap) {
+        return pal_bitmap->get_color(index);
+    }
 
-	return make_zero_vector<3, uint8_t>();
+    return make_zero_vector<3, uint8_t>();
 }
 
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
-	std::unique_ptr<content::assets::bitmap> mat(new content::assets::bitmap());
+    std::unique_ptr<content::assets::bitmap> mat(new content::assets::bitmap());
 
-	char magic[4];
-	file.read(magic, sizeof(char) * 4);
+    char magic[4];
+    file.read(magic, sizeof(char) * 4);
 
-	// Check magic and version
-	if(strncmp(magic, "BM  ", 4) != 0) {
-		diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(file.Filename, 0, 0, 0, 0));
-		throw io::file_corrupt_exception();
-	}
+    // Check magic and version
+    if(strncmp(magic, "BM  ", 4) != 0) {
+        diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+        throw io::file_corrupt_exception();
+    }
 
-	bitmap_header header;
-	file.read(&header, sizeof(bitmap_header));
+    bitmap_header header;
+    file.read(&header, sizeof(bitmap_header));
 
-	if(header.pal_included == 2) {
-		// Palette is included at the end of the file.
-		pal_bitmap = mat.get();
-		pal_colormap = nullptr;
-	}
+    if(header.pal_included == 2) {
+        // Palette is included at the end of the file.
+        pal_bitmap = mat.get();
+        pal_colormap = nullptr;
+    }
 
-	if(header.bit_depth == 8) {
-		std::vector<std::tuple<int, int, std::vector<uint8_t>>> images;
+    if(header.bit_depth == 8) {
+        std::vector<std::tuple<int, int, std::vector<uint8_t>>> images;
 
-		for(unsigned int i = 0; i < header.num_images; ++i) {
-			bitmap_image_header bi_header;
-			file.read(&bi_header, sizeof(bitmap_image_header));
+        for(unsigned int i = 0; i < header.num_images; ++i) {
+            bitmap_image_header bi_header;
+            file.read(&bi_header, sizeof(bitmap_image_header));
 
-			images.emplace_back(static_cast<int>(bi_header.width), static_cast<int>(bi_header.height),
-					std::vector<uint8_t>(bi_header.width * bi_header.height));
-			auto& v = std::get<2>(images.back());
-			file.read(&v[0], v.size() * sizeof(uint8_t));
-		}
+            images.emplace_back(static_cast<int>(bi_header.width), static_cast<int>(bi_header.height),
+                    std::vector<uint8_t>(bi_header.width * bi_header.height));
+            auto& v = std::get<2>(images.back());
+            file.read(&v[0], v.size() * sizeof(uint8_t));
+        }
 
-		// Load palette
-		if(header.pal_included == 2) {
-			uint8_t pal_buf[sizeof(uint8_t) * 3 * 256];
-			file.read(pal_buf, sizeof(uint8_t) * 3 * 256);
-			for(int i = 0, j = 0; i < 256; ++i, j += 3) {
-				mat->set_color(i, make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
-			}
-		}
+        // Load palette
+        if(header.pal_included == 2) {
+            uint8_t pal_buf[sizeof(uint8_t) * 3 * 256];
+            file.read(pal_buf, sizeof(uint8_t) * 3 * 256);
+            for(int i = 0, j = 0; i < 256; ++i, j += 3) {
+                mat->set_color(i, make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
+            }
+        }
 
-		// Create images
-		for(auto& img : images) {
-			int adjusted_width = next_power_of_two(std::get<0>(img));
-			int adjusted_height = next_power_of_two(std::get<1>(img));
-			int stride = (adjusted_width - std::get<0>(img) - 1) * 4;
+        // Create images
+        for(auto& img : images) {
+            int adjusted_width = next_power_of_two(std::get<0>(img));
+            int adjusted_height = next_power_of_two(std::get<1>(img));
+            int stride = (adjusted_width - std::get<0>(img) - 1) * 4;
 
-			int num_pels = std::get<0>(img) * std::get<1>(img);
-			std::vector<uint8_t> final_img(adjusted_width * adjusted_height * sizeof(uint8_t) * 4, 0);
-			for(int i = 0, j = 0; i < num_pels; j += stride) {
-				for(int k = 0; k < std::get<0>(img); ++k, ++i, j += 4) {
-					auto pal_idx = get<2>(img)[i];
-					auto pal_col = get_palette_color(pal_idx);
+            int num_pels = std::get<0>(img) * std::get<1>(img);
+            std::vector<uint8_t> final_img(adjusted_width * adjusted_height * sizeof(uint8_t) * 4, 0);
+            for(int i = 0, j = 0; i < num_pels; j += stride) {
+                for(int k = 0; k < std::get<0>(img); ++k, ++i, j += 4) {
+                    auto pal_idx = get<2>(img)[i];
+                    auto pal_col = get_palette_color(pal_idx);
 
-					final_img[j + 0] = get<0>(pal_col);
-					final_img[j + 1] = get<1>(pal_col);
-					final_img[j + 2] = get<2>(pal_col);
+                    final_img[j + 0] = get<0>(pal_col);
+                    final_img[j + 1] = get<1>(pal_col);
+                    final_img[j + 2] = get<2>(pal_col);
 
-					if(pal_idx == header.transparent_color) {
-						final_img[j + 3] = 0;
-					}
-					else {
-						final_img[j + 3] = 255;
-					}
-				}
-			}
+                    if(pal_idx == header.transparent_color) {
+                        final_img[j + 3] = 0;
+                    }
+                    else {
+                        final_img[j + 3] = 255;
+                    }
+                }
+            }
 
-			mat->cels.emplace_back(load_bitmap_from_memory(adjusted_width, adjusted_height, &final_img[0]),
-					make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)),
-					make_box(make_vector(0, 0), make_vector(std::get<0>(img), std::get<1>(img))));
-		}
-	}
-	else if(header.bit_depth == 16) {
-		std::vector<std::tuple<int, int, std::vector<uint16_t>>> images;
+            mat->cels.emplace_back(load_bitmap_from_memory(adjusted_width, adjusted_height, &final_img[0]),
+                    make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)),
+                    make_box(make_vector(0, 0), make_vector(std::get<0>(img), std::get<1>(img))));
+        }
+    }
+    else if(header.bit_depth == 16) {
+        std::vector<std::tuple<int, int, std::vector<uint16_t>>> images;
 
-		for(unsigned int i = 0; i < header.num_images; ++i) {
-			bitmap_image_header bi_header;
-			file.read(&bi_header, sizeof(bitmap_image_header));
+        for(unsigned int i = 0; i < header.num_images; ++i) {
+            bitmap_image_header bi_header;
+            file.read(&bi_header, sizeof(bitmap_image_header));
 
-			images.emplace_back(static_cast<int>(bi_header.width), static_cast<int>(bi_header.height),
-					std::vector<uint16_t>(bi_header.width * bi_header.height));
-			auto& v = std::get<2>(images.back());
-			file.read(&v[0], v.size() * sizeof(uint16_t));
-		}
+            images.emplace_back(static_cast<int>(bi_header.width), static_cast<int>(bi_header.height),
+                    std::vector<uint16_t>(bi_header.width * bi_header.height));
+            auto& v = std::get<2>(images.back());
+            file.read(&v[0], v.size() * sizeof(uint16_t));
+        }
 
-		// Load palette
-		if(header.pal_included == 2) {
-			uint8_t pal_buf[sizeof(uint8_t) * 3 * 256];
-			file.read(pal_buf, sizeof(uint8_t) * 3 * 256);
-			for(int i = 0, j = 0; i < 256; ++i, j += 3) {
-				mat->set_color(i, make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
-			}
-		}
+        // Load palette
+        if(header.pal_included == 2) {
+            uint8_t pal_buf[sizeof(uint8_t) * 3 * 256];
+            file.read(pal_buf, sizeof(uint8_t) * 3 * 256);
+            for(int i = 0, j = 0; i < 256; ++i, j += 3) {
+                mat->set_color(i, make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
+            }
+        }
 
-		// Create images
-		for(auto& img : images) {
-			int adjusted_width = next_power_of_two(std::get<0>(img));
-			int adjusted_height = next_power_of_two(std::get<1>(img));
-			int stride = (adjusted_width - std::get<0>(img)) * 4;
+        // Create images
+        for(auto& img : images) {
+            int adjusted_width = next_power_of_two(std::get<0>(img));
+            int adjusted_height = next_power_of_two(std::get<1>(img));
+            int stride = (adjusted_width - std::get<0>(img)) * 4;
 
-			int num_pels = std::get<0>(img) * std::get<1>(img);
-			std::vector<uint8_t> final_img(adjusted_width * adjusted_height * sizeof(uint8_t) * 4, 0);
-			for(int i = 0, j = 0; i < num_pels; j += stride) {
-				for(int k = 0; k < std::get<0>(img); ++k, ++i, j += 4) {
-					auto pal_idx = get<2>(img)[i];
-					auto pal_col = convert_rgb565(pal_idx);
+            int num_pels = std::get<0>(img) * std::get<1>(img);
+            std::vector<uint8_t> final_img(adjusted_width * adjusted_height * sizeof(uint8_t) * 4, 0);
+            for(int i = 0, j = 0; i < num_pels; j += stride) {
+                for(int k = 0; k < std::get<0>(img); ++k, ++i, j += 4) {
+                    auto pal_idx = get<2>(img)[i];
+                    auto pal_col = convert_rgb565(pal_idx);
 
-					final_img[j + 0] = get<0>(pal_col);
-					final_img[j + 1] = get<1>(pal_col);
-					final_img[j + 2] = get<2>(pal_col);
+                    final_img[j + 0] = get<0>(pal_col);
+                    final_img[j + 1] = get<1>(pal_col);
+                    final_img[j + 2] = get<2>(pal_col);
 
-					if(pal_idx == header.transparent_color) {
-						final_img[j + 3] = 0;
-					}
-					else {
-						final_img[j + 3] = 255;
-					}
-				}
-			}
+                    if(pal_idx == header.transparent_color) {
+                        final_img[j + 3] = 0;
+                    }
+                    else {
+                        final_img[j + 3] = 255;
+                    }
+                }
+            }
 
-			auto bm_handle = load_bitmap_from_memory(adjusted_width, adjusted_height, &final_img[0]);
-			mat->cels.emplace_back(bm_handle, make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)),
-					make_box(make_vector(0, 0), make_vector(std::get<0>(img), std::get<1>(img))));
-		}
-	}
-	else {
-		// Unknown bit depth
-		diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(file.Filename, 0, 0, 0, 0));
-		throw io::file_corrupt_exception();
-	}
+            auto bm_handle = load_bitmap_from_memory(adjusted_width, adjusted_height, &final_img[0]);
+            mat->cels.emplace_back(bm_handle, make_box(make_vector(0, 0), make_vector(adjusted_width, adjusted_height)),
+                    make_box(make_vector(0, 0), make_vector(std::get<0>(img), std::get<1>(img))));
+        }
+    }
+    else {
+        // Unknown bit depth
+        diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+        throw io::file_corrupt_exception();
+    }
 
-	return std::unique_ptr<asset>(std::move(mat));
+    return std::unique_ptr<asset>(std::move(mat));
 }

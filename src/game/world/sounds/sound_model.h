@@ -12,9 +12,9 @@ namespace sounds {
 
 class sound_model {
 public:
-	sf::Sound ambient_sound;
-	music ambient_music;
-	pool<sound, 8> sounds;
+    sf::Sound ambient_sound;
+    music ambient_music;
+    pool<sound, 8> sounds;
 };
 
 }

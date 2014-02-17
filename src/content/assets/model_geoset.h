@@ -8,7 +8,7 @@ namespace assets {
 
 class model_geoset {
 public:
-	std::vector<model_mesh> meshes;
+    std::vector<model_mesh> meshes;
 };
 
 }

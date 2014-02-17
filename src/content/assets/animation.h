@@ -14,14 +14,14 @@ namespace assets {
 
 class animation : public asset {
 public:
-	using loader = loaders::animation_loader;
+    using loader = loaders::animation_loader;
 
-	flag_set<flags::key_flag> flags;
-	unsigned int frame_count;
-	double framerate;
+    flag_set<flags::key_flag> flags;
+    unsigned int frame_count;
+    double framerate;
 
-	std::vector<std::tuple<double, flags::key_marker_type>> markers;
-	std::vector<animation_node> nodes;
+    std::vector<std::tuple<double, flags::key_marker_type>> markers;
+    std::vector<animation_node> nodes;
 };
 
 }

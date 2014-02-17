@@ -43,12 +43,12 @@ ast::translation_unit* generate_ast(text::source& inputFilestream, diagnostics::
 
 namespace semantic_analysis {
 void semantic_analysis(ast::translation_unit* ast, symbols::symbol_table& symbolTable, const std::unordered_map<std::string, vm::value>& constantTable,
-		verbs::verb_table& verbTable, diagnostics::report& report);
+        verbs::verb_table& verbTable, diagnostics::report& report);
 }
 
 namespace constant_folding {
 void constant_folding(ast::factory& factory, ast::translation_unit* ast, symbols::symbol_table& symbolTable,
-		const std::unordered_map<std::string, vm::value>& constantTable, diagnostics::report& report);
+        const std::unordered_map<std::string, vm::value>& constantTable, diagnostics::report& report);
 }
 
 namespace generate_code {

@@ -5,9 +5,9 @@ namespace gui {
 namespace layout {
 
 enum class horizontal_align_style {
-	left,
-	right,
-	center
+    left,
+    right,
+    center
 };
 
 }

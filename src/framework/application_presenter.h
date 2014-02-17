@@ -7,9 +7,9 @@ namespace gorc {
 
 class application_presenter : public place::presenter {
 public:
-	virtual ~application_presenter();
+    virtual ~application_presenter();
 
-	virtual void update(const time& time);
+    virtual void update(const time& time);
 };
 
 }

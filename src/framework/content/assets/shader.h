@@ -10,16 +10,16 @@ namespace assets {
 
 class shader : public asset {
 public:
-	using loader = loaders::shader_loader;
+    using loader = loaders::shader_loader;
 
-	GLuint program = 0;
+    GLuint program = 0;
 
-	shader(GLuint program);
-	shader(const shader&) = delete;
-	shader(shader&&);
-	~shader();
+    shader(GLuint program);
+    shader(const shader&) = delete;
+    shader(shader&&);
+    ~shader();
 
-	const shader& operator=(const shader&) = delete;
+    const shader& operator=(const shader&) = delete;
 };
 
 }

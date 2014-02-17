@@ -9,14 +9,14 @@ namespace loaders {
 
 class inventory_loader : public text_loader {
 private:
-	cog::compiler& compiler;
+    cog::compiler& compiler;
 
 public:
-	static const std::vector<boost::filesystem::path> asset_root_path;
+    static const std::vector<boost::filesystem::path> asset_root_path;
 
-	inventory_loader(cog::compiler& compiler);
+    inventory_loader(cog::compiler& compiler);
 
-	virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
+    virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
 };
 
 }

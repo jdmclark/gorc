@@ -9,12 +9,12 @@ namespace vfs {
 
 class container {
 public:
-	virtual ~container();
+    virtual ~container();
 
-	virtual size_t file_count() const = 0;
-	virtual const virtual_file& get_virtual_file(size_t index) const = 0;
-	virtual bool is_episode() const = 0;
-	virtual const virtual_file& get_episode() const = 0;
+    virtual size_t file_count() const = 0;
+    virtual const virtual_file& get_virtual_file(size_t index) const = 0;
+    virtual bool is_episode() const = 0;
+    virtual const virtual_file& get_episode() const = 0;
 };
 
 }

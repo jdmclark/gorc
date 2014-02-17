@@ -7,11 +7,11 @@ namespace events {
 
 class window_focus {
 public:
-	static const std::string& get_event_type();
+    static const std::string& get_event_type();
 
-	const bool has_focus;
+    const bool has_focus;
 
-	window_focus(bool HasFocus);
+    window_focus(bool HasFocus);
 };
 
 }

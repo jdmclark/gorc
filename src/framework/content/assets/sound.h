@@ -10,9 +10,9 @@ namespace assets {
 
 class sound : public asset {
 public:
-	using loader = loaders::sound_loader;
+    using loader = loaders::sound_loader;
 
-	sf::SoundBuffer buffer;
+    sf::SoundBuffer buffer;
 };
 
 }

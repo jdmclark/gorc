@@ -10,11 +10,11 @@ namespace gorc {
 
 class view {
 public:
-	virtual ~view();
+    virtual ~view();
 
-	virtual void resize(const box<2, int>& view_size);
-	virtual void draw(const time& time, const box<2, int>& view_size, graphics::render_target& target);
-	virtual maybe<input::input_adapter*> get_input_adapter();
+    virtual void resize(const box<2, int>& view_size);
+    virtual void draw(const time& time, const box<2, int>& view_size, graphics::render_target& target);
+    virtual maybe<input::input_adapter*> get_input_adapter();
 };
 
 }

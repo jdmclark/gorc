@@ -12,9 +12,9 @@ class manager;
 
 class loader {
 public:
-	virtual ~loader();
+    virtual ~loader();
 
-	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) = 0;
+    virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) = 0;
 };
 
 }

@@ -12,12 +12,12 @@ namespace cog {
 
 class script {
 public:
-	script();
+    script();
 
-	flag_set<flags::cog_flag> flags;
-	symbols::symbol_table symbol_table;
-	vm::jump_table jump_table;
-	vm::code_buffer code;
+    flag_set<flags::cog_flag> flags;
+    symbols::symbol_table symbol_table;
+    vm::jump_table jump_table;
+    vm::code_buffer code;
 };
 
 }

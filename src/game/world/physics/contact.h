@@ -11,14 +11,14 @@ namespace physics {
 
 class contact {
 public:
-	vector<3> position;
-	vector<3> normal;
-	vector<3> velocity;
-	maybe<int> contact_thing_id;
-	maybe<int> contact_surface_id;
+    vector<3> position;
+    vector<3> normal;
+    vector<3> velocity;
+    maybe<int> contact_thing_id;
+    maybe<int> contact_surface_id;
 
-	contact() = default;
-	contact(const vector<3>& position, const vector<3>& normal, const vector<3>& velocity);
+    contact() = default;
+    contact(const vector<3>& position, const vector<3>& normal, const vector<3>& velocity);
 };
 
 }

@@ -7,7 +7,7 @@
 #include "cog/grammar/instance.h"
 
 gorc::cog::ast::translation_unit* gorc::cog::stages::generate_ast::generate_ast(text::source& inputFilestream,
-		diagnostics::report& report, ast::factory& factory) {
-	grammar::instance instance(inputFilestream, factory, report);
-	return instance.parse();
+        diagnostics::report& report, ast::factory& factory) {
+    grammar::instance instance(inputFilestream, factory, report);
+    return instance.parse();
 }

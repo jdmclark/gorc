@@ -6,9 +6,9 @@ namespace gorc {
 namespace diagnostics {
 
 enum class error_level {
-	warning,
-	error,
-	critical_error
+    warning,
+    error,
+    critical_error
 };
 
 }

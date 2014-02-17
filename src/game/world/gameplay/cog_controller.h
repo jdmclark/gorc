@@ -12,9 +12,9 @@ namespace gameplay {
 
 class cog_controller : public thing_controller {
 public:
-	using thing_controller::thing_controller;
+    using thing_controller::thing_controller;
 
-	virtual void update(int thing_id, double dt) override;
+    virtual void update(int thing_id, double dt) override;
 };
 
 }

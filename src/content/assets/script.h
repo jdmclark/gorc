@@ -22,9 +22,9 @@ class level_surface;
 
 class script : public asset {
 public:
-	using loader = loaders::script_loader;
+    using loader = loaders::script_loader;
 
-	cog::script cogscript;
+    cog::script cogscript;
 };
 
 }

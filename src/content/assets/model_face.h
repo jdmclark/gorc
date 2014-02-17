@@ -15,14 +15,14 @@ namespace assets {
 
 class model_face {
 public:
-	int material;
-	flag_set<flags::face_flag> type;
-	flags::geometry_mode geo;
-	flags::light_mode light;
-	flags::texture_mode tex;
-	float extra_light;
-	std::vector<std::tuple<size_t, size_t>> vertices;
-	vector<3> normal;
+    int material;
+    flag_set<flags::face_flag> type;
+    flags::geometry_mode geo;
+    flags::light_mode light;
+    flags::texture_mode tex;
+    float extra_light;
+    std::vector<std::tuple<size_t, size_t>> vertices;
+    vector<3> normal;
 };
 
 }

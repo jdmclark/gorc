@@ -3,10 +3,10 @@
 #include "game/constants.h"
 
 gorc::game::world::animations::slide_ceiling_sky_animation::slide_ceiling_sky_animation(level_model& model, const vector<2>& speed)
-	: model(model), speed(speed) {
-	return;
+    : model(model), speed(speed) {
+    return;
 }
 
 void gorc::game::world::animations::slide_ceiling_sky_animation::update(double dt) {
-	model.header.ceiling_sky_offset += speed * dt * rate_factor;
+    model.header.ceiling_sky_offset += speed * dt * rate_factor;
 }

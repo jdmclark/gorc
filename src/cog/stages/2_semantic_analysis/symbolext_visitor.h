@@ -12,26 +12,26 @@ namespace semantic_analysis {
 class symbol_extension_visitor : public ast::visitor
 {
 public:
-	bool local;
+    bool local;
 
-	bool linkid_defined;
-	int linkid;
+    bool linkid_defined;
+    int linkid;
 
-	bool nolink;
+    bool nolink;
 
-	std::string desc;
+    std::string desc;
 
-	bool mask_defined;
-	int mask;
+    bool mask_defined;
+    int mask;
 
-	symbol_extension_visitor(symbols::symbol_type type, diagnostics::report& report);
+    symbol_extension_visitor(symbols::symbol_type type, diagnostics::report& report);
 
 private:
-	symbols::symbol_type symbol_type;
+    symbols::symbol_type symbol_type;
 
-	ASTCLASS_SYMBOL_EXTENSION(AVPROTO);
+    ASTCLASS_SYMBOL_EXTENSION(AVPROTO);
 
-	bool validate_extension(const std::string& name, text::location& location);
+    bool validate_extension(const std::string& name, text::location& location);
 };
 
 }

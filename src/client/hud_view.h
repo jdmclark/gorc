@@ -8,7 +8,7 @@ namespace client {
 
 class hud_view : public gorc::gui::gui_view {
 public:
-	hud_view(content::manager& manager);
+    hud_view(content::manager& manager);
 };
 
 }

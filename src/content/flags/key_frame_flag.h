@@ -4,8 +4,8 @@ namespace gorc {
 namespace flags {
 
 enum class KeyframeFlag {
-	PositionChanges = 0x1,
-	OrientationChanges = 0x2
+    PositionChanges = 0x1,
+    OrientationChanges = 0x2
 };
 
 }

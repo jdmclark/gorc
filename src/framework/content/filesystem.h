@@ -9,8 +9,8 @@ namespace content {
 
 class filesystem {
 public:
-	virtual ~filesystem();
-	virtual std::unique_ptr<io::read_only_file> open(const boost::filesystem::path& path) const = 0;
+    virtual ~filesystem();
+    virtual std::unique_ptr<io::read_only_file> open(const boost::filesystem::path& path) const = 0;
 };
 
 }

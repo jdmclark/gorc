@@ -33,8 +33,5 @@ Requirements
 * Flex 2.5
 * Bison 2.5
 * SFML 2.1
-* Glew
 * [Boost](http://boost.org)
-* [NullUnit](http://github.com/jdmclark/nullunit)
-* Dark Forces II (for running test cases)
-
+* Dark Forces II

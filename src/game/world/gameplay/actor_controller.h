@@ -9,9 +9,9 @@ namespace gameplay {
 
 class actor_controller : public character_controller {
 public:
-	using character_controller::character_controller;
+    using character_controller::character_controller;
 
-	virtual void update(int thing_id, double dt) override;
+    virtual void update(int thing_id, double dt) override;
 };
 
 }

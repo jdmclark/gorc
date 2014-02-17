@@ -12,8 +12,8 @@ namespace keys {
 
 class key_mix {
 public:
-	int attached_thing;
-	key_mix_level_state high, low, body;
+    int attached_thing;
+    key_mix_level_state high, low, body;
 };
 
 }

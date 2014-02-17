@@ -13,13 +13,13 @@ namespace semantic_analysis {
 
 class label_visitor : public ast::visitor {
 protected:
-	std::unordered_set<std::string>& SeenLabels;
+    std::unordered_set<std::string>& SeenLabels;
 
 public:
-	label_visitor(std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
+    label_visitor(std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
 
 private:
-	ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO);
 };
 
 }

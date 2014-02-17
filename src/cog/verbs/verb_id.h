@@ -9,13 +9,13 @@ namespace verbs {
 class verb_table;
 
 class verb_id {
-	friend class verb_table;
+    friend class verb_table;
 
 private:
-	size_t id;
+    size_t id;
 
 public:
-	verb_id(size_t id);
+    verb_id(size_t id);
 };
 
 }

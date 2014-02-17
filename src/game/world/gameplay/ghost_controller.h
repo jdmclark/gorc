@@ -9,7 +9,7 @@ namespace gameplay {
 
 class ghost_controller : public thing_controller {
 public:
-	using thing_controller::thing_controller;
+    using thing_controller::thing_controller;
 };
 
 }

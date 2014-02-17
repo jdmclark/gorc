@@ -20,21 +20,21 @@ namespace camera {
 
 class camera_model {
 public:
-	flag_set<flags::camera_state_flag> state_flags;
+    flag_set<flags::camera_state_flag> state_flags;
 
-	std::vector<camera_state> cameras = {
-			camera_state(), camera_state()
-	};
+    std::vector<camera_state> cameras = {
+            camera_state(), camera_state()
+    };
 
-	int current_camera = 0;
-	current_camera_state current_computed_state;
+    int current_camera = 0;
+    current_camera_state current_computed_state;
 
-	content::assets::model const* pov_model = nullptr;
-	int pov_key_mix_id = -1;
+    content::assets::model const* pov_model = nullptr;
+    int pov_key_mix_id = -1;
 
-	vector<3> waggle = make_zero_vector<3, float>();
-	float waggle_speed = 0.0f;
-	double waggle_time = 0.0;
+    vector<3> waggle = make_zero_vector<3, float>();
+    float waggle_speed = 0.0f;
+    double waggle_time = 0.0;
 };
 
 }

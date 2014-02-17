@@ -21,20 +21,20 @@ namespace widgets {
 
 class popup_menu : public widget {
 private:
-	const content::assets::texture& skin;
-	const content::assets::font& font;
-	vector<2, int> desired_position = make_vector(0, 0);
-	input_block_panel& background;
-	frame& menu;
-	grid_panel& grid;
+    const content::assets::texture& skin;
+    const content::assets::font& font;
+    vector<2, int> desired_position = make_vector(0, 0);
+    input_block_panel& background;
+    frame& menu;
+    grid_panel& grid;
 
 public:
-	popup_menu(gui_view&, const content::assets::texture& skin, const content::assets::font& font);
+    popup_menu(gui_view&, const content::assets::texture& skin, const content::assets::font& font);
 
-	void add_item(gui_view& v, const std::string& label, std::function<void()>&& fn);
+    void add_item(gui_view& v, const std::string& label, std::function<void()>&& fn);
 
-	void set_desired_position(gui_view& v, const vector<2, int>& pos);
-	virtual box<2, int> get_child_position(const gui_view&, const widget& child) const override;
+    void set_desired_position(gui_view& v, const vector<2, int>& pos);
+    virtual box<2, int> get_child_position(const gui_view&, const widget& child) const override;
 };
 
 }

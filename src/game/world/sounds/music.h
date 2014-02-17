@@ -9,25 +9,25 @@ namespace sounds {
 
 class music {
 private:
-	sf::Music internal_music;
+    sf::Music internal_music;
 
-	bool play = false;
+    bool play = false;
 
-	int start;
-	int end;
-	int loopto;
+    int start;
+    int end;
+    int loopto;
 
-	int current;
+    int current;
 
-	static const int num_tracks = 7;
+    static const int num_tracks = 7;
 
-	void internal_play_song(int song);
+    void internal_play_song(int song);
 
 public:
-	void play_song(int start, int end, int loopto);
-	void set_volume(float volume);
+    void play_song(int start, int end, int loopto);
+    void set_volume(float volume);
 
-	void update(double dt);
+    void update(double dt);
 };
 
 }

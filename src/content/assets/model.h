@@ -15,16 +15,16 @@ namespace assets {
 
 class model : public asset {
 public:
-	using loader = loaders::model_loader;
+    using loader = loaders::model_loader;
 
-	std::vector<std::string> material_entries;
-	std::vector<material const*> materials;
+    std::vector<std::string> material_entries;
+    std::vector<material const*> materials;
 
-	float radius;
-	vector<3> insert_offset;
+    float radius;
+    vector<3> insert_offset;
 
-	std::vector<model_geoset> geosets;
-	std::vector<model_node> hierarchy_nodes;
+    std::vector<model_geoset> geosets;
+    std::vector<model_node> hierarchy_nodes;
 };
 
 }

@@ -10,14 +10,14 @@ namespace generate_code {
 
 class lvalue_expression_visitor : public ast::visitor {
 protected:
-	ir::printer& Printer;
+    ir::printer& Printer;
 
 public:
-	lvalue_expression_visitor(ir::printer& printer, diagnostics::report& report);
+    lvalue_expression_visitor(ir::printer& printer, diagnostics::report& report);
 
 private:
-	AVPROTO(identifier_expression);
-	AVPROTO(subscript_expression);
+    AVPROTO(identifier_expression);
+    AVPROTO(subscript_expression);
 };
 
 }

@@ -10,18 +10,18 @@ namespace generate_code {
 
 class code_visitor : public ast::visitor {
 protected:
-	ir::printer& Printer;
-	int& nextLabelNumber;
+    ir::printer& Printer;
+    int& nextLabelNumber;
 
-	const std::string BreakLabel;
+    const std::string BreakLabel;
 
-	std::string generate_label(const std::string& prefix);
+    std::string generate_label(const std::string& prefix);
 
 public:
-	code_visitor(int& nextLabelNumber, ir::printer& printer, diagnostics::report& report, const std::string breakLabel = "");
+    code_visitor(int& nextLabelNumber, ir::printer& printer, diagnostics::report& report, const std::string breakLabel = "");
 
 private:
-	ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO);
 };
 
 }

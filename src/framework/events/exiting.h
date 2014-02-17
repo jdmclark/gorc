@@ -7,9 +7,9 @@ namespace events {
 
 class exiting {
 public:
-	bool cancel = false;
+    bool cancel = false;
 
-	static const std::string& get_event_type();
+    static const std::string& get_event_type();
 };
 
 }

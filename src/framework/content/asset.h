@@ -5,7 +5,7 @@ namespace content {
 
 class asset {
 public:
-	virtual ~asset();
+    virtual ~asset();
 };
 
 }

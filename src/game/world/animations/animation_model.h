@@ -12,7 +12,7 @@ namespace animations {
 
 class animation_model {
 public:
-	pool<pool_ptr<animation>> animations;
+    pool<pool_ptr<animation>> animations;
 };
 
 }

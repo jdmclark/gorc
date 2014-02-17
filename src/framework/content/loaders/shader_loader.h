@@ -8,9 +8,9 @@ namespace loaders {
 
 class shader_loader : public loader {
 public:
-	static const std::vector<boost::filesystem::path> asset_root_path;
+    static const std::vector<boost::filesystem::path> asset_root_path;
 
-	virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
+    virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
 };
 
 }

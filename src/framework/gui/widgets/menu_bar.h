@@ -23,16 +23,16 @@ namespace widgets {
 
 class menu_bar : public horizontal_split_panel {
 private:
-	const content::assets::texture& skin;
-	const content::assets::font& font;
-	vector<2, int> desired_position = make_vector(0, 0);
-	frame& menu;
-	grid_panel& grid;
+    const content::assets::texture& skin;
+    const content::assets::font& font;
+    vector<2, int> desired_position = make_vector(0, 0);
+    frame& menu;
+    grid_panel& grid;
 
 public:
-	menu_bar(gui_view&, const content::assets::texture& skin, const content::assets::font& font);
+    menu_bar(gui_view&, const content::assets::texture& skin, const content::assets::font& font);
 
-	popup_menu& add_item(gui_view& v, const std::string& label);
+    popup_menu& add_item(gui_view& v, const std::string& label);
 };
 
 }

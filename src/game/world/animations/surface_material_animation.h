@@ -15,18 +15,18 @@ namespace animations {
 
 class surface_material_animation : public animation {
 private:
-	level_model& model;
-	unsigned int surface;
-	double framerate;
-	flag_set<flags::AnimFlag> flag;
-	double framerate_accumulator = 0.0;
-	int num_cels;
+    level_model& model;
+    unsigned int surface;
+    double framerate;
+    flag_set<flags::AnimFlag> flag;
+    double framerate_accumulator = 0.0;
+    int num_cels;
 
 public:
-	surface_material_animation(level_model& model, unsigned int surface, double framerate, flag_set<flags::AnimFlag> flag, int anim_num);
+    surface_material_animation(level_model& model, unsigned int surface, double framerate, flag_set<flags::AnimFlag> flag, int anim_num);
 
-	void update(double dt);
-	void stop();
+    void update(double dt);
+    void stop();
 };
 
 }

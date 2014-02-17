@@ -10,12 +10,12 @@ class application;
 
 class presenter_mapper {
 private:
-	application& app;
+    application& app;
 
 public:
-	presenter_mapper(application& app);
+    presenter_mapper(application& app);
 
-	std::unique_ptr<presenter> get_presenter(const action::action_place&) const;
+    std::unique_ptr<presenter> get_presenter(const action::action_place&) const;
 };
 
 }

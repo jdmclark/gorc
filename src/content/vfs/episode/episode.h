@@ -15,32 +15,32 @@ namespace episode {
 
 class episode {
 private:
-	std::unordered_map<int, size_t> entryMap;
-	std::vector<entry> entries;
+    std::unordered_map<int, size_t> entryMap;
+    std::vector<entry> entries;
 
-	std::string EpisodeName;
-	episode_type type;
+    std::string EpisodeName;
+    episode_type type;
 
 public:
-	episode(io::read_only_file& file, diagnostics::report& report);
+    episode(io::read_only_file& file, diagnostics::report& report);
 
-	inline const std::string& get_episode_name() const {
-		return EpisodeName;
-	}
+    inline const std::string& get_episode_name() const {
+        return EpisodeName;
+    }
 
-	inline episode_type get_type() const {
-		return type;
-	}
+    inline episode_type get_type() const {
+        return type;
+    }
 
-	inline auto begin() const -> decltype(entries.begin()) {
-		return entries.begin();
-	}
+    inline auto begin() const -> decltype(entries.begin()) {
+        return entries.begin();
+    }
 
-	inline auto end() const -> decltype(entries.end()) {
-		return entries.end();
-	}
+    inline auto end() const -> decltype(entries.end()) {
+        return entries.end();
+    }
 
-	const entry& get_entry(int LineNumber) const;
+    const entry& get_entry(int LineNumber) const;
 };
 
 }

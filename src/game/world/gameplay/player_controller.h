@@ -10,7 +10,7 @@ namespace gameplay {
 
 class player_controller : public character_controller {
 public:
-	using character_controller::character_controller;
+    using character_controller::character_controller;
 };
 
 }

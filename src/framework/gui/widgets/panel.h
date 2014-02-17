@@ -11,7 +11,7 @@ namespace widgets {
 
 class panel : public widget {
 public:
-	panel(gui_view&);
+    panel(gui_view&);
 };
 
 }

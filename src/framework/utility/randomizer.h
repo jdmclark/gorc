@@ -7,14 +7,14 @@ inline namespace utility {
 
 class randomizer {
 private:
-	std::default_random_engine rng;
+    std::default_random_engine rng;
 
 public:
-	randomizer();
+    randomizer();
 
-	inline operator double() {
-		return std::generate_canonical<double, 10>(rng);
-	}
+    inline operator double() {
+        return std::generate_canonical<double, 10>(rng);
+    }
 };
 
 }

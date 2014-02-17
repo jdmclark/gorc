@@ -8,11 +8,11 @@ namespace assets {
 
 class material_cel {
 public:
-	texture diffuse, light;
+    texture diffuse, light;
 
-	material_cel(GLuint diffuse, GLuint light, const box<2, int>& m_size);
-	material_cel(const material_cel&) = delete;
-	material_cel(material_cel&&) = default;
+    material_cel(GLuint diffuse, GLuint light, const box<2, int>& m_size);
+    material_cel(const material_cel&) = delete;
+    material_cel(material_cel&&) = default;
 };
 
 }

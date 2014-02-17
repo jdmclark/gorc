@@ -6,15 +6,15 @@ namespace layout {
 
 class margin {
 public:
-	int left = 0;
-	int right = 0;
-	int top = 0;
-	int bottom = 0;
+    int left = 0;
+    int right = 0;
+    int top = 0;
+    int bottom = 0;
 
-	inline const margin& operator=(int v) {
-		left = right = top = bottom = v;
-		return *this;
-	}
+    inline const margin& operator=(int v) {
+        left = right = top = bottom = v;
+        return *this;
+    }
 };
 
 }

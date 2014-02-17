@@ -15,16 +15,16 @@ namespace semantic_analysis {
 class symbol_visitor : public ast::visitor
 {
 protected:
-	symbols::symbol_table& symbol_table;
-	const std::unordered_set<std::string>& SeenLabels;
+    symbols::symbol_table& symbol_table;
+    const std::unordered_set<std::string>& SeenLabels;
 
 public:
-	symbol_visitor(symbols::symbol_table& st, const std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
+    symbol_visitor(symbols::symbol_table& st, const std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
 
 private:
-	symbols::symbol_type get_type(ast::symbol& symbol);
+    symbols::symbol_type get_type(ast::symbol& symbol);
 
-	ASTCLASS_SYMBOL(AVPROTO);
+    ASTCLASS_SYMBOL(AVPROTO);
 };
 
 }

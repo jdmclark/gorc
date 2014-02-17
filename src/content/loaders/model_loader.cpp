@@ -16,233 +16,233 @@ namespace content {
 namespace loaders {
 
 void SkipToNextModelSection(text::tokenizer& tok) {
-	text::token t;
-	do {
-		tok.get_token(t);
-	}
-	while(t.type != text::token_type::end_of_file && (t.type != text::token_type::identifier || !boost::iequals(t.value, "SECTION")));
+    text::token t;
+    do {
+        tok.get_token(t);
+    }
+    while(t.type != text::token_type::end_of_file && (t.type != text::token_type::identifier || !boost::iequals(t.value, "SECTION")));
 
-	if(t.type == text::token_type::end_of_file) {
-		return;
-	}
+    if(t.type == text::token_type::end_of_file) {
+        return;
+    }
 
-	tok.assert_punctuator(":");
+    tok.assert_punctuator(":");
 }
 
 void ParseModelHeaderSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
-	std::string magic = tok.get_space_delimited_string();
-	if(!boost::iequals(magic, "3DO")) {
-		report.add_error("ModelLoader::ParseModelHeaderSection", boost::str(boost::format("expected \'3DO\', found \'%s\'") % magic),
-				tok.get_internal_token_location());
-		throw text::tokenizer_assertion_exception();
-	}
+    std::string magic = tok.get_space_delimited_string();
+    if(!boost::iequals(magic, "3DO")) {
+        report.add_error("ModelLoader::ParseModelHeaderSection", boost::str(boost::format("expected \'3DO\', found \'%s\'") % magic),
+                tok.get_internal_token_location());
+        throw text::tokenizer_assertion_exception();
+    }
 
-	tok.get_number<double>();
+    tok.get_number<double>();
 }
 
 void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
-	tok.assert_identifier("materials");
+    tok.assert_identifier("materials");
 
-	unsigned int num = tok.get_number<unsigned int>();
-	for(unsigned int i = 0; i < num; ++i) {
-		tok.get_number<unsigned int>();
-		tok.assert_punctuator(":");
-		model.material_entries.push_back(tok.get_space_delimited_string());
-	}
+    unsigned int num = tok.get_number<unsigned int>();
+    for(unsigned int i = 0; i < num; ++i) {
+        tok.get_number<unsigned int>();
+        tok.assert_punctuator(":");
+        model.material_entries.push_back(tok.get_space_delimited_string());
+    }
 }
 
 void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
-	tok.assert_identifier("RADIUS");
-	model.radius = tok.get_number<float>();
+    tok.assert_identifier("RADIUS");
+    model.radius = tok.get_number<float>();
 
-	tok.assert_identifier("INSERT");
-	tok.assert_identifier("OFFSET");
-	float insert_x = tok.get_number<float>();
-	float insert_y = tok.get_number<float>();
-	float insert_z = tok.get_number<float>();
-	model.insert_offset = make_vector(insert_x, insert_y, insert_z);
+    tok.assert_identifier("INSERT");
+    tok.assert_identifier("OFFSET");
+    float insert_x = tok.get_number<float>();
+    float insert_y = tok.get_number<float>();
+    float insert_z = tok.get_number<float>();
+    model.insert_offset = make_vector(insert_x, insert_y, insert_z);
 
-	tok.assert_identifier("GEOSETS");
-	unsigned int num_geosets = tok.get_number<unsigned int>();
+    tok.assert_identifier("GEOSETS");
+    unsigned int num_geosets = tok.get_number<unsigned int>();
 
-	for(unsigned int i = 0; i < num_geosets; ++i) {
-		tok.assert_identifier("GEOSET");
-		tok.get_number<int>();
+    for(unsigned int i = 0; i < num_geosets; ++i) {
+        tok.assert_identifier("GEOSET");
+        tok.get_number<int>();
 
-		model.geosets.push_back(assets::model_geoset());
-		assets::model_geoset& geoset = model.geosets.back();
+        model.geosets.push_back(assets::model_geoset());
+        assets::model_geoset& geoset = model.geosets.back();
 
-		tok.assert_identifier("MESHES");
-		unsigned int num_meshes = tok.get_number<unsigned int>();
+        tok.assert_identifier("MESHES");
+        unsigned int num_meshes = tok.get_number<unsigned int>();
 
-		for(unsigned int j = 0; j < num_meshes; ++j) {
-			geoset.meshes.push_back(assets::model_mesh());
-			assets::model_mesh& mesh = geoset.meshes.back();
+        for(unsigned int j = 0; j < num_meshes; ++j) {
+            geoset.meshes.push_back(assets::model_mesh());
+            assets::model_mesh& mesh = geoset.meshes.back();
 
-			tok.assert_identifier("MESH");
-			mesh.index = tok.get_number<int>();
+            tok.assert_identifier("MESH");
+            mesh.index = tok.get_number<int>();
 
-			tok.assert_identifier("NAME");
-			// HACK: Some assets have spaces in mesh names. Don't really need it anyway.
-			//mesh.Name = tok.get_space_delimited_string();
-			tok.skip_to_next_line();
+            tok.assert_identifier("NAME");
+            // HACK: Some assets have spaces in mesh names. Don't really need it anyway.
+            //mesh.Name = tok.get_space_delimited_string();
+            tok.skip_to_next_line();
 
-			tok.assert_identifier("RADIUS");
-			mesh.radius = tok.get_number<float>();
+            tok.assert_identifier("RADIUS");
+            mesh.radius = tok.get_number<float>();
 
-			tok.assert_identifier("GEOMETRYMODE");
-			mesh.geo = static_cast<flags::geometry_mode>(tok.get_number<uint32_t>());
+            tok.assert_identifier("GEOMETRYMODE");
+            mesh.geo = static_cast<flags::geometry_mode>(tok.get_number<uint32_t>());
 
-			tok.assert_identifier("LIGHTINGMODE");
-			mesh.light = static_cast<flags::light_mode>(tok.get_number<uint32_t>());
+            tok.assert_identifier("LIGHTINGMODE");
+            mesh.light = static_cast<flags::light_mode>(tok.get_number<uint32_t>());
 
-			tok.assert_identifier("TEXTUREMODE");
-			mesh.tex = static_cast<flags::texture_mode>(tok.get_number<uint32_t>());
+            tok.assert_identifier("TEXTUREMODE");
+            mesh.tex = static_cast<flags::texture_mode>(tok.get_number<uint32_t>());
 
-			tok.assert_identifier("VERTICES");
-			unsigned int num_vertices = tok.get_number<unsigned int>();
-			for(unsigned int k = 0; k < num_vertices; ++k) {
-				tok.get_number<int>();
-				tok.assert_punctuator(":");
+            tok.assert_identifier("VERTICES");
+            unsigned int num_vertices = tok.get_number<unsigned int>();
+            for(unsigned int k = 0; k < num_vertices; ++k) {
+                tok.get_number<int>();
+                tok.assert_punctuator(":");
 
-				float v_x = tok.get_number<float>();
-				float v_y = tok.get_number<float>();
-				float v_z = tok.get_number<float>();
-				tok.get_number<float>();
+                float v_x = tok.get_number<float>();
+                float v_y = tok.get_number<float>();
+                float v_z = tok.get_number<float>();
+                tok.get_number<float>();
 
-				mesh.vertices.push_back(make_vector(v_x, v_y, v_z));
-			}
+                mesh.vertices.push_back(make_vector(v_x, v_y, v_z));
+            }
 
-			tok.assert_identifier("TEXTURE");
-			tok.assert_identifier("VERTICES");
-			unsigned int num_tex_vertices = tok.get_number<unsigned int>();
-			for(unsigned int k = 0; k < num_tex_vertices; ++k) {
-				tok.get_number<int>();
-				tok.assert_punctuator(":");
+            tok.assert_identifier("TEXTURE");
+            tok.assert_identifier("VERTICES");
+            unsigned int num_tex_vertices = tok.get_number<unsigned int>();
+            for(unsigned int k = 0; k < num_tex_vertices; ++k) {
+                tok.get_number<int>();
+                tok.assert_punctuator(":");
 
-				float v_u = tok.get_number<float>();
-				float v_v = tok.get_number<float>();
+                float v_u = tok.get_number<float>();
+                float v_v = tok.get_number<float>();
 
-				mesh.texture_vertices.push_back(make_vector(v_u, v_v));
-			}
+                mesh.texture_vertices.push_back(make_vector(v_u, v_v));
+            }
 
-			tok.assert_identifier("VERTEX");
-			tok.assert_identifier("NORMALS");
-			for(unsigned int k = 0; k < num_vertices; ++k) {
-				tok.get_number<int>();
-				tok.assert_punctuator(":");
+            tok.assert_identifier("VERTEX");
+            tok.assert_identifier("NORMALS");
+            for(unsigned int k = 0; k < num_vertices; ++k) {
+                tok.get_number<int>();
+                tok.assert_punctuator(":");
 
-				float n_x = tok.get_number<float>();
-				float n_y = tok.get_number<float>();
-				float n_z = tok.get_number<float>();
+                float n_x = tok.get_number<float>();
+                float n_y = tok.get_number<float>();
+                float n_z = tok.get_number<float>();
 
-				mesh.vertex_normals.push_back(make_vector(n_x, n_y, n_z));
-			}
+                mesh.vertex_normals.push_back(make_vector(n_x, n_y, n_z));
+            }
 
-			tok.assert_identifier("FACES");
-			unsigned int num_faces = tok.get_number<unsigned int>();
-			for(unsigned int k = 0; k < num_faces; ++k) {
-				mesh.faces.push_back(assets::model_face());
-				assets::model_face& face = mesh.faces.back();
+            tok.assert_identifier("FACES");
+            unsigned int num_faces = tok.get_number<unsigned int>();
+            for(unsigned int k = 0; k < num_faces; ++k) {
+                mesh.faces.push_back(assets::model_face());
+                assets::model_face& face = mesh.faces.back();
 
-				tok.get_number<int>();
-				tok.assert_punctuator(":");
+                tok.get_number<int>();
+                tok.assert_punctuator(":");
 
-				face.material = tok.get_number<int>();
-				face.type = flag_set<flags::face_flag>(tok.get_number<uint32_t>());
-				face.geo = static_cast<flags::geometry_mode>(tok.get_number<uint32_t>());
-				face.light = static_cast<flags::light_mode>(tok.get_number<uint32_t>());
-				face.tex = static_cast<flags::texture_mode>(tok.get_number<uint32_t>());
-				face.extra_light = tok.get_number<float>();
+                face.material = tok.get_number<int>();
+                face.type = flag_set<flags::face_flag>(tok.get_number<uint32_t>());
+                face.geo = static_cast<flags::geometry_mode>(tok.get_number<uint32_t>());
+                face.light = static_cast<flags::light_mode>(tok.get_number<uint32_t>());
+                face.tex = static_cast<flags::texture_mode>(tok.get_number<uint32_t>());
+                face.extra_light = tok.get_number<float>();
 
-				unsigned int num_face_verts = tok.get_number<unsigned int>();
-				for(unsigned int l = 0; l < num_face_verts; ++l) {
-					unsigned int geo_v = tok.get_number<unsigned int>();
-					tok.assert_punctuator(",");
-					unsigned int tex_v = tok.get_number<unsigned int>();
+                unsigned int num_face_verts = tok.get_number<unsigned int>();
+                for(unsigned int l = 0; l < num_face_verts; ++l) {
+                    unsigned int geo_v = tok.get_number<unsigned int>();
+                    tok.assert_punctuator(",");
+                    unsigned int tex_v = tok.get_number<unsigned int>();
 
-					face.vertices.emplace_back(geo_v, tex_v);
-				}
-			}
+                    face.vertices.emplace_back(geo_v, tex_v);
+                }
+            }
 
-			tok.assert_identifier("FACE");
-			tok.assert_identifier("NORMALS");
-			for(unsigned int k = 0; k < num_faces; ++k) {
-				tok.get_number<int>();
-				tok.assert_punctuator(":");
+            tok.assert_identifier("FACE");
+            tok.assert_identifier("NORMALS");
+            for(unsigned int k = 0; k < num_faces; ++k) {
+                tok.get_number<int>();
+                tok.assert_punctuator(":");
 
-				float n_x = tok.get_number<float>();
-				float n_y = tok.get_number<float>();
-				float n_z = tok.get_number<float>();
+                float n_x = tok.get_number<float>();
+                float n_y = tok.get_number<float>();
+                float n_z = tok.get_number<float>();
 
-				mesh.faces[k].normal = make_vector(n_x, n_y, n_z);
-			}
-		}
-	}
+                mesh.faces[k].normal = make_vector(n_x, n_y, n_z);
+            }
+        }
+    }
 }
 
 void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
-	tok.assert_identifier("hierarchy");
-	tok.assert_identifier("nodes");
+    tok.assert_identifier("hierarchy");
+    tok.assert_identifier("nodes");
 
-	int nodes = tok.get_number<int>();
-	model.hierarchy_nodes.resize(nodes);
+    int nodes = tok.get_number<int>();
+    model.hierarchy_nodes.resize(nodes);
 
-	for(int i = 0; i < nodes; ++i) {
-		auto& node = model.hierarchy_nodes[i];
+    for(int i = 0; i < nodes; ++i) {
+        auto& node = model.hierarchy_nodes[i];
 
-		tok.get_number<int>();
-		tok.assert_punctuator(":");
+        tok.get_number<int>();
+        tok.assert_punctuator(":");
 
-		tok.get_number<int>();
+        tok.get_number<int>();
 
-		node.type = flag_set<flags::mesh_node_type>(tok.get_number<unsigned int>());
-		node.mesh = tok.get_number<int>();
-		node.parent = tok.get_number<int>();
-		node.child = tok.get_number<int>();
-		node.sibling = tok.get_number<int>();
-		node.num_children = tok.get_number<int>();
+        node.type = flag_set<flags::mesh_node_type>(tok.get_number<unsigned int>());
+        node.mesh = tok.get_number<int>();
+        node.parent = tok.get_number<int>();
+        node.child = tok.get_number<int>();
+        node.sibling = tok.get_number<int>();
+        node.num_children = tok.get_number<int>();
 
-		get<0>(node.offset) = tok.get_number<float>();
-		get<1>(node.offset) = tok.get_number<float>();
-		get<2>(node.offset) = tok.get_number<float>();
+        get<0>(node.offset) = tok.get_number<float>();
+        get<1>(node.offset) = tok.get_number<float>();
+        get<2>(node.offset) = tok.get_number<float>();
 
-		get<0>(node.rotation) = tok.get_number<float>();
-		get<1>(node.rotation) = tok.get_number<float>();
-		get<2>(node.rotation) = tok.get_number<float>();
+        get<0>(node.rotation) = tok.get_number<float>();
+        get<1>(node.rotation) = tok.get_number<float>();
+        get<2>(node.rotation) = tok.get_number<float>();
 
-		get<0>(node.pivot) = tok.get_number<float>();
-		get<1>(node.pivot) = tok.get_number<float>();
-		get<2>(node.pivot) = tok.get_number<float>();
+        get<0>(node.pivot) = tok.get_number<float>();
+        get<1>(node.pivot) = tok.get_number<float>();
+        get<2>(node.pivot) = tok.get_number<float>();
 
-		node.name = tok.get_space_delimited_string();
-	}
+        node.name = tok.get_space_delimited_string();
+    }
 }
 
 void PostprocessModel(assets::model& model, manager& manager, const assets::colormap& colormap, diagnostics::report& report) {
-	for(const auto& mat_name : model.material_entries) {
-		model.materials.push_back(&manager.load<assets::material>(mat_name, colormap));
-	}
+    for(const auto& mat_name : model.material_entries) {
+        model.materials.push_back(&manager.load<assets::material>(mat_name, colormap));
+    }
 
-	// Some color faces have invalid texture coordinates.
-	// Ensure each mesh has at least one texture vertex.
-	for(auto& geoset : model.geosets) {
-		for(auto& mesh : geoset.meshes) {
-			if(mesh.texture_vertices.empty()) {
-				mesh.texture_vertices.push_back(make_vector(0.0f, 0.0f));
-			}
-		}
-	}
+    // Some color faces have invalid texture coordinates.
+    // Ensure each mesh has at least one texture vertex.
+    for(auto& geoset : model.geosets) {
+        for(auto& mesh : geoset.meshes) {
+            if(mesh.texture_vertices.empty()) {
+                mesh.texture_vertices.push_back(make_vector(0.0f, 0.0f));
+            }
+        }
+    }
 
-	return;
+    return;
 }
 
 using ModelLoaderSectionFn = std::function<void(assets::model&, text::tokenizer&, manager&, diagnostics::report&)>;
 const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMap {
-	{ "header", ParseModelHeaderSection },
-	{ "modelresource", ParseModelResourceSection },
-	{ "geometrydef", ParseGeometryDefSection },
-	{ "hierarchydef", ParseHierarchyDefSection }
+    { "header", ParseModelHeaderSection },
+    { "modelresource", ParseModelResourceSection },
+    { "geometrydef", ParseGeometryDefSection },
+    { "hierarchydef", ParseHierarchyDefSection }
 };
 
 }
@@ -250,34 +250,34 @@ const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMa
 }
 
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::model_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
-	std::unique_ptr<assets::model> lev(new assets::model());
+    std::unique_ptr<assets::model> lev(new assets::model());
 
-	text::token t;
-	while(true) {
-		SkipToNextModelSection(tok);
-		tok.get_token(t);
+    text::token t;
+    while(true) {
+        SkipToNextModelSection(tok);
+        tok.get_token(t);
 
-		if(t.type == text::token_type::end_of_file) {
-			break;
-		}
-		else {
-			std::transform(t.value.begin(), t.value.end(), t.value.begin(), tolower);
-			auto it = ModelLoaderSectionMap.find(t.value);
-			if(it == ModelLoaderSectionMap.end()) {
-				report.add_warning("ModelLoader", boost::str(boost::format("skipping unknown section %s") % t.value), t.location);
-			}
-			else {
-				it->second(*lev, tok, manager, report);
-			}
-		}
-	}
+        if(t.type == text::token_type::end_of_file) {
+            break;
+        }
+        else {
+            std::transform(t.value.begin(), t.value.end(), t.value.begin(), tolower);
+            auto it = ModelLoaderSectionMap.find(t.value);
+            if(it == ModelLoaderSectionMap.end()) {
+                report.add_warning("ModelLoader", boost::str(boost::format("skipping unknown section %s") % t.value), t.location);
+            }
+            else {
+                it->second(*lev, tok, manager, report);
+            }
+        }
+    }
 
-	PostprocessModel(*lev, manager, colormap, report);
+    PostprocessModel(*lev, manager, colormap, report);
 
-	return std::unique_ptr<asset>(std::move(lev));
+    return std::unique_ptr<asset>(std::move(lev));
 }
 
 gorc::content::loaders::model_loader::model_loader(const assets::colormap& colormap)
-	: colormap(colormap) {
-	return;
+    : colormap(colormap) {
+    return;
 }

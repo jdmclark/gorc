@@ -8,9 +8,9 @@ namespace assets {
 
 class level_adjoin {
 public:
-	flag_set<flags::adjoin_flag> flags;
-	size_t mirror;
-	float distance;
+    flag_set<flags::adjoin_flag> flags;
+    size_t mirror;
+    float distance;
 };
 
 }

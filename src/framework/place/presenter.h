@@ -7,12 +7,12 @@ namespace place {
 
 class presenter {
 public:
-	virtual ~presenter();
+    virtual ~presenter();
 
-	virtual void start(event::event_bus& eventBus) = 0;
+    virtual void start(event::event_bus& eventBus) = 0;
 
-	virtual bool can_stop();
-	virtual void stop();
+    virtual bool can_stop();
+    virtual void stop();
 };
 
 }

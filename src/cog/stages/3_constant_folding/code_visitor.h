@@ -16,17 +16,17 @@ namespace constant_folding {
 class code_visitor : public ast::visitor
 {
 protected:
-	ast::factory& Factory;
-	symbols::symbol_table& symbol_table;
-	const std::unordered_map<std::string, vm::value>& ConstantTable;
+    ast::factory& Factory;
+    symbols::symbol_table& symbol_table;
+    const std::unordered_map<std::string, vm::value>& ConstantTable;
 
 public:
-	code_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
-		const std::unordered_map<std::string, vm::value>& constantTable,
-		diagnostics::report& report);
+    code_visitor(ast::factory& factory, symbols::symbol_table& symbolTable,
+        const std::unordered_map<std::string, vm::value>& constantTable,
+        diagnostics::report& report);
 
 private:
-	ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO);
 };
 
 }

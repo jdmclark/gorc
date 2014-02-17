@@ -9,9 +9,9 @@ namespace loaders {
 
 class puppet_loader : public text_loader {
 public:
-	static const std::vector<boost::filesystem::path> asset_root_path;
+    static const std::vector<boost::filesystem::path> asset_root_path;
 
-	virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
+    virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
 };
 
 }

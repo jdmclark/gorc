@@ -11,22 +11,22 @@ class gui_view;
 namespace widgets {
 
 enum class frame_style {
-	flat = 0,
-	outset = 1,
-	inset = 2,
-	border = 3,
+    flat = 0,
+    outset = 1,
+    inset = 2,
+    border = 3,
 };
 
 class frame : public widget {
 private:
-	const content::assets::texture& sprite_sheet;
+    const content::assets::texture& sprite_sheet;
 
 public:
-	frame_style style = frame_style::outset;
+    frame_style style = frame_style::outset;
 
-	frame(gui_view&, const content::assets::texture& sprite_sheet);
+    frame(gui_view&, const content::assets::texture& sprite_sheet);
 
-	virtual void draw(const time& time, graphics::gui_renderer& renderer, int depth) const override;
+    virtual void draw(const time& time, graphics::gui_renderer& renderer, int depth) const override;
 };
 
 }

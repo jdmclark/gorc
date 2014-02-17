@@ -11,18 +11,18 @@ namespace assets {
 
 class model_node {
 public:
-	flag_set<flags::mesh_node_type> type;
-	int mesh;
-	int parent;
-	int child;
-	int sibling;
-	int num_children;
+    flag_set<flags::mesh_node_type> type;
+    int mesh;
+    int parent;
+    int child;
+    int sibling;
+    int num_children;
 
-	vector<3> offset;
-	vector<3> rotation;
-	vector<3> pivot;
+    vector<3> offset;
+    vector<3> rotation;
+    vector<3> pivot;
 
-	std::string name;
+    std::string name;
 };
 
 }

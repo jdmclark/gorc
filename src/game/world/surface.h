@@ -15,16 +15,16 @@ class animation;
 
 class surface : public content::assets::level_surface {
 public:
-	physics::surface_object_data object_data;
+    physics::surface_object_data object_data;
 
-	int cel_number = -1;
-	maybe<animations::animation*> surface_anim;
+    int cel_number = -1;
+    maybe<animations::animation*> surface_anim;
 
-	inline const physics::surface_object_data& get_object_data() const {
-		return object_data;
-	}
+    inline const physics::surface_object_data& get_object_data() const {
+        return object_data;
+    }
 
-	surface(const content::assets::level_surface& surf);
+    surface(const content::assets::level_surface& surf);
 };
 
 }

@@ -7,7 +7,7 @@ namespace events {
 
 class exit {
 public:
-	static const std::string& get_event_type();
+    static const std::string& get_event_type();
 };
 
 }

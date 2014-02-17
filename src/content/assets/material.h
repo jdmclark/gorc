@@ -10,10 +10,10 @@ namespace assets {
 
 class material : public asset {
 public:
-	using loader = loaders::material_loader;
+    using loader = loaders::material_loader;
 
-	box<2, int> size;
-	std::vector<material_cel> cels;
+    box<2, int> size;
+    std::vector<material_cel> cels;
 };
 
 }

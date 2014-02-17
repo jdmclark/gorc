@@ -16,20 +16,20 @@ namespace widgets {
 
 class file_open_box : public dialog_box {
 private:
-	grid_panel& content_panel;
-	button &ok, &cancel;
-	static_text& label;
-	edit_box& path;
-	std::function<void(const boost::filesystem::path&)> ok_p;
+    grid_panel& content_panel;
+    button &ok, &cancel;
+    static_text& label;
+    edit_box& path;
+    std::function<void(const boost::filesystem::path&)> ok_p;
 
 protected:
-	void ok_clicked();
-	void cancel_clicked();
+    void ok_clicked();
+    void cancel_clicked();
 
 public:
-	void show(std::function<void(const boost::filesystem::path&)>&& ok_p);
+    void show(std::function<void(const boost::filesystem::path&)>&& ok_p);
 
-	file_open_box(gui_view&, const content::assets::texture& skin, const content::assets::font& font);
+    file_open_box(gui_view&, const content::assets::texture& skin, const content::assets::font& font);
 };
 
 }

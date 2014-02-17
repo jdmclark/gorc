@@ -13,13 +13,13 @@ namespace animations {
 
 class slide_ceiling_sky_animation : public animation {
 private:
-	level_model& model;
-	vector<2> speed;
+    level_model& model;
+    vector<2> speed;
 
 public:
-	slide_ceiling_sky_animation(level_model& model, const vector<2>& speed);
+    slide_ceiling_sky_animation(level_model& model, const vector<2>& speed);
 
-	void update(double dt);
+    void update(double dt);
 };
 
 }

@@ -13,15 +13,15 @@ namespace animations {
 
 class surface_light_animation : public animation {
 private:
-	level_model& model;
-	unsigned int surface;
-	float start_light, end_light, change_time, anim_time;
+    level_model& model;
+    unsigned int surface;
+    float start_light, end_light, change_time, anim_time;
 
 public:
-	surface_light_animation(level_model& model, unsigned int surface, float start_light, float end_light, float change_time, int anim_num);
+    surface_light_animation(level_model& model, unsigned int surface, float start_light, float end_light, float change_time, int anim_num);
 
-	void update(double dt);
-	void stop();
+    void update(double dt);
+    void stop();
 };
 
 }
