@@ -87,7 +87,7 @@ gorc::vector<3, uint8_t> gorc::content::loaders::bitmap_loader::get_palette_colo
     return make_zero_vector<3, uint8_t>();
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::bitmap> mat(new content::assets::bitmap());
 
     char magic[4];
@@ -126,7 +126,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
             uint8_t pal_buf[sizeof(uint8_t) * 3 * 256];
             file.read(pal_buf, sizeof(uint8_t) * 3 * 256);
             for(int i = 0, j = 0; i < 256; ++i, j += 3) {
-                mat->set_color(i, make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
+                mat->set_color(static_cast<uint8_t>(i), make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
             }
         }
 
@@ -179,7 +179,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
             uint8_t pal_buf[sizeof(uint8_t) * 3 * 256];
             file.read(pal_buf, sizeof(uint8_t) * 3 * 256);
             for(int i = 0, j = 0; i < 256; ++i, j += 3) {
-                mat->set_color(i, make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
+                mat->set_color(static_cast<uint8_t>(i), make_vector(pal_buf[j], pal_buf[j + 1], pal_buf[j + 2]));
             }
         }
 

@@ -38,9 +38,9 @@ int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::A
 
 int animation_presenter::get_surface_anim(int surface) {
     int return_value = -1;
-    if_set(levelModel->surfaces[surface].surface_anim, then_do, [&return_value](const animation& anim) {
-        return_value = anim.get_id();
-    });
+    if(animation const* anim = levelModel->surfaces[surface].surface_anim) {
+        return_value = anim->get_id();
+    }
 
     return return_value;
 }
@@ -83,7 +83,7 @@ int animation_presenter::surface_light_anim(int surface, float start_light, floa
 }
 
 void gorc::game::world::animations::animation_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
-    verbTable.add_verb<int, 3>("materialanim", [&components](int material, float cps, int flags) {
+    verbTable.add_verb<int, 3>("materialanim", [&components](int, float, int) {
         // TODO: Implement this verb when setsurfacematerial changes have been made.
         return -1;
     });

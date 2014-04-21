@@ -9,6 +9,6 @@ gorc::box<2, int> gorc::gui::widgets::static_image::get_minimum_size(const gui_v
     return graphics_size;
 }
 
-void gorc::gui::widgets::static_image::draw(const time& time, graphics::gui_renderer& renderer, int depth) const {
+void gorc::gui::widgets::static_image::draw(const time&, graphics::gui_renderer& renderer, int depth) const {
     renderer.draw_sprite(sprite_sheet, position, graphics_size, depth);
 }

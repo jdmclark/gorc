@@ -16,7 +16,7 @@ gorc::box<2, int> gorc::gui::widgets::horizontal_split_panel::get_child_position
     bottom_pos -= padding.bottom;
     right_pos -= padding.right;
 
-    int actual_split_pos;
+    int actual_split_pos = 0;
     switch(style) {
     case horizontal_split_style::top_px:
         actual_split_pos = top_pos + static_cast<int>(split_position);

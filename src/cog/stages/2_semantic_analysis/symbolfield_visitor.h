@@ -24,7 +24,7 @@ public:
     symbol_field_visitor(diagnostics::report& report);
 
 private:
-    ASTCLASS_SYMBOL_FIELD(AVPROTO);
+    ASTCLASS_SYMBOL_FIELD(AVPROTO)
 };
 
 }

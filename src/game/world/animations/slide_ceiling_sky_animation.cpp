@@ -8,5 +8,5 @@ gorc::game::world::animations::slide_ceiling_sky_animation::slide_ceiling_sky_an
 }
 
 void gorc::game::world::animations::slide_ceiling_sky_animation::update(double dt) {
-    model.header.ceiling_sky_offset += speed * dt * rate_factor;
+    model.header.ceiling_sky_offset += speed * static_cast<float>(dt * rate_factor);
 }

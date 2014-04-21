@@ -17,7 +17,7 @@ namespace physics {
 
 template <typename VertexProvider, typename EdgeProvider> bool point_inside_surface(const vector<3>& sp,
         const VertexProvider& level, const EdgeProvider& surface, const matrix<4>& trns) {
-    for(unsigned int i = surface.vertices.size() - 1, j = 0; j < surface.vertices.size(); i = j++) {
+    for(size_t i = surface.vertices.size() - 1UL, j = 0UL; j < surface.vertices.size(); i = j++) {
         auto p0 = trns.transform(level.vertices[std::get<0>(surface.vertices[i])]);
         auto edge = trns.transform(level.vertices[std::get<0>(surface.vertices[j])]) - p0;
         auto edge_normal = cross(trns.transform_normal(surface.normal), edge);
@@ -31,7 +31,7 @@ template <typename VertexProvider, typename EdgeProvider> bool point_inside_surf
 
 template <typename VertexProvider, typename EdgeProvider> bool point_inside_surface(const vector<3>& sp,
         const VertexProvider& level, const EdgeProvider& surface) {
-    for(unsigned int i = surface.vertices.size() - 1, j = 0; j < surface.vertices.size(); i = j++) {
+    for(size_t i = surface.vertices.size() - 1UL, j = 0UL; j < surface.vertices.size(); i = j++) {
         auto p0 = level.vertices[std::get<0>(surface.vertices[i])];
         auto edge = level.vertices[std::get<0>(surface.vertices[j])] - p0;
         auto edge_normal = cross(surface.normal, edge);
@@ -128,9 +128,9 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 
     // Check edges
     float closest_dist = std::numeric_limits<float>::max();
-    vector<3> closest_point;
+    vector<3> closest_point = make_zero_vector<3, float>();
 
-    for(unsigned int p0 = surface.vertices.size() - 1, p1 = 0; p1 < surface.vertices.size(); p0 = p1++) {
+    for(size_t p0 = surface.vertices.size() - 1UL, p1 = 0UL; p1 < surface.vertices.size(); p0 = p1++) {
         auto vp0 = trns.transform(level.vertices[std::get<0>(surface.vertices[p0])]);
         auto vp1 = trns.transform(level.vertices[std::get<0>(surface.vertices[p1])]);
         auto lv = vp1 - vp0;
@@ -175,9 +175,9 @@ template <typename VertexProvider, typename EdgeProvider> maybe<vector<3>> bound
 
     // Check edges
     float closest_dist = std::numeric_limits<float>::max();
-    vector<3> closest_point;
+    vector<3> closest_point = make_zero_vector<3, float>();
 
-    for(unsigned int p0 = surface.vertices.size() - 1, p1 = 0; p1 < surface.vertices.size(); p0 = p1++) {
+    for(size_t p0 = surface.vertices.size() - 1UL, p1 = 0UL; p1 < surface.vertices.size(); p0 = p1++) {
         auto vp0 = level.vertices[std::get<0>(surface.vertices[p0])];
         auto vp1 = level.vertices[std::get<0>(surface.vertices[p1])];
         auto lv = vp1 - vp0;
@@ -248,12 +248,12 @@ inline maybe<vector<3>> segment_sphere_intersection(const segment& segment, cons
         return nothing;
     }
 
-    auto sqrt_det = sqrt(det);
+    auto sqrt_det = sqrtf(det);
     auto sol_a = (-b + sqrt_det) / (2.0f * a);
     auto sol_b = (-b - sqrt_det) / (2.0f * a);
 
     bool has_sol = false;
-    float selected_sol;
+    float selected_sol = 0.0f;
 
     if(sol_a >= 0.0f && sol_a <= 1.0f) {
         has_sol = true;

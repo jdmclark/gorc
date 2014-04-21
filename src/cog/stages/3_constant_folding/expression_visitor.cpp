@@ -205,7 +205,7 @@ void expression_visitor::visit_comma_expression(comma_expression& e) {
     e.right = v.get_substitution();
 }
 
-void expression_visitor::visit_for_optional_expression(for_optional_expression& e) {
+void expression_visitor::visit_for_optional_expression(for_optional_expression&) {
     return;
 }
 

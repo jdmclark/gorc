@@ -137,42 +137,42 @@ translation_unit::translation_unit(unsigned int flags, std::vector<symbol*>* sym
     return;
 }
 
-ASTVISITOR_ACCEPT_IMPL(string_fragment_field);
-ASTVISITOR_ACCEPT_IMPL(integer_field);
-ASTVISITOR_ACCEPT_IMPL(float_field);
+ASTVISITOR_ACCEPT_IMPL(string_fragment_field)
+ASTVISITOR_ACCEPT_IMPL(integer_field)
+ASTVISITOR_ACCEPT_IMPL(float_field)
 
-ASTVISITOR_ACCEPT_IMPL(bare_extension);
-ASTVISITOR_ACCEPT_IMPL(valued_extension);
+ASTVISITOR_ACCEPT_IMPL(bare_extension)
+ASTVISITOR_ACCEPT_IMPL(valued_extension)
 
-ASTVISITOR_ACCEPT_IMPL(symbol);
-ASTVISITOR_ACCEPT_IMPL(valued_symbol);
+ASTVISITOR_ACCEPT_IMPL(symbol)
+ASTVISITOR_ACCEPT_IMPL(valued_symbol)
 
-ASTVISITOR_ACCEPT_IMPL(constant_value_expression);
-ASTVISITOR_ACCEPT_IMPL(string_literal_expression);
-ASTVISITOR_ACCEPT_IMPL(integer_literal_expression);
-ASTVISITOR_ACCEPT_IMPL(float_literal_expression);
-ASTVISITOR_ACCEPT_IMPL(vector_literal_expression);
-ASTVISITOR_ACCEPT_IMPL(identifier_expression);
-ASTVISITOR_ACCEPT_IMPL(subscript_expression);
-ASTVISITOR_ACCEPT_IMPL(method_call_expression);
-ASTVISITOR_ACCEPT_IMPL(unary_expression);
-ASTVISITOR_ACCEPT_IMPL(infix_expression);
-ASTVISITOR_ACCEPT_IMPL(assignment_expression);
-ASTVISITOR_ACCEPT_IMPL(comma_expression);
+ASTVISITOR_ACCEPT_IMPL(constant_value_expression)
+ASTVISITOR_ACCEPT_IMPL(string_literal_expression)
+ASTVISITOR_ACCEPT_IMPL(integer_literal_expression)
+ASTVISITOR_ACCEPT_IMPL(float_literal_expression)
+ASTVISITOR_ACCEPT_IMPL(vector_literal_expression)
+ASTVISITOR_ACCEPT_IMPL(identifier_expression)
+ASTVISITOR_ACCEPT_IMPL(subscript_expression)
+ASTVISITOR_ACCEPT_IMPL(method_call_expression)
+ASTVISITOR_ACCEPT_IMPL(unary_expression)
+ASTVISITOR_ACCEPT_IMPL(infix_expression)
+ASTVISITOR_ACCEPT_IMPL(assignment_expression)
+ASTVISITOR_ACCEPT_IMPL(comma_expression)
 
-ASTVISITOR_ACCEPT_IMPL(compound_statement);
-ASTVISITOR_ACCEPT_IMPL(empty_statement);
-ASTVISITOR_ACCEPT_IMPL(expression_statement);
-ASTVISITOR_ACCEPT_IMPL(break_statement);
-ASTVISITOR_ACCEPT_IMPL(return_statement);
-ASTVISITOR_ACCEPT_IMPL(call_statement);
-ASTVISITOR_ACCEPT_IMPL(if_statement);
-ASTVISITOR_ACCEPT_IMPL(if_else_statement);
-ASTVISITOR_ACCEPT_IMPL(while_statement);
-ASTVISITOR_ACCEPT_IMPL(do_statement);
-ASTVISITOR_ACCEPT_IMPL(for_optional_expression);
-ASTVISITOR_ACCEPT_IMPL(for_expression);
-ASTVISITOR_ACCEPT_IMPL(for_statement);
-ASTVISITOR_ACCEPT_IMPL(labeled_statement);
+ASTVISITOR_ACCEPT_IMPL(compound_statement)
+ASTVISITOR_ACCEPT_IMPL(empty_statement)
+ASTVISITOR_ACCEPT_IMPL(expression_statement)
+ASTVISITOR_ACCEPT_IMPL(break_statement)
+ASTVISITOR_ACCEPT_IMPL(return_statement)
+ASTVISITOR_ACCEPT_IMPL(call_statement)
+ASTVISITOR_ACCEPT_IMPL(if_statement)
+ASTVISITOR_ACCEPT_IMPL(if_else_statement)
+ASTVISITOR_ACCEPT_IMPL(while_statement)
+ASTVISITOR_ACCEPT_IMPL(do_statement)
+ASTVISITOR_ACCEPT_IMPL(for_optional_expression)
+ASTVISITOR_ACCEPT_IMPL(for_expression)
+ASTVISITOR_ACCEPT_IMPL(for_statement)
+ASTVISITOR_ACCEPT_IMPL(labeled_statement)
 
-ASTVISITOR_ACCEPT_IMPL(translation_unit);
+ASTVISITOR_ACCEPT_IMPL(translation_unit)

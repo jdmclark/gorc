@@ -13,99 +13,99 @@ test_case(Instantiation) {
 test_case(fire_event) {
     event::event_bus eventBus;
 
-    size_t call_ct = 0;
+    size_t call_ct = 0UL;
 
-    assert_eq(call_ct, 0);
+    assert_eq(call_ct, 0UL);
 
     events::print e("Test Message");
 
     eventBus.fire_event(e);
 
-    assert_eq(call_ct, 0);
+    assert_eq(call_ct, 0UL);
 
-    eventBus.add_handler<events::print>([&call_ct](events::print& e) {
+    eventBus.add_handler<events::print>([&call_ct](events::print&) {
         ++call_ct;
     });
 
     eventBus.fire_event(e);
 
-    assert_eq(call_ct, 1);
+    assert_eq(call_ct, 1UL);
 
-    eventBus.add_handler<events::print>([&call_ct](events::print& e) {
+    eventBus.add_handler<events::print>([&call_ct](events::print&) {
         ++call_ct;
     });
 
     eventBus.fire_event(e);
 
-    assert_eq(call_ct, 3);
+    assert_eq(call_ct, 3UL);
 }
 
 test_case(ChildFireEvent) {
     event::event_bus parentEventBus;
     event::event_bus eventBus(&parentEventBus);
 
-    size_t call_ct = 0;
+    size_t call_ct = 0UL;
 
-    assert_eq(call_ct, 0);
+    assert_eq(call_ct, 0UL);
 
     events::print e("Test Message");
 
     eventBus.fire_event(e);
 
-    assert_eq(call_ct, 0);
+    assert_eq(call_ct, 0UL);
 
-    parentEventBus.add_handler<events::print>([&call_ct](events::print& e) {
+    parentEventBus.add_handler<events::print>([&call_ct](events::print&) {
         ++call_ct;
     });
 
     eventBus.fire_event(e);
 
-    assert_eq(call_ct, 1);
+    assert_eq(call_ct, 1UL);
 
-    eventBus.add_handler<events::print>([&call_ct](events::print& e) {
+    eventBus.add_handler<events::print>([&call_ct](events::print&) {
         ++call_ct;
     });
 
     eventBus.fire_event(e);
 
-    assert_eq(call_ct, 3);
+    assert_eq(call_ct, 3UL);
 }
 
 test_case(ChildDetachFireEvent) {
     event::event_bus parentEventBus;
     event::event_bus* eventBus = new event::event_bus(&parentEventBus);
 
-    size_t call_ct = 0;
+    size_t call_ct = 0UL;
 
-    assert_eq(call_ct, 0);
+    assert_eq(call_ct, 0UL);
 
     events::print e("Test Message");
 
     eventBus->fire_event(e);
 
-    assert_eq(call_ct, 0);
+    assert_eq(call_ct, 0UL);
 
-    parentEventBus.add_handler<events::print>([&call_ct](events::print& e) {
+    parentEventBus.add_handler<events::print>([&call_ct](events::print&) {
         ++call_ct;
     });
 
     eventBus->fire_event(e);
 
-    assert_eq(call_ct, 1);
+    assert_eq(call_ct, 1UL);
 
-    eventBus->add_handler<events::print>([&call_ct](events::print& e) {
+    eventBus->add_handler<events::print>([&call_ct](events::print&) {
         ++call_ct;
     });
 
     eventBus->fire_event(e);
 
-    assert_eq(call_ct, 3);
+    assert_eq(call_ct, 3UL);
 
     delete eventBus;
 
     parentEventBus.fire_event(e);
 
-    assert_eq(call_ct, 4);
+    assert_eq(call_ct, 4UL);
 }
 
 test_case(CallMemberFunction) {
@@ -117,7 +117,7 @@ test_case(CallMemberFunction) {
             return;
         }
 
-        void HandlePrintEvent(events::print& e) {
+        void HandlePrintEvent(events::print&) {
             ++i;
         }
     } someClass;

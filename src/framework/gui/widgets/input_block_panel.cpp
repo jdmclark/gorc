@@ -10,6 +10,6 @@ bool gorc::gui::widgets::input_block_panel::wants_mouse_input() const {
     return true;
 }
 
-void gorc::gui::widgets::input_block_panel::on_mouse_down(const time& time, const vector<2, int>& position, sf::Mouse::Button button) {
+void gorc::gui::widgets::input_block_panel::on_mouse_down(const time&, const vector<2, int>&, sf::Mouse::Button) {
     click_predicate();
 }

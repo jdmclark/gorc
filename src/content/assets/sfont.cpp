@@ -9,7 +9,7 @@ const gorc::content::assets::glyph& gorc::content::assets::sfont::get_glyph(char
     return it->second;
 }
 
-int gorc::content::assets::sfont::get_kerning(char c, char d) const {
+int gorc::content::assets::sfont::get_kerning(char, char) const {
     return 0;
 }
 

@@ -16,14 +16,14 @@ gorc::game::world::gameplay::thing_controller::~thing_controller() {
 
 void gorc::game::world::gameplay::thing_controller::update(int thing_id, double dt) {
     auto& thing = presenter.model->things[thing_id];
-    thing.time_alive += dt;
+    thing.time_alive += static_cast<float>(dt);
 
-    if(thing.timer && thing.time_alive >= thing.timer) {
+    if(thing.timer > 0.0f && thing.time_alive >= thing.timer) {
         presenter.destroy_thing(thing_id);
     }
 }
 
-void gorc::game::world::gameplay::thing_controller::handle_animation_marker(int thing_id, flags::key_marker_type marker) {
+void gorc::game::world::gameplay::thing_controller::handle_animation_marker(int, flags::key_marker_type) {
     return;
 }
 
@@ -32,11 +32,11 @@ void gorc::game::world::gameplay::thing_controller::create_controller_data(int t
     new_thing.time_alive = 0.0f;
 }
 
-void gorc::game::world::gameplay::thing_controller::remove_controller_data(int thing_id) {
+void gorc::game::world::gameplay::thing_controller::remove_controller_data(int) {
     return;
 }
 
-void gorc::game::world::gameplay::thing_controller::taken(int thing_id, int player_id) {
+void gorc::game::world::gameplay::thing_controller::taken(int, int) {
     return;
 }
 

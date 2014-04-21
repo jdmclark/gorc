@@ -85,7 +85,7 @@ void unknown_verb(report& report, const std::string& visitorname, const std::str
     report.add_error(visitorname, boost::str(boost::format("unknown verb \'%s\'") % verbname), location);
 }
 
-void invalid_argument_count(report& report, const std::string& visitorname, const std::string& verbname, int wanted, int found, const error_location& location) {
+void invalid_argument_count(report& report, const std::string& visitorname, const std::string& verbname, size_t wanted, size_t found, const error_location& location) {
     report.add_error(visitorname, boost::str(boost::format("verb \'%s\' expects %d arguments, found %d") % verbname % wanted % found), location);
 }
 
@@ -145,11 +145,11 @@ void expected_string(report& report, const std::string& visitorname, const error
     report.add_error(visitorname, "expected string", location);
 }
 
-void expected_label(report& report, const std::string& visitorname, const std::string& found, const std::string& expected, const error_location& location) {
+void expected_label(report& report, const std::string& visitorname, const std::string&, const std::string&, const error_location& location) {
     report.add_error(visitorname, "expected label", location);
 }
 
-void expected_end_of_file(report& report, const std::string& visitorname, const std::string& found, const error_location& location) {
+void expected_end_of_file(report& report, const std::string& visitorname, const std::string&, const error_location& location) {
     report.add_error(visitorname, "expected end of file", location);
 }
 

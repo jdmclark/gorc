@@ -4,6 +4,6 @@ gorc::application_presenter::~application_presenter() {
     return;
 }
 
-void gorc::application_presenter::update(const time& time) {
+void gorc::application_presenter::update(const time&) {
     return;
 }

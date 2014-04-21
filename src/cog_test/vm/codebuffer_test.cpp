@@ -99,7 +99,7 @@ test_case(size) {
     cb.write<uint32_t>(0xDEADBEEF, sizeof(uint32_t));
     cb.write<uint32_t>(0xFEEDDEAD, sizeof(uint32_t) * 2);
 
-    assert_eq(cb.size(), sizeof(uint32_t) * 3);
+    assert_eq(cb.size(), sizeof(uint32_t) * 3UL);
 }
 
 end_suite(CodeBufferTests);

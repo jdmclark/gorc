@@ -18,17 +18,17 @@ bool gorc::gui::widgets::button::wants_mouse_input() const {
     return true;
 }
 
-void gorc::gui::widgets::button::on_mouse_out(const time& time) {
+void gorc::gui::widgets::button::on_mouse_out(const time&) {
     set_is_depressed(false);
 }
 
-void gorc::gui::widgets::button::on_mouse_down(const time& time, const vector<2, int>& position, sf::Mouse::Button btn) {
+void gorc::gui::widgets::button::on_mouse_down(const time&, const vector<2, int>&, sf::Mouse::Button btn) {
     if(btn == sf::Mouse::Left) {
         set_is_depressed(true);
     }
 }
 
-void gorc::gui::widgets::button::on_mouse_up(const time& time, const vector<2, int>& position, sf::Mouse::Button btn) {
+void gorc::gui::widgets::button::on_mouse_up(const time&, const vector<2, int>&, sf::Mouse::Button btn) {
     if(btn == sf::Mouse::Left && is_depressed) {
         set_is_depressed(false);
         click_predicate();

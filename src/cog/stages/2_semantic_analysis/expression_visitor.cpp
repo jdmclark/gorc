@@ -14,19 +14,19 @@ expression_visitor::expression_visitor(symbols::symbol_table& symbolTable,
     return;
 }
 
-void expression_visitor::visit_string_literal_expression(string_literal_expression& e) {
+void expression_visitor::visit_string_literal_expression(string_literal_expression&) {
     expression_type = vm::type::string;
 }
 
-void expression_visitor::visit_integer_literal_expression(integer_literal_expression& e) {
+void expression_visitor::visit_integer_literal_expression(integer_literal_expression&) {
     expression_type = vm::type::integer;
 }
 
-void expression_visitor::visit_float_literal_expression(float_literal_expression& e) {
+void expression_visitor::visit_float_literal_expression(float_literal_expression&) {
     expression_type = vm::type::floating;
 }
 
-void expression_visitor::visit_vector_literal_expression(vector_literal_expression& e) {
+void expression_visitor::visit_vector_literal_expression(vector_literal_expression&) {
     expression_type = vm::type::vector;
 }
 
@@ -219,7 +219,7 @@ void expression_visitor::visit_comma_expression(comma_expression& e) {
     expression_type = right.expression_type;
 }
 
-void expression_visitor::visit_for_optional_expression(for_optional_expression& e) {
+void expression_visitor::visit_for_optional_expression(for_optional_expression&) {
     expression_type = vm::type::boolean;
 }
 

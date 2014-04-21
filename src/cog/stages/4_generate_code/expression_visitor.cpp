@@ -131,7 +131,7 @@ void expression_visitor::visit_comma_expression(comma_expression& e) {
     e.right->accept(*this);
 }
 
-void expression_visitor::visit_for_optional_expression(for_optional_expression& e) {
+void expression_visitor::visit_for_optional_expression(for_optional_expression&) {
     // For optional expression always has value of 'true'
     Printer.constant(true);
 }

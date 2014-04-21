@@ -47,7 +47,7 @@ public:
     template <typename T> inline T read(size_t src) const
     {
         tryRead(src, sizeof(T));
-        return *(T*)(&data[src]);
+        return *(T const*)(&data[src]);
     }
 
     inline void* write_pointer(size_t dest, size_t size)

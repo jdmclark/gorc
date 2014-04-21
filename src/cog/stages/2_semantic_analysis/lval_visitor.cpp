@@ -14,7 +14,7 @@ lvalue_visitor::lvalue_visitor(symbols::symbol_table& symbolTable,
     return;
 }
 
-void lvalue_visitor::default_action(const std::string& action, node& n) {
+void lvalue_visitor::default_action(const std::string&, node& n) {
     diagnostics::helper::assign_to_rvalue(report, visitor_name, n.location);
 }
 

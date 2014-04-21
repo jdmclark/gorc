@@ -12,7 +12,7 @@ gorc::box<2, int> gorc::gui::widgets::static_text::get_minimum_size(const gui_vi
                     get_size<1>(text_size) + margin.top + margin.bottom));
 }
 
-void gorc::gui::widgets::static_text::draw(const time& time, graphics::gui_renderer& renderer, int depth) const {
+void gorc::gui::widgets::static_text::draw(const time&, graphics::gui_renderer& renderer, int depth) const {
     int current_left = std::get<0>(get_range<0>(position));
     int current_top = std::get<0>(get_range<1>(position));
 

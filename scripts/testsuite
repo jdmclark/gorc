@@ -1,0 +1,32 @@
+#!/bin/sh
+
+#
+# Run integration test suite
+#
+base_path=`pwd`
+
+test_cases=`find test -type f -name Makefile | sed 's/^\(.*\)\/Makefile$/\1/'`
+
+echo "=============================="
+echo "Running integration test suite"
+echo "=============================="
+num_failed=0
+num_passed=0
+for t in $test_cases; do
+    echo -n $t | sed 's/^test\/\(.*\)$/\1/'
+    if bash -c "cd $t && make BASE_PATH=$base_path CXXFLAGS_EXTRA=\"$CXXFLAGS_EXTRA\" 2>&1" > $t/test_log.txt ; then
+        echo " - Passed"
+        num_passed=`expr $num_passed + 1`
+    else
+        echo " - Failed"
+        num_failed=`expr $num_failed + 1`
+    fi
+done
+echo "Test cases passed: $num_passed"
+
+if [ $num_failed -ne 0 ] ; then
+    echo "Test cases failed: $num_failed"
+    exit 1
+else
+    exit 0
+fi

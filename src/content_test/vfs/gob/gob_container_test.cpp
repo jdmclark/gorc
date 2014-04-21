@@ -11,14 +11,14 @@ test_case(Empty) {
     gorc::io::native_file file("test/gob/empty.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
-    assert_eq(cnt.file_count(), 0);
+    assert_eq(cnt.file_count(), 0UL);
 }
 
 test_case(OneFile) {
     gorc::io::native_file file("test/gob/onefile.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
-    assert_eq(cnt.file_count(), 1);
+    assert_eq(cnt.file_count(), 1UL);
 
     const gorc::content::vfs::virtual_file& vf = cnt.get_virtual_file(0);
     assert_eq(vf.get_filename(), "test.txt");
@@ -37,7 +37,7 @@ test_case(ThreeFiles) {
     gorc::io::native_file file("test/gob/threefiles.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
-    assert_eq(cnt.file_count(), 3);
+    assert_eq(cnt.file_count(), 3UL);
 
     const gorc::content::vfs::virtual_file& vf1 = cnt.get_virtual_file(0);
     assert_eq(vf1.get_filename(), "first.txt");
@@ -76,7 +76,7 @@ test_case(Structured) {
     gorc::io::native_file file("test/gob/structured.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
-    assert_eq(cnt.file_count(), 1);
+    assert_eq(cnt.file_count(), 1UL);
 
     const gorc::content::vfs::virtual_file& vf = cnt.get_virtual_file(0);
     assert_eq(vf.get_filename().generic_string(), boost::filesystem::path("dir/test.txt").generic_string());

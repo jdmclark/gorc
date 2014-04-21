@@ -27,7 +27,7 @@ gorc::box<2, int> gorc::gui::widget::get_default_child_position(const gui_view& 
         desired_height = std::max(get_size<1>(parent_area), desired_height);
     }
 
-    int desired_x;
+    int desired_x = get<0>(child.position.v0);
     switch(child.horizontal_align) {
     case layout::horizontal_align_style::left:
         desired_x = std::get<0>(get_range<0>(parent_area));
@@ -42,7 +42,7 @@ gorc::box<2, int> gorc::gui::widget::get_default_child_position(const gui_view& 
         break;
     }
 
-    int desired_y;
+    int desired_y = get<1>(child.position.v0);
     switch(child.vertical_align) {
     case layout::vertical_align_style::top:
         desired_y = std::get<0>(get_range<1>(parent_area));
@@ -91,19 +91,19 @@ bool gorc::gui::widget::wants_mouse_input() const {
     return false;
 }
 
-void gorc::gui::widget::on_mouse_over(const time& time) {
+void gorc::gui::widget::on_mouse_over(const time&) {
     return;
 }
 
-void gorc::gui::widget::on_mouse_out(const time& time) {
+void gorc::gui::widget::on_mouse_out(const time&) {
     return;
 }
 
-void gorc::gui::widget::on_mouse_down(const time& time, const vector<2, int>&, sf::Mouse::Button) {
+void gorc::gui::widget::on_mouse_down(const time&, const vector<2, int>&, sf::Mouse::Button) {
     return;
 }
 
-void gorc::gui::widget::on_mouse_up(const time& time, const vector<2, int>&, sf::Mouse::Button) {
+void gorc::gui::widget::on_mouse_up(const time&, const vector<2, int>&, sf::Mouse::Button) {
     return;
 }
 
@@ -111,26 +111,26 @@ bool gorc::gui::widget::wants_keyboard_focus() const {
     return false;
 }
 
-void gorc::gui::widget::on_gain_keyboard_focus(const time& time) {
+void gorc::gui::widget::on_gain_keyboard_focus(const time&) {
     return;
 }
 
-void gorc::gui::widget::on_lost_keyboard_focus(const time& time) {
+void gorc::gui::widget::on_lost_keyboard_focus(const time&) {
     return;
 }
 
-void gorc::gui::widget::on_key_down(const time& time, sf::Keyboard::Key, bool shift_down, bool ctrl_down, bool alt_down) {
+void gorc::gui::widget::on_key_down(const time&, sf::Keyboard::Key, bool, bool, bool) {
     return;
 }
 
-void gorc::gui::widget::on_key_up(const time& time, sf::Keyboard::Key, bool shift_down, bool ctrl_down, bool alt_down) {
+void gorc::gui::widget::on_key_up(const time&, sf::Keyboard::Key, bool, bool, bool) {
     return;
 }
 
-void gorc::gui::widget::on_text_entered(const time& time, char ch) {
+void gorc::gui::widget::on_text_entered(const time&, char) {
     return;
 }
 
-void gorc::gui::widget::draw(const time& time, graphics::gui_renderer&, int depth) const {
+void gorc::gui::widget::draw(const time&, graphics::gui_renderer&, int) const {
     return;
 }

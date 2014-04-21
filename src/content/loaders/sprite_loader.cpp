@@ -12,7 +12,7 @@ gorc::content::loaders::sprite_loader::sprite_loader(const content::assets::colo
 }
 
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::sprite_loader::parse(text::tokenizer& t,
-        content::manager& manager, diagnostics::report& report) {
+        content::manager& manager, diagnostics::report&) {
     std::unique_ptr<content::assets::sprite> spr(new content::assets::sprite());
 
     spr->mat = &manager.load<assets::material>(t.get_space_delimited_string(), colormap);

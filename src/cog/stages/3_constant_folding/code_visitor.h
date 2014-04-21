@@ -26,7 +26,7 @@ public:
         diagnostics::report& report);
 
 private:
-    ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO)
 };
 
 }

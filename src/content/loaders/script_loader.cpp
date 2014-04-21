@@ -8,7 +8,7 @@ gorc::content::loaders::script_loader::script_loader(const cog::compiler& compil
     return;
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::script_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::script_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::script> script(new content::assets::script());
 
     compiler.compile(file, script->cogscript, report);

@@ -48,7 +48,7 @@ public:
     }
 
     box operator&(const box& b) const {
-        vector<n> nv0, nv1;
+        vector<n, F> nv0, nv1;
 
         auto v0_it = v0.begin(), v1_it = v1.begin(), b0_it = b.v0.begin(), b1_it = b.v1.begin();
         auto nv0_it = nv0.begin(), nv1_it = nv1.begin();

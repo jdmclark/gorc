@@ -10,7 +10,7 @@ non_valued_expression_visitor::non_valued_expression_visitor(ir::printer& printe
     return;
 }
 
-void non_valued_expression_visitor::visit_identifier_expression(identifier_expression& e) {
+void non_valued_expression_visitor::visit_identifier_expression(identifier_expression&) {
     return;
 }
 
@@ -50,7 +50,7 @@ void non_valued_expression_visitor::visit_comma_expression(comma_expression& e) 
     e.right->accept(*this);
 }
 
-void non_valued_expression_visitor::visit_for_optional_expression(for_optional_expression& e) {
+void non_valued_expression_visitor::visit_for_optional_expression(for_optional_expression&) {
     return;
 }
 
@@ -58,6 +58,6 @@ void non_valued_expression_visitor::visit_for_expression(for_expression& e) {
     e.condition->accept(*this);
 }
 
-void non_valued_expression_visitor::visit_constant_value_expression(constant_value_expression& e) {
+void non_valued_expression_visitor::visit_constant_value_expression(constant_value_expression&) {
     return;
 }

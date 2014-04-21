@@ -70,7 +70,7 @@ public:                                                              \
     return ::test::case_registry<test_fixture>::get().factory_map;   \
 } };                                                                 \
 ::test::autorun< ::test::register_suite<x> > x##_aro(                \
-    #x, __FILE__, __LINE__);
+    #x, __FILE__, __LINE__)
 
 /**
  * @brief Defines a new test case.

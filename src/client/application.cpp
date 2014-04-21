@@ -61,7 +61,7 @@ void gorc::client::application::shutdown() {
     return;
 }
 
-void gorc::client::application::update(const time& time, const box<2, int>& view_size) {
+void gorc::client::application::update(const time& time, const box<2, int>&) {
     components.current_level_presenter->update(time);
 }
 
@@ -87,7 +87,7 @@ void gorc::client::application::register_verbs() {
     });
 
     verb_table.add_verb<vector<3>, 0>("randvec", [this] {
-        return make_vector<float>(randomizer * 2.0 - 1.0, randomizer * 2.0 - 1.0, randomizer * 2.0 - 1.0);
+        return make_vector<float>(static_cast<float>(randomizer * 2.0 - 1.0), static_cast<float>(randomizer * 2.0 - 1.0), static_cast<float>(randomizer * 2.0 - 1.0));
     });
 
     verb_table.add_verb<vector<3>, 2>("vectoradd", [](vector<3> a, vector<3> b) {

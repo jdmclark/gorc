@@ -21,14 +21,14 @@ public:
     std::array<cog::vm::value, 4> params;
     cog::vm::value returnex_value;
 
-    unsigned int program_counter;
+    size_t program_counter;
 
     script_continuation() = default;
     script_continuation(int InstanceId,
             int SenderId, int SenderRef, flags::message_type SenderType,
             int SourceRef, flags::message_type SourceType,
             cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3,
-            unsigned int ProgramCounter = 0);
+            size_t ProgramCounter = 0);
 };
 
 }

@@ -44,302 +44,302 @@ test_case(GetTokenTests) {
     tok.get_token(t);
     assert_eq(t.type, text::token_type::string);
     assert_eq(t.value, "string literal");
-    assert_eq(t.location.first_line, 2);
+    assert_eq(t.location.first_line, 2UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::string);
     assert_eq(t.value, "string literal with \"escape sequences\"");
-    assert_eq(t.location.first_line, 3);
+    assert_eq(t.location.first_line, 3UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "identifier");
-    assert_eq(t.location.first_line, 4);
+    assert_eq(t.location.first_line, 4UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "numeric_0123456789_id");
-    assert_eq(t.location.first_line, 5);
+    assert_eq(t.location.first_line, 5UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "_identifierwithleadingunderscore");
-    assert_eq(t.location.first_line, 6);
+    assert_eq(t.location.first_line, 6UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::integer);
     assert_eq(t.value, "9");
-    assert_eq(t.location.first_line, 7);
+    assert_eq(t.location.first_line, 7UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "illegalidentifier");
-    assert_eq(t.location.first_line, 7);
+    assert_eq(t.location.first_line, 7UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "illegal");
-    assert_eq(t.location.first_line, 8);
+    assert_eq(t.location.first_line, 8UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "!");
-    assert_eq(t.location.first_line, 8);
+    assert_eq(t.location.first_line, 8UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "identifier");
-    assert_eq(t.location.first_line, 8);
+    assert_eq(t.location.first_line, 8UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "{");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "}");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "[");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "]");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "(");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ")");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ".");
-    assert_eq(t.location.first_line, 9);
+    assert_eq(t.location.first_line, 9UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "&");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "*");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "+");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "-");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "~");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "!");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "/");
-    assert_eq(t.location.first_line, 10);
+    assert_eq(t.location.first_line, 10UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "%");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "<");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ">");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "^");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "|");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "?");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, "=");
-    assert_eq(t.location.first_line, 11);
+    assert_eq(t.location.first_line, 11UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ",");
-    assert_eq(t.location.first_line, 12);
+    assert_eq(t.location.first_line, 12UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ";");
-    assert_eq(t.location.first_line, 12);
+    assert_eq(t.location.first_line, 12UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ":");
-    assert_eq(t.location.first_line, 12);
+    assert_eq(t.location.first_line, 12UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::integer);
     assert_eq(t.value, "255");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::integer);
     assert_eq(t.value, "-255");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::hex_integer);
     assert_eq(t.value, "0x255");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::hex_integer);
     assert_eq(t.value, "0xFF");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::hex_integer);
     assert_eq(t.value, "-0x255");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::hex_integer);
     assert_eq(t.value, "-0xFF");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::hex_integer);
     assert_eq(t.value, "0XFF");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::hex_integer);
     assert_eq(t.value, "-0XFF");
-    assert_eq(t.location.first_line, 13);
+    assert_eq(t.location.first_line, 13UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1.0");
-    assert_eq(t.location.first_line, 14);
+    assert_eq(t.location.first_line, 14UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "-1.0");
-    assert_eq(t.location.first_line, 14);
+    assert_eq(t.location.first_line, 14UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "0.1");
-    assert_eq(t.location.first_line, 14);
+    assert_eq(t.location.first_line, 14UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "-0.1");
-    assert_eq(t.location.first_line, 14);
+    assert_eq(t.location.first_line, 14UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1e2");
-    assert_eq(t.location.first_line, 16);
+    assert_eq(t.location.first_line, 16UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "-1e2");
-    assert_eq(t.location.first_line, 16);
+    assert_eq(t.location.first_line, 16UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1E2");
-    assert_eq(t.location.first_line, 16);
+    assert_eq(t.location.first_line, 16UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "-1E2");
-    assert_eq(t.location.first_line, 16);
+    assert_eq(t.location.first_line, 16UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "0.1e2");
-    assert_eq(t.location.first_line, 17);
+    assert_eq(t.location.first_line, 17UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "-0.1e2");
-    assert_eq(t.location.first_line, 17);
+    assert_eq(t.location.first_line, 17UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "0.1E2");
-    assert_eq(t.location.first_line, 17);
+    assert_eq(t.location.first_line, 17UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "-0.1E2");
-    assert_eq(t.location.first_line, 17);
+    assert_eq(t.location.first_line, 17UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1e+2");
-    assert_eq(t.location.first_line, 18);
+    assert_eq(t.location.first_line, 18UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1e-2");
-    assert_eq(t.location.first_line, 18);
+    assert_eq(t.location.first_line, 18UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1E+2");
-    assert_eq(t.location.first_line, 18);
+    assert_eq(t.location.first_line, 18UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::floating);
     assert_eq(t.value, "1E-2");
-    assert_eq(t.location.first_line, 18);
+    assert_eq(t.location.first_line, 18UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::punctuator);
     assert_eq(t.value, ".");
-    assert_eq(t.location.first_line, 20);
+    assert_eq(t.location.first_line, 20UL);
 
     tok.get_token(t);
     assert_eq(t.type, text::token_type::integer);
     assert_eq(t.value, "5");
-    assert_eq(t.location.first_line, 20);
+    assert_eq(t.location.first_line, 20UL);
 }
 
 test_case(AssertionTests) {
@@ -366,7 +366,7 @@ test_case(AssertionTests) {
     tok.get_delimited_string(t, [](char c) { return c == '.'; });
     assert_eq(t.type, text::token_type::string);
     assert_eq(t.value, "some~delimited~string");
-    assert_eq(t.location.first_line, 3);
+    assert_eq(t.location.first_line, 3UL);
 
     tok.assert_punctuator(".");
 
@@ -379,7 +379,7 @@ test_case(AssertionTests) {
     tok.get_token(t);
     assert_eq(t.type, text::token_type::identifier);
     assert_eq(t.value, "nice_data");
-    assert_eq(t.location.first_line, 6);
+    assert_eq(t.location.first_line, 6UL);
 }
 
 test_case(ParseVectorTest) {

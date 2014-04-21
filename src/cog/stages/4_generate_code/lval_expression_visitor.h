@@ -16,8 +16,8 @@ public:
     lvalue_expression_visitor(ir::printer& printer, diagnostics::report& report);
 
 private:
-    AVPROTO(identifier_expression);
-    AVPROTO(subscript_expression);
+    AVPROTO(identifier_expression)
+    AVPROTO(subscript_expression)
 };
 
 }

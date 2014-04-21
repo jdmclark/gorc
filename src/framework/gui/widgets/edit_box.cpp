@@ -31,7 +31,7 @@ void gorc::gui::widgets::edit_box::set_cursor_position(size_t pos, const time& t
         auto text_sz = font.measure_text(buffer.begin() + scroll_position, buffer.begin() + cursor_position);
         int sz_diff = get_size<0>(text_sz) - get_size<0>(container_box->position) + container_box->padding.left + container_box->padding.right;
 
-        int prev_ch = 0;
+        char prev_ch = 0;
         while(sz_diff > 0) {
             // Span between beginning of range and cursor is too large to fit in box.
 
@@ -52,7 +52,7 @@ void gorc::gui::widgets::edit_box::on_mouse_down(const time& time, const vector<
     if(btn == sf::Mouse::Left) {
         auto text_cursor_pos = cursor_pos - make_vector(padding.left, padding.top);
 
-        int next_cursor_pos = buffer.size();
+        size_t next_cursor_pos = buffer.size();
 
         int current_left = 0;
         char prev_c = 0;
@@ -84,11 +84,11 @@ bool gorc::gui::widgets::edit_box::wants_keyboard_focus() const {
     return true;
 }
 
-void gorc::gui::widgets::edit_box::on_gain_keyboard_focus(const time& time) {
+void gorc::gui::widgets::edit_box::on_gain_keyboard_focus(const time&) {
     has_focus = true;
 }
 
-void gorc::gui::widgets::edit_box::on_lost_keyboard_focus(const time& time) {
+void gorc::gui::widgets::edit_box::on_lost_keyboard_focus(const time&) {
     has_focus = false;
 }
 
@@ -97,7 +97,7 @@ void gorc::gui::widgets::edit_box::on_text_entered(const time& time, char ch) {
     set_cursor_position(cursor_position + 1, time);
 }
 
-void gorc::gui::widgets::edit_box::on_key_down(const time& time, sf::Keyboard::Key k, bool shift_down, bool ctrl_down, bool alt_down) {
+void gorc::gui::widgets::edit_box::on_key_down(const time& time, sf::Keyboard::Key k, bool, bool ctrl_down, bool alt_down) {
     if(ctrl_down || alt_down) {
         return;
     }
@@ -148,7 +148,7 @@ void gorc::gui::widgets::edit_box::draw(const time& time, graphics::gui_renderer
     int right = std::get<1>(get_range<0>(container_box->position)) - container_box->padding.right;
 
     char prev_c = 0;
-    int spos = clamp(scroll_position, 0UL, buffer.size());
+    size_t spos = clamp(scroll_position, 0UL, buffer.size());
     for(size_t i = spos; i < buffer.size(); ++i) {
 
         if(cursor_position == i && inner_draw_cursor) {

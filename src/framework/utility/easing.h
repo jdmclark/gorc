@@ -17,7 +17,7 @@ public:
     void update(DeltaT dt) {
         current_time += dt;
 
-        if(goal_time == DeltaT(0)) {
+        if(goal_time <= DeltaT(0)) {
             current_value = end_value;
         }
         else {

@@ -1,5 +1,5 @@
 #include <iostream>
 
-int main(int argc, char** argv) {
+int main(int, char**) {
     std::cout << "Gorc server" << std::endl;
 }

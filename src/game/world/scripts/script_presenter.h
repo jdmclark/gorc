@@ -45,7 +45,7 @@ public:
 
     void start(level_model& levelModel, script_model& scriptModel);
 
-    void create_level_dummy_instances(int count);
+    void create_level_dummy_instances(size_t count);
     void create_level_cog_instance(int index, const cog::script& script, content::manager& manager, cog::compiler& compiler,
             const std::vector<cog::vm::value>& values);
     void create_global_cog_instance(const cog::script& script, content::manager& manager, cog::compiler& compiler);

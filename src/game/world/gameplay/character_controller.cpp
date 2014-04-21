@@ -135,14 +135,14 @@ void gorc::game::world::gameplay::character_controller::set_walk_animation_speed
     }
 }
 
-void gorc::game::world::gameplay::character_controller::play_falling_animation(int thing_id, thing& thing) {
-    if(dot(thing.vel, make_vector(0.0f, 0.0f, -1.0f))) {
+void gorc::game::world::gameplay::character_controller::play_falling_animation(int, thing& thing) {
+    if(dot(thing.vel, make_vector(0.0f, 0.0f, -1.0f)) > 0.0f) {
         // Player's trajectory has reached apogee.
         set_walk_animation(thing, flags::puppet_submode_type::Drop, 1.0f);
     }
 }
 
-void gorc::game::world::gameplay::character_controller::play_standing_animation(int thing_id, thing& thing) {
+void gorc::game::world::gameplay::character_controller::play_standing_animation(int, thing& thing) {
     auto oriented_vel = invert(thing.orient).transform(thing.vel);
     auto run_length = length(thing.vel);
 
@@ -151,10 +151,10 @@ void gorc::game::world::gameplay::character_controller::play_standing_animation(
     auto turn_rate = get<1>(thing.ang_vel);
 
     float run_anim_speed = run_length * 20.0f;
-    float turn_anim_speed = fabs(turn_rate) / 360.0f;
+    float turn_anim_speed = static_cast<float>(fabs(turn_rate) / 360.0);
 
     if(thing.physics_flags & flags::physics_flag::is_crouching) {
-        if(fabs(turn_rate) > 0.0001f) {
+        if(fabs(turn_rate) > 0.0001) {
             set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, turn_anim_speed * 20.0f);
         }
         else if(vel_fb >= 0.0f || fabs(vel_lr) > fabs(vel_fb)) {
@@ -175,7 +175,7 @@ void gorc::game::world::gameplay::character_controller::play_standing_animation(
                 // Turning left
                 set_walk_animation(thing, flags::puppet_submode_type::TurnLeft, turn_anim_speed);
             }
-            else if(fabs(turn_rate) < 0.001f) {
+            else if(fabs(turn_rate) < 0.001) {
                 set_walk_animation(thing, flags::puppet_submode_type::Stand, 1.0f);
             }
             else if(!is_walk_animation_mode(thing, flags::puppet_submode_type::Stand)) {
@@ -246,7 +246,7 @@ gorc::game::world::gameplay::standing_material gorc::game::world::gameplay::char
 }
 
 gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::character_controller::run_falling_sweep(int thing_id, thing& thing,
-                double dt) {
+                double) {
     // Test for collision between legs and ground using multiple tests
     auto leg_height = thing.model_3d->insert_offset;
 
@@ -274,7 +274,7 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
 }
 
 gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::character_controller::run_walking_sweep(int thing_id, thing& thing,
-        double dt) {
+        double) {
     // Test for collision between legs and ground using multiple tests
     auto leg_height = thing.model_3d->insert_offset * 1.50f;
 
@@ -302,54 +302,54 @@ void gorc::game::world::gameplay::character_controller::update_falling(int thing
 
     auto applied_thrust = thing.thrust;
     get<2>(applied_thrust) = 0.0f;
-    thing.vel = thing.vel + applied_thrust * dt;
+    thing.vel = thing.vel + applied_thrust * static_cast<float>(dt);
 
     play_falling_animation(thing_id, thing);
 
-    if_set(maybe_contact, then_do, [this, &thing, thing_id](const physics::contact& contact) {
+    if(physics::contact const* contact = maybe_contact) {
         // Check if attached surface/thing has changed.
-        if_set(contact.contact_surface_id, then_do, [this, thing_id, &thing, &contact](int attachment_id) {
-            land_on_surface(thing_id, thing, attachment_id, contact);
-        });
+        if(int const* attachment_id = contact->contact_surface_id) {
+            land_on_surface(thing_id, thing, *attachment_id, *contact);
+        }
 
-        if_set(contact.contact_thing_id, then_do, [this, &thing, thing_id, &contact](int attachment_id) {
-            land_on_thing(thing_id, thing, attachment_id, contact);
-        });
-    });
+        if(int const* attachment_id = contact->contact_thing_id) {
+            land_on_thing(thing_id, thing, *attachment_id, *contact);
+        }
+    }
 }
 
 void gorc::game::world::gameplay::character_controller::update_standing(int thing_id, thing& thing, double dt) {
     auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
 
-    if_set(maybe_contact, then_do, [this, &thing, thing_id, dt](const physics::contact& contact) {
+    if(const physics::contact* contact = maybe_contact) {
         // Check if attached surface/thing has changed.
-        if_set(contact.contact_surface_id, then_do, [this, thing_id, &thing, &contact](int attachment_id) {
-            if(!(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) || attachment_id != thing.attached_surface) {
+        if(const int* attachment_id = contact->contact_surface_id) {
+            if(!(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) || *attachment_id != thing.attached_surface) {
                 // Player has landed on a new surface.
-                step_on_surface(thing_id, thing, attachment_id, contact);
+                step_on_surface(thing_id, thing, *attachment_id, *contact);
             }
-        });
+        }
 
-        if_set(contact.contact_thing_id, then_do, [this, &thing, thing_id, &contact](int attachment_id) {
-            if(!(thing.attach_flags & flags::attach_flag::AttachedToThingFace) || attachment_id != thing.attached_thing) {
+        if(const int* attachment_id = contact->contact_thing_id) {
+            if(!(thing.attach_flags & flags::attach_flag::AttachedToThingFace) || *attachment_id != thing.attached_thing) {
                 // Player has landed on a new thing.
-                step_on_thing(thing_id, thing, attachment_id, contact);
+                step_on_thing(thing_id, thing, *attachment_id, *contact);
             }
-        });
+        }
 
         if(get<2>(thing.thrust) > 0.0f) {
             jump(thing_id, thing);
         }
         else {
             // Accelerate body along surface
-            auto hit_world = contact.position;
-            auto hit_normal = contact.normal;
+            auto hit_world = contact->position;
+            auto hit_normal = contact->normal;
             auto player_new_vel = thing.thrust - hit_normal * dot(thing.thrust, hit_normal);
             auto new_vel = player_new_vel;
 
-            if_set(contact.contact_surface_id, then_do, [&new_vel, this](int attachment_id) {
-                new_vel += presenter.model->surfaces[attachment_id].thrust;
-            });
+            if(const int* attachment_id = contact->contact_surface_id) {
+                new_vel += presenter.model->surfaces[*attachment_id].thrust;
+            }
 
             // Accelerate body toward standing position
             if(thing.physics_flags & flags::physics_flag::is_crouching) {
@@ -369,10 +369,10 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
             // Update idle animation
             play_standing_animation(thing_id, thing);
         }
-    },
-    else_do, [&thing, thing_id, this] {
+    }
+    else {
         set_is_falling(thing_id, thing);
-    });
+    }
 }
 
 void gorc::game::world::gameplay::character_controller::set_is_falling(int thing_id, thing& thing) {
@@ -392,7 +392,7 @@ void gorc::game::world::gameplay::character_controller::set_is_falling(int thing
 }
 
 bool gorc::game::world::gameplay::character_controller::step_on_surface(int thing_id, thing& thing, unsigned int surf_id,
-                const physics::contact& rrcb) {
+                const physics::contact&) {
     const auto& surface = presenter.model->surfaces[surf_id];
     if(surface.flags & flags::surface_flag::Floor) {
         thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToWorldSurface };
@@ -413,7 +413,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_surface(int thin
 }
 
 bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_id, thing& thing, int land_thing_id,
-                const physics::contact& rrcb) {
+                const physics::contact&) {
     const auto& attach_thing = presenter.model->things[land_thing_id];
     if(attach_thing.flags & flags::thing_flag::CanStandOn) {
         thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToThingFace };
@@ -561,14 +561,14 @@ void gorc::game::world::gameplay::character_controller::update(int thing_id, dou
     // Update lightsaber state
     if(thing.jk_flags & flags::jk_flag::has_saber) {
         if(thing.jk_flags & flags::jk_flag::saber_igniting) {
-            thing.saber_drawn_length += fabs(thing.saber_drawn_length - thing.saber_length) * dt * 6.0f;
+            thing.saber_drawn_length += static_cast<float>(fabs(thing.saber_drawn_length - thing.saber_length) * dt * 6.0);
             if(thing.saber_drawn_length >= thing.saber_length) {
                 thing.saber_drawn_length = thing.saber_length;
                 thing.jk_flags -= flags::jk_flag::saber_igniting;
             }
         }
         else if(thing.jk_flags & flags::jk_flag::saber_shrinking) {
-            thing.saber_drawn_length -= thing.saber_drawn_length * dt * 6.0f;
+            thing.saber_drawn_length -= thing.saber_drawn_length * static_cast<float>(dt) * 6.0f;
             if(thing.saber_drawn_length <= 0.0f) {
                 thing.saber_drawn_length = 0.0f;
                 thing.jk_flags -= flag_set<flags::jk_flag> { flags::jk_flag::saber_shrinking, flags::jk_flag::has_saber };
@@ -630,6 +630,10 @@ void gorc::game::world::gameplay::character_controller::handle_animation_marker(
 
     case flags::key_marker_type::RightFootstep:
         presenter.sound_presenter->play_sound_class(thing_id, map_get(character_right_walk_map, get_standing_material(thing)));
+        break;
+
+    default:
+        // TODO: Handle remaining marker types.
         break;
     }
 }

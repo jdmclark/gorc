@@ -64,7 +64,7 @@ void gorc::game::world::keys::key_presenter::update(const time& time) {
     // Expunge expired keys.
     for(auto& key : model->keys) {
         if(key.expiration_time > 0.0f) {
-            key.expiration_time -= dt;
+            key.expiration_time -= static_cast<float>(dt);
 
             if(key.expiration_time <= 0.0f) {
                 model->keys.erase(key);
@@ -191,7 +191,7 @@ void gorc::game::world::keys::key_presenter::expunge_thing_animations(int thing_
 
 std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_animation_frame(const content::assets::animation& anim,
         int node_id, double frame) const {
-    if(anim.nodes.size() <= node_id || anim.nodes[node_id].frames.empty()) {
+    if(anim.nodes.size() <= static_cast<size_t>(node_id) || anim.nodes[node_id].frames.empty()) {
         // Abort if there are no frames to interpolate.
         return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
     }
@@ -271,7 +271,7 @@ int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
     auto& state = model->keys.emplace();
 
     state.animation = &contentmanager.get_asset<content::assets::animation>(key);
-    state.high_priority = state.low_priority = state.high_priority = priority;
+    state.high_priority = state.low_priority = state.body_priority = priority;
     state.animation_time = 0.0;
     state.current_frame = 0.0;
     state.mix_id = mix_id;
@@ -315,7 +315,7 @@ int gorc::game::world::keys::key_presenter::play_mode(int thing_id, flags::puppe
     return state.get_id();
 }
 
-void gorc::game::world::keys::key_presenter::stop_key(int thing_id, int key_id, float delay) {
+void gorc::game::world::keys::key_presenter::stop_key(int, int key_id, float delay) {
     if(delay <= 0.0f) {
         // Immediately remove.
         model->keys.erase(key_id);

@@ -54,7 +54,7 @@ test_case(Mod2) {
 test_case(Episode) {
     gorc::content::vfs::virtual_filesystem vfs("test/vfs/restricted", "test/vfs/resource", "test/vfs/episode", report);
 
-    assert_eq(vfs.get_episode_count(), 2);
+    assert_eq(vfs.get_episode_count(), 2UL);
 
     // "Test Episode 1" and "Test Episode 2" should both appear, although not necessarily in a particular order.
     // Store the names and sort them.

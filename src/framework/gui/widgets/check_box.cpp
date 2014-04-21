@@ -17,24 +17,24 @@ bool gorc::gui::widgets::check_box::wants_mouse_input() const {
     return true;
 }
 
-void gorc::gui::widgets::check_box::on_mouse_out(const time& time) {
+void gorc::gui::widgets::check_box::on_mouse_out(const time&) {
     is_depressed = false;
 }
 
-void gorc::gui::widgets::check_box::on_mouse_down(const time& time, const vector<2, int>& position, sf::Mouse::Button btn) {
+void gorc::gui::widgets::check_box::on_mouse_down(const time&, const vector<2, int>&, sf::Mouse::Button btn) {
     if(btn == sf::Mouse::Left) {
         is_depressed = true;
     }
 }
 
-void gorc::gui::widgets::check_box::on_mouse_up(const time& time, const vector<2, int>& position, sf::Mouse::Button btn) {
+void gorc::gui::widgets::check_box::on_mouse_up(const time&, const vector<2, int>&, sf::Mouse::Button btn) {
     if(btn == sf::Mouse::Left && is_depressed) {
         is_depressed = false;
         selected = !selected;
     }
 }
 
-void gorc::gui::widgets::check_box::draw(const time& time, graphics::gui_renderer& r, int depth) const {
+void gorc::gui::widgets::check_box::draw(const time&, graphics::gui_renderer& r, int depth) const {
     box<2, int> tex_coords = (selected) ?
             make_box(make_vector(21, 13), make_vector(34, 26)) :
             make_box(make_vector(21, 0), make_vector(34, 13));

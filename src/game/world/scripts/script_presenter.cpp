@@ -28,15 +28,15 @@ void gorc::game::world::scripts::script_presenter::resume_wait_for_stop(int wait
     run_waiting_cogs();
 }
 
-void gorc::game::world::scripts::script_presenter::create_level_dummy_instances(int count) {
+void gorc::game::world::scripts::script_presenter::create_level_dummy_instances(size_t count) {
     // create empty, non-functional COG instances for padding out the list of level instances.
-    for(int i = 0; i < count; ++i) {
+    for(size_t i = 0; i < count; ++i) {
         model->cogs.emplace_back(std::unique_ptr<cog::instance>(nullptr), cog::scripts::script_timer_state());
     }
 }
 
 void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int index, const cog::script& script, content::manager& manager,
-        cog::compiler& compiler, const std::vector<cog::vm::value>& values) {
+        cog::compiler&, const std::vector<cog::vm::value>& values) {
     auto& cog_inst_pair = model->cogs[index];
     std::get<0>(cog_inst_pair) = std::unique_ptr<cog::instance>(new cog::instance(script));
     std::get<1>(cog_inst_pair) = cog::scripts::script_timer_state();
@@ -67,7 +67,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
         switch(it->type) {
         case cog::symbols::symbol_type::material:
             try {
-                (*jt) = manager.load_id<content::assets::material>(static_cast<const char*>(*jt), *levelModel->level.master_colormap);
+                (*jt) = static_cast<int>(manager.load_id<content::assets::material>(static_cast<const char*>(*jt), *levelModel->level.master_colormap));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -76,7 +76,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 
         case cog::symbols::symbol_type::model:
             try {
-                (*jt) = manager.load_id<content::assets::model>(static_cast<const char*>(*jt), *levelModel->level.master_colormap);
+                (*jt) = static_cast<int>(manager.load_id<content::assets::model>(static_cast<const char*>(*jt), *levelModel->level.master_colormap));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -85,7 +85,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 
         case cog::symbols::symbol_type::sound:
             try {
-                (*jt) = manager.load_id<content::assets::sound>(static_cast<const char*>(*jt));
+                (*jt) = static_cast<int>(manager.load_id<content::assets::sound>(static_cast<const char*>(*jt)));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -94,7 +94,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 
         case cog::symbols::symbol_type::keyframe:
             try {
-                (*jt) = manager.load_id<content::assets::animation>(static_cast<const char*>(*jt));
+                (*jt) = static_cast<int>(manager.load_id<content::assets::animation>(static_cast<const char*>(*jt)));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -157,7 +157,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 }
 
 void gorc::game::world::scripts::script_presenter::create_global_cog_instance(const cog::script& script,
-        content::manager& manager, cog::compiler& compiler) {
+        content::manager& manager, cog::compiler&) {
     if(model->global_script_instances.find(&script) != model->global_script_instances.end()) {
         // Instance already created.
         return;
@@ -267,7 +267,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
     }
 
     // Send startup message
-    send_message(model->cogs.size() - 1, cog::message_id::startup, -1, -1, flags::message_type::nothing);
+    send_message(static_cast<int>(model->cogs.size()) - 1, cog::message_id::startup, -1, -1, flags::message_type::nothing);
 }
 
 int gorc::game::world::scripts::script_presenter::get_global_cog_instance(cog::script const* script) const {
@@ -283,10 +283,10 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
         int SenderRef, flags::message_type SenderType,
         int SourceRef, flags::message_type SourceType,
         cog::vm::value Param0, cog::vm::value Param1, cog::vm::value Param2, cog::vm::value Param3) {
-    cog::symbols::symbol_type expectedsymbol_type;
+    cog::symbols::symbol_type expectedsymbol_type = cog::symbols::symbol_type::integer;
 
-    int capture_cog = -1;
-    int class_cog = -1;
+    maybe<size_t> capture_cog;
+    maybe<size_t> class_cog;
 
     int source_mask = 0;
     if(SourceType == flags::message_type::thing) {
@@ -322,7 +322,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
             thing& thing = levelModel->things[SenderRef];
             if(thing.capture_cog >= 0) {
                 capture_cog = thing.capture_cog;
-                send_message(capture_cog, message, -1, SenderRef, SenderType,
+                send_message(thing.capture_cog, message, -1, SenderRef, SenderType,
                         SourceRef, SourceType, Param0, Param1, Param2, Param3);
             }
 
@@ -341,10 +341,16 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
             }
         }
         break;
+
+    case flags::message_type::system:
+    case flags::message_type::cog:
+    case flags::message_type::nothing:
+        // Cannot be coglinked.
+        return;
     }
 
-    for(int i = 0; i < levelModel->level.cogs.size(); ++i) {
-        if(i == class_cog || i == capture_cog) {
+    for(size_t i = 0; i < levelModel->level.cogs.size(); ++i) {
+        if(make_maybe(i) == class_cog || make_maybe(i) == capture_cog) {
             continue;
         }
 
@@ -361,7 +367,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
         for(; it != inst.script.symbol_table.end() && jt != inst.heap.end(); ++it, ++jt) {
             if(!it->no_link && !it->local && it->type == expectedsymbol_type && static_cast<int>(*jt) == SenderRef
                     && (!source_mask || (it->mask & source_mask))) {
-                send_message(i, message,
+                send_message(static_cast<int>(i), message,
                         it->link_id, SenderRef, SenderType, SourceRef, SourceType,
                         Param0, Param1, Param2, Param3);
                 break;

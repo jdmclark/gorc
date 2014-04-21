@@ -10,7 +10,7 @@ gorc::box<2, int> gorc::gui::widgets::wrapped_text::get_minimum_size(const gui_v
 }
 
 void gorc::gui::widgets::wrapped_text::draw_range(std::string::const_iterator begin, std::string::const_iterator end,
-        int left, int top, graphics::gui_renderer& r, int depth) const {
+        int, int top, graphics::gui_renderer& r, int depth) const {
     int current_left = std::get<0>(get_range<0>(position));
 
     char prev_c = 0;
@@ -26,7 +26,7 @@ void gorc::gui::widgets::wrapped_text::draw_range(std::string::const_iterator be
     }
 }
 
-void gorc::gui::widgets::wrapped_text::draw(const time& time, graphics::gui_renderer& renderer, int depth) const {
+void gorc::gui::widgets::wrapped_text::draw(const time&, graphics::gui_renderer& renderer, int depth) const {
     int current_top = std::get<0>(get_range<1>(position));
     int right_bound = std::get<1>(get_range<0>(position));
 

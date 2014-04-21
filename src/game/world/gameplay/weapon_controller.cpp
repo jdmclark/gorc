@@ -85,7 +85,7 @@ void gorc::game::world::gameplay::weapon_controller::update(int thing_id, double
     flag_set<flags::weapon_flag> weap_flags(thing.type_flags);
 
     if(weap_flags & flags::weapon_flag::uses_damage_decay) {
-        float alpha = dt / (thing.time_alive - thing.timer);
+        float alpha = static_cast<float>(dt) / (thing.time_alive - thing.timer);
         thing.damage = lerp(thing.damage, thing.min_damage, alpha);
     }
 

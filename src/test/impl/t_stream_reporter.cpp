@@ -18,26 +18,8 @@ void test::stream_reporter::add_failure(const std::string& suite_name) {
     ++suite_failures[suite_name];
 }
 
-void test::stream_reporter::list_begin() {
-    return;
-}
-
-void test::stream_reporter::list_end() {
-    return;
-}
-
-void test::stream_reporter::list_entry_suite(const std::string& suite_name,
-    const std::string& filename, int lineNumber) {
-    return;
-}
-
-void test::stream_reporter::list_entry_case(const std::string& suite_name,
-    const std::string& case_name, const std::string& filename, int lineNumber) {
-    return;
-}
-
-void test::stream_reporter::report_begin() {
-    stream << strings::running_tests << std::endl;
+void test::stream_reporter::report_begin(const std::string& bin_name) {
+    stream << strings::make_running_tests_string(bin_name) << std::endl;
 }
 
 void test::stream_reporter::report_end() {
@@ -48,7 +30,7 @@ void test::stream_reporter::report_end() {
     }
 }
 
-void test::stream_reporter::suite_begin(const std::string& suite_name) {
+void test::stream_reporter::suite_begin(const std::string&) {
     return;
 }
 
@@ -60,22 +42,16 @@ void test::stream_reporter::suite_end(const std::string& suite_name) {
     }
 }
 
-void test::stream_reporter::case_begin(const std::string& suite_name, const std::string& case_name) {
+void test::stream_reporter::case_begin(const std::string&, const std::string&) {
     return;
 }
 
-void test::stream_reporter::case_end(const std::string& suite_name, const std::string& case_name) {
+void test::stream_reporter::case_end(const std::string&, const std::string&) {
     return;
 }
 
-void test::stream_reporter::case_pass(const std::string& suite_name, const std::string& case_name) {
+void test::stream_reporter::case_pass(const std::string& suite_name, const std::string&) {
     add_success(suite_name);
-}
-
-void test::stream_reporter::case_fail(const std::string& suite_name, const std::string& case_name,
-    const std::string& reason, const std::string& filename, int lineNumber) {
-    add_failure(suite_name);
-    stream << strings::make_case_failed_line_string(filename, lineNumber, suite_name, case_name, reason) << std::endl;
 }
 
 void test::stream_reporter::case_std_exception_fail(const std::string& suite_name, const std::string& case_name,

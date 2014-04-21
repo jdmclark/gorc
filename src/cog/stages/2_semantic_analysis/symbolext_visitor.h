@@ -29,7 +29,7 @@ public:
 private:
     symbols::symbol_type symbol_type;
 
-    ASTCLASS_SYMBOL_EXTENSION(AVPROTO);
+    ASTCLASS_SYMBOL_EXTENSION(AVPROTO)
 
     bool validate_extension(const std::string& name, text::location& location);
 };

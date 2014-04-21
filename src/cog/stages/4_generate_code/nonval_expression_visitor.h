@@ -17,7 +17,7 @@ public:
     non_valued_expression_visitor(ir::printer& printer, diagnostics::report& report);
 
 private:
-    ASTCLASS_FINAL_EXPRESSION(AVPROTO);
+    ASTCLASS_FINAL_EXPRESSION(AVPROTO)
 };
 
 }

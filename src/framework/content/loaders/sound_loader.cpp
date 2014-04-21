@@ -7,7 +7,7 @@
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::sound_loader::asset_root_path = { "sound", "voice" };
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::sound_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::sound_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report&) {
     std::unique_ptr<content::assets::sound> wav(new content::assets::sound());
 
     size_t wav_sz = file.get_size();

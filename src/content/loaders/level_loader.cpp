@@ -30,12 +30,12 @@ void SkipToNextSection(text::tokenizer& tok) {
     tok.assert_punctuator(":");
 }
 
-void ParseJKSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseJKSection(assets::level&, text::tokenizer&, manager&, cog::compiler&, diagnostics::report&) {
     // JK section is empty.
     return;
 }
 
-void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, manager&, cog::compiler&, diagnostics::report&) {
     tok.assert_identifier("Version");
     lev.header.version = tok.get_number<int>();
 
@@ -93,7 +93,7 @@ void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, manager& manag
     lev.header.gouraud_distance = tok.get_number<float>();
 }
 
-void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, manager&, cog::compiler&, diagnostics::report& report) {
     tok.assert_identifier("world");
     tok.assert_identifier("materials");
 
@@ -124,7 +124,7 @@ void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, manager& ma
     }
 }
 
-void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler&, diagnostics::report&) {
     text::token t;
 
     tok.assert_identifier("World");
@@ -186,7 +186,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
         assets::level_adjoin adj;
 
         adj.flags = flag_set<flags::adjoin_flag>(tok.get_number<uint32_t>());
-        adj.mirror = tok.get_number<size_t>();
+        adj.mirror = tok.get_number<int>();
         adj.distance = tok.get_number<float>();
 
         lev.adjoins.push_back(adj);
@@ -241,7 +241,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
     }
 }
 
-void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler&, diagnostics::report& report) {
     text::token t;
 
     tok.assert_identifier("world");
@@ -260,7 +260,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
                 return;
             }
             if(boost::iequals(t.value, "sector")) {
-                sec.number = tok.get_number<size_t>();
+                sec.number = tok.get_number<int>();
             }
             else if(boost::iequals(t.value, "flags")) {
                 sec.flags = flag_set<flags::sector_flag>(tok.get_number<uint32_t>());
@@ -274,7 +274,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
                 sec.extra_light = tok.get_number<float>();
             }
             else if(boost::iequals(t.value, "colormap")) {
-                sec.colormap_id = tok.get_number<size_t>();
+                sec.colormap_id = tok.get_number<int>();
             }
             else if(boost::iequals(t.value, "tint")) {
                 float r = tok.get_number<float>();
@@ -551,7 +551,7 @@ const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap 
     {"things", ParseThingsSection}
 };
 
-void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler&, diagnostics::report&) {
     // Post-process; load materials and scripts.
     for(auto& mat_entry : lev.materials) {
         std::get<0>(mat_entry) = &manager.load<assets::material>(std::get<3>(mat_entry), *lev.master_colormap);
@@ -591,7 +591,8 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler& compi
             auto& vx = lev.vertices[vx_id];
 
             for(auto vx_it = vx.begin(), min_it = min_aabb.begin(), max_it = max_aabb.begin();
-                    vx_it != vx.end(); ++vx_it, ++min_it, ++max_it) {
+                    vx_it != vx.end() && min_it != min_aabb.end() && max_it != max_aabb.end();
+                    ++vx_it, ++min_it, ++max_it) {
                 *min_it = std::min(*min_it, *vx_it);
                 *max_it = std::max(*max_it, *vx_it);
             }

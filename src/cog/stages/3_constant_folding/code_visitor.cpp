@@ -18,7 +18,7 @@ void code_visitor::visit_compound_statement(compound_statement& s) {
     }
 }
 
-void code_visitor::visit_empty_statement(empty_statement& s) {
+void code_visitor::visit_empty_statement(empty_statement&) {
     return;
 }
 
@@ -28,15 +28,15 @@ void code_visitor::visit_expression_statement(expression_statement& s) {
     s.expr = v.get_substitution();
 }
 
-void code_visitor::visit_break_statement(break_statement& s) {
+void code_visitor::visit_break_statement(break_statement&) {
     return;
 }
 
-void code_visitor::visit_return_statement(return_statement& s) {
+void code_visitor::visit_return_statement(return_statement&) {
     return;
 }
 
-void code_visitor::visit_call_statement(call_statement& s) {
+void code_visitor::visit_call_statement(call_statement&) {
     return;
 }
 

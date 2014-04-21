@@ -4,7 +4,3 @@ test::exception::exception(const std::string& filename, const int lineNumber, co
     : filename(filename), reason(reason), line_number(lineNumber) {
     return;
 }
-
-test::internal_exception::internal_exception(const std::string& reason) : reason(reason) {
-    return;
-}

@@ -20,7 +20,7 @@ private:
     double framerate;
     flag_set<flags::AnimFlag> flag;
     double framerate_accumulator = 0.0;
-    int num_cels;
+    size_t num_cels;
 
 public:
     surface_material_animation(level_model& model, unsigned int surface, double framerate, flag_set<flags::AnimFlag> flag, int anim_num);

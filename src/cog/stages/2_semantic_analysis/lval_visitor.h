@@ -22,8 +22,8 @@ public:
         verbs::verb_table& vt, diagnostics::report& report);
 
 private:
-    AVPROTO(identifier_expression);
-    AVPROTO(subscript_expression);
+    AVPROTO(identifier_expression)
+    AVPROTO(subscript_expression)
 };
 
 }

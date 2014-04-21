@@ -14,11 +14,11 @@ class colormap;
 
 class level_sector {
 public:
-    size_t number;
+    int number;
     flag_set<flags::sector_flag> flags;
     float ambient_light;
     float extra_light;
-    size_t colormap_id;
+    int colormap_id;
     maybe<colormap const*> cmp;
     vector<3> tint;
     box<3> bounding_box;

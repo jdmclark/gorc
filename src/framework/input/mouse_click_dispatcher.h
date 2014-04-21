@@ -25,7 +25,7 @@ public:
         return;
     }
 
-    void set_mouse_cursor_position(const time& time, const vector<2, int>& cursor_pos) {
+    void set_mouse_cursor_position(const time&, const vector<2, int>& cursor_pos) {
         this->cursor_pos = cursor_pos;
     }
 

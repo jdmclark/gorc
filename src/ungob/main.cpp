@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    if(argc == 3) {
+    if(argc == 3 && argv[2]) {
         auto file = FileSystem.open(argv[2]);
 
         std::string buffer(file->get_size(), ' ');

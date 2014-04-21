@@ -12,11 +12,4 @@ public:
     exception(const std::string& filename, const int line_number, const std::string& reason);
 };
 
-class internal_exception {
-public:
-    const std::string reason;
-
-    internal_exception(const std::string& reason);
-};
-
 }

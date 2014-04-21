@@ -28,24 +28,24 @@ bool gorc::gui::widgets::radio_button::wants_mouse_input() const {
     return true;
 }
 
-void gorc::gui::widgets::radio_button::on_mouse_out(const time& time) {
+void gorc::gui::widgets::radio_button::on_mouse_out(const time&) {
     is_depressed = false;
 }
 
-void gorc::gui::widgets::radio_button::on_mouse_down(const time& time, const vector<2, int>& position, sf::Mouse::Button btn) {
+void gorc::gui::widgets::radio_button::on_mouse_down(const time&, const vector<2, int>&, sf::Mouse::Button btn) {
     if(btn == sf::Mouse::Left) {
         is_depressed = true;
     }
 }
 
-void gorc::gui::widgets::radio_button::on_mouse_up(const time& time, const vector<2, int>& position, sf::Mouse::Button btn) {
+void gorc::gui::widgets::radio_button::on_mouse_up(const time&, const vector<2, int>&, sf::Mouse::Button btn) {
     if(btn == sf::Mouse::Left && is_depressed) {
         is_depressed = false;
         select_radio_button(parent_view.get_root());
     }
 }
 
-void gorc::gui::widgets::radio_button::draw(const time& time, graphics::gui_renderer& r, int depth) const {
+void gorc::gui::widgets::radio_button::draw(const time&, graphics::gui_renderer& r, int depth) const {
     box<2, int> tex_coords = (selected) ?
             make_box(make_vector(21, 39), make_vector(34, 52)) :
             make_box(make_vector(21, 26), make_vector(34, 39));

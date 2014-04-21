@@ -114,10 +114,10 @@ void gorc::game::world::sounds::sound_presenter::play_foley_loop_class(int thing
 void gorc::game::world::sounds::sound_presenter::stop_foley_loop(int thing_id) {
     thing& referenced_thing = levelModel->things[thing_id];
 
-    if_set(referenced_thing.current_foley_loop_channel, then_do, [&referenced_thing](sound& snd) {
-        snd.stop();
+    if(sound* snd = referenced_thing.current_foley_loop_channel) {
+        snd->stop();
         referenced_thing.current_foley_loop_channel = nothing;
-    });
+    }
 }
 
 int gorc::game::world::sounds::sound_presenter::play_sound_local(int wav, float volume, float panning, flag_set<flags::sound_flag> flags) {

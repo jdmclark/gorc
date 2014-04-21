@@ -137,7 +137,7 @@ void gorc::game::world::sounds::sound::stop(float delay) {
 
 void gorc::game::world::sounds::sound::update(double dt, const level_model& model) {
     if(stop_delay > 0.0f) {
-        stop_delay -= dt;
+        stop_delay -= static_cast<float>(dt);
 
         if(stop_delay <= 0.0f) {
             internal_sound.stop();
@@ -149,8 +149,8 @@ void gorc::game::world::sounds::sound::update(double dt, const level_model& mode
         return;
     }
 
-    vol.update(dt);
-    pitch.update(dt);
+    vol.update(static_cast<float>(dt));
+    pitch.update(static_cast<float>(dt));
 
     if(update_position) {
         vector<3> pos = model.things[thing].position;
@@ -161,7 +161,7 @@ void gorc::game::world::sounds::sound::update(double dt, const level_model& mode
     if(do_distance_attenuation) {
         auto sound_dist = length(model.camera_model.current_computed_state.position - position);
 
-        float attenuation = (actual_min_rad != actual_max_rad) ? ((sound_dist - actual_max_rad) / (actual_min_rad - actual_max_rad)) : 1.0f;
+        float attenuation = (actual_min_rad < actual_max_rad) ? ((sound_dist - actual_max_rad) / (actual_min_rad - actual_max_rad)) : 1.0f;
         attenuation = clamp(attenuation, 0.0f, 1.0f);
 
         //std::cout << "DIST: " << sound_dist << " MIN: " << actual_min_rad << " MAX: " << actual_max_rad << " ATTEN:" << attenuation << std::endl;

@@ -67,7 +67,7 @@ public:
         return;
     }
 
-    vm::value invoke(std::stack<vm::value>& stack, void* system) const {
+    vm::value invoke(std::stack<vm::value>& stack, void*) const {
         verb_binder<ResultType, Arity> binder;
         return binder.invoke(stack, functor);
     }

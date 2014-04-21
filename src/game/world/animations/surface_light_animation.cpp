@@ -2,8 +2,9 @@
 #include "game/world/level_model.h"
 
 gorc::game::world::animations::surface_light_animation::surface_light_animation(level_model& model, unsigned int surface, float start_light,
-        float end_light, float change_time, int anim_num)
+        float end_light, float change_time, int)
     : model(model), surface(surface), start_light(start_light), end_light(end_light), change_time(change_time), anim_time(0.0) {
+    // TODO: Deal with anim_num
     model.surfaces[surface].extra_light = start_light;
     model.surfaces[surface].surface_anim = this;
     return;
@@ -19,5 +20,5 @@ void gorc::game::world::animations::surface_light_animation::update(double dt) {
 
 void gorc::game::world::animations::surface_light_animation::stop() {
     auto& surf = model.surfaces[surface];
-    model.surfaces[surface].surface_anim = maybe<animation*>();
+    model.surfaces[surface].surface_anim = nothing;
 }

@@ -9,7 +9,7 @@ test_case(seek) {
     gorc::cog::vm::code_buffer_read_stream cb(cBuffer);
 
     cb.seek(128);
-    assert_eq(cb.tell(), 128);
+    assert_eq(cb.tell(), 128UL);
 }
 
 test_case(ReadStream) {

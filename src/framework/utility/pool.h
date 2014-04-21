@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <vector>
 #include <functional>
 #include <memory>
@@ -32,20 +31,23 @@ public:
 };
 
 template <typename T, size_t page_size = 128> class pool {
-    static_assert(page_size > 0 && (page_size & (page_size - 1)) == 0, "page_size must be a power of 2");
+    static_assert((page_size & (page_size - 1)) == 0, "page_size must be a power of 2");
     static const int page_number_shift = boost::static_log2<page_size>::value;
     static const size_t page_offset_mask = page_size - 1;
     friend class iterator;
+    friend class const_iterator;
 
 public:
     class element : public T {
         friend class pool;
         friend class page;
         element* pool_next_free = nullptr;
-        int pool_element_id;
-        bool pool_element_initialized;
+        int pool_element_id = -1;
+        bool pool_element_initialized = false;
 
     public:
+        element() = default;
+
         inline int get_id() const {
             return pool_element_id;
         }
@@ -83,11 +85,11 @@ public:
             }
         }
 
-        inline element& operator[](int index) {
+        inline element& operator[](size_t index) {
             return data[index];
         }
 
-        inline const element& operator[](int index) const {
+        inline const element& operator[](size_t index) const {
             return data[index];
         }
 
@@ -113,7 +115,7 @@ private:
     std::vector<page> pages;
 
     void add_page() {
-        int page_base = (pages.size() << page_number_shift) | page_offset_mask;
+        size_t page_base = (pages.size() << page_number_shift) | page_offset_mask;
 
         pages.push_back(page());
 
@@ -122,7 +124,7 @@ private:
             element& obj = pages.back()[i - 1];
             obj.pool_element_initialized = false;
             obj.pool_next_free = next_free;
-            obj.pool_element_id = page_base--;
+            obj.pool_element_id = static_cast<int>(page_base--);
             next_free = &obj;
         }
 
@@ -133,8 +135,8 @@ private:
         unsigned int page_num = index >> page_number_shift;
         unsigned int item_num = index & page_offset_mask;
 
-        assert(page_num >= 0 && page_num < pages.size() && "page num out of bounds");
-        assert(item_num >= 0 && item_num < page_size && "item num out of bounds");
+        assert(page_num < pages.size() && "page num out of bounds");
+        assert(item_num < page_size && "item num out of bounds");
 
         return pages[page_num][item_num];
     }
@@ -146,7 +148,7 @@ private:
         return pages[page_num][item_num];
     }
 
-    int get_index_upper_bound() const {
+    size_t get_index_upper_bound() const {
         return ((pages.size() - 1) << page_number_shift) | page_offset_mask;
     }
 
@@ -157,7 +159,7 @@ public:
         pool* refd_pool;
 
         void advance() {
-            int upper_bound = refd_pool->get_index_upper_bound();
+            size_t upper_bound = refd_pool->get_index_upper_bound();
             ++index;
             while(index < upper_bound) {
                 if(refd_pool->get_pool_object(index).pool_element_initialized) {
@@ -192,11 +194,11 @@ public:
             return refd_pool != it.refd_pool || index != it.index;
         }
 
-        element& operator*() {
+        element& operator*() const {
             return (*refd_pool)[index];
         }
 
-        element* operator->() {
+        element* operator->() const {
             return &(*refd_pool)[index];
         }
 
@@ -207,6 +209,67 @@ public:
 
         iterator operator++(int) {
             iterator cpy(*this);
+            advance();
+            return cpy;
+        }
+    };
+
+    class const_iterator {
+    private:
+        int index;
+        const pool* refd_pool;
+
+        void advance() {
+            size_t upper_bound = refd_pool->get_index_upper_bound();
+            ++index;
+            while(index < upper_bound) {
+                if(refd_pool->get_pool_object(index).pool_element_initialized) {
+                    return;
+                }
+                ++index;
+            }
+
+            index = 0;
+            refd_pool = nullptr;
+        }
+
+    public:
+        const_iterator()
+            : index(0), refd_pool(nullptr) {
+            return;
+        }
+
+        const_iterator(int index, const pool* refd_pool)
+            : index(index), refd_pool(refd_pool) {
+            if(refd_pool->get_pool_object(index).pool_next_free) {
+                advance();
+            }
+            return;
+        }
+
+        bool operator==(const const_iterator& it) const {
+            return refd_pool == it.refd_pool && index == it.index;
+        }
+
+        bool operator!=(const const_iterator& it) const {
+            return refd_pool != it.refd_pool || index != it.index;
+        }
+
+        const element& operator*() const {
+            return (*refd_pool)[index];
+        }
+
+        const element* operator->() const {
+            return &(*refd_pool)[index];
+        }
+
+        const_iterator& operator++() {
+            advance();
+            return *this;
+        }
+
+        const_iterator operator++(int) {
+            const_iterator cpy(*this);
             advance();
             return cpy;
         }
@@ -264,6 +327,14 @@ public:
 
     iterator end() {
         return iterator();
+    }
+
+    const_iterator begin() const {
+        return const_iterator(0, this);
+    }
+
+    const_iterator end() const {
+        return const_iterator();
     }
 
     size_t size() const {

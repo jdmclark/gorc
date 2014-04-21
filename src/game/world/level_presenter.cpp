@@ -136,7 +136,7 @@ void gorc::game::world::level_presenter::update(const time& time) {
     model->game_time += dt;
     model->level_time += dt;
 
-    model->dynamic_tint = model->dynamic_tint * (1.0 - dt);
+    model->dynamic_tint = model->dynamic_tint * static_cast<float>(1.0 - dt);
     get<0>(model->dynamic_tint) = std::max(get<0>(model->dynamic_tint), 0.0f);
     get<1>(model->dynamic_tint) = std::max(get<1>(model->dynamic_tint), 0.0f);
     get<2>(model->dynamic_tint) = std::max(get<2>(model->dynamic_tint), 0.0f);
@@ -234,7 +234,7 @@ void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) 
 
 void gorc::game::world::level_presenter::yaw_camera(double amt) {
     auto& player = model->things[model->local_player_thing_id];
-    get<1>(player.ang_vel) = amt * 60.0f;
+    get<1>(player.ang_vel) = static_cast<float>(amt) * 60.0f;
     //get<1>(player.orient) += amt;
 }
 
@@ -270,27 +270,27 @@ void gorc::game::world::level_presenter::activate() {
     const auto& cam = model->camera_model.current_computed_state;
     auto activate_contact = physics_presenter->segment_query(physics::segment(cam.position, cam.position + cam.look * 0.5f),
             cam.containing_sector, get_local_player_thing(),
-            [&](int t) { return true; },
+            [&](int) { return true; },
             [&](int s) {
                 auto& surf = model->surfaces[s];
                 return surf.flags & flags::surface_flag::CogLinked;
             });
 
-    if_set(activate_contact, then_do, [&](const physics::contact& contact) {
-        if_set(contact.contact_surface_id, then_do, [this](int contact_surface_id) {
-            std::cout << "ACTIVATE SURFACE: " << contact_surface_id << std::endl;
+    if(const physics::contact* contact = activate_contact) {
+        if(const int* contact_surface_id = contact->contact_surface_id) {
+            std::cout << "ACTIVATE SURFACE: " << *contact_surface_id << std::endl;
             script_presenter->send_message_to_linked(cog::message_id::activated,
-                    contact_surface_id, flags::message_type::surface,
+                    *contact_surface_id, flags::message_type::surface,
                     model->local_player_thing_id, flags::message_type::thing);
-        });
+        }
 
-        if_set(contact.contact_thing_id, then_do, [&](int contact_thing_id) {
-            std::cout << "ACTIVATE THING: " << contact_thing_id << std::endl;
-            script_presenter->send_message_to_linked(cog::message_id::activated, contact_thing_id, flags::message_type::thing,
+        if(const int* contact_thing_id = contact->contact_thing_id) {
+            std::cout << "ACTIVATE THING: " << *contact_thing_id << std::endl;
+            script_presenter->send_message_to_linked(cog::message_id::activated, *contact_thing_id, flags::message_type::thing,
                     model->local_player_thing_id, flags::message_type::thing);
-            sound_presenter->play_sound_class(contact_thing_id, flags::sound_subclass_type::Activate);
-        });
-    });
+            sound_presenter->play_sound_class(*contact_thing_id, flags::sound_subclass_type::Activate);
+        }
+    }
 }
 
 void gorc::game::world::level_presenter::damage() {
@@ -299,23 +299,23 @@ void gorc::game::world::level_presenter::damage() {
     const auto& cam = model->camera_model.current_computed_state;
     auto activate_contact = physics_presenter->segment_query(physics::segment(cam.position, cam.position + cam.look * 0.5f),
             cam.containing_sector, get_local_player_thing(),
-            [&](int t) { return true; },
+            [&](int) { return true; },
             [&](int s) {
                 auto& surf = model->surfaces[s];
                 return surf.flags & flags::surface_flag::CogLinked;
             });
 
-    if_set(activate_contact, then_do, [this](const physics::contact& contact) {
-        if_set(contact.contact_surface_id, then_do, [this](int contact_surface_id) {
-            script_presenter->send_message_to_linked(cog::message_id::damaged, contact_surface_id, flags::message_type::surface,
+    if(const physics::contact* contact = activate_contact) {
+        if(const int* contact_surface_id = contact->contact_surface_id) {
+            script_presenter->send_message_to_linked(cog::message_id::damaged, *contact_surface_id, flags::message_type::surface,
                     model->local_player_thing_id, flags::message_type::thing, 1000, static_cast<int>(flags::damage_flag::saber));
-        });
+        }
 
-        if_set(contact.contact_thing_id, then_do, [this](int contact_thing_id) {
-            damage_thing(contact_thing_id, 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
+        if(const int* contact_thing_id = contact->contact_thing_id) {
+            damage_thing(*contact_thing_id, 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
                     model->local_player_thing_id);
-        });
-    });
+        }
+    }
 }
 
 void gorc::game::world::level_presenter::crouch(bool is_crouched) {
@@ -345,7 +345,7 @@ gorc::flag_set<gorc::flags::ai_mode_flag> gorc::game::world::level_presenter::ai
 void gorc::game::world::level_presenter::ai_set_look_frame(int thing_id, int frame) {
     auto& thing = model->things[thing_id];
 
-    if(frame >= 0 && frame < thing.frames.size()) {
+    if(frame >= 0 && frame < static_cast<int>(thing.frames.size())) {
         ai_set_look_pos(thing_id, std::get<0>(thing.frames[frame]));
     }
 }
@@ -364,7 +364,7 @@ void gorc::game::world::level_presenter::ai_set_mode(int thing_id, flag_set<flag
 void gorc::game::world::level_presenter::ai_set_move_frame(int thing_id, int frame) {
     auto& thing = model->things[thing_id];
 
-    if(frame >= 0 && frame < thing.frames.size()) {
+    if(frame >= 0 && frame < static_cast<int>(thing.frames.size())) {
         ai_set_move_pos(thing_id, std::get<0>(thing.frames[frame]));
     }
 }
@@ -381,11 +381,12 @@ void gorc::game::world::level_presenter::ai_set_move_speed(int thing_id, float s
 }
 
 void gorc::game::world::level_presenter::ai_set_move_thing(int thing_id, int move_to_thing) {
-    ai_set_move_pos(thing_id, model->things[thing_id].position);
+    // TODO: Revisit. Does this mean continuously chase?
+    ai_set_move_pos(thing_id, model->things[move_to_thing].position);
 }
 
 // Color verbs
-void gorc::game::world::level_presenter::add_dynamic_tint(int player_id, const vector<3>& tint) {
+void gorc::game::world::level_presenter::add_dynamic_tint(int, const vector<3>& tint) {
     model->dynamic_tint += tint;
 
     // Clamp dynamic tint
@@ -422,11 +423,11 @@ bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_t
             });
 
     bool rv = false;
-    if_set(contact, then_do, [&](const physics::contact& ct) {
-        if_set(ct.contact_thing_id, then_do, [&](int ctid) {
-            rv = ctid == target_thing_id;
-        });
-    });
+    if(const physics::contact* ct = contact) {
+        if(const int* ctid = ct->contact_thing_id) {
+            rv = *ctid == target_thing_id;
+        }
+    }
 
     return rv;
 }
@@ -479,7 +480,7 @@ void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, f
     referenced_thing.rotatepivot_moving = true;
     referenced_thing.current_frame = 0;
     referenced_thing.goal_frame = frame;
-    referenced_thing.path_move_speed = (time == 0.0) ? 1.0f : abs(time);
+    referenced_thing.path_move_speed = (fabs(time) <= 0.0) ? 1.0f : static_cast<float>(fabs(time));
     referenced_thing.path_move_time = 0.0f;
     referenced_thing.rotatepivot_longway = time < 0.0f;
     sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StartMove);
@@ -488,11 +489,11 @@ void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, f
 
 // level verbs
 float gorc::game::world::level_presenter::get_game_time() {
-    return model->game_time;
+    return static_cast<float>(model->game_time);
 }
 
 float gorc::game::world::level_presenter::get_level_time() {
-    return model->level_time;
+    return static_cast<float>(model->level_time);
 }
 
 void gorc::game::world::level_presenter::jk_end_level(bool success) {
@@ -612,7 +613,7 @@ void gorc::game::world::level_presenter::set_sector_flags(int sector_id, flag_se
     model->sectors[sector_id].flags += flags;
 }
 
-void gorc::game::world::level_presenter::set_sector_light(int sector_id, float value, float delay) {
+void gorc::game::world::level_presenter::set_sector_light(int sector_id, float value, float) {
     // TODO: create animation to implement delay feature.
     content::assets::level_sector& sector = model->sectors[sector_id];
     sector.extra_light = value;
@@ -620,7 +621,7 @@ void gorc::game::world::level_presenter::set_sector_light(int sector_id, float v
 
 void gorc::game::world::level_presenter::set_sector_thrust(int sector_id, const vector<3>& thrust) {
     content::assets::level_sector& sector = model->sectors[sector_id];
-    sector.thrust = thrust * rate_factor;
+    sector.thrust = thrust * static_cast<float>(rate_factor);
 }
 
 void gorc::game::world::level_presenter::set_sector_tint(int sector_id, const vector<3>& color) {
@@ -736,7 +737,7 @@ int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name
 }
 
 int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
-        const vector<3>& offset_vec, const vector<3>& error_vec, float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovy) {
+        const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
     const auto& parent_thing = model->things[parent_thing_id];
 
     const auto& parent_look_orient = parent_thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), parent_thing.head_pitch) * make_euler(error_vec);
@@ -975,7 +976,7 @@ void gorc::game::world::level_presenter::set_thing_type(int thing_id, flags::thi
     thing.controller->create_controller_data(thing_id);
 }
 
-void gorc::game::world::level_presenter::set_thing_light(int thing_id, float light, float fade_time) {
+void gorc::game::world::level_presenter::set_thing_light(int thing_id, float light, float) {
     // TODO: Implement fade_time
     auto& thing = model->things[thing_id];
     thing.light = light;
@@ -1172,8 +1173,8 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         return components.current_level_presenter->get_local_player_thing();
     });
 
-    // Print verbs
-    verbTable.add_verb<void, 2>("jkprintunistring", [&components](int destination, int message_num) {
+    // Print verbs:
+    verbTable.add_verb<void, 2>("jkprintunistring", [&components](int /*destination*/, int message_num) {
         // TODO: Add actual jkPrintUniString once localization is implemented.
         std::cout << "COG_" << message_num << std::endl;
     });
@@ -1282,7 +1283,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         components.current_level_presenter->set_surface_flags(surface, flag_set<flags::surface_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("setsurfacemat", [&components](int surface, int mat) {
+    verbTable.add_verb<void, 2>("setsurfacemat", [&components](int, int) {
         // TODO: Not implemented for now. Architecturally inconvenient.
     });
 

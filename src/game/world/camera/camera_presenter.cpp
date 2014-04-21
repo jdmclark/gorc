@@ -59,10 +59,10 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
             contact);
 
     auto true_desired_position = focus_thing.position + true_offset;
-    if_set(contact, then_do, [&true_desired_position, &focus_thing](const physics::contact& cnt) {
+    if(const physics::contact* cnt = contact) {
         // Bring back by some small radius - 0.02?
-        true_desired_position = cnt.position + normalize(focus_thing.position - cnt.position) * 0.02f;
-    });
+        true_desired_position = cnt->position + normalize(focus_thing.position - cnt->position) * 0.02f;
+    }
 
     // Calculate sector containing camera
     physics::segment_adjoin_path(physics::segment(focus_thing.position, true_desired_position), *levelmodel,
@@ -86,10 +86,10 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
     // Calculate pov model waggle.
     const auto& player_thing = levelmodel->things[presenter.get_local_player_thing()];
     auto player_speed = length(make_vector(get<0>(player_thing.vel), get<1>(player_thing.vel))) / player_thing.max_vel;
-    float actual_waggle_speed = player_speed * model->waggle_speed * time * (1.0f / 60.0f);
+    float actual_waggle_speed = player_speed * model->waggle_speed * static_cast<float>(time) * (1.0f / 60.0f);
     model->waggle_time += actual_waggle_speed;
-    float waggle_up = -cos(model->waggle_time * 2.0);
-    float waggle_left = sin(model->waggle_time);
+    float waggle_up = -cosf(model->waggle_time * 2.0f);
+    float waggle_left = sinf(model->waggle_time);
     auto new_offset = player_speed * make_vector(waggle_up * get<0>(model->waggle) * (9.0f / 16.0f),
             waggle_left * get<1>(model->waggle) * (16.0f / 9.0f), waggle_up * get<2>(model->waggle));
     cam.pov_model_offset = lerp(cam.pov_model_offset, new_offset, 0.1f);
@@ -136,7 +136,8 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
     internal_cam.angle_reset_speed = ang_reset_speed;
 }
 
-void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int player, int model_id) {
+void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int, int model_id) {
+    // TODO: Handle player
     if(model_id >= 0) {
         model->pov_model = &presenter.contentmanager->get_asset<content::assets::model>(model_id);
     }
@@ -147,16 +148,19 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int player, i
     presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);
 }
 
-void gorc::game::world::camera::camera_presenter::jk_set_waggle(int player, const vector<3>& move_vec, float speed) {
+void gorc::game::world::camera::camera_presenter::jk_set_waggle(int, const vector<3>& move_vec, float speed) {
+    // TODO: Handle player
     model->waggle = move_vec;
     model->waggle_speed = speed;
 }
 
-int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags) {
+int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int, int key, int priority, flag_set<flags::key_flag> flags) {
+    // TODO: Handle player
     return presenter.key_presenter->play_mix_key(model->pov_key_mix_id, key, priority, flags);
 }
 
-void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int player, int key_id, float delay) {
+void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int, int key_id, float delay) {
+    // TODO: Handle player
     presenter.key_presenter->stop_key(-1, key_id, delay);
 }
 

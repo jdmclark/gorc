@@ -31,7 +31,7 @@ void illegal_extension(report& report, const std::string& visitorname, const std
 void break_outside_loop(report& report, const std::string& visitorname, const error_location& location);
 void label_inside_block(report& report, const std::string& visitorname, const std::string& labelname, const error_location& location);
 void unknown_verb(report& report, const std::string& visitorname, const std::string& verbname, const error_location& location);
-void invalid_argument_count(report& report, const std::string& visitorname, const std::string& verbname, int wanted, int found, const error_location& location);
+void invalid_argument_count(report& report, const std::string& visitorname, const std::string& verbname, size_t wanted, size_t found, const error_location& location);
 void undefined_symbol(report& report, const std::string& visitorname, const std::string& symbolname, const error_location& location);
 void illegal_void_result(report& report, const std::string& visitorname, const error_location& location);
 void result_not_boolean(report& report, const std::string& visitorname, const error_location& location);

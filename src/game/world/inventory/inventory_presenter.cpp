@@ -18,7 +18,7 @@ void gorc::game::world::inventory::inventory_presenter::start(level_model& level
 }
 
 void gorc::game::world::inventory::inventory_presenter::update(const time& time) {
-    model->mod_all_cooldowns(-time);
+    model->mod_all_cooldowns(-static_cast<float>(time));
 
     // Update firing messages.
     for(auto& player_inv : *model) {
@@ -26,15 +26,15 @@ void gorc::game::world::inventory::inventory_presenter::update(const time& time)
             auto bin_id = std::get<0>(player_bin);
             auto& bin = std::get<1>(player_bin);
 
-            bin.refire_time_activated += time;
+            bin.refire_time_activated += static_cast<float>(time);
 
             if(bin.activated) {
-                bin.total_time_activated += time;
+                bin.total_time_activated += static_cast<float>(time);
             }
 
             if(bin.activated && bin.refiring) {
                 if(bin.refire_time_activated >= bin.refire_rate) {
-                    bin.refire_time_activated = 0.0;
+                    bin.refire_time_activated = 0.0f;
                     presenter.script_presenter->send_message(get_inv_cog(std::get<0>(player_inv), bin_id), cog::message_id::fire,
                             -1, bin.mode, flags::message_type::system,
                             std::get<0>(player_inv), flags::message_type::thing);
@@ -43,7 +43,7 @@ void gorc::game::world::inventory::inventory_presenter::update(const time& time)
         }
 
         auto& inv = std::get<1>(player_inv);
-        inv.mount_wait -= time;
+        inv.mount_wait -= static_cast<float>(time);
         if(inv.switching_weapons && inv.mount_wait <= 0.0f) {
             inv.switching_weapons = false;
             // TODO: When weapon is ASSIGNED, pass sender ref of 1.
@@ -62,7 +62,7 @@ int gorc::game::world::inventory::inventory_presenter::get_inv(int player, int b
     return model->get_inventory(player).get_bin_value(bin);
 }
 
-int gorc::game::world::inventory::inventory_presenter::get_inv_cog(int player, int bin) {
+int gorc::game::world::inventory::inventory_presenter::get_inv_cog(int, int bin) {
     const content::assets::inventory_bin& inv_bin = model->base_inventory.get_bin(bin);
     if(inv_bin.cog) {
         return presenter.script_presenter->get_global_cog_instance(&inv_bin.cog->cogscript);
@@ -72,11 +72,11 @@ int gorc::game::world::inventory::inventory_presenter::get_inv_cog(int player, i
     }
 }
 
-int gorc::game::world::inventory::inventory_presenter::get_inv_max(int player, int bin) {
+int gorc::game::world::inventory::inventory_presenter::get_inv_max(int, int bin) {
     return model->base_inventory.get_bin(bin).max_value;
 }
 
-int gorc::game::world::inventory::inventory_presenter::get_inv_min(int player, int bin) {
+int gorc::game::world::inventory::inventory_presenter::get_inv_min(int, int bin) {
     return model->base_inventory.get_bin(bin).min_value;
 }
 
@@ -126,7 +126,8 @@ void gorc::game::world::inventory::inventory_presenter::activate_weapon(int play
     }
 }
 
-int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(int player, flags::autoselect_mode select_mode) {
+int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(int player, flags::autoselect_mode) {
+    // TODO: Handle autoselect mode
     int best_bin = -1;
     int best_bin_value = std::numeric_limits<int>::lowest();
 
@@ -154,7 +155,8 @@ void gorc::game::world::inventory::inventory_presenter::change_fire_rate(int pla
     }
 }
 
-float gorc::game::world::inventory::inventory_presenter::deactivate_weapon(int player, int fire_mode) {
+float gorc::game::world::inventory::inventory_presenter::deactivate_weapon(int player, int) {
+    // TODO: Handle fire mode
     int cur_weapon = get_cur_weapon(player);
 
     if(cur_weapon >= 0) {
@@ -366,7 +368,7 @@ void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verb
         components.current_level_presenter->inventory_presenter->set_cur_weapon(player, weap_num);
     });
 
-    verbTable.add_verb<void, 2>("setfirewait", [&components](int player, float wait) {
+    verbTable.add_verb<void, 2>("setfirewait", [&components](int, float) {
         // TODO
     });
 

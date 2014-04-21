@@ -2,6 +2,7 @@
 
 #include "framework/math/vector.h"
 #include "type.h"
+#include <functional>
 
 namespace gorc {
 namespace cog {
@@ -13,11 +14,11 @@ private:
 
     union {
         int integer;
-        float Floating;
-        bool Boolean;
+        float floating;
+        bool boolean;
         const char* string;
         struct {
-            float X, Y, Z;
+            float x, y, z;
         } vector;
     } data;
 
@@ -145,7 +146,7 @@ public:
 
     inline value operator==(const value& v2) const {
         if(type_flag == type::floating || v2.type_flag == type::floating) {
-            return value(static_cast<float>(*this) == static_cast<float>(v2));
+            return value(std::equal_to<float>()(static_cast<float>(*this), static_cast<float>(v2)));
         }
         else if(type_flag == type::integer || v2.type_flag == type::integer) {
             return value(static_cast<int>(*this) == static_cast<int>(v2));
@@ -160,7 +161,7 @@ public:
 
     inline value operator!=(const value& v2) const {
         if(type_flag == type::floating || v2.type_flag == type::floating) {
-            return value(static_cast<float>(*this) != static_cast<float>(v2));
+            return value(std::not_equal_to<float>()(static_cast<float>(*this), static_cast<float>(v2)));
         }
         else if(type_flag == type::integer || v2.type_flag == type::integer) {
             return value(static_cast<int>(*this) != static_cast<int>(v2));

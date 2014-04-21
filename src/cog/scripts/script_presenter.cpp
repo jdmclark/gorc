@@ -74,7 +74,7 @@ void gorc::cog::scripts::script_presenter::run_waiting_cogs() {
     }
 }
 
-void gorc::cog::scripts::script_presenter::create_global_cog_instance_unlinked(const cog::script& script, cog::compiler& compiler) {
+void gorc::cog::scripts::script_presenter::create_global_cog_instance_unlinked(const cog::script& script, cog::compiler&) {
     if(model->global_script_instances.find(&script) != model->global_script_instances.end()) {
         // Instance already created.
         return;
@@ -94,7 +94,7 @@ void gorc::cog::scripts::script_presenter::create_global_cog_instance_unlinked(c
     }
 
     // Send startup message
-    send_message(model->cogs.size() - 1, cog::message_id::startup, -1, -1, flags::message_type::nothing);
+    send_message(static_cast<int>(model->cogs.size()) - 1, cog::message_id::startup, -1, -1, flags::message_type::nothing);
 }
 
 int gorc::cog::scripts::script_presenter::get_global_cog_instance(cog::script const* script) const {

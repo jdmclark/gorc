@@ -39,10 +39,10 @@ value::operator int() const {
         return data.integer;
 
     case type::floating:
-        return static_cast<int>(data.Floating);
+        return static_cast<int>(data.floating);
 
     case type::boolean:
-        return (data.Boolean) ? 1 : 0;
+        return (data.boolean) ? 1 : 0;
 
     case type::string:
         return constants::default_int;
@@ -61,7 +61,7 @@ value::value(float v) {
 
 float value::operator=(float v) {
     type_flag = type::floating;
-    data.Floating = v;
+    data.floating = v;
 
     return v;
 }
@@ -75,10 +75,10 @@ value::operator float() const {
         return static_cast<float>(data.integer);
 
     case type::floating:
-        return data.Floating;
+        return data.floating;
 
     case type::boolean:
-        return (data.Boolean) ? 1.0f : 0.0f;
+        return (data.boolean) ? 1.0f : 0.0f;
 
     case type::string:
         return constants::default_float;
@@ -97,7 +97,7 @@ value::value(bool v) {
 
 bool value::operator=(bool v) {
     type_flag = type::boolean;
-    data.Boolean = v;
+    data.boolean = v;
 
     return v;
 }
@@ -111,10 +111,10 @@ value::operator bool() const {
         return data.integer != 0;
 
     case type::floating:
-        return data.Floating != 0.0f;
+        return std::not_equal_to<float>()(data.floating, 0.0f);
 
     case type::boolean:
-        return data.Boolean;
+        return data.boolean;
 
     case type::string:
         return true;
@@ -169,9 +169,9 @@ value::value(const vector<3>& v) {
 
 const gorc::vector<3>& value::operator=(const vector<3>& v) {
     type_flag = type::vector;
-    data.vector.X = get<0>(v);
-    data.vector.Y = get<1>(v);
-    data.vector.Z = get<2>(v);
+    data.vector.x = get<0>(v);
+    data.vector.y = get<1>(v);
+    data.vector.z = get<2>(v);
 
     return v;
 }
@@ -194,7 +194,7 @@ value::operator gorc::vector<3>() const {
         return make_zero_vector<3, float>();
 
     case type::vector:
-        return make_vector(data.vector.X, data.vector.Y, data.vector.Z);
+        return make_vector(data.vector.x, data.vector.y, data.vector.z);
 
     default:
         return make_zero_vector<3, float>();

@@ -28,7 +28,7 @@ public:
         diagnostics::report& report, bool inside_loop = false, bool inside_block = false);
 
 private:
-    ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO)
 };
 
 }

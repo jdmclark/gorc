@@ -8,7 +8,7 @@
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::shader_loader::asset_root_path = { "misc/glsl" };
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
     std::vector<char> shader_text(file.get_size() + 1, '\0');
     file.read(shader_text.data(), file.get_size());
 
@@ -18,11 +18,11 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::des
     GLint result = GL_FALSE;
 
     auto vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShaderObject, 2, vshader, NULL);
+    glShaderSource(vertexShaderObject, 2, vshader, nullptr);
     glCompileShader(vertexShaderObject);
 
     auto fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShaderObject, 2, fshader, NULL);
+    glShaderSource(fragmentShaderObject, 2, fshader, nullptr);
     glCompileShader(fragmentShaderObject);
 
     bool failed = false;
@@ -33,7 +33,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::des
         GLint err_len;
         glGetShaderiv(vertexShaderObject, GL_INFO_LOG_LENGTH, &err_len);
         std::vector<char> err_msg(err_len, '\0');
-        glGetShaderInfoLog(vertexShaderObject, err_len, NULL, err_msg.data());
+        glGetShaderInfoLog(vertexShaderObject, err_len, nullptr, err_msg.data());
 
         report.add_error("ShaderLoader", err_msg.data(), diagnostics::error_location(file.Filename, 0, 0, 0, 0));
     }
@@ -45,7 +45,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::des
         GLint err_len;
         glGetShaderiv(fragmentShaderObject, GL_INFO_LOG_LENGTH, &err_len);
         std::vector<char> err_msg(err_len, '\0');
-        glGetShaderInfoLog(fragmentShaderObject, err_len, NULL, err_msg.data());
+        glGetShaderInfoLog(fragmentShaderObject, err_len, nullptr, err_msg.data());
 
         report.add_error("ShaderLoader", err_msg.data(), diagnostics::error_location(file.Filename, 0, 0, 0, 0));
     }
@@ -66,7 +66,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::shader_loader::des
             GLint err_len;
             glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &err_len);
             std::vector<char> err_msg(err_len, '\0');
-            glGetProgramInfoLog(programObject, err_len, NULL, err_msg.data());
+            glGetProgramInfoLog(programObject, err_len, nullptr, err_msg.data());
 
             report.add_error("ShaderLoader", err_msg.data(), diagnostics::error_location(file.Filename, 0, 0, 0, 0));
         }

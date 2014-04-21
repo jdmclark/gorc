@@ -5,7 +5,7 @@
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp" };
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::colormap> cmp(new content::assets::colormap());
 
     char magic[4];
@@ -32,14 +32,14 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::d
 
     uint8_t* cb_idx = colorbytes;
     for(size_t i = 0; i < 256; ++i, cb_idx += 3) {
-        cmp->set_color(i, make_vector(cb_idx[0], cb_idx[1], cb_idx[2]));
+        cmp->set_color(static_cast<uint8_t>(i), make_vector(cb_idx[0], cb_idx[1], cb_idx[2]));
     }
 
     // Read first (darkest) light level table to generate texture light data.
     uint8_t lightbytes[256];
     file.read(lightbytes, sizeof(uint8_t) * 256);
     for(size_t i = 0; i < 256; ++i) {
-        cmp->set_extra(i, cmp->get_color(lightbytes[i]));
+        cmp->set_extra(static_cast<uint8_t>(i), cmp->get_color(lightbytes[static_cast<uint8_t>(i)]));
     }
 
     return std::unique_ptr<asset>(std::move(cmp));

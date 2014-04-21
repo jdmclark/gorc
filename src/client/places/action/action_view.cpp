@@ -7,13 +7,9 @@ gorc::client::action::action_view::action_view() {
 }
 
 gorc::maybe<gorc::input::input_adapter*> gorc::client::action::action_view::get_input_adapter() {
-    maybe<input::input_adapter*> rv;
-    if_set(presenter, then_do, [&rv](action_presenter& p) {
-        rv = &p.get_input_adapter();
-    },
-    else_do, [&rv] {
-        rv = nothing;
-    });
+    if(action_presenter* p = presenter) {
+        return make_maybe(&p->get_input_adapter());
+    }
 
-    return rv;
+    return nothing;
 }

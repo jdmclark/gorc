@@ -19,13 +19,13 @@ test_case(CastIntToInt) {
 
 test_case(CastIntToFloat) {
     value v1(0);
-    expect_eq(static_cast<float>(v1), 0.0f);
+    expect_le(fabsf(static_cast<float>(v1)), 0.0f);
 
     value v2(1);
-    expect_eq(static_cast<float>(v2), 1.0f);
+    expect_le(fabsf(static_cast<float>(v2) - 1.0f), 0.0f);
 
     value v3(-1);
-    expect_eq(static_cast<float>(v3), -1.0f);
+    expect_le(fabsf(static_cast<float>(v3) + 1.0f), 0.0f);
 }
 
 test_case(CastIntToBool) {
@@ -76,13 +76,13 @@ test_case(CastFloatToInt) {
 
 test_case(CastFloatToFloat) {
     value v1(0.0f);
-    expect_eq(static_cast<float>(v1), 0.0f);
+    expect_le(fabsf(static_cast<float>(v1)), 0.0f);
 
     value v2(1.0f);
-    expect_eq(static_cast<float>(v2), 1.0f);
+    expect_le(fabsf(static_cast<float>(v2) - 1.0f), 0.0f);
 
     value v3(-1.0f);
-    expect_eq(static_cast<float>(v3), -1.0f);
+    expect_le(fabsf(static_cast<float>(v3) + 1.0f), 0.0f);
 }
 
 test_case(CastFloatToBool) {
@@ -130,10 +130,10 @@ test_case(CastBoolToInt) {
 
 test_case(CastBoolToFloat) {
     value v1(true);
-    expect_eq(static_cast<float>(v1), 1.0f);
+    expect_le(fabsf(static_cast<float>(v1) - 1.0f), 0.0f);
 
     value v2(false);
-    expect_eq(static_cast<float>(v2), 0.0f);
+    expect_le(fabsf(static_cast<float>(v2)), 0.0f);
 }
 
 test_case(CastBoolToBool) {
@@ -175,13 +175,13 @@ test_case(CastStringToInt) {
 
 test_case(CastStringToFloat) {
     value v1("Any string");
-    expect_eq(static_cast<float>(v1), 0.0f);
+    expect_le(fabsf(static_cast<float>(v1)), 0.0f);
 
     value v2("Any other string");
-    expect_eq(static_cast<float>(v2), 0.0f);
+    expect_le(fabsf(static_cast<float>(v2)), 0.0f);
 
     value v3("");
-    expect_eq(static_cast<float>(v3), 0.0f);
+    expect_le(fabsf(static_cast<float>(v3)), 0.0f);
 }
 
 test_case(CastStringToBool) {
@@ -232,13 +232,13 @@ test_case(CastVectorToInt) {
 
 test_case(CastVectorToFloat) {
     value v1 = value(make_zero_vector<3, float>());
-    expect_eq(static_cast<float>(v1), 0.0f);
+    expect_le(fabsf(static_cast<float>(v1)), 0.0f);
 
     value v2(make_vector(10.0f, 20.0f, 30.0f));
-    expect_eq(static_cast<float>(v2), 0.0f);
+    expect_le(fabsf(static_cast<float>(v2)), 0.0f);
 
     value v3(make_vector(-0.1f, 0.1f, 0.0f));
-    expect_eq(static_cast<float>(v3), 0.0f);
+    expect_le(fabsf(static_cast<float>(v3)), 0.0f);
 }
 
 test_case(CastVectorToBool) {

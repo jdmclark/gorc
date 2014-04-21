@@ -23,7 +23,7 @@ void code_visitor::visit_compound_statement(compound_statement& s) {
     }
 }
 
-void code_visitor::visit_empty_statement(empty_statement& s) {
+void code_visitor::visit_empty_statement(empty_statement&) {
     return;
 }
 
@@ -38,7 +38,7 @@ void code_visitor::visit_break_statement(break_statement& s) {
     }
 }
 
-void code_visitor::visit_return_statement(return_statement& s) {
+void code_visitor::visit_return_statement(return_statement&) {
     return;
 }
 

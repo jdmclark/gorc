@@ -3,7 +3,7 @@
 #include "framework/content/manager.h"
 #include "game/constants.h"
 
-gorc::game::world::level_model::level_model(gorc::content::manager& contentmanager, cog::compiler& Cogcompiler,
+gorc::game::world::level_model::level_model(gorc::content::manager&, cog::compiler&,
         const gorc::content::assets::level& level, const content::assets::inventory& inv)
     : level(level), header(level.header), adjoins(level.adjoins), sectors(level.sectors), inventory_model(inv) {
 

@@ -9,7 +9,7 @@ test_case(seek) {
     gorc::cog::vm::code_buffer_write_stream cb(cBuffer);
 
     cb.seek(128);
-    assert_eq(cb.tell(), 128);
+    assert_eq(cb.tell(), 128UL);
 }
 
 test_case(WriteStream) {
@@ -42,7 +42,7 @@ test_case(write_buffer) {
 
     assert_eq(cBuffer.read<uint32_t>(0), 0xFEEDBEEF);
     assert_eq(cBuffer.read<uint32_t>(sizeof(uint32_t)), 0xFEEDBEEF);
-    assert_eq(destOffset, 0);
+    assert_eq(destOffset, 0UL);
     assert_eq(destOffset2, sizeof(uint32_t));
 }
 

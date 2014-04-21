@@ -70,17 +70,31 @@ public:                                                                         
     }                                                                                                            \
 };
 
-GORC_CV_BINDER(0);
-GORC_CV_BINDER(1);
-GORC_CV_BINDER(2);
-GORC_CV_BINDER(3);
-GORC_CV_BINDER(4);
-GORC_CV_BINDER(5);
-GORC_CV_BINDER(6);
-GORC_CV_BINDER(7);
-GORC_CV_BINDER(8);
-GORC_CV_BINDER(9);
-GORC_CV_BINDER(10);
+template <typename T> class verb_binder<T, 0> {
+public:
+    template <typename U> vm::value invoke(std::stack<vm::value>&, U fn) {
+        return vm::value(fn());
+    }
+};
+
+template <> class verb_binder<void, 0> {
+public:
+    template <typename U> vm::value invoke(std::stack<vm::value>&, U fn) {
+        fn();
+        return vm::value();
+    }
+};
+
+GORC_CV_BINDER(1)
+GORC_CV_BINDER(2)
+GORC_CV_BINDER(3)
+GORC_CV_BINDER(4)
+GORC_CV_BINDER(5)
+GORC_CV_BINDER(6)
+GORC_CV_BINDER(7)
+GORC_CV_BINDER(8)
+GORC_CV_BINDER(9)
+GORC_CV_BINDER(10)
 
 #define GORC_CV_SYS_BINDER(n)                                                                                    \
 template <typename T, typename SystemRefT> class system_verb_binder<T, n, SystemRefT> {                            \
@@ -100,17 +114,31 @@ public:                                                                         
     }                                                                                                            \
 };
 
-GORC_CV_SYS_BINDER(0);
-GORC_CV_SYS_BINDER(1);
-GORC_CV_SYS_BINDER(2);
-GORC_CV_SYS_BINDER(3);
-GORC_CV_SYS_BINDER(4);
-GORC_CV_SYS_BINDER(5);
-GORC_CV_SYS_BINDER(6);
-GORC_CV_SYS_BINDER(7);
-GORC_CV_SYS_BINDER(8);
-GORC_CV_SYS_BINDER(9);
-GORC_CV_SYS_BINDER(10);
+template <typename T, typename SystemRefT> class system_verb_binder<T, 0, SystemRefT> {
+public:
+    template <typename U> vm::value invoke(std::stack<vm::value>&, SystemRefT& sys, U fn) {
+        return vm::value(fn(sys));
+    }
+};
+
+template <typename SystemRefT> class system_verb_binder<void, 0, SystemRefT> {
+public:
+    template <typename U> vm::value invoke(std::stack<vm::value>&, SystemRefT& sys, U fn) {
+        fn(sys);
+        return vm::value();
+    }
+};
+
+GORC_CV_SYS_BINDER(1)
+GORC_CV_SYS_BINDER(2)
+GORC_CV_SYS_BINDER(3)
+GORC_CV_SYS_BINDER(4)
+GORC_CV_SYS_BINDER(5)
+GORC_CV_SYS_BINDER(6)
+GORC_CV_SYS_BINDER(7)
+GORC_CV_SYS_BINDER(8)
+GORC_CV_SYS_BINDER(9)
+GORC_CV_SYS_BINDER(10)
 
 }
 }

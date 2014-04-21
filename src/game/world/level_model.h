@@ -39,7 +39,7 @@ public:
     int local_player_thing_id;
 
     std::vector<content::assets::thing_template const*> spawn_points;
-    unsigned int current_spawn_point = 0;
+    size_t current_spawn_point = 0UL;
 
     double level_time = 0.0;
     double game_time = 0.0;

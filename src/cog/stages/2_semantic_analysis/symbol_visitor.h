@@ -24,7 +24,7 @@ public:
 private:
     symbols::symbol_type get_type(ast::symbol& symbol);
 
-    ASTCLASS_SYMBOL(AVPROTO);
+    ASTCLASS_SYMBOL(AVPROTO)
 };
 
 }

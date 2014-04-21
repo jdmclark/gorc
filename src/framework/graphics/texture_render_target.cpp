@@ -8,7 +8,7 @@ gorc::graphics::texture_render_target::texture_render_target(const box<2, int>& 
     glGenTextures(1, &texture_name);
     glBindTexture(GL_TEXTURE_2D, texture_name);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, get_size<0>(size), get_size<1>(size), 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, get_size<0>(size), get_size<1>(size), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

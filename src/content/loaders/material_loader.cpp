@@ -99,7 +99,7 @@ gorc::content::loaders::material_loader::material_loader(const assets::colormap&
     return;
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::material> mat(new content::assets::material());
 
     char magic[4];
@@ -129,7 +129,8 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
             MaterialColorRecordHeader colorRecord;
             file.read(&colorRecord, sizeof(MaterialColorRecordHeader));
 
-            vector<3, uint8_t> color, lightcolor;
+            vector<3, uint8_t> color = make_zero_vector<3, uint8_t>();
+            vector<3, uint8_t> lightcolor = make_zero_vector<3, uint8_t>();
 
             if(header.BitDepth == 8) {
                 color = colormap.get_color(static_cast<uint8_t>(colorRecord.ColorNumber));
@@ -137,10 +138,31 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
             }
 
             // Use 16x16 as a safe default texture size for color mats.
-            size_t bufsz = 16 * 16 * 4;
+            constexpr size_t bufsz = 16 * 16 * 4;
             uint8_t buffer[bufsz];
 
-            for(uint8_t* buf_idx = buffer; buf_idx < buffer + bufsz; buf_idx += 4) {
+            for(size_t i = 0; i < bufsz; ++i) {
+                switch(i & 0x3) {
+                case 0x0:
+                    buffer[i] = get<0>(color);
+                    break;
+
+                case 0x1:
+                    buffer[i] = get<1>(color);
+                    break;
+
+                case 0x2:
+                    buffer[i] = get<2>(color);
+                    break;
+
+                case 0x3:
+                    buffer[i] = 255U;
+                    break;
+                }
+            }
+
+            for(size_t i = 0; i < bufsz; i += 4) {
+                uint8_t* buf_idx = &buffer[i];
                 buf_idx[0] = get<0>(color);
                 buf_idx[1] = get<1>(color);
                 buf_idx[2] = get<2>(color);
@@ -149,7 +171,8 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
             auto diffuse = LoadMaterialFromMemory(16, 16, buffer);
 
-            for(uint8_t* buf_idx = buffer; buf_idx < buffer + bufsz; buf_idx += 4) {
+            for(size_t i = 0; i < bufsz; i += 4) {
+                uint8_t* buf_idx = &buffer[i];
                 buf_idx[0] = get<0>(lightcolor);
                 buf_idx[1] = get<1>(lightcolor);
                 buf_idx[2] = get<2>(lightcolor);

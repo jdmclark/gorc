@@ -29,7 +29,7 @@ void SkipToNextModelSection(text::tokenizer& tok) {
     tok.assert_punctuator(":");
 }
 
-void ParseModelHeaderSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseModelHeaderSection(assets::model&, text::tokenizer& tok, manager&, diagnostics::report& report) {
     std::string magic = tok.get_space_delimited_string();
     if(!boost::iequals(magic, "3DO")) {
         report.add_error("ModelLoader::ParseModelHeaderSection", boost::str(boost::format("expected \'3DO\', found \'%s\'") % magic),
@@ -40,7 +40,7 @@ void ParseModelHeaderSection(assets::model& model, text::tokenizer& tok, manager
     tok.get_number<double>();
 }
 
-void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manager&, diagnostics::report&) {
     tok.assert_identifier("materials");
 
     unsigned int num = tok.get_number<unsigned int>();
@@ -51,7 +51,7 @@ void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manag
     }
 }
 
-void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager&, diagnostics::report&) {
     tok.assert_identifier("RADIUS");
     model.radius = tok.get_number<float>();
 
@@ -181,7 +181,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
     }
 }
 
-void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manager&, diagnostics::report&) {
     tok.assert_identifier("hierarchy");
     tok.assert_identifier("nodes");
 
@@ -219,7 +219,7 @@ void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manage
     }
 }
 
-void PostprocessModel(assets::model& model, manager& manager, const assets::colormap& colormap, diagnostics::report& report) {
+void PostprocessModel(assets::model& model, manager& manager, const assets::colormap& colormap, diagnostics::report&) {
     for(const auto& mat_name : model.material_entries) {
         model.materials.push_back(&manager.load<assets::material>(mat_name, colormap));
     }

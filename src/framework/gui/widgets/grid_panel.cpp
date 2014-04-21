@@ -1,7 +1,7 @@
 #include "grid_panel.h"
 #include "framework/gui/gui_view.h"
 
-gorc::gui::widgets::grid_panel::grid_panel(gui_view& v, const content::assets::texture& tex,
+gorc::gui::widgets::grid_panel::grid_panel(gui_view&, const content::assets::texture& tex,
         int col_width, int n_cols, int row_width, int n_rows, int gutter_size)
     : tex(tex), row_width(row_width), n_rows(n_rows), col_width(col_width), n_cols(n_cols), gutter_size(gutter_size) {
     return;
@@ -24,13 +24,13 @@ gorc::box<2, int> gorc::gui::widgets::grid_panel::get_child_position(const gui_v
     return get_default_child_position(v, child, make_box(make_vector(x_pos, y_pos), make_vector(x1_pos, y1_pos)));
 }
 
-gorc::box<2, int> gorc::gui::widgets::grid_panel::get_minimum_size(const gui_view& v) const {
+gorc::box<2, int> gorc::gui::widgets::grid_panel::get_minimum_size(const gui_view&) const {
     return make_box(make_vector(0, 0), make_vector(
             (n_cols - 1) * (col_width + gutter_size) + col_width,
             (n_rows - 1) * (row_width + gutter_size) + row_width));
 }
 
-void gorc::gui::widgets::grid_panel::draw(const time& time, graphics::gui_renderer& r, int depth) const {
+void gorc::gui::widgets::grid_panel::draw(const time&, graphics::gui_renderer& r, int depth) const {
     if(draw_wireframe) {
         constexpr auto frame_texcoords = make_vector(0, 32);
 

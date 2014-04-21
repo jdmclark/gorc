@@ -23,11 +23,11 @@ public:
     }
 };
 
-void OverloadVerb(int a, int b) {
+void OverloadVerb(int, int) {
     return;
 }
 
-void ExtVerb(int a, int b, int c) {
+void ExtVerb(int, int, int) {
     return;
 }
 
@@ -103,7 +103,7 @@ test_case(get_verb) {
     catch(undefined_verb_exception&) {
         table.add_verb("Test", EmptyVerb);
 
-        verb_id id = table.get_verb("Test");
+        table.get_verb("Test");
 
         return;
     }
@@ -117,13 +117,13 @@ test_case(parameter_count) {
 
     verb_id id = table.get_verb("Test");
 
-    assert_eq(table.parameter_count(id), 0);
+    assert_eq(table.parameter_count(id), 0UL);
 
     table.add_verb("Test2", ExtVerb);
 
     id = table.get_verb("Test2");
 
-    assert_eq(table.parameter_count(id), 3);
+    assert_eq(table.parameter_count(id), 3UL);
 }
 
 test_case(return_type) {
@@ -160,7 +160,7 @@ test_case(invoke) {
     stack.push(5.0f);
     stack.push(10);
 
-    assert_eq(static_cast<float>(table.invoke(id, stack, nullptr)), 50);
+    assert_le(fabsf(static_cast<float>(table.invoke(id, stack, nullptr)) - 50.0f), 0.0f);
 }
 
 test_case(VerbExists) {

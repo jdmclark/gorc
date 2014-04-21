@@ -14,7 +14,7 @@ template <typename T> auto dispatch_set_mouse_cursor_position(T& view, const tim
     view.set_mouse_cursor_position(time, cursor_pos);
 }
 
-template <typename... T> void dispatch_set_mouse_cursor_position(const T&... args) {
+template <typename... T> void dispatch_set_mouse_cursor_position(const T&...) {
     return;
 }
 
@@ -46,7 +46,7 @@ template <typename T> auto dispatch_handle_mouse_input(T& view, const time& time
     view.handle_mouse_input(time);
 }
 
-template <typename... T> void dispatch_handle_mouse_input(const T&... args) {
+template <typename... T> void dispatch_handle_mouse_input(const T&...) {
     return;
 }
 
@@ -54,7 +54,7 @@ template <typename T> auto dispatch_handle_keyboard_input(T& view, const time& t
     view.handle_keyboard_input(time);
 }
 
-template <typename... T> void dispatch_handle_keyboard_input(const T&... args) {
+template <typename... T> void dispatch_handle_keyboard_input(const T&...) {
     return;
 }
 
@@ -62,7 +62,7 @@ template <typename T> auto dispatch_handle_text_input(T& view, const time& time,
     view.handle_text_input(time, ch);
 }
 
-template <typename... T> void dispatch_handle_text_input(const T&... args) {
+template <typename... T> void dispatch_handle_text_input(const T&...) {
     return;
 }
 

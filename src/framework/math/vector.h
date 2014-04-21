@@ -116,17 +116,13 @@ template <typename F, typename... G> inline constexpr vector<sizeof...(G), F> ma
 
 template <size_t n, typename F = float> inline vector<n, F> make_zero_vector() {
     vector<n, F> rv;
-    for(auto& em : rv) {
-        em = 0;
-    }
+    std::fill(rv.begin(), rv.end(), 0);
     return rv;
 }
 
 template <size_t n, typename F = float> inline vector<n, F> make_fill_vector(F c) {
     vector<n, F> rv;
-    for(auto& em : rv) {
-        em = c;
-    }
+    std::fill(rv.begin(), rv.end(), c);
     return rv;
 }
 
@@ -181,7 +177,7 @@ template <size_t n, typename F> inline constexpr vector<n, F> normalize(const ve
 }
 
 template <size_t m, size_t n, typename F, typename Fn, typename... G> inline typename std::enable_if<(m == n), void>::type
-        inner_apply(Fn f, const vector<n, F>& v, G... v0) {
+        inner_apply(Fn f, const vector<n, F>&, G... v0) {
     f(v0...);
 }
 
@@ -195,7 +191,7 @@ template <size_t n, typename F, typename Fn> inline void apply(Fn f, const vecto
 }
 
 template <typename Rv, size_t m, size_t n, typename F, typename Fn, typename... G> inline typename std::enable_if<(m == n), Rv>::type
-        inner_apply_v(Fn f, const vector<n, F>& v, G... v0) {
+        inner_apply_v(Fn f, const vector<n, F>&, G... v0) {
     return f(v0...);
 }
 

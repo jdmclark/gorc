@@ -23,7 +23,7 @@ public:
         verbs::verb_table& vt, diagnostics::report& report);
 
 private:
-    ASTCLASS_EXPRESSION(AVPROTO);
+    ASTCLASS_EXPRESSION(AVPROTO)
 };
 
 }

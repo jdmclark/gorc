@@ -141,14 +141,20 @@ public:
         vector<3> closest_contact_position;
         vector<3> closest_contact_normal;
 
-        if_set(prev_contact, then_do, [&](const contact& prev_ct) {
-            closest_contact_distance = length(prev_ct.position - std::get<0>(cam_segment));
+        if(const contact* prev_ct = prev_contact) {
+            closest_contact_distance = length(prev_ct->position - std::get<0>(cam_segment));
             has_contact = true;
-            if_set(prev_ct.contact_thing_id, then_do, [&closest_contact_thing_id](int c) { closest_contact_thing_id = c; });
-            if_set(prev_ct.contact_surface_id, then_do, [&closest_contact_surface_id](int c) { closest_contact_surface_id = c; });
-            closest_contact_position = prev_ct.position;
-            closest_contact_normal = prev_ct.normal;
-        });
+            if(const int* c = prev_ct->contact_thing_id) {
+                closest_contact_thing_id = *c;
+            }
+
+            if(const int* c = prev_ct->contact_surface_id) {
+                closest_contact_surface_id = *c;
+            }
+
+            closest_contact_position = prev_ct->position;
+            closest_contact_normal = prev_ct->normal;
+        }
 
         // Find contact among sectors.
         // Get list of sectors within thing influence.
@@ -171,14 +177,14 @@ public:
                 const auto& surface = model->surfaces[i];
 
                 auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
-                if_set(maybe_nearest_point, then_do, [&](const vector<3>& nearest_point) {
+                if(const vector<3>* nearest_point = maybe_nearest_point) {
                     if(surface_p(i)) {
-                        auto dist = length(nearest_point - std::get<0>(cam_segment));
+                        auto dist = length(*nearest_point - std::get<0>(cam_segment));
                         if(dist < closest_contact_distance) {
                             closest_contact_distance = dist;
                             has_contact = true;
                             closest_contact_surface_id = i;
-                            closest_contact_position = nearest_point;
+                            closest_contact_position = *nearest_point;
                             closest_contact_normal = surface.normal;
                         }
                     }
@@ -186,7 +192,7 @@ public:
                     if(surface.adjoin >= 0) {
                         segment_query_open_sectors.push_back(surface.adjoined_sector);
                     }
-                });
+                }
             }
         }
 
@@ -209,18 +215,18 @@ public:
 
             if(col_thing.collide == flags::collide_type::sphere) {
                 auto maybe_int = segment_sphere_intersection(cam_segment, sphere(col_thing.position, col_thing.size));
-                if_set(maybe_int, then_do, [&](const vector<3>& int_point) {
+                if(const vector<3>* int_point = maybe_int) {
                     // Sphere intersected.
-                    float col_dist = length(int_point - std::get<0>(cam_segment));
+                    float col_dist = length(*int_point - std::get<0>(cam_segment));
                     if(col_dist < closest_contact_distance) {
                         closest_contact_distance = col_dist;
                         has_contact = true;
                         closest_contact_surface_id = -1;
                         closest_contact_thing_id = col_thing_id;
-                        closest_contact_normal = normalize(int_point - col_thing.position);
-                        closest_contact_position = int_point;
+                        closest_contact_normal = normalize(*int_point - col_thing.position);
+                        closest_contact_position = *int_point;
                     }
-                });
+                }
             }
             else if(col_thing.collide == flags::collide_type::face) {
                 if(!col_thing.model_3d) {

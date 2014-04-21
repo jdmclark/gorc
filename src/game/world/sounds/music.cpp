@@ -28,7 +28,7 @@ void gorc::game::world::sounds::music::set_volume(float volume) {
     internal_music.setVolume(100.0f * volume);
 }
 
-void gorc::game::world::sounds::music::update(double dt) {
+void gorc::game::world::sounds::music::update(double) {
     if(play && (internal_music.getStatus() != sf::Music::Playing)) {
         // Advance to next song.
         if(current == end) {

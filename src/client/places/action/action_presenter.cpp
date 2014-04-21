@@ -75,7 +75,7 @@ void gorc::client::action::action_presenter::handle_keyboard_input(const time& t
     key_dispatcher.handle_keyboard_input(time);
 }
 
-void gorc::client::action::action_presenter::on_mouse_button_down(const time& time, const vector<2, int>& cursor_pos, sf::Mouse::Button b) {
+void gorc::client::action::action_presenter::on_mouse_button_down(const time&, const vector<2, int>&, sf::Mouse::Button b) {
     int current_player = app.components.current_level_presenter->get_local_player_thing();
 
     if(b == sf::Mouse::Left) {
@@ -86,7 +86,7 @@ void gorc::client::action::action_presenter::on_mouse_button_down(const time& ti
     }
 }
 
-void gorc::client::action::action_presenter::on_mouse_button_up(const time& time, const vector<2, int>& cursor_pos, sf::Mouse::Button b) {
+void gorc::client::action::action_presenter::on_mouse_button_up(const time&, const vector<2, int>&, sf::Mouse::Button b) {
     int current_player = app.components.current_level_presenter->get_local_player_thing();
 
     if(b == sf::Mouse::Left) {
@@ -97,7 +97,7 @@ void gorc::client::action::action_presenter::on_mouse_button_up(const time& time
     }
 }
 
-void gorc::client::action::action_presenter::on_keyboard_key_down(const time& time, sf::Keyboard::Key k, bool shift, bool ctrl, bool alt) {
+void gorc::client::action::action_presenter::on_keyboard_key_down(const time&, sf::Keyboard::Key k, bool, bool, bool) {
     int current_player = app.components.current_level_presenter->get_local_player_thing();
 
     switch(k) {
@@ -186,7 +186,7 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const time& ti
     }
 }
 
-void gorc::client::action::action_presenter::on_keyboard_key_up(const time& time, sf::Keyboard::Key k, bool shift, bool ctrl, bool alt) {
+void gorc::client::action::action_presenter::on_keyboard_key_up(const time&, sf::Keyboard::Key k, bool, bool, bool) {
     switch(k) {
     case sf::Keyboard::F2:
         app.components.current_level_presenter->inventory_presenter->on_item_hotkey_released(app.components.current_level_presenter->get_local_player_thing(), 42);

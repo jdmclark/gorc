@@ -10,9 +10,9 @@ protected:
     std::shared_ptr<mock_reporter> mockReporter;
 
 public:
-    expect_test_fixture() {
-        originalReporter = test::test_reporter;
-        mockReporter = std::make_shared<mock_reporter>();
+    expect_test_fixture()
+        : originalReporter(test::test_reporter), mockReporter(std::make_shared<mock_reporter>()) {
+        return;
     }
 };
 

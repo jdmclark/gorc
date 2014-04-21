@@ -80,7 +80,7 @@ public:
     virtual void startup(event::event_bus& event_bus, content::manager& content) = 0;
     virtual void shutdown() = 0;
 
-    virtual void update(const time& time, const box<2, int>& view_size) {
+    virtual void update(const time&, const box<2, int>&) {
         return;
     }
 
@@ -145,9 +145,9 @@ private:
 
         views.handle_input(time, mouse_pos);
 
-        if_set(place_controller.current_presenter(), then_do, [&time] (PresenterT& curr_presenter) {
-            curr_presenter.update(time);
-        });
+        if(PresenterT* curr_presenter = place_controller.current_presenter()) {
+            curr_presenter->update(time);
+        }
 
         update(time, view_size);
     }
@@ -157,7 +157,7 @@ public:
         bool running = true;
 
         // Register core event handlers
-        event_bus.add_handler<events::exit>([this, &running](events::exit& e) {
+        event_bus.add_handler<events::exit>([this, &running](events::exit&) {
             // A component has requested application exit.
             // Check if components can quit.
             events::exiting exiting_event;

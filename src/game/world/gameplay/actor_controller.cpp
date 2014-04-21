@@ -15,8 +15,8 @@ void gorc::game::world::gameplay::actor_controller::update(int thing_id, double 
         auto v = thing.ai_look_target;
         auto plane_v = normalize(make_vector(get<0>(v), get<1>(v)));
 
-        float base_yaw = to_degrees(atan2(get<1>(plane_look), get<0>(plane_look)));
-        float target_yaw = to_degrees(atan2(get<1>(plane_v), get<0>(plane_v)));
+        float base_yaw = to_degrees(atan2f(get<1>(plane_look), get<0>(plane_look)));
+        float target_yaw = to_degrees(atan2f(get<1>(plane_v), get<0>(plane_v)));
 
         if(fabs(base_yaw - target_yaw) <= 0.5) {
             thing.ai_mode_flags -= flags::ai_mode_flag::turning_to_face_target;
@@ -32,7 +32,7 @@ void gorc::game::world::gameplay::actor_controller::update(int thing_id, double 
 
         float vlen = length(v);
         if(vlen > 0.005f) {
-            thing.thrust = (v / vlen) * thing.ai_move_speed * dt * 6.0f;
+            thing.thrust = (v / vlen) * thing.ai_move_speed * static_cast<float>(dt) * 6.0f;
         }
         else {
             thing.thrust = make_zero_vector<3, float>();

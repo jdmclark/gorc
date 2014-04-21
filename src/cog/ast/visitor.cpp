@@ -12,7 +12,7 @@ gorc::cog::ast::visitor::~visitor()
     return;
 }
 
-void gorc::cog::ast::visitor::default_action(const std::string& action, node& n)
+void gorc::cog::ast::visitor::default_action(const std::string& action, node&)
 {
     diagnostics::helper::feature_not_implemented(report, visitor_name, action);
 }

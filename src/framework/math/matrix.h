@@ -19,8 +19,8 @@ template <size_t m, typename G> class matrix_col_vector_const_iterator;
 template <size_t m, typename G> class matrix_col_element_const_iterator;
 
 template <size_t n, typename F = float> class matrix {
-    template <unsigned int i, unsigned int j, size_t m, typename G> friend G& get(matrix<m, G>&);
-    template <unsigned int i, unsigned int j, size_t m, typename G> friend G get(const matrix<m, G>&);
+    template <size_t i, size_t j, size_t m, typename G> friend G& get(matrix<m, G>&);
+    template <size_t i, size_t j, size_t m, typename G> friend G get(const matrix<m, G>&);
     template <size_t m, typename G, typename... H> friend matrix<m, G> make_matrix(H&&...);
     template <size_t m, typename G> friend const G* make_opengl_matrix(const matrix<m, G>&);
     template <size_t m, typename G> friend matrix<m, G> make_scale_matrix(const vector<m, G>&);
@@ -39,11 +39,11 @@ template <size_t n, typename F = float> class matrix {
 private:
     F data[n][n];
 
-    inline F& get(unsigned int i, unsigned int j) {
+    inline F& get(size_t i, size_t j) {
         return data[j][i];
     }
 
-    inline F get(unsigned int i, unsigned int j) const {
+    inline F get(size_t i, size_t j) const {
         return data[j][i];
     }
 
@@ -54,8 +54,8 @@ private:
 public:
     matrix transpose() const {
         matrix rv;
-        for(unsigned int i = 0; i < n; ++i) {
-            for(unsigned int j = 0; j < n; ++j) {
+        for(size_t i = 0; i < n; ++i) {
+            for(size_t j = 0; j < n; ++j) {
                 rv.get(i, j) = get(j, i);
             }
         }
@@ -65,8 +65,8 @@ public:
 
     inline matrix operator+(const matrix& m) const {
         matrix rv;
-        for(unsigned int i = 0; i < n; ++i) {
-            for(unsigned int j = 0; j < n; ++j) {
+        for(size_t i = 0; i < n; ++i) {
+            for(size_t j = 0; j < n; ++j) {
                 rv.get(i, j) = get(i, j) + m.get(i, j);
             }
         }
@@ -75,8 +75,8 @@ public:
 
     inline matrix operator-(const matrix& m) const {
         matrix rv;
-        for(unsigned int i = 0; i < n; ++i) {
-            for(unsigned int j = 0; j < n; ++j) {
+        for(size_t i = 0; i < n; ++i) {
+            for(size_t j = 0; j < n; ++j) {
                 rv.get(i, j) = get(i, j) - m.get(i, j);
             }
         }
@@ -85,10 +85,10 @@ public:
 
     inline matrix operator*(const matrix& m) const {
         matrix rv;
-        for(unsigned int i = 0; i < n; ++i) {
-            for(unsigned int j = 0; j < n; ++j) {
+        for(size_t i = 0; i < n; ++i) {
+            for(size_t j = 0; j < n; ++j) {
                 rv.get(i, j) = 0;
-                for(unsigned int r = 0; r < n; ++r) {
+                for(size_t r = 0; r < n; ++r) {
                     rv.get(i, j) += get(i, r) * m.get(r, j);
                 }
             }
@@ -99,10 +99,10 @@ public:
     inline vector<n, F> operator*(const vector<n, F>& v) const {
         auto rv = make_zero_vector<n, F>();
         auto rt = rv.begin();
-        for(unsigned int i = 0; i < n; ++i, ++rt) {
+        for(size_t i = 0; i < n; ++i, ++rt) {
             *rt = 0;
             auto it = v.begin();
-            for(unsigned int j = 0; j < n; ++j, ++it) {
+            for(size_t j = 0; j < n; ++j, ++it) {
                 *rt += get(i, j) * (*it);
             }
         }
@@ -113,10 +113,10 @@ public:
     inline vector<n - 1, F> transform(const vector<n - 1, F>& v) const {
         auto rv = make_zero_vector<n - 1, F>();
         auto rt = rv.begin();
-        for(unsigned int i = 0; i < n - 1; ++i, ++rt) {
+        for(size_t i = 0; i < n - 1; ++i, ++rt) {
             *rt = 0;
             auto it = v.begin();
-            for(unsigned int j = 0; j < n - 1; ++j, ++it) {
+            for(size_t j = 0; j < n - 1; ++j, ++it) {
                 *rt += get(i, j) * (*it);
             }
 
@@ -129,10 +129,10 @@ public:
     inline vector<n - 1, F> transform_normal(const vector<n - 1, F>& v) const {
         auto rv = make_zero_vector<n - 1, F>();
         auto rt = rv.begin();
-        for(unsigned int i = 0; i < n - 1; ++i, ++rt) {
+        for(size_t i = 0; i < n - 1; ++i, ++rt) {
             *rt = 0;
             auto it = v.begin();
-            for(unsigned int j = 0; j < n - 1; ++j, ++it) {
+            for(size_t j = 0; j < n - 1; ++j, ++it) {
                 *rt += get(i, j) * (*it);
             }
         }
@@ -713,13 +713,13 @@ public:
     }
 };
 
-template <unsigned int i, unsigned int j, size_t n, typename F> F& get(matrix<n, F>& matrix) {
+template <size_t i, size_t j, size_t n, typename F> F& get(matrix<n, F>& matrix) {
     static_assert(i < n, "row index out of bounds");
     static_assert(j < n, "column index out of bounds");
     return matrix.get(i, j);
 }
 
-template <unsigned int i, unsigned int j, size_t n, typename F> F get(const matrix<n, F>& matrix) {
+template <size_t i, size_t j, size_t n, typename F> F get(const matrix<n, F>& matrix) {
     static_assert(i < n, "row index out of bounds");
     static_assert(j < n, "column index out of bounds");
     return matrix.get(i, j);
@@ -751,10 +751,10 @@ template <size_t n, typename F = float> matrix<n, F> make_scale_matrix(const vec
     matrix<n, F> rv;
     auto kt = amt.begin();
     auto it = rv.row_begin();
-    for(unsigned int i = 0; i < n; ++i) {
+    for(size_t i = 0; i < n; ++i) {
 
         auto jt = it.begin();
-        for(unsigned int j = 0; j < n; ++j) {
+        for(size_t j = 0; j < n; ++j) {
             *jt = (i == j) ? *kt : 0;
 
             ++jt;
@@ -786,7 +786,7 @@ template <typename F> matrix<4, F> make_frustum_matrix(F left, F right, F bottom
 }
 
 template <typename F> matrix<4, F> make_perspective_matrix(F fovy_in_degrees, F aspect_ratio, F znear, F zfar) {
-    F ymax = znear * tan(to_radians(fovy_in_degrees) * 0.5);
+    F ymax = znear * static_cast<F>(tan(to_radians(static_cast<double>(fovy_in_degrees)) * 0.5));
     F xmax = ymax * aspect_ratio;
     return make_frustum_matrix(-xmax, xmax, -ymax, ymax, znear, zfar);
 }
@@ -824,8 +824,8 @@ template <typename F> matrix<4, F> make_rotation_matrix(F angle, const vector<3,
     F ay = get<1>(axis);
     F az = get<2>(axis);
 
-    F cost = cos(to_radians(angle));
-    F sint = sin(to_radians(angle));
+    F cost = static_cast<F>(cos(to_radians(angle)));
+    F sint = static_cast<F>(sin(to_radians(angle)));
     F icost = 1 - cost;
 
     return make_matrix<4, F>(

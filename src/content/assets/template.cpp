@@ -10,6 +10,27 @@ namespace gorc {
 namespace content {
 namespace assets {
 
+class template_parser_args {
+public:
+    text::tokenizer& tok;
+    content::manager& content;
+    const assets::colormap& colormap;
+    const cog::compiler& compiler;
+    const std::unordered_map<std::string, int>& templates;
+    diagnostics::report& report;
+
+    template_parser_args(text::tokenizer& tok, content::manager& content,
+            const assets::colormap& colormap, const cog::compiler& compiler,
+            const std::unordered_map<std::string, int>& templates,
+            diagnostics::report& report) :
+                tok(tok), content(content), colormap(colormap), compiler(compiler),
+                templates(templates), report(report) {
+        return;
+    }
+};
+
+#define TPP_ARGS thing_template& tpl, template_parser_args& args
+
 static const std::unordered_map<std::string, flags::thing_type> TemplateTypeMap {
     { "actor", flags::thing_type::Actor },
     { "weapon", flags::thing_type::Weapon },
@@ -101,7 +122,7 @@ void tpl_quaternion_mapper(quaternion<float>& value, text::tokenizer& tok) {
     value = make_euler(v);
 }
 
-void tpl_template_mapper(int& value, int defaultvalue, const std::unordered_map<std::string, int>& templates,
+void tpl_template_mapper(int& value, int, const std::unordered_map<std::string, int>& templates,
         text::tokenizer& tok, diagnostics::report& report) {
     std::string tpl_name = tok.get_space_delimited_string();
     std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
@@ -157,57 +178,54 @@ void tpl_add_frame(thing_template& tpl, text::tokenizer& tok) {
     }
 }
 
-#define TPP_ARGS thing_template& tpl, text::tokenizer& tok, content::manager& content, const colormap& colormap, const cog::compiler& compiler, const std::unordered_map<std::string, int>& templates, diagnostics::report& report
-
-using TemplateParameterParser = std::function<void(thing_template&, text::tokenizer&, content::manager&, const colormap&,
-        const cog::compiler&, const std::unordered_map<std::string, int>& templates, diagnostics::report&)>;
+using TemplateParameterParser = std::function<void(thing_template&, template_parser_args&)>;
 
 static const std::unordered_map<std::string, TemplateParameterParser> TemplateParameterParserMap {
-    { "actorflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.actor_flags, flag_set<flags::actor_flag>(), tok, report); }},
-    { "angvel", [](TPP_ARGS) { tpl_vector_mapper(tpl.ang_vel, tok); }},
-    { "cog", [](TPP_ARGS) { tpl_asset_loader(tpl.cog, tok, content, compiler); }},
-    { "collide", [](TPP_ARGS) { tpl_enum_mapper(tpl.collide, flags::collide_type::none, tok, report); }},
-    { "creatething", [](TPP_ARGS) { tpl_template_mapper(tpl.create_thing, 0, templates, tok, report); }},
-    { "damage", [](TPP_ARGS) { tpl_number_mapper(tpl.damage, 0.0f, tok, report); }},
-    { "damageclass", [](TPP_ARGS) { tpl_flag_mapper(tpl.damage_class, flag_set<flags::damage_flag>(), tok, report); }},
-    { "explode", [](TPP_ARGS) { tpl_template_mapper(tpl.explode, 0, templates, tok, report); }},
-    { "eyeoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.eye_offset, tok); }},
-    { "fleshhit", [](TPP_ARGS) { tpl_template_mapper(tpl.flesh_hit, 0, templates, tok, report); }},
-    { "frame", [](TPP_ARGS) { tpl_add_frame(tpl, tok); }},
-    { "headpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.head_pitch, 0.0f, tok, report); }},
-    { "health", [](TPP_ARGS) { tpl_number_mapper(tpl.health, 100.0f, tok, report); }},
-    { "height", [](TPP_ARGS) { tpl_number_mapper(tpl.height, 0.18f, tok, report); }},
-    { "jumpspeed", [](TPP_ARGS) { tpl_number_mapper(tpl.jump_speed, 1.5f, tok, report); }},
-    { "light", [](TPP_ARGS) { tpl_number_mapper(tpl.light, 0.0f, tok, report); }},
-    { "lightintensity", [](TPP_ARGS) { tpl_number_mapper(tpl.light_intensity, 0.0f, tok, report); }},
-    { "lightoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.light_offset, tok); }},
-    { "mass", [](TPP_ARGS) { tpl_number_mapper(tpl.mass, 2.0f, tok, report); }},
-    { "maxheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.max_head_pitch, 80.0f, tok, report); }},
-    { "maxhealth", [](TPP_ARGS) { tpl_number_mapper(tpl.max_health, 100.0f, tok, report); }},
-    { "maxlight", [](TPP_ARGS) { tpl_number_mapper(tpl.light, 1.0f, tok, report); }},
-    { "maxrotthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_thrust, 180.0f, tok, report); }},
-    { "maxrotvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_vel, 200.0f, tok, report); }},
-    { "maxthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_thrust, 2.00f, tok, report); }},
-    { "maxvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_vel, 1.0f, tok, report); }},
-    { "mindamage", [](TPP_ARGS) { tpl_number_mapper(tpl.min_damage, 0.0f, tok, report); }},
-    { "minheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.min_head_pitch, -80.0f, tok, report); }},
-    { "model3d", [](TPP_ARGS) { tpl_asset_loader(tpl.model_3d, tok, content, colormap); }},
-    { "move", [](TPP_ARGS) { tpl_value_mapper(MoveTypeMap, tpl.move, flags::move_type::none, tok, report); }},
-    { "movesize", [](TPP_ARGS) { tpl_number_mapper(tpl.move_size, 0.05f, tok, report); }},
-    { "numframes", [](TPP_ARGS) { /* Silently consume numframes */ tok.get_number<int>(); }},
-    { "orient", [](TPP_ARGS) { tpl_quaternion_mapper(tpl.orient, tok); }},
-    { "physflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.physics_flags, flag_set<flags::physics_flag>(), tok, report); }},
-    { "puppet", [](TPP_ARGS) { tpl_asset_loader(tpl.pup, tok, content); }},
-    { "rotthrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.rot_thrust, tok); }},
-    { "size", [](TPP_ARGS) { tpl_number_mapper(tpl.size, 0.05f, tok, report); }},
-    { "soundclass", [](TPP_ARGS) { tpl_asset_loader(tpl.sound_class, tok, content); }},
-    { "sprite", [](TPP_ARGS) { tpl_asset_loader(tpl.spr, tok, content, colormap); }},
-    { "thingflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.flags, flag_set<flags::thing_flag>(), tok, report); }},
-    { "thrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.thrust, tok); }},
-    { "timer", [](TPP_ARGS) { tpl_number_mapper(tpl.timer, 0.0f, tok, report); }},
-    { "type", [](TPP_ARGS) { tpl_value_mapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, tok, report); }},
-    { "typeflags", [](TPP_ARGS) { tpl_number_mapper(tpl.type_flags, 0, tok, report); }},
-    { "vel", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, tok); }}
+    { "actorflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.actor_flags, flag_set<flags::actor_flag>(), args.tok, args.report); }},
+    { "angvel", [](TPP_ARGS) { tpl_vector_mapper(tpl.ang_vel, args.tok); }},
+    { "cog", [](TPP_ARGS) { tpl_asset_loader(tpl.cog, args.tok, args.content, args.compiler); }},
+    { "collide", [](TPP_ARGS) { tpl_enum_mapper(tpl.collide, flags::collide_type::none, args.tok, args.report); }},
+    { "creatething", [](TPP_ARGS) { tpl_template_mapper(tpl.create_thing, 0, args.templates, args.tok, args.report); }},
+    { "damage", [](TPP_ARGS) { tpl_number_mapper(tpl.damage, 0.0f, args.tok, args.report); }},
+    { "damageclass", [](TPP_ARGS) { tpl_flag_mapper(tpl.damage_class, flag_set<flags::damage_flag>(), args.tok, args.report); }},
+    { "explode", [](TPP_ARGS) { tpl_template_mapper(tpl.explode, 0, args.templates, args.tok, args.report); }},
+    { "eyeoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.eye_offset, args.tok); }},
+    { "fleshhit", [](TPP_ARGS) { tpl_template_mapper(tpl.flesh_hit, 0, args.templates, args.tok, args.report); }},
+    { "frame", [](TPP_ARGS) { tpl_add_frame(tpl, args.tok); }},
+    { "headpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.head_pitch, 0.0f, args.tok, args.report); }},
+    { "health", [](TPP_ARGS) { tpl_number_mapper(tpl.health, 100.0f, args.tok, args.report); }},
+    { "height", [](TPP_ARGS) { tpl_number_mapper(tpl.height, 0.18f, args.tok, args.report); }},
+    { "jumpspeed", [](TPP_ARGS) { tpl_number_mapper(tpl.jump_speed, 1.5f, args.tok, args.report); }},
+    { "light", [](TPP_ARGS) { tpl_number_mapper(tpl.light, 0.0f, args.tok, args.report); }},
+    { "lightintensity", [](TPP_ARGS) { tpl_number_mapper(tpl.light_intensity, 0.0f, args.tok, args.report); }},
+    { "lightoffset", [](TPP_ARGS) { tpl_vector_mapper(tpl.light_offset, args.tok); }},
+    { "mass", [](TPP_ARGS) { tpl_number_mapper(tpl.mass, 2.0f, args.tok, args.report); }},
+    { "maxheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.max_head_pitch, 80.0f, args.tok, args.report); }},
+    { "maxhealth", [](TPP_ARGS) { tpl_number_mapper(tpl.max_health, 100.0f, args.tok, args.report); }},
+    { "maxlight", [](TPP_ARGS) { tpl_number_mapper(tpl.light, 1.0f, args.tok, args.report); }},
+    { "maxrotthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_thrust, 180.0f, args.tok, args.report); }},
+    { "maxrotvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_rot_vel, 200.0f, args.tok, args.report); }},
+    { "maxthrust", [](TPP_ARGS) { tpl_number_mapper(tpl.max_thrust, 2.00f, args.tok, args.report); }},
+    { "maxvel", [](TPP_ARGS) { tpl_number_mapper(tpl.max_vel, 1.0f, args.tok, args.report); }},
+    { "mindamage", [](TPP_ARGS) { tpl_number_mapper(tpl.min_damage, 0.0f, args.tok, args.report); }},
+    { "minheadpitch", [](TPP_ARGS) { tpl_number_mapper(tpl.min_head_pitch, -80.0f, args.tok, args.report); }},
+    { "model3d", [](TPP_ARGS) { tpl_asset_loader(tpl.model_3d, args.tok, args.content, args.colormap); }},
+    { "move", [](TPP_ARGS) { tpl_value_mapper(MoveTypeMap, tpl.move, flags::move_type::none, args.tok, args.report); }},
+    { "movesize", [](TPP_ARGS) { tpl_number_mapper(tpl.move_size, 0.05f, args.tok, args.report); }},
+    { "numframes", [](thing_template&, template_parser_args& args) { /* Silently consume numframes */ args.tok.get_number<int>(); }},
+    { "orient", [](TPP_ARGS) { tpl_quaternion_mapper(tpl.orient, args.tok); }},
+    { "physflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.physics_flags, flag_set<flags::physics_flag>(), args.tok, args.report); }},
+    { "puppet", [](TPP_ARGS) { tpl_asset_loader(tpl.pup, args.tok, args.content); }},
+    { "rotthrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.rot_thrust, args.tok); }},
+    { "size", [](TPP_ARGS) { tpl_number_mapper(tpl.size, 0.05f, args.tok, args.report); }},
+    { "soundclass", [](TPP_ARGS) { tpl_asset_loader(tpl.sound_class, args.tok, args.content); }},
+    { "sprite", [](TPP_ARGS) { tpl_asset_loader(tpl.spr, args.tok, args.content, args.colormap); }},
+    { "thingflags", [](TPP_ARGS) { tpl_flag_mapper(tpl.flags, flag_set<flags::thing_flag>(), args.tok, args.report); }},
+    { "thrust", [](TPP_ARGS) { tpl_vector_mapper(tpl.thrust, args.tok); }},
+    { "timer", [](TPP_ARGS) { tpl_number_mapper(tpl.timer, 0.0f, args.tok, args.report); }},
+    { "type", [](TPP_ARGS) { tpl_value_mapper(TemplateTypeMap, tpl.type, flags::thing_type::Free, args.tok, args.report); }},
+    { "typeflags", [](TPP_ARGS) { tpl_number_mapper(tpl.type_flags, 0, args.tok, args.report); }},
+    { "vel", [](TPP_ARGS) { tpl_vector_mapper(tpl.vel, args.tok); }}
 };
 
 #undef TPP_ARGS
@@ -218,6 +236,8 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 
 void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, content::manager& manager, const colormap& cmp,
         const cog::compiler& compiler, const std::unordered_map<std::string, int>& templates, diagnostics::report& report) {
+    template_parser_args tp_args(tok, manager, cmp, compiler, templates, report);
+
     bool oldReportEOL = tok.get_report_eol();
     tok.set_report_eol(true);
 
@@ -238,7 +258,7 @@ void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, con
                 tok.get_space_delimited_string();
             }
             else {
-                it->second(*this, tok, manager, cmp, compiler, templates, report);
+                it->second(*this, tp_args);
             }
         }
     }

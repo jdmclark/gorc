@@ -28,7 +28,7 @@ void SkipToNextAnimationSection(text::tokenizer& tok) {
     tok.assert_punctuator(":");
 }
 
-void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, manager&, diagnostics::report&) {
     tok.assert_identifier("FLAGS");
     anim.flags = flag_set<flags::key_flag>(tok.get_number<uint32_t>());
 
@@ -45,7 +45,7 @@ void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, 
     tok.get_number<unsigned int>();
 }
 
-void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, manager&, diagnostics::report&) {
     tok.assert_identifier("MARKERS");
     unsigned int num_markers = tok.get_number<unsigned int>();
 
@@ -55,7 +55,7 @@ void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, manager&
     }
 }
 
-void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, manager&, diagnostics::report&) {
     tok.assert_identifier("NODES");
 
     tok.assert_identifier("NODES");

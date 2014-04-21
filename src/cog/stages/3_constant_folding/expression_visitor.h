@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    ASTCLASS_EXPRESSION(AVPROTO);
+    ASTCLASS_EXPRESSION(AVPROTO)
 };
 
 }

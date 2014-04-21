@@ -65,27 +65,27 @@ physics_presenter::physics_node_visitor::physics_node_visitor(physics_presenter&
     return;
 }
 
-void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
+void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int) {
     const auto& mesh = model.geosets.front().meshes[mesh_id];
 
     for(const auto& face : mesh.faces) {
         auto maybe_face_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, mesh, face, current_matrix, sphere.radius);
 
-        if_set(maybe_face_nearest_point, then_do, [this, &face](const vector<3>& face_nearest_point) {
-            auto face_nearest_dist = length(sphere.position - face_nearest_point);
+        if(const vector<3>* face_nearest_point = maybe_face_nearest_point) {
+            auto face_nearest_dist = length(sphere.position - *face_nearest_point);
             if(face_nearest_dist <= sphere.radius) {
                 if(needs_response) {
-                    vector<3> contact_pos_vel = presenter.get_thing_path_moving_point_velocity(visited_thing_id, face_nearest_point);
+                    vector<3> contact_pos_vel = presenter.get_thing_path_moving_point_velocity(visited_thing_id, *face_nearest_point);
                     vector<3> nrm = current_matrix.transform_normal(face.normal);
                     vector<3> nrm_vel = nrm * ((sphere.radius / face_nearest_dist) - 1.0f);
 
-                    resting_manifolds.emplace_back(face_nearest_point, (sphere.position - face_nearest_point) / face_nearest_dist,
+                    resting_manifolds.emplace_back(*face_nearest_point, (sphere.position - *face_nearest_point) / face_nearest_dist,
                             contact_pos_vel + nrm_vel);
                     resting_manifolds.back().contact_thing_id = visited_thing_id;
                 }
                 physics_touched_thing_pairs.emplace(std::min(moving_thing_id, visited_thing_id), std::max(moving_thing_id, visited_thing_id));
             }
-        });
+        }
     }
 }
 
@@ -95,7 +95,7 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
 
     // Calculate influence AABBs and record overlapping sectors.
     for(const auto& thing : model->things) {
-        auto thing_off_v = make_vector(1.0f, 1.0f, 1.0f) * (thing.move_size + length(thing.vel) * dt);
+        auto thing_off_v = make_vector(1.0f, 1.0f, 1.0f) * (thing.move_size + length(thing.vel) * static_cast<float>(dt));
         auto thing_aabb = make_box(thing.position - thing_off_v, thing.position + thing_off_v);
 
         physics_thing_closed_set.clear();
@@ -133,7 +133,7 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
     return;
 }
 
-void physics_presenter::physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir,
+void physics_presenter::physics_find_sector_resting_manifolds(const physics::sphere& sphere, int, const vector<3>&,
         int current_thing_id) {
     // Get list of sectors within thing influence.
     auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
@@ -148,21 +148,21 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
             }
 
             auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, model->level, surface, sphere.radius);
-            if_set(maybe_surf_nearest_point, then_do, [&](const vector<3>& surf_nearest_point) {
-                auto surf_nearest_dist = length(sphere.position - surf_nearest_point);
+            if(const vector<3>* surf_nearest_point = maybe_surf_nearest_point) {
+                auto surf_nearest_dist = length(sphere.position - *surf_nearest_point);
 
                 if(surf_nearest_dist <= sphere.radius) {
-                    physics_thing_resting_manifolds.emplace_back(surf_nearest_point, (sphere.position - surf_nearest_point) / surf_nearest_dist,
+                    physics_thing_resting_manifolds.emplace_back(*surf_nearest_point, (sphere.position - *surf_nearest_point) / surf_nearest_dist,
                             surface.normal * ((sphere.radius / surf_nearest_dist) - 1.0f));
                     physics_thing_resting_manifolds.back().contact_surface_id = i;
                     physics_touched_surface_pairs.emplace(current_thing_id, i);
                 }
-            });
+            }
         }
     }
 }
 
-void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id) {
+void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>&, int current_thing_id) {
     auto& current_thing = model->things[current_thing_id];
 
     // Get list of things within thing influence.
@@ -260,7 +260,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
     auto this_frame_only_vel = make_zero_vector<3, float>();
     if((thing.attach_flags & flags::attach_flag::AttachedToThing) || (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
         const auto& parent_thing = model->things[thing.attached_thing];
-        this_frame_only_vel = (parent_thing.position - thing.prev_attached_thing_position) / dt;
+        this_frame_only_vel = (parent_thing.position - thing.prev_attached_thing_position) / static_cast<float>(dt);
         thing.prev_attached_thing_position = parent_thing.position;
     }
 
@@ -367,7 +367,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
         else {
             if(!reject_vel) {
                 thing.vel = prev_thing_vel;
-                presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * this_step_dt);
+                presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * static_cast<float>(this_step_dt));
             }
             else {
                 thing.vel = make_zero_vector<3, float>();
@@ -391,10 +391,10 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 
             if(amt_in_man_vel < man_vel_len) {
                 // Thing is blocked.
-                if_set(manifold.contact_thing_id, then_do, [this](int contact_thing_id) {
-                        auto& contact_thing = model->things[contact_thing_id];
+                if(const int* contact_thing_id = manifold.contact_thing_id) {
+                        auto& contact_thing = model->things[*contact_thing_id];
                         contact_thing.is_blocked = true;
-                });
+                }
             }
         }
 
@@ -415,13 +415,12 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
         auto targetOrientation = make_euler(std::get<1>(target_position_tuple));
 
         vector<3> currentPosition = thing.position;
-        auto currentOrientation = thing.orient;
 
         // PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
         // Use a magic multiple to correct it.
         float dist_len = length(targetPosition - currentPosition);
-        float alpha = rate_factor * dt * thing.path_move_speed / dist_len;
-        if(alpha >= 1.0f || dist_len == 0.0f) {
+        float alpha = static_cast<float>(rate_factor * dt) * thing.path_move_speed / dist_len;
+        if(alpha >= 1.0f || dist_len <= 0.0f) {
             presenter.adjust_thing_pos(thing_id, targetPosition);
             thing.orient = targetOrientation;
 
@@ -450,7 +449,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
         }
     }
     else if(thing.rotatepivot_moving) {
-        float alpha = dt / thing.path_move_speed;
+        float alpha = static_cast<float>(dt) / thing.path_move_speed;
 
         if(thing.path_move_time >= thing.path_move_speed) {
 
@@ -463,7 +462,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
                 frame_orient = -frame_orient;
             }
 
-            auto angle = make_euler(frame_orient * (thing.path_move_speed - thing.path_move_time + dt) / thing.path_move_speed);
+            auto angle = make_euler(frame_orient * (thing.path_move_speed - thing.path_move_time + static_cast<float>(dt)) / thing.path_move_speed);
             auto new_pos = angle.transform(thing.position - frame_pos) + frame_pos;
 
             thing.orient = angle * thing.orient;
@@ -491,7 +490,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
             thing.orient = angle * thing.orient;
             presenter.adjust_thing_pos(thing_id, new_pos);
 
-            thing.path_move_time += dt;
+            thing.path_move_time += static_cast<float>(dt);
         }
     }
 }
@@ -510,7 +509,7 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
         // PathMoveSpeed seems to be some factor of distance per frame, and Jedi has a different framerate.
         // Use a magic multiple to correct it.
         float dist_len = length(targetPosition - currentPosition);
-        float alpha = rate_factor * thing.path_move_speed / dist_len;
+        float alpha = static_cast<float>(rate_factor) * thing.path_move_speed / dist_len;
 
         auto delta_position = lerp(thing.position, targetPosition, alpha);
         auto delta_orientation = slerp(thing.orient, targetOrientation, alpha);
@@ -605,22 +604,22 @@ physics_presenter::segment_query_node_visitor::segment_query_node_visitor(physic
     return;
 }
 
-void physics_presenter::segment_query_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
+void physics_presenter::segment_query_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int) {
     const auto& mesh = model.geosets.front().meshes[mesh_id];
 
     for(const auto& face : mesh.faces) {
         auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, mesh, face, current_matrix);
-        if_set(maybe_nearest_point, then_do, [&](const vector<3>& nearest_point) {
-            auto dist = length(nearest_point - std::get<0>(cam_segment));
+        if(const vector<3>* nearest_point = maybe_nearest_point) {
+            auto dist = length(*nearest_point - std::get<0>(cam_segment));
             if(dist < closest_contact_distance) {
                 closest_contact_distance = dist;
                 has_closest_contact = true;
-                closest_contact = nearest_point;
+                closest_contact = *nearest_point;
                 closest_contact_normal = current_matrix.transform_normal(face.normal);
             }
-        });
+        }
     }
 }
 
-void physics_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+void physics_presenter::register_verbs(cog::verbs::verb_table&, level_state&) {
 }

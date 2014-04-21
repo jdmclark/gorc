@@ -26,7 +26,7 @@ gorc::client::world::level_view::level_view(content::manager& contentmanager)
     return;
 }
 
-void gorc::client::world::level_view::compute_visible_sectors(const box<2, int>& view_size) {
+void gorc::client::world::level_view::compute_visible_sectors(const box<2, int>&) {
     const auto& cam = currentModel->camera_model.current_computed_state;
 
     std::array<double, 16> proj_matrix;
@@ -41,8 +41,8 @@ void gorc::client::world::level_view::compute_visible_sectors(const box<2, int>&
 
     glGetIntegerv(GL_VIEWPORT, viewport.data());
 
-    box<2, double> adj_bbox(make_vector<double>(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
-            make_vector<double>(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
+    box<2, double> adj_bbox(make_vector(static_cast<double>(std::get<0>(viewport)), static_cast<double>(std::get<1>(viewport))),
+            make_vector(static_cast<double>(std::get<0>(viewport) + std::get<2>(viewport)),
                     static_cast<double>(std::get<1>(viewport) + std::get<3>(viewport))));
 
     sector_visited_scratch.clear();
@@ -269,7 +269,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
     }
 }
 
-void gorc::client::world::level_view::draw(const time& time, const box<2, int>& view_size, graphics::render_target& render_target) {
+void gorc::client::world::level_view::draw(const time&, const box<2, int>& view_size, graphics::render_target&) {
     if(currentModel) {
         const auto& cam = currentModel->camera_model.current_computed_state;
 
@@ -392,9 +392,9 @@ void gorc::client::world::level_view::draw_pov_model() {
             const auto& thing = currentModel->things[currentPresenter->get_local_player_thing()];
             const auto& current_sector = currentModel->sectors[thing.sector];
             auto sector_color = make_fill_vector<3, float>(1.0f);
-            if_set(current_sector.cmp, then_do, [&sector_color](const content::assets::colormap& cmp) {
-                sector_color = cmp.tint_color;
-            });
+            if(content::assets::colormap const* cmp = current_sector.cmp) {
+                sector_color = cmp->tint_color;
+            }
 
             float sector_light = current_sector.ambient_light + current_sector.extra_light;
             auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
@@ -429,7 +429,7 @@ void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const 
         int surfaceCelNumber = surface.cel_number;
         int actualSurfaceCelNumber;
         if(surfaceCelNumber >= 0) {
-            actualSurfaceCelNumber = surfaceCelNumber % material->cels.size();
+            actualSurfaceCelNumber = surfaceCelNumber % static_cast<int>(material->cels.size());
         }
         else {
             // TODO: Add MaterialAnim.
@@ -445,9 +445,9 @@ void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const 
         glBegin(GL_TRIANGLES);
 
         auto sector_tint = make_zero_vector<3, float>();
-        if_set(sector.cmp, then_do, [&sector_tint](const content::assets::colormap& cmp) {
-            sector_tint = cmp.tint_color;
-        });
+        if(const content::assets::colormap* cmp = sector.cmp) {
+            sector_tint = cmp->tint_color;
+        }
 
         vector<3> first_geo = lev.vertices[std::get<0>(surface.vertices[0])];
         vector<2> first_tex = lev.texture_vertices[std::get<1>(surface.vertices[0])] + surface.texture_offset;
@@ -570,7 +570,8 @@ void gorc::client::world::level_view::draw_saber(const content::assets::material
 }
 
 void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
-        flags::geometry_mode geo, flags::light_mode light_mode, float extra_light, const vector<3>& spr_offset, float sector_light) {
+        flags::geometry_mode, flags::light_mode light_mode, float extra_light, const vector<3>& spr_offset, float sector_light) {
+    // TODO: Deal with geo
     push_matrix();
 
     float light = sector_light + extra_light;
@@ -667,8 +668,8 @@ void gorc::client::world::level_view::draw_sprite(const game::world::thing& thin
     if(sprite.mat) {
         // TODO: Currently plays animation over duration of timer. Behavior should be verified.
         int current_frame = 0;
-        if(thing.timer) {
-            current_frame = static_cast<int>(std::floor(sprite.mat->cels.size() * thing.time_alive / thing.timer)) % sprite.mat->cels.size();
+        if(thing.timer > 0.0f) {
+            current_frame = static_cast<int>(static_cast<int>(std::floor(static_cast<float>(sprite.mat->cels.size()) * thing.time_alive / thing.timer)) % sprite.mat->cels.size());
         }
 
         const auto& cam = currentModel->camera_model.current_computed_state;
@@ -688,9 +689,9 @@ void gorc::client::world::level_view::draw_thing(const game::world::thing& thing
 
     const auto& current_sector = currentModel->sectors[thing.sector];
     auto sector_color = make_fill_vector<3, float>(1.0f);
-    if_set(current_sector.cmp, then_do, [&sector_color](const content::assets::colormap& cmp) {
-        sector_color = cmp.tint_color;
-    });
+    if(const content::assets::colormap* cmp = current_sector.cmp) {
+        sector_color = cmp->tint_color;
+    }
 
     float sector_light = current_sector.ambient_light + current_sector.extra_light;
     auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);

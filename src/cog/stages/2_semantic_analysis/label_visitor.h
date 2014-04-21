@@ -19,7 +19,7 @@ public:
     label_visitor(std::unordered_set<std::string>& SeenLabels, diagnostics::report& report);
 
 private:
-    ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO)
 };
 
 }

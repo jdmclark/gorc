@@ -69,7 +69,7 @@ void gorc::graphics::gui_renderer::end() {
             glBegin(GL_TRIANGLES);
         }
 
-        int s_left, s_right, s_top, s_bottom;
+        float s_left, s_right, s_top, s_bottom;
         float t_left, t_right, t_top, t_bottom;
 
         std::tie(s_left, s_right) = get_range<0>(std::get<0>(sprite.second));
@@ -126,7 +126,7 @@ void gorc::graphics::gui_renderer::draw_frame(const content::assets::texture& te
         const box<2, int>& position, const vector<2, int>& part_offset, int depth) {
     matrix<3, float> txt = make_scale_matrix(make_vector(1.0f / static_cast<float>(get_size<0>(texture.size())),
             1.0f / static_cast<float>(get_size<1>(texture.size())), 1.0f))
-                    * make_translation_matrix(make_vector<float>(get<0>(part_offset), get<1>(part_offset)));
+                    * make_translation_matrix(make_vector(static_cast<float>(get<0>(part_offset)), static_cast<float>(get<1>(part_offset))));
 
     constexpr int corner_size = 2;
     auto top_left = make_box(txt.transform(make_vector(0.0f, 0.0f)), txt.transform(make_vector(2.0f, 2.0f)));

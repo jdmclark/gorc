@@ -21,7 +21,7 @@ public:
     code_visitor(int& nextLabelNumber, ir::printer& printer, diagnostics::report& report, const std::string breakLabel = "");
 
 private:
-    ASTCLASS_STATEMENT(AVPROTO);
+    ASTCLASS_STATEMENT(AVPROTO)
 };
 
 }

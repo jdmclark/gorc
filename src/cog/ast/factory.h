@@ -24,7 +24,7 @@ private:
             return;
         }
 
-        void accept(visitor& v) {
+        void accept(visitor&) {
             return;
         }
     };

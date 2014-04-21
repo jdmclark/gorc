@@ -5,8 +5,9 @@
 using namespace gorc::math;
 
 gorc::game::world::animations::slide_surface_animation::slide_surface_animation(level_model& model, unsigned int surface,
-        const vector<3>& direction, int anim_num)
+        const vector<3>& direction, int)
     : model(model), surface(surface), direction(direction) {
+    // TODO: Deal with anim_num
     auto& surf = model.surfaces[surface];
     model.surfaces[surface].surface_anim = this;
 
@@ -19,7 +20,7 @@ gorc::game::world::animations::slide_surface_animation::slide_surface_animation(
     unsigned int noncol_vert;
     for(noncol_vert = 2; noncol_vert < surf.vertices.size(); ++noncol_vert) {
         auto sb2 = model.level.vertices[std::get<0>(surf.vertices[noncol_vert])] - model.level.vertices[std::get<0>(surf.vertices[0])];
-        if(dot(sb1, sb2) != 0.0f) {
+        if(fabsf(dot(sb1, sb2)) > 0.0f) {
             break;
         }
     }
@@ -40,15 +41,15 @@ gorc::game::world::animations::slide_surface_animation::slide_surface_animation(
 
 void gorc::game::world::animations::slide_surface_animation::update(double dt) {
     auto& surf = model.surfaces[surface];
-    surf.thrust = direction * rate_factor;
+    surf.thrust = direction * static_cast<float>(rate_factor);
 
     auto plane_dir = tb0 * dot(direction, sb0) + tb1 * dot(direction, sb1);
 
-    surf.texture_offset += plane_dir * dt * rate_factor;
+    surf.texture_offset += plane_dir * static_cast<float>(dt * rate_factor);
 }
 
 void gorc::game::world::animations::slide_surface_animation::stop() {
     auto& surf = model.surfaces[surface];
-    model.surfaces[surface].surface_anim = maybe<animation*>();
+    model.surfaces[surface].surface_anim = nothing;
     surf.thrust = make_zero_vector<3, float>();
 }
