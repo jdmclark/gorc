@@ -52,7 +52,7 @@ public:
     };
 
     FunctionalCodegenTestFixture()
-        : CodegenTestFixture("test/cog/functional/codegen") {
+        : CodegenTestFixture("src/cog_test/language/functional/codegen") {
         verb_table.add_verb<void, 1>("printint", printint_functor(Output));
         verb_table.add_verb<void, 3>("printint3", printint3_functor(Output));
         verb_table.add_verb<int, 0>("getint", [](){ return 5847; });

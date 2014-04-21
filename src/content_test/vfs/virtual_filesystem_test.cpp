@@ -26,7 +26,7 @@ public:
 begin_suite_fixture(VirtualFileSystemTest, VirtualFileSystemTestFixture);
 
 test_case(Basic) {
-    gorc::content::vfs::virtual_filesystem vfs("test/vfs/restricted", "test/vfs/resource", "test/vfs/episode", report);
+    gorc::content::vfs::virtual_filesystem vfs("src/content_test/vfs/test_vfs/restricted", "src/content_test/vfs/test_vfs/resource", "src/content_test/vfs/test_vfs/episode", report);
 
     assert_eq(GetIntFromFile(vfs, "asset.txt"), 1);
     assert_eq(GetIntFromFile(vfs, "overridden.txt"), 3);
@@ -34,8 +34,8 @@ test_case(Basic) {
 }
 
 test_case(Mod1) {
-    gorc::content::vfs::virtual_filesystem vfs("test/vfs/restricted", "test/vfs/resource", "test/vfs/episode",
-        "test/vfs/mod1", report);
+    gorc::content::vfs::virtual_filesystem vfs("src/content_test/vfs/test_vfs/restricted", "src/content_test/vfs/test_vfs/resource", "src/content_test/vfs/test_vfs/episode",
+        "src/content_test/vfs/test_vfs/mod1", report);
 
     assert_eq(GetIntFromFile(vfs, "asset.txt"), 1);
     assert_eq(GetIntFromFile(vfs, "overridden.txt"), 3);
@@ -43,8 +43,8 @@ test_case(Mod1) {
 }
 
 test_case(Mod2) {
-    gorc::content::vfs::virtual_filesystem vfs("test/vfs/restricted", "test/vfs/resource", "test/vfs/episode",
-        "test/vfs/mod2", report);
+    gorc::content::vfs::virtual_filesystem vfs("src/content_test/vfs/test_vfs/restricted", "src/content_test/vfs/test_vfs/resource", "src/content_test/vfs/test_vfs/episode",
+        "src/content_test/vfs/test_vfs/mod2", report);
 
     assert_eq(GetIntFromFile(vfs, "asset.txt"), 1);
     assert_eq(GetIntFromFile(vfs, "overridden.txt"), 3);
@@ -52,7 +52,7 @@ test_case(Mod2) {
 }
 
 test_case(Episode) {
-    gorc::content::vfs::virtual_filesystem vfs("test/vfs/restricted", "test/vfs/resource", "test/vfs/episode", report);
+    gorc::content::vfs::virtual_filesystem vfs("src/content_test/vfs/test_vfs/restricted", "src/content_test/vfs/test_vfs/resource", "src/content_test/vfs/test_vfs/episode", report);
 
     assert_eq(vfs.get_episode_count(), 2UL);
 

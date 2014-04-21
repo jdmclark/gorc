@@ -8,14 +8,14 @@
 begin_suite(GobContainerTest);
 
 test_case(Empty) {
-    gorc::io::native_file file("test/gob/empty.gob");
+    gorc::io::native_file file("src/content_test/vfs/gob/empty.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
     assert_eq(cnt.file_count(), 0UL);
 }
 
 test_case(OneFile) {
-    gorc::io::native_file file("test/gob/onefile.gob");
+    gorc::io::native_file file("src/content_test/vfs/gob/onefile.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
     assert_eq(cnt.file_count(), 1UL);
@@ -34,7 +34,7 @@ test_case(OneFile) {
 }
 
 test_case(ThreeFiles) {
-    gorc::io::native_file file("test/gob/threefiles.gob");
+    gorc::io::native_file file("src/content_test/vfs/gob/threefiles.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
     assert_eq(cnt.file_count(), 3UL);
@@ -73,7 +73,7 @@ test_case(ThreeFiles) {
 }
 
 test_case(Structured) {
-    gorc::io::native_file file("test/gob/structured.gob");
+    gorc::io::native_file file("src/content_test/vfs/gob/structured.gob");
     gorc::content::vfs::gob::gob_container cnt(file);
 
     assert_eq(cnt.file_count(), 1UL);

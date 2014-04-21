@@ -1,7 +1,0 @@
-symbols
-end
-code
-
-for(; i < 10;);
-
-end

@@ -11,7 +11,7 @@ begin_suite(EpisodeTest);
 
 test_case(PreparedTest) {
     gorc::diagnostics::stored_report report;
-    gorc::io::native_file file("test/episode/test.jk");
+    gorc::io::native_file file("src/content_test/vfs/episode/test.jk");
     gorc::content::vfs::episode::episode ep(file, report);
 
     assert_eq(ep.get_episode_name(), "The Farce Without");

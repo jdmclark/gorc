@@ -8,7 +8,7 @@ class FunctionalSemanticTestFixture : public SemanticTestFixture
 {
 public:
     FunctionalSemanticTestFixture()
-        : SemanticTestFixture("test/cog/functional/semantic") {
+        : SemanticTestFixture("src/cog_test/language/functional/semantic") {
         return;
     }
 };

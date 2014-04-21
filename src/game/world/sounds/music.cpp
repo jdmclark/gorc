@@ -3,7 +3,7 @@
 #include <boost/format.hpp>
 
 void gorc::game::world::sounds::music::internal_play_song(int song) {
-    boost::filesystem::path music_file_path = boost::filesystem::path("game/restricted/music/1") /
+    boost::filesystem::path music_file_path = boost::filesystem::path("game/resource/music/1") /
             boost::str(boost::format("%1%.ogg") % (song + 1));
     internal_music.openFromFile(music_file_path.native());
     internal_music.setLoop(false);

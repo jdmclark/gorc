@@ -1,9 +1,0 @@
-symbols
-end
-code
-
-i = 16;
-i = -16;
-i = 0;
-
-end

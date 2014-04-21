@@ -6,7 +6,7 @@
 
 class FunctionalSyntacticTestFixture : public SyntacticTestFixture {
 public:
-    FunctionalSyntacticTestFixture() : SyntacticTestFixture("test/cog/functional/syntactic") {
+    FunctionalSyntacticTestFixture() : SyntacticTestFixture("src/cog_test/language/functional/syntactic") {
         return;
     }
 };
