@@ -26,7 +26,7 @@
 namespace gorc {
 namespace content {
 
-class manager;
+class content_manager;
 
 namespace assets {
 
@@ -82,7 +82,7 @@ public:
     int type_flags = 0x0;
     vector<3> vel;
 
-    void parse_args(text::tokenizer& tok, manager& manager, const colormap& cmp, const cog::compiler& compiler,
+    void parse_args(text::tokenizer& tok, content_manager& manager, const colormap& cmp, const cog::compiler& compiler,
             const std::unordered_map<std::string, int>& templates, diagnostics::report& report);
 };
 

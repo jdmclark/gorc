@@ -1,6 +1,6 @@
 #include "animation_loader.h"
 #include "content/assets/animation.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>
@@ -28,7 +28,7 @@ void SkipToNextAnimationSection(text::tokenizer& tok) {
     tok.assert_punctuator(":");
 }
 
-void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, manager&, diagnostics::report&) {
+void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, content_manager&, diagnostics::report&) {
     tok.assert_identifier("FLAGS");
     anim.flags = flag_set<flags::key_flag>(tok.get_number<uint32_t>());
 
@@ -45,7 +45,7 @@ void ParseAnimationHeaderSection(assets::animation& anim, text::tokenizer& tok, 
     tok.get_number<unsigned int>();
 }
 
-void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, manager&, diagnostics::report&) {
+void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, content_manager&, diagnostics::report&) {
     tok.assert_identifier("MARKERS");
     unsigned int num_markers = tok.get_number<unsigned int>();
 
@@ -55,7 +55,7 @@ void ParseMarkersSection(assets::animation& anim, text::tokenizer& tok, manager&
     }
 }
 
-void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, manager&, diagnostics::report&) {
+void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, content_manager&, diagnostics::report&) {
     tok.assert_identifier("NODES");
 
     tok.assert_identifier("NODES");
@@ -111,7 +111,7 @@ void ParseKeyframeNodesSection(assets::animation& anim, text::tokenizer& tok, ma
     }
 }
 
-using AnimationLoaderSectionFn = std::function<void(assets::animation&, text::tokenizer&, manager&, diagnostics::report&)>;
+using AnimationLoaderSectionFn = std::function<void(assets::animation&, text::tokenizer&, content_manager&, diagnostics::report&)>;
 const std::unordered_map<std::string, AnimationLoaderSectionFn> AnimationLoaderSectionMap {
     { "header", ParseAnimationHeaderSection },
     { "markers", ParseMarkersSection },
@@ -122,7 +122,7 @@ const std::unordered_map<std::string, AnimationLoaderSectionFn> AnimationLoaderS
 }
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::animation_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::animation_loader::parse(text::tokenizer& tok, content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<assets::animation> lev(new assets::animation());
 
     text::token t;

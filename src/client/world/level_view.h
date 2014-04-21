@@ -15,7 +15,7 @@
 
 namespace gorc {
 namespace content {
-class manager;
+class content_manager;
 
 namespace assets {
 class material;
@@ -90,7 +90,7 @@ private:
     void draw_thing(const game::world::thing& thing, int thing_id);
 
 public:
-    level_view(content::manager& shadercontentmanager);
+    level_view(content::content_manager& shadercontentmanager);
 
     inline void set_presenter(game::world::level_presenter* presenter) {
         currentPresenter = presenter;

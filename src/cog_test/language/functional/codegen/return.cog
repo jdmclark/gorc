@@ -1,0 +1,8 @@
+symbols
+end
+code
+startup:
+PrintInt(1);
+return;
+PrintInt(2);
+end

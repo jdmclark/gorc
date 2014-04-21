@@ -22,7 +22,7 @@ public:
 
 protected:
     CodegenTestFixture(const boost::filesystem::path& BasePath);
-    CodegenTestFixture(const gorc::content::filesystem& fs);
+    CodegenTestFixture(const gorc::io::file_system& fs);
 
 public:
     virtual void ParseFile(const boost::filesystem::path& file);

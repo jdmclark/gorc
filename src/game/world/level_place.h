@@ -1,7 +1,7 @@
 #pragma once
 
 #include "content/assets/level.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include <memory>
 
 namespace gorc {
@@ -10,10 +10,10 @@ namespace world {
 
 class level_place {
 public:
-    std::shared_ptr<content::manager> contentmanager;
+    std::shared_ptr<content::content_manager> contentmanager;
     const content::assets::level& level;
 
-    level_place(std::shared_ptr<content::manager> contentmanager, const content::assets::level& level);
+    level_place(std::shared_ptr<content::content_manager> contentmanager, const content::assets::level& level);
 };
 
 }

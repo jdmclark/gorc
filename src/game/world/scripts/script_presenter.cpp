@@ -35,7 +35,7 @@ void gorc::game::world::scripts::script_presenter::create_level_dummy_instances(
     }
 }
 
-void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int index, const cog::script& script, content::manager& manager,
+void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int index, const cog::script& script, content::content_manager& manager,
         cog::compiler&, const std::vector<cog::vm::value>& values) {
     auto& cog_inst_pair = model->cogs[index];
     std::get<0>(cog_inst_pair) = std::unique_ptr<cog::instance>(new cog::instance(script));
@@ -157,7 +157,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
 }
 
 void gorc::game::world::scripts::script_presenter::create_global_cog_instance(const cog::script& script,
-        content::manager& manager, cog::compiler&) {
+        content::content_manager& manager, cog::compiler&) {
     if(model->global_script_instances.find(&script) != model->global_script_instances.end()) {
         // Instance already created.
         return;

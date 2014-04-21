@@ -1,0 +1,12 @@
+symbols
+end
+code
+
+i = 0x0;
+i = 0X0;
+i = 0x0000000000000000000000;
+i = 0x1;
+i = 0x01;
+i = 0X9ABCDEF;
+
+end

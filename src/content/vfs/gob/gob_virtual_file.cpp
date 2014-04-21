@@ -13,6 +13,5 @@ const boost::filesystem::path& gorc::content::vfs::gob::gob_virtual_file::get_fi
 }
 
 std::unique_ptr<gorc::io::read_only_file> gorc::content::vfs::gob::gob_virtual_file::open() const {
-    return std::unique_ptr<gorc::io::read_only_file>(new gob_file(parentContainer.get_path(),
-            filename, chunkOffset, chunkLength));
+    return std::unique_ptr<gorc::io::read_only_file>(new gob_file(parentContainer.get_path(), chunkOffset, chunkLength));
 }

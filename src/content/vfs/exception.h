@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/exception.h"
+#include "base/exception.h"
 
 namespace gorc {
 namespace content {

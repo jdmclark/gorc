@@ -1,0 +1,24 @@
+==== Simple create/read ====
+str and str2 match
+str and str3 match
+str and str4 match
+file read exception thrown
+f at end
+==== Overwrite existing ====
+==== Truncate failure ====
+File create exception thrown
+==== Open failure ====
+File open exception thrown
+==== Read failure ====
+File read exception thrown
+==== Seek failure ====
+File seek exception thrown
+==== Position ====
+Current position: 0
+Current position: 3
+Current position: 5
+==== Size ====
+Small size: 6
+Medium size: 16
+==== Testsuite returns: 0 ====
+Contents overwritten

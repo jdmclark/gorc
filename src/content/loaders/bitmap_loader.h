@@ -26,7 +26,8 @@ public:
     bitmap_loader(const assets::colormap& colormap);
     bitmap_loader(const assets::bitmap& bitmap);
 
-    virtual std::unique_ptr<asset> deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) override;
+    virtual std::unique_ptr<asset> deserialize(const boost::filesystem::path& filename,
+            io::read_only_file& file, content_manager& manager, diagnostics::report& report) override;
 };
 
 }

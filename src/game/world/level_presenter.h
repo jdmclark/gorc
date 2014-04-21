@@ -60,7 +60,7 @@ private:
     gameplay::thing_controller& get_thing_controller(flags::thing_type type);
 
 public:
-    std::shared_ptr<content::manager> contentmanager;
+    std::shared_ptr<content::content_manager> contentmanager;
     std::unique_ptr<level_model> model;
 
     std::unique_ptr<physics::physics_presenter> physics_presenter;

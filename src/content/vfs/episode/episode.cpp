@@ -2,13 +2,13 @@
 #include "exception.h"
 #include "framework/text/source.h"
 #include "framework/text/tokenizer.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
 #include "framework/diagnostics/report.h"
 #include "framework/diagnostics/helper.h"
 #include <boost/algorithm/string.hpp>
 
 gorc::content::vfs::episode::episode::episode(io::read_only_file& file, diagnostics::report& report) {
-    text::source src(file);
+    text::source src("episode.jk", file);
     text::tokenizer tok(src, report);
     text::token t;
 

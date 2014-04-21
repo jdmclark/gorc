@@ -4,28 +4,28 @@
 #include <boost/filesystem/path.hpp>
 #include <vector>
 
-#include "framework/content/filesystem.h"
-#include "framework/content/native_filesystem.h"
+#include "base/io/file_system.h"
+#include "base/io/native_file_system.h"
 #include "framework/diagnostics/stored_report.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include "cog/compiler.h"
 
 class LoaderTestFixture : public test::fixture {
 private:
-    gorc::content::native_filesystem nfs;
+    gorc::io::native_file_system nfs;
 
     void CreateMockCogverbs();
 
 public:
-    const gorc::content::filesystem& FileSystem;
-    gorc::content::manager contentmanager;
+    const gorc::io::file_system& FileSystem;
+    gorc::content::content_manager contentmanager;
     gorc::diagnostics::stored_report report;
     gorc::cog::verbs::verb_table verb_table;
     gorc::cog::compiler compiler;
 
 protected:
     LoaderTestFixture(const boost::filesystem::path& BasePath);
-    LoaderTestFixture(const gorc::content::filesystem& fs);
+    LoaderTestFixture(const gorc::io::file_system& fs);
 
 public:
     template <typename T, typename... ArgT> const T* TryLoad(const boost::filesystem::path& filename, ArgT... args) {

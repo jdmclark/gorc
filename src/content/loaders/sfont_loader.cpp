@@ -2,7 +2,8 @@
 #include "content/assets/sfont.h"
 #include "bitmap_loader.h"
 #include "framework/diagnostics/helper.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
+#include "base/io/binary_input_stream.h"
 
 namespace gorc {
 namespace content {
@@ -31,7 +32,8 @@ gorc::content::loaders::sfont_loader::sfont_loader(const assets::bitmap& bitmap)
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::sfont_loader::asset_root_path = { "ui/sft" };
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::sfont_loader::deserialize(io::read_only_file& file, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::sfont_loader::deserialize(const boost::filesystem::path& filename,
+        io::read_only_file& file, content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<content::assets::sfont> cmp(new content::assets::sfont());
 
     sfont_header header;
@@ -40,30 +42,30 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::sfont_loader::dese
     // Check fourcc
     if(strncmp(header.fourcc, "SFNT", 4) != 0) {
         diagnostics::helper::file_corrupt(report, "sfont_loader::deserialize",
-                diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+                diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 
     std::vector<std::tuple<char, int, int>> working_glyphs;
 
     for(unsigned int i = 0; i < header.num_tables; ++i) {
-        uint16_t first_char = file.read<uint16_t>();
-        uint16_t last_char = file.read<uint16_t>();
+        uint16_t first_char = io::deserialize<uint16_t>(file);
+        uint16_t last_char = io::deserialize<uint16_t>(file);
 
         for(; first_char <= last_char; ++first_char) {
             // TODO: Update this code (and the font base class) to support unicode fonts.
-            int xoff = file.read<int32_t>();
-            int width = file.read<int32_t>();
+            int xoff = io::deserialize<int32_t>(file);
+            int width = io::deserialize<int32_t>(file);
             working_glyphs.emplace_back(static_cast<char>(first_char), xoff, width);
         }
     }
 
     bitmap_loader embedded_bm_loader = pal_colormap ? bitmap_loader(*pal_colormap) : bitmap_loader(*pal_bitmap);
-    cmp->uncast_embedded_bm = embedded_bm_loader.deserialize(file, manager, report);
+    cmp->uncast_embedded_bm = embedded_bm_loader.deserialize(filename, file, manager, report);
     cmp->embedded_bm = dynamic_cast<assets::bitmap*>(cmp->uncast_embedded_bm.get());
     if(!cmp->embedded_bm) {
         diagnostics::helper::file_corrupt(report, "sfont_loader::deserialize",
-                diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+                diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 

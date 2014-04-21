@@ -1,6 +1,6 @@
 #include "puppet_loader.h"
 #include "content/assets/puppet.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 
 #include <unordered_map>
 #include <string>
@@ -55,7 +55,7 @@ const std::unordered_map<std::string, flags::puppet_submode_type> SubmodeMap {
 }
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::puppet_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::puppet_loader::parse(text::tokenizer& tok, content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<assets::puppet> pup(new assets::puppet());
 
     text::token t;

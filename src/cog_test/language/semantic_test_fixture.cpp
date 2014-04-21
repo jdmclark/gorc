@@ -1,6 +1,6 @@
 #include "semantic_test_fixture.h"
 #include "cog/stages/stages.h"
-#include "framework/io/native_file.h"
+#include "base/io/native_file.h"
 #include <fstream>
 
 void SemanticTestFixture::ParseFile(const boost::filesystem::path& filename) {
@@ -15,7 +15,7 @@ void SemanticTestFixture::ParseFile(const boost::filesystem::path& filename) {
         return;
     }
 
-    gorc::text::source source(*file);
+    gorc::text::source source(filename, *file);
 
     gorc::cog::ast::translation_unit* ast = gorc::cog::stages::generate_ast::generate_ast(source, report, astFactory);
 

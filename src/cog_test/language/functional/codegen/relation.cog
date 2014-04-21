@@ -1,0 +1,37 @@
+symbols
+end
+
+code
+startup:
+
+if(0 == 0) PrintInt(1);
+if(0 == 1) PrintInt(2);
+if(1 == 0) PrintInt(3);
+if(1 == 1) PrintInt(4);
+
+if(0 != 0) PrintInt(5);
+if(0 != 1) PrintInt(6);
+if(1 != 0) PrintInt(7);
+if(1 != 1) PrintInt(8);
+
+if(0 > 0) PrintInt(9);
+if(0 > 1) PrintInt(10);
+if(1 > 0) PrintInt(11);
+if(1 > 1) PrintInt(12);
+
+if(0 >= 0) PrintInt(13);
+if(0 >= 1) PrintInt(14);
+if(1 >= 0) PrintInt(15);
+if(1 >= 1) PrintInt(16);
+
+if(0 < 0) PrintInt(17);
+if(0 < 1) PrintInt(18);
+if(1 < 0) PrintInt(19);
+if(1 < 1) PrintInt(20);
+
+if(0 <= 0) PrintInt(21);
+if(0 <= 1) PrintInt(22);
+if(1 <= 0) PrintInt(23);
+if(1 <= 1) PrintInt(24);
+
+end

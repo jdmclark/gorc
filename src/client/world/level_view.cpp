@@ -17,7 +17,7 @@
 
 using namespace gorc::math;
 
-gorc::client::world::level_view::level_view(content::manager& contentmanager)
+gorc::client::world::level_view::level_view(content::content_manager& contentmanager)
     : surfaceShader(contentmanager.load<content::assets::shader>("surface.glsl")),
       horizonShader(contentmanager.load<content::assets::shader>("horizon.glsl")),
       ceilingShader(contentmanager.load<content::assets::shader>("ceiling.glsl")),

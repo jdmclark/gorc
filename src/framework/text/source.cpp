@@ -1,8 +1,8 @@
 #include "source.h"
 
-gorc::text::source::source(gorc::io::read_only_file& file)
-    : index(0), filename(file.Filename.generic_string()) {
-    size_t fsize = file.get_size();
+gorc::text::source::source(const boost::filesystem::path& filename, gorc::io::read_only_file& file)
+    : index(0), filename(filename) {
+    size_t fsize = file.size();
     if(fsize == 0) {
         return;
     }

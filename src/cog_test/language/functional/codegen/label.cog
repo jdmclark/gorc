@@ -1,0 +1,9 @@
+symbols
+end
+code
+foo:
+PrintInt(100);
+startup:
+PrintInt(16);
+return;
+end

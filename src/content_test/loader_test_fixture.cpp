@@ -7,7 +7,7 @@ LoaderTestFixture::LoaderTestFixture(const boost::filesystem::path& BasePath)
     return;
 }
 
-LoaderTestFixture::LoaderTestFixture(const gorc::content::filesystem& fs)
+LoaderTestFixture::LoaderTestFixture(const gorc::io::file_system& fs)
     : nfs(""), FileSystem(fs), contentmanager(report, FileSystem), compiler(verb_table) {
     CreateMockCogverbs();
     return;

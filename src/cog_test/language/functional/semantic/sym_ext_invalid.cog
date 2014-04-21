@@ -1,0 +1,10 @@
+symbols
+
+int var00 invalid_ext
+int var01 invalid_ext=5
+int var02=5 invalid_ext
+int var03=5 invalid_ext=5
+
+end
+code
+end

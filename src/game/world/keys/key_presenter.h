@@ -22,7 +22,7 @@ class verb_table;
 }
 
 namespace content {
-class manager;
+class content_manager;
 }
 
 namespace game {
@@ -41,7 +41,7 @@ class key_mix;
 
 class key_presenter {
 private:
-    content::manager& contentmanager;
+    content::content_manager& contentmanager;
     level_model* levelModel;
     key_model* model;
 
@@ -51,7 +51,7 @@ private:
     void DispatchMarker(int thing_id, flags::key_marker_type marker);
 
 public:
-    key_presenter(content::manager& contentmanager);
+    key_presenter(content::content_manager& contentmanager);
 
     void start(level_model& levelModel, key_model& model);
     void update(const time& time);

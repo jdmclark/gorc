@@ -1,7 +1,8 @@
 #include "material_loader.h"
 #include "content/assets/material.h"
 #include "framework/diagnostics/helper.h"
-#include "framework/io/exception.h"
+#include "base/io/binary_input_stream.h"
+#include "base/io/exception.h"
 #include <array>
 #include <boost/format.hpp>
 
@@ -99,16 +100,17 @@ gorc::content::loaders::material_loader::material_loader(const assets::colormap&
     return;
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::deserialize(const boost::filesystem::path& filename,
+        io::read_only_file& file, content_manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::material> mat(new content::assets::material());
 
     char magic[4];
     file.read(magic, sizeof(char) * 4);
 
     // Check magic and version
-    if(strncmp(magic, "MAT ", 4) != 0 || file.read<uint32_t>() != 0x32) {
+    if(strncmp(magic, "MAT ", 4) != 0 || io::deserialize<uint32_t>(file) != 0x32) {
         diagnostics::helper::file_corrupt(report, "material_loader::deserialize",
-                diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+                diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 
@@ -117,7 +119,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::material_loader::d
 
     if(header.BitDepth != 8) {
         report.add_error("material_loader::deserialize", boost::str(boost::format("%d bit materials not supported") % header.BitDepth),
-                diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+                diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 

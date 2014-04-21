@@ -4,8 +4,8 @@
 #include <SFML/Window.hpp>
 #include "framework/event/event_bus.h"
 #include "framework/utility/time.h"
-#include "framework/content/filesystem.h"
-#include "framework/content/manager.h"
+#include "base/io/file_system.h"
+#include "framework/content/content_manager.h"
 #include "framework/place/place_controller.h"
 #include "framework/view_stack.h"
 #include "framework/content/assets/shader.h"
@@ -28,10 +28,10 @@ public:
 
 protected:
     diagnostics::report& report;
-    const content::filesystem& filesystem;
+    const io::file_system& filesystem;
 
 private:
-    content::manager master_content_manager;
+    content::content_manager master_content_manager;
     const uint32_t gameplay_timestep_ms;
     std::unique_ptr<graphics::default_render_target> default_target;
     std::unique_ptr<graphics::texture_render_target> texture_target;
@@ -45,7 +45,7 @@ public:
     view_stack<LayerIdT> views;
     place::place_controller<PresenterT, MapperT> place_controller;
 
-    application(const std::string& title, const MapperT& place_mapper, diagnostics::report& report, const content::filesystem& filesystem,
+    application(const std::string& title, const MapperT& place_mapper, diagnostics::report& report, const io::file_system& filesystem,
             const box<2, int>& window_size = make_box(make_vector(0, 0), make_vector(1280, 720)), bool windowed = true,
             double gameplay_timestep = (1.0 / 60.0))
         : report(report), filesystem(filesystem), master_content_manager(report, filesystem),
@@ -77,7 +77,7 @@ public:
         return;
     }
 
-    virtual void startup(event::event_bus& event_bus, content::manager& content) = 0;
+    virtual void startup(event::event_bus& event_bus, content::content_manager& content) = 0;
     virtual void shutdown() = 0;
 
     virtual void update(const time&, const box<2, int>&) {

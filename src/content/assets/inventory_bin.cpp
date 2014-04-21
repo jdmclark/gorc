@@ -1,7 +1,7 @@
 #include "inventory_bin.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>
@@ -10,9 +10,9 @@ namespace gorc {
 namespace content {
 namespace assets {
 
-using InventoryBinParameterParser = std::function<void(inventory_bin&, text::tokenizer&, content::manager&, const cog::compiler&, diagnostics::report&)>;
+using InventoryBinParameterParser = std::function<void(inventory_bin&, text::tokenizer&, content::content_manager&, const cog::compiler&, diagnostics::report&)>;
 
-void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content::manager& manager, const cog::compiler& compiler, diagnostics::report& report) {
+void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content::content_manager& manager, const cog::compiler& compiler, diagnostics::report& report) {
     std::string fn = tok.get_space_delimited_string();
     if(boost::iequals(fn, "none")) {
         tpl.cog = nullptr;
@@ -38,7 +38,7 @@ static const std::unordered_map<std::string, InventoryBinParameterParser> Invent
 }
 }
 
-void gorc::content::assets::inventory_bin::parse_args(text::tokenizer& tok, content::manager& manager, const cog::compiler& compiler, diagnostics::report& report) {
+void gorc::content::assets::inventory_bin::parse_args(text::tokenizer& tok, content::content_manager& manager, const cog::compiler& compiler, diagnostics::report& report) {
     bool oldReportEOL = tok.get_report_eol();
     tok.set_report_eol(true);
 

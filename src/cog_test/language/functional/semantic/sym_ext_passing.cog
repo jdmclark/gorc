@@ -1,0 +1,25 @@
+symbols
+
+sector var00
+
+sector var01 local
+sector var02 desc=test
+sector var03 mask=0x1
+sector var04 linkid=1
+sector var05 nolink
+
+sector var06 local desc=test
+sector var07 local mask=0x1
+sector var08 local linkid=1
+sector var09 local nolink
+
+sector var10 desc=test local
+sector var11 mask=0x1 local
+sector var12 linkid=1 local
+sector var13 nolink local
+
+sector var14 desc=test mask=0x1 nolink linkid=1 local
+
+end
+code
+end

@@ -9,7 +9,7 @@ VfsSingleton::VfsSingleton()
 }
 
 void VfsSingleton::SetEpisode(const std::string& name) {
-    gorc::content::vfs::virtual_filesystem& vfs = inst.vfs;
+    gorc::content::vfs::virtual_file_system& vfs = inst.vfs;
 
     // Find episode
     for(size_t i = 0; i < vfs.get_episode_count(); ++i) {

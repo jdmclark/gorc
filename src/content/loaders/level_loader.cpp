@@ -1,6 +1,6 @@
 #include "level_loader.h"
 #include "content/assets/level.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include "content/constants.h"
 #include "framework/math/vector.h"
 #include <boost/format.hpp>
@@ -30,12 +30,12 @@ void SkipToNextSection(text::tokenizer& tok) {
     tok.assert_punctuator(":");
 }
 
-void ParseJKSection(assets::level&, text::tokenizer&, manager&, cog::compiler&, diagnostics::report&) {
+void ParseJKSection(assets::level&, text::tokenizer&, content_manager&, cog::compiler&, diagnostics::report&) {
     // JK section is empty.
     return;
 }
 
-void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, manager&, cog::compiler&, diagnostics::report&) {
+void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, content_manager&, cog::compiler&, diagnostics::report&) {
     tok.assert_identifier("Version");
     lev.header.version = tok.get_number<int>();
 
@@ -93,7 +93,7 @@ void ParseHeaderSection(assets::level& lev, text::tokenizer& tok, manager&, cog:
     lev.header.gouraud_distance = tok.get_number<float>();
 }
 
-void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, manager&, cog::compiler&, diagnostics::report& report) {
+void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, content_manager&, cog::compiler&, diagnostics::report& report) {
     tok.assert_identifier("world");
     tok.assert_identifier("materials");
 
@@ -124,7 +124,7 @@ void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, manager&, c
     }
 }
 
-void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler&, diagnostics::report&) {
+void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, content_manager& manager, cog::compiler&, diagnostics::report&) {
     text::token t;
 
     tok.assert_identifier("World");
@@ -241,7 +241,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, manager& 
     }
 }
 
-void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler&, diagnostics::report& report) {
+void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, content_manager& manager, cog::compiler&, diagnostics::report& report) {
     text::token t;
 
     tok.assert_identifier("world");
@@ -340,7 +340,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, manager& mana
     }
 }
 
-void ParseCogsSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager& manager, cog::compiler& compiler, diagnostics::report& report) {
     tok.assert_identifier("world");
     tok.assert_identifier("Cogs");
 
@@ -434,7 +434,7 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, manager& manager
     }
 }
 
-void ParseTemplatesSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseTemplatesSection(assets::level& lev, text::tokenizer& tok, content_manager& manager, cog::compiler& compiler, diagnostics::report& report) {
     tok.assert_identifier("world");
     tok.assert_identifier("templates");
 
@@ -487,7 +487,7 @@ void ParseTemplatesSection(assets::level& lev, text::tokenizer& tok, manager& ma
     }
 }
 
-void ParseThingsSection(assets::level& lev, text::tokenizer& tok, manager& manager, cog::compiler& compiler, diagnostics::report& report) {
+void ParseThingsSection(assets::level& lev, text::tokenizer& tok, content_manager& manager, cog::compiler& compiler, diagnostics::report& report) {
     tok.assert_identifier("world");
     tok.assert_identifier("things");
 
@@ -539,7 +539,7 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, manager& manag
     }
 }
 
-using LevelSectionParser = std::function<void(assets::level&, text::tokenizer&, manager&, cog::compiler&, diagnostics::report&)>;
+using LevelSectionParser = std::function<void(assets::level&, text::tokenizer&, content_manager&, cog::compiler&, diagnostics::report&)>;
 const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap {
     {"jk", ParseJKSection},
     {"header", ParseHeaderSection},
@@ -551,7 +551,7 @@ const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap 
     {"things", ParseThingsSection}
 };
 
-void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler&, diagnostics::report&) {
+void PostprocessLevel(assets::level& lev, content_manager& manager, cog::compiler&, diagnostics::report&) {
     // Post-process; load materials and scripts.
     for(auto& mat_entry : lev.materials) {
         std::get<0>(mat_entry) = &manager.load<assets::material>(std::get<3>(mat_entry), *lev.master_colormap);
@@ -607,7 +607,7 @@ void PostprocessLevel(assets::level& lev, manager& manager, cog::compiler&, diag
 }
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::level_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::level_loader::parse(text::tokenizer& tok, content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<assets::level> lev(new assets::level());
 
     text::token t;

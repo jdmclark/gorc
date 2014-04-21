@@ -2,7 +2,7 @@
 #include "content/assets/bitmap.h"
 #include "content/assets/colormap.h"
 #include "framework/diagnostics/helper.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
 #include "framework/math/util.h"
 #include <array>
 #include <boost/format.hpp>
@@ -87,7 +87,8 @@ gorc::vector<3, uint8_t> gorc::content::loaders::bitmap_loader::get_palette_colo
     return make_zero_vector<3, uint8_t>();
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::deserialize(const boost::filesystem::path& filename,
+        io::read_only_file& file, content_manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::bitmap> mat(new content::assets::bitmap());
 
     char magic[4];
@@ -95,7 +96,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
 
     // Check magic and version
     if(strncmp(magic, "BM  ", 4) != 0) {
-        diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+        diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 
@@ -216,7 +217,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
     }
     else {
         // Unknown bit depth
-        diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+        diagnostics::helper::file_corrupt(report, "bitmap_loader::deserialize", diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 

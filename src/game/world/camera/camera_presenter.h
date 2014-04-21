@@ -15,7 +15,7 @@ class verb_table;
 }
 
 namespace content {
-class manager;
+class content_manager;
 }
 
 namespace game {

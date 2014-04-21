@@ -13,7 +13,7 @@
 namespace gorc {
 namespace content {
 
-class manager;
+class content_manager;
 
 namespace assets {
 
@@ -27,7 +27,7 @@ public:
 
     script const* cog = nullptr;
 
-    void parse_args(text::tokenizer& tok, manager& manager, const cog::compiler& compiler, diagnostics::report& report);
+    void parse_args(text::tokenizer& tok, content_manager& manager, const cog::compiler& compiler, diagnostics::report& report);
 };
 
 }

@@ -1,9 +1,9 @@
 #include "level_model.h"
 #include "framework/utility/flag_set.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include "game/constants.h"
 
-gorc::game::world::level_model::level_model(gorc::content::manager&, cog::compiler&,
+gorc::game::world::level_model::level_model(gorc::content::content_manager&, cog::compiler&,
         const gorc::content::assets::level& level, const content::assets::inventory& inv)
     : level(level), header(level.header), adjoins(level.adjoins), sectors(level.sectors), inventory_model(inv) {
 

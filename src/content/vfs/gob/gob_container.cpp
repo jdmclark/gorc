@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <cstddef>
 
-gorc::content::vfs::gob::gob_container::gob_container(io::read_only_file& file)
-    : gobPath(file.Filename), isEpisode(false), episodeIndex(0) {
+gorc::content::vfs::gob::gob_container::gob_container(const boost::filesystem::path& gobPath, io::read_only_file& file)
+    : gobPath(gobPath), isEpisode(false), episodeIndex(0) {
 
     struct GOB_HEADER {
         char magic[4];

@@ -1,0 +1,6 @@
+symbols
+int foo=0x85fD
+int foo=0XFFFEC855
+end
+code
+end

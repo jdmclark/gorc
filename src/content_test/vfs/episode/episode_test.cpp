@@ -1,10 +1,10 @@
 #include "test/test.h"
 #include "content/vfs/episode/episode.h"
-#include "framework/io/native_file.h"
+#include "base/io/native_file.h"
 #include "framework/diagnostics/stored_report.h"
 #include "content/vfs/episode/exception.h"
 #include "content/vfs/container.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
 #include "framework/text/exception.h"
 
 begin_suite(EpisodeTest);

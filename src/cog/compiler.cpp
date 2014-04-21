@@ -3,7 +3,7 @@
 #include "cog/stages/stages.h"
 #include "cog/ast/factory.h"
 #include "cog/ir/code_printer.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
 
 void gorc::cog::compiler::add_message_id(const std::string& name, message_id value) {
     MessageTable.insert(std::make_pair(name, value));
@@ -62,11 +62,11 @@ gorc::cog::compiler::compiler(verbs::verb_table& vt)
     populate_tables();
 }
 
-void gorc::cog::compiler::compile(io::read_only_file& file, script& output, diagnostics::report& report) const {
+void gorc::cog::compiler::compile(const boost::filesystem::path& filename, io::read_only_file& file, script& output, diagnostics::report& report) const {
     unsigned int prevErrorCount = report.get_error_count();
 
     ast::factory astFactory;
-    text::source source(file);
+    text::source source(filename, file);
 
     ast::translation_unit* ast = stages::generate_ast::generate_ast(source, report, astFactory);
 

@@ -45,7 +45,7 @@ public:
     double game_time = 0.0;
     vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
-    level_model(content::manager& manager, cog::compiler& Cogcompiler, const content::assets::level& level, const content::assets::inventory& inv);
+    level_model(content::content_manager& manager, cog::compiler& Cogcompiler, const content::assets::level& level, const content::assets::inventory& inv);
 };
 
 }

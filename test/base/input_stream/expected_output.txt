@@ -1,0 +1,4 @@
+Strings match
+File read exception thrown
+Stream at end
+==== Testsuite returns: 0 ====

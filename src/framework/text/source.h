@@ -2,7 +2,8 @@
 
 #include <string>
 #include <vector>
-#include "framework/io/read_only_file.h"
+#include <boost/filesystem/path.hpp>
+#include "base/io/read_only_file.h"
 
 namespace gorc {
 namespace text {
@@ -13,9 +14,9 @@ private:
     size_t index;
 
 public:
-    const std::string filename;
+    const boost::filesystem::path filename;
 
-    source(io::read_only_file& f);
+    source(const boost::filesystem::path& filename, io::read_only_file& f);
     source(const std::string& s);
 
     inline char get_next() {

@@ -7,7 +7,7 @@ LanguageTestFixture::LanguageTestFixture(const boost::filesystem::path& BasePath
     return;
 }
 
-LanguageTestFixture::LanguageTestFixture(const gorc::content::filesystem& fs)
+LanguageTestFixture::LanguageTestFixture(const gorc::io::file_system& fs)
     : nfs(""), FileSystem(fs) {
     return;
 }

@@ -16,7 +16,7 @@ public:
 
     level_loader(cog::compiler& compiler);
 
-    virtual std::unique_ptr<asset> parse(text::tokenizer& t, manager& manager, diagnostics::report& report) override;
+    virtual std::unique_ptr<asset> parse(text::tokenizer& t, content_manager& manager, diagnostics::report& report) override;
 };
 
 }

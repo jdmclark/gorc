@@ -6,7 +6,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "framework/events/print.h"
 
-gorc::client::application::application(content::vfs::virtual_filesystem& vfs, diagnostics::report& report,
+gorc::client::application::application(content::vfs::virtual_file_system& vfs, diagnostics::report& report,
         const std::string& episode_name, const std::string& level_name)
     : gorc::application<view_layer, presenter, presenter_mapper>("Gorc", mapper, report, vfs, make_box(make_vector(0, 0), make_vector(1280, 720)), true),
       mapper(*this), input_episodename(episode_name), input_levelname(level_name), virtual_filesystem(vfs) {
@@ -17,7 +17,7 @@ gorc::client::application::~application() {
     return;
 }
 
-void gorc::client::application::startup(event::event_bus& event_bus, content::manager& content) {
+void gorc::client::application::startup(event::event_bus& event_bus, content::content_manager& content) {
     // Register handler to print messages.
     event_bus.add_handler<events::print>([](const events::print& print) {
         std::cout << print.message << std::endl;
@@ -39,7 +39,7 @@ void gorc::client::application::startup(event::event_bus& event_bus, content::ma
     }
 
     // HACK: Set current level to 01narshadda.jkl.
-    auto contentmanager = std::make_shared<content::manager>(report, filesystem);
+    auto contentmanager = std::make_shared<content::content_manager>(report, filesystem);
     const auto& lev = contentmanager->load<content::assets::level>(input_levelname, components.compiler);
 
     // Start game:

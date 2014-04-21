@@ -11,7 +11,7 @@
 namespace gorc {
 namespace content {
 
-class manager;
+class content_manager;
 
 namespace assets {
 

@@ -1,7 +1,7 @@
 #include "template.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>
@@ -13,13 +13,13 @@ namespace assets {
 class template_parser_args {
 public:
     text::tokenizer& tok;
-    content::manager& content;
+    content::content_manager& content;
     const assets::colormap& colormap;
     const cog::compiler& compiler;
     const std::unordered_map<std::string, int>& templates;
     diagnostics::report& report;
 
-    template_parser_args(text::tokenizer& tok, content::manager& content,
+    template_parser_args(text::tokenizer& tok, content::content_manager& content,
             const assets::colormap& colormap, const cog::compiler& compiler,
             const std::unordered_map<std::string, int>& templates,
             diagnostics::report& report) :
@@ -137,7 +137,7 @@ void tpl_template_mapper(int& value, int, const std::unordered_map<std::string, 
     }
 }
 
-template <typename T, typename... U> void tpl_asset_loader(T const*& value, text::tokenizer& tok, content::manager& manager, U... args) {
+template <typename T, typename... U> void tpl_asset_loader(T const*& value, text::tokenizer& tok, content::content_manager& manager, U... args) {
     std::string fn = tok.get_space_delimited_string();
     if(boost::iequals(fn, "none")) {
         value = nullptr;
@@ -234,7 +234,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 }
 }
 
-void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, content::manager& manager, const colormap& cmp,
+void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, content::content_manager& manager, const colormap& cmp,
         const cog::compiler& compiler, const std::unordered_map<std::string, int>& templates, diagnostics::report& report) {
     template_parser_args tp_args(tok, manager, cmp, compiler, templates, report);
 

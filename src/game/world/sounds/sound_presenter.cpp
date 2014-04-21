@@ -1,11 +1,11 @@
 #include "sound_presenter.h"
 #include "game/world/level_model.h"
 #include "game/level_state.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include "game/world/level_presenter.h"
 #include "sound_model.h"
 
-gorc::game::world::sounds::sound_presenter::sound_presenter(content::manager& contentmanager)
+gorc::game::world::sounds::sound_presenter::sound_presenter(content::content_manager& contentmanager)
     : contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
     return;
 }

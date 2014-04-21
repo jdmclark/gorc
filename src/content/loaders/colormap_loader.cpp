@@ -1,28 +1,30 @@
 #include "colormap_loader.h"
 #include "content/assets/colormap.h"
 #include "framework/diagnostics/helper.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
+#include "base/io/binary_input_stream.h"
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp" };
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::deserialize(io::read_only_file& file, manager&, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::deserialize(const boost::filesystem::path& filename,
+        io::read_only_file& file, content_manager&, diagnostics::report& report) {
     std::unique_ptr<content::assets::colormap> cmp(new content::assets::colormap());
 
     char magic[4];
     file.read(magic, sizeof(char) * 4);
 
     // Check magic and version
-    if(strncmp(magic, "CMP ", 4) != 0 || file.read<uint32_t>() != 0x1E) {
+    if(strncmp(magic, "CMP ", 4) != 0 || io::deserialize<uint32_t>(file) != 0x1E) {
         diagnostics::helper::file_corrupt(report, "ColormapLoader::Deserialize",
-                diagnostics::error_location(file.Filename, 0, 0, 0, 0));
+                diagnostics::error_location(filename, 0, 0, 0, 0));
         throw io::file_corrupt_exception();
     }
 
-    bool hasTransparency = (file.read<uint32_t>() != 0);
+    bool hasTransparency = (io::deserialize<uint32_t>(file) != 0);
 
-    get<0>(cmp->tint_color) = file.read<float>();
-    get<1>(cmp->tint_color) = file.read<float>();
-    get<2>(cmp->tint_color) = file.read<float>();
+    get<0>(cmp->tint_color) = io::deserialize<float>(file);
+    get<1>(cmp->tint_color) = io::deserialize<float>(file);
+    get<2>(cmp->tint_color) = io::deserialize<float>(file);
 
     file.seek(40); // Skip padding/unknowns.
 

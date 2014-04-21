@@ -1,6 +1,6 @@
 #include "soundclass_loader.h"
 #include "content/assets/soundclass.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 
 #include <unordered_map>
 #include <string>
@@ -146,7 +146,7 @@ const std::unordered_map<std::string, flags::sound_subclass_type> SubclassMap {
 }
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::soundclass_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::soundclass_loader::parse(text::tokenizer& tok, content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<assets::soundclass> snd(new assets::soundclass());
 
     text::token t;

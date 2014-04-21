@@ -11,3 +11,5 @@ game/episode
 game/resource
 game/restricted/music
 *.ogg
+test_log.txt
+tempdir/

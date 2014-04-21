@@ -10,28 +10,37 @@
 # Module configuration #
 # ==================== #
 
-LIB_MODULES = test framework cog content game
-TEST_MODULES = test_test framework_test cog_test content_test
+LIB_MODULES = test base framework cog content game
+TEST_MODULES = test_test base_test framework_test cog_test content_test
 BIN_MODULES = client server ungob
 
+base_LIBRARIES = boost_system boost_filesystem
 framework_LIBRARIES = GLEW GL GLU sfml-audio sfml-graphics sfml-window sfml-system boost_system boost_filesystem
-content_DEPENDENCIES = cog framework
-game_DEPENDENCIES = cog framework content
 
-cog_DEPENDENCIES = framework
+content_DEPENDENCIES = cog base framework
+game_DEPENDENCIES = cog base framework content
+
+cog_DEPENDENCIES = base framework
 cog_SOURCE_FILES += $(SRC_PATH)/cog/grammar/lexer.cpp $(SRC_PATH)/cog/grammar/parser.cpp
 cog_HEADER_FILES += $(SRC_PATH)/cog/grammar/parser.hpp
 
-framework_test_DEPENDENCIES = framework
-cog_test_DEPENDENCIES = cog framework content
-content_test_DEPENDENCIES = cog framework content
+base_test_DEPENDENCIES = base
+framework_test_DEPENDENCIES = base framework
+cog_test_DEPENDENCIES = cog base framework content
+content_test_DEPENDENCIES = cog base framework content
 
-client_DEPENDENCIES = framework cog content game
-server_DEPENDENCIES = framework cog content game
+client_DEPENDENCIES = base framework cog content game
+server_DEPENDENCIES = base framework cog content game
 
-ungob_DEPENDENCIES = framework cog content
+ungob_DEPENDENCIES = base framework cog content
 
-INTTEST_MODULES = 
+INTTEST_MODULES = input_stream native_file output_stream test_integration
+
+test_integration_INTTEST_DEPENDENCIES += test
+native_file_INTTEST_DEPENDENCIES += base
+output_stream_INTTEST_DEPENDENCIES += base
+input_stream_INTTEST_DEPENDENCIES += base
+
 
 # =================== #
 # Build configuration #
@@ -92,7 +101,7 @@ define INTTEST_BIN_MODULE_template
 $(1)_INTTEST_SOURCE_FILES += $$(shell find $$(INTTEST_SRC_PATH)/$(1) -name *.cpp)
 $(1)_INTTEST_HEADER_FILES += $$(shell find $$(INTTEST_SRC_PATH)/$(1) -name *.h)
 $(1)_INTTEST_OBJECT_FILES += $$(subst $$(INTTEST_SRC_PATH),$$(INTTEST_OBJ_PATH),$$($(1)_INTTEST_SOURCE_FILES:.cpp=.o))
-$(1)_INTTEST_ACTUAL_LIBRARIES += $$($(1)_INTTEST_LIBRARIES) $$(foreach depend,$$($(1)_DEPENDENCIES),$$($$(depend)_LIBRARIES))
+$(1)_INTTEST_ACTUAL_LIBRARIES += $$($(1)_INTTEST_LIBRARIES) $$(foreach depend,$$($(1)_INTTEST_DEPENDENCIES),$$($$(depend)_LIBRARIES))
 
 $$(INTTEST_BIN_PATH)/$(1): $$(foreach depend,$$($(1)_INTTEST_DEPENDENCIES),$$($$(depend)_OBJECT_FILES)) $$($(1)_INTTEST_OBJECT_FILES)
 	mkdir -p $$(dir $$@)

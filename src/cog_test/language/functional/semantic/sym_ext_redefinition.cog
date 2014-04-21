@@ -1,0 +1,7 @@
+symbols
+
+int test local local # Error - extension redefinition
+
+end
+code
+end

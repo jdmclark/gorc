@@ -1,6 +1,6 @@
 #include "model_loader.h"
 #include "content/assets/model.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>
@@ -29,7 +29,7 @@ void SkipToNextModelSection(text::tokenizer& tok) {
     tok.assert_punctuator(":");
 }
 
-void ParseModelHeaderSection(assets::model&, text::tokenizer& tok, manager&, diagnostics::report& report) {
+void ParseModelHeaderSection(assets::model&, text::tokenizer& tok, content_manager&, diagnostics::report& report) {
     std::string magic = tok.get_space_delimited_string();
     if(!boost::iequals(magic, "3DO")) {
         report.add_error("ModelLoader::ParseModelHeaderSection", boost::str(boost::format("expected \'3DO\', found \'%s\'") % magic),
@@ -40,7 +40,7 @@ void ParseModelHeaderSection(assets::model&, text::tokenizer& tok, manager&, dia
     tok.get_number<double>();
 }
 
-void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manager&, diagnostics::report&) {
+void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, content_manager&, diagnostics::report&) {
     tok.assert_identifier("materials");
 
     unsigned int num = tok.get_number<unsigned int>();
@@ -51,7 +51,7 @@ void ParseModelResourceSection(assets::model& model, text::tokenizer& tok, manag
     }
 }
 
-void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager&, diagnostics::report&) {
+void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, content_manager&, diagnostics::report&) {
     tok.assert_identifier("RADIUS");
     model.radius = tok.get_number<float>();
 
@@ -181,7 +181,7 @@ void ParseGeometryDefSection(assets::model& model, text::tokenizer& tok, manager
     }
 }
 
-void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manager&, diagnostics::report&) {
+void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, content_manager&, diagnostics::report&) {
     tok.assert_identifier("hierarchy");
     tok.assert_identifier("nodes");
 
@@ -219,7 +219,7 @@ void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, manage
     }
 }
 
-void PostprocessModel(assets::model& model, manager& manager, const assets::colormap& colormap, diagnostics::report&) {
+void PostprocessModel(assets::model& model, content_manager& manager, const assets::colormap& colormap, diagnostics::report&) {
     for(const auto& mat_name : model.material_entries) {
         model.materials.push_back(&manager.load<assets::material>(mat_name, colormap));
     }
@@ -237,7 +237,7 @@ void PostprocessModel(assets::model& model, manager& manager, const assets::colo
     return;
 }
 
-using ModelLoaderSectionFn = std::function<void(assets::model&, text::tokenizer&, manager&, diagnostics::report&)>;
+using ModelLoaderSectionFn = std::function<void(assets::model&, text::tokenizer&, content_manager&, diagnostics::report&)>;
 const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMap {
     { "header", ParseModelHeaderSection },
     { "modelresource", ParseModelResourceSection },
@@ -249,7 +249,7 @@ const std::unordered_map<std::string, ModelLoaderSectionFn> ModelLoaderSectionMa
 }
 }
 
-std::unique_ptr<gorc::content::asset> gorc::content::loaders::model_loader::parse(text::tokenizer& tok, manager& manager, diagnostics::report& report) {
+std::unique_ptr<gorc::content::asset> gorc::content::loaders::model_loader::parse(text::tokenizer& tok, content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<assets::model> lev(new assets::model());
 
     text::token t;

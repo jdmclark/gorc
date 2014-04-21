@@ -3,11 +3,11 @@
 #include "key_presenter.h"
 #include "key_model.h"
 #include "game/world/level_model.h"
-#include "framework/content/manager.h"
+#include "framework/content/content_manager.h"
 #include "game/world/gameplay/character_controller.h"
 #include "game/world/level_presenter.h"
 
-gorc::game::world::keys::key_presenter::key_presenter(content::manager& contentmanager)
+gorc::game::world::keys::key_presenter::key_presenter(content::content_manager& contentmanager)
     : contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
     return;
 }

@@ -9,7 +9,7 @@
 
 namespace gorc {
 namespace content {
-class manager;
+class content_manager;
 }
 
 namespace cog {
@@ -31,12 +31,12 @@ class sound;
 
 class sound_presenter {
 private:
-    content::manager& contentmanager;
+    content::content_manager& contentmanager;
     level_model* levelModel;
     sound_model* model;
 
 public:
-    sound_presenter(content::manager&);
+    sound_presenter(content::content_manager&);
 
     void start(level_model& levelModel, sound_model& soundModel);
     void update(const time& time);

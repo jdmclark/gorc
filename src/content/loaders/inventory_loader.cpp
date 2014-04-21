@@ -1,7 +1,7 @@
 #include "inventory_loader.h"
 #include "content/assets/inventory.h"
 #include "framework/diagnostics/helper.h"
-#include "framework/io/exception.h"
+#include "base/io/exception.h"
 #include <boost/format.hpp>
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::inventory_loader::asset_root_path = { "misc" };
@@ -11,7 +11,7 @@ gorc::content::loaders::inventory_loader::inventory_loader(cog::compiler& compil
 }
 
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::inventory_loader::parse(text::tokenizer& t,
-        content::manager& manager, diagnostics::report& report) {
+        content::content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<content::assets::inventory> dat(new content::assets::inventory());
 
     text::token tok;

@@ -6,7 +6,7 @@
 #include "framework/gui/widgets/static_image.h"
 #include "framework/gui/widgets/static_text.h"
 
-gorc::client::hud_view::hud_view(content::manager& manager)
+gorc::client::hud_view::hud_view(content::content_manager& manager)
     : gui_view(manager.load<content::assets::shader>("gui.glsl")) {
     auto& dfltcmp = manager.load<content::assets::colormap>("dflt.cmp");
     const auto& statusleft = manager.load<content::assets::bitmap>("statusleft16.bm", dfltcmp);
