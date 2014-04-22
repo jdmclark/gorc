@@ -5,10 +5,10 @@
 #include "content/assets/model.h"
 #include "shape.h"
 #include "contact.h"
-#include "framework/math/util.h"
-#include "framework/math/matrix.h"
+#include "base/math/util.h"
+#include "base/math/matrix.h"
 #include "game/world/level_model.h"
-#include "framework/utility/maybe.h"
+#include "base/utility/maybe.h"
 
 namespace gorc {
 namespace game {

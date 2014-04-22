@@ -1,0 +1,1 @@
+static inline const char* type_name() { return "test_health_component"; }

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <GL/glew.h>
-#include "framework/math/matrix.h"
-#include "framework/math/box.h"
-#include "framework/content/assets/shader.h"
+#include "base/math/matrix.h"
+#include "base/math/box.h"
+#include "base/content/assets/shader.h"
 
 namespace gorc {
 namespace client {

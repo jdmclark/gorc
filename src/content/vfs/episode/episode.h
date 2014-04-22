@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base/io/read_only_file.h"
-#include "framework/diagnostics/report.h"
+#include "base/diagnostics/report.h"
 #include "entry.h"
 #include "episode_type.h"
 #include "content/vfs/container.h"

@@ -1,7 +1,7 @@
 #include "cog/ast/node.h"
 #include "cog/symbols/table.h"
 #include "cog/verbs/table.h"
-#include "framework/diagnostics/report.h"
+#include "base/diagnostics/report.h"
 
 #include "symbol_visitor.h"
 #include "code_visitor.h"

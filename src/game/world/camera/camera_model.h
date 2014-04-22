@@ -3,7 +3,7 @@
 #include "camera_state.h"
 #include "current_camera_state.h"
 #include "game/flags/camera_state_flag.h"
-#include "framework/utility/flag_set.h"
+#include "base/utility/flag_set.h"
 #include <vector>
 
 namespace gorc {

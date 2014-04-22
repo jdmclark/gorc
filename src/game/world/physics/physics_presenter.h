@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/utility/flag_set.h"
-#include "framework/math/vector.h"
+#include "base/utility/flag_set.h"
+#include "base/math/vector.h"
 #include "game/world/thing.h"
-#include "framework/utility/time.h"
+#include "base/utility/time.h"
 #include "shape.h"
 #include "contact.h"
 #include <unordered_map>

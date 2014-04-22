@@ -1,11 +1,11 @@
 #pragma once
 
-#include "framework/content/asset.h"
+#include "base/content/asset.h"
 #include "content/loaders/sprite_loader.h"
 #include "content/flags/geometry_mode.h"
 #include "content/flags/light_mode.h"
 #include "content/flags/texture_mode.h"
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 
 #include "material.h"
 

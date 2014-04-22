@@ -3,7 +3,7 @@
 #include "content/assets/template.h"
 #include "gameplay/thing_controller.h"
 #include "physics/object_data.h"
-#include "framework/utility/maybe.h"
+#include "base/utility/maybe.h"
 #include "content/flags/armed_mode.h"
 #include "content/flags/jk_flag.h"
 #include "content/flags/ai_mode_flag.h"

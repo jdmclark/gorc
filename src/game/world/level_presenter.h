@@ -1,7 +1,7 @@
 #pragma once
 
-#include "framework/place/presenter.h"
-#include "framework/utility/time.h"
+#include "base/place/presenter.h"
+#include "base/utility/time.h"
 #include "level_place.h"
 
 #include "game/flags/difficulty_mode.h"
@@ -51,7 +51,7 @@ private:
 
     level_state& components;
     level_place place;
-    event::event_bus* event_bus;
+    event_bus* eventbus;
 
     void initialize_world();
 
@@ -82,7 +82,7 @@ public:
     level_presenter(level_state& components, const level_place& place);
     ~level_presenter();
 
-    void start(event::event_bus& eventBus);
+    void start(event_bus& eventBus);
     void update(const time& time);
 
     void translate_camera(const vector<3>& amt);

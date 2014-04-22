@@ -1,10 +1,10 @@
 #pragma once
 
-#include "framework/math/matrix.h"
-#include "framework/view.h"
-#include "framework/math/box.h"
-#include "framework/utility/flag_set.h"
-#include "framework/utility/randomizer.h"
+#include "base/math/matrix.h"
+#include "base/view.h"
+#include "base/math/box.h"
+#include "base/utility/flag_set.h"
+#include "base/utility/randomizer.h"
 #include "content/flags/key_flag.h"
 #include "content/flags/geometry_mode.h"
 #include "content/flags/light_mode.h"

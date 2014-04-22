@@ -3,7 +3,7 @@
 #include "key_presenter.h"
 #include "key_model.h"
 #include "game/world/level_model.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include "game/world/gameplay/character_controller.h"
 #include "game/world/level_presenter.h"
 
@@ -59,7 +59,7 @@ int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {
 }
 
 void gorc::game::world::keys::key_presenter::update(const time& time) {
-    double dt = time;
+    double dt = time.elapsed_as_seconds();
 
     // Expunge expired keys.
     for(auto& key : model->keys) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/content/asset.h"
+#include "base/content/asset.h"
 #include "content/loaders/model_loader.h"
 
 #include "model_geoset.h"

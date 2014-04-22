@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/application.h"
+#include "base/application.h"
 #include "view_layer.h"
 #include "presenter.h"
 #include "presenter_mapper.h"
@@ -10,7 +10,7 @@
 #include "content/vfs/virtual_file_system.h"
 #include "game/level_state.h"
 
-#include "framework/utility/randomizer.h"
+#include "base/utility/randomizer.h"
 #include "cog/verbs/table.h"
 #include "cog/compiler.h"
 
@@ -47,7 +47,7 @@ public:
             const std::string& input_episodename, const std::string& input_levelname);
     ~application();
 
-    virtual void startup(event::event_bus& event_bus, content::content_manager& content) override;
+    virtual void startup(event_bus& eventbus, content::content_manager& content) override;
     virtual void shutdown() override;
 
     virtual void update(const time& time, const box<2, int>& view_size) override;

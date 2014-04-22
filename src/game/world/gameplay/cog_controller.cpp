@@ -3,7 +3,7 @@
 #include "game/world/thing.h"
 #include "game/world/level_model.h"
 #include "game/constants.h"
-#include "framework/math/util.h"
+#include "base/math/util.h"
 #include <iostream>
 
 using namespace gorc::math;

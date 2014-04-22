@@ -5,6 +5,7 @@
 #include "cog/vm/exception.h"
 #include "cog/ir/code_printer.h"
 #include "cog/instance.h"
+#include "base/utility/make_unique.h"
 #include <fstream>
 
 using namespace gorc::cog;
@@ -69,7 +70,7 @@ void CodegenTestFixture::populate_tables() {
 }
 
 std::unique_ptr<gorc::cog::instance> CreateInstance(gorc::cog::script& script) {
-    std::unique_ptr<gorc::cog::instance> inst(new gorc::cog::instance(script));
+    auto inst = gorc::make_unique<gorc::cog::instance>(script);
 
     inst->heap.resize(script.symbol_table.size());
 

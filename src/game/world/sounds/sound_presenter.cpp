@@ -1,7 +1,7 @@
 #include "sound_presenter.h"
 #include "game/world/level_model.h"
 #include "game/level_state.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include "game/world/level_presenter.h"
 #include "sound_model.h"
 
@@ -28,7 +28,7 @@ void gorc::game::world::sounds::sound_presenter::update(const time& time) {
 
     // Update sounds
     for(auto& sound : model->sounds) {
-        sound.update(time, *levelModel);
+        sound.update(time.elapsed_as_seconds(), *levelModel);
     }
 
     for(auto& sound : model->sounds) {
@@ -37,7 +37,7 @@ void gorc::game::world::sounds::sound_presenter::update(const time& time) {
         }
     }
 
-    model->ambient_music.update(time);
+    model->ambient_music.update(time.elapsed_as_seconds());
 }
 
 void gorc::game::world::sounds::sound_presenter::expunge_thing_sounds(int thing_id) {
@@ -49,7 +49,7 @@ void gorc::game::world::sounds::sound_presenter::expunge_thing_sounds(int thing_
         }
     }
 
-    update(time(0, 0.0));
+    update(time(timestamp(0), timestamp(0)));
 }
 
 void gorc::game::world::sounds::sound_presenter::set_ambient_sound(content::assets::sound const* sound, float volume) {

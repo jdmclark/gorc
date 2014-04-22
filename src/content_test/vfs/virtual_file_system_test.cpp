@@ -1,8 +1,8 @@
 #include "test/test.h"
 #include <algorithm>
 #include "content/vfs/virtual_file_system.h"
-#include "framework/text/tokenizer.h"
-#include "framework/diagnostics/stored_report.h"
+#include "base/text/tokenizer.h"
+#include "base/diagnostics/stored_report.h"
 #include "content/vfs/episode/episode.h"
 
 class VirtualFileSystemTestFixture : public test::fixture {

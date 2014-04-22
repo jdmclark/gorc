@@ -1,7 +1,7 @@
 #pragma once
 
 #include "content/assets/level.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include <memory>
 
 namespace gorc {

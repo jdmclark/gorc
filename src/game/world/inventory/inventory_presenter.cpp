@@ -18,7 +18,7 @@ void gorc::game::world::inventory::inventory_presenter::start(level_model& level
 }
 
 void gorc::game::world::inventory::inventory_presenter::update(const time& time) {
-    model->mod_all_cooldowns(-static_cast<float>(time));
+    model->mod_all_cooldowns(-static_cast<float>(time.elapsed_as_seconds()));
 
     // Update firing messages.
     for(auto& player_inv : *model) {
@@ -26,10 +26,10 @@ void gorc::game::world::inventory::inventory_presenter::update(const time& time)
             auto bin_id = std::get<0>(player_bin);
             auto& bin = std::get<1>(player_bin);
 
-            bin.refire_time_activated += static_cast<float>(time);
+            bin.refire_time_activated += static_cast<float>(time.elapsed_as_seconds());
 
             if(bin.activated) {
-                bin.total_time_activated += static_cast<float>(time);
+                bin.total_time_activated += static_cast<float>(time.elapsed_as_seconds());
             }
 
             if(bin.activated && bin.refiring) {
@@ -43,7 +43,7 @@ void gorc::game::world::inventory::inventory_presenter::update(const time& time)
         }
 
         auto& inv = std::get<1>(player_inv);
-        inv.mount_wait -= static_cast<float>(time);
+        inv.mount_wait -= static_cast<float>(time.elapsed_as_seconds());
         if(inv.switching_weapons && inv.mount_wait <= 0.0f) {
             inv.switching_weapons = false;
             // TODO: When weapon is ASSIGNED, pass sender ref of 1.

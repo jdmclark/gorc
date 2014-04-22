@@ -1,5 +1,5 @@
 #include "label_visitor.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 
 #include <algorithm>
 

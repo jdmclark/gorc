@@ -1,5 +1,5 @@
 #include "cog/ast/factory.h"
-#include "framework/diagnostics/report.h"
+#include "base/diagnostics/report.h"
 #include "cog/symbols/table.h"
 #include <string>
 #include <unordered_map>

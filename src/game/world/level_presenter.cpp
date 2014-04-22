@@ -2,8 +2,8 @@
 #include "level_model.h"
 #include "game/constants.h"
 #include "physics/query.h"
-#include "framework/events/print.h"
-#include "framework/events/exit.h"
+#include "base/events/print.h"
+#include "base/events/exit.h"
 #include "game/level_state.h"
 #include "game/world/physics/physics_presenter.h"
 #include "game/world/animations/animation_presenter.h"
@@ -47,10 +47,10 @@ gorc::game::world::level_presenter::~level_presenter() {
     return;
 }
 
-void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
-    event_bus = &eventBus;
-    model = std::unique_ptr<level_model>(new level_model(*place.contentmanager, components.compiler, place.level,
-            place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler)));
+void gorc::game::world::level_presenter::start(event_bus& eventBus) {
+    eventbus = &eventBus;
+    model = make_unique<level_model>(*place.contentmanager, components.compiler, place.level,
+            place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler));
 
     physics_presenter->start(*model);
     key_presenter->start(*model, model->key_model);
@@ -63,7 +63,7 @@ void gorc::game::world::level_presenter::start(event::event_bus& eventBus) {
     initialize_world();
 
     // Update all components
-    update(time(0, 0.0));
+    update(time(timestamp(0), timestamp(0)));
 
     // Send startup and loading messages
     script_presenter->send_message_to_all(cog::message_id::loading, -1, -1, flags::message_type::nothing);
@@ -117,7 +117,7 @@ void gorc::game::world::level_presenter::initialize_world() {
 }
 
 void gorc::game::world::level_presenter::update(const time& time) {
-    double dt = time;
+    double dt = time.elapsed_as_seconds();
 
     physics_presenter->update(time);
     camera_presenter->update(time);
@@ -498,13 +498,13 @@ float gorc::game::world::level_presenter::get_level_time() {
 
 void gorc::game::world::level_presenter::jk_end_level(bool success) {
     if(success) {
-        event_bus->fire_event(events::print("Ending level - success"));
+        eventbus->fire_event(events::print("Ending level - success"));
     }
     else {
-        event_bus->fire_event(events::print("Ending level - failure"));
+        eventbus->fire_event(events::print("Ending level - failure"));
     }
 
-    event_bus->fire_event(events::exit());
+    eventbus->fire_event(events::exit());
 }
 
 // Misc verbs

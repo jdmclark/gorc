@@ -1,10 +1,10 @@
 #pragma once
 
-#include "framework/math/vector.h"
-#include "framework/math/box.h"
-#include "framework/content/assets/sound.h"
+#include "base/math/vector.h"
+#include "base/math/box.h"
+#include "base/content/assets/sound.h"
 #include "content/flags/sector_flag.h"
-#include "framework/utility/maybe.h"
+#include "base/utility/maybe.h"
 
 namespace gorc {
 namespace content {

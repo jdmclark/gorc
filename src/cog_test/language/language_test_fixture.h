@@ -6,7 +6,7 @@
 
 #include "base/io/file_system.h"
 #include "base/io/native_file_system.h"
-#include "framework/diagnostics/stored_report.h"
+#include "base/diagnostics/stored_report.h"
 #include "cog/grammar/instance.h"
 
 class LanguageTestFixture : public test::fixture {

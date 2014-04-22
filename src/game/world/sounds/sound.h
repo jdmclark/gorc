@@ -1,10 +1,10 @@
 #pragma once
 
 #include "content/flags/sound_flag.h"
-#include "framework/content/assets/sound.h"
-#include "framework/utility/flag_set.h"
-#include "framework/math/vector.h"
-#include "framework/utility/easing.h"
+#include "base/content/assets/sound.h"
+#include "base/utility/flag_set.h"
+#include "base/math/vector.h"
+#include "base/utility/easing.h"
 #include <SFML/Audio.hpp>
 
 namespace gorc {

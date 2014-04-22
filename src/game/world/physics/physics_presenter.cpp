@@ -4,8 +4,8 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 #include "game/constants.h"
-#include "framework/utility/pair_range.h"
-#include "framework/math/matrix.h"
+#include "base/utility/range.h"
+#include "base/math/matrix.h"
 #include "game/world/scripts/script_presenter.h"
 #include "game/world/sounds/sound_presenter.h"
 #include "game/world/keys/key_presenter.h"
@@ -544,7 +544,7 @@ gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thin
 }
 
 void physics_presenter::update(const time& time) {
-    double dt = time;
+    double dt = time.elapsed_as_seconds();
 
     physics_touched_thing_pairs.clear();
     physics_touched_surface_pairs.clear();

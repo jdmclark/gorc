@@ -4,7 +4,7 @@
 #include "game/world/level_presenter.h"
 #include "game/world/keys/key_presenter.h"
 #include "game/world/physics/physics_presenter.h"
-#include "framework/math/util.h"
+#include "base/math/util.h"
 #include "camera_model.h"
 #include "game/world/level_model.h"
 #include "game/world/physics/query.h"
@@ -86,7 +86,7 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
     // Calculate pov model waggle.
     const auto& player_thing = levelmodel->things[presenter.get_local_player_thing()];
     auto player_speed = length(make_vector(get<0>(player_thing.vel), get<1>(player_thing.vel))) / player_thing.max_vel;
-    float actual_waggle_speed = player_speed * model->waggle_speed * static_cast<float>(time) * (1.0f / 60.0f);
+    float actual_waggle_speed = player_speed * model->waggle_speed * static_cast<float>(time.elapsed_as_seconds()) * (1.0f / 60.0f);
     model->waggle_time += actual_waggle_speed;
     float waggle_up = -cosf(model->waggle_time * 2.0f);
     float waggle_left = sinf(model->waggle_time);
@@ -95,8 +95,8 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
     cam.pov_model_offset = lerp(cam.pov_model_offset, new_offset, 0.1f);
 
     for(auto& camera_state : model->cameras) {
-        camera_state.angle_offset = camera_state.angle_offset - clamp_length(camera_state.angle_offset, 0.0f, camera_state.angle_reset_speed * static_cast<float>(time));
-        camera_state.pos_offset = camera_state.pos_offset - clamp_length(camera_state.pos_offset, 0.0f, camera_state.pos_reset_speed * static_cast<float>(time));
+        camera_state.angle_offset = camera_state.angle_offset - clamp_length(camera_state.angle_offset, 0.0f, camera_state.angle_reset_speed * static_cast<float>(time.elapsed_as_seconds()));
+        camera_state.pos_offset = camera_state.pos_offset - clamp_length(camera_state.pos_offset, 0.0f, camera_state.pos_reset_speed * static_cast<float>(time.elapsed_as_seconds()));
     }
 }
 

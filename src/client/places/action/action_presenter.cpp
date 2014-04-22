@@ -9,7 +9,7 @@ gorc::client::action::action_presenter::action_presenter(application& app)
     return;
 }
 
-void gorc::client::action::action_presenter::start(event::event_bus& bus) {
+void gorc::client::action::action_presenter::start(event_bus& bus) {
     app.action_view->set_presenter(this);
     app.views.set_layer(view_layer::screen, *app.action_view);
 
@@ -31,7 +31,7 @@ void gorc::client::action::action_presenter::handle_mouse_input(const time& time
                 static_cast<double>(sf::Mouse::getPosition(app.window).y)) - ScreenCenter) / get<0>(ScreenCenter);
         sf::Mouse::setPosition(sf::Vector2i(app.window.getSize().x / 2, app.window.getSize().y / 2), app.window);
 
-        auto CameraRotation = -CursorPos * 20000.0 * time;
+        auto CameraRotation = -CursorPos * 20000.0 * time.elapsed_as_seconds();
 
         app.components.current_level_presenter->yaw_camera(get<0>(CameraRotation));
         app.components.current_level_presenter->pitch_camera(get<1>(CameraRotation));
@@ -102,7 +102,7 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const time&, s
 
     switch(k) {
     case sf::Keyboard::Escape:
-        app.event_bus.fire_event(events::exit());
+        app.eventbus.fire_event(events::exit());
         break;
 
     case sf::Keyboard::R:

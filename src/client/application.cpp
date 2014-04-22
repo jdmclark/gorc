@@ -4,7 +4,7 @@
 #include "cog/scripts/script_presenter.h"
 #include "world/level_view.h"
 #include <boost/algorithm/string/predicate.hpp>
-#include "framework/events/print.h"
+#include "base/events/print.h"
 
 gorc::client::application::application(content::vfs::virtual_file_system& vfs, diagnostics::report& report,
         const std::string& episode_name, const std::string& level_name)
@@ -17,9 +17,9 @@ gorc::client::application::~application() {
     return;
 }
 
-void gorc::client::application::startup(event::event_bus& event_bus, content::content_manager& content) {
+void gorc::client::application::startup(event_bus& eventbus, content::content_manager& content) {
     // Register handler to print messages.
-    event_bus.add_handler<events::print>([](const events::print& print) {
+    eventbus.add_handler<events::print>([](const events::print& print) {
         std::cout << print.message << std::endl;
     });
 
@@ -46,7 +46,7 @@ void gorc::client::application::startup(event::event_bus& event_bus, content::co
     components.current_level_presenter = make_unique<game::world::level_presenter>(components, game::world::level_place(contentmanager, lev));
     place_controller.go_to(action::action_place());
 
-    components.current_level_presenter->start(event_bus);
+    components.current_level_presenter->start(eventbus);
 
     level_view->set_presenter(components.current_level_presenter.get());
     level_view->set_level_model(components.current_level_presenter->model.get());

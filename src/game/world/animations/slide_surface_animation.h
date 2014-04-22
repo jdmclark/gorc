@@ -1,7 +1,7 @@
 #pragma once
 
 #include "animation.h"
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 
 namespace gorc {
 namespace game {

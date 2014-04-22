@@ -1,5 +1,5 @@
 #include "query.h"
-#include "framework/math/util.h"
+#include "base/math/util.h"
 
 bool gorc::game::world::physics::point_inside_sector(const vector<3>& position, const level_model& model,
         const gorc::content::assets::level_sector& sec) {

@@ -1,5 +1,5 @@
 #include "visitor.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 
 gorc::cog::ast::visitor::visitor(const std::string& name, diagnostics::report& report)
     : visitor_name(name), report(report)

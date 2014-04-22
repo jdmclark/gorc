@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 #include <memory>
-#include "framework/content/asset.h"
-#include "framework/content/assets/font.h"
+#include "base/content/asset.h"
+#include "base/content/assets/font.h"
 #include "content/assets/bitmap.h"
 #include "content/loaders/sfont_loader.h"
 

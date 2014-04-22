@@ -1,8 +1,8 @@
 #include "level_loader.h"
 #include "content/assets/level.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include "content/constants.h"
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>

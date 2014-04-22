@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/content/asset.h"
+#include "base/content/asset.h"
 #include "content/loaders/level_loader.h"
 
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 #include "level_header.h"
 #include "level_adjoin.h"
 #include "level_surface.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/content/asset.h"
+#include "base/content/asset.h"
 #include "puppet_mode.h"
 #include "content/loaders/puppet_loader.h"
 #include "content/flags/puppet_mode_type.h"

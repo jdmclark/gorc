@@ -1,6 +1,6 @@
 #include "inventory_loader.h"
 #include "content/assets/inventory.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 #include "base/io/exception.h"
 #include <boost/format.hpp>
 

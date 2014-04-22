@@ -1,4 +1,4 @@
-#include "framework/diagnostics/stream_report.h"
+#include "base/diagnostics/stream_report.h"
 #include "content/vfs/virtual_file_system.h"
 #include <iostream>
 #include <string>

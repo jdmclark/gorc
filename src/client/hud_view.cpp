@@ -2,9 +2,9 @@
 #include "content/assets/bitmap.h"
 #include "content/assets/colormap.h"
 #include "content/assets/sfont.h"
-#include "framework/content/assets/shader.h"
-#include "framework/gui/widgets/static_image.h"
-#include "framework/gui/widgets/static_text.h"
+#include "base/content/assets/shader.h"
+#include "base/gui/widgets/static_image.h"
+#include "base/gui/widgets/static_text.h"
 
 gorc::client::hud_view::hud_view(content::content_manager& manager)
     : gui_view(manager.load<content::assets::shader>("gui.glsl")) {

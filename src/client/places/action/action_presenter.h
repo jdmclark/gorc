@@ -1,9 +1,9 @@
 #pragma once
 
 #include "client/presenter.h"
-#include "framework/input/passthrough_input_adapter.h"
-#include "framework/input/keyboard_key_dispatcher.h"
-#include "framework/input/mouse_click_dispatcher.h"
+#include "base/input/passthrough_input_adapter.h"
+#include "base/input/keyboard_key_dispatcher.h"
+#include "base/input/mouse_click_dispatcher.h"
 
 namespace gorc {
 namespace client {
@@ -23,7 +23,7 @@ private:
 public:
     action_presenter(application& app);
 
-    virtual void start(event::event_bus&) override;
+    virtual void start(event_bus&) override;
 
     inline input::input_adapter& get_input_adapter() {
         return input_adapter;

@@ -2,8 +2,8 @@
 
 #include <string>
 #include "cog/ast/factory.h"
-#include "framework/text/source.h"
-#include "framework/diagnostics/report.h"
+#include "base/text/source.h"
+#include "base/diagnostics/report.h"
 
 namespace gorc {
 namespace cog {

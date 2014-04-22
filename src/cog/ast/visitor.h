@@ -1,7 +1,7 @@
 #pragma once
 
 #include "node.h"
-#include "framework/diagnostics/report.h"
+#include "base/diagnostics/report.h"
 
 #define AVPROTO(x) virtual void visit_##x(ast::x&);
 #define AVCONSUME(x) virtual void visit_##x(ast::x&) { }

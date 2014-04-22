@@ -1,7 +1,7 @@
 #include "symbol_visitor.h"
 #include "symbolfield_visitor.h"
 #include "symbolext_visitor.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 
 #include <algorithm>
 #include <boost/format.hpp>

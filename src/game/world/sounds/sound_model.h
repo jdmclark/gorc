@@ -1,8 +1,8 @@
 #pragma once
 
 #include "music.h"
-#include "framework/content/assets/sound.h"
-#include "framework/utility/pool.h"
+#include "base/content/assets/sound.h"
+#include "base/utility/pool.h"
 #include "sound.h"
 
 namespace gorc {

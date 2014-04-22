@@ -1,6 +1,6 @@
-#include "framework/content/assets/sound.h"
+#include "base/content/assets/sound.h"
 #include "game/world/level_model.h"
-#include "framework/math/util.h"
+#include "base/math/util.h"
 
 void gorc::game::world::sounds::sound::play_ambient(const content::assets::sound& buffer, float volume, float panning, flag_set<flags::sound_flag> flags) {
     expired = false;

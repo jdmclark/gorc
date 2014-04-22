@@ -6,12 +6,12 @@
 #include "content/flags/puppet_submode_type.h"
 #include "content/flags/key_flag.h"
 #include "content/assets/model.h"
-#include "framework/utility/flag_set.h"
-#include "framework/math/vector.h"
-#include "framework/math/matrix.h"
+#include "base/utility/flag_set.h"
+#include "base/math/vector.h"
+#include "base/math/matrix.h"
 #include "content/assets/puppet.h"
-#include "framework/math/quaternion.h"
-#include "framework/utility/time.h"
+#include "base/math/quaternion.h"
+#include "base/utility/time.h"
 
 namespace gorc {
 

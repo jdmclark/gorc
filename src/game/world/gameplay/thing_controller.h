@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 #include "content/flags/key_marker_type.h"
 #include "content/assets/model.h"
-#include "framework/math/matrix.h"
+#include "base/math/matrix.h"
 #include "game/world/physics/shape.h"
 #include <vector>
 #include <set>

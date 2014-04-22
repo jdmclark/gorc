@@ -1,6 +1,6 @@
 #include "colormap_loader.h"
 #include "content/assets/colormap.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 #include "base/io/exception.h"
 #include "base/io/binary_input_stream.h"
 

@@ -1,6 +1,6 @@
 #include "material_loader.h"
 #include "content/assets/material.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 #include "base/io/binary_input_stream.h"
 #include "base/io/exception.h"
 #include <array>

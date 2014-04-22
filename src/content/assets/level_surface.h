@@ -5,8 +5,8 @@
 #include "content/flags/geometry_mode.h"
 #include "content/flags/light_mode.h"
 #include "content/flags/texture_mode.h"
-#include "framework/math/vector.h"
-#include "framework/utility/flag_set.h"
+#include "base/math/vector.h"
+#include "base/utility/flag_set.h"
 #include <memory>
 #include <vector>
 #include <tuple>

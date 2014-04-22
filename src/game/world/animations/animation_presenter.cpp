@@ -18,7 +18,7 @@ void animation_presenter::start(level_model& levelModel, animation_model& model)
 
 void animation_presenter::update(const time& time) {
     for(auto& entity : model->animations) {
-            entity->update(time);
+            entity->update(time.elapsed_as_seconds());
     }
 
     for(auto& anim : model->animations) {
@@ -31,7 +31,7 @@ void animation_presenter::update(const time& time) {
 // Anim / Cel verbs
 int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::AnimFlag> flags) {
     auto& ent = model->animations.emplace();
-    ent.value = std::unique_ptr<animation>(new surface_material_animation(*levelModel, surface, rate, flags, ent.get_id()));
+    ent.value = make_unique<surface_material_animation>(*levelModel, surface, rate, flags, ent.get_id());
     ent.value->set_id(ent.get_id());
     return ent.get_id();
 }
@@ -63,21 +63,21 @@ void animation_presenter::set_surface_cel(int surface, int cel) {
 
 int animation_presenter::slide_surface(int surface_id, const vector<3>& direction) {
     auto& ent = model->animations.emplace();
-    ent.value = std::unique_ptr<animation>(new slide_surface_animation(*levelModel, surface_id, direction, ent.get_id()));
+    ent.value = make_unique<slide_surface_animation>(*levelModel, surface_id, direction, ent.get_id());
     ent.value->set_id(ent.get_id());
     return ent.get_id();
 }
 
 int animation_presenter::slide_ceiling_sky(float u_speed, float v_speed) {
     auto& ent = model->animations.emplace();
-    ent.value = std::unique_ptr<animation>(new slide_ceiling_sky_animation(*levelModel, make_vector(u_speed, v_speed)));
+    ent.value = make_unique<slide_ceiling_sky_animation>(*levelModel, make_vector(u_speed, v_speed));
     ent.value->set_id(ent.get_id());
     return ent.get_id();
 }
 
 int animation_presenter::surface_light_anim(int surface, float start_light, float end_light, float change_time) {
     auto& ent = model->animations.emplace();
-    ent.value = std::unique_ptr<animation>(new surface_light_animation(*levelModel, surface, start_light, end_light, change_time, ent.get_id()));
+    ent.value = make_unique<surface_light_animation>(*levelModel, surface, start_light, end_light, change_time, ent.get_id());
     ent.value->set_id(ent.get_id());
     return ent.get_id();
 }

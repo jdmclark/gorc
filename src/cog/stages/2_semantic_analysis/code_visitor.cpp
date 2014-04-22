@@ -1,6 +1,6 @@
 #include "code_visitor.h"
 #include "expression_visitor.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 
 #include <algorithm>
 

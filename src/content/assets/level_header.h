@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 #include <tuple>
 
 namespace gorc {

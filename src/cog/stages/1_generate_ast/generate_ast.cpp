@@ -1,8 +1,8 @@
 #include "cog/stages/stages.h"
 #include "cog/ast/node.h"
 #include "cog/ast/factory.h"
-#include "framework/diagnostics/report.h"
-#include "framework/text/source.h"
+#include "base/diagnostics/report.h"
+#include "base/text/source.h"
 
 #include "cog/grammar/instance.h"
 

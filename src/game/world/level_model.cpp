@@ -1,6 +1,6 @@
 #include "level_model.h"
-#include "framework/utility/flag_set.h"
-#include "framework/content/content_manager.h"
+#include "base/utility/flag_set.h"
+#include "base/content/content_manager.h"
 #include "game/constants.h"
 
 gorc::game::world::level_model::level_model(gorc::content::content_manager&, cog::compiler&,

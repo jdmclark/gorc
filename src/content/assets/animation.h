@@ -1,10 +1,10 @@
 #pragma once
 
-#include "framework/content/asset.h"
+#include "base/content/asset.h"
 #include "content/loaders/animation_loader.h"
 #include "content/flags/key_flag.h"
 #include "content/flags/key_marker_type.h"
-#include "framework/utility/flag_set.h"
+#include "base/utility/flag_set.h"
 #include "animation_node.h"
 #include <vector>
 

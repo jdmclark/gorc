@@ -1,10 +1,10 @@
 #pragma once
 
-#include "framework/math/vector.h"
-#include "framework/math/quaternion.h"
-#include "framework/utility/flag_set.h"
-#include "framework/text/tokenizer.h"
-#include "framework/utility/flag_set.h"
+#include "base/math/vector.h"
+#include "base/math/quaternion.h"
+#include "base/utility/flag_set.h"
+#include "base/text/tokenizer.h"
+#include "base/utility/flag_set.h"
 #include "cog/compiler.h"
 #include "content/flags/thing_type.h"
 #include "content/flags/move_type.h"

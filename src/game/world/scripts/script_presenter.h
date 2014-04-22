@@ -4,7 +4,7 @@
 #include "cog/flags/message_type.h"
 #include "script_model.h"
 #include "cog/vm/virtual_machine.h"
-#include "framework/utility/time.h"
+#include "base/utility/time.h"
 
 namespace gorc {
 namespace content {

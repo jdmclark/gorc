@@ -4,8 +4,8 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
-#include "framework/math/vector.h"
-#include "framework/content/asset.h"
+#include "base/math/vector.h"
+#include "base/content/asset.h"
 #include "content/loaders/inventory_loader.h"
 #include "inventory_bin.h"
 

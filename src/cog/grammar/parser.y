@@ -11,7 +11,7 @@
 %expect-rr 0
 
 %code requires {
-    #include "framework/text/location.h"
+    #include "base/text/location.h"
     #define YYLTYPE YYLTYPE
     typedef gorc::text::location YYLTYPE;
     

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 #include "client/world/level_view.h"
 
 namespace gorc {

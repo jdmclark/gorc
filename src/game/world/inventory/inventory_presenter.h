@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/utility/time.h"
+#include "base/utility/time.h"
 #include "content/flags/autoselect_mode.h"
 #include "content/flags/goal_flag.h"
-#include "framework/utility/flag_set.h"
+#include "base/utility/flag_set.h"
 
 namespace gorc {
 namespace cog {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "framework/content/loader.h"
-#include "framework/math/vector.h"
+#include "base/content/loader.h"
+#include "base/math/vector.h"
 
 namespace gorc {
 namespace content {

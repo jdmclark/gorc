@@ -1,5 +1,5 @@
 #include "compiler.h"
-#include "framework/text/source.h"
+#include "base/text/source.h"
 #include "cog/stages/stages.h"
 #include "cog/ast/factory.h"
 #include "cog/ir/code_printer.h"

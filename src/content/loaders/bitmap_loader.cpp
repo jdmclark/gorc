@@ -1,9 +1,9 @@
 #include "bitmap_loader.h"
 #include "content/assets/bitmap.h"
 #include "content/assets/colormap.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 #include "base/io/exception.h"
-#include "framework/math/util.h"
+#include "base/math/util.h"
 #include <array>
 #include <boost/format.hpp>
 

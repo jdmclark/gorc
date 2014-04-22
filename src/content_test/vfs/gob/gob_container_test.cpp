@@ -1,9 +1,9 @@
 #include "test/test.h"
 #include "content/vfs/gob/gob_container.h"
 #include "base/io/native_file.h"
-#include "framework/text/source.h"
-#include "framework/text/tokenizer.h"
-#include "framework/diagnostics/stored_report.h"
+#include "base/text/source.h"
+#include "base/text/tokenizer.h"
+#include "base/diagnostics/stored_report.h"
 
 begin_suite(GobContainerTest);
 

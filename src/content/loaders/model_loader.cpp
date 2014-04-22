@@ -1,6 +1,6 @@
 #include "model_loader.h"
 #include "content/assets/model.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>

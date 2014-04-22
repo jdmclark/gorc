@@ -10,29 +10,27 @@
 # Module configuration #
 # ==================== #
 
-LIB_MODULES = test base framework cog content game
-TEST_MODULES = test_test base_test framework_test cog_test content_test
+LIB_MODULES = test base cog content game
+TEST_MODULES = test_test base_test cog_test content_test
 BIN_MODULES = client server ungob
 
-base_LIBRARIES = boost_system boost_filesystem
-framework_LIBRARIES = GLEW GL GLU sfml-audio sfml-graphics sfml-window sfml-system boost_system boost_filesystem
+base_LIBRARIES = GLEW GL GLU sfml-audio sfml-graphics sfml-window sfml-system boost_system boost_filesystem
 
-content_DEPENDENCIES = cog base framework
-game_DEPENDENCIES = cog base framework content
+content_DEPENDENCIES = cog base
+game_DEPENDENCIES = cog base content
 
-cog_DEPENDENCIES = base framework
+cog_DEPENDENCIES = base
 cog_SOURCE_FILES += $(SRC_PATH)/cog/grammar/lexer.cpp $(SRC_PATH)/cog/grammar/parser.cpp
 cog_HEADER_FILES += $(SRC_PATH)/cog/grammar/parser.hpp
 
 base_test_DEPENDENCIES = base
-framework_test_DEPENDENCIES = base framework
-cog_test_DEPENDENCIES = cog base framework content
-content_test_DEPENDENCIES = cog base framework content
+cog_test_DEPENDENCIES = cog base content
+content_test_DEPENDENCIES = cog base content
 
-client_DEPENDENCIES = base framework cog content game
-server_DEPENDENCIES = base framework cog content game
+client_DEPENDENCIES = base cog content game
+server_DEPENDENCIES = base cog content game
 
-ungob_DEPENDENCIES = base framework cog content
+ungob_DEPENDENCIES = base cog content
 
 INTTEST_MODULES = input_stream native_file output_stream test_integration
 

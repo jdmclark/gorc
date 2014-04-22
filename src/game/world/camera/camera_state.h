@@ -1,7 +1,7 @@
 #pragma once
 
-#include "framework/math/vector.h"
-#include "framework/utility/flag_set.h"
+#include "base/math/vector.h"
+#include "base/utility/flag_set.h"
 #include "game/flags/camera_state_flag.h"
 
 namespace gorc {

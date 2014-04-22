@@ -1,5 +1,5 @@
 #include "script.h"
 #include "model.h"
-#include "framework/content/assets/sound.h"
+#include "base/content/assets/sound.h"
 #include "material.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"

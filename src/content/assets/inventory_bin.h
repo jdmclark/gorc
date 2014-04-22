@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/math/vector.h"
-#include "framework/utility/flag_set.h"
-#include "framework/text/tokenizer.h"
-#include "framework/utility/flag_set.h"
+#include "base/math/vector.h"
+#include "base/utility/flag_set.h"
+#include "base/text/tokenizer.h"
+#include "base/utility/flag_set.h"
 #include "cog/compiler.h"
 #include "content/flags/inventory_flag.h"
 #include "script.h"

@@ -3,6 +3,7 @@
 #include "game/level_state.h"
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
+#include "base/utility/make_unique.h"
 
 gorc::game::world::scripts::script_presenter::script_presenter(level_state& components)
     : gorc::cog::scripts::script_presenter(components.verb_table), levelModel(nullptr), model(nullptr) {
@@ -38,7 +39,7 @@ void gorc::game::world::scripts::script_presenter::create_level_dummy_instances(
 void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int index, const cog::script& script, content::content_manager& manager,
         cog::compiler&, const std::vector<cog::vm::value>& values) {
     auto& cog_inst_pair = model->cogs[index];
-    std::get<0>(cog_inst_pair) = std::unique_ptr<cog::instance>(new cog::instance(script));
+    std::get<0>(cog_inst_pair) = make_unique<cog::instance>(script);
     std::get<1>(cog_inst_pair) = cog::scripts::script_timer_state();
 
     cog::instance& inst = *std::get<0>(cog_inst_pair);
@@ -163,7 +164,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
         return;
     }
 
-    model->cogs.emplace_back(std::unique_ptr<cog::instance>(new cog::instance(script)), cog::scripts::script_timer_state());
+    model->cogs.emplace_back(make_unique<cog::instance>(script), cog::scripts::script_timer_state());
     cog::instance& inst = *std::get<0>(model->cogs.back());
     model->global_script_instances.emplace(&script, model->cogs.size() - 1);
 

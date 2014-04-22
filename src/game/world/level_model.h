@@ -1,9 +1,9 @@
 #pragma once
 
-#include "framework/math/vector.h"
+#include "base/math/vector.h"
 #include "content/assets/level.h"
 #include "cog/instance.h"
-#include "framework/utility/pool.h"
+#include "base/utility/pool.h"
 #include "thing.h"
 #include "surface.h"
 #include "sounds/sound.h"

@@ -11,7 +11,7 @@
 
 %{
     #include "instance.h"
-    #include "framework/diagnostics/helper.h"
+    #include "base/diagnostics/helper.h"
     #include "parser.hpp"
 
     #include <string.h>

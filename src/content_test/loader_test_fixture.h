@@ -6,8 +6,8 @@
 
 #include "base/io/file_system.h"
 #include "base/io/native_file_system.h"
-#include "framework/diagnostics/stored_report.h"
-#include "framework/content/content_manager.h"
+#include "base/diagnostics/stored_report.h"
+#include "base/content/content_manager.h"
 #include "cog/compiler.h"
 
 class LoaderTestFixture : public test::fixture {

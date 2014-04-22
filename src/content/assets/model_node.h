@@ -1,8 +1,8 @@
 #pragma once
 
 #include "content/flags/mesh_node_type.h"
-#include "framework/utility/flag_set.h"
-#include "framework/math/vector.h"
+#include "base/utility/flag_set.h"
+#include "base/math/vector.h"
 #include <string>
 
 namespace gorc {

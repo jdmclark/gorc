@@ -2,7 +2,7 @@
 #include "cog/verbs/table.h"
 #include "cog/ir/printer.h"
 #include "cog/ast/node.h"
-#include "framework/diagnostics/report.h"
+#include "base/diagnostics/report.h"
 #include "code_visitor.h"
 
 #include "cog/stages/stages.h"

@@ -8,7 +8,7 @@ int main(int, char**) {
     gorc::io::std_input_stream is;
 
     std::vector<char> str;
-    str.resize(13);
+    str.resize(14, '\0');
     is.read(str.data(), 13);
 
     if(strcmp(str.data(), "Hello, World!")) {

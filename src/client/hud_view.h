@@ -1,7 +1,7 @@
 #pragma once
 
-#include "framework/gui/gui_view.h"
-#include "framework/content/content_manager.h"
+#include "base/gui/gui_view.h"
+#include "base/content/content_manager.h"
 
 namespace gorc {
 namespace client {

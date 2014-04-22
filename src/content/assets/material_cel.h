@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/content/assets/texture.h"
+#include "base/content/assets/texture.h"
 
 namespace gorc {
 namespace content {

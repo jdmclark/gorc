@@ -2,9 +2,9 @@
 
 #include <vector>
 #include <tuple>
-#include "framework/utility/flag_set.h"
+#include "base/utility/flag_set.h"
 #include "content/flags/key_flag.h"
-#include "framework/utility/time.h"
+#include "base/utility/time.h"
 
 namespace gorc {
 

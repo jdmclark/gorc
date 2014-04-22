@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#
+# Generates a UID file
+#
+
+random32=$(( ( ($RANDOM & 3)<<30 | $RANDOM<<15 | $RANDOM )))
+echo "enum class UID : uint32_t { UID = $random32 };"

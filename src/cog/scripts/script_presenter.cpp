@@ -18,7 +18,7 @@ void gorc::cog::scripts::script_presenter::start(script_model& scriptModel) {
 }
 
 void gorc::cog::scripts::script_presenter::update(const time& time) {
-    double dt = time;
+    double dt = time.elapsed_as_seconds();
 
     // update cogs
     for(unsigned int i = 0; i < model->cogs.size(); ++i) {

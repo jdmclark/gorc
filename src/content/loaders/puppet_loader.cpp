@@ -1,6 +1,6 @@
 #include "puppet_loader.h"
 #include "content/assets/puppet.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 
 #include <unordered_map>
 #include <string>

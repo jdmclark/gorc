@@ -9,7 +9,7 @@
 #include "cog/vm/value.h"
 #include "cog/message_id.h"
 #include "base/io/read_only_file.h"
-#include "framework/diagnostics/report.h"
+#include "base/diagnostics/report.h"
 
 namespace gorc {
 namespace cog {

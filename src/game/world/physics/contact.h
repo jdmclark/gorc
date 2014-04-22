@@ -1,8 +1,8 @@
 #pragma once
 
 #include "object_data.h"
-#include "framework/math/vector.h"
-#include "framework/utility/maybe.h"
+#include "base/math/vector.h"
+#include "base/utility/maybe.h"
 
 namespace gorc {
 namespace game {

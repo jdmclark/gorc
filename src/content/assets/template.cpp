@@ -1,7 +1,7 @@
 #include "template.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>

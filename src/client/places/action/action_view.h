@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/view.h"
+#include "base/view.h"
 
 namespace gorc {
 namespace client {

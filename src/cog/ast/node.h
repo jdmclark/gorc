@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/text/location.h"
+#include "base/text/location.h"
 #include "cog/vm/value.h"
 #include <string>
 #include <vector>

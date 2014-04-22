@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framework/content/text_loader.h"
+#include "base/content/text_loader.h"
 
 namespace gorc {
 namespace content {

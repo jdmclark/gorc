@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "application.h"
-#include "framework/diagnostics/stream_report.h"
+#include "base/diagnostics/stream_report.h"
 #include "content/vfs/virtual_file_system.h"
 
 int main(int argc, char** argv) {

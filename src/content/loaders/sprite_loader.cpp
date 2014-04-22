@@ -1,8 +1,8 @@
 #include "inventory_loader.h"
 #include "content/assets/sprite.h"
-#include "framework/diagnostics/helper.h"
+#include "base/diagnostics/helper.h"
 #include "base/io/exception.h"
-#include "framework/content/content_manager.h"
+#include "base/content/content_manager.h"
 #include <boost/format.hpp>
 
 const std::vector<boost::filesystem::path> gorc::content::loaders::sprite_loader::asset_root_path = { "misc/spr" };
