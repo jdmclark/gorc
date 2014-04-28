@@ -3,6 +3,9 @@
 #include <initializer_list>
 #include <type_traits>
 
+#include "base/io/binary_input_stream.h"
+#include "base/io/binary_output_stream.h"
+
 namespace gorc {
 inline namespace utility {
 
@@ -25,6 +28,11 @@ public:
         for(T val : initl) {
             value |= static_cast<UT>(val);
         }
+    }
+
+    flag_set(io::deserialization_constructor_tag, io::binary_input_stream& is)
+        : value(io::deserialize<UT>(is)) {
+        return;
     }
 
     explicit operator UT() const {
@@ -73,6 +81,10 @@ public:
     inline const flag_set& operator-=(flag_set val) {
         value &= ~val.value;
         return *this;
+    }
+
+    inline void serialize(io::binary_output_stream& os) const {
+        io::serialize(os, value);
     }
 };
 

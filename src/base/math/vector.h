@@ -28,6 +28,10 @@ public:
     template <typename... G, class = typename std::enable_if<sizeof...(G) == n>::type> constexpr explicit vector(G... v)
         : data {{ std::forward<G>(v)... }} { }
 
+    vector(io::deserialization_constructor_tag, io::binary_input_stream& is) {
+        std::generate(data.begin(), data.end(), [&is]() { return io::deserialize<F>(is); });
+    }
+
     inline auto begin() const -> decltype(data.begin()) {
         return data.begin();
     }

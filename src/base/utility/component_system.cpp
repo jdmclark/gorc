@@ -14,6 +14,10 @@ gorc::utility::component_system::pool_container::~pool_container() {
     return;
 }
 
+gorc::utility::component_system::component_system(event_bus* parent_event_bus) : bus(parent_event_bus) {
+    return;
+}
+
 void gorc::utility::component_system::serialize(io::binary_output_stream& f) const {
 
     // Write header

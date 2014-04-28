@@ -49,13 +49,13 @@ gorc::game::world::level_presenter::~level_presenter() {
 
 void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     eventbus = &eventBus;
-    model = make_unique<level_model>(*place.contentmanager, components.compiler, place.level,
+    model = make_unique<level_model>(eventBus, *place.contentmanager, components.compiler, place.level,
             place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler));
 
     physics_presenter->start(*model);
     key_presenter->start(*model, model->key_model);
     camera_presenter->start(*model, model->camera_model);
-    animation_presenter->start(*model, model->animation_model);
+    animation_presenter->start(*model);
     script_presenter->start(*model, model->script_model);
     sound_presenter->start(*model, model->sound_model);
     inventory_presenter->start(*model, model->inventory_model);
@@ -119,9 +119,11 @@ void gorc::game::world::level_presenter::initialize_world() {
 void gorc::game::world::level_presenter::update(const time& time) {
     double dt = time.elapsed_as_seconds();
 
+    model->surface_ecs.update(time);
+    model->effect_ecs.update(time);
+
     physics_presenter->update(time);
     camera_presenter->update(time);
-    animation_presenter->update(time);
     script_presenter->update(time);
     sound_presenter->update(time);
     key_presenter->update(time);

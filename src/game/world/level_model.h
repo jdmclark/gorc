@@ -4,10 +4,10 @@
 #include "content/assets/level.h"
 #include "cog/instance.h"
 #include "base/utility/pool.h"
+#include "base/utility/component_system.h"
 #include "thing.h"
 #include "surface.h"
 #include "sounds/sound.h"
-#include "game/world/animations/animation_model.h"
 #include "game/world/scripts/script_model.h"
 #include "game/world/sounds/sound_model.h"
 #include "game/world/keys/key_model.h"
@@ -27,7 +27,9 @@ public:
     std::vector<surface> surfaces;
     std::vector<content::assets::level_sector> sectors;
 
-    animations::animation_model animation_model;
+    component_system surface_ecs;
+    component_system effect_ecs;
+
     scripts::script_model script_model;
     sounds::sound_model sound_model;
     keys::key_model key_model;
@@ -45,7 +47,8 @@ public:
     double game_time = 0.0;
     vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
-    level_model(content::content_manager& manager, cog::compiler& Cogcompiler, const content::assets::level& level, const content::assets::inventory& inv);
+    level_model(event_bus& parent_event_bus, content::content_manager& manager, cog::compiler& Cogcompiler,
+            const content::assets::level& level, const content::assets::inventory& inv);
 };
 
 }

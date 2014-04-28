@@ -3,10 +3,10 @@
 namespace gorc {
 namespace flags {
 
-enum class AnimFlag {
-    Looping                            = 0x1,
-    SkipFirstFrame                    = 0x2,
-    SkipFirstTwoFrames                = 0x4
+enum class anim_flag {
+    looping                            = 0x1,
+    skip_first_frame                   = 0x2,
+    skip_first_two_frames              = 0x4
 };
 
 }

@@ -140,6 +140,9 @@ private:
 public:
     event_bus bus;
 
+    component_system() = default;
+    explicit component_system(event_bus* parent_event_bus);
+
     void deserialize(io::binary_input_stream& f);
     void serialize(io::binary_output_stream& f) const;
 
@@ -154,6 +157,7 @@ public:
         for(auto& pool : pool_containers) {
             pool.second->erase_entity(id);
         }
+
         entities.erase(static_cast<int>(id));
     }
 

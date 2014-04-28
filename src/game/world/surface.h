@@ -18,7 +18,6 @@ public:
     physics::surface_object_data object_data;
 
     int cel_number = -1;
-    maybe<animations::animation*> surface_anim;
 
     inline const physics::surface_object_data& get_object_data() const {
         return object_data;

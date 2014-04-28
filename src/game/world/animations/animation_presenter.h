@@ -26,19 +26,16 @@ class level_model;
 
 namespace animations {
 
-class animation_model;
-
 class animation_presenter {
 private:
     level_model* levelModel;
-    animation_model* model;
 
 public:
-    void start(level_model& levelModel, animation_model& model);
-    void update(const time& time);
+    void start(level_model& levelModel);
 
-    int surface_anim(int surface, float rate, flag_set<flags::AnimFlag> flags);
+    int surface_anim(int surface, float rate, flag_set<flags::anim_flag> flags);
     int get_surface_anim(int surface);
+    void stop_surface_anim(int surface);
 
     void stop_anim(int anim);
 
