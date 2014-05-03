@@ -67,7 +67,7 @@ public:
     }
 
     inline vector operator-(const vector& v) const {
-        vector rv;
+        vector rv = v;
         std::transform(begin(), end(), v.begin(), rv.begin(), std::minus<F>());
         return rv;
     }
@@ -170,8 +170,8 @@ template <unsigned int idx, size_t n, typename F> inline F get(const vector<n, F
 }
 
 template <size_t n, typename F> inline F dot(const vector<n, F>& v, const vector<n, F>& w) {
-    F accum = 0;
-    for(auto it = v.begin(), jt = w.begin(); it != v.end(); ++it, ++jt) {
+    F accum = F(0);
+    for(auto it = v.begin(), jt = w.begin(); it != v.end() && jt != w.end(); ++it, ++jt) {
         accum += *it * *jt;
     }
 

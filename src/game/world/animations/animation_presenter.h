@@ -1,6 +1,5 @@
 #pragma once
 
-#include "animation.h"
 #include "content/flags/anim_flag.h"
 #include "base/utility/flag_set.h"
 #include "base/math/vector.h"

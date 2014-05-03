@@ -88,7 +88,7 @@ void gorc::game::world::sounds::sound_presenter::play_song(int start, int end, i
 
 int gorc::game::world::sounds::sound_presenter::play_sound_class(int thing_id,
         flags::sound_subclass_type subclass_type) {
-    thing& referenced_thing = levelModel->things[thing_id];
+    thing& referenced_thing = levelModel->get_thing(thing_id);
     if(referenced_thing.sound_class) {
         const content::assets::sound_subclass& subclass = referenced_thing.sound_class->get(subclass_type);
         if(subclass.sound >= 0) {
@@ -103,7 +103,7 @@ int gorc::game::world::sounds::sound_presenter::play_sound_class(int thing_id,
 void gorc::game::world::sounds::sound_presenter::play_foley_loop_class(int thing_id, flags::sound_subclass_type subclass_type) {
     stop_foley_loop(thing_id);
 
-    thing& referenced_thing = levelModel->things[thing_id];
+    thing& referenced_thing = levelModel->get_thing(thing_id);
 
     auto channel = play_sound_class(thing_id, subclass_type);
     if(channel >= 0) {
@@ -112,7 +112,7 @@ void gorc::game::world::sounds::sound_presenter::play_foley_loop_class(int thing
 }
 
 void gorc::game::world::sounds::sound_presenter::stop_foley_loop(int thing_id) {
-    thing& referenced_thing = levelModel->things[thing_id];
+    thing& referenced_thing = levelModel->get_thing(thing_id);
 
     if(sound* snd = referenced_thing.current_foley_loop_channel) {
         snd->stop();

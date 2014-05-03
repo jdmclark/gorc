@@ -5,7 +5,7 @@
 
 void gorc::game::world::gameplay::actor_controller::update(int thing_id, double dt) {
 
-    auto& thing = presenter.model->things[thing_id];
+    auto& thing = presenter.model->get_thing(thing_id);
 
     if(thing.ai_mode_flags & flags::ai_mode_flag::turning_to_face_target) {
         // Get plane angle.

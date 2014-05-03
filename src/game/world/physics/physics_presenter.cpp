@@ -24,7 +24,7 @@ void physics_presenter::start(level_model& model) {
 }
 
 bool physics_presenter::surface_needs_collision_response(int moving_thing_id, int surface_id) {
-    const auto& moving_thing = model->things[moving_thing_id];
+    const auto& moving_thing = model->get_thing(moving_thing_id);
     const auto& surface = model->surfaces[surface_id];
 
     if(surface.adjoin < 0) {
@@ -43,8 +43,8 @@ bool physics_presenter::surface_needs_collision_response(int moving_thing_id, in
 }
 
 bool physics_presenter::thing_needs_collision_response(int moving_thing_id, int collision_thing_id) {
-    const auto& moving_thing = model->things[moving_thing_id];
-    const auto& collision_thing = model->things[collision_thing_id];
+    const auto& moving_thing = model->get_thing(moving_thing_id);
+    const auto& collision_thing = model->get_thing(collision_thing_id);
 
     auto mt_type = moving_thing.type;
     auto ct_type = collision_thing.type;
@@ -94,7 +94,10 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
     physics_broadphase_sector_things.clear();
 
     // Calculate influence AABBs and record overlapping sectors.
-    for(const auto& thing : model->things) {
+    for(const auto& thing_pair : model->thing_ecs.all_components<thing>()) {
+        const auto& thing = thing_pair.second;
+        int thing_id = static_cast<int>(thing_pair.first);
+
         auto thing_off_v = make_vector(1.0f, 1.0f, 1.0f) * (thing.move_size + length(thing.vel) * static_cast<float>(dt));
         auto thing_aabb = make_box(thing.position - thing_off_v, thing.position + thing_off_v);
 
@@ -117,8 +120,8 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
 
             // Thing influences sector. Move to closed set.
             physics_thing_closed_set.emplace(sector_id);
-            physics_broadphase_sector_things.emplace(sector_id, thing.get_id());
-            physics_broadphase_thing_influence.emplace(thing.get_id(), sector_id);
+            physics_broadphase_sector_things.emplace(sector_id, thing_id);
+            physics_broadphase_thing_influence.emplace(thing_id, sector_id);
 
             // Add adjoining sectors to open set.
             for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
@@ -163,7 +166,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
 }
 
 void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>&, int current_thing_id) {
-    auto& current_thing = model->things[current_thing_id];
+    auto& current_thing = model->get_thing(current_thing_id);
 
     // Get list of things within thing influence.
     physics_overlapping_things.clear();
@@ -176,9 +179,9 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
     }
 
     for(auto col_thing_id : physics_overlapping_things) {
-        auto& col_thing = model->things[col_thing_id];
+        auto& col_thing = model->get_thing(col_thing_id);
 
-        if(col_thing.get_id() == current_thing_id) {
+        if(col_thing_id == current_thing_id) {
             continue;
         }
 
@@ -227,6 +230,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
 }
 
 void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt) {
+
     // TODO: Move somewhere more appropriate.
     //thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
 
@@ -259,7 +263,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
 
     auto this_frame_only_vel = make_zero_vector<3, float>();
     if((thing.attach_flags & flags::attach_flag::AttachedToThing) || (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
-        const auto& parent_thing = model->things[thing.attached_thing];
+        const auto& parent_thing = model->get_thing(thing.attached_thing);
         this_frame_only_vel = (parent_thing.position - thing.prev_attached_thing_position) / static_cast<float>(dt);
         thing.prev_attached_thing_position = parent_thing.position;
     }
@@ -319,6 +323,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
         bool reject_vel = true;
 
         // Solve LCP, 20 iterations
+
         for(int i = 0; i < 5; ++i) {
             vector<3> new_computed_vel = prev_thing_vel;
             for(const auto& manifold : physics_thing_resting_manifolds) {
@@ -392,7 +397,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
             if(amt_in_man_vel < man_vel_len) {
                 // Thing is blocked.
                 if(const int* contact_thing_id = manifold.contact_thing_id) {
-                        auto& contact_thing = model->things[*contact_thing_id];
+                        auto& contact_thing = model->get_thing(*contact_thing_id);
                         contact_thing.is_blocked = true;
                 }
             }
@@ -496,7 +501,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, dou
 }
 
 gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thing_id, const vector<3>& rel_point) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
 
     if(thing.move == flags::move_type::Path && thing.path_moving && !thing.is_blocked && !thing.path_moving_paused) {
         auto target_position_tuple = thing.frames[thing.next_frame];
@@ -552,33 +557,33 @@ void physics_presenter::update(const time& time) {
     // General approach:
 
     // - Clear blocked flag on all path things.
-    for(auto& thing : model->things) {
-        thing.is_blocked = false;
+    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+        thing.second.is_blocked = false;
     }
 
     // - Calculate potentially overlapping pairs (broadphase)
     physics_calculate_broadphase(dt);
 
     // - Rectify physics thing position vs. velocity, resting contacts, etc.
-    for(auto& thing : model->things) {
-        if(thing.move == flags::move_type::physics) {
-            physics_thing_step(thing.get_id(), thing, dt);
+    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+        if(thing.second.move == flags::move_type::physics) {
+            physics_thing_step(static_cast<int>(thing.first), thing.second, dt);
         }
     }
 
     // - Send blocked message to all blocked things; else, update path.
-    for(auto& thing : model->things) {
-        if(thing.is_blocked && (thing.path_moving || thing.rotatepivot_moving)) {
-            presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, thing.get_id(), flags::message_type::thing,
+    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+        if(thing.second.is_blocked && (thing.second.path_moving || thing.second.rotatepivot_moving)) {
+            presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, static_cast<int>(thing.first), flags::message_type::thing,
                     -1, flags::message_type::nothing);
         }
-        else if(thing.path_moving || thing.rotatepivot_moving) {
-            update_thing_path_moving(thing.get_id(), thing, dt);
+        else if(thing.second.path_moving || thing.second.rotatepivot_moving) {
+            update_thing_path_moving(static_cast<int>(thing.first), thing.second, dt);
         }
-        else if(thing.attach_flags & flags::attach_flag::AttachedToThing) {
-            const auto& parent_thing = model->things[thing.attached_thing];
-            presenter.adjust_thing_pos(thing.get_id(), thing.position + (parent_thing.position - thing.prev_attached_thing_position));
-            thing.prev_attached_thing_position = parent_thing.position;
+        else if(thing.second.attach_flags & flags::attach_flag::AttachedToThing) {
+            const auto& parent_thing = model->get_thing(thing.second.attached_thing);
+            presenter.adjust_thing_pos(static_cast<int>(thing.first), thing.second.position + (parent_thing.position - thing.second.prev_attached_thing_position));
+            thing.second.prev_attached_thing_position = parent_thing.position;
         }
     }
 
@@ -586,7 +591,7 @@ void physics_presenter::update(const time& time) {
     for(const auto& touched_surface_pair : physics_touched_surface_pairs) {
         int thing_id, surf_id;
         std::tie(thing_id, surf_id) = touched_surface_pair;
-        auto& thing = model->things[thing_id];
+        auto& thing = model->get_thing(thing_id);
         thing.controller->touched_surface(thing_id, surf_id);
     }
 
@@ -594,8 +599,8 @@ void physics_presenter::update(const time& time) {
         int thing_a_id, thing_b_id;
         std::tie(thing_a_id, thing_b_id) = touched_thing_pair;
 
-        model->things[thing_a_id].controller->touched_thing(thing_a_id, thing_b_id);
-        model->things[thing_b_id].controller->touched_thing(thing_b_id, thing_a_id);
+        model->get_thing(thing_a_id).controller->touched_thing(thing_a_id, thing_b_id);
+        model->get_thing(thing_b_id).controller->touched_thing(thing_b_id, thing_a_id);
     }
 }
 

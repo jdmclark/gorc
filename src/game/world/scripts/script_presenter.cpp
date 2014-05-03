@@ -141,7 +141,7 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
         case cog::symbols::symbol_type::thing: {
             int index = static_cast<int>(*jt);
             if(index >= 0) {
-                levelModel->things[index].flags += flags::thing_flag::CogLinked;
+                levelModel->get_thing(index).flags += flags::thing_flag::CogLinked;
             }
         }
         break;
@@ -255,7 +255,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
         case cog::symbols::symbol_type::thing: {
             int index = static_cast<int>(*jt);
             if(index >= 0) {
-                levelModel->things[index].flags += flags::thing_flag::CogLinked;
+                levelModel->get_thing(index).flags += flags::thing_flag::CogLinked;
             }
         }
         break;
@@ -291,7 +291,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
 
     int source_mask = 0;
     if(SourceType == flags::message_type::thing) {
-        const auto& sender_thing = levelModel->things[SourceRef];
+        const auto& sender_thing = levelModel->get_thing(SourceRef);
         source_mask = 1 << static_cast<int>(sender_thing.type);
     }
 
@@ -320,7 +320,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
             expectedsymbol_type = cog::symbols::symbol_type::thing;
 
             // Dispatch to capture cog
-            thing& thing = levelModel->things[SenderRef];
+            thing& thing = levelModel->get_thing(SenderRef);
             if(thing.capture_cog >= 0) {
                 capture_cog = thing.capture_cog;
                 send_message(thing.capture_cog, message, -1, SenderRef, SenderType,
@@ -390,11 +390,11 @@ void gorc::game::world::scripts::script_presenter::wait_for_stop(int thing) {
 }
 
 void gorc::game::world::scripts::script_presenter::capture_thing(int thing_id) {
-    levelModel->things[thing_id].capture_cog = model->running_cog_state.top().instance_id;
+    levelModel->get_thing(thing_id).capture_cog = model->running_cog_state.top().instance_id;
 }
 
 int gorc::game::world::scripts::script_presenter::get_thing_class_cog(int thing_id) {
-    const auto* classcog = levelModel->things[thing_id].cog;
+    const auto* classcog = levelModel->get_thing(thing_id).cog;
     if(classcog) {
         return get_global_cog_instance(&classcog->cogscript);
     }

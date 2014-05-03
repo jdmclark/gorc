@@ -39,7 +39,7 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
     auto& selected_camera = model->cameras[model->current_camera];
     auto& cam = model->current_computed_state;
 
-    const auto& focus_thing = levelmodel->things[selected_camera.focus];
+    const auto& focus_thing = levelmodel->get_thing(selected_camera.focus);
     const auto focus_thing_orient = focus_thing.orient
             * make_euler(selected_camera.angle_offset)
             * make_rotation(make_vector(1.0f, 0.0f, 0.0f), focus_thing.head_pitch);
@@ -50,11 +50,11 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
     maybe<physics::contact> contact;
     contact = presenter.physics_presenter->thing_segment_query(selected_camera.focus, true_offset,
             [&](int thing_id) {
-                auto t = presenter.model->things[thing_id].type;
+                auto t = presenter.model->get_thing(thing_id).type;
                 return t == flags::thing_type::cog;
             },
             [&](int surf_id) {
-                return presenter.physics_presenter->surface_needs_collision_response(focus_thing.get_id(), surf_id);
+                return presenter.physics_presenter->surface_needs_collision_response(selected_camera.focus, surf_id);
             },
             contact);
 
@@ -84,7 +84,7 @@ void gorc::game::world::camera::camera_presenter::update(const time& time) {
     cam.draw_pov_model = selected_camera.draw_pov_model;
 
     // Calculate pov model waggle.
-    const auto& player_thing = levelmodel->things[presenter.get_local_player_thing()];
+    const auto& player_thing = levelmodel->get_thing(presenter.get_local_player_thing());
     auto player_speed = length(make_vector(get<0>(player_thing.vel), get<1>(player_thing.vel))) / player_thing.max_vel;
     float actual_waggle_speed = player_speed * model->waggle_speed * static_cast<float>(time.elapsed_as_seconds()) * (1.0f / 60.0f);
     model->waggle_time += actual_waggle_speed;

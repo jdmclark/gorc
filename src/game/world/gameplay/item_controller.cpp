@@ -4,7 +4,7 @@
 #include "game/world/scripts/script_presenter.h"
 
 void gorc::game::world::gameplay::item_controller::taken(int thing_id, int player_id) {
-    auto& player_thing = presenter.model->things[player_id];
+    auto& player_thing = presenter.model->get_thing(player_id);
     if(player_thing.type != flags::thing_type::Player) {
         return;
     }

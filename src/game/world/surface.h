@@ -1,7 +1,6 @@
 #pragma once
 
 #include "content/assets/level_surface.h"
-#include "animations/animation.h"
 #include "base/utility/maybe.h"
 #include "physics/object_data.h"
 

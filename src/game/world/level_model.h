@@ -29,14 +29,13 @@ public:
 
     component_system surface_ecs;
     component_system effect_ecs;
+    component_system thing_ecs;
 
     scripts::script_model script_model;
     sounds::sound_model sound_model;
     keys::key_model key_model;
     inventory::inventory_model inventory_model;
     camera::camera_model camera_model;
-
-    pool<thing> things;
 
     int local_player_thing_id;
 
@@ -49,6 +48,14 @@ public:
 
     level_model(event_bus& parent_event_bus, content::content_manager& manager, cog::compiler& Cogcompiler,
             const content::assets::level& level, const content::assets::inventory& inv);
+
+    inline thing& get_thing(int id) {
+        for(auto& t : thing_ecs.find_component<thing>(entity_id(id))) {
+            return t.second;
+        }
+
+        throw std::exception();
+    }
 };
 
 }

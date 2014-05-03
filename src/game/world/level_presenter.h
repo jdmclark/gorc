@@ -49,6 +49,8 @@ private:
     // Scratch space
     std::vector<std::tuple<int, int>> update_path_sector_scratch;
 
+    std::vector<int> things_to_destroy;
+
     level_state& components;
     level_place place;
     event_bus* eventbus;
@@ -176,6 +178,7 @@ public:
     int create_thing_at_thing(int tpl_id, int thing_id);
     float damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id);
     void destroy_thing(int thing_id);
+    void real_destroy_thing(int thing_id);
     void detach_thing(int thing_id);
     vector<3> get_thing_pos(int thing_id);
     void heal_thing(int thing_id, float health);

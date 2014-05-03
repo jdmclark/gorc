@@ -130,8 +130,8 @@ void gorc::game::world::level_presenter::update(const time& time) {
     inventory_presenter->update(time);
 
     // update things
-    for(auto& thing : model->things) {
-        thing.controller->update(thing.get_id(), dt);
+    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+        thing.second.controller->update(static_cast<int>(thing.first), dt);
     }
 
     // update dynamic tint, game time.
@@ -142,6 +142,12 @@ void gorc::game::world::level_presenter::update(const time& time) {
     get<0>(model->dynamic_tint) = std::max(get<0>(model->dynamic_tint), 0.0f);
     get<1>(model->dynamic_tint) = std::max(get<1>(model->dynamic_tint), 0.0f);
     get<2>(model->dynamic_tint) = std::max(get<2>(model->dynamic_tint), 0.0f);
+
+    for(auto thing_id : things_to_destroy) {
+        real_destroy_thing(thing_id);
+    }
+
+    things_to_destroy.clear();
 }
 
 gorc::game::world::gameplay::thing_controller& gorc::game::world::level_presenter::get_thing_controller(flags::thing_type type) {
@@ -227,7 +233,7 @@ void gorc::game::world::level_presenter::update_thing_sector(int thing_id, thing
 }
 
 void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
     player.thrust = player.orient.transform(amt);
 
     // TODO: Handle this in character controller or in physics presenter.
@@ -235,13 +241,13 @@ void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) 
 }
 
 void gorc::game::world::level_presenter::yaw_camera(double amt) {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
     get<1>(player.ang_vel) = static_cast<float>(amt) * 60.0f;
     //get<1>(player.orient) += amt;
 }
 
 void gorc::game::world::level_presenter::pitch_camera(double amt) {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
     player.head_pitch = clamp(player.head_pitch + static_cast<float>(amt), player.min_head_pitch, player.max_head_pitch);
 }
 
@@ -249,7 +255,7 @@ void gorc::game::world::level_presenter::respawn() {
     ++model->current_spawn_point;
     model->current_spawn_point = model->current_spawn_point % model->spawn_points.size();
 
-    thing& cameraThing = model->things[model->local_player_thing_id];
+    thing& cameraThing = model->get_thing(model->local_player_thing_id);
     cameraThing.sector = model->spawn_points[model->current_spawn_point]->sector;
     cameraThing.position = model->spawn_points[model->current_spawn_point]->position;
     cameraThing.attach_flags = flag_set<flags::attach_flag>();
@@ -257,17 +263,17 @@ void gorc::game::world::level_presenter::respawn() {
 }
 
 void gorc::game::world::level_presenter::jump() {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
     get<2>(player.thrust) = player.jump_speed;
 }
 
 void gorc::game::world::level_presenter::fly() {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
     get<2>(player.vel) += 0.1f;
 }
 
 void gorc::game::world::level_presenter::activate() {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
 
     const auto& cam = model->camera_model.current_computed_state;
     auto activate_contact = physics_presenter->segment_query(physics::segment(cam.position, cam.position + cam.look * 0.5f),
@@ -296,7 +302,7 @@ void gorc::game::world::level_presenter::activate() {
 }
 
 void gorc::game::world::level_presenter::damage() {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
 
     const auto& cam = model->camera_model.current_computed_state;
     auto activate_contact = physics_presenter->segment_query(physics::segment(cam.position, cam.position + cam.look * 0.5f),
@@ -321,7 +327,7 @@ void gorc::game::world::level_presenter::damage() {
 }
 
 void gorc::game::world::level_presenter::crouch(bool is_crouched) {
-    auto& player = model->things[model->local_player_thing_id];
+    auto& player = model->get_thing(model->local_player_thing_id);
     if(is_crouched) {
         player.physics_flags += flags::physics_flag::is_crouching;
     }
@@ -331,21 +337,21 @@ void gorc::game::world::level_presenter::crouch(bool is_crouched) {
 }
 
 void gorc::game::world::level_presenter::thing_sighted(int thing_id) {
-    model->things[thing_id].flags += flags::thing_flag::Sighted;
+    model->get_thing(thing_id).flags += flags::thing_flag::Sighted;
     script_presenter->send_message_to_linked(cog::message_id::sighted, thing_id, flags::message_type::thing);
 }
 
 
 void gorc::game::world::level_presenter::ai_clear_mode(int thing_id, flag_set<flags::ai_mode_flag> flags) {
-    model->things[thing_id].ai_mode_flags -= flags;
+    model->get_thing(thing_id).ai_mode_flags -= flags;
 }
 
 gorc::flag_set<gorc::flags::ai_mode_flag> gorc::game::world::level_presenter::ai_get_mode(int thing_id) {
-    return model->things[thing_id].ai_mode_flags;
+    return model->get_thing(thing_id).ai_mode_flags;
 }
 
 void gorc::game::world::level_presenter::ai_set_look_frame(int thing_id, int frame) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
 
     if(frame >= 0 && frame < static_cast<int>(thing.frames.size())) {
         ai_set_look_pos(thing_id, std::get<0>(thing.frames[frame]));
@@ -353,18 +359,18 @@ void gorc::game::world::level_presenter::ai_set_look_frame(int thing_id, int fra
 }
 
 void gorc::game::world::level_presenter::ai_set_look_pos(int thing_id, const vector<3>& pos) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
 
     thing.ai_look_target = pos - thing.position;
     thing.ai_mode_flags += flags::ai_mode_flag::turning_to_face_target;
 }
 
 void gorc::game::world::level_presenter::ai_set_mode(int thing_id, flag_set<flags::ai_mode_flag> flags) {
-    model->things[thing_id].ai_mode_flags += flags;
+    model->get_thing(thing_id).ai_mode_flags += flags;
 }
 
 void gorc::game::world::level_presenter::ai_set_move_frame(int thing_id, int frame) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
 
     if(frame >= 0 && frame < static_cast<int>(thing.frames.size())) {
         ai_set_move_pos(thing_id, std::get<0>(thing.frames[frame]));
@@ -372,19 +378,19 @@ void gorc::game::world::level_presenter::ai_set_move_frame(int thing_id, int fra
 }
 
 void gorc::game::world::level_presenter::ai_set_move_pos(int thing_id, const vector<3>& pos) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
 
     thing.ai_move_target = pos;
     thing.ai_mode_flags += flags::ai_mode_flag::moving_toward_destination;
 }
 
 void gorc::game::world::level_presenter::ai_set_move_speed(int thing_id, float speed) {
-    model->things[thing_id].ai_move_speed = speed;
+    model->get_thing(thing_id).ai_move_speed = speed;
 }
 
 void gorc::game::world::level_presenter::ai_set_move_thing(int thing_id, int move_to_thing) {
     // TODO: Revisit. Does this mean continuously chase?
-    ai_set_move_pos(thing_id, model->things[move_to_thing].position);
+    ai_set_move_pos(thing_id, model->get_thing(move_to_thing).position);
 }
 
 // Color verbs
@@ -403,12 +409,12 @@ void gorc::game::world::level_presenter::add_dynamic_tint(int, const vector<3>& 
 
 // Creature verbs
 float gorc::game::world::level_presenter::get_thing_health(int thing_id) {
-    return model->things[thing_id].health;
+    return model->get_thing(thing_id).health;
 }
 
 bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_thing_id) {
-    auto& look_thing = model->things[look_thing_id];
-    auto& target_thing = model->things[target_thing_id];
+    auto& look_thing = model->get_thing(look_thing_id);
+    auto& target_thing = model->get_thing(target_thing_id);
 
     auto contact = physics_presenter->thing_segment_query(look_thing_id, target_thing.position - look_thing.position,
             [&](int tid) {
@@ -416,7 +422,7 @@ bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_t
                     return true;
                 }
 
-                auto& seen_thing = model->things[tid];
+                auto& seen_thing = model->get_thing(tid);
                 return seen_thing.type == flags::thing_type::cog;
             },
             [&](int sid) {
@@ -436,17 +442,17 @@ bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_t
 
 // Frame verbs
 int gorc::game::world::level_presenter::get_cur_frame(int thing_id) {
-    return model->things[thing_id].current_frame;
+    return model->get_thing(thing_id).current_frame;
 }
 
 void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
-    thing& referenced_thing = model->things[thing_id];
+    thing& referenced_thing = model->get_thing(thing_id);
     auto& referenced_frame = referenced_thing.frames[frame];
     set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
 }
 
 void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, float speed) {
-    thing& referenced_thing = model->things[thing_id];
+    thing& referenced_thing = model->get_thing(thing_id);
 
     referenced_thing.goal_frame = frame;
     if(frame > referenced_thing.current_frame) {
@@ -467,17 +473,17 @@ void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, 
 }
 
 void gorc::game::world::level_presenter::path_move_pause(int thing_id) {
-    auto& referenced_thing = model->things[thing_id];
+    auto& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving_paused = true;
 }
 
 void gorc::game::world::level_presenter::path_move_resume(int thing_id) {
-    auto& referenced_thing = model->things[thing_id];
+    auto& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving_paused = false;
 }
 
 void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, float time) {
-    thing& referenced_thing = model->things[thing_id];
+    thing& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving = false;
     referenced_thing.rotatepivot_moving = true;
     referenced_thing.current_frame = 0;
@@ -511,14 +517,14 @@ void gorc::game::world::level_presenter::jk_end_level(bool success) {
 
 // Misc verbs
 void gorc::game::world::level_presenter::jk_disable_saber(int thing_id) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
     thing.saber_enabled = false;
     return;
 }
 
 void gorc::game::world::level_presenter::jk_enable_saber(int thing_id, float damage,
         float collide_length, float unknown) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
     thing.saber_enabled = true;
     thing.saber_damage = damage;
     thing.saber_collide_length = collide_length;
@@ -529,7 +535,7 @@ void gorc::game::world::level_presenter::jk_enable_saber(int thing_id, float dam
 void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
         int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
         int wall, int blood, int saber) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
 
     thing.saber_side_mat = &contentmanager->get_asset<content::assets::material>(side_mat);
     thing.saber_tip_mat = &contentmanager->get_asset<content::assets::material>(tip_mat);
@@ -543,7 +549,7 @@ void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
 }
 
 void gorc::game::world::level_presenter::take_item(int thing_id, int player_id) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
     thing.controller->taken(thing_id, player_id);
 }
 
@@ -558,9 +564,9 @@ void gorc::game::world::level_presenter::clear_sector_flags(int sector_id, flag_
 }
 
 int gorc::game::world::level_presenter::first_thing_in_sector(int sector_id) {
-    for(auto& thing : model->things) {
-        if(thing.sector == sector_id) {
-            return thing.get_id();
+    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+        if(thing.second.sector == sector_id) {
+            return static_cast<int>(thing.first);
         }
     }
 
@@ -572,11 +578,11 @@ gorc::flag_set<gorc::flags::sector_flag> gorc::game::world::level_presenter::get
 }
 
 int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
-    int sector_id = model->things[thing_id].sector;
+    int sector_id = model->get_thing(thing_id).sector;
 
-    for(auto& thing : model->things) {
-        if(thing.sector == sector_id && thing.get_id() > thing_id) {
-            return thing.get_id();
+    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+        if(thing.second.sector == sector_id && static_cast<int>(thing.first) > thing_id) {
+            return static_cast<int>(thing.first);
         }
     }
 
@@ -695,23 +701,26 @@ int gorc::game::world::level_presenter::load_sound(const char* fn) {
 int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
         const vector<3>& pos, const quaternion<float>& orient) {
     // Initialize thing properties
-    auto& new_thing = model->things.emplace(tpl);
+    entity_id new_thing_id = model->thing_ecs.make_entity();
+    model->thing_ecs.emplace_component<thing>(new_thing_id, tpl);
 
-    new_thing.object_data.thing_id = new_thing.get_id();
+    auto& new_thing = model->get_thing(static_cast<int>(new_thing_id));
+
+    new_thing.object_data.thing_id = static_cast<int>(new_thing_id);
     new_thing.sector = sector_num;
     new_thing.position = pos;
     new_thing.orient = orient;
     new_thing.controller = &get_thing_controller(new_thing.type);
 
-    new_thing.controller->create_controller_data(new_thing.get_id());
+    new_thing.controller->create_controller_data(static_cast<int>(new_thing_id));
 
     if(new_thing.cog) {
         script_presenter->create_global_cog_instance(new_thing.cog->cogscript, *place.contentmanager, components.compiler);
     }
 
-    sound_presenter->play_sound_class(new_thing.get_id(), flags::sound_subclass_type::create);
+    sound_presenter->play_sound_class(static_cast<int>(new_thing_id), flags::sound_subclass_type::create);
 
-    return new_thing.get_id();
+    return static_cast<int>(new_thing_id);
 }
 
 int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int sector_num,
@@ -740,12 +749,12 @@ int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name
 
 int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
         const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
-    const auto& parent_thing = model->things[parent_thing_id];
+    const auto& parent_thing = model->get_thing(parent_thing_id);
 
     const auto& parent_look_orient = parent_thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), parent_thing.head_pitch) * make_euler(error_vec);
 
     int new_thing = create_thing(tpl_id, parent_thing.sector, parent_thing.position, parent_look_orient);
-    auto& created_thing = model->things[new_thing];
+    auto& created_thing = model->get_thing(new_thing);
 
     created_thing.parent_thing = parent_thing_id;
     adjust_thing_pos(new_thing, created_thing.position + parent_look_orient.transform(offset_vec));
@@ -767,22 +776,22 @@ int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int
 }
 
 void gorc::game::world::level_presenter::adjust_thing_pos(int thing_id, const vector<3>& new_pos) {
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
     auto old_pos = thing.position;
     thing.position = new_pos;
     update_thing_sector(thing_id, thing, old_pos);
 }
 
 void gorc::game::world::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, int new_sector) {
-    thing& thing = model->things[thing_id];
+    thing& thing = model->get_thing(thing_id);
     thing.position = new_pos;
     thing.orient = new_orient;
     thing.sector = new_sector;
 }
 
 void gorc::game::world::level_presenter::attach_thing_to_thing(int thing_id, int base_id) {
-    auto& thing = model->things[thing_id];
-    auto& base = model->things[base_id];
+    auto& thing = model->get_thing(thing_id);
+    auto& base = model->get_thing(base_id);
 
     thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToThing };
     thing.attached_thing = base_id;
@@ -795,9 +804,9 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
         return -1;
     }
 
-    thing& referencedThing = model->things[thing_id];
+    thing& referencedThing = model->get_thing(thing_id);
     int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orient);
-    thing& new_thing = model->things[new_thing_id];
+    thing& new_thing = model->get_thing(new_thing_id);
 
     new_thing.path_moving = false;
 
@@ -823,7 +832,7 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
     script_presenter->send_message_to_linked(cog::message_id::damaged, static_cast<int>(thing_id), flags::message_type::thing,
             damager_id, flags::message_type::thing, damage, static_cast<int>(flags));
 
-    thing& referencedThing = model->things[thing_id];
+    thing& referencedThing = model->get_thing(thing_id);
     if(referencedThing.health > 0.0f) {
         referencedThing.health -= damage;
 
@@ -851,42 +860,46 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
 }
 
 void gorc::game::world::level_presenter::destroy_thing(int thing_id) {
-    auto& thing = model->things[thing_id];
+    things_to_destroy.push_back(thing_id);
+}
+
+void gorc::game::world::level_presenter::real_destroy_thing(int thing_id) {
+    auto& thing = model->get_thing(thing_id);
 
     // Reset thing parentage.
-    for(auto& thing : model->things) {
-        if(thing.parent_thing == thing_id) {
-            thing.parent_thing = -1;
+    for(auto& thing_pair : model->thing_ecs.all_components<class thing>()) {
+        if(thing_pair.second.parent_thing == thing_id) {
+            thing_pair.second.parent_thing = -1;
         }
     }
 
     // Remove controller data
-    model->things[thing_id].controller->remove_controller_data(thing_id);
+    model->get_thing(thing_id).controller->remove_controller_data(thing_id);
 
     // Expunge associated resources.
     sound_presenter->expunge_thing_sounds(thing_id);
     key_presenter->expunge_thing_animations(thing_id);
 
-    model->things.erase(thing_id);
+    model->thing_ecs.erase_entity(entity_id(thing_id));
 }
 
 void gorc::game::world::level_presenter::detach_thing(int thing_id) {
-    model->things[thing_id].attach_flags = flag_set<flags::attach_flag>();
+    model->get_thing(thing_id).attach_flags = flag_set<flags::attach_flag>();
 }
 
 gorc::vector<3> gorc::game::world::level_presenter::get_thing_pos(int thing_id) {
-    thing& referenced_thing = model->things[thing_id];
+    thing& referenced_thing = model->get_thing(thing_id);
     return referenced_thing.position;
 }
 
 void gorc::game::world::level_presenter::heal_thing(int thing_id, float amount) {
-    thing& referencedThing = model->things[thing_id];
+    thing& referencedThing = model->get_thing(thing_id);
     referencedThing.health = clamp(referencedThing.health + amount, 0.0f, referencedThing.max_health);
 }
 
 bool gorc::game::world::level_presenter::is_thing_moving(int thing_id) {
     // TODO: Temporary hack implementation pending new physics implementation.
-    thing& referencedThing = model->things[thing_id];
+    thing& referencedThing = model->get_thing(thing_id);
     switch(referencedThing.move) {
     case flags::move_type::physics:
         return length(referencedThing.vel) > 0.0000001f;
@@ -900,75 +913,75 @@ bool gorc::game::world::level_presenter::is_thing_moving(int thing_id) {
 }
 
 gorc::vector<3, float> gorc::game::world::level_presenter::get_thing_lvec(int thing_id) {
-    const auto& thing = model->things[thing_id];
+    const auto& thing = model->get_thing(thing_id);
     return thing.orient.transform(make_vector(0.0f, 1.0f, 0.0f));
 }
 
 // thing flags verbs
 void gorc::game::world::level_presenter::clear_actor_flags(int thing_id, flag_set<flags::actor_flag> flags) {
-    model->things[thing_id].actor_flags -= flags;
+    model->get_thing(thing_id).actor_flags -= flags;
 }
 
 gorc::flag_set<gorc::flags::actor_flag> gorc::game::world::level_presenter::get_actor_flags(int thing_id) {
-    return model->things[thing_id].actor_flags;
+    return model->get_thing(thing_id).actor_flags;
 }
 
 void gorc::game::world::level_presenter::set_actor_flags(int thing_id, flag_set<flags::actor_flag> flags) {
-    model->things[thing_id].actor_flags += flags;
+    model->get_thing(thing_id).actor_flags += flags;
 }
 
 void gorc::game::world::level_presenter::clear_thing_flags(int thing_id, flag_set<flags::thing_flag> flags) {
-    model->things[thing_id].flags -= flags;
+    model->get_thing(thing_id).flags -= flags;
 }
 
 gorc::flag_set<gorc::flags::thing_flag> gorc::game::world::level_presenter::get_thing_flags(int thing_id) {
-    return model->things[thing_id].flags;
+    return model->get_thing(thing_id).flags;
 }
 
 void gorc::game::world::level_presenter::set_thing_flags(int thing_id, flag_set<flags::thing_flag> flags) {
-    model->things[thing_id].flags += flags;
+    model->get_thing(thing_id).flags += flags;
 }
 
 void gorc::game::world::level_presenter::clear_thing_attach_flags(int thing_id, flag_set<flags::attach_flag> flags) {
-    model->things[thing_id].attach_flags -= flags;
+    model->get_thing(thing_id).attach_flags -= flags;
 }
 
 gorc::flag_set<gorc::flags::attach_flag> gorc::game::world::level_presenter::get_thing_attach_flags(int thing_id) {
-    return model->things[thing_id].attach_flags;
+    return model->get_thing(thing_id).attach_flags;
 }
 
 void gorc::game::world::level_presenter::set_thing_attach_flags(int thing_id, flag_set<flags::attach_flag> flags) {
-    model->things[thing_id].attach_flags += flags;
+    model->get_thing(thing_id).attach_flags += flags;
 }
 
 void gorc::game::world::level_presenter::jk_clear_flags(int thing_id, flag_set<flags::jk_flag> flags) {
-    model->things[thing_id].jk_flags -= flags;
+    model->get_thing(thing_id).jk_flags -= flags;
 }
 
 gorc::flag_set<gorc::flags::jk_flag> gorc::game::world::level_presenter::jk_get_flags(int thing_id) {
-    return model->things[thing_id].jk_flags;
+    return model->get_thing(thing_id).jk_flags;
 }
 
 void gorc::game::world::level_presenter::jk_set_flags(int thing_id, flag_set<flags::jk_flag> flags) {
-    model->things[thing_id].jk_flags += flags;
+    model->get_thing(thing_id).jk_flags += flags;
 }
 
 // thing property verbs
 int gorc::game::world::level_presenter::get_thing_parent(int thing_id) {
-    return model->things[thing_id].attached_thing;
+    return model->get_thing(thing_id).attached_thing;
 }
 
 int gorc::game::world::level_presenter::get_thing_sector(int thing_id) {
-    return model->things[thing_id].sector;
+    return model->get_thing(thing_id).sector;
 }
 
 gorc::flags::thing_type gorc::game::world::level_presenter::get_thing_type(int thing_id) {
-    return model->things[thing_id].type;
+    return model->get_thing(thing_id).type;
 }
 
 void gorc::game::world::level_presenter::set_thing_type(int thing_id, flags::thing_type type) {
     // Clean up type physics.
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
     thing.controller->remove_controller_data(thing_id);
 
     thing.type = type;
@@ -980,14 +993,14 @@ void gorc::game::world::level_presenter::set_thing_type(int thing_id, flags::thi
 
 void gorc::game::world::level_presenter::set_thing_light(int thing_id, float light, float) {
     // TODO: Implement fade_time
-    auto& thing = model->things[thing_id];
+    auto& thing = model->get_thing(thing_id);
     thing.light = light;
 }
 
 // velocity verbs
 
 void gorc::game::world::level_presenter::stop_thing(int thing) {
-    auto& t = model->things[thing];
+    auto& t = model->get_thing(thing);
 
     t.vel = make_zero_vector<3, float>();
     t.thrust = make_zero_vector<3, float>();
@@ -998,7 +1011,7 @@ void gorc::game::world::level_presenter::stop_thing(int thing) {
 // weapon verbs
 
 void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh) {
-    auto& thing = model->things[player];
+    auto& thing = model->get_thing(player);
 
     if(mesh >= 0) {
         thing.weapon_mesh = &contentmanager->get_asset<content::assets::model>(mesh);
@@ -1009,11 +1022,11 @@ void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh
 }
 
 void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed_mode mode) {
-    model->things[player].armed_mode = mode;
+    model->get_thing(player).armed_mode = mode;
 }
 
 gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(int player) {
-    const auto& thing = model->things[player];
+    const auto& thing = model->get_thing(player);
     return thing.puppet_mode;
 }
 
@@ -1426,17 +1439,17 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
     verbTable.add_verb<void, 2>("setthingrotvel", [&components](int thing_id, vector<3> vel) {
         // TODO: Proper implementation
-        components.current_level_presenter->model->things[thing_id].ang_vel = vel;
+        components.current_level_presenter->model->get_thing(thing_id).ang_vel = vel;
     });
 
     verbTable.add_verb<void, 2>("applyforce", [&components](int thing_id, vector<3> force) {
         // TODO: Proper implementation
-        components.current_level_presenter->model->things[thing_id].vel += force;
+        components.current_level_presenter->model->get_thing(thing_id).vel += force;
     });
 
     verbTable.add_verb<vector<3>, 1>("getthingthrust", [&components](int thing_id) {
         // TODO: Proper implementation
-        return components.current_level_presenter->model->things[thing_id].thrust;
+        return components.current_level_presenter->model->get_thing(thing_id).thrust;
     });
 
     // weapon verbs

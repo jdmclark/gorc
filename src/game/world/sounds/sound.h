@@ -43,10 +43,10 @@ public:
 
     const sound& operator=(const sound&) = delete;
 
-    void play_sound_local(const level_model& model, const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
-    void play_sound_pos(const level_model& model, const content::assets::sound& sound, const vector<3>& pos, float volume,
+    void play_sound_local(level_model& model, const content::assets::sound& sound, float volume, float panning, flag_set<flags::sound_flag> flags);
+    void play_sound_pos(level_model& model, const content::assets::sound& sound, const vector<3>& pos, float volume,
             float minrad, float maxrad, flag_set<flags::sound_flag> flags);
-    void play_sound_thing(const level_model& model, const content::assets::sound& sound, int thing, float volume,
+    void play_sound_thing(level_model& model, const content::assets::sound& sound, int thing, float volume,
             float minrad, float maxrad, flag_set<flags::sound_flag> flags);
 
     void set_pitch(float pitch, float delay);
@@ -54,7 +54,7 @@ public:
     void stop();
     void stop(float delay);
 
-    void update(double dt, const level_model& model);
+    void update(double dt, level_model& model);
 
     inline bool get_expired() {
         return expired;

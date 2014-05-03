@@ -9,6 +9,9 @@
 #include "content/flags/ai_mode_flag.h"
 #include <memory>
 
+#include "base/io/binary_input_stream.h"
+#include "base/io/binary_output_stream.h"
+
 namespace gorc {
 namespace game {
 namespace world {
@@ -24,6 +27,8 @@ class key_state;
 
 class thing : public content::assets::thing_template {
 public:
+    #include "thing.uid"
+
     gameplay::thing_controller* controller;
     physics::thing_object_data object_data;
 
@@ -80,6 +85,9 @@ public:
 
     thing() = default;
     thing(const content::assets::thing_template& tpl);
+    thing(io::deserialization_constructor_tag, io::binary_input_stream& is);
+
+    void serialize(io::binary_output_stream& os) const;
 };
 
 }

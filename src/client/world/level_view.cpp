@@ -10,6 +10,7 @@
 #include "content/assets/model.h"
 #include "content/assets/sprite.h"
 #include "content/constants.h"
+#include "game/world/thing.h"
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -171,13 +172,13 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 }
 
 void gorc::client::world::level_view::record_visible_things() {
-    for(auto& thing : currentModel->things) {
-        if(sector_vis_scratch.find(thing.sector) != sector_vis_scratch.end()) {
-            visible_thing_scratch.emplace_back(thing.get_id(), length(thing.position - currentModel->camera_model.current_computed_state.position));
+    for(auto& thing_pair : currentModel->thing_ecs.all_components<gorc::game::world::thing>()) {
+        if(sector_vis_scratch.find(thing_pair.second.sector) != sector_vis_scratch.end()) {
+            visible_thing_scratch.emplace_back(static_cast<int>(thing_pair.first), length(thing_pair.second.position - currentModel->camera_model.current_computed_state.position));
 
-            if(!(thing.flags & flags::thing_flag::Sighted)) {
+            if(!(thing_pair.second.flags & flags::thing_flag::Sighted)) {
                 // thing has been sighted for first time. Fire sighted event.
-                currentPresenter->thing_sighted(thing.get_id());
+                currentPresenter->thing_sighted(static_cast<int>(thing_pair.first));
             }
         }
     }
@@ -241,7 +242,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
         if(std::get<1>(*thing_it) <= std::get<2>(*surf_it)) {
             glDepthMask(GL_TRUE);
             glDisable(GL_CULL_FACE);
-            draw_thing(currentModel->things[std::get<0>(*thing_it)], std::get<0>(*thing_it));
+            draw_thing(currentModel->get_thing(std::get<0>(*thing_it)), std::get<0>(*thing_it));
             ++thing_it;
         }
         else {
@@ -256,7 +257,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
     glDepthMask(GL_TRUE);
     glDisable(GL_CULL_FACE);
     while(thing_it != visible_thing_scratch.end()) {
-        draw_thing(currentModel->things[std::get<0>(*thing_it)], std::get<0>(*thing_it));
+        draw_thing(currentModel->get_thing(std::get<0>(*thing_it)), std::get<0>(*thing_it));
         ++thing_it;
     }
 
@@ -335,7 +336,7 @@ void gorc::client::world::level_view::draw(const time&, const box<2, int>& view_
         glDepthMask(GL_TRUE);
 
         for(const auto& light_thing : visible_thing_scratch) {
-            const auto& thing = currentModel->things[std::get<0>(light_thing)];
+            const auto& thing = currentModel->get_thing(std::get<0>(light_thing));
 
             float light = thing.light + ((thing.actor_flags & flags::actor_flag::HasFieldlight) ? thing.light_intensity : 0.0f);
 
@@ -363,7 +364,7 @@ void gorc::client::world::level_view::draw(const time&, const box<2, int>& view_
         glDepthMask(GL_TRUE);
 
         for(const auto& light_thing : visible_thing_scratch) {
-            const auto& thing = currentModel->things[std::get<0>(light_thing)];
+            const auto& thing = currentModel->get_thing(std::get<0>(light_thing));
 
             float light = thing.light + ((thing.actor_flags & flags::actor_flag::HasFieldlight) ? thing.light_intensity : 0.0f);
 
@@ -389,7 +390,7 @@ void gorc::client::world::level_view::draw_pov_model() {
     if(cam.draw_pov_model) {
         auto const* pov_model = currentModel->camera_model.pov_model;
         if(pov_model) {
-            const auto& thing = currentModel->things[currentPresenter->get_local_player_thing()];
+            const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
             const auto& current_sector = currentModel->sectors[thing.sector];
             auto sector_color = make_fill_vector<3, float>(1.0f);
             if(content::assets::colormap const* cmp = current_sector.cmp) {

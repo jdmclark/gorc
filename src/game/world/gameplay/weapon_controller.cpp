@@ -8,10 +8,10 @@
 void gorc::game::world::gameplay::weapon_controller::touched_thing(int thing_id, int touched_thing_id) {
     thing_controller::touched_thing(thing_id, touched_thing_id);
 
-    auto& projectile = presenter.model->things[thing_id];
+    auto& projectile = presenter.model->get_thing(thing_id);
     flag_set<flags::weapon_flag> proj_flags(projectile.type_flags);
 
-    auto& touched_thing = presenter.model->things[touched_thing_id];
+    auto& touched_thing = presenter.model->get_thing(touched_thing_id);
 
     if(projectile.parent_thing != -1 && projectile.parent_thing == touched_thing.parent_thing) {
         // Projectiles fired by same player. Ignore collision.
@@ -50,7 +50,7 @@ void gorc::game::world::gameplay::weapon_controller::touched_thing(int thing_id,
 void gorc::game::world::gameplay::weapon_controller::touched_surface(int thing_id, int touched_surface_id) {
     thing_controller::touched_surface(thing_id, touched_surface_id);
 
-    auto& projectile = presenter.model->things[thing_id];
+    auto& projectile = presenter.model->get_thing(thing_id);
     flag_set<flags::weapon_flag> proj_flags(projectile.type_flags);
 
     const auto& touched_surface = presenter.model->surfaces[touched_surface_id];
@@ -81,7 +81,7 @@ void gorc::game::world::gameplay::weapon_controller::touched_surface(int thing_i
 }
 
 void gorc::game::world::gameplay::weapon_controller::update(int thing_id, double dt) {
-    auto& thing = presenter.model->things[thing_id];
+    auto& thing = presenter.model->get_thing(thing_id);
     flag_set<flags::weapon_flag> weap_flags(thing.type_flags);
 
     if(weap_flags & flags::weapon_flag::uses_damage_decay) {

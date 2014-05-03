@@ -207,9 +207,9 @@ public:
         }
 
         for(auto col_thing_id : physics_overlapping_things) {
-            auto& col_thing = model->things[col_thing_id];
+            auto& col_thing = model->get_thing(col_thing_id);
 
-            if(col_thing.get_id() == ray_cast_thing || !thing_p(col_thing_id)) {
+            if(col_thing_id == ray_cast_thing || !thing_p(col_thing_id)) {
                 continue;
             }
 
@@ -268,7 +268,7 @@ public:
 
     template <typename ThingP, typename SurfaceP> maybe<contact> thing_segment_query(int current_thing_id, const vector<3>& direction,
             ThingP thing_p, SurfaceP surface_p, const maybe<contact>& previous_contact = maybe<contact>()) {
-        const auto& current_thing = model->things[current_thing_id];
+        const auto& current_thing = model->get_thing(current_thing_id);
         return segment_query<ThingP, SurfaceP>(segment(current_thing.position, current_thing.position + direction), current_thing.sector, current_thing_id,
                 thing_p, surface_p, previous_contact);
     }

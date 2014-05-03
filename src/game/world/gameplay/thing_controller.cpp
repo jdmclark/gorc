@@ -15,7 +15,7 @@ gorc::game::world::gameplay::thing_controller::~thing_controller() {
 }
 
 void gorc::game::world::gameplay::thing_controller::update(int thing_id, double dt) {
-    auto& thing = presenter.model->things[thing_id];
+    auto& thing = presenter.model->get_thing(thing_id);
     thing.time_alive += static_cast<float>(dt);
 
     if(thing.timer > 0.0f && thing.time_alive >= thing.timer) {
@@ -28,7 +28,7 @@ void gorc::game::world::gameplay::thing_controller::handle_animation_marker(int,
 }
 
 void gorc::game::world::gameplay::thing_controller::create_controller_data(int thing_id) {
-    auto& new_thing = presenter.model->things[thing_id];
+    auto& new_thing = presenter.model->get_thing(thing_id);
     new_thing.time_alive = 0.0f;
 }
 

@@ -43,12 +43,12 @@ void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, co
 }
 
 void gorc::game::world::keys::key_presenter::DispatchMarker(int thing_id, flags::key_marker_type marker) {
-    auto& thing = levelModel->things[thing_id];
+    auto& thing = levelModel->get_thing(thing_id);
     thing.controller->handle_animation_marker(thing_id, marker);
 }
 
 int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {
-    auto& thing = levelModel->things[thing_id];
+    auto& thing = levelModel->get_thing(thing_id);
     if(thing.attached_key_mix < 0) {
         auto& mix = model->mixes.emplace();
         mix.attached_thing = thing_id;
@@ -176,7 +176,7 @@ void gorc::game::world::keys::key_presenter::update(const time& time) {
 }
 
 void gorc::game::world::keys::key_presenter::expunge_thing_animations(int thing_id) {
-    auto& thing = levelModel->things[thing_id];
+    auto& thing = levelModel->get_thing(thing_id);
     if(thing.attached_key_mix >= 0) {
         for(auto& key : model->keys) {
             if(key.mix_id == thing.attached_key_mix) {
@@ -288,7 +288,7 @@ int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
 }
 
 int gorc::game::world::keys::key_presenter::play_mode(int thing_id, flags::puppet_submode_type minor_mode) {
-    auto& thing = levelModel->things[thing_id];
+    auto& thing = levelModel->get_thing(thing_id);
     if(!thing.pup) {
         return -1;
     }

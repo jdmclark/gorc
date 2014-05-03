@@ -207,7 +207,7 @@ void gorc::game::world::gameplay::character_controller::play_standing_animation(
 
 gorc::game::world::gameplay::standing_material gorc::game::world::gameplay::character_controller::get_standing_material(thing& thing) {
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
-        auto& floor_thing = presenter.model->things[thing.attached_thing];
+        auto& floor_thing = presenter.model->get_thing(thing.attached_thing);
         if(floor_thing.flags & flags::thing_flag::Metal) {
             return standing_material::metal;
         }
@@ -414,11 +414,11 @@ bool gorc::game::world::gameplay::character_controller::step_on_surface(int thin
 
 bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_id, thing& thing, int land_thing_id,
                 const physics::contact&) {
-    const auto& attach_thing = presenter.model->things[land_thing_id];
+    const auto& attach_thing = presenter.model->get_thing(land_thing_id);
     if(attach_thing.flags & flags::thing_flag::CanStandOn) {
         thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToThingFace };
         thing.attached_thing = land_thing_id;
-        thing.prev_attached_thing_position = presenter.model->things[land_thing_id].position;
+        thing.prev_attached_thing_position = presenter.model->get_thing(land_thing_id).position;
 
         presenter.script_presenter->send_message_to_linked(cog::message_id::entered,
                 land_thing_id, flags::message_type::thing,
@@ -472,7 +472,7 @@ void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_
 
     presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
 
-    flag_set<flags::thing_flag> flags = presenter.model->things[land_thing_id].flags;
+    flag_set<flags::thing_flag> flags = presenter.model->get_thing(land_thing_id).flags;
 
     flags::sound_subclass_type subclass = flags::sound_subclass_type::LandHard;
     if(flags & flags::thing_flag::Metal) {
@@ -531,7 +531,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_thing(int thin
     set_is_falling(thing_id, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 
-    flag_set<flags::thing_flag> flags = presenter.model->things[jump_thing_id].flags;
+    flag_set<flags::thing_flag> flags = presenter.model->get_thing(jump_thing_id).flags;
 
     flags::sound_subclass_type subclass = flags::sound_subclass_type::Jump;
     if(flags & flags::thing_flag::Metal) {
@@ -547,7 +547,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_thing(int thin
 void gorc::game::world::gameplay::character_controller::update(int thing_id, double dt) {
     thing_controller::update(thing_id, dt);
 
-    thing& thing = presenter.model->things[thing_id];
+    thing& thing = presenter.model->get_thing(thing_id);
     thing.puppet_mode = get_puppet_mode(thing);
 
     // Update actor state
@@ -587,7 +587,7 @@ void gorc::game::world::gameplay::character_controller::update(int thing_id, dou
 void gorc::game::world::gameplay::character_controller::create_controller_data(int thing_id) {
     thing_controller::create_controller_data(thing_id);
 
-    auto& new_thing = presenter.model->things[thing_id];
+    auto& new_thing = presenter.model->get_thing(thing_id);
 
     // HACK: Initialize actor walk animation
     if(new_thing.pup) {
@@ -604,7 +604,7 @@ void gorc::game::world::gameplay::character_controller::create_controller_data(i
 }
 
 void gorc::game::world::gameplay::character_controller::remove_controller_data(int thing_id) {
-    auto& thing = presenter.model->things[thing_id];
+    auto& thing = presenter.model->get_thing(thing_id);
     if(thing.actor_walk_animation >= 0) {
         presenter.key_presenter->stop_key(thing_id, thing.actor_walk_animation, 0.0f);
     }
@@ -613,7 +613,7 @@ void gorc::game::world::gameplay::character_controller::remove_controller_data(i
 }
 
 void gorc::game::world::gameplay::character_controller::handle_animation_marker(int thing_id, flags::key_marker_type marker) {
-    auto& thing = presenter.model->things[thing_id];
+    auto& thing = presenter.model->get_thing(thing_id);
 
     switch(marker) {
     case flags::key_marker_type::LeftRunFootstep:
