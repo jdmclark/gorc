@@ -19,6 +19,21 @@ const value& value::operator=(const value& v) {
     return v;
 }
 
+value::value(gorc::entity_id v) {
+    *this = v;
+}
+
+gorc::entity_id value::operator=(gorc::entity_id v) {
+    type_flag = type::integer;
+    data.integer = static_cast<int>(v);
+
+    return v;
+}
+
+value::operator gorc::entity_id() const {
+    return entity_id(static_cast<int>(*this));
+}
+
 value::value(int v) {
     *this = v;
 }

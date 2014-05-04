@@ -14,9 +14,9 @@ class surface_animation {
 public:
     #include "surface_animation.uid"
 
-    entity_id animation;
+    int surface;
 
-    surface_animation(entity_id animation);
+    surface_animation(int surface);
     surface_animation(io::deserialization_constructor_tag, io::binary_input_stream&);
 
     void serialize(io::binary_output_stream&) const;

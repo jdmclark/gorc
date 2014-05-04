@@ -10,7 +10,7 @@
 #include "content/assets/model.h"
 #include "content/assets/sprite.h"
 #include "content/constants.h"
-#include "game/world/thing.h"
+#include "game/world/components/thing.h"
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -172,7 +172,7 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 }
 
 void gorc::client::world::level_view::record_visible_things() {
-    for(auto& thing_pair : currentModel->thing_ecs.all_components<gorc::game::world::thing>()) {
+    for(auto& thing_pair : currentModel->ecs.all_components<gorc::game::world::components::thing>()) {
         if(sector_vis_scratch.find(thing_pair.second.sector) != sector_vis_scratch.end()) {
             visible_thing_scratch.emplace_back(static_cast<int>(thing_pair.first), length(thing_pair.second.position - currentModel->camera_model.current_computed_state.position));
 
@@ -665,7 +665,7 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
     update_shader_model_matrix();
 }
 
-void gorc::client::world::level_view::draw_sprite(const game::world::thing& thing, const content::assets::sprite& sprite, float sector_light) {
+void gorc::client::world::level_view::draw_sprite(const game::world::components::thing& thing, const content::assets::sprite& sprite, float sector_light) {
     if(sprite.mat) {
         // TODO: Currently plays animation over duration of timer. Behavior should be verified.
         int current_frame = 0;
@@ -683,7 +683,7 @@ void gorc::client::world::level_view::draw_sprite(const game::world::thing& thin
     }
 }
 
-void gorc::client::world::level_view::draw_thing(const game::world::thing& thing, int thing_id) {
+void gorc::client::world::level_view::draw_thing(const game::world::components::thing& thing, int thing_id) {
     if((thing.flags & flags::thing_flag::Invisible) || thing_id == currentModel->camera_model.current_computed_state.focus_not_drawn_thing) {
         return;
     }

@@ -6,7 +6,9 @@ namespace gorc {
 namespace game {
 namespace world {
 
+namespace components {
 class thing;
+}
 
 namespace keys {
 

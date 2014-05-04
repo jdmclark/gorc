@@ -22,6 +22,10 @@ template <> struct helper_get_vm_type<int> {
     static const vm::type type = vm::type::integer;
 };
 
+template <> struct helper_get_vm_type<entity_id> {
+    static const vm::type type = vm::type::integer;
+};
+
 template <> struct helper_get_vm_type<float> {
     static const vm::type type = vm::type::floating;
 };

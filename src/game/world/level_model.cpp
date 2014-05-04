@@ -6,7 +6,7 @@
 gorc::game::world::level_model::level_model(event_bus& parent_event_bus, gorc::content::content_manager&, cog::compiler&,
         const gorc::content::assets::level& level, const content::assets::inventory& inv)
     : level(level), header(level.header), adjoins(level.adjoins), sectors(level.sectors),
-      surface_ecs(&parent_event_bus), effect_ecs(&parent_event_bus), inventory_model(inv) {
+      ecs(&parent_event_bus), inventory_model(inv) {
 
     // Copy surfaces and set up object data.
     std::copy(level.surfaces.begin(), level.surfaces.end(), std::back_inserter(surfaces));

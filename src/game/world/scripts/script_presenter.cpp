@@ -320,7 +320,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
             expectedsymbol_type = cog::symbols::symbol_type::thing;
 
             // Dispatch to capture cog
-            thing& thing = levelModel->get_thing(SenderRef);
+            auto& thing = levelModel->get_thing(SenderRef);
             if(thing.capture_cog >= 0) {
                 capture_cog = thing.capture_cog;
                 send_message(thing.capture_cog, message, -1, SenderRef, SenderType,

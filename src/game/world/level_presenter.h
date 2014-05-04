@@ -12,6 +12,8 @@
 #include "content/flags/damage_flag.h"
 #include "content/flags/ai_mode_flag.h"
 
+#include "components/thing.h"
+
 #include <memory>
 #include <stack>
 #include <set>
@@ -42,14 +44,13 @@ namespace gameplay {
 }
 
 class level_model;
-class thing;
 
 class level_presenter : public gorc::place::presenter {
 private:
     // Scratch space
     std::vector<std::tuple<int, int>> update_path_sector_scratch;
 
-    std::vector<int> things_to_destroy;
+    std::set<int> things_to_destroy;
 
     level_state& components;
     level_place place;
@@ -57,7 +58,7 @@ private:
 
     void initialize_world();
 
-    void update_thing_sector(int thing_id, thing& thing, const vector<3>& oldThingPosition);
+    void update_thing_sector(int thing_id, components::thing& thing, const vector<3>& oldThingPosition);
 
     gameplay::thing_controller& get_thing_controller(flags::thing_type type);
 

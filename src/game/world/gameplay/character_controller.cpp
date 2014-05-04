@@ -82,7 +82,7 @@ template <typename T, typename U> auto map_get(const T& map, U key) -> decltype(
 }
 }
 
-gorc::flags::puppet_mode_type gorc::game::world::gameplay::character_controller::get_puppet_mode(thing& thing) {
+gorc::flags::puppet_mode_type gorc::game::world::gameplay::character_controller::get_puppet_mode(components::thing& thing) {
     bool is_underwater = (presenter.model->sectors[thing.sector].flags & flags::sector_flag::Underwater);
 
     switch(thing.armed_mode) {
@@ -98,7 +98,7 @@ gorc::flags::puppet_mode_type gorc::game::world::gameplay::character_controller:
     }
 }
 
-void gorc::game::world::gameplay::character_controller::set_walk_animation(thing& thing, flags::puppet_submode_type type, float speed) {
+void gorc::game::world::gameplay::character_controller::set_walk_animation(components::thing& thing, flags::puppet_submode_type type, float speed) {
     if(thing.actor_walk_animation >= 0) {
         keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
         const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(type);
@@ -118,7 +118,7 @@ void gorc::game::world::gameplay::character_controller::set_walk_animation(thing
     }
 }
 
-bool gorc::game::world::gameplay::character_controller::is_walk_animation_mode(thing& thing, flags::puppet_submode_type type) {
+bool gorc::game::world::gameplay::character_controller::is_walk_animation_mode(components::thing& thing, flags::puppet_submode_type type) {
     if(thing.actor_walk_animation >= 0) {
         keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
         const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(type);
@@ -128,21 +128,21 @@ bool gorc::game::world::gameplay::character_controller::is_walk_animation_mode(t
     return false;
 }
 
-void gorc::game::world::gameplay::character_controller::set_walk_animation_speed(thing& thing, float speed) {
+void gorc::game::world::gameplay::character_controller::set_walk_animation_speed(components::thing& thing, float speed) {
     if(thing.actor_walk_animation >= 0) {
         keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
         keyState.speed = speed;
     }
 }
 
-void gorc::game::world::gameplay::character_controller::play_falling_animation(int, thing& thing) {
+void gorc::game::world::gameplay::character_controller::play_falling_animation(int, components::thing& thing) {
     if(dot(thing.vel, make_vector(0.0f, 0.0f, -1.0f)) > 0.0f) {
         // Player's trajectory has reached apogee.
         set_walk_animation(thing, flags::puppet_submode_type::Drop, 1.0f);
     }
 }
 
-void gorc::game::world::gameplay::character_controller::play_standing_animation(int, thing& thing) {
+void gorc::game::world::gameplay::character_controller::play_standing_animation(int, components::thing& thing) {
     auto oriented_vel = invert(thing.orient).transform(thing.vel);
     auto run_length = length(thing.vel);
 
@@ -205,7 +205,7 @@ void gorc::game::world::gameplay::character_controller::play_standing_animation(
     }
 }
 
-gorc::game::world::gameplay::standing_material gorc::game::world::gameplay::character_controller::get_standing_material(thing& thing) {
+gorc::game::world::gameplay::standing_material gorc::game::world::gameplay::character_controller::get_standing_material(components::thing& thing) {
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
         auto& floor_thing = presenter.model->get_thing(thing.attached_thing);
         if(floor_thing.flags & flags::thing_flag::Metal) {
@@ -245,7 +245,7 @@ gorc::game::world::gameplay::standing_material gorc::game::world::gameplay::char
     }
 }
 
-gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::character_controller::run_falling_sweep(int thing_id, thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::character_controller::run_falling_sweep(int thing_id, components::thing& thing,
                 double) {
     // Test for collision between legs and ground using multiple tests
     auto leg_height = thing.model_3d->insert_offset;
@@ -273,7 +273,7 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
     return contact;
 }
 
-gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::character_controller::run_walking_sweep(int thing_id, thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::character_controller::run_walking_sweep(int thing_id, components::thing& thing,
         double) {
     // Test for collision between legs and ground using multiple tests
     auto leg_height = thing.model_3d->insert_offset * 1.50f;
@@ -297,7 +297,7 @@ gorc::maybe<gorc::game::world::physics::contact> gorc::game::world::gameplay::ch
     return contact;
 }
 
-void gorc::game::world::gameplay::character_controller::update_falling(int thing_id, thing& thing, double dt) {
+void gorc::game::world::gameplay::character_controller::update_falling(int thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_falling_sweep(thing_id, thing, dt);
 
     auto applied_thrust = thing.thrust;
@@ -318,7 +318,7 @@ void gorc::game::world::gameplay::character_controller::update_falling(int thing
     }
 }
 
-void gorc::game::world::gameplay::character_controller::update_standing(int thing_id, thing& thing, double dt) {
+void gorc::game::world::gameplay::character_controller::update_standing(int thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
 
     if(const physics::contact* contact = maybe_contact) {
@@ -375,7 +375,7 @@ void gorc::game::world::gameplay::character_controller::update_standing(int thin
     }
 }
 
-void gorc::game::world::gameplay::character_controller::set_is_falling(int thing_id, thing& thing) {
+void gorc::game::world::gameplay::character_controller::set_is_falling(int thing_id, components::thing& thing) {
     // Player is falling again.
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
         presenter.script_presenter->send_message_to_linked(cog::message_id::exited,
@@ -391,7 +391,7 @@ void gorc::game::world::gameplay::character_controller::set_is_falling(int thing
     thing.attach_flags = flag_set<flags::attach_flag>();
 }
 
-bool gorc::game::world::gameplay::character_controller::step_on_surface(int thing_id, thing& thing, unsigned int surf_id,
+bool gorc::game::world::gameplay::character_controller::step_on_surface(int thing_id, components::thing& thing, unsigned int surf_id,
                 const physics::contact&) {
     const auto& surface = presenter.model->surfaces[surf_id];
     if(surface.flags & flags::surface_flag::Floor) {
@@ -412,7 +412,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_surface(int thin
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_id, thing& thing, int land_thing_id,
+bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_id, components::thing& thing, int land_thing_id,
                 const physics::contact&) {
     const auto& attach_thing = presenter.model->get_thing(land_thing_id);
     if(attach_thing.flags & flags::thing_flag::CanStandOn) {
@@ -434,7 +434,7 @@ bool gorc::game::world::gameplay::character_controller::step_on_thing(int thing_
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-void gorc::game::world::gameplay::character_controller::land_on_surface(int thing_id, thing& thing, unsigned int surf_id,
+void gorc::game::world::gameplay::character_controller::land_on_surface(int thing_id, components::thing& thing, unsigned int surf_id,
                 const physics::contact& rrcb) {
     if(!step_on_surface(thing_id, thing, surf_id, rrcb)) {
         return;
@@ -464,7 +464,7 @@ void gorc::game::world::gameplay::character_controller::land_on_surface(int thin
     presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
-void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_id, thing& thing, int land_thing_id,
+void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_id, components::thing& thing, int land_thing_id,
                 const physics::contact& rrcb) {
     if(!step_on_thing(thing_id, thing, land_thing_id, rrcb)) {
         return;
@@ -485,7 +485,7 @@ void gorc::game::world::gameplay::character_controller::land_on_thing(int thing_
     presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
-void gorc::game::world::gameplay::character_controller::jump(int thing_id, thing& thing) {
+void gorc::game::world::gameplay::character_controller::jump(int thing_id, components::thing& thing) {
     if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
         jump_from_surface(thing_id, thing, thing.attached_surface);
     }
@@ -501,7 +501,7 @@ void gorc::game::world::gameplay::character_controller::jump(int thing_id, thing
     }
 }
 
-void gorc::game::world::gameplay::character_controller::jump_from_surface(int thing_id, thing& thing, unsigned int surf_id) {
+void gorc::game::world::gameplay::character_controller::jump_from_surface(int thing_id, components::thing& thing, unsigned int surf_id) {
     set_is_falling(thing_id, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 
@@ -527,7 +527,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_surface(int th
     presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
-void gorc::game::world::gameplay::character_controller::jump_from_thing(int thing_id, thing& thing, int jump_thing_id) {
+void gorc::game::world::gameplay::character_controller::jump_from_thing(int thing_id, components::thing& thing, int jump_thing_id) {
     set_is_falling(thing_id, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 
@@ -547,7 +547,7 @@ void gorc::game::world::gameplay::character_controller::jump_from_thing(int thin
 void gorc::game::world::gameplay::character_controller::update(int thing_id, double dt) {
     thing_controller::update(thing_id, dt);
 
-    thing& thing = presenter.model->get_thing(thing_id);
+    auto& thing = presenter.model->get_thing(thing_id);
     thing.puppet_mode = get_puppet_mode(thing);
 
     // Update actor state

@@ -12,7 +12,10 @@ namespace game {
 namespace world {
 
 class level_model;
+
+namespace components {
 class thing;
+}
 
 namespace sounds {
 

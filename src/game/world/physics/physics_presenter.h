@@ -2,7 +2,7 @@
 
 #include "base/utility/flag_set.h"
 #include "base/math/vector.h"
-#include "game/world/thing.h"
+#include "game/world/components/thing.h"
 #include "base/utility/time.h"
 #include "shape.h"
 #include "contact.h"
@@ -54,9 +54,9 @@ private:
     void physics_calculate_broadphase(double dt);
     void physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir, int current_thing_id);
     void physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id);
-    void physics_thing_step(int thing_id, thing& thing, double dt);
+    void physics_thing_step(int thing_id, components::thing& thing, double dt);
 
-    void update_thing_path_moving(int thing_id, thing& thing, double dt);
+    void update_thing_path_moving(int thing_id, components::thing& thing, double dt);
     vector<3> get_thing_path_moving_point_velocity(int thing_id, const vector<3>& rel_point);
 
     class physics_node_visitor {

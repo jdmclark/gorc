@@ -119,8 +119,7 @@ void gorc::game::world::level_presenter::initialize_world() {
 void gorc::game::world::level_presenter::update(const time& time) {
     double dt = time.elapsed_as_seconds();
 
-    model->surface_ecs.update(time);
-    model->effect_ecs.update(time);
+    model->ecs.update(time);
 
     physics_presenter->update(time);
     camera_presenter->update(time);
@@ -130,7 +129,7 @@ void gorc::game::world::level_presenter::update(const time& time) {
     inventory_presenter->update(time);
 
     // update things
-    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing : model->ecs.all_components<components::thing>()) {
         thing.second.controller->update(static_cast<int>(thing.first), dt);
     }
 
@@ -176,7 +175,7 @@ gorc::game::world::gameplay::thing_controller& gorc::game::world::level_presente
     }
 }
 
-void gorc::game::world::level_presenter::update_thing_sector(int thing_id, thing& thing,
+void gorc::game::world::level_presenter::update_thing_sector(int thing_id, components::thing& thing,
         const vector<3>& oldThingPosition) {
     physics::segment segment(oldThingPosition, thing.position);
     physics::segment_adjoin_path(segment, *model, model->sectors[thing.sector], update_path_sector_scratch);
@@ -255,7 +254,7 @@ void gorc::game::world::level_presenter::respawn() {
     ++model->current_spawn_point;
     model->current_spawn_point = model->current_spawn_point % model->spawn_points.size();
 
-    thing& cameraThing = model->get_thing(model->local_player_thing_id);
+    components::thing& cameraThing = model->get_thing(model->local_player_thing_id);
     cameraThing.sector = model->spawn_points[model->current_spawn_point]->sector;
     cameraThing.position = model->spawn_points[model->current_spawn_point]->position;
     cameraThing.attach_flags = flag_set<flags::attach_flag>();
@@ -446,13 +445,13 @@ int gorc::game::world::level_presenter::get_cur_frame(int thing_id) {
 }
 
 void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
-    thing& referenced_thing = model->get_thing(thing_id);
+    components::thing& referenced_thing = model->get_thing(thing_id);
     auto& referenced_frame = referenced_thing.frames[frame];
     set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
 }
 
 void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, float speed) {
-    thing& referenced_thing = model->get_thing(thing_id);
+    components::thing& referenced_thing = model->get_thing(thing_id);
 
     referenced_thing.goal_frame = frame;
     if(frame > referenced_thing.current_frame) {
@@ -483,7 +482,7 @@ void gorc::game::world::level_presenter::path_move_resume(int thing_id) {
 }
 
 void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, float time) {
-    thing& referenced_thing = model->get_thing(thing_id);
+    components::thing& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving = false;
     referenced_thing.rotatepivot_moving = true;
     referenced_thing.current_frame = 0;
@@ -564,7 +563,7 @@ void gorc::game::world::level_presenter::clear_sector_flags(int sector_id, flag_
 }
 
 int gorc::game::world::level_presenter::first_thing_in_sector(int sector_id) {
-    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.sector == sector_id) {
             return static_cast<int>(thing.first);
         }
@@ -580,7 +579,7 @@ gorc::flag_set<gorc::flags::sector_flag> gorc::game::world::level_presenter::get
 int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
     int sector_id = model->get_thing(thing_id).sector;
 
-    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.sector == sector_id && static_cast<int>(thing.first) > thing_id) {
             return static_cast<int>(thing.first);
         }
@@ -701,8 +700,8 @@ int gorc::game::world::level_presenter::load_sound(const char* fn) {
 int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
         const vector<3>& pos, const quaternion<float>& orient) {
     // Initialize thing properties
-    entity_id new_thing_id = model->thing_ecs.make_entity();
-    model->thing_ecs.emplace_component<thing>(new_thing_id, tpl);
+    entity_id new_thing_id = model->ecs.make_entity();
+    model->ecs.emplace_component<components::thing>(new_thing_id, tpl);
 
     auto& new_thing = model->get_thing(static_cast<int>(new_thing_id));
 
@@ -783,7 +782,7 @@ void gorc::game::world::level_presenter::adjust_thing_pos(int thing_id, const ve
 }
 
 void gorc::game::world::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, int new_sector) {
-    thing& thing = model->get_thing(thing_id);
+    components::thing& thing = model->get_thing(thing_id);
     thing.position = new_pos;
     thing.orient = new_orient;
     thing.sector = new_sector;
@@ -804,9 +803,9 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
         return -1;
     }
 
-    thing& referencedThing = model->get_thing(thing_id);
+    components::thing& referencedThing = model->get_thing(thing_id);
     int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orient);
-    thing& new_thing = model->get_thing(new_thing_id);
+    components::thing& new_thing = model->get_thing(new_thing_id);
 
     new_thing.path_moving = false;
 
@@ -832,7 +831,7 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
     script_presenter->send_message_to_linked(cog::message_id::damaged, static_cast<int>(thing_id), flags::message_type::thing,
             damager_id, flags::message_type::thing, damage, static_cast<int>(flags));
 
-    thing& referencedThing = model->get_thing(thing_id);
+    components::thing& referencedThing = model->get_thing(thing_id);
     if(referencedThing.health > 0.0f) {
         referencedThing.health -= damage;
 
@@ -860,14 +859,14 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
 }
 
 void gorc::game::world::level_presenter::destroy_thing(int thing_id) {
-    things_to_destroy.push_back(thing_id);
+    things_to_destroy.insert(thing_id);
 }
 
 void gorc::game::world::level_presenter::real_destroy_thing(int thing_id) {
     auto& thing = model->get_thing(thing_id);
 
     // Reset thing parentage.
-    for(auto& thing_pair : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing_pair : model->ecs.all_components<components::thing>()) {
         if(thing_pair.second.parent_thing == thing_id) {
             thing_pair.second.parent_thing = -1;
         }
@@ -880,7 +879,7 @@ void gorc::game::world::level_presenter::real_destroy_thing(int thing_id) {
     sound_presenter->expunge_thing_sounds(thing_id);
     key_presenter->expunge_thing_animations(thing_id);
 
-    model->thing_ecs.erase_entity(entity_id(thing_id));
+    model->ecs.erase_entity(entity_id(thing_id));
 }
 
 void gorc::game::world::level_presenter::detach_thing(int thing_id) {
@@ -888,18 +887,18 @@ void gorc::game::world::level_presenter::detach_thing(int thing_id) {
 }
 
 gorc::vector<3> gorc::game::world::level_presenter::get_thing_pos(int thing_id) {
-    thing& referenced_thing = model->get_thing(thing_id);
+    components::thing& referenced_thing = model->get_thing(thing_id);
     return referenced_thing.position;
 }
 
 void gorc::game::world::level_presenter::heal_thing(int thing_id, float amount) {
-    thing& referencedThing = model->get_thing(thing_id);
+    components::thing& referencedThing = model->get_thing(thing_id);
     referencedThing.health = clamp(referencedThing.health + amount, 0.0f, referencedThing.max_health);
 }
 
 bool gorc::game::world::level_presenter::is_thing_moving(int thing_id) {
     // TODO: Temporary hack implementation pending new physics implementation.
-    thing& referencedThing = model->get_thing(thing_id);
+    components::thing& referencedThing = model->get_thing(thing_id);
     switch(referencedThing.move) {
     case flags::move_type::physics:
         return length(referencedThing.vel) > 0.0000001f;

@@ -6,6 +6,7 @@
 #include "base/utility/flag_set.h"
 #include "base/math/vector.h"
 #include "base/utility/time.h"
+#include "game/world/components/thing.h"
 
 namespace gorc {
 namespace content {
@@ -23,7 +24,6 @@ class level_state;
 
 namespace world {
 class level_model;
-class thing;
 
 namespace sounds {
 class sound_model;

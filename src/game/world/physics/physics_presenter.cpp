@@ -94,7 +94,7 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
     physics_broadphase_sector_things.clear();
 
     // Calculate influence AABBs and record overlapping sectors.
-    for(const auto& thing_pair : model->thing_ecs.all_components<thing>()) {
+    for(const auto& thing_pair : model->ecs.all_components<components::thing>()) {
         const auto& thing = thing_pair.second;
         int thing_id = static_cast<int>(thing_pair.first);
 
@@ -229,7 +229,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
     }
 }
 
-void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt) {
+void physics_presenter::physics_thing_step(int thing_id, components::thing& thing, double dt) {
 
     // TODO: Move somewhere more appropriate.
     //thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
@@ -409,7 +409,7 @@ void physics_presenter::physics_thing_step(int thing_id, thing& thing, double dt
     thing.vel -= this_frame_only_vel;
 }
 
-void physics_presenter::update_thing_path_moving(int thing_id, thing& thing, double dt) {
+void physics_presenter::update_thing_path_moving(int thing_id, components::thing& thing, double dt) {
     if(thing.move != flags::move_type::Path || thing.is_blocked || thing.path_moving_paused) {
         return;
     }
@@ -557,7 +557,7 @@ void physics_presenter::update(const time& time) {
     // General approach:
 
     // - Clear blocked flag on all path things.
-    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing : model->ecs.all_components<components::thing>()) {
         thing.second.is_blocked = false;
     }
 
@@ -565,14 +565,14 @@ void physics_presenter::update(const time& time) {
     physics_calculate_broadphase(dt);
 
     // - Rectify physics thing position vs. velocity, resting contacts, etc.
-    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.move == flags::move_type::physics) {
             physics_thing_step(static_cast<int>(thing.first), thing.second, dt);
         }
     }
 
     // - Send blocked message to all blocked things; else, update path.
-    for(auto& thing : model->thing_ecs.all_components<class thing>()) {
+    for(auto& thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.is_blocked && (thing.second.path_moving || thing.second.rotatepivot_moving)) {
             presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, static_cast<int>(thing.first), flags::message_type::thing,
                     -1, flags::message_type::nothing);

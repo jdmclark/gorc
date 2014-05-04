@@ -21,7 +21,10 @@ namespace game {
 namespace world {
 
 class level_presenter;
+
+namespace components {
 class thing;
+}
 
 namespace gameplay {
 

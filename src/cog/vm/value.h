@@ -1,5 +1,6 @@
 #pragma once
 
+#include "base/utility/entity_id.h"
 #include "base/math/vector.h"
 #include "type.h"
 #include <functional>
@@ -27,6 +28,10 @@ public:
 
     value(const value&);
     const value& operator=(const value&);
+
+    value(entity_id);
+    entity_id operator=(entity_id);
+    operator entity_id() const;
 
     value(int);
     int operator=(int);

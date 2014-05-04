@@ -5,7 +5,7 @@
 #include "cog/instance.h"
 #include "base/utility/pool.h"
 #include "base/utility/component_system.h"
-#include "thing.h"
+#include "components/thing.h"
 #include "surface.h"
 #include "sounds/sound.h"
 #include "game/world/scripts/script_model.h"
@@ -27,9 +27,7 @@ public:
     std::vector<surface> surfaces;
     std::vector<content::assets::level_sector> sectors;
 
-    component_system surface_ecs;
-    component_system effect_ecs;
-    component_system thing_ecs;
+    component_system ecs;
 
     scripts::script_model script_model;
     sounds::sound_model sound_model;
@@ -49,8 +47,8 @@ public:
     level_model(event_bus& parent_event_bus, content::content_manager& manager, cog::compiler& Cogcompiler,
             const content::assets::level& level, const content::assets::inventory& inv);
 
-    inline thing& get_thing(int id) {
-        for(auto& t : thing_ecs.find_component<thing>(entity_id(id))) {
+    inline components::thing& get_thing(int id) {
+        for(auto& t : ecs.find_component<components::thing>(entity_id(id))) {
             return t.second;
         }
 

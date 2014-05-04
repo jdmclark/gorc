@@ -1,6 +1,6 @@
 #include "cog_controller.h"
 #include "game/world/level_presenter.h"
-#include "game/world/thing.h"
+#include "game/world/components/thing.h"
 #include "game/world/level_model.h"
 #include "game/constants.h"
 #include "base/math/util.h"

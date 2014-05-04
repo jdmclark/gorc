@@ -16,10 +16,10 @@ class surface_light {
 public:
     #include "surface_light.uid"
 
-    entity_id surface;
+    int surface;
     float start_light, end_light, change_time, anim_time;
 
-    surface_light(entity_id surface, float start_light, float end_light, float change_time);
+    surface_light(int surface, float start_light, float end_light, float change_time);
     surface_light(io::deserialization_constructor_tag, io::binary_input_stream& is);
 
     void serialize(io::binary_output_stream& os) const;

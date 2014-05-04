@@ -1,8 +1,8 @@
 #pragma once
 
 #include "content/assets/template.h"
-#include "gameplay/thing_controller.h"
-#include "physics/object_data.h"
+#include "game/world/gameplay/thing_controller.h"
+#include "game/world/physics/object_data.h"
 #include "base/utility/maybe.h"
 #include "content/flags/armed_mode.h"
 #include "content/flags/jk_flag.h"
@@ -24,6 +24,8 @@ namespace keys {
 class key_mix;
 class key_state;
 }
+
+namespace components {
 
 class thing : public content::assets::thing_template {
 public:
@@ -89,6 +91,8 @@ public:
 
     void serialize(io::binary_output_stream& os) const;
 };
+
+}
 
 }
 }

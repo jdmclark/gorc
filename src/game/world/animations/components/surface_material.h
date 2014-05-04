@@ -19,12 +19,12 @@ class surface_material {
 public:
     #include "surface_material.uid"
 
-    entity_id surface;
+    int surface;
     double framerate;
     flag_set<flags::anim_flag> flag;
     double framerate_accumulator = 0.0;
 
-    surface_material(entity_id surface, double framerate, flag_set<flags::anim_flag> flag);
+    surface_material(int surface, double framerate, flag_set<flags::anim_flag> flag);
     surface_material(io::deserialization_constructor_tag, io::binary_input_stream& is);
 
     void serialize(io::binary_output_stream& os) const;
