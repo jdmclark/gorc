@@ -6,15 +6,17 @@
 #include "base/content/content_manager.h"
 #include "game/world/gameplay/character_controller.h"
 #include "game/world/level_presenter.h"
+#include "game/world/events/animation_marker.h"
 
 gorc::game::world::keys::key_presenter::key_presenter(content::content_manager& contentmanager)
     : contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
     return;
 }
 
-void gorc::game::world::keys::key_presenter::start(level_model& levelModel, key_model& model) {
+void gorc::game::world::keys::key_presenter::start(level_model& levelModel, key_model& model, event_bus& bus) {
     this->levelModel = &levelModel;
     this->model = &model;
+    this->bus = &bus;
 }
 
 void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
@@ -43,8 +45,7 @@ void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, co
 }
 
 void gorc::game::world::keys::key_presenter::DispatchMarker(int thing_id, flags::key_marker_type marker) {
-    auto& thing = levelModel->get_thing(thing_id);
-    thing.controller->handle_animation_marker(thing_id, marker);
+    bus->fire_event(events::animation_marker(entity_id(thing_id), marker));
 }
 
 int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {

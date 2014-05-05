@@ -34,7 +34,6 @@ namespace scripts { class script_presenter; }
 namespace sounds { class sound_presenter; }
 namespace gameplay {
     class thing_controller;
-    class actor_controller;
     class player_controller;
     class cog_controller;
     class ghost_controller;
@@ -74,7 +73,6 @@ public:
     std::unique_ptr<inventory::inventory_presenter> inventory_presenter;
     std::unique_ptr<camera::camera_presenter> camera_presenter;
 
-    std::unique_ptr<gameplay::actor_controller> actor_controller;
     std::unique_ptr<gameplay::player_controller> player_controller;
     std::unique_ptr<gameplay::cog_controller> cog_controller;
     std::unique_ptr<gameplay::ghost_controller> ghost_controller;

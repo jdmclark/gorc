@@ -4,6 +4,7 @@
 #include "game/constants.h"
 #include "game/world/physics/query.h"
 #include "game/world/scripts/script_presenter.h"
+#include "game/world/events/animation_marker.h"
 
 gorc::game::world::gameplay::thing_controller::thing_controller(level_presenter& presenter)
     : presenter(presenter) {
@@ -14,16 +15,7 @@ gorc::game::world::gameplay::thing_controller::~thing_controller() {
     return;
 }
 
-void gorc::game::world::gameplay::thing_controller::update(int thing_id, double dt) {
-    auto& thing = presenter.model->get_thing(thing_id);
-    thing.time_alive += static_cast<float>(dt);
-
-    if(thing.timer > 0.0f && thing.time_alive >= thing.timer) {
-        presenter.destroy_thing(thing_id);
-    }
-}
-
-void gorc::game::world::gameplay::thing_controller::handle_animation_marker(int, flags::key_marker_type) {
+void gorc::game::world::gameplay::thing_controller::update(int, double) {
     return;
 }
 
@@ -53,5 +45,9 @@ void gorc::game::world::gameplay::thing_controller::touched_surface(int thing_id
     presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
             touched_surface_id, flags::message_type::surface,
             thing_id, flags::message_type::thing);
+    return;
+}
+
+void gorc::game::world::gameplay::thing_controller::handle_animation_marker(int, flags::key_marker_type) {
     return;
 }

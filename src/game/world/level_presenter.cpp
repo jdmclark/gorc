@@ -12,13 +12,17 @@
 #include "game/world/keys/key_presenter.h"
 #include "game/world/camera/camera_presenter.h"
 #include "game/world/inventory/inventory_presenter.h"
-#include "game/world/gameplay/actor_controller.h"
 #include "game/world/gameplay/player_controller.h"
 #include "game/world/gameplay/cog_controller.h"
 #include "game/world/gameplay/ghost_controller.h"
 #include "game/world/gameplay/item_controller.h"
 #include "game/world/gameplay/corpse_controller.h"
 #include "game/world/gameplay/weapon_controller.h"
+
+#include "game/world/components/actor.h"
+
+#include "game/world/aspects/thing_controller_aspect.h"
+#include "game/world/aspects/actor_controller_aspect.h"
 
 using namespace gorc::math;
 
@@ -32,7 +36,6 @@ gorc::game::world::level_presenter::level_presenter(level_state& components, con
     inventory_presenter = make_unique<inventory::inventory_presenter>(*this);
     camera_presenter = make_unique<camera::camera_presenter>(*this);
 
-    actor_controller = make_unique<gameplay::actor_controller>(*this);
     player_controller = make_unique<gameplay::player_controller>(*this);
     cog_controller = make_unique<gameplay::cog_controller>(*this);
     ghost_controller = make_unique<gameplay::ghost_controller>(*this);
@@ -52,8 +55,12 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     model = make_unique<level_model>(eventBus, *place.contentmanager, components.compiler, place.level,
             place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler));
 
+    // Create local aspects
+    model->ecs.emplace_aspect<aspects::thing_controller_aspect>(*this);
+    model->ecs.emplace_aspect<aspects::actor_controller_aspect>();
+
     physics_presenter->start(*model);
-    key_presenter->start(*model, model->key_model);
+    key_presenter->start(*model, model->key_model, eventBus);
     camera_presenter->start(*model, model->camera_model);
     animation_presenter->start(*model);
     script_presenter->start(*model, model->script_model);
@@ -119,14 +126,14 @@ void gorc::game::world::level_presenter::initialize_world() {
 void gorc::game::world::level_presenter::update(const time& time) {
     double dt = time.elapsed_as_seconds();
 
-    model->ecs.update(time);
-
     physics_presenter->update(time);
     camera_presenter->update(time);
     script_presenter->update(time);
     sound_presenter->update(time);
     key_presenter->update(time);
     inventory_presenter->update(time);
+
+    model->ecs.update(time);
 
     // update things
     for(auto& thing : model->ecs.all_components<components::thing>()) {
@@ -151,12 +158,10 @@ void gorc::game::world::level_presenter::update(const time& time) {
 
 gorc::game::world::gameplay::thing_controller& gorc::game::world::level_presenter::get_thing_controller(flags::thing_type type) {
     switch(type) {
-    case flags::thing_type::Actor:
-        return *actor_controller;
-
     case flags::thing_type::cog:
         return *cog_controller;
 
+    case flags::thing_type::Actor:
     case flags::thing_type::Player:
         return *player_controller;
 
@@ -710,6 +715,16 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     new_thing.position = pos;
     new_thing.orient = orient;
     new_thing.controller = &get_thing_controller(new_thing.type);
+
+    // Create controller components
+    switch(new_thing.type) {
+    case flags::thing_type::Actor:
+        model->ecs.emplace_component<components::actor>(new_thing_id);
+        break;
+
+    default:
+        break;
+    }
 
     new_thing.controller->create_controller_data(static_cast<int>(new_thing_id));
 

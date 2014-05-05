@@ -1,11 +1,12 @@
-#include "actor_controller.h"
-#include "game/world/level_presenter.h"
+#include "actor_controller_aspect.h"
 #include "game/world/level_model.h"
-#include "game/constants.h"
 
-void gorc::game::world::gameplay::actor_controller::update(int thing_id, double dt) {
+gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(component_system& cs)
+    : inner_join_aspect(cs) {
+    return;
+}
 
-    auto& thing = presenter.model->get_thing(thing_id);
+void gorc::game::world::aspects::actor_controller_aspect::update(time t, entity_id, components::actor&, components::thing& thing) {
 
     if(thing.ai_mode_flags & flags::ai_mode_flag::turning_to_face_target) {
         // Get plane angle.
@@ -22,7 +23,7 @@ void gorc::game::world::gameplay::actor_controller::update(int thing_id, double 
             thing.ai_mode_flags -= flags::ai_mode_flag::turning_to_face_target;
         }
         else {
-            thing.orient = slerp(thing.orient, make_rotation<float>(make_vector(0.0f, 0.0f, 1.0f), target_yaw - 90.0f), thing.ai_move_speed * static_cast<float>(dt) * 1.0f);
+            thing.orient = slerp(thing.orient, make_rotation<float>(make_vector(0.0f, 0.0f, 1.0f), target_yaw - 90.0f), thing.ai_move_speed * static_cast<float>(t.elapsed_as_seconds()) * 1.0f);
         }
     }
 
@@ -32,13 +33,12 @@ void gorc::game::world::gameplay::actor_controller::update(int thing_id, double 
 
         float vlen = length(v);
         if(vlen > 0.005f) {
-            thing.thrust = (v / vlen) * thing.ai_move_speed * static_cast<float>(dt) * 6.0f;
+            thing.thrust = (v / vlen) * thing.ai_move_speed * static_cast<float>(t.elapsed_as_seconds()) * 6.0f;
         }
         else {
             thing.thrust = make_zero_vector<3, float>();
             thing.ai_mode_flags -= flags::ai_mode_flag::moving_toward_destination;
         }
     }
-
-    character_controller::update(thing_id, dt);
+    return;
 }

@@ -12,6 +12,7 @@
 #include "content/assets/puppet.h"
 #include "base/math/quaternion.h"
 #include "base/utility/time.h"
+#include "base/utility/event_bus.h"
 
 namespace gorc {
 
@@ -44,6 +45,7 @@ private:
     content::content_manager& contentmanager;
     level_model* levelModel;
     key_model* model;
+    event_bus* bus;
 
     int GetThingMixId(int thing_id);
     void DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
@@ -53,7 +55,7 @@ private:
 public:
     key_presenter(content::content_manager& contentmanager);
 
-    void start(level_model& levelModel, key_model& model);
+    void start(level_model& levelModel, key_model& model, event_bus& bus);
     void update(const time& time);
 
     void expunge_thing_animations(int thing_id);
