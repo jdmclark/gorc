@@ -39,6 +39,7 @@ class physics_presenter {
 private:
     level_presenter& presenter;
     level_model* model;
+    event_bus* eventbus;
 
     std::unordered_multimap<int, int> physics_broadphase_thing_influence;
     std::unordered_multimap<int, int> physics_broadphase_sector_things;
@@ -126,7 +127,7 @@ private:
 public:
     physics_presenter(level_presenter& presenter);
 
-    void start(level_model& model);
+    void start(level_model& model, event_bus& eventbus);
     void update(const time& time);
 
     template <typename ThingP, typename SurfaceP> maybe<contact> segment_query(const segment& cam_segment, int initial_sector, int ray_cast_thing,

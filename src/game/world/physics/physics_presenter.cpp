@@ -9,6 +9,8 @@
 #include "game/world/scripts/script_presenter.h"
 #include "game/world/sounds/sound_presenter.h"
 #include "game/world/keys/key_presenter.h"
+#include "game/world/events/touched_thing.h"
+#include "game/world/events/touched_surface.h"
 #include "query.h"
 
 using namespace gorc::game::world::physics;
@@ -19,8 +21,9 @@ physics_presenter::physics_presenter(level_presenter& presenter)
     return;
 }
 
-void physics_presenter::start(level_model& model) {
+void physics_presenter::start(level_model& model, event_bus& eb) {
     this->model = &model;
+    this->eventbus = &eb;
 }
 
 bool physics_presenter::surface_needs_collision_response(int moving_thing_id, int surface_id) {
@@ -592,15 +595,18 @@ void physics_presenter::update(const time& time) {
         int thing_id, surf_id;
         std::tie(thing_id, surf_id) = touched_surface_pair;
         auto& thing = model->get_thing(thing_id);
-        thing.controller->touched_surface(thing_id, surf_id);
+        eventbus->fire_event(events::touched_surface(entity_id(thing_id),
+                                                     surf_id));
     }
 
     for(const auto& touched_thing_pair : physics_touched_thing_pairs) {
         int thing_a_id, thing_b_id;
         std::tie(thing_a_id, thing_b_id) = touched_thing_pair;
 
-        model->get_thing(thing_a_id).controller->touched_thing(thing_a_id, thing_b_id);
-        model->get_thing(thing_b_id).controller->touched_thing(thing_b_id, thing_a_id);
+        eventbus->fire_event(events::touched_thing(entity_id(thing_a_id),
+                                                   entity_id(thing_b_id)));
+        eventbus->fire_event(events::touched_thing(entity_id(thing_b_id),
+                                                   entity_id(thing_a_id)));
     }
 }
 

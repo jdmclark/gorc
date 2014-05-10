@@ -1,14 +1,19 @@
-#include "weapon_controller.h"
-#include "game/world/level_presenter.h"
+#include "weapon_controller_aspect.h"
 #include "game/world/level_model.h"
 #include "content/flags/weapon_flag.h"
 #include "game/world/scripts/script_presenter.h"
 #include "game/world/sounds/sound_presenter.h"
+#include "game/world/events/touched_thing.h"
+#include "game/world/events/touched_surface.h"
 
-void gorc::game::world::gameplay::weapon_controller::touched_thing(int thing_id, int touched_thing_id) {
-    thing_controller::touched_thing(thing_id, touched_thing_id);
+using gorc::game::world::aspects::weapon_controller_aspect;
 
+void weapon_controller_aspect::touched_thing(entity_id thing_id, entity_id touched_thing_id) {
     auto& projectile = presenter.model->get_thing(thing_id);
+    if(projectile.type != flags::thing_type::Weapon) {
+        return;
+    }
+
     flag_set<flags::weapon_flag> proj_flags(projectile.type_flags);
 
     auto& touched_thing = presenter.model->get_thing(touched_thing_id);
@@ -47,10 +52,12 @@ void gorc::game::world::gameplay::weapon_controller::touched_thing(int thing_id,
     }
 }
 
-void gorc::game::world::gameplay::weapon_controller::touched_surface(int thing_id, int touched_surface_id) {
-    thing_controller::touched_surface(thing_id, touched_surface_id);
-
+void weapon_controller_aspect::touched_surface(entity_id thing_id, int touched_surface_id) {
     auto& projectile = presenter.model->get_thing(thing_id);
+    if(projectile.type != flags::thing_type::Weapon) {
+        return;
+    }
+
     flag_set<flags::weapon_flag> proj_flags(projectile.type_flags);
 
     const auto& touched_surface = presenter.model->surfaces[touched_surface_id];
@@ -80,14 +87,29 @@ void gorc::game::world::gameplay::weapon_controller::touched_surface(int thing_i
     presenter.destroy_thing(thing_id);
 }
 
-void gorc::game::world::gameplay::weapon_controller::update(int thing_id, double dt) {
-    auto& thing = presenter.model->get_thing(thing_id);
+weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
+                                                   level_presenter &presenter)
+    : inner_join_aspect(cs), presenter(presenter) {
+
+    cs.bus.add_handler<events::touched_thing>([this](events::touched_thing const &e) {
+        touched_thing(e.toucher, e.touched);
+    });
+
+    cs.bus.add_handler<events::touched_surface>([this](events::touched_surface const &e) {
+        touched_surface(e.toucher, e.touched);
+    });
+
+    return;
+}
+
+void weapon_controller_aspect::update(time t,
+                                      entity_id,
+                                      components::weapon&,
+                                      components::thing &thing) {
     flag_set<flags::weapon_flag> weap_flags(thing.type_flags);
 
     if(weap_flags & flags::weapon_flag::uses_damage_decay) {
-        float alpha = static_cast<float>(dt) / (thing.time_alive - thing.timer);
+        float alpha = static_cast<float>(t.elapsed_as_seconds()) / (thing.time_alive - thing.timer);
         thing.damage = lerp(thing.damage, thing.min_damage, alpha);
     }
-
-    thing_controller::update(thing_id, dt);
 }

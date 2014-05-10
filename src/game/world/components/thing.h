@@ -1,7 +1,6 @@
 #pragma once
 
 #include "content/assets/template.h"
-#include "game/world/gameplay/thing_controller.h"
 #include "game/world/physics/object_data.h"
 #include "base/utility/maybe.h"
 #include "content/flags/armed_mode.h"
@@ -31,7 +30,6 @@ class thing : public content::assets::thing_template {
 public:
     #include "thing.uid"
 
-    gameplay::thing_controller* controller;
     physics::thing_object_data object_data;
 
     bool path_moving_paused = false;

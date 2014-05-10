@@ -1,36 +1,29 @@
 #pragma once
 
-#include "thing_controller.h"
+#include "base/utility/inner_join_aspect.h"
+#include "game/world/level_presenter.h"
+#include "game/world/components/thing.h"
+#include "game/world/components/character.h"
+
 #include "game/world/physics/contact.h"
 #include "base/utility/maybe.h"
 #include "content/flags/puppet_mode_type.h"
 #include "content/flags/puppet_submode_type.h"
 #include "content/flags/sound_subclass_type.h"
 
+#include "game/flags/standing_material_type.h"
+
 namespace gorc {
 namespace game {
 namespace world {
+namespace aspects {
 
-namespace components {
-class thing;
-}
-
-namespace gameplay {
-
-enum class standing_material {
-    none,
-    hard,
-    dirt,
-    metal,
-    shallow_water,
-    deep_water,
-    very_deep_water
-};
-
-class character_controller : public thing_controller {
+class character_controller_aspect : public inner_join_aspect<components::character, components::thing> {
 private:
+    level_presenter &presenter;
+
     flags::puppet_mode_type get_puppet_mode(components::thing& thing);
-    standing_material get_standing_material(components::thing& thing);
+    flags::standing_material_type get_standing_material(components::thing& thing);
 
     flags::sound_subclass_type get_left_run_subclass_type(int thing_id);
     flags::sound_subclass_type get_right_run_subclass_type(int thing_id);
@@ -64,13 +57,15 @@ private:
     void play_left_walk_footstep(int thing_id);
     void play_right_walk_footstep(int thing_id);
 
-public:
-    using thing_controller::thing_controller;
+    void handle_animation_marker(int thing_id, flags::key_marker_type marker);
 
-    virtual void update(int thing_id, double dt) override;
-    virtual void create_controller_data(int thing_id) override;
-    virtual void remove_controller_data(int thing_id) override;
-    virtual void handle_animation_marker(int thing_id, flags::key_marker_type marker) override;
+public:
+    character_controller_aspect(component_system&, level_presenter&);
+
+    static void create_controller_data(int thing_id, level_presenter&);
+    static void remove_controller_data(int thing_id, level_presenter&);
+
+    virtual void update(time, entity_id, components::character&, components::thing&) override;
 };
 
 }

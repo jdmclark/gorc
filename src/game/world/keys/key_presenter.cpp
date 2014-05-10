@@ -4,7 +4,6 @@
 #include "key_model.h"
 #include "game/world/level_model.h"
 #include "base/content/content_manager.h"
-#include "game/world/gameplay/character_controller.h"
 #include "game/world/level_presenter.h"
 #include "game/world/events/animation_marker.h"
 

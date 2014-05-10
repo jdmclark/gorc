@@ -64,7 +64,7 @@ CXXFLAGS_EXTRA = -O3
 CXXFLAGS = -I$(SRC_PATH) -std=gnu++11 -Werror \
 	-Wall -Wextra -Wpedantic \
 	-Wdouble-promotion -Wno-switch-enum -Wswitch -Wuninitialized \
-	-Wstrict-aliasing=3 -Wstrict-overflow=5 \
+	-Wstrict-aliasing=3 -Wstrict-overflow=1 \
 	-Wtrampolines -Wfloat-equal -Wcast-qual \
 	-Wcast-align -Wwrite-strings -Wconversion \
 	-Wlogical-op -Wno-aggressive-loop-optimizations \

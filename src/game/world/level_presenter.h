@@ -32,15 +32,6 @@ namespace keys { class key_presenter; }
 namespace physics { class physics_presenter; }
 namespace scripts { class script_presenter; }
 namespace sounds { class sound_presenter; }
-namespace gameplay {
-    class thing_controller;
-    class player_controller;
-    class cog_controller;
-    class ghost_controller;
-    class item_controller;
-    class corpse_controller;
-    class weapon_controller;
-}
 
 class level_model;
 
@@ -59,8 +50,6 @@ private:
 
     void update_thing_sector(int thing_id, components::thing& thing, const vector<3>& oldThingPosition);
 
-    gameplay::thing_controller& get_thing_controller(flags::thing_type type);
-
 public:
     std::shared_ptr<content::content_manager> contentmanager;
     std::unique_ptr<level_model> model;
@@ -72,13 +61,6 @@ public:
     std::unique_ptr<keys::key_presenter> key_presenter;
     std::unique_ptr<inventory::inventory_presenter> inventory_presenter;
     std::unique_ptr<camera::camera_presenter> camera_presenter;
-
-    std::unique_ptr<gameplay::player_controller> player_controller;
-    std::unique_ptr<gameplay::cog_controller> cog_controller;
-    std::unique_ptr<gameplay::ghost_controller> ghost_controller;
-    std::unique_ptr<gameplay::item_controller> item_controller;
-    std::unique_ptr<gameplay::corpse_controller> corpse_controller;
-    std::unique_ptr<gameplay::weapon_controller> weapon_controller;
 
     level_presenter(level_state& components, const level_place& place);
     ~level_presenter();
@@ -134,7 +116,7 @@ public:
     void jk_enable_saber(int thing_id, float damage, float collide_length, float unknown);
     void jk_set_saber_info(int thing_id, int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
             int wall, int blood, int saber);
-    void take_item(int thing_id, int player_id);
+    void take_item(entity_id thing_id, entity_id player_id);
 
     // Player verbs
     int get_local_player_thing();
@@ -208,7 +190,6 @@ public:
     int get_thing_parent(int thing_id);
     int get_thing_sector(int thing_id);
     flags::thing_type get_thing_type(int thing_id);
-    void set_thing_type(int thing_id, flags::thing_type type);
     void set_thing_light(int thing_id, float light, float fade_time);
 
     // velocity verbs

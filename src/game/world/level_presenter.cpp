@@ -12,17 +12,20 @@
 #include "game/world/keys/key_presenter.h"
 #include "game/world/camera/camera_presenter.h"
 #include "game/world/inventory/inventory_presenter.h"
-#include "game/world/gameplay/player_controller.h"
-#include "game/world/gameplay/cog_controller.h"
-#include "game/world/gameplay/ghost_controller.h"
-#include "game/world/gameplay/item_controller.h"
-#include "game/world/gameplay/corpse_controller.h"
-#include "game/world/gameplay/weapon_controller.h"
 
 #include "game/world/components/actor.h"
+#include "game/world/components/character.h"
+#include "game/world/components/player.h"
+#include "game/world/components/item.h"
+#include "game/world/components/weapon.h"
 
 #include "game/world/aspects/thing_controller_aspect.h"
 #include "game/world/aspects/actor_controller_aspect.h"
+#include "game/world/aspects/character_controller_aspect.h"
+#include "game/world/aspects/item_controller_aspect.h"
+#include "game/world/aspects/weapon_controller_aspect.h"
+
+#include "game/world/events/taken.h"
 
 using namespace gorc::math;
 
@@ -35,13 +38,6 @@ gorc::game::world::level_presenter::level_presenter(level_state& components, con
     key_presenter = make_unique<keys::key_presenter>(*place.contentmanager);
     inventory_presenter = make_unique<inventory::inventory_presenter>(*this);
     camera_presenter = make_unique<camera::camera_presenter>(*this);
-
-    player_controller = make_unique<gameplay::player_controller>(*this);
-    cog_controller = make_unique<gameplay::cog_controller>(*this);
-    ghost_controller = make_unique<gameplay::ghost_controller>(*this);
-    item_controller = make_unique<gameplay::item_controller>(*this);
-    corpse_controller = make_unique<gameplay::corpse_controller>(*this);
-    weapon_controller = make_unique<gameplay::weapon_controller>(*this);
 
     return;
 }
@@ -58,8 +54,11 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     // Create local aspects
     model->ecs.emplace_aspect<aspects::thing_controller_aspect>(*this);
     model->ecs.emplace_aspect<aspects::actor_controller_aspect>();
+    model->ecs.emplace_aspect<aspects::character_controller_aspect>(*this);
+    model->ecs.emplace_aspect<aspects::item_controller_aspect>(*this);
+    model->ecs.emplace_aspect<aspects::weapon_controller_aspect>(*this);
 
-    physics_presenter->start(*model);
+    physics_presenter->start(*model, eventBus);
     key_presenter->start(*model, model->key_model, eventBus);
     camera_presenter->start(*model, model->camera_model);
     animation_presenter->start(*model);
@@ -135,11 +134,6 @@ void gorc::game::world::level_presenter::update(const time& time) {
 
     model->ecs.update(time);
 
-    // update things
-    for(auto& thing : model->ecs.all_components<components::thing>()) {
-        thing.second.controller->update(static_cast<int>(thing.first), dt);
-    }
-
     // update dynamic tint, game time.
     model->game_time += dt;
     model->level_time += dt;
@@ -154,30 +148,6 @@ void gorc::game::world::level_presenter::update(const time& time) {
     }
 
     things_to_destroy.clear();
-}
-
-gorc::game::world::gameplay::thing_controller& gorc::game::world::level_presenter::get_thing_controller(flags::thing_type type) {
-    switch(type) {
-    case flags::thing_type::cog:
-        return *cog_controller;
-
-    case flags::thing_type::Actor:
-    case flags::thing_type::Player:
-        return *player_controller;
-
-    case flags::thing_type::Corpse:
-        return *corpse_controller;
-
-    case flags::thing_type::Item:
-        return *item_controller;
-
-    case flags::thing_type::Weapon:
-        return *weapon_controller;
-
-    default:
-    case flags::thing_type::ghost:
-        return *ghost_controller;
-    }
 }
 
 void gorc::game::world::level_presenter::update_thing_sector(int thing_id, components::thing& thing,
@@ -510,13 +480,13 @@ float gorc::game::world::level_presenter::get_level_time() {
 
 void gorc::game::world::level_presenter::jk_end_level(bool success) {
     if(success) {
-        eventbus->fire_event(events::print("Ending level - success"));
+        eventbus->fire_event(gorc::events::print("Ending level - success"));
     }
     else {
-        eventbus->fire_event(events::print("Ending level - failure"));
+        eventbus->fire_event(gorc::events::print("Ending level - failure"));
     }
 
-    eventbus->fire_event(events::exit());
+    eventbus->fire_event(gorc::events::exit());
 }
 
 // Misc verbs
@@ -552,9 +522,8 @@ void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
     thing.saber_saber = (saber >= 0) ? &model->level.templates[saber] : nullptr;
 }
 
-void gorc::game::world::level_presenter::take_item(int thing_id, int player_id) {
-    auto& thing = model->get_thing(thing_id);
-    thing.controller->taken(thing_id, player_id);
+void gorc::game::world::level_presenter::take_item(entity_id thing_id, entity_id player_id) {
+    eventbus->fire_event(events::taken(thing_id, player_id));
 }
 
 // Player verbs
@@ -714,19 +683,36 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     new_thing.sector = sector_num;
     new_thing.position = pos;
     new_thing.orient = orient;
-    new_thing.controller = &get_thing_controller(new_thing.type);
 
     // Create controller components
     switch(new_thing.type) {
     case flags::thing_type::Actor:
         model->ecs.emplace_component<components::actor>(new_thing_id);
+        model->ecs.emplace_component<components::character>(new_thing_id);
+
+        // FIXME: Centralize creation of walk animation
+        aspects::character_controller_aspect::create_controller_data(new_thing_id, *this);
+        break;
+
+    case flags::thing_type::Player:
+        model->ecs.emplace_component<components::player>(new_thing_id);
+        model->ecs.emplace_component<components::character>(new_thing_id);
+
+        // FIXME: Centralize creation of walk animation
+        aspects::character_controller_aspect::create_controller_data(new_thing_id, *this);
+        break;
+
+    case flags::thing_type::Item:
+        model->ecs.emplace_component<components::item>(new_thing_id);
+        break;
+
+    case flags::thing_type::Weapon:
+        model->ecs.emplace_component<components::weapon>(new_thing_id);
         break;
 
     default:
         break;
     }
-
-    new_thing.controller->create_controller_data(static_cast<int>(new_thing_id));
 
     if(new_thing.cog) {
         script_presenter->create_global_cog_instance(new_thing.cog->cogscript, *place.contentmanager, components.compiler);
@@ -855,7 +841,7 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id, float damag
             script_presenter->send_message_to_linked(cog::message_id::killed, static_cast<int>(thing_id), flags::message_type::thing,
                     damager_id, flags::message_type::thing);
             // TODO: thing is dead. Reset to corpse
-            set_thing_type(thing_id, flags::thing_type::Corpse);
+            //set_thing_type(thing_id, flags::thing_type::Corpse);
             if(referencedThing.pup) {
                 key_presenter->play_mode(thing_id, flags::puppet_submode_type::Death);
             }
@@ -886,9 +872,6 @@ void gorc::game::world::level_presenter::real_destroy_thing(int thing_id) {
             thing_pair.second.parent_thing = -1;
         }
     }
-
-    // Remove controller data
-    model->get_thing(thing_id).controller->remove_controller_data(thing_id);
 
     // Expunge associated resources.
     sound_presenter->expunge_thing_sounds(thing_id);
@@ -991,18 +974,6 @@ int gorc::game::world::level_presenter::get_thing_sector(int thing_id) {
 
 gorc::flags::thing_type gorc::game::world::level_presenter::get_thing_type(int thing_id) {
     return model->get_thing(thing_id).type;
-}
-
-void gorc::game::world::level_presenter::set_thing_type(int thing_id, flags::thing_type type) {
-    // Clean up type physics.
-    auto& thing = model->get_thing(thing_id);
-    thing.controller->remove_controller_data(thing_id);
-
-    thing.type = type;
-
-    // Install new controller
-    thing.controller = &get_thing_controller(thing.type);
-    thing.controller->create_controller_data(thing_id);
 }
 
 void gorc::game::world::level_presenter::set_thing_light(int thing_id, float light, float) {
@@ -1163,7 +1134,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
                 base_rad, tip_rad, length, wall, blood, saber);
     });
 
-    verbTable.add_verb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
+    verbTable.add_verb<void, 2>("takeitem", [&components](entity_id thing_id, entity_id player_id) {
         components.current_level_presenter->take_item(thing_id, player_id);
     });
 

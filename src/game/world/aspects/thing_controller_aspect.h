@@ -16,6 +16,9 @@ public:
     thing_controller_aspect(component_system& cs, level_presenter& presenter);
 
     void update(time, entity_id, components::thing&);
+
+    void on_touched_surface(entity_id thing, int touched_surface);
+    void on_touched_thing(entity_id thing, entity_id touched_thing);
 };
 
 }

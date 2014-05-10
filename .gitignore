@@ -13,3 +13,4 @@ game/restricted/music
 *.ogg
 test_log.txt
 tempdir/
+*.swp
