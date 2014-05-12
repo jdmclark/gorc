@@ -273,6 +273,24 @@ test_case(enumerate_components) {
 test_case(serialize) {
     component_system cs;
 
+    component_serializer c_serializer;
+    c_serializer.add_default_serializer<health_component>();
+    c_serializer.add_serializer<armor_component>([](armor_component const &c,
+                                                    io::binary_output_stream &os) {
+        c.serialize(os);
+    });
+
+    component_deserializer c_deserializer;
+    c_deserializer.add_deserializer<health_component>([](component_system &cs,
+                                                         entity_id id,
+                                                         io::binary_input_stream &is) {
+        cs.emplace_component<health_component>(id,
+                                               io::deserialization_constructor,
+                                               is);
+    });
+    c_deserializer.add_default_deserializer<armor_component>();
+
+
     for(int i = 0; i < 12; ++i) {
         auto id = cs.make_entity();
 
@@ -286,7 +304,7 @@ test_case(serialize) {
     gorc::io::memory_file f;
     auto bos = gorc::io::make_binary_output_stream(f);
 
-    gorc::io::serialize(bos, cs);
+    cs.serialize(bos, c_serializer);
 
     f.set_position(0);
     auto bis = gorc::io::make_binary_input_stream(f);
@@ -295,7 +313,7 @@ test_case(serialize) {
     d_cs.register_component_type<health_component>();
     d_cs.register_component_type<armor_component>();
 
-    d_cs.deserialize(bis);
+    d_cs.deserialize(bis, c_deserializer);
 
     int ct = 0;
     for(auto id : d_cs.all_entities()) {
@@ -343,15 +361,23 @@ test_case(deserialize_without_register) {
     gorc::io::memory_file f;
     auto bos = gorc::io::make_binary_output_stream(f);
 
-    gorc::io::serialize(bos, cs);
+    component_serializer cs_s;
+    cs_s.add_default_serializer<health_component>();
+    cs_s.add_default_serializer<armor_component>();
+
+    cs.serialize(bos, cs_s);
 
     f.set_position(0);
     auto bis = gorc::io::make_binary_input_stream(f);
 
     component_system d_cs;
 
+    component_deserializer cs_d;
+    cs_d.add_default_deserializer<health_component>();
+    cs_d.add_default_deserializer<armor_component>();
+
     try {
-        d_cs.deserialize(bis);
+        d_cs.deserialize(bis, cs_d);
         assert_always("did not throw exception");
     }
     catch(const gorc::io::file_corrupt_exception&) { }
@@ -369,8 +395,10 @@ test_case(deserialize_bad_fourcc) {
     auto bis = gorc::io::make_binary_input_stream(f);
     f.set_position(0);
 
+    component_deserializer cs_d;
+
     try {
-        cs.deserialize(bis);
+        cs.deserialize(bis, cs_d);
         assert_always("did not throw exception");
     }
     catch(const gorc::io::file_corrupt_exception&) { }
@@ -388,8 +416,10 @@ test_case(deserialize_bad_version) {
     auto bis = gorc::io::make_binary_input_stream(f);
     f.set_position(0);
 
+    component_deserializer cs_d;
+
     try {
-        cs.deserialize(bis);
+        cs.deserialize(bis, cs_d);
         assert_always("did not throw exception");
     }
     catch(const gorc::io::file_corrupt_exception&) { }
@@ -397,6 +427,14 @@ test_case(deserialize_bad_version) {
 
 test_case(deserialize_clears) {
     component_system cs;
+
+    component_serializer cs_s;
+    cs_s.add_default_serializer<health_component>();
+    cs_s.add_default_serializer<armor_component>();
+
+    component_deserializer cs_d;
+    cs_d.add_default_deserializer<health_component>();
+    cs_d.add_default_deserializer<armor_component>();
 
     cs.make_entity();
     auto eid = cs.make_entity();
@@ -407,7 +445,7 @@ test_case(deserialize_clears) {
     gorc::io::memory_file f;
     auto bos = gorc::io::make_binary_output_stream(f);
 
-    cs.serialize(bos);
+    cs.serialize(bos, cs_s);
 
     f.set_position(0);
 
@@ -444,7 +482,7 @@ test_case(deserialize_clears) {
     }
 
     auto bis = gorc::io::make_binary_input_stream(f);
-    ds.deserialize(bis);
+    ds.deserialize(bis, cs_d);
 
     ct = 0;
     for(const auto& ac : ds.all_components<health_component>()) {

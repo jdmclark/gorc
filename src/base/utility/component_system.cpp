@@ -2,6 +2,14 @@
 #include "fourcc.h"
 #include "base/io/exception.h"
 
+gorc::utility::base_component_type_deserializer::~base_component_type_deserializer() {
+    return;
+}
+
+gorc::utility::base_component_deserializer::~base_component_deserializer() {
+    return;
+}
+
 gorc::utility::component_system::entity_iterator::entity_iterator(const pool<entity, 1024>::iterator& it) : it(it) {
     return;
 }
@@ -18,7 +26,8 @@ gorc::utility::component_system::component_system(event_bus* parent_event_bus) :
     return;
 }
 
-void gorc::utility::component_system::serialize(io::binary_output_stream& f) const {
+void gorc::utility::component_system::serialize(io::binary_output_stream& f,
+                                                component_serializer &comp_s) const {
 
     // Write header
     fourcc expected_fourcc("BECS");
@@ -69,11 +78,12 @@ void gorc::utility::component_system::serialize(io::binary_output_stream& f) con
     for(const auto& pc : pool_containers) {
         // Record component type UID
         io::serialize<uint32_t>(f, pc.first);
-        pc.second->serialize(f);
+        pc.second->serialize(f, comp_s);
     }
 }
 
-void gorc::utility::component_system::deserialize(io::binary_input_stream& f) {
+void gorc::utility::component_system::deserialize(io::binary_input_stream& f,
+                                                  base_component_deserializer &comp_d) {
     // Clear ECS:
     for(auto entity : all_entities()) {
         erase_entity(entity);
@@ -115,7 +125,7 @@ void gorc::utility::component_system::deserialize(io::binary_input_stream& f) {
             throw io::file_corrupt_exception();
         }
 
-        ct_it->second->deserialize(f);
+        ct_it->second->deserialize(*this, f, comp_d);
     }
 }
 

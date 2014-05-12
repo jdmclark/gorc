@@ -270,6 +270,14 @@ test_case(multiple_entities) {
 test_case(ija_automatically_registers) {
     component_system cs;
 
+    component_serializer cs_s;
+    cs_s.add_default_serializer<ijat_health_component>();
+    cs_s.add_default_serializer<ijat_armor_component>();
+
+    component_deserializer cs_d;
+    cs_d.add_default_deserializer<ijat_health_component>();
+    cs_d.add_default_deserializer<ijat_armor_component>();
+
     for(int i = 0; i < 12; ++i) {
         auto id = cs.make_entity();
 
@@ -283,7 +291,7 @@ test_case(ija_automatically_registers) {
     gorc::io::memory_file f;
     auto bos = gorc::io::make_binary_output_stream(f);
 
-    gorc::io::serialize(bos, cs);
+    cs.serialize(bos, cs_s);
 
     f.set_position(0);
     auto bis = gorc::io::make_binary_input_stream(f);
@@ -291,7 +299,7 @@ test_case(ija_automatically_registers) {
     component_system d_cs;
     d_cs.emplace_aspect<everything>();
 
-    d_cs.deserialize(bis);
+    d_cs.deserialize(bis, cs_d);
 
     int ct = 0;
     for(auto id : d_cs.all_entities()) {

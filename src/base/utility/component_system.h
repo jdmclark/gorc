@@ -1,15 +1,32 @@
 #pragma once
 
+#include "base/io/binary_input_stream.h"
+#include "base/io/binary_output_stream.h"
 #include "component_pool.h"
 #include "pool.h"
 #include "make_unique.h"
 #include "aspect.h"
 #include "event_bus.h"
-#include "base/io/binary_input_stream.h"
-#include "base/io/binary_output_stream.h"
+#include "component_serializer.h"
 
 namespace gorc {
 inline namespace utility {
+
+class component_system;
+
+class base_component_type_deserializer {
+public:
+    virtual ~base_component_type_deserializer();
+
+    virtual void deserialize(component_system&, entity_id, io::binary_input_stream&) = 0;
+};
+
+class base_component_deserializer {
+public:
+    virtual ~base_component_deserializer();
+
+    virtual base_component_type_deserializer& get_deserializer(uint32_t component_uid) = 0;
+};
 
 class component_system {
 private:
@@ -85,8 +102,11 @@ private:
         virtual ~pool_container();
         virtual void erase_entity(entity_id id) = 0;
 
-        virtual void serialize(io::binary_output_stream& f) const = 0;
-        virtual void deserialize(io::binary_input_stream& f) = 0;
+        virtual void serialize(io::binary_output_stream& f,
+                               component_serializer&) const = 0;
+        virtual void deserialize(component_system &cs,
+                                 io::binary_input_stream& f,
+                                 base_component_deserializer&) = 0;
     };
 
     template <typename CompT> class pool_container_impl : public pool_container {
@@ -97,7 +117,10 @@ private:
             components.erase(components.find(id));
         }
 
-        virtual void serialize(io::binary_output_stream& f) const override {
+        virtual void serialize(io::binary_output_stream& f,
+                               component_serializer &comp_s) const override {
+            auto &comp_t_s = comp_s.get_serializer<CompT>();
+
             uint32_t comp_ct = 0;
             for(const auto& cmp : components) {
                 ++comp_ct;
@@ -106,15 +129,19 @@ private:
             io::serialize<uint32_t>(f, comp_ct);
             for(const auto& cmp : components) {
                 io::serialize<uint32_t>(f, static_cast<uint32_t>(cmp.first));
-                cmp.second.serialize(f);
+                comp_t_s.serialize(cmp.second, f);
             }
         }
 
-        virtual void deserialize(io::binary_input_stream& f) override {
+        virtual void deserialize(component_system &cs,
+                                 io::binary_input_stream &f,
+                                 base_component_deserializer &comp_d) override {
+            auto &comp_t_d = comp_d.get_deserializer(static_cast<uint32_t>(CompT::UID::UID));
+
             uint32_t comp_ct = io::deserialize<uint32_t>(f);
             for(uint32_t i = 0; i < comp_ct; ++i) {
                 entity_id eid(io::deserialize<uint32_t>(f));
-                components.emplace(eid, io::deserialization_constructor, f);
+                comp_t_d.deserialize(cs, eid, f);
             }
         }
     };
@@ -143,8 +170,10 @@ public:
     component_system() = default;
     explicit component_system(event_bus* parent_event_bus);
 
-    void deserialize(io::binary_input_stream& f);
-    void serialize(io::binary_output_stream& f) const;
+    void deserialize(io::binary_input_stream& f,
+                     base_component_deserializer&);
+    void serialize(io::binary_output_stream& f,
+                   component_serializer&) const;
 
     void update(gorc::time time);
     void draw(gorc::time time);
@@ -197,3 +226,5 @@ public:
 
 }
 }
+
+#include "component_deserializer.h"
