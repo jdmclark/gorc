@@ -1,0 +1,17 @@
+# Tests that non-valued expressions are compiled
+# and can produce side effects.
+
+symbols
+int val=0
+end
+
+code
+startup:
+    val;
+    val[0];
+    printandret(5);
+    -printandret(7);
+    printandret(9) + printandret(13);
+    printandret(15), printandret(20), printandret(2);
+    4;
+end

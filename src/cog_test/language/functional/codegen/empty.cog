@@ -2,5 +2,6 @@ symbols
 end
 code
 startup:
+; // Empty statement
 return;
 end

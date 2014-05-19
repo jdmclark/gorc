@@ -669,7 +669,7 @@ public:
         return *this;
     }
 
-    inline matrix_col_vector_const_iterator& operator--(int) {
+    inline matrix_col_vector_const_iterator operator--(int) {
         return matrix_col_vector_const_iterator(mat, col--);
     }
 

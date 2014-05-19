@@ -1,0 +1,38 @@
+# Tests that arrays can be correctly manipulated and assigned.
+symbols
+
+int arr
+int arr1
+int arr2
+int arr3
+int arr4
+int arr5
+int arr6
+int arr7
+int arr8
+int arr9
+
+int i
+
+end
+
+code
+
+startup:
+    for(i = 0; i < 10; i = i + 1) {
+        if(i == 0) {
+            arr[i] = 0;
+        }
+        else if(i == 1) {
+            arr[i] = 1;
+        }
+        else {
+            arr[i] = arr[i - 1] + arr[i - 2];
+        }
+    }
+
+    for(i = 0; i < 10; i = i + 1) {
+        printint(arr[i]);
+    }
+
+end

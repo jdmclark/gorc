@@ -1,0 +1,45 @@
+# Tests various valued expressions.
+symbols
+end
+
+code
+startup:
+    printint(printandret(5) + printandret(7));
+
+    printint(+printandret(6));
+    printint(-printandret(8));
+
+    printint(6 / 4);
+    printint(6 % 4);
+
+    if(5 >= 5) {
+        printint(1);
+    }
+
+    if(5 >= 4) {
+        printint(1);
+    }
+
+    if(5 >= 6) {
+        printint(2);
+    }
+
+    if(5 <= 5) {
+        printint(1);
+    }
+
+    if(5 <= 4) {
+        printint(2);
+    }
+
+    if(5 <= 6) {
+        printint(1);
+    }
+
+    printint(1 & 2);
+    printint(1 | 2);
+    printint(3 ^ 2);
+
+    printint((1, 2, 3, 4, (68, 3785), 6, 7, 8, (95, 37, 1, 7857)));
+
+end

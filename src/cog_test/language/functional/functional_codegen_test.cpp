@@ -56,6 +56,11 @@ public:
         verb_table.add_verb<void, 1>("printint", printint_functor(Output));
         verb_table.add_verb<void, 3>("printint3", printint3_functor(Output));
         verb_table.add_verb<int, 0>("getint", [](){ return 5847; });
+
+        verb_table.add_verb<int, 1>("printandret", [&](int v) {
+            Output.push(v);
+            return v;
+        });
         return;
     }
 };
@@ -107,6 +112,24 @@ test_case(s2_arithmetic) {
     assert_eq(Pop(), 0);
     assert_eq(Pop(), 1);
     assert_eq(Pop(), 1);
+
+    assert_true(IsEmpty());
+}
+
+test_case(s2_array) {
+    ParseFile("array.cog");
+    AssertResult(0, 0);
+
+    assert_eq(Pop(), 0);
+    assert_eq(Pop(), 1);
+    assert_eq(Pop(), 1);
+    assert_eq(Pop(), 2);
+    assert_eq(Pop(), 3);
+    assert_eq(Pop(), 5);
+    assert_eq(Pop(), 8);
+    assert_eq(Pop(), 13);
+    assert_eq(Pop(), 21);
+    assert_eq(Pop(), 34);
 
     assert_true(IsEmpty());
 }
@@ -266,6 +289,20 @@ test_case(s2_logical_or) {
     assert_true(IsEmpty());
 }
 
+test_case(s2_nonval_expr) {
+    ParseFile("nonval_expr.cog");
+    AssertResult(0, 0);
+
+    assert_eq(Pop(), 5);
+    assert_eq(Pop(), 7);
+    assert_eq(Pop(), 9);
+    assert_eq(Pop(), 13);
+    assert_eq(Pop(), 15);
+    assert_eq(Pop(), 20);
+    assert_eq(Pop(), 2);
+    assert_true(IsEmpty());
+}
+
 test_case(s2_relation) {
     ParseFile("relation.cog");
     AssertResult(0, 0);
@@ -297,6 +334,36 @@ test_case(s2_return) {
 
     assert_eq(Pop(), 1);
     assert_true(IsEmpty());
+}
+
+test_case(s2_val_expr) {
+    ParseFile("val_expr.cog");
+    AssertResult(0, 0);
+
+    assert_eq(Pop(), 5);
+    assert_eq(Pop(), 7);
+    assert_eq(Pop(), 12);
+
+    assert_eq(Pop(), 6);
+    assert_eq(Pop(), 6);
+
+    assert_eq(Pop(), 8);
+    assert_eq(Pop(), -8);
+
+    assert_eq(Pop(), 1);
+    assert_eq(Pop(), 2);
+
+    assert_eq(Pop(), 1);
+    assert_eq(Pop(), 1);
+
+    assert_eq(Pop(), 1);
+    assert_eq(Pop(), 1);
+
+    assert_eq(Pop(), 0);
+    assert_eq(Pop(), 3);
+    assert_eq(Pop(), 1);
+
+    assert_eq(Pop(), 7857);
 }
 
 test_case(s2_verb) {
