@@ -61,6 +61,8 @@ public:
             Output.push(v);
             return v;
         });
+
+        verb_table.add_verb<int, 1>("mkint", [](int v) { return v; });
         return;
     }
 };
@@ -351,6 +353,8 @@ test_case(s2_val_expr) {
     assert_eq(Pop(), -8);
 
     assert_eq(Pop(), 1);
+    assert_eq(Pop(), 1);
+    assert_eq(Pop(), 2);
     assert_eq(Pop(), 2);
 
     assert_eq(Pop(), 1);
@@ -360,10 +364,20 @@ test_case(s2_val_expr) {
     assert_eq(Pop(), 1);
 
     assert_eq(Pop(), 0);
+    assert_eq(Pop(), 0);
     assert_eq(Pop(), 3);
+    assert_eq(Pop(), 3);
+    assert_eq(Pop(), 1);
     assert_eq(Pop(), 1);
 
     assert_eq(Pop(), 7857);
+
+    assert_eq(Pop(), 26);
+
+    assert_eq(Pop(), 64);
+    assert_eq(Pop(), 32);
+
+    assert_true(IsEmpty());
 }
 
 test_case(s2_verb) {

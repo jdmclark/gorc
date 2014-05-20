@@ -10,36 +10,52 @@ startup:
     printint(-printandret(8));
 
     printint(6 / 4);
+    printint(mkint(6) / mkint(4));
     printint(6 % 4);
+    printinT(mkint(6) % mkint(4));
 
-    if(5 >= 5) {
+    if(5 >= 5 && mkint(5) >= mkint(5)) {
         printint(1);
     }
 
-    if(5 >= 4) {
+    if(5 >= 4 && mkint(5) >= mkint(4)) {
         printint(1);
     }
 
-    if(5 >= 6) {
+    if(5 >= 6 && mkint(5) >= mkint(6)) {
         printint(2);
     }
 
-    if(5 <= 5) {
+    if(5 <= 5 && mkint(5) <= mkint(5)) {
         printint(1);
     }
 
-    if(5 <= 4) {
+    if(5 <= 4 && mkint(5) <= mkint(4)) {
         printint(2);
     }
 
-    if(5 <= 6) {
+    if(5 <= 6 && mkint(5) <= mkint(6)) {
         printint(1);
     }
 
     printint(1 & 2);
+    printint(mkint(1) & mkint(2));
     printint(1 | 2);
+    printint(mkint(1) | mkint(2));
     printint(3 ^ 2);
+    printint(mkint(3) ^ mkint(2));
 
     printint((1, 2, 3, 4, (68, 3785), 6, 7, 8, (95, 37, 1, 7857)));
 
+    if(!(1 == 0)) {
+        printint(26);
+    }
+
+    if((1 != 0) && (1 != 0)) {
+        printint(64);
+    }
+
+    if((1 == 0) || (1 != 0)) {
+        printint(32);
+    }
 end
