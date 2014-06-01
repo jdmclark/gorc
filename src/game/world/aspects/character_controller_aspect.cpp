@@ -4,69 +4,11 @@
 #include "game/constants.h"
 #include "game/world/scripts/script_presenter.h"
 #include "game/world/keys/key_presenter.h"
-#include "game/world/sounds/sound_presenter.h"
 #include "game/world/physics/physics_presenter.h"
-#include "game/world/events/animation_marker.h"
-#include "base/utility/enum_hasher.h"
-#include <unordered_map>
+#include "game/world/events/jumped.h"
+#include "game/world/events/landed.h"
+#include "game/world/events/standing_material_changed.h"
 #include <type_traits>
-
-namespace gorc {
-namespace game {
-namespace world {
-namespace aspects {
-
-const std::unordered_map<flags::standing_material_type, flags::sound_subclass_type, enum_hasher<flags::standing_material_type>> character_left_run_map {
-    { flags::standing_material_type::none, flags::sound_subclass_type::LRunHard },
-    { flags::standing_material_type::hard, flags::sound_subclass_type::LRunHard },
-    { flags::standing_material_type::dirt, flags::sound_subclass_type::LRunEarth },
-    { flags::standing_material_type::metal, flags::sound_subclass_type::LRunMetal },
-    { flags::standing_material_type::shallow_water, flags::sound_subclass_type::LRunPuddle },
-    { flags::standing_material_type::deep_water, flags::sound_subclass_type::LRunWater },
-    { flags::standing_material_type::very_deep_water, flags::sound_subclass_type::LRunWater },
-};
-
-const std::unordered_map<flags::standing_material_type, flags::sound_subclass_type, enum_hasher<flags::standing_material_type>> character_right_run_map {
-    { flags::standing_material_type::none, flags::sound_subclass_type::RRunHard },
-    { flags::standing_material_type::hard, flags::sound_subclass_type::RRunHard },
-    { flags::standing_material_type::dirt, flags::sound_subclass_type::RRunEarth },
-    { flags::standing_material_type::metal, flags::sound_subclass_type::RRunMetal },
-    { flags::standing_material_type::shallow_water, flags::sound_subclass_type::RRunPuddle },
-    { flags::standing_material_type::deep_water, flags::sound_subclass_type::RRunWater },
-    { flags::standing_material_type::very_deep_water, flags::sound_subclass_type::RRunWater },
-};
-
-const std::unordered_map<flags::standing_material_type, flags::sound_subclass_type, enum_hasher<flags::standing_material_type>> character_left_walk_map {
-    { flags::standing_material_type::none, flags::sound_subclass_type::LWalkHard },
-    { flags::standing_material_type::hard, flags::sound_subclass_type::LWalkHard },
-    { flags::standing_material_type::dirt, flags::sound_subclass_type::LWalkEarth },
-    { flags::standing_material_type::metal, flags::sound_subclass_type::LWalkMetal },
-    { flags::standing_material_type::shallow_water, flags::sound_subclass_type::LWalkPuddle },
-    { flags::standing_material_type::deep_water, flags::sound_subclass_type::LWalkWater },
-    { flags::standing_material_type::very_deep_water, flags::sound_subclass_type::LWalkWater },
-};
-
-const std::unordered_map<flags::standing_material_type, flags::sound_subclass_type, enum_hasher<flags::standing_material_type>> character_right_walk_map {
-    { flags::standing_material_type::none, flags::sound_subclass_type::RWalkHard },
-    { flags::standing_material_type::hard, flags::sound_subclass_type::RWalkHard },
-    { flags::standing_material_type::dirt, flags::sound_subclass_type::RWalkEarth },
-    { flags::standing_material_type::metal, flags::sound_subclass_type::RWalkMetal },
-    { flags::standing_material_type::shallow_water, flags::sound_subclass_type::RWalkPuddle },
-    { flags::standing_material_type::deep_water, flags::sound_subclass_type::RWalkWater },
-    { flags::standing_material_type::very_deep_water, flags::sound_subclass_type::RWalkWater },
-};
-
-template <typename T, typename U>
-auto map_get(const T& map, U key) -> decltype(map.find(key)->second) {
-    auto it = map.find(key);
-    assert(it != map.end());
-    return it->second;
-}
-
-}
-}
-}
-}
 
 using gorc::game::world::aspects::character_controller_aspect;
 
@@ -123,14 +65,14 @@ void character_controller_aspect::set_walk_animation_speed(components::thing& th
     }
 }
 
-void character_controller_aspect::play_falling_animation(int, components::thing& thing) {
+void character_controller_aspect::play_falling_animation(entity_id, components::thing& thing) {
     if(dot(thing.vel, make_vector(0.0f, 0.0f, -1.0f)) > 0.0f) {
         // Player's trajectory has reached apogee.
         set_walk_animation(thing, flags::puppet_submode_type::Drop, 1.0f);
     }
 }
 
-void character_controller_aspect::play_standing_animation(int, components::thing& thing) {
+void character_controller_aspect::play_standing_animation(entity_id, components::thing& thing) {
     auto oriented_vel = invert(thing.orient).transform(thing.vel);
     auto run_length = length(thing.vel);
 
@@ -233,7 +175,7 @@ gorc::flags::standing_material_type character_controller_aspect::get_standing_ma
     }
 }
 
-gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(int thing_id, components::thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(entity_id thing_id, components::thing& thing,
                 double) {
     // Test for collision between legs and ground using multiple tests
     auto leg_height = thing.model_3d->insert_offset;
@@ -261,7 +203,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     return contact;
 }
 
-gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(int thing_id, components::thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(entity_id thing_id, components::thing& thing,
         double) {
     // Test for collision between legs and ground using multiple tests
     auto leg_height = thing.model_3d->insert_offset * 1.50f;
@@ -285,7 +227,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     return contact;
 }
 
-void character_controller_aspect::update_falling(int thing_id, components::thing& thing, double dt) {
+void character_controller_aspect::update_falling(entity_id thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_falling_sweep(thing_id, thing, dt);
 
     auto applied_thrust = thing.thrust;
@@ -306,7 +248,7 @@ void character_controller_aspect::update_falling(int thing_id, components::thing
     }
 }
 
-void character_controller_aspect::update_standing(int thing_id, components::thing& thing, double dt) {
+void character_controller_aspect::update_standing(entity_id thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
 
     if(const physics::contact* contact = maybe_contact) {
@@ -363,7 +305,7 @@ void character_controller_aspect::update_standing(int thing_id, components::thin
     }
 }
 
-void character_controller_aspect::set_is_falling(int thing_id, components::thing& thing) {
+void character_controller_aspect::set_is_falling(entity_id thing_id, components::thing& thing) {
     // Player is falling again.
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
         presenter.script_presenter->send_message_to_linked(cog::message_id::exited,
@@ -377,9 +319,11 @@ void character_controller_aspect::set_is_falling(int thing_id, components::thing
     }
 
     thing.attach_flags = flag_set<flags::attach_flag>();
+
+    cs.bus.fire_event(events::standing_material_changed(thing_id, flags::standing_material_type::none));
 }
 
-bool character_controller_aspect::step_on_surface(int thing_id, components::thing& thing, unsigned int surf_id,
+bool character_controller_aspect::step_on_surface(entity_id thing_id, components::thing& thing, unsigned int surf_id,
                 const physics::contact&) {
     const auto& surface = presenter.model->surfaces[surf_id];
     if(surface.flags & flags::surface_flag::Floor) {
@@ -389,6 +333,8 @@ bool character_controller_aspect::step_on_surface(int thing_id, components::thin
         presenter.script_presenter->send_message_to_linked(cog::message_id::entered,
                 surf_id, flags::message_type::surface,
                 thing_id, flags::message_type::thing);
+
+        cs.bus.fire_event(events::standing_material_changed(thing_id, get_standing_material(thing)));
         return true;
     }
     else {
@@ -400,7 +346,7 @@ bool character_controller_aspect::step_on_surface(int thing_id, components::thin
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-bool character_controller_aspect::step_on_thing(int thing_id, components::thing& thing, int land_thing_id,
+bool character_controller_aspect::step_on_thing(entity_id thing_id, components::thing& thing, int land_thing_id,
                 const physics::contact&) {
     const auto& attach_thing = presenter.model->get_thing(land_thing_id);
     if(attach_thing.flags & flags::thing_flag::CanStandOn) {
@@ -411,6 +357,8 @@ bool character_controller_aspect::step_on_thing(int thing_id, components::thing&
         presenter.script_presenter->send_message_to_linked(cog::message_id::entered,
                 land_thing_id, flags::message_type::thing,
                 thing_id, flags::message_type::thing);
+
+        cs.bus.fire_event(events::standing_material_changed(thing_id, get_standing_material(thing)));
         return true;
     }
     else {
@@ -422,64 +370,32 @@ bool character_controller_aspect::step_on_thing(int thing_id, components::thing&
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-void character_controller_aspect::land_on_surface(int thing_id, components::thing& thing, unsigned int surf_id,
-                const physics::contact& rrcb) {
+void character_controller_aspect::land_on_surface(entity_id thing_id,
+                                                  components::thing &thing,
+                                                  unsigned int surf_id,
+                                                  physics::contact const &rrcb) {
     if(!step_on_surface(thing_id, thing, surf_id, rrcb)) {
         return;
     }
 
     presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
-
-    const auto& surf = presenter.model->surfaces[surf_id];
-
-    flags::sound_subclass_type subclass = flags::sound_subclass_type::LandHard;
-    if(surf.flags & flags::surface_flag::Metal) {
-        subclass = flags::sound_subclass_type::LandMetal;
-    }
-    else if(surf.flags & flags::surface_flag::Dirt) {
-        subclass = flags::sound_subclass_type::LandEarth;
-    }
-    else if(surf.flags & flags::surface_flag::ShallowWater) {
-        subclass = flags::sound_subclass_type::LandPuddle;
-    }
-    else if(surf.flags & flags::surface_flag::DeepWater) {
-        subclass = flags::sound_subclass_type::LandWater;
-    }
-    else if(surf.flags & flags::surface_flag::VeryDeepWater) {
-        subclass = flags::sound_subclass_type::LandWater;
-    }
-
-    presenter.sound_presenter->play_sound_class(thing_id, subclass);
+    cs.bus.fire_event(events::landed(thing_id));
 }
 
-void character_controller_aspect::land_on_thing(int thing_id, components::thing& thing, int land_thing_id,
+void character_controller_aspect::land_on_thing(entity_id thing_id, components::thing& thing, int land_thing_id,
                 const physics::contact& rrcb) {
     if(!step_on_thing(thing_id, thing, land_thing_id, rrcb)) {
         return;
     }
 
     presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
-
-    flag_set<flags::thing_flag> flags = presenter.model->get_thing(land_thing_id).flags;
-
-    flags::sound_subclass_type subclass = flags::sound_subclass_type::LandHard;
-    if(flags & flags::thing_flag::Metal) {
-        subclass = flags::sound_subclass_type::LandMetal;
-    }
-    else if(flags & flags::thing_flag::Dirt) {
-        subclass = flags::sound_subclass_type::LandEarth;
-    }
-
-    presenter.sound_presenter->play_sound_class(thing_id, subclass);
+    cs.bus.fire_event(events::landed(thing_id));
 }
 
-void character_controller_aspect::jump(int thing_id, components::thing& thing) {
-    if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
-        jump_from_surface(thing_id, thing, thing.attached_surface);
-    }
-    else if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
-        jump_from_thing(thing_id, thing, thing.attached_thing);
-    }
+void character_controller_aspect::jump(entity_id thing_id, components::thing& thing) {
+    cs.bus.fire_event(events::jumped(thing_id));
+    set_is_falling(thing_id, thing);
+    thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 
     if(thing.physics_flags & flags::physics_flag::is_crouching) {
         set_walk_animation(thing, flags::puppet_submode_type::Leap, 1.0f);
@@ -487,49 +403,6 @@ void character_controller_aspect::jump(int thing_id, components::thing& thing) {
     else {
         set_walk_animation(thing, flags::puppet_submode_type::Rising, 1.0f);
     }
-}
-
-void character_controller_aspect::jump_from_surface(int thing_id, components::thing& thing, unsigned int surf_id) {
-    set_is_falling(thing_id, thing);
-    thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
-
-    const auto& surf = presenter.model->surfaces[surf_id];
-
-    flags::sound_subclass_type subclass = flags::sound_subclass_type::Jump;
-    if(surf.flags & flags::surface_flag::Metal) {
-        subclass = flags::sound_subclass_type::JumpMetal;
-    }
-    else if(surf.flags & flags::surface_flag::Dirt) {
-        subclass = flags::sound_subclass_type::JumpEarth;
-    }
-    else if(surf.flags & flags::surface_flag::ShallowWater) {
-        subclass = flags::sound_subclass_type::JumpWater;
-    }
-    else if(surf.flags & flags::surface_flag::DeepWater) {
-        subclass = flags::sound_subclass_type::JumpWater;
-    }
-    else if(surf.flags & flags::surface_flag::VeryDeepWater) {
-        subclass = flags::sound_subclass_type::JumpWater;
-    }
-
-    presenter.sound_presenter->play_sound_class(thing_id, subclass);
-}
-
-void character_controller_aspect::jump_from_thing(int thing_id, components::thing& thing, int jump_thing_id) {
-    set_is_falling(thing_id, thing);
-    thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
-
-    flag_set<flags::thing_flag> flags = presenter.model->get_thing(jump_thing_id).flags;
-
-    flags::sound_subclass_type subclass = flags::sound_subclass_type::Jump;
-    if(flags & flags::thing_flag::Metal) {
-        subclass = flags::sound_subclass_type::JumpMetal;
-    }
-    else if(flags & flags::thing_flag::Dirt) {
-        subclass = flags::sound_subclass_type::JumpEarth;
-    }
-
-    presenter.sound_presenter->play_sound_class(thing_id, subclass);
 }
 
 void character_controller_aspect::update(time t,
@@ -573,7 +446,7 @@ void character_controller_aspect::update(time t,
     }
 }
 
-void character_controller_aspect::create_controller_data(int thing_id, level_presenter &presenter) {
+void character_controller_aspect::create_controller_data(entity_id thing_id, level_presenter &presenter) {
     auto& new_thing = presenter.model->get_thing(thing_id);
 
     // HACK: Initialize actor walk animation
@@ -590,50 +463,16 @@ void character_controller_aspect::create_controller_data(int thing_id, level_pre
     }
 }
 
-void character_controller_aspect::remove_controller_data(int thing_id, level_presenter &presenter) {
+void character_controller_aspect::remove_controller_data(entity_id thing_id, level_presenter &presenter) {
     auto& thing = presenter.model->get_thing(thing_id);
     if(thing.actor_walk_animation >= 0) {
         presenter.key_presenter->stop_key(thing_id, thing.actor_walk_animation, 0.0f);
     }
 }
 
-void character_controller_aspect::handle_animation_marker(int thing_id, flags::key_marker_type marker) {
-    auto& thing = presenter.model->get_thing(thing_id);
-
-    switch(marker) {
-    case flags::key_marker_type::LeftRunFootstep:
-        presenter.sound_presenter->play_sound_class(thing_id, map_get(character_left_run_map, get_standing_material(thing)));
-        break;
-
-    case flags::key_marker_type::RightRunFootstep:
-        presenter.sound_presenter->play_sound_class(thing_id, map_get(character_right_run_map, get_standing_material(thing)));
-        break;
-
-    case flags::key_marker_type::LeftFootstep:
-        presenter.sound_presenter->play_sound_class(thing_id, map_get(character_left_walk_map, get_standing_material(thing)));
-        break;
-
-    case flags::key_marker_type::RightFootstep:
-        presenter.sound_presenter->play_sound_class(thing_id, map_get(character_right_walk_map, get_standing_material(thing)));
-        break;
-
-    case flags::key_marker_type::Death:
-        presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::CorpseHit);
-        break;
-
-    default:
-        // TODO: Handle remaining marker types.
-        break;
-    }
-}
-
 character_controller_aspect::character_controller_aspect(component_system &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
-
-    cs.bus.add_handler<events::animation_marker>([&](events::animation_marker const &e) {
-        handle_animation_marker(e.thing, e.type);
-    });
 
     return;
 }

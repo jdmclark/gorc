@@ -18,9 +18,10 @@ public:
         return;
     }
 
-private:
+protected:
     component_system& cs;
 
+private:
     template <size_t n, typename HeadT, typename... TailT> struct nth_param {
     public:
         using type = typename nth_param<n - 1, TailT...>::type;

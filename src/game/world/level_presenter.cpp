@@ -18,12 +18,14 @@
 #include "game/world/components/player.h"
 #include "game/world/components/item.h"
 #include "game/world/components/weapon.h"
+#include "game/world/components/class_sounds.h"
 
 #include "game/world/aspects/thing_controller_aspect.h"
 #include "game/world/aspects/actor_controller_aspect.h"
 #include "game/world/aspects/character_controller_aspect.h"
 #include "game/world/aspects/item_controller_aspect.h"
 #include "game/world/aspects/weapon_controller_aspect.h"
+#include "game/world/aspects/dispatch_class_sound_aspect.h"
 
 #include "game/world/events/taken.h"
 
@@ -57,6 +59,7 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     model->ecs.emplace_aspect<aspects::character_controller_aspect>(*this);
     model->ecs.emplace_aspect<aspects::item_controller_aspect>(*this);
     model->ecs.emplace_aspect<aspects::weapon_controller_aspect>(*this);
+    model->ecs.emplace_aspect<aspects::dispatch_class_sound_aspect>(*this);
 
     physics_presenter->start(*model, eventBus);
     key_presenter->start(*model, model->key_model, eventBus);
@@ -716,6 +719,10 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
 
     if(new_thing.cog) {
         script_presenter->create_global_cog_instance(new_thing.cog->cogscript, *place.contentmanager, components.compiler);
+    }
+
+    if(new_thing.sound_class) {
+        model->ecs.emplace_component<components::class_sounds>(new_thing_id, *new_thing.sound_class);
     }
 
     sound_presenter->play_sound_class(static_cast<int>(new_thing_id), flags::sound_subclass_type::create);
