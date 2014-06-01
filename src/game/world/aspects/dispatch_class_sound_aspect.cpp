@@ -4,6 +4,8 @@
 #include "game/world/events/standing_material_changed.h"
 #include "game/world/events/jumped.h"
 #include "game/world/events/landed.h"
+#include "game/world/events/killed.h"
+#include "game/world/events/thing_created.h"
 #include "base/utility/enum_hasher.h"
 #include "game/world/sounds/sound_presenter.h"
 
@@ -111,6 +113,15 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 
+    cs.bus.add_handler<events::thing_created>([&](events::thing_created &e) {
+        if(e.tpl.sound_class) {
+            cs.emplace_component<components::class_sounds>(e.thing, *e.tpl.sound_class);
+
+            presenter.sound_presenter->play_sound_class(e.thing,
+                                                        flags::sound_subclass_type::create);
+        }
+    });
+
     cs.bus.add_handler<events::standing_material_changed>([&](events::standing_material_changed &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
             csnd.second.standing_material_type = e.type;
@@ -138,6 +149,19 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
     cs.bus.add_handler<events::landed>([&](events::landed &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
             dispatch_from_map(character_land_map, e.thing, csnd.second.standing_material_type);
+        }
+    });
+
+    cs.bus.add_handler<events::killed>([&](events::killed &e) {
+        for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
+            double random_value = static_cast<double>(rand);
+
+            if(random_value < 0.5) {
+                presenter.sound_presenter->play_sound_class(e.thing, sound_subclass_type::Death1);
+            }
+            else {
+                presenter.sound_presenter->play_sound_class(e.thing, sound_subclass_type::Death2);
+            }
         }
     });
 

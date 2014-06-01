@@ -5,6 +5,7 @@
 #include "game/world/sounds/sound_presenter.h"
 #include "game/world/events/touched_thing.h"
 #include "game/world/events/touched_surface.h"
+#include "game/world/events/thing_created.h"
 
 using gorc::game::world::aspects::weapon_controller_aspect;
 
@@ -90,6 +91,12 @@ void weapon_controller_aspect::touched_surface(entity_id thing_id, int touched_s
 weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
                                                    level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
+
+    cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
+        if(e.tpl.type == flags::thing_type::Weapon) {
+            cs.emplace_component<components::weapon>(e.thing);
+        }
+    });
 
     cs.bus.add_handler<events::touched_thing>([this](events::touched_thing const &e) {
         touched_thing(e.toucher, e.touched);

@@ -1,9 +1,15 @@
 #include "actor_controller_aspect.h"
 #include "game/world/level_model.h"
+#include "game/world/events/thing_created.h"
 
 gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(component_system& cs)
     : inner_join_aspect(cs) {
-    return;
+
+    cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
+        if(e.tpl.type == flags::thing_type::Actor) {
+            cs.emplace_component<components::actor>(e.thing);
+        }
+    });
 }
 
 void gorc::game::world::aspects::actor_controller_aspect::update(time t, entity_id, components::actor&, components::thing& thing) {

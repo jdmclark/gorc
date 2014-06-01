@@ -152,12 +152,12 @@ public:
     int create_thing(const std::string& tpl_name, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
     int create_thing(int tpl_id, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
 
-    int fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
+    int fire_projectile(entity_id parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
             float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovz);
 
     void attach_thing_to_thing(int thing_id, int base_id);
     int create_thing_at_thing(int tpl_id, int thing_id);
-    float damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id);
+    float damage_thing(entity_id thing_id, float damage, flag_set<flags::damage_flag> flags, entity_id damager_id);
     void destroy_thing(int thing_id);
     void real_destroy_thing(int thing_id);
     void detach_thing(int thing_id);
@@ -197,8 +197,8 @@ public:
 
     // weapon verbs
     void jk_set_weapon_mesh(int player, int model);
-    void set_armed_mode(int player, flags::armed_mode mode);
-    flags::puppet_mode_type get_major_mode(int player);
+    void set_armed_mode(entity_id player, flags::armed_mode mode);
+    flags::puppet_mode_type get_major_mode(entity_id player);
 
     static void register_verbs(cog::verbs::verb_table&, level_state&);
 };

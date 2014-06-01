@@ -19,6 +19,7 @@
 #include "game/world/components/item.h"
 #include "game/world/components/weapon.h"
 #include "game/world/components/class_sounds.h"
+#include "game/world/components/puppet_animations.h"
 
 #include "game/world/aspects/thing_controller_aspect.h"
 #include "game/world/aspects/actor_controller_aspect.h"
@@ -26,8 +27,12 @@
 #include "game/world/aspects/item_controller_aspect.h"
 #include "game/world/aspects/weapon_controller_aspect.h"
 #include "game/world/aspects/dispatch_class_sound_aspect.h"
+#include "game/world/aspects/puppet_animation_aspect.h"
 
 #include "game/world/events/taken.h"
+#include "game/world/events/killed.h"
+#include "game/world/events/thing_created.h"
+#include "game/world/events/armed_mode_changed.h"
 
 using namespace gorc::math;
 
@@ -60,6 +65,7 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     model->ecs.emplace_aspect<aspects::item_controller_aspect>(*this);
     model->ecs.emplace_aspect<aspects::weapon_controller_aspect>(*this);
     model->ecs.emplace_aspect<aspects::dispatch_class_sound_aspect>(*this);
+    model->ecs.emplace_aspect<aspects::puppet_animation_aspect>(*this);
 
     physics_presenter->start(*model, eventBus);
     key_presenter->start(*model, model->key_model, eventBus);
@@ -297,8 +303,8 @@ void gorc::game::world::level_presenter::damage() {
         }
 
         if(const int* contact_thing_id = contact->contact_thing_id) {
-            damage_thing(*contact_thing_id, 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
-                    model->local_player_thing_id);
+            damage_thing(entity_id(*contact_thing_id), 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
+                    entity_id(model->local_player_thing_id));
         }
     }
 }
@@ -687,45 +693,13 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     new_thing.position = pos;
     new_thing.orient = orient;
 
-    // Create controller components
-    switch(new_thing.type) {
-    case flags::thing_type::Actor:
-        model->ecs.emplace_component<components::actor>(new_thing_id);
-        model->ecs.emplace_component<components::character>(new_thing_id);
+    // Dispatch creation of thing components
+    eventbus->fire_event(events::thing_created(new_thing_id, tpl));
 
-        // FIXME: Centralize creation of walk animation
-        aspects::character_controller_aspect::create_controller_data(new_thing_id, *this);
-        break;
-
-    case flags::thing_type::Player:
-        model->ecs.emplace_component<components::player>(new_thing_id);
-        model->ecs.emplace_component<components::character>(new_thing_id);
-
-        // FIXME: Centralize creation of walk animation
-        aspects::character_controller_aspect::create_controller_data(new_thing_id, *this);
-        break;
-
-    case flags::thing_type::Item:
-        model->ecs.emplace_component<components::item>(new_thing_id);
-        break;
-
-    case flags::thing_type::Weapon:
-        model->ecs.emplace_component<components::weapon>(new_thing_id);
-        break;
-
-    default:
-        break;
-    }
-
+    // Create thing components
     if(new_thing.cog) {
         script_presenter->create_global_cog_instance(new_thing.cog->cogscript, *place.contentmanager, components.compiler);
     }
-
-    if(new_thing.sound_class) {
-        model->ecs.emplace_component<components::class_sounds>(new_thing_id, *new_thing.sound_class);
-    }
-
-    sound_presenter->play_sound_class(static_cast<int>(new_thing_id), flags::sound_subclass_type::create);
 
     return static_cast<int>(new_thing_id);
 }
@@ -754,7 +728,7 @@ int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name
     }
 }
 
-int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
+int gorc::game::world::level_presenter::fire_projectile(entity_id parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
         const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
     const auto& parent_thing = model->get_thing(parent_thing_id);
 
@@ -835,23 +809,26 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
     return new_thing_id;
 }
 
-float gorc::game::world::level_presenter::damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id) {
-    script_presenter->send_message_to_linked(cog::message_id::damaged, static_cast<int>(thing_id), flags::message_type::thing,
-            damager_id, flags::message_type::thing, damage, static_cast<int>(flags));
+float gorc::game::world::level_presenter::damage_thing(entity_id thing_id,
+                                                       float damage,
+                                                       flag_set<flags::damage_flag> flags,
+                                                       entity_id damager_id) {
+    script_presenter->send_message_to_linked(cog::message_id::damaged,
+                                             static_cast<int>(thing_id),
+                                             flags::message_type::thing,
+                                             damager_id,
+                                             flags::message_type::thing,
+                                             damage,
+                                             static_cast<int>(flags));
 
     components::thing& referencedThing = model->get_thing(thing_id);
     if(referencedThing.health > 0.0f) {
         referencedThing.health -= damage;
 
-        if(referencedThing.health <= 0.0f && (referencedThing.type == flags::thing_type::Actor || referencedThing.type == flags::thing_type::Player)) {
-            sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::Death1);
-            script_presenter->send_message_to_linked(cog::message_id::killed, static_cast<int>(thing_id), flags::message_type::thing,
-                    damager_id, flags::message_type::thing);
-            // TODO: thing is dead. Reset to corpse
-            //set_thing_type(thing_id, flags::thing_type::Corpse);
-            if(referencedThing.pup) {
-                key_presenter->play_mode(thing_id, flags::puppet_submode_type::Death);
-            }
+        if(referencedThing.health <= 0.0f &&
+           (referencedThing.type == flags::thing_type::Player ||
+            referencedThing.type == flags::thing_type::Actor)) {
+            eventbus->fire_event(events::killed(thing_id, damager_id));
         }
         else {
             sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::HurtSpecial);
@@ -1013,13 +990,16 @@ void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh
     }
 }
 
-void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed_mode mode) {
-    model->get_thing(player).armed_mode = mode;
+void gorc::game::world::level_presenter::set_armed_mode(entity_id player, flags::armed_mode mode) {
+    eventbus->fire_event(events::armed_mode_changed(player, mode));
 }
 
-gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(int player) {
-    const auto& thing = model->get_thing(player);
-    return thing.puppet_mode;
+gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(entity_id player) {
+    for(auto const &pup : model->ecs.find_component<components::puppet_animations>(player)) {
+        return pup.second.puppet_mode_type;
+    }
+
+    return flags::puppet_mode_type::unarmed;
 }
 
 void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
@@ -1316,13 +1296,13 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         return components.current_level_presenter->create_thing(tpl_id, sector, pos, make_euler(orient));
     });
 
-    verbTable.add_verb<int, 10>("fireprojectile", [&components](int parent_thing_id, int tpl_id, int snd_id, int submode_id,
+    verbTable.add_verb<int, 10>("fireprojectile", [&components](entity_id parent_thing_id, int tpl_id, int snd_id, int submode_id,
             vector<3> offset_vec, vector<3> error_vec, float extra, int proj_flags, float aa_fovx, float aa_fovz) {
         return components.current_level_presenter->fire_projectile(parent_thing_id, tpl_id, snd_id, submode_id,
                 offset_vec, error_vec, extra, proj_flags, aa_fovx, aa_fovz);
     });
 
-    verbTable.add_verb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
+    verbTable.add_verb<float, 4>("damagething", [&components](entity_id thing_id, float damage, int flags, entity_id damager_id) {
         return components.current_level_presenter->damage_thing(thing_id, damage, flag_set<flags::damage_flag>(flags), damager_id);
     });
 
@@ -1449,11 +1429,11 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
     });
 
-    verbTable.add_verb<void, 2>("setarmedmode", [&components](int player, int mode) {
+    verbTable.add_verb<void, 2>("setarmedmode", [&components](entity_id player, int mode) {
         components.current_level_presenter->set_armed_mode(player, flags::armed_mode(mode));
     });
 
-    verbTable.add_verb<int, 1>("getmajormode", [&components](int player) {
+    verbTable.add_verb<int, 1>("getmajormode", [&components](entity_id player) {
         return static_cast<int>(components.current_level_presenter->get_major_mode(player));
     });
 }

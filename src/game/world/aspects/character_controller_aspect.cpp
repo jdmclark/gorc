@@ -2,138 +2,18 @@
 #include "game/world/level_presenter.h"
 #include "game/world/level_model.h"
 #include "game/constants.h"
+#include "game/world/components/player.h"
 #include "game/world/scripts/script_presenter.h"
 #include "game/world/keys/key_presenter.h"
 #include "game/world/physics/physics_presenter.h"
+#include "game/world/events/thing_created.h"
 #include "game/world/events/jumped.h"
 #include "game/world/events/landed.h"
 #include "game/world/events/standing_material_changed.h"
+#include "game/world/events/killed.h"
 #include <type_traits>
 
 using gorc::game::world::aspects::character_controller_aspect;
-
-gorc::flags::puppet_mode_type character_controller_aspect::get_puppet_mode(components::thing& thing) {
-    bool is_underwater = (presenter.model->sectors[thing.sector].flags & flags::sector_flag::Underwater);
-
-    switch(thing.armed_mode) {
-    default:
-    case flags::armed_mode::unarmed:
-        return is_underwater? flags::puppet_mode_type::swimming_unarmed : flags::puppet_mode_type::unarmed;
-
-    case flags::armed_mode::armed:
-        return is_underwater? flags::puppet_mode_type::swimming_armed : flags::puppet_mode_type::armed;
-
-    case flags::armed_mode::saber:
-        return is_underwater? flags::puppet_mode_type::swimming_saber : flags::puppet_mode_type::saber;
-    }
-}
-
-void character_controller_aspect::set_walk_animation(components::thing& thing, flags::puppet_submode_type type, float speed) {
-    if(thing.actor_walk_animation >= 0) {
-        keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-        const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(type);
-        if(!keyState.animation) {
-            return;
-        }
-
-        if(keyState.animation != submode.anim) {
-            keyState.animation_time = 0.0;
-        }
-
-        keyState.animation = submode.anim;
-        keyState.high_priority = submode.hi_priority;
-        keyState.low_priority = submode.lo_priority;
-        keyState.flags = flag_set<flags::key_flag>();
-        keyState.speed = speed;
-    }
-}
-
-bool character_controller_aspect::is_walk_animation_mode(components::thing& thing, flags::puppet_submode_type type) {
-    if(thing.actor_walk_animation >= 0) {
-        keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-        const content::assets::puppet_submode& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(type);
-        return keyState.animation == submode.anim;
-    }
-
-    return false;
-}
-
-void character_controller_aspect::set_walk_animation_speed(components::thing& thing, float speed) {
-    if(thing.actor_walk_animation >= 0) {
-        keys::key_state& keyState = presenter.model->key_model.keys[thing.actor_walk_animation];
-        keyState.speed = speed;
-    }
-}
-
-void character_controller_aspect::play_falling_animation(entity_id, components::thing& thing) {
-    if(dot(thing.vel, make_vector(0.0f, 0.0f, -1.0f)) > 0.0f) {
-        // Player's trajectory has reached apogee.
-        set_walk_animation(thing, flags::puppet_submode_type::Drop, 1.0f);
-    }
-}
-
-void character_controller_aspect::play_standing_animation(entity_id, components::thing& thing) {
-    auto oriented_vel = invert(thing.orient).transform(thing.vel);
-    auto run_length = length(thing.vel);
-
-    auto vel_fb = get<1>(oriented_vel);
-    auto vel_lr = get<0>(oriented_vel);
-    auto turn_rate = get<1>(thing.ang_vel);
-
-    float run_anim_speed = run_length * 20.0f;
-    float turn_anim_speed = static_cast<float>(fabs(turn_rate) / 360.0);
-
-    if(thing.physics_flags & flags::physics_flag::is_crouching) {
-        if(fabs(turn_rate) > 0.0001) {
-            set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, turn_anim_speed * 20.0f);
-        }
-        else if(vel_fb >= 0.0f || fabs(vel_lr) > fabs(vel_fb)) {
-            set_walk_animation(thing, flags::puppet_submode_type::CrouchForward, run_anim_speed);
-        }
-        else {
-            set_walk_animation(thing, flags::puppet_submode_type::CrouchBack, run_anim_speed);
-        }
-    }
-    else {
-        if(run_length < 0.001f) {
-            // Idle or turning.
-            if(turn_rate > 60.0f) {
-                // Turning right
-                set_walk_animation(thing, flags::puppet_submode_type::TurnRight, turn_anim_speed);
-            }
-            else if(turn_rate < -60.0f) {
-                // Turning left
-                set_walk_animation(thing, flags::puppet_submode_type::TurnLeft, turn_anim_speed);
-            }
-            else if(fabs(turn_rate) < 0.001) {
-                set_walk_animation(thing, flags::puppet_submode_type::Stand, 1.0f);
-            }
-            else if(!is_walk_animation_mode(thing, flags::puppet_submode_type::Stand)) {
-                set_walk_animation_speed(thing, turn_anim_speed);
-            }
-        }
-        else if(fabs(vel_lr) > fabs(vel_fb)) {
-            // Strafing left or right
-            if(vel_lr >= 0.0f) {
-                set_walk_animation(thing, flags::puppet_submode_type::StrafeRight, run_anim_speed);
-            }
-            else {
-                set_walk_animation(thing, flags::puppet_submode_type::StrafeLeft, run_anim_speed);
-            }
-        }
-        else if(vel_fb > 0.5f) {
-            // Running forward
-            set_walk_animation(thing, flags::puppet_submode_type::Run, run_anim_speed);
-        }
-        else if(vel_fb > 0.0f) {
-            set_walk_animation(thing, flags::puppet_submode_type::Walk, run_anim_speed);
-        }
-        else {
-            // Walking backwards
-            set_walk_animation(thing, flags::puppet_submode_type::WalkBack, run_anim_speed);
-        }
-    }
-}
 
 gorc::flags::standing_material_type character_controller_aspect::get_standing_material(components::thing& thing) {
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
@@ -234,8 +114,6 @@ void character_controller_aspect::update_falling(entity_id thing_id, components:
     get<2>(applied_thrust) = 0.0f;
     thing.vel = thing.vel + applied_thrust * static_cast<float>(dt);
 
-    play_falling_animation(thing_id, thing);
-
     if(physics::contact const* contact = maybe_contact) {
         // Check if attached surface/thing has changed.
         if(int const* attachment_id = contact->contact_surface_id) {
@@ -295,9 +173,6 @@ void character_controller_aspect::update_standing(entity_id thing_id, components
             }
 
             thing.vel = new_vel;
-
-            // Update idle animation
-            play_standing_animation(thing_id, thing);
         }
     }
     else {
@@ -378,7 +253,6 @@ void character_controller_aspect::land_on_surface(entity_id thing_id,
         return;
     }
 
-    presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
     cs.bus.fire_event(events::landed(thing_id));
 }
 
@@ -388,7 +262,6 @@ void character_controller_aspect::land_on_thing(entity_id thing_id, components::
         return;
     }
 
-    presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Land);
     cs.bus.fire_event(events::landed(thing_id));
 }
 
@@ -396,21 +269,12 @@ void character_controller_aspect::jump(entity_id thing_id, components::thing& th
     cs.bus.fire_event(events::jumped(thing_id));
     set_is_falling(thing_id, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
-
-    if(thing.physics_flags & flags::physics_flag::is_crouching) {
-        set_walk_animation(thing, flags::puppet_submode_type::Leap, 1.0f);
-    }
-    else {
-        set_walk_animation(thing, flags::puppet_submode_type::Rising, 1.0f);
-    }
 }
 
 void character_controller_aspect::update(time t,
                                          entity_id thing_id,
                                          components::character&,
                                          components::thing &thing) {
-    thing.puppet_mode = get_puppet_mode(thing);
-
     // Update actor state
     if(static_cast<int>(thing.attach_flags)) {
         update_standing(thing_id, thing, t.elapsed_as_seconds());
@@ -446,33 +310,41 @@ void character_controller_aspect::update(time t,
     }
 }
 
-void character_controller_aspect::create_controller_data(entity_id thing_id, level_presenter &presenter) {
-    auto& new_thing = presenter.model->get_thing(thing_id);
+void character_controller_aspect::on_killed(entity_id thing_id,
+                                            components::thing &thing,
+                                            entity_id killer) {
+    presenter.script_presenter->send_message_to_linked(cog::message_id::killed,
+                                                       static_cast<int>(thing_id),
+                                                       flags::message_type::thing,
+                                                       killer,
+                                                       flags::message_type::thing);
 
-    // HACK: Initialize actor walk animation
-    if(new_thing.pup) {
-        new_thing.actor_walk_animation = presenter.key_presenter->play_mode(thing_id, flags::puppet_submode_type::Stand);
-    }
-    else {
-        new_thing.actor_walk_animation = -1;
-    }
-
-    if(new_thing.actor_walk_animation >= 0) {
-        keys::key_state& keyState = presenter.model->key_model.keys[new_thing.actor_walk_animation];
-        keyState.flags = flag_set<flags::key_flag>();
-    }
-}
-
-void character_controller_aspect::remove_controller_data(entity_id thing_id, level_presenter &presenter) {
-    auto& thing = presenter.model->get_thing(thing_id);
-    if(thing.actor_walk_animation >= 0) {
-        presenter.key_presenter->stop_key(thing_id, thing.actor_walk_animation, 0.0f);
-    }
+    thing.type = flags::thing_type::Corpse;
 }
 
 character_controller_aspect::character_controller_aspect(component_system &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
+
+    cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
+        if(e.tpl.type == flags::thing_type::Actor ||
+           e.tpl.type == flags::thing_type::Player ) {
+            cs.emplace_component<components::character>(e.thing);
+        }
+
+        if(e.tpl.type == flags::thing_type::Player) {
+            // TODO: When player gets an aspect, this should be moved there.
+            cs.emplace_component<components::player>(e.thing);
+        }
+    });
+
+    cs.bus.add_handler<events::killed>([&](events::killed const &e) {
+        for(auto &ch : cs.find_component<components::character>(e.thing)) {
+            for(auto &thing : cs.find_component<components::thing>(e.thing)) {
+                on_killed(e.thing, thing.second, e.killer);
+            }
+        }
+    });
 
     return;
 }

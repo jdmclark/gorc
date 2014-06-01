@@ -3,7 +3,6 @@
 #include "content/assets/template.h"
 #include "game/world/physics/object_data.h"
 #include "base/utility/maybe.h"
-#include "content/flags/armed_mode.h"
 #include "content/flags/jk_flag.h"
 #include "content/flags/ai_mode_flag.h"
 #include <memory>
@@ -54,7 +53,6 @@ public:
     vector<3> prev_attached_thing_position;
 
     int attached_key_mix = -1;
-    int actor_walk_animation = -1;
 
     int capture_cog = -1;
     float time_alive = 0.0f;
@@ -62,9 +60,6 @@ public:
     int parent_thing = -1;
 
     content::assets::model const* weapon_mesh = nullptr;
-
-    flags::armed_mode armed_mode = flags::armed_mode::unarmed;
-    flags::puppet_mode_type puppet_mode = flags::puppet_mode_type::unarmed;
 
     flag_set<flags::jk_flag> jk_flags;
     flag_set<flags::ai_mode_flag> ai_mode_flags;

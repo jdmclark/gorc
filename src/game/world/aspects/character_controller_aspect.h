@@ -22,14 +22,7 @@ class character_controller_aspect : public inner_join_aspect<components::charact
 private:
     level_presenter &presenter;
 
-    flags::puppet_mode_type get_puppet_mode(components::thing& thing);
     flags::standing_material_type get_standing_material(components::thing& thing);
-
-    void set_walk_animation(components::thing& thing, flags::puppet_submode_type type, float speed);
-    bool is_walk_animation_mode(components::thing& thing, flags::puppet_submode_type type);
-    void set_walk_animation_speed(components::thing& thing, float speed);
-    void play_falling_animation(entity_id thing_id, components::thing& thing);
-    void play_standing_animation(entity_id thing_id, components::thing& thing);
 
     maybe<physics::contact> run_falling_sweep(entity_id thing_id, components::thing& thing, double dt);
     maybe<physics::contact> run_walking_sweep(entity_id thing_id, components::thing& thing, double dt);
@@ -47,6 +40,8 @@ private:
     void play_right_run_footstep(entity_id thing_id);
     void play_left_walk_footstep(entity_id thing_id);
     void play_right_walk_footstep(entity_id thing_id);
+
+    void on_killed(entity_id thing_id, components::thing &thing, entity_id killer);
 
 public:
     character_controller_aspect(component_system&, level_presenter&);

@@ -2,12 +2,20 @@
 #include "game/world/events/taken.h"
 #include "game/world/scripts/script_presenter.h"
 #include "game/world/level_model.h"
+#include "game/world/events/thing_created.h"
 
 using gorc::game::world::aspects::item_controller_aspect;
 
 item_controller_aspect::item_controller_aspect(component_system &cs,
                                                level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
+
+    cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
+        if(e.tpl.type == flags::thing_type::Item) {
+            cs.emplace_component<components::item>(e.thing);
+        }
+    });
+
     cs.bus.add_handler<events::taken>([&](events::taken const &e) {
         auto &player_thing = presenter.model->get_thing(e.taker);
         if(player_thing.type != flags::thing_type::Player) {

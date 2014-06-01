@@ -6,6 +6,7 @@
 #include "base/content/content_manager.h"
 #include "game/world/level_presenter.h"
 #include "game/world/events/animation_marker.h"
+#include "game/world/components/puppet_animations.h"
 
 gorc::game::world::keys::key_presenter::key_presenter(content::content_manager& contentmanager)
     : contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
@@ -287,13 +288,23 @@ int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
     return play_mix_key(GetThingMixId(thing_id), key, priority, flags);
 }
 
-int gorc::game::world::keys::key_presenter::play_mode(int thing_id, flags::puppet_submode_type minor_mode) {
+int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
+                                                      flags::puppet_submode_type minor_mode) {
     auto& thing = levelModel->get_thing(thing_id);
     if(!thing.pup) {
         return -1;
     }
 
-    const auto& submode = thing.pup->get_mode(thing.puppet_mode).get_submode(minor_mode);
+    content::assets::puppet_submode const *submode_ptr = nullptr;
+    for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(thing_id)) {
+        submode_ptr = &tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
+    }
+
+    if(!submode_ptr) {
+        return -1;
+    }
+
+    const auto& submode = *submode_ptr;
     if(!submode.anim) {
         return -1;
     }
@@ -348,7 +359,7 @@ void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_tab
         return components.current_level_presenter->key_presenter->play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
     });
 
-    verbTable.add_verb<int, 2>("playmode", [&components](int thing_id, int submode) {
+    verbTable.add_verb<int, 2>("playmode", [&components](entity_id thing_id, int submode) {
         return components.current_level_presenter->key_presenter->play_mode(thing_id, static_cast<flags::puppet_submode_type>(submode));
     });
 

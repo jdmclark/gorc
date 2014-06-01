@@ -68,7 +68,7 @@ public:
     float get_key_len(int key_id);
     int play_mix_key(int mix_id, int key, int priority, flag_set<flags::key_flag> flags);
     int play_key(int thing_id, int key, int priority, flag_set<flags::key_flag> flags);
-    int play_mode(int thing_id, flags::puppet_submode_type submode);
+    int play_mode(entity_id thing_id, flags::puppet_submode_type submode);
     void stop_key(int thing_id, int key, float delay);
     void stop_all_mix_keys(int mix);
 

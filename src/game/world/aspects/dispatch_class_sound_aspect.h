@@ -6,6 +6,7 @@
 #include "game/world/components/class_sounds.h"
 #include "content/flags/key_marker_type.h"
 #include "base/utility/enum_hasher.h"
+#include "base/utility/randomizer.h"
 
 namespace gorc {
 namespace game {
@@ -19,6 +20,7 @@ public:
                                                      enum_hasher<flags::standing_material_type>>;
 private:
     level_presenter &presenter;
+    randomizer rand;
 
     void dispatch_from_map(standing_material_map const&, entity_id, flags::standing_material_type);
     void handle_animation_marker(entity_id, components::class_sounds&, flags::key_marker_type);
