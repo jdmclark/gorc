@@ -1,6 +1,7 @@
 #include "actor_controller_aspect.h"
 #include "game/world/level_model.h"
 #include "game/world/events/thing_created.h"
+#include "game/world/events/killed.h"
 
 gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(component_system& cs)
     : inner_join_aspect(cs) {
@@ -9,6 +10,16 @@ gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(com
         if(e.tpl.type == flags::thing_type::Actor) {
             cs.emplace_component<components::actor>(e.thing);
         }
+    });
+
+    cs.bus.add_handler<events::killed>([&](events::killed const &e) {
+        for(auto &actor_component : cs.find_component<components::actor>(e.thing)) {
+            for(auto &thing : cs.find_component<components::thing>(e.thing)) {
+                thing.second.thrust = make_zero_vector<3, float>();
+            }
+        }
+
+        cs.erase_components(cs.find_component<components::actor>(e.thing));
     });
 }
 

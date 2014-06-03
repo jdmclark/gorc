@@ -52,14 +52,22 @@ bool physics_presenter::thing_needs_collision_response(int moving_thing_id, int 
     auto mt_type = moving_thing.type;
     auto ct_type = collision_thing.type;
 
-    return (mt_type == flags::thing_type::Actor ||
-            mt_type == flags::thing_type::Debris ||
-            mt_type == flags::thing_type::cog ||
-            mt_type == flags::thing_type::Player) &&
-            (ct_type == flags::thing_type::Actor ||
-            ct_type == flags::thing_type::Debris ||
-            ct_type == flags::thing_type::cog ||
-            ct_type == flags::thing_type::Player);
+    // Ordinary objects collide against all other ordinary objects.
+    bool normal_col = (mt_type == flags::thing_type::Actor ||
+                       mt_type == flags::thing_type::Debris ||
+                       mt_type == flags::thing_type::cog ||
+                       mt_type == flags::thing_type::Player) &&
+                      (ct_type == flags::thing_type::Actor ||
+                       ct_type == flags::thing_type::Debris ||
+                       ct_type == flags::thing_type::cog ||
+                       ct_type == flags::thing_type::Player);
+
+    // Corpses collide against everything except actors and players.
+    bool corpse_col = (mt_type == flags::thing_type::Corpse) &&
+                      (ct_type == flags::thing_type::Debris ||
+                       ct_type == flags::thing_type::cog);
+
+    return normal_col || corpse_col;
 }
 
 physics_presenter::physics_node_visitor::physics_node_visitor(physics_presenter& presenter, std::vector<physics::contact>& resting_manifolds,
@@ -274,7 +282,10 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
     thing.vel += this_frame_only_vel;
 
     // Only perform collision detection for player, actor, and weapon types.
-    if(thing.type != flags::thing_type::Actor && thing.type != flags::thing_type::Player && thing.type != flags::thing_type::Weapon) {
+    if(thing.type != flags::thing_type::Actor &&
+       thing.type != flags::thing_type::Player &&
+       thing.type != flags::thing_type::Weapon &&
+       thing.type != flags::thing_type::Corpse) {
         return;
     }
 

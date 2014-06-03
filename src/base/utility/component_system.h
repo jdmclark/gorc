@@ -219,6 +219,12 @@ public:
         get_pool<typename IteratorT::PoolCompT>().erase(it);
     }
 
+    template <typename IteratorT> inline void erase_components(range<IteratorT> rng) {
+        for(auto it = rng.begin(); it != rng.end();) {
+            erase_component(it++);
+        }
+    }
+
     template <typename T, typename... ArgT> inline void emplace_aspect(ArgT&&... args) {
         aspects.push_back(make_unique<T>(*this, std::forward<ArgT>(args)...));
     }
