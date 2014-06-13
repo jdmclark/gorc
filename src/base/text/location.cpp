@@ -6,7 +6,7 @@ gorc::text::location::location()
     return;
 }
 
-gorc::text::location::location(const char* filename,
+gorc::text::location::location(boost::filesystem::path const *filename,
         unsigned int firstline, unsigned int firstcol, unsigned int lastline, unsigned int lastcol)
     : filename(filename), first_line(firstline), first_column(firstcol), last_line(lastline), last_column(lastcol) {
     return;
@@ -26,10 +26,14 @@ const gorc::text::location& gorc::text::location::operator=(const location& loc)
 }
 
 bool gorc::text::location::operator==(const location& l) const {
-    return std::strcmp(filename, l.filename) == 0 && first_line == l.first_line && last_line == l.last_line
-            && first_column == l.first_column && last_column == l.last_column;
+    return (filename == l.filename ||
+            (filename != nullptr && *filename == *l.filename)) &&
+            first_line == l.first_line &&
+            last_line == l.last_line &&
+            first_column == l.first_column &&
+            last_column == l.last_column;
 }
 
 gorc::text::location::operator gorc::diagnostics::error_location() const {
-    return diagnostics::error_location((filename != nullptr) ? filename : "unknown", first_line, first_column, last_line, last_column);
+    return diagnostics::error_location((filename != nullptr) ? *filename : "unknown", first_line, first_column, last_line, last_column);
 }

@@ -17,11 +17,11 @@ gorc::box<2, int> gorc::gui::widgets::edit_box::get_minimum_size(const gui_view&
 }
 
 void gorc::gui::widgets::edit_box::set_scroll_position(size_t pos) {
-    scroll_position = clamp(pos, 0UL, buffer.size());
+    scroll_position = clamp(pos, size_t(0), buffer.size());
 }
 
 void gorc::gui::widgets::edit_box::set_cursor_position(size_t pos, const time& time) {
-    cursor_position = clamp(pos, 0UL, buffer.size());
+    cursor_position = clamp(pos, size_t(0), buffer.size());
     focus_time = time.current;
 
     // Determine if cursor position is still inside box.
@@ -94,7 +94,7 @@ void gorc::gui::widgets::edit_box::on_lost_keyboard_focus(const time&) {
 }
 
 void gorc::gui::widgets::edit_box::on_text_entered(const time& time, char ch) {
-    buffer.insert(buffer.begin() + clamp(cursor_position, 0UL, buffer.size()), ch);
+    buffer.insert(buffer.begin() + clamp(cursor_position, size_t(0), buffer.size()), ch);
     set_cursor_position(cursor_position + 1, time);
 }
 
@@ -122,14 +122,14 @@ void gorc::gui::widgets::edit_box::on_key_down(const time& time, sf::Keyboard::K
 
     case sf::Keyboard::Delete:
         if(cursor_position < buffer.size()) {
-            buffer.erase(buffer.begin() + clamp(cursor_position, 0UL, buffer.size()));
+            buffer.erase(buffer.begin() + clamp(cursor_position, size_t(0), buffer.size()));
         }
         break;
 
     case sf::Keyboard::BackSpace:
         if(cursor_position > 0) {
             set_cursor_position(cursor_position - 1, time);
-            buffer.erase(buffer.begin() + clamp(cursor_position, 0UL, buffer.size()));
+            buffer.erase(buffer.begin() + clamp(cursor_position, size_t(0), buffer.size()));
         }
         break;
 
@@ -149,7 +149,7 @@ void gorc::gui::widgets::edit_box::draw(const time& time, graphics::gui_renderer
     int right = std::get<1>(get_range<0>(container_box->position)) - container_box->padding.right;
 
     char prev_c = 0;
-    size_t spos = clamp(scroll_position, 0UL, buffer.size());
+    size_t spos = clamp(scroll_position, size_t(0), buffer.size());
     for(size_t i = spos; i < buffer.size(); ++i) {
 
         if(cursor_position == i && inner_draw_cursor) {

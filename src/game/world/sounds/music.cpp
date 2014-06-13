@@ -5,7 +5,19 @@
 void gorc::game::world::sounds::music::internal_play_song(int song) {
     boost::filesystem::path music_file_path = boost::filesystem::path("game/resource/music/1") /
             boost::str(boost::format("%1%.ogg") % (song + 1));
+#ifdef WIN32
+    // HACK: Assume filename doesn't contain non-ASCII characters.
+    // This needs to be fixed for proper Windows music file support.
+    auto original_filename = music_file_path.native();
+    std::string music_filename;
+    std::transform(original_filename.begin(),
+                   original_filename.end(),
+                   std::back_inserter(music_filename),
+                   [](wchar_t ch) { return static_cast<char>(ch); });
+    internal_music.openFromFile(music_filename);
+#else
     internal_music.openFromFile(music_file_path.native());
+#endif
     internal_music.setLoop(false);
     internal_music.setRelativeToListener(false);
     internal_music.setPosition(0,0,0);

@@ -4,6 +4,13 @@
 #include <errno.h>
 #include <cassert>
 
+#ifdef WIN32
+#include <windows.h>
+#define PLATFORM_FOPEN(fn, op) _wfopen(fn, L##op)
+#else
+#define PLATFORM_FOPEN(fn, op) fopen(fn, op)
+#endif
+
 using namespace gorc::io;
 
 native_file::native_file(const boost::filesystem::path& filename, bool create_new) {
@@ -34,13 +41,13 @@ native_file::~native_file() {
 }
 
 bool native_file::open(const boost::filesystem::path& filename) {
-    file_handle = fopen(filename.native().c_str(), "rb");
+    file_handle = PLATFORM_FOPEN(filename.native().c_str(), "rb");
 
     return file_handle != nullptr;
 }
 
 bool native_file::create(const boost::filesystem::path& filename) {
-    file_handle = fopen(filename.native().c_str(), "wb");
+    file_handle = PLATFORM_FOPEN(filename.native().c_str(), "wb");
 
     return file_handle != nullptr;
 }

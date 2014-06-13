@@ -5,6 +5,7 @@
 #include <memory>
 #include <boost/integer/static_log2.hpp>
 #include <cassert>
+#include <cstdlib>
 
 namespace gorc {
 inline namespace utility {

@@ -20,7 +20,7 @@ private:
 
     void* scanner;
     ast::translation_unit* return_value;
-    const char* current_filename;
+    boost::filesystem::path const *current_filename;
 
 public:
     ast::factory& factory;
@@ -43,7 +43,7 @@ public:
         return_value = astroot;
     }
 
-    inline const char* get_filename() const {
+    inline boost::filesystem::path const *get_filename() const {
         return current_filename;
     }
 

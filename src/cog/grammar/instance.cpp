@@ -3,8 +3,7 @@
 gorc::cog::grammar::instance::instance(text::source& inputFilestream,
         ast::factory& ast, diagnostics::report& report)
     : inputFilestream(inputFilestream), factory(ast), report(report) {
-    std::string* stored_filename = ast.store_value(inputFilestream.filename.generic_string());
-    current_filename = stored_filename->c_str();
+    current_filename = ast.store_value(inputFilestream.filename);
 
     init_scanner();
     return;

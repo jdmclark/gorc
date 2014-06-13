@@ -1,4 +1,6 @@
+#define __STDC_FORMAT_MACROS
 #include "json_input_stream.h"
+#include <inttypes.h>
 
 gorc::io::json_input_stream::json_input_stream(input_stream& f) : f(f) {
     advance_char();
@@ -171,8 +173,8 @@ void gorc::io::json_input_stream::advance_token() {
 }
 
 int64_t gorc::io::json_input_stream::read_integer() {
-    long long int v;
-    size_t result = sscanf(curr_token.c_str(), "%1024lld", &v);
+    int64_t v;
+    size_t result = sscanf(curr_token.c_str(), "%1024" PRId64, &v);
 
     if(result != 1) {
         throw json_invalid_format_exception();

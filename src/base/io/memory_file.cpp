@@ -1,5 +1,6 @@
 #include "memory_file.h"
 #include "exception.h"
+#include <cmath>
 
 gorc::io::memory_file::memory_file() {
     return;
@@ -31,7 +32,7 @@ void gorc::io::memory_file::write(const void* dest, size_t size) {
 }
 
 void gorc::io::memory_file::seek(int off) {
-    if((off < 0 && static_cast<size_t>(abs(off)) > offset) || offset + off > buffer.size()) {
+    if((off < 0 && static_cast<size_t>(std::abs(off)) > offset) || offset + off > buffer.size()) {
         throw file_seek_exception();
     }
 

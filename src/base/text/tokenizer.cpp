@@ -203,7 +203,7 @@ void tokenizer::get_token(token& out) {
     skipWhitespace();
 
     out.value.clear();
-    out.location.filename = buffer.filename.c_str();
+    out.location.filename = &buffer.filename;
     out.location.first_line = line;
     out.location.first_column = col;
 
@@ -246,7 +246,7 @@ void tokenizer::get_delimited_string(token& out, const std::function<bool(char)>
     skipWhitespace();
 
     out.value.clear();
-    out.location.filename = buffer.filename.c_str();
+    out.location.filename = &buffer.filename;
     out.location.first_line = line;
     out.location.first_column = col;
 
