@@ -13,15 +13,12 @@ setup-files:
 	echo "Some existing content" > $(TESTSUITE_DIR)/existing.txt
 	touch $(TESTSUITE_DIR)/write_denied.txt
 	chmod a-w $(TESTSUITE_DIR)/write_denied.txt
-	touch $(TESTSUITE_DIR)/read_denied.txt
-	chmod a-r $(TESTSUITE_DIR)/read_denied.txt
 	echo "small" > $(TESTSUITE_DIR)/small.txt
 	echo "somewhat larger" > $(TESTSUITE_DIR)/medium.txt
 
 cleanup-files:
 	cat $(TESTSUITE_DIR)/existing.txt >> $(RAW_OUTPUT)
 	chmod a+w $(TESTSUITE_DIR)/write_denied.txt
-	chmod a+r $(TESTSUITE_DIR)/read_denied.txt
 	
 run-testsuite:
 	$(ITEST_BIN_PATH)/native_file > $(RAW_OUTPUT) \

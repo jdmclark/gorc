@@ -19,7 +19,12 @@ create-dirs:
 
 process-raw-output:
 	# Strip PWD from output
-	-@sed 's?$(BASE_PATH)?$$ROOT$$?' $(RAW_OUTPUT) > $(CURRENT_OUTPUT)
+	-@sed \
+		-e 's?c:\\?/c/?Ig' \
+		-e 's?\\?/?g' \
+		-e 's?$(BASE_PATH)?$$ROOT$$?g' \
+		-e 's?\.EXE??Ig' \
+		$(RAW_OUTPUT) > $(CURRENT_OUTPUT)
 	
 compare-output:
-	diff -u $(EXPECTED_OUTPUT) $(CURRENT_OUTPUT)
+	diff -u -w $(EXPECTED_OUTPUT) $(CURRENT_OUTPUT)
