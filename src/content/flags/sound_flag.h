@@ -7,6 +7,7 @@ enum class sound_flag {
     Loops = 0x1,
     Narration = 0x2,
     Ambient = 0x4,
+    StopsWhenThingDestroyed = 0x8,
     MinimalVolume = 0x10,
     Delay = 0x20,
     ClassOriginDoesNotMove = 0x40,

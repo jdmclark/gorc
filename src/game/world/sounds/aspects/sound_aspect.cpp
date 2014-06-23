@@ -2,6 +2,7 @@
 #include "game/world/sounds/components/thing_sound.h"
 #include "game/world/sounds/components/voice.h"
 #include "game/world/sounds/components/foley.h"
+#include "game/world/sounds/components/stop_when_destroyed.h"
 
 gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system &cs,
                                                                level_model &model)
@@ -27,6 +28,18 @@ gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system 
             [&](components::foley const &fol) {
                 return fol.sound == e.destroyed_entity;
             });
+
+        for(auto &fol : cs.find_component<components::foley>(e.destroyed_entity)) {
+            for(auto &snd : cs.find_component<components::sound>(fol.second.sound)) {
+                snd.second.stop_delay = 0.0001f;
+            }
+        }
+
+        for(auto &tsnd : cs.find_component<components::stop_when_destroyed>(e.destroyed_entity)) {
+            for(auto &snd : cs.find_component<components::sound>(tsnd.second.sound)) {
+                snd.second.stop_delay = 0.0001f;
+            }
+        }
     });
 
     return;

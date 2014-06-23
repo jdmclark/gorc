@@ -8,6 +8,7 @@
 #include "game/world/sounds/components/foley.h"
 #include "game/world/sounds/components/thing_sound.h"
 #include "game/world/sounds/components/voice.h"
+#include "game/world/sounds/components/stop_when_destroyed.h"
 #include "game/constants.h"
 
 #include "game/world/sounds/aspects/thing_sound_aspect.h"
@@ -230,6 +231,10 @@ gorc::entity_id sound_presenter::play_sound_thing(int wav,
 
     if(flags & flags::sound_flag::ThingOriginMovesWithThing) {
         levelModel->ecs.emplace_component<components::thing_sound>(thing_id, snd_id);
+    }
+
+    if(flags & flags::sound_flag::StopsWhenThingDestroyed) {
+        levelModel->ecs.emplace_component<components::stop_when_destroyed>(thing_id, snd_id);
     }
 
     if(flags & flags::sound_flag::Voice) {
