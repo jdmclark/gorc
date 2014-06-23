@@ -99,12 +99,12 @@ public:
     bool has_los(int look_thing_id, int target_thing_id);
 
     // Frame verbs
-    int get_cur_frame(int thing_id);
-    void jump_to_frame(int thing_id, int frame, int sector);
-    void move_to_frame(int thing_id, int frame, float speed);
-    void path_move_pause(int thing_id);
-    void path_move_resume(int thing_id);
-    void rotate_pivot(int thing_id, int frame, float time);
+    int get_cur_frame(entity_id thing_id);
+    void jump_to_frame(entity_id thing_id, int frame, int sector);
+    void move_to_frame(entity_id thing_id, int frame, float speed);
+    void path_move_pause(entity_id thing_id);
+    void path_move_resume(entity_id thing_id);
+    void rotate_pivot(entity_id thing_id, int frame, float time);
 
     // Level verbs
     float get_game_time();

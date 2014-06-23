@@ -12,7 +12,9 @@ private:
     int32_t value;
 
 public:
-    explicit entity_id(int32_t value);
+    explicit constexpr entity_id(int32_t value)
+        : value(value) { }
+
     entity_id(io::deserialization_constructor_tag, io::binary_input_stream&);
 
     void serialize(io::binary_output_stream&) const;
@@ -29,6 +31,8 @@ public:
         return value != v.value;
     }
 };
+
+constexpr entity_id invalid_id(-1);
 
 }
 }

@@ -33,6 +33,7 @@
 #include "game/world/events/killed.h"
 #include "game/world/events/thing_created.h"
 #include "game/world/events/armed_mode_changed.h"
+#include "game/world/events/class_sound.h"
 
 using namespace gorc::math;
 
@@ -279,7 +280,8 @@ void gorc::game::world::level_presenter::activate() {
             std::cout << "ACTIVATE THING: " << *contact_thing_id << std::endl;
             script_presenter->send_message_to_linked(cog::message_id::activated, *contact_thing_id, flags::message_type::thing,
                     model->local_player_thing_id, flags::message_type::thing);
-            sound_presenter->play_sound_class(*contact_thing_id, flags::sound_subclass_type::Activate);
+            eventbus->fire_event(events::class_sound(entity_id(*contact_thing_id),
+                                                     flags::sound_subclass_type::Activate));
         }
     }
 }
@@ -424,17 +426,17 @@ bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_t
 }
 
 // Frame verbs
-int gorc::game::world::level_presenter::get_cur_frame(int thing_id) {
+int gorc::game::world::level_presenter::get_cur_frame(entity_id thing_id) {
     return model->get_thing(thing_id).current_frame;
 }
 
-void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
+void gorc::game::world::level_presenter::jump_to_frame(entity_id thing_id, int frame, int sector) {
     components::thing& referenced_thing = model->get_thing(thing_id);
     auto& referenced_frame = referenced_thing.frames[frame];
     set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
 }
 
-void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, float speed) {
+void gorc::game::world::level_presenter::move_to_frame(entity_id thing_id, int frame, float speed) {
     components::thing& referenced_thing = model->get_thing(thing_id);
 
     referenced_thing.goal_frame = frame;
@@ -451,21 +453,21 @@ void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, 
     referenced_thing.path_move_speed = speed;
     referenced_thing.path_moving = true;
     referenced_thing.rotatepivot_moving = false;
-    sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StartMove);
+    eventbus->fire_event(events::class_sound(thing_id, flags::sound_subclass_type::StartMove));
     sound_presenter->play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
 }
 
-void gorc::game::world::level_presenter::path_move_pause(int thing_id) {
+void gorc::game::world::level_presenter::path_move_pause(entity_id thing_id) {
     auto& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving_paused = true;
 }
 
-void gorc::game::world::level_presenter::path_move_resume(int thing_id) {
+void gorc::game::world::level_presenter::path_move_resume(entity_id thing_id) {
     auto& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving_paused = false;
 }
 
-void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, float time) {
+void gorc::game::world::level_presenter::rotate_pivot(entity_id thing_id, int frame, float time) {
     components::thing& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving = false;
     referenced_thing.rotatepivot_moving = true;
@@ -474,7 +476,7 @@ void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, f
     referenced_thing.path_move_speed = (fabs(time) <= 0.0) ? 1.0f : static_cast<float>(fabs(time));
     referenced_thing.path_move_time = 0.0f;
     referenced_thing.rotatepivot_longway = time < 0.0f;
-    sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StartMove);
+    eventbus->fire_event(events::class_sound(thing_id, flags::sound_subclass_type::StartMove));
     sound_presenter->play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
 }
 
@@ -831,7 +833,8 @@ float gorc::game::world::level_presenter::damage_thing(entity_id thing_id,
             eventbus->fire_event(events::killed(thing_id, damager_id));
         }
         else {
-            sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::HurtSpecial);
+            eventbus->fire_event(events::class_sound(thing_id,
+                                                     flags::sound_subclass_type::HurtSpecial));
             if(referencedThing.pup) {
                 key_presenter->play_mode(thing_id, flags::puppet_submode_type::Hit);
             }
@@ -858,7 +861,6 @@ void gorc::game::world::level_presenter::real_destroy_thing(int thing_id) {
     }
 
     // Expunge associated resources.
-    sound_presenter->expunge_thing_sounds(thing_id);
     key_presenter->expunge_thing_animations(thing_id);
 
     model->ecs.erase_entity(entity_id(thing_id));
@@ -1067,27 +1069,27 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
     });
 
     // Frame verbs
-    verbTable.add_verb<int, 1>("getcurframe", [&components](int thing) {
+    verbTable.add_verb<int, 1>("getcurframe", [&components](entity_id thing) {
         return components.current_level_presenter->get_cur_frame(thing);
     });
 
-    verbTable.add_verb<void, 3>("jumptoframe", [&components](int thing, int frame, int sector) {
+    verbTable.add_verb<void, 3>("jumptoframe", [&components](entity_id thing, int frame, int sector) {
         return components.current_level_presenter->jump_to_frame(thing, frame, sector);
     });
 
-    verbTable.add_verb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
+    verbTable.add_verb<void, 3>("movetoframe", [&components](entity_id thing, int frame, float speed) {
         return components.current_level_presenter->move_to_frame(thing, frame, speed);
     });
 
-    verbTable.add_verb<void, 1>("pathmovepause", [&components](int thing) {
+    verbTable.add_verb<void, 1>("pathmovepause", [&components](entity_id thing) {
         components.current_level_presenter->path_move_pause(thing);
     });
 
-    verbTable.add_verb<void, 1>("pathmoveresume", [&components](int thing) {
+    verbTable.add_verb<void, 1>("pathmoveresume", [&components](entity_id thing) {
         components.current_level_presenter->path_move_resume(thing);
     });
 
-    verbTable.add_verb<void, 3>("rotatepivot", [&components](int thing_id, int frame, float time) {
+    verbTable.add_verb<void, 3>("rotatepivot", [&components](entity_id thing_id, int frame, float time) {
         components.current_level_presenter->rotate_pivot(thing_id, frame, time);
     });
 

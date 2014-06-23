@@ -39,20 +39,11 @@ private:
 
     template <typename... ArgT>
     void update_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) != sizeof...(CompT) + 1, entity_id>::type id, ArgT&... args) {
-        for(auto& component : cs.find_component<typename nth_param<sizeof...(ArgT), HeadCompT, CompT...>::type>(id)) {
-            update_over_ranges(time, id, args..., component.second);
-        }
-    }
-
-    template <typename... ArgT>
-    void draw_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) == sizeof...(CompT) + 1, entity_id>::type id, ArgT&... args) {
-        draw(time, id, args...);
-    }
-
-    template <typename... ArgT>
-    void draw_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) != sizeof...(CompT) + 1, entity_id>::type id, ArgT&... args) {
-        for(auto& component : cs.find_component<typename nth_param<sizeof...(ArgT), HeadCompT, CompT...>::type>(id)) {
-            draw_over_ranges(time, id, args..., component.second);
+        auto rng = cs.find_component<typename nth_param<sizeof...(ArgT), HeadCompT, CompT...>::type>(id);
+        for(auto it = rng.begin(); it != rng.end();) {
+            auto jt = it;
+            ++it;
+            update_over_ranges(time, id, args..., jt->second);
         }
     }
 
@@ -81,14 +72,11 @@ public:
     }
 
     virtual void update(gorc::time time) override {
-        for(auto& comp : cs.all_components<HeadCompT>()) {
-            update_over_ranges(time, comp.first, comp.second);
-        }
-    }
-
-    virtual void draw(gorc::time time) override {
-        for(auto& comp : cs.all_components<HeadCompT>()) {
-            draw_over_ranges(time, comp.first, comp.second);
+        auto rng = cs.all_components<HeadCompT>();
+        for(auto it = rng.begin(); it != rng.end();) {
+            auto jt = it;
+            ++it;
+            update_over_ranges(time, jt->first, jt->second);
         }
     }
 };

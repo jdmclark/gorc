@@ -7,7 +7,6 @@
 #include "base/utility/component_system.h"
 #include "components/thing.h"
 #include "surface.h"
-#include "sounds/sound.h"
 #include "game/world/scripts/script_model.h"
 #include "game/world/sounds/sound_model.h"
 #include "game/world/keys/key_model.h"

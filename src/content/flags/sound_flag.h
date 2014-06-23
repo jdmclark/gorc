@@ -5,7 +5,7 @@ namespace flags {
 
 enum class sound_flag {
     Loops = 0x1,
-    Voice = 0x2,
+    Narration = 0x2,
     Ambient = 0x4,
     MinimalVolume = 0x10,
     Delay = 0x20,
@@ -16,7 +16,7 @@ enum class sound_flag {
     IgnoreIfAlreadyPlaying = 0x400,
     IgnoreIfSoundclassAlreadyPlaying = 0x800,
     VolumeQuickFalloff = 0x2000,
-    NotSimultaneous = 0x10000
+    Voice = 0x10000
 };
 
 }

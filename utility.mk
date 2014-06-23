@@ -14,6 +14,8 @@ INTTEST_SRC_PATH = $(INTTEST_BASE_PATH)/src
 INTTEST_BIN_PATH = $(INTTEST_BASE_PATH)/bin
 INTTEST_OBJ_PATH = $(BASE_PATH)/obj/test/modules/src
 
+CXXFLAGS_EXTRA = -Ofast
+
 CXXFLAGS = -I$(SRC_PATH) -std=gnu++11 -Werror \
 	-Wall -Wextra -Wpedantic \
 	-Wdouble-promotion -Wno-switch-enum -Wswitch -Wuninitialized \

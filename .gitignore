@@ -14,3 +14,4 @@ game/restricted/music
 test_log.txt
 tempdir/
 *.swp
+*.pyc

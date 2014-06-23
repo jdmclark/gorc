@@ -30,9 +30,10 @@ private:
 
 public:
 
-    template <typename... Args> void emplace(entity_id parent, Args&&... args) {
+    template <typename... Args> CompT& emplace(entity_id parent, Args&&... args) {
         auto& em = components.emplace(parent, std::forward<Args>(args)...);
         index.emplace(static_cast<int>(parent), em.get_id());
+        return em.component_pair.second;
     }
 
     class iterator {

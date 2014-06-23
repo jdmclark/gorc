@@ -20,6 +20,10 @@ public:
     const It& end() const {
         return last;
     }
+
+    inline bool empty() const {
+        return first == last;
+    }
 };
 
 template <typename It> range<It> make_range(const It& first, const It& last) {

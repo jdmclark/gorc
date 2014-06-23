@@ -46,8 +46,6 @@ public:
     vector<3> ai_look_target;
     float ai_move_speed = 1.0;
 
-    maybe<sounds::sound*> current_foley_loop_channel;
-
     int attached_surface = -1;
     int attached_thing = -1;
     vector<3> prev_attached_thing_position;

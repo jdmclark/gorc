@@ -448,8 +448,8 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             if(thing.current_frame == thing.goal_frame) {
                 thing.path_moving = false;
                 thing.path_move_speed = 0.0f;
-                presenter.sound_presenter->stop_foley_loop(thing_id);
-                presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
+                presenter.sound_presenter->stop_foley_loop(entity_id(thing_id));
+                presenter.sound_presenter->play_sound_class(entity_id(thing_id), flags::sound_subclass_type::StopMove);
 
                 // Dispatch cog messages and resume cogs which are waiting for stop.
                 presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
@@ -487,8 +487,8 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             thing.orient = angle * thing.orient;
             presenter.adjust_thing_pos(thing_id, new_pos);
 
-            presenter.sound_presenter->stop_foley_loop(thing_id);
-            presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::StopMove);
+            presenter.sound_presenter->stop_foley_loop(entity_id(thing_id));
+            presenter.sound_presenter->play_sound_class(entity_id(thing_id), flags::sound_subclass_type::StopMove);
 
             // Dispatch cog messages and resume cogs which are waiting for stop.
             presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);

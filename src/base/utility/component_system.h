@@ -8,6 +8,7 @@
 #include "aspect.h"
 #include "event_bus.h"
 #include "component_serializer.h"
+#include "base/events/destroyed.h"
 
 namespace gorc {
 inline namespace utility {
@@ -183,7 +184,9 @@ public:
     }
 
     inline void erase_entity(entity_id id) {
-        for(auto& pool : pool_containers) {
+        bus.fire_event(events::destroyed(id));
+
+        for(auto &pool : pool_containers) {
             pool.second->erase_entity(id);
         }
 
@@ -202,8 +205,9 @@ public:
         get_pool<T>();
     }
 
-    template <typename T, typename... ArgT> inline void emplace_component(entity_id parent, ArgT&&... args) {
-        get_pool<T>().emplace(parent, std::forward<ArgT>(args)...);
+    template <typename T, typename... ArgT>
+    inline T& emplace_component(entity_id parent, ArgT&&... args) {
+        return get_pool<T>().emplace(parent, std::forward<ArgT>(args)...);
     }
 
     template <typename T> inline range<typename component_pool<T>::iterator> find_component(entity_id parent) {
@@ -222,6 +226,18 @@ public:
     template <typename IteratorT> inline void erase_components(range<IteratorT> rng) {
         for(auto it = rng.begin(); it != rng.end();) {
             erase_component(it++);
+        }
+    }
+
+    template <typename IteratorT, typename PredT>
+    inline void erase_components(range<IteratorT> rng, PredT pred) {
+        for(auto it = rng.begin(); it != rng.end();) {
+            if(pred(it->second)) {
+                erase_component(it++);
+            }
+            else {
+                ++it;
+            }
         }
     }
 
