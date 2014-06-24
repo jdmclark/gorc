@@ -110,8 +110,7 @@ void sound_presenter::play_foley_loop_class(entity_id thing_id,
 
 void sound_presenter::stop_foley_loop(entity_id thing_id) {
     for(auto const &foley : levelModel->ecs.find_component<components::foley>(thing_id)) {
-        levelModel->ecs.erase_entity(foley.second.sound);
-        return;
+        stop_sound(foley.second.sound, 0.0f);
     }
 }
 
@@ -216,9 +215,7 @@ gorc::entity_id sound_presenter::play_sound_thing(int wav,
     if(flags & flags::sound_flag::Voice) {
         // Each thing can only play one voice at a time.
         for(auto &voc : levelModel->ecs.find_component<components::voice>(thing_id)) {
-            for(auto &snd : levelModel->ecs.find_component<components::sound>(voc.second.sound)) {
-                snd.second.stop_delay = 0.00001f;
-            }
+            stop_sound(voc.second.sound, 0.0f);
         }
     }
 
@@ -249,13 +246,12 @@ void gorc::game::world::sounds::sound_presenter::set_music_vol(float volume) {
 }
 
 void gorc::game::world::sounds::sound_presenter::stop_sound(entity_id channel, float delay) {
-    if(delay > 0.0f) {
-        for(auto &snd : levelModel->ecs.find_component<components::sound>(channel)) {
-            snd.second.stop_delay = delay;
-        }
+    if(delay <= 0.0f) {
+        delay = std::numeric_limits<float>::epsilon();
     }
-    else {
-        levelModel->ecs.erase_entity(channel);
+
+    for(auto &snd : levelModel->ecs.find_component<components::sound>(channel)) {
+        snd.second.stop_delay = delay;
     }
 }
 

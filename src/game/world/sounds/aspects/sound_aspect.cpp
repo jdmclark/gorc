@@ -31,13 +31,13 @@ gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system 
 
         for(auto &fol : cs.find_component<components::foley>(e.destroyed_entity)) {
             for(auto &snd : cs.find_component<components::sound>(fol.second.sound)) {
-                snd.second.stop_delay = 0.0001f;
+                snd.second.stop_delay = std::numeric_limits<float>::epsilon();
             }
         }
 
         for(auto &tsnd : cs.find_component<components::stop_when_destroyed>(e.destroyed_entity)) {
             for(auto &snd : cs.find_component<components::sound>(tsnd.second.sound)) {
-                snd.second.stop_delay = 0.0001f;
+                snd.second.stop_delay = std::numeric_limits<float>::epsilon();
             }
         }
     });
