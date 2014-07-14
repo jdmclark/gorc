@@ -52,7 +52,7 @@ void code_printer::copy() {
 
 void code_printer::constant(const vm::value& value) {
     stream.write(vm::opcode::CONST);
-    stream.write(value);
+    stream.write(&value, sizeof(value));
 }
 
 void code_printer::load(const std::string& symbol) {

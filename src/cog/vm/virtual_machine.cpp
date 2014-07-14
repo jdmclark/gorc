@@ -23,7 +23,8 @@ void gorc::cog::vm::virtual_machine::execute(std::vector<value>& heap, const cod
             break;
 
         case opcode::CONST: {
-                value v = stream.read<value>();
+                value v(0);
+                stream.read(&v, sizeof(v));
                 push(v);
             }
             break;

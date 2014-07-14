@@ -24,9 +24,13 @@ private:
             return;
         }
 
+        // Code deliberately uncovered. This object is used for storing
+        // constant values inside AST nodes, and should never be visited.
+        // LCOV_EXCL_START
         void accept(visitor&) {
             return;
         }
+        // LCOV_EXCL_STOP
     };
 
 public:
