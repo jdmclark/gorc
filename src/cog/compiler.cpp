@@ -82,17 +82,17 @@ void gorc::cog::compiler::compile(const boost::filesystem::path& filename, io::r
 
     gorc::cog::stages::constant_folding::constant_folding(astFactory, ast, output.symbol_table, ConstantTable, report);
 
-    if(report.get_error_count() != prevErrorCount) {
-        throw io::file_corrupt_exception();
-    }
-
     ir::code_printer printer(output.code, output.symbol_table, MessageTable, verb_table, output.jump_table);
 
     gorc::cog::stages::generate_code::generate_code(ast, printer, report);
 
+    // Currently this branch is not possible. However, it's included to harden this code against
+    // future changes.
+    // LCOV_EXCL_START
     if(report.get_error_count() != prevErrorCount) {
         throw io::file_corrupt_exception();
     }
+    // LCOV_EXCL_STOP
 
     output.flags = flag_set<flags::cog_flag> { ast->flags };
 }

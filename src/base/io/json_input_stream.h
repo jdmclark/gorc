@@ -30,7 +30,13 @@ private:
             next_ch = '\0';
         }
         else {
-            next_ch = read<char>(f);
+            try {
+                next_ch = read<char>(f);
+            }
+            catch(io::file_read_exception&) {
+                // Reached end of stream.
+                next_ch = '\0';
+            }
         }
     }
 

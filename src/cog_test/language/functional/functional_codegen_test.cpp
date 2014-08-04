@@ -63,6 +63,8 @@ public:
         });
 
         verb_table.add_verb<int, 1>("mkint", [](int v) { return v; });
+
+        ConstantTable.emplace("three", 3);
         return;
     }
 };
@@ -185,6 +187,15 @@ test_case(s2_call) {
     assert_eq(Pop(), 6);
     assert_eq(Pop(), 24);
     assert_eq(Pop(), 120);
+    assert_true(IsEmpty());
+}
+
+test_case(s2_const_val) {
+    ParseFile("const_val.cog");
+    AssertResult(0, 0);
+
+    expect_eq(Pop(), 3);
+    expect_eq(Pop(), 7);
     assert_true(IsEmpty());
 }
 
