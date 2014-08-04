@@ -49,6 +49,7 @@ public:
     int attached_surface = -1;
     int attached_thing = -1;
     vector<3> prev_attached_thing_position;
+    vector<3> attached_thing_velocity;
 
     int attached_key_mix = -1;
 

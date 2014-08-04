@@ -7,7 +7,9 @@
 #include "shape.h"
 #include "contact.h"
 #include <unordered_map>
+#include <map>
 #include <set>
+#include <unordered_set>
 #include <vector>
 #include <tuple>
 #include "game/world/level_model.h"
@@ -43,6 +45,9 @@ private:
 
     std::unordered_multimap<int, int> physics_broadphase_thing_influence;
     std::unordered_multimap<int, int> physics_broadphase_sector_things;
+    std::unordered_map<int, int> physics_broadphase_sector_group;
+    std::multimap<int, int> physics_broadphase_thing_groups;
+    std::unordered_set<int> physics_broadphase_groups_to_merge;
     std::set<int> physics_overlapping_things;
     std::vector<physics::contact> physics_thing_resting_manifolds;
     std::set<int> physics_thing_closed_set;
@@ -55,6 +60,8 @@ private:
     void physics_calculate_broadphase(double dt);
     void physics_find_sector_resting_manifolds(const physics::sphere& sphere, int sector_id, const vector<3>& vel_dir, int current_thing_id);
     void physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>& vel_dir, int current_thing_id);
+    void compute_current_velocity(components::thing &thing, double dt);
+    void compute_thing_attachment_velocity(components::thing &thing, double dt);
     void physics_thing_step(int thing_id, components::thing& thing, double dt);
 
     void update_thing_path_moving(int thing_id, components::thing& thing, double dt);

@@ -144,6 +144,69 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
         }
     }
 
+    // Compute and merge sector groups
+    physics_broadphase_sector_group.clear();
+
+    // Group sectors together
+    int current_influence_group = 0;
+    for(auto it_begin = physics_broadphase_thing_influence.begin();
+        it_begin != physics_broadphase_thing_influence.end(); ) {
+        // Find range end
+        auto it_end = it_begin;
+        while((it_end != physics_broadphase_thing_influence.end()) &&
+              (it_end->first == it_begin->first)) {
+            ++it_end;
+        }
+
+        physics_broadphase_groups_to_merge.clear();
+        bool used_current_influence_group = false;
+        int min_id_to_merge = current_influence_group;
+        for(const auto &influenced_sector : make_range(it_begin, it_end)) {
+            auto sector_group_it = physics_broadphase_sector_group.find(influenced_sector.second);
+            if(sector_group_it == physics_broadphase_sector_group.end()) {
+                // Sector is not currently in a group.
+                physics_broadphase_sector_group.emplace(influenced_sector.second,
+                                                        current_influence_group);
+                used_current_influence_group = true;
+            }
+            else {
+                // Sector is currently in a group.
+                physics_broadphase_groups_to_merge.emplace(sector_group_it->second);
+                min_id_to_merge = std::min(sector_group_it->second, min_id_to_merge);
+            }
+        }
+
+        if(used_current_influence_group) {
+            physics_broadphase_groups_to_merge.emplace(current_influence_group++);
+        }
+
+        // Merge groups
+        for(auto &grouped_sector : physics_broadphase_sector_group) {
+            if(physics_broadphase_groups_to_merge.count(grouped_sector.second)) {
+                grouped_sector.second = min_id_to_merge;
+            }
+        }
+
+        it_begin = it_end;
+    }
+
+    // Remap sector groups to thing groups
+    physics_broadphase_thing_groups.clear();
+
+    for(auto it_begin = physics_broadphase_thing_influence.begin();
+        it_begin != physics_broadphase_thing_influence.end(); ) {
+        auto it_end = it_begin;
+        while((it_end != physics_broadphase_thing_influence.end()) &&
+              (it_end->first == it_begin->first)) {
+            ++it_end;
+        }
+
+        int thing_group_id = physics_broadphase_sector_group.find(it_begin->second)->second;
+        physics_broadphase_thing_groups.emplace(thing_group_id, it_begin->first);
+
+        it_begin = it_end;
+    }
+
     return;
 }
 
@@ -240,8 +303,8 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
     }
 }
 
-void physics_presenter::physics_thing_step(int thing_id, components::thing& thing, double dt) {
-
+void physics_presenter::compute_current_velocity(components::thing &thing,
+                                                 double dt) {
     // TODO: Move somewhere more appropriate.
     //thing.vel = thing.vel + thing.thrust * static_cast<float>(dt);
 
@@ -271,16 +334,20 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
     //if(thing.physics_flags & flags::physics_flag::uses_rotational_velocity) {
     thing.orient *= make_euler(thing.ang_vel * static_cast<float>(dt));
     //}
+}
 
-    auto this_frame_only_vel = make_zero_vector<3, float>();
-    if((thing.attach_flags & flags::attach_flag::AttachedToThing) || (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
+void physics_presenter::compute_thing_attachment_velocity(components::thing &thing, double dt) {
+    thing.attached_thing_velocity = make_zero_vector<3, float>();
+    if((thing.attach_flags & flags::attach_flag::AttachedToThing) ||
+       (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
         const auto& parent_thing = model->get_thing(thing.attached_thing);
-        this_frame_only_vel = (parent_thing.position - thing.prev_attached_thing_position) / static_cast<float>(dt);
+        thing.attached_thing_velocity = (parent_thing.position - thing.prev_attached_thing_position) /
+                                        static_cast<float>(dt);
         thing.prev_attached_thing_position = parent_thing.position;
     }
+}
 
-    thing.vel += this_frame_only_vel;
-
+void physics_presenter::physics_thing_step(int thing_id, components::thing& thing, double dt) {
     // Only perform collision detection for player, actor, and weapon types.
     if(thing.type != flags::thing_type::Actor &&
        thing.type != flags::thing_type::Player &&
@@ -294,133 +361,123 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
         return;
     }
 
-    double dt_remaining = dt;
-    double dt_step = 0.5 * static_cast<double>(thing.move_size) / static_cast<double>(length(thing.vel));
+    // Do sphere collision:
 
-    int loop_ct = 0;
+    physics_thing_resting_manifolds.clear();
+    physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size),
+                                          thing.sector,
+                                          thing.vel,
+                                          thing_id);
+    physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, thing_id);
 
-    while(dt_remaining > 0.0) {
-        ++loop_ct;
+    vector<3> prev_thing_vel = thing.vel;
 
-        double this_step_dt = (dt_remaining < dt_step) ? dt_remaining : dt_step;
+    bool influenced_by_manifolds = false;
 
-        // Do sphere collision:
+    // Add 'towards' velocities from resting contacts, projected into manifold direction.
+    for(const auto& manifold : physics_thing_resting_manifolds) {
+        auto man_vel_len = dot(manifold.velocity, manifold.normal);
 
-        physics_thing_resting_manifolds.clear();
-        physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size), thing.sector, thing.vel, thing_id);
-        physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, thing_id);
-
-        vector<3> prev_thing_vel = thing.vel;
-
-        bool influenced_by_manifolds = false;
-
-        // Add 'towards' velocities from resting contacts, projected into manifold direction.
-        for(const auto& manifold : physics_thing_resting_manifolds) {
-            auto man_vel_len = dot(manifold.velocity, manifold.normal);
-
-            if(man_vel_len <= 0.0f) {
-                // Not contributing velocity.
-                continue;
-            }
-
-            auto man_vel = manifold.normal * man_vel_len;
-
-            auto vel_dot = dot(prev_thing_vel, man_vel);
-            auto amt_in_man_vel = vel_dot / man_vel_len;
-
-            if(amt_in_man_vel < man_vel_len) {
-                influenced_by_manifolds = true;
-                prev_thing_vel += (man_vel_len - amt_in_man_vel) * (man_vel / man_vel_len);
-            }
+        if(man_vel_len <= 0.0f) {
+            // Not contributing velocity.
+            continue;
         }
 
-        bool reject_vel = true;
+        auto man_vel = manifold.normal * man_vel_len;
 
-        // Solve LCP, 20 iterations
+        auto vel_dot = dot(prev_thing_vel, man_vel);
+        auto amt_in_man_vel = vel_dot / man_vel_len;
 
-        for(int i = 0; i < 5; ++i) {
-            vector<3> new_computed_vel = prev_thing_vel;
-            for(const auto& manifold : physics_thing_resting_manifolds) {
-                // Three cases:
-                auto vel_dot = dot(new_computed_vel, manifold.normal);
-                if(vel_dot < 0.0f) {
-                    // Reject manifold vector from velocity.
-                    // But just enough to prevent drift.
-                    auto vel_man_vel_dot = dot(new_computed_vel, manifold.velocity);
-                    if(vel_man_vel_dot <= 0.0f) {
-                        // Object is being stopped.
-                        new_computed_vel -= vel_dot * manifold.normal;
+        if(amt_in_man_vel < man_vel_len) {
+            influenced_by_manifolds = true;
+            prev_thing_vel += (man_vel_len - amt_in_man_vel) * (man_vel / man_vel_len);
+        }
+    }
+
+    bool reject_vel = true;
+
+    // Solve LCP, 5 iterations
+    for(int i = 0; i < 5; ++i) {
+        vector<3> new_computed_vel = prev_thing_vel;
+        for(const auto& manifold : physics_thing_resting_manifolds) {
+            // Three cases:
+            auto vel_dot = dot(new_computed_vel, manifold.normal);
+            if(vel_dot < 0.0f) {
+                // Reject manifold vector from velocity.
+                // But just enough to prevent drift.
+                auto vel_man_vel_dot = dot(new_computed_vel, manifold.velocity);
+                if(vel_man_vel_dot <= 0.0f) {
+                    // Object is being stopped.
+                    new_computed_vel -= vel_dot * manifold.normal;
+                    influenced_by_manifolds = true;
+                }
+                else {
+                    // Object is possibly being slowed.
+                    float manifold_vel_len = length(manifold.velocity);
+                    auto nrm_manifold_vel = manifold.velocity / manifold_vel_len;
+                    auto nrm_man_vel_dot = vel_man_vel_dot / manifold_vel_len;
+                    if(nrm_man_vel_dot > manifold_vel_len) {
+                        // Object is being slowed.
+                        new_computed_vel -= nrm_manifold_vel * (nrm_man_vel_dot - manifold_vel_len);
                         influenced_by_manifolds = true;
-                    }
-                    else {
-                        // Object is possibly being slowed.
-                        float manifold_vel_len = length(manifold.velocity);
-                        auto nrm_manifold_vel = manifold.velocity / manifold_vel_len;
-                        auto nrm_man_vel_dot = vel_man_vel_dot / manifold_vel_len;
-                        if(nrm_man_vel_dot > manifold_vel_len) {
-                            // Object is being slowed.
-                            new_computed_vel -= nrm_manifold_vel * (nrm_man_vel_dot - manifold_vel_len);
-                            influenced_by_manifolds = true;
-                        }
                     }
                 }
             }
-
-            if(length_squared(new_computed_vel - prev_thing_vel) < 0.000001f) {
-                // Solution has stabilized
-                prev_thing_vel = new_computed_vel;
-                reject_vel = false;
-                break;
-            }
-            else {
-                // Solution has not yet stabilized.
-                prev_thing_vel = new_computed_vel;
-            }
         }
 
-        // HACK: if thing is projectile and there is a valid resting manifold,
-        // stop at the current position and process collisions.
-        if(thing.type == flags::thing_type::Weapon && (influenced_by_manifolds || reject_vel)) {
+        if(length_squared(new_computed_vel - prev_thing_vel) < 0.000001f) {
+            // Solution has stabilized
+            prev_thing_vel = new_computed_vel;
+            reject_vel = false;
             break;
         }
         else {
-            if(!reject_vel) {
-                thing.vel = prev_thing_vel;
-                presenter.adjust_thing_pos(thing_id, thing.position + prev_thing_vel * static_cast<float>(this_step_dt));
-            }
-            else {
-                thing.vel = make_zero_vector<3, float>();
-                break;
-            }
+            // Solution has not yet stabilized.
+            prev_thing_vel = new_computed_vel;
         }
-
-        // Check vel to make sure all valid resting velocities are still applied.
-        for(const auto& manifold : physics_thing_resting_manifolds) {
-            auto man_vel_len = dot(manifold.velocity, manifold.normal);
-
-            if(man_vel_len <= 0.0f) {
-                // Not contributing velocity.
-                continue;
-            }
-
-            auto man_vel = manifold.normal * man_vel_len;
-
-            auto vel_dot = dot(prev_thing_vel, man_vel);
-            auto amt_in_man_vel = vel_dot / man_vel_len;
-
-            if(amt_in_man_vel < man_vel_len) {
-                // Thing is blocked.
-                if(const int* contact_thing_id = manifold.contact_thing_id) {
-                        auto& contact_thing = model->get_thing(*contact_thing_id);
-                        contact_thing.is_blocked = true;
-                }
-            }
-        }
-
-        dt_remaining -= dt_step;
     }
 
-    thing.vel -= this_frame_only_vel;
+    // HACK: if thing is projectile and there is a valid resting manifold,
+    // stop at the current position and process collisions.
+    if(thing.type == flags::thing_type::Weapon && (influenced_by_manifolds || reject_vel)) {
+        //thing.vel = make_zero_vector<3, float>();
+        //thing.collide = flags::collide_type::none;
+        return;
+    }
+    else {
+        if(!reject_vel) {
+            thing.vel = prev_thing_vel;
+            presenter.adjust_thing_pos(thing_id,
+                                       thing.position + prev_thing_vel * static_cast<float>(dt));
+        }
+        else {
+            thing.vel = make_zero_vector<3, float>();
+            return;
+        }
+    }
+
+    // Check vel to make sure all valid resting velocities are still applied.
+    for(const auto& manifold : physics_thing_resting_manifolds) {
+        auto man_vel_len = dot(manifold.velocity, manifold.normal);
+
+        if(man_vel_len <= 0.0f) {
+            // Not contributing velocity.
+            continue;
+        }
+
+        auto man_vel = manifold.normal * man_vel_len;
+
+        auto vel_dot = dot(prev_thing_vel, man_vel);
+        auto amt_in_man_vel = vel_dot / man_vel_len;
+
+        if(amt_in_man_vel < man_vel_len) {
+            // Thing is blocked.
+            if(const int* contact_thing_id = manifold.contact_thing_id) {
+                    auto& contact_thing = model->get_thing(*contact_thing_id);
+                    contact_thing.is_blocked = true;
+            }
+        }
+    }
 }
 
 void physics_presenter::update_thing_path_moving(int thing_id, components::thing& thing, double dt) {
@@ -578,10 +635,68 @@ void physics_presenter::update(const time& time) {
     // - Calculate potentially overlapping pairs (broadphase)
     physics_calculate_broadphase(dt);
 
-    // - Rectify physics thing position vs. velocity, resting contacts, etc.
-    for(auto& thing : model->ecs.all_components<components::thing>()) {
+    // - Compute current velocity from thrust, etc.
+    for(auto &thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.move == flags::move_type::physics) {
-            physics_thing_step(static_cast<int>(thing.first), thing.second, dt);
+            compute_current_velocity(thing.second, dt);
+            compute_thing_attachment_velocity(thing.second, dt);
+            thing.second.vel += thing.second.attached_thing_velocity;
+        }
+    }
+
+    // - Rectify physics thing position vs. velocity, resting contacts, etc.
+    for(auto thing_range_begin = physics_broadphase_thing_groups.begin();
+        thing_range_begin != physics_broadphase_thing_groups.end(); ) {
+
+        // - Find end of group range.
+        auto thing_range_end = thing_range_begin;
+        while((thing_range_end != physics_broadphase_thing_groups.end()) &&
+              (thing_range_begin->first == thing_range_end->first)) {
+            ++thing_range_end;
+        }
+
+        // - Compute minimum step size
+        double step_dt = dt;
+        for(auto const &moving_thing_pair : make_range(thing_range_begin, thing_range_end)) {
+            auto const &moving_thing = model->get_thing(moving_thing_pair.second);
+            auto moving_thing_vel_length = static_cast<double>(length(moving_thing.vel));
+            if(moving_thing_vel_length <= 0.0) {
+                step_dt = std::min(step_dt, dt);
+            }
+            else {
+                double moving_thing_step = 0.5 * static_cast<double>(moving_thing.move_size) /
+                                           static_cast<double>(length(moving_thing.vel));
+                step_dt = std::min(step_dt, moving_thing_step);
+            }
+        }
+
+        // - Update things
+        double dt_remaining = dt;
+        while(dt_remaining > 0.0) {
+            double this_step_dt = (dt_remaining > step_dt) ? step_dt : dt_remaining;
+            dt_remaining -= this_step_dt;
+
+            for(auto &moving_thing_pair : make_range(thing_range_begin, thing_range_end)) {
+                auto &moving_thing = model->get_thing(moving_thing_pair.second);
+                if(moving_thing.move == flags::move_type::physics) {
+                    physics_thing_step(moving_thing_pair.second,
+                                       moving_thing,
+                                       this_step_dt);
+                }
+                else if(!moving_thing.is_blocked &&
+                        (moving_thing.path_moving || moving_thing.rotatepivot_moving)) {
+                    update_thing_path_moving(moving_thing_pair.second, moving_thing, this_step_dt);
+                }
+            }
+        }
+
+        thing_range_begin = thing_range_end;
+    }
+
+    // - Remove thing attachment velocity.
+    for(auto &thing : model->ecs.all_components<components::thing>()) {
+        if(thing.second.move == flags::move_type::physics) {
+            thing.second.vel -= thing.second.attached_thing_velocity;
         }
     }
 
@@ -590,9 +705,6 @@ void physics_presenter::update(const time& time) {
         if(thing.second.is_blocked && (thing.second.path_moving || thing.second.rotatepivot_moving)) {
             presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, static_cast<int>(thing.first), flags::message_type::thing,
                     -1, flags::message_type::nothing);
-        }
-        else if(thing.second.path_moving || thing.second.rotatepivot_moving) {
-            update_thing_path_moving(static_cast<int>(thing.first), thing.second, dt);
         }
         else if(thing.second.attach_flags & flags::attach_flag::AttachedToThing) {
             const auto& parent_thing = model->get_thing(thing.second.attached_thing);
