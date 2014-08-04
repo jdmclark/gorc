@@ -55,6 +55,17 @@ gorc::flags::standing_material_type character_controller_aspect::get_standing_ma
     }
 }
 
+bool character_controller_aspect::can_stand_on_thing(int surface_thing_id) {
+    auto const &surface_thing = presenter.model->get_thing(surface_thing_id);
+    return (surface_thing.collide == flags::collide_type::face) &&
+           (surface_thing.flags & flags::thing_flag::CanStandOn);
+}
+
+bool character_controller_aspect::can_stand_on_surface(int surface_id) {
+    auto const &surface = presenter.model->surfaces[surface_id];
+    return surface.flags & flags::surface_flag::Floor;
+}
+
 gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(entity_id thing_id, components::thing& thing,
                 double) {
     // Test for collision between legs and ground using multiple tests
@@ -67,8 +78,9 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     maybe<physics::contact> contact;
 
     contact = presenter.physics_presenter->thing_segment_query(thing_id, -leg_height,
-            [&](int t) { return presenter.physics_presenter->thing_needs_collision_response(thing_id, t); },
-            [&](int s) { return presenter.physics_presenter->surface_needs_collision_response(thing_id, s); }, contact);
+            [&](int t) { return can_stand_on_thing(t); },
+            [&](int s) { return can_stand_on_surface(s); },
+            contact);
     if(contact) {
         return contact;
     }
@@ -91,8 +103,9 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     maybe<physics::contact> contact;
 
     contact = presenter.physics_presenter->thing_segment_query(thing_id, -leg_height,
-            [&](int t) { return presenter.physics_presenter->thing_needs_collision_response(thing_id, t); },
-            [&](int s) { return presenter.physics_presenter->surface_needs_collision_response(thing_id, s); }, contact);
+            [&](int t) { return can_stand_on_thing(t); },
+            [&](int s) { return can_stand_on_surface(s); },
+            contact);
     if(contact) {
         return contact;
     }

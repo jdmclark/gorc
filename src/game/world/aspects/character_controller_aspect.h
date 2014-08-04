@@ -24,6 +24,9 @@ private:
 
     flags::standing_material_type get_standing_material(components::thing& thing);
 
+    bool can_stand_on_thing(int surface_thing_id);
+    bool can_stand_on_surface(int surface_id);
+
     maybe<physics::contact> run_falling_sweep(entity_id thing_id, components::thing& thing, double dt);
     maybe<physics::contact> run_walking_sweep(entity_id thing_id, components::thing& thing, double dt);
 
