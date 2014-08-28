@@ -44,7 +44,7 @@ public:
     game::level_state components;
 
     application(content::vfs::virtual_file_system& filesystem, diagnostics::report& report,
-            const std::string& input_episodename, const std::string& input_levelname);
+            const std::string& input_episodename, const std::string& input_levelname, std::string& input_enginename);
     ~application();
 
     virtual void startup(event_bus& eventbus, content::content_manager& content) override;

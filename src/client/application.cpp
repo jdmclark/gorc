@@ -5,11 +5,13 @@
 #include "world/level_view.h"
 #include <boost/algorithm/string/predicate.hpp>
 #include "base/events/print.h"
+#include "base/engine.h"
 
 gorc::client::application::application(content::vfs::virtual_file_system& vfs, diagnostics::report& report,
-        const std::string& episode_name, const std::string& level_name)
+        const std::string& episode_name, const std::string& level_name, std::string& engine_name)
     : gorc::application<view_layer, presenter, presenter_mapper>("Gorc", mapper, report, vfs, make_box(make_vector(0, 0), make_vector(1280, 720)), true),
       mapper(*this), input_episodename(episode_name), input_levelname(level_name), virtual_filesystem(vfs) {
+    gorc::engine::enginename = engine_name;
     return;
 }
 
@@ -23,7 +25,7 @@ void gorc::client::application::startup(event_bus& eventbus, content::content_ma
         std::cout << print.message << std::endl;
     });
 
-    hud_view = make_unique<class hud_view>(content);
+    hud_view = make_unique<class hud_view>(content, gorc::engine::enginename);
     level_view = make_unique<world::level_view>(content);
     action_view = make_unique<action::action_view>();
 

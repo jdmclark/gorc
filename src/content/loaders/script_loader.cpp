@@ -1,7 +1,7 @@
 #include "script_loader.h"
 #include "content/assets/script.h"
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::script_loader::asset_root_path = { "cog" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::script_loader::asset_root_path = { "cog", "mission/cog" };
 
 gorc::content::loaders::script_loader::script_loader(const cog::compiler& compiler)
     : compiler(compiler) {

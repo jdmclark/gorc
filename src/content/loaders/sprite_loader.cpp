@@ -5,7 +5,7 @@
 #include "base/content/content_manager.h"
 #include <boost/format.hpp>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::sprite_loader::asset_root_path = { "misc/spr" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::sprite_loader::asset_root_path = { "misc/spr", "mission/spr" };
 
 gorc::content::loaders::sprite_loader::sprite_loader(const content::assets::colormap& colormap) : colormap(colormap) {
     return;

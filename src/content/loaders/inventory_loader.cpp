@@ -2,9 +2,11 @@
 #include "content/assets/inventory.h"
 #include "base/diagnostics/helper.h"
 #include "base/io/exception.h"
+#include "base/engine.h"
+#include "client/application.h"
 #include <boost/format.hpp>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::inventory_loader::asset_root_path = { "misc" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::inventory_loader::asset_root_path = { "misc", "mission" };
 
 gorc::content::loaders::inventory_loader::inventory_loader(cog::compiler& compiler) : compiler(compiler) {
     return;
@@ -13,6 +15,9 @@ gorc::content::loaders::inventory_loader::inventory_loader(cog::compiler& compil
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::inventory_loader::parse(text::tokenizer& t,
         content::content_manager& manager, diagnostics::report& report) {
     std::unique_ptr<content::assets::inventory> dat(new content::assets::inventory());
+
+    if(gorc::engine::enginename != "JEDI") //TODO: Droidworks and MoTS inventory handling
+        return std::unique_ptr<asset>(std::move(dat));
 
     text::token tok;
     while(true) {
