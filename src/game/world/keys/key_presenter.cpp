@@ -297,7 +297,8 @@ int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
 
     content::assets::puppet_submode const *submode_ptr = nullptr;
     for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(thing_id)) {
-        submode_ptr = &tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
+        if(tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).submode_exists(minor_mode))
+            submode_ptr = &tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
     }
 
     if(!submode_ptr) {
