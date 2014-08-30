@@ -36,7 +36,7 @@ void sound_presenter::update(const time& time) {
     const auto& cam = levelModel->camera_model.current_computed_state;
     auto camera_position = cam.position;
     auto listener_target = cam.look;
-    sf::Listener::setDirection(get<0>(listener_target), get<2>(listener_target), -get<1>(listener_target));
+    sf::Listener::setDirection(get<0>(listener_target), get<2>(listener_target), (1 - get<1>(listener_target)) / 2);
     sf::Listener::setPosition(get<0>(camera_position), get<2>(camera_position), -get<1>(camera_position));
     // TODO: Handle camera orientation (not properly implemented in SFML).
     const auto& player_sec = levelModel->sectors[cam.containing_sector];
