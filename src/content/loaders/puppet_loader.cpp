@@ -108,7 +108,9 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::puppet_loader::par
                 tok.skip_to_next_line();
             }
             else {
-                assets::puppet_submode& submode = mode->submodes[static_cast<unsigned int>(it->second)];
+                auto ins_res = mode->submodes.emplace(it->second, assets::puppet_submode());
+                assets::puppet_submode &submode = ins_res.first->second;
+
                 submode.anim = &manager.load<assets::animation>(tok.get_space_delimited_string());
                 submode.flags = flag_set<flags::key_flag>(tok.get_number<unsigned int>());
                 submode.lo_priority = tok.get_number<unsigned int>();

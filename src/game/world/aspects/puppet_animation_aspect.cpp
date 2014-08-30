@@ -99,27 +99,28 @@ void puppet_animation_aspect::set_walk_animation(components::thing &thing,
                                                  components::puppet_animations &pup,
                                                  flags::puppet_submode_type type,
                                                  float speed) {
-    if(thing.type == flags::thing_type::Corpse || pup.actor_walk_animation < 0 || pup.puppet.get_mode(pup.puppet_mode_type).submode_exists(type) == 0) {
+    if(thing.type == flags::thing_type::Corpse || pup.actor_walk_animation < 0) {
         // Thing is dead and/or cannot play a walk animation.
         return;
     }
 
     keys::key_state &keyState = presenter.model->key_model.keys[pup.actor_walk_animation];
-    auto const &submode = pup.puppet.get_mode(pup.puppet_mode_type).get_submode(type);
-
     if(!keyState.animation) {
         return;
     }
 
-    if(keyState.animation != submode.anim) {
-        keyState.animation_time = 0.0;
-    }
+    auto const &maybe_submode = pup.puppet.get_mode(pup.puppet_mode_type).get_submode(type);
+    if(content::assets::puppet_submode const *submode = maybe_submode) {
+        if(keyState.animation != submode->anim) {
+            keyState.animation_time = 0.0;
+        }
 
-    keyState.animation = submode.anim;
-    keyState.high_priority = submode.hi_priority;
-    keyState.low_priority = submode.lo_priority;
-    keyState.flags = flag_set<flags::key_flag>();
-    keyState.speed = speed;
+        keyState.animation = submode->anim;
+        keyState.high_priority = submode->hi_priority;
+        keyState.low_priority = submode->lo_priority;
+        keyState.flags = flag_set<flags::key_flag>();
+        keyState.speed = speed;
+    }
 }
 
 void puppet_animation_aspect::set_walk_animation_speed(components::puppet_animations &pup,
@@ -134,8 +135,10 @@ bool puppet_animation_aspect::is_walk_animation_mode(components::puppet_animatio
                                                      flags::puppet_submode_type type) {
     if(pup.actor_walk_animation >= 0) {
         auto &key_state = presenter.model->key_model.keys[pup.actor_walk_animation];
-        auto const &submode = pup.puppet.get_mode(pup.puppet_mode_type).get_submode(type);
-        return key_state.animation == submode.anim;
+        auto const &maybe_submode = pup.puppet.get_mode(pup.puppet_mode_type).get_submode(type);
+        if(content::assets::puppet_submode const *submode = maybe_submode) {
+            return key_state.animation == submode->anim;
+        }
     }
 
     return false;

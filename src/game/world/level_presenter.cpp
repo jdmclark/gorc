@@ -1292,7 +1292,6 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         components.current_level_presenter->attach_thing_to_thing(attach_thing, base_thing);
     });
 
-    //TODO: Fix SWDW implementation
     verbTable.add_verb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
         return components.current_level_presenter->create_thing_at_thing(tpl_id, thing_pos);
     });
@@ -1348,7 +1347,6 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         return static_cast<int>(components.current_level_presenter->get_actor_flags(thing_id));
     });
 
-    //TODO: Fix SWDW implementation
     verbTable.add_verb<void, 2>("setactorflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->set_actor_flags(thing_id, flag_set<flags::actor_flag>(flags));
     });
@@ -1402,7 +1400,6 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
         return static_cast<int>(components.current_level_presenter->get_thing_type(thing_id));
     });
 
-    //TODO: Fix SWDW implementation
     verbTable.add_verb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {
         components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
     });

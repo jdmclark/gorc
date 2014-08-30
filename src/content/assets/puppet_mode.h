@@ -2,6 +2,8 @@
 
 #include "content/flags/puppet_submode_type.h"
 #include "puppet_submode.h"
+#include "base/utility/enum_hasher.h"
+#include "base/utility/maybe.h"
 #include <unordered_map>
 #include <array>
 
@@ -11,18 +13,17 @@ namespace assets {
 
 class puppet_mode {
 public:
-    std::unordered_map<int, puppet_submode> submodes;
+    std::unordered_map<flags::puppet_submode_type,
+                       puppet_submode,
+                       enum_hasher<flags::puppet_submode_type>> submodes;
 
-    inline const puppet_submode& get_submode(flags::puppet_submode_type type) const {
-        if(submodes.find(static_cast<unsigned int>(type)) == submodes.end())
-            return submodes.at(0); //Return idle by default if submode is nonexistant
-        return submodes.at(static_cast<unsigned int>(type));
-    }
+    inline maybe<puppet_submode const*> get_submode(flags::puppet_submode_type type) const {
+        auto it = submodes.find(type);
+        if(it != submodes.end()) {
+            return make_maybe(&it->second);
+        }
 
-    inline const int submode_exists(flags::puppet_submode_type type) const {
-        if(submodes.find(static_cast<unsigned int>(type)) == submodes.end() || submodes.find(0) == submodes.end())
-            return 0;
-        return 1;
+        return nothing;
     }
 };
 
