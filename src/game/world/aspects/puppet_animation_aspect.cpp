@@ -99,8 +99,8 @@ void puppet_animation_aspect::set_walk_animation(components::thing &thing,
                                                  components::puppet_animations &pup,
                                                  flags::puppet_submode_type type,
                                                  float speed) {
-    if(thing.type == flags::thing_type::Corpse || pup.actor_walk_animation < 0) {
-        // Thing is dead and cannot play a walk animation.
+    if(thing.type == flags::thing_type::Corpse || pup.actor_walk_animation < 0 || pup.puppet.get_mode(pup.puppet_mode_type).submode_exists(type) == 0) {
+        // Thing is dead and/or cannot play a walk animation.
         return;
     }
 
