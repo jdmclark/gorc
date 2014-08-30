@@ -8,7 +8,7 @@
 #include <tuple>
 #include <vector>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::animation_loader::asset_root_path = { "3do/key" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::animation_loader::asset_root_path = { "3do/key", "mission/key" };
 
 namespace gorc {
 namespace content {

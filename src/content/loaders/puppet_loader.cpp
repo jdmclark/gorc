@@ -8,7 +8,7 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::puppet_loader::asset_root_path = { "misc/pup" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::puppet_loader::asset_root_path = { "misc/pup", "mission/pup" };
 
 namespace gorc {
 namespace content {

@@ -3,6 +3,7 @@
 #include "base/diagnostics/helper.h"
 #include "base/io/exception.h"
 #include <boost/format.hpp>
+using namespace std;
 
 gorc::content::content_manager::content_manager(diagnostics::report& report, const io::file_system& fs)
     : report(report), fs(fs) {
@@ -18,6 +19,7 @@ std::tuple<int, gorc::content::asset*> gorc::content::content_manager::internal_
         try {
             target_path = root / name;
             file = fs.open(target_path);
+
             break;
         }
         catch(...) {

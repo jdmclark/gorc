@@ -4,7 +4,7 @@
 #include "base/io/exception.h"
 #include "base/io/binary_input_stream.h"
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp", "misc" };
 
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::colormap_loader::deserialize(const boost::filesystem::path& filename,
         io::read_only_file& file, content_manager&, diagnostics::report& report) {

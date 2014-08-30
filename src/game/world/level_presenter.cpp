@@ -4,6 +4,7 @@
 #include "physics/query.h"
 #include "base/events/print.h"
 #include "base/events/exit.h"
+#include "base/engine.h"
 #include "game/level_state.h"
 #include "game/world/physics/physics_presenter.h"
 #include "game/world/animations/animation_presenter.h"
@@ -56,8 +57,12 @@ gorc::game::world::level_presenter::~level_presenter() {
 
 void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     eventbus = &eventBus;
-    model = make_unique<level_model>(eventBus, *place.contentmanager, components.compiler, place.level,
-            place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler));
+            if(gorc::engine::enginename == "JEDI") {
+                model = make_unique<level_model>(eventBus, *place.contentmanager, components.compiler, place.level, place.contentmanager->load<content::assets::inventory>("items.dat", components.compiler));
+            }
+            else if(gorc::engine::enginename == "SWDW") {
+                model = make_unique<level_model>(eventBus, *place.contentmanager, components.compiler, place.level, place.contentmanager->load<content::assets::inventory>("items.inv", components.compiler));
+            }
 
     // Create local aspects
     model->ecs.emplace_aspect<aspects::thing_controller_aspect>(*this);

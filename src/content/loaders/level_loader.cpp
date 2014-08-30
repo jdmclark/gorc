@@ -10,7 +10,7 @@
 #include <tuple>
 #include <vector>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::level_loader::asset_root_path = { "jkl" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::level_loader::asset_root_path = { "jkl", "mission" };
 
 namespace gorc {
 namespace content {

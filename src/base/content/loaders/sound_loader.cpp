@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstdint>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::sound_loader::asset_root_path = { "sound", "voice" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::sound_loader::asset_root_path = { "sound", "voice", "mission/sound", "" };
 
 std::unique_ptr<gorc::content::asset> gorc::content::loaders::sound_loader::deserialize(const boost::filesystem::path&,
         io::read_only_file& file, content_manager&, diagnostics::report&) {

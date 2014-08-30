@@ -9,7 +9,7 @@
 #include <vector>
 #include "content/constants.h"
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::model_loader::asset_root_path = { "3do" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::model_loader::asset_root_path = { "3do", "mission/3do" };
 
 namespace gorc {
 namespace content {

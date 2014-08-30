@@ -6,7 +6,7 @@
 #include <array>
 #include <boost/format.hpp>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::material_loader::asset_root_path = { "mat", "3do/mat" };
+const std::vector<boost::filesystem::path> gorc::content::loaders::material_loader::asset_root_path = { "mat", "3do/mat", "mission/3do/mat", "mission/mat"};
 
 namespace gorc {
 namespace content {
