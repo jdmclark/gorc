@@ -1,5 +1,7 @@
 #include <iomanip>
 #include <sstream>
+#include <stdio.h>
+#include <memory>
 
 #include "hud_view.h"
 #include "client/application.h"
@@ -11,6 +13,8 @@
 #include "base/content/assets/shader.h"
 #include "base/gui/widgets/static_image.h"
 #include "base/gui/widgets/static_text.h"
+#include "game/world/inventory/inventory_presenter.h"
+#include "game/world/level_presenter.h"
 
 gorc::client::hud_view::hud_view(content::content_manager& manager)
     : gui_view(manager.load<content::assets::shader>("gui.glsl")),
@@ -112,31 +116,34 @@ gorc::client::hud_view::hud_view(content::content_manager& manager)
     message_label.vertical_align = gui::layout::vertical_align_style::top;
 }
 
-void gorc::client::hud_view::update(int currentplayer, bool fieldlight, int batt_amount, int health, int max_health, int shields, int max_shields, int force, int ammo) {
-    int health_frac = clamp(5 - (health / (max_health / 5)), 0, 5);
-    int shield_frac = clamp(10 - (shields / (max_shields / 10)), 0, 10); //TODO: Pull proper max shields value
-    int batt_frac = 200 / 6;
-    int force_frac = clamp(15 - (force / (400 / 15)), 0, 15); //TODO: Pull proper max force value from getInv(20)*50, which is currently broken.
+void gorc::client::hud_view::update(int current_player, gorc::game::world::inventory::inventory_presenter* inventory, gorc::game::world::level_presenter* level) {
+    int health_frac = clamp(static_cast<int>(5 - (level->model->get_thing(current_player).health / (level->model->get_thing(current_player).max_health / 5))), 0, 5);
+    int shield_frac = clamp(10 - (inventory->get_inv(current_player, 60) / (inventory->get_inv_max(current_player, 60) / 10)), 0, 10); //TODO: Pull proper max shields value
+    int batt_frac = inventory->get_inv_max(current_player, 13) / 6;
+    int force_frac = clamp(15 - (inventory->get_inv(current_player, 14) / (inventory->get_inv_max(current_player, 14) / 15)), 0, 15); //TODO: Pull proper max force value from getInv(20)*50, which is currently broken.
+    int ammo = (weapon_ammo[inventory->get_cur_weapon(current_player)] > 0
+            ? inventory->get_inv(current_player, weapon_ammo[inventory->get_cur_weapon(current_player)])
+            : 0);
 
-    std::ostringstream a;
-    a << std::setw( 3 ) << std::setfill( '0' ) << ammo;
-    std::string ammo_padded = (ammo > 0 ? a.str() : "---");
 
-    std::ostringstream h;
-    h << std::setw( 3 ) << std::setfill( '0' ) << health;
-    std::string health_padded = h.str();
+    char ammo_padded [4];
+    snprintf(ammo_padded, 4, ammo > 0 ? "%03d" : "---", ammo);
 
-    std::ostringstream sh;
-    sh << std::setw( 3 ) << std::setfill( '0' ) << shields;
-    std::string shield_padded = sh.str();
+    char health_padded [4];
+    snprintf(health_padded, 4, "%03d", clamp(static_cast<int>(level->model->get_thing(current_player).health),0,static_cast<int>(level->model->get_thing(current_player).max_health)));
+
+    char shield_padded [4];
+    snprintf(shield_padded, 4, "%03d", inventory->get_inv(current_player, 60));
 
     left_health.set_cel(health_frac);
     left_shields.set_cel(shield_frac);
-    right_battery.set_cel(batt_amount / batt_frac);
-    right_fieldlight.visible = fieldlight;
+    right_battery.set_cel(inventory->get_inv(current_player, 13) / batt_frac);
+    right_fieldlight.visible = inventory->is_inv_activated(current_player, 42);
     right_force.set_cel(force_frac);
 
     health_amount.text = health_padded;
     shields_amount.text = shield_padded;
     ammo_amount.text = ammo_padded;
+
+    std::cout << ammo_padded << std::endl;
 }

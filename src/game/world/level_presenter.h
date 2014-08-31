@@ -71,9 +71,6 @@ public:
     void translate_camera(const vector<3>& amt);
     void yaw_camera(double amt);
     void pitch_camera(double amt);
-    int get_player_inv(int item);
-    int is_player_inv_active(int item);
-    int get_player_weap();
     void respawn();
     void jump();
     void activate();
