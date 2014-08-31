@@ -30,30 +30,30 @@ gorc::box<2, int> gorc::gui::widget::get_default_child_position(const gui_view& 
     int desired_x = get<0>(child.position.v0);
     switch(child.horizontal_align) {
     case layout::horizontal_align_style::left:
-        desired_x = std::get<0>(get_range<0>(parent_area));
+        desired_x = std::get<0>(get_range<0>(parent_area)) + child.padding.left;
         break;
 
     case layout::horizontal_align_style::right:
-        desired_x = std::get<1>(get_range<0>(parent_area)) - desired_width;
+        desired_x = std::get<1>(get_range<0>(parent_area)) - desired_width - child.padding.right;
         break;
 
     case layout::horizontal_align_style::center:
-        desired_x = std::get<0>(get_range<0>(parent_area)) + (get_size<0>(parent_area) - desired_width) / 2;
+        desired_x = std::get<0>(get_range<0>(parent_area)) + (get_size<0>(parent_area) - desired_width) / 2  + child.padding.left - child.padding.right;
         break;
     }
 
     int desired_y = get<1>(child.position.v0);
     switch(child.vertical_align) {
     case layout::vertical_align_style::top:
-        desired_y = std::get<0>(get_range<1>(parent_area));
+        desired_y = std::get<0>(get_range<1>(parent_area)) + child.padding.top;
         break;
 
     case layout::vertical_align_style::bottom:
-        desired_y = std::get<1>(get_range<1>(parent_area)) - desired_height;
+        desired_y = std::get<1>(get_range<1>(parent_area)) - desired_height - child.padding.bottom;
         break;
 
     case layout::vertical_align_style::middle:
-        desired_y = std::get<0>(get_range<1>(parent_area)) + (get_size<1>(parent_area) - desired_height) / 2;
+        desired_y = std::get<0>(get_range<1>(parent_area)) + (get_size<1>(parent_area) - desired_height) / 2 + child.padding.top - child.padding.bottom;
         break;
     }
 
