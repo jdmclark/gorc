@@ -62,22 +62,8 @@ void gorc::client::application::shutdown() {
 }
 
 void gorc::client::application::update(const time& time, const box<2, int>&) {
-    int current_player = components.current_level_presenter->get_local_player_thing();
-    int current_weapon = components.current_level_presenter->get_player_weap();
-    int ammo = 0;
-    if(current_weapon <= 1 || current_weapon == 10)
-        ammo = 0;
-    else if(current_weapon == 2 || current_weapon == 3)
-        ammo = components.current_level_presenter->get_player_inv(11); //Blaster Bolts
-    else if(current_weapon == 5 || current_weapon == 6 || current_weapon == 9)
-        ammo = components.current_level_presenter->get_player_inv(12); //Energy
-    else if(current_weapon == 7)
-        ammo = components.current_level_presenter->get_player_inv(15); //Rail Charges
-    else
-        ammo = components.current_level_presenter->get_player_inv(current_weapon); //Otherwise, check weapon amount
-
     components.current_level_presenter->update(time);
-    hud_view->update(current_player, components.current_level_presenter->is_player_inv_active(42), components.current_level_presenter->get_player_inv(13), components.current_level_presenter->model->get_thing(current_player).health, components.current_level_presenter->model->get_thing(current_player).max_health, components.current_level_presenter->get_player_inv(60), 200, components.current_level_presenter->get_player_inv(14), ammo);
+    hud_view->update(components.current_level_presenter->get_local_player_thing(), components.current_level_presenter->inventory_presenter.get(), components.current_level_presenter.get());
 }
 
 void gorc::client::application::register_verbs() {

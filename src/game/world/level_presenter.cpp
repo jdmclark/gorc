@@ -235,18 +235,6 @@ void gorc::game::world::level_presenter::pitch_camera(double amt) {
     player.head_pitch = clamp(player.head_pitch + static_cast<float>(amt), player.min_head_pitch, player.max_head_pitch);
 }
 
-int gorc::game::world::level_presenter::get_player_inv(int item) {
-    return inventory_presenter->get_inv(get_local_player_thing(), item);
-}
-
-int gorc::game::world::level_presenter::is_player_inv_active(int item) {
-    return inventory_presenter->is_inv_activated(get_local_player_thing(), item);
-}
-
-int gorc::game::world::level_presenter::get_player_weap() {
-    return inventory_presenter->get_cur_weapon(get_local_player_thing());
-}
-
 void gorc::game::world::level_presenter::respawn() {
     ++model->current_spawn_point;
     model->current_spawn_point = model->current_spawn_point % model->spawn_points.size();
