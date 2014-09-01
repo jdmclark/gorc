@@ -5,6 +5,7 @@ flags = [
 '-Wall',
 '-Wextra',
 '-Werror',
+'-Wno-unused-parameter',
 '-std=c++11',
 '-x',
 'c++',

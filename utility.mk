@@ -21,10 +21,10 @@ CXXFLAGS = -I$(SRC_PATH) -std=gnu++11 -Werror \
 	-Wdouble-promotion -Wno-switch-enum -Wswitch -Wuninitialized \
 	-Wstrict-aliasing=3 -Wstrict-overflow=1 \
 	-Wtrampolines -Wfloat-equal -Wcast-qual \
-	-Wcast-align -Wwrite-strings -Wconversion \
+	-Wcast-align -Wwrite-strings -Wno-conversion \
 	-Wlogical-op -Wno-aggressive-loop-optimizations \
 	-Wvector-operation-performance -Wvla \
-	-Wdisabled-optimization \
+	-Wdisabled-optimization -Wno-unused-parameter \
 	-Wno-unused-variable -Wno-unused-local-typedefs -Wno-format \
 	$(CXXFLAGS_EXTRA)
 
