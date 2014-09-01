@@ -40,11 +40,9 @@ private:
     const content::assets::bitmap& battery;
 
     gui::widgets::static_image& left;
-    gui::widgets::static_image& left_mask;
     gui::widgets::dynamic_image& left_health;
     gui::widgets::dynamic_image& left_shields;
     gui::widgets::static_image& right;
-    gui::widgets::static_image& right_mask;
     gui::widgets::dynamic_image& right_force;
     gui::widgets::static_image& right_fieldlight;
     gui::widgets::dynamic_image& right_battery;

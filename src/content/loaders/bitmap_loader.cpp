@@ -66,13 +66,17 @@ GLuint load_bitmap_from_memory(int width, int height, const uint8_t* data) {
 }
 }
 
-gorc::content::loaders::bitmap_loader::bitmap_loader(const assets::colormap& colormap)
-    : pal_colormap(&colormap) {
+gorc::content::loaders::bitmap_loader::bitmap_loader(const assets::colormap& colormap,
+                                                     bool disable_transparency)
+    : pal_colormap(&colormap)
+    , disable_transparency(disable_transparency) {
     return;
 }
 
-gorc::content::loaders::bitmap_loader::bitmap_loader(const assets::bitmap& bitmap)
-    : pal_bitmap(&bitmap) {
+gorc::content::loaders::bitmap_loader::bitmap_loader(const assets::bitmap& bitmap,
+                                                     bool disable_transparency)
+    : pal_bitmap(&bitmap)
+    , disable_transparency(disable_transparency) {
     return;
 }
 
@@ -148,7 +152,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
                     final_img[j + 1] = get<1>(pal_col);
                     final_img[j + 2] = get<2>(pal_col);
 
-                    if(pal_idx == header.transparent_color) {
+                    if(!disable_transparency && pal_idx == header.transparent_color) {
                         final_img[j + 3] = 0;
                     }
                     else {
@@ -201,7 +205,7 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::bitmap_loader::des
                     final_img[j + 1] = get<1>(pal_col);
                     final_img[j + 2] = get<2>(pal_col);
 
-                    if(pal_idx == header.transparent_color) {
+                    if(!disable_transparency && pal_idx == header.transparent_color) {
                         final_img[j + 3] = 0;
                     }
                     else {

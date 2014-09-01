@@ -20,9 +20,9 @@ gorc::client::hud_view::hud_view(content::content_manager& manager)
     : gui_view(manager.load<content::assets::shader>("gui.glsl")),
     dfltcmp(manager.load<content::assets::colormap>("dflt.cmp")),
     msgfont(manager.load<content::assets::sfont>("msgfont16.sft", dfltcmp)),
-    healthfont(manager.load<content::assets::sfont>("helthnum16.sft", dfltcmp)),
-    shieldfont(manager.load<content::assets::sfont>("armornum16.sft", dfltcmp)),
-    ammofont(manager.load<content::assets::sfont>("amonums16.sft", dfltcmp)),
+    healthfont(manager.load<content::assets::sfont>("helthnum16.sft", dfltcmp, true)),
+    shieldfont(manager.load<content::assets::sfont>("armornum16.sft", dfltcmp, true)),
+    ammofont(manager.load<content::assets::sfont>("amonums16.sft", dfltcmp, true)),
     statusleft(manager.load<content::assets::bitmap>("statusleft16.bm", dfltcmp)),
     statusright(manager.load<content::assets::bitmap>("statusright16.bm", dfltcmp)),
     health(manager.load<content::assets::bitmap>("sthealth16.bm", dfltcmp)),
@@ -33,11 +33,9 @@ gorc::client::hud_view::hud_view(content::content_manager& manager)
     battery(manager.load<content::assets::bitmap>("stbat16.bm", dfltcmp)),
 
     left(add_child<gui::widgets::static_image>(get_root(), statusleft.cels[0].color, make_box(make_vector(0, 0), make_vector(59, 60)))),
-    left_mask(add_child<gui::widgets::static_image>(get_root(), health.cels[7].color, make_box(make_vector(0, 0), make_vector(24, 15)))),
     left_health(add_child<gui::widgets::dynamic_image>(get_root(), health, make_box(make_vector(0, 0), make_vector(18, 18)))),
     left_shields(add_child<gui::widgets::dynamic_image>(get_root(), shields, make_box(make_vector(0, 0), make_vector(38, 38)))),
     right(add_child<gui::widgets::static_image>(get_root(), statusright.cels[0].color, make_box(make_vector(0, 0), make_vector(59, 60)))),
-    right_mask(add_child<gui::widgets::static_image>(get_root(), health.cels[7].color, make_box(make_vector(0, 0), make_vector(35, 11)))),
     right_force(add_child<gui::widgets::dynamic_image>(get_root(), force, make_box(make_vector(0, 0), make_vector(43, 22)))), //TODO: Check force level
     right_fieldlight(add_child<gui::widgets::static_image>(get_root(), fieldlight.cels[1].color, make_box(make_vector(0, 0), make_vector(10, 11)))),
     right_battery(add_child<gui::widgets::dynamic_image>(get_root(), battery, make_box(make_vector(0, 0), make_vector(27, 14)))),
@@ -48,22 +46,8 @@ gorc::client::hud_view::hud_view(content::content_manager& manager)
     left.horizontal_align = gui::layout::horizontal_align_style::left;
     left.vertical_align = gui::layout::vertical_align_style::bottom;
 
-    //HACK: Force a black box around the '000' text so we can draw our own stuff
-    left_mask.horizontal_align = gui::layout::horizontal_align_style::left;
-    left_mask.vertical_align = gui::layout::vertical_align_style::bottom;
-    left_mask.padding.bottom = 10;
-    left_mask.padding.left = 13;
-    left_mask.zbias = 1;
-
     right.horizontal_align = gui::layout::horizontal_align_style::right;
     right.vertical_align = gui::layout::vertical_align_style::bottom;
-
-    //HACK: Force a black box around the '000' text for ammo
-    right_mask.horizontal_align = gui::layout::horizontal_align_style::right;
-    right_mask.vertical_align = gui::layout::vertical_align_style::bottom;
-    right_mask.padding.right = 11;
-    right_mask.padding.bottom = 30;
-    right_mask.zbias = 1;
 
     left_health.horizontal_align = gui::layout::horizontal_align_style::left;
     left_health.vertical_align = gui::layout::vertical_align_style::bottom;

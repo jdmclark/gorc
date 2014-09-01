@@ -20,13 +20,17 @@ struct sfont_header {
 }
 }
 
-gorc::content::loaders::sfont_loader::sfont_loader(const assets::colormap& colormap)
-    : pal_colormap(&colormap) {
+gorc::content::loaders::sfont_loader::sfont_loader(const assets::colormap& colormap,
+                                                   bool disable_transparency)
+    : pal_colormap(&colormap)
+    , disable_transparency(disable_transparency) {
     return;
 }
 
-gorc::content::loaders::sfont_loader::sfont_loader(const assets::bitmap& bitmap)
-    : pal_bitmap(&bitmap) {
+gorc::content::loaders::sfont_loader::sfont_loader(const assets::bitmap& bitmap,
+                                                   bool disable_transparency)
+    : pal_bitmap(&bitmap)
+    , disable_transparency(disable_transparency) {
     return;
 }
 
@@ -60,7 +64,9 @@ std::unique_ptr<gorc::content::asset> gorc::content::loaders::sfont_loader::dese
         }
     }
 
-    bitmap_loader embedded_bm_loader = pal_colormap ? bitmap_loader(*pal_colormap) : bitmap_loader(*pal_bitmap);
+    bitmap_loader embedded_bm_loader = pal_colormap ?
+                                       bitmap_loader(*pal_colormap, disable_transparency) :
+                                       bitmap_loader(*pal_bitmap, disable_transparency);
     cmp->uncast_embedded_bm = embedded_bm_loader.deserialize(filename, file, manager, report);
     cmp->embedded_bm = dynamic_cast<assets::bitmap*>(cmp->uncast_embedded_bm.get());
     if(!cmp->embedded_bm) {
