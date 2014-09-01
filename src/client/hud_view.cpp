@@ -144,6 +144,4 @@ void gorc::client::hud_view::update(int current_player, gorc::game::world::inven
     health_amount.text = health_padded;
     shields_amount.text = shield_padded;
     ammo_amount.text = ammo_padded;
-
-    std::cout << ammo_padded << std::endl;
 }
