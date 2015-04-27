@@ -35,6 +35,8 @@
 #include "game/world/events/armed_mode_changed.h"
 #include "game/world/events/class_sound.h"
 
+#include <iostream>
+
 using namespace gorc::math;
 
 gorc::game::world::level_presenter::level_presenter(level_state& components, const level_place& place)
@@ -218,14 +220,18 @@ void gorc::game::world::level_presenter::update_thing_sector(int thing_id, compo
 
 void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) {
     auto& player = model->get_thing(model->local_player_thing_id);
+    auto oriented_vel = invert(player.orient).transform(player.vel);
+    auto vel_fb = get<1>(oriented_vel);
+    auto vel_lr = get<0>(oriented_vel);
+
     player.thrust = player.orient.transform(amt);
 
     if(player.physics_flags & flags::physics_flag::is_crouching) {
         player.thrust *= 0.25f;
     }
 
-    if(player.physics_flags & flags::physics_flag::is_crouching) {
-        player.thrust *= 0.25f;
+    if(player.physics_flags & flags::physics_flag::is_running && vel_fb > 0.0f && fabs(vel_lr) < 0.75f) {
+        player.thrust *= 1.5f;
     }
 
     // TODO: Handle this in character controller or in physics presenter.
@@ -326,6 +332,16 @@ void gorc::game::world::level_presenter::crouch(bool is_crouched) {
     }
     else {
         player.physics_flags -= flags::physics_flag::is_crouching;
+    }
+}
+
+void gorc::game::world::level_presenter::run(bool is_running) {
+    auto& player = model->get_thing(model->local_player_thing_id);
+    if(is_running) {
+        player.physics_flags += flags::physics_flag::is_running;
+    }
+    else {
+        player.physics_flags -= flags::physics_flag::is_running;
     }
 }
 
