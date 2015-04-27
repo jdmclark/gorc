@@ -234,6 +234,10 @@ void gorc::game::world::level_presenter::translate_camera(const vector<3>& amt) 
         player.thrust *= 1.5f;
     }
 
+    if(vel_fb < 0.0f || fabs(vel_lr) > 0.75f) {
+        player.thrust *= 0.75f;
+    }
+
     // TODO: Handle this in character controller or in physics presenter.
     get<2>(player.thrust) = 0.0f;
 }
