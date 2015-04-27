@@ -141,6 +141,10 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const time&, s
         app.components.current_level_presenter->crouch(true);
         break;
 
+    case sf::Keyboard::LShift:
+        app.components.current_level_presenter->run(true);
+        break;
+
     case sf::Keyboard::Num1:
         app.components.current_level_presenter->inventory_presenter->select_weapon(current_player, 1);
         break;
@@ -194,6 +198,10 @@ void gorc::client::action::action_presenter::on_keyboard_key_up(const time&, sf:
 
     case sf::Keyboard::LControl:
         app.components.current_level_presenter->crouch(false);
+        break;
+
+    case sf::Keyboard::LShift:
+        app.components.current_level_presenter->run(false);
         break;
 
     default:
