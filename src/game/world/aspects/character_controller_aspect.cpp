@@ -164,28 +164,28 @@ void character_controller_aspect::update_standing(entity_id thing_id, components
         //Adjust thrust depending on action
         float scale_adjust = 1.0f;
         if(thing.physics_flags & flags::physics_flag::is_crouching) {
-        	scale_adjust *= ((float)4 / (float)15);
+        scale_adjust *= ((float)4 / (float)15);
         }
         else {
             if(fabs(vel_lr) > fabs(vel_fb)) {
-            	scale_adjust *= 0.5f;
+            scale_adjust *= 0.5f;
             }
             else {
-            	scale_adjust *= ((float)2 / (float)3);
+            scale_adjust *= ((float)2 / (float)3);
             }
 
             if(thing.physics_flags & flags::physics_flag::is_running) {
-            	scale_adjust *= 2;
+            scale_adjust *= 2;
             }
         }
 
         //Walking backwards
         if(vel_fb < 0.0f && fabs(vel_lr) < fabs(vel_fb)) {
-        	scale_adjust *= 0.5f;
+        scale_adjust *= 0.5f;
         }
 
         get<0>(thing.thrust) *= scale_adjust;
-		get<1>(thing.thrust) *= scale_adjust;
+        get<1>(thing.thrust) *= scale_adjust;
 
         if(get<2>(thing.thrust) > 0.0f) {
             jump(thing_id, thing);
