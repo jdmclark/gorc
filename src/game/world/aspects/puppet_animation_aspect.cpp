@@ -194,7 +194,7 @@ void puppet_animation_aspect::update_standing_animation(components::thing &thing
                 set_walk_animation(thing, pup, flags::puppet_submode_type::StrafeLeft, run_anim_speed);
             }
         }
-        else if(vel_fb > 0.5f) {
+        else if(vel_fb > 1.0f) {
             // Running forward
             set_walk_animation(thing, pup, flags::puppet_submode_type::Run, run_anim_speed);
         }

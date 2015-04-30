@@ -16,11 +16,11 @@ enum class physics_flag {
     can_fly                            = 0x2000,
     affected_by_blast_force            = 0x4000,
     is_crouching                    = 0x10000,
-    is_running                        = 0x20000,
-    do_not_rotate_velocity            = 0x40000,
-    partial_gravity                    = 0x80000,
+    do_not_rotate_velocity            = 0x20000,
+    partial_gravity                    = 0x40000,
     treading_water                    = 0x100000,
-    not_affected_by_thrust            = 0x400000
+    not_affected_by_thrust            = 0x400000,
+    is_running                    = 0x800000, //TODO: Find actual flag
 };
 
 }

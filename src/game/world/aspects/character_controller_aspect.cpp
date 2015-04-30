@@ -141,6 +141,9 @@ void character_controller_aspect::update_falling(entity_id thing_id, components:
 
 void character_controller_aspect::update_standing(entity_id thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
+    auto oriented_vel = invert(thing.orient).transform(thing.vel);
+    auto vel_fb = get<1>(oriented_vel);
+    auto vel_lr = get<0>(oriented_vel);
 
     if(const physics::contact* contact = maybe_contact) {
         // Check if attached surface/thing has changed.
@@ -156,6 +159,28 @@ void character_controller_aspect::update_standing(entity_id thing_id, components
                 // Player has landed on a new thing.
                 step_on_thing(thing_id, thing, *attachment_id, *contact);
             }
+        }
+
+        //Adjust thrust depending on action
+        if(thing.physics_flags & flags::physics_flag::is_crouching) {
+            thing.thrust *= ((float)4 / (float)15);
+        }
+        else {
+            if(fabs(vel_lr) > fabs(vel_fb)) {
+                thing.thrust *= 0.5f;
+            }
+            else {
+                thing.thrust *= ((float)2 / (float)3);
+            }
+
+            if(thing.physics_flags & flags::physics_flag::is_running) {
+                thing.thrust *= 2;
+            }
+        }
+
+        //Walking backwards
+        if(vel_fb < 0.0f && fabs(vel_lr) < fabs(vel_fb)) {
+            thing.thrust *= 0.5f;
         }
 
         if(get<2>(thing.thrust) > 0.0f) {
