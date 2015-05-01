@@ -146,8 +146,8 @@ bool puppet_animation_aspect::is_walk_animation_mode(components::puppet_animatio
 
 void puppet_animation_aspect::update_standing_animation(components::thing &thing,
                                                         components::puppet_animations &pup) {
-    auto oriented_vel = invert(thing.orient).transform(thing.vel);
-    auto run_length = length(thing.vel);
+    auto oriented_vel = invert(thing.orient).transform(thing.thrust);
+    auto run_length = length(thing.thrust);
 
     auto vel_fb = get<1>(oriented_vel);
     auto vel_lr = get<0>(oriented_vel);
