@@ -10,10 +10,13 @@ before_script:
   - sudo add-apt-repository -y ppa:boost-latest/ppa
   - sudo apt-get -qq update
   - sudo apt-get install -y gcc-4.9 g++-4.9 libstdc++-4.8-dev build-essential boost1.55
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 90
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.9 90
   - sudo apt-get install -y libjpeg62-dev libsndfile1-dev libglew1.5 libglew1.5-dev libfreetype6 libjpeg-turbo8 libjpeg8 libopenal-data libopenal1 libxrandr2 libxrender1 libsoil1 flex bison
   - sudo pip install cpp-coveralls
 
 script:
-  - CC=gcc-4.9 CXX=g++-4.9 make BUILD_CONFIG=test-coverage
-  - CC=gcc-4.9 CXX=g++-4.9 make test BUILD_CONFIG=test-coverage
+  - make BUILD_CONFIG=test-coverage
+  - make test BUILD_CONFIG=test-coverage
   - make coveralls-test-coverage-report
