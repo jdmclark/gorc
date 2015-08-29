@@ -28,4 +28,8 @@ test:
 test-coverage-report:
 	$(MAKE) -f $(RULES)/build.mk generate-test-coverage-report
 
+.PHONY: coveralls-test-coverage-report
+coveralls-test-coverage-report:
+	$(MAKE) -f $(RULES)/build.mk generate-coveralls-test-coverage-report
+
 endif

@@ -11,7 +11,9 @@ before_script:
   - sudo apt-get -qq update
   - sudo apt-get install -y gcc-4.9 g++-4.9 libstdc++-4.8-dev build-essential boost1.55
   - sudo apt-get install -y libjpeg62-dev libsndfile1-dev libglew1.5 libglew1.5-dev libfreetype6 libjpeg-turbo8 libjpeg8 libopenal-data libopenal1 libxrandr2 libxrender1 libsoil1 flex bison
+  - sudo pip install cpp-coveralls
 
 script:
-  - CC=gcc-4.9 CXX=g++-4.9 make
-  - CC=gcc-4.9 CXX=g++-4.9 make test
+  - CC=gcc-4.9 CXX=g++-4.9 make BUILD_CONFIG=test-coverage
+  - CC=gcc-4.9 CXX=g++-4.9 make test BUILD_CONFIG=test-coverage
+  - make coveralls-test-coverage-report
