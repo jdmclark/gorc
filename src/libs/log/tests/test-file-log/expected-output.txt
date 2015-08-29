@@ -1,0 +1,5 @@
+$ROOT$/src/libs/log/tests/example-file-log/main.cpp|18|error> logged error message
+$ROOT$/src/libs/log/tests/example-file-log/main.cpp|19|warning> logged warning message
+$ROOT$/src/libs/log/tests/example-file-log/main.cpp|20|info> logged info message
+$ROOT$/src/libs/log/tests/example-file-log/main.cpp|21|debug> logged debug message
+$ROOT$/src/libs/log/tests/example-file-log/main.cpp|22|trace> logged trace message

@@ -1,0 +1,4 @@
+[ERROR] logged error message
+[WARNING] logged warning message
+logged info message
+logged format message: message
