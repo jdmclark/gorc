@@ -132,6 +132,7 @@
     using namespace gorc::cog;
 
     int yylex(YYSTYPE *lvalp, diagnostic_context_location *llocp, void *scanner);
+    int yyparse(grammar *instance);
 
     void yyerror(diagnostic_context_location *llocp, grammar*, char const *err)
     {
