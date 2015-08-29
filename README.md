@@ -1,6 +1,6 @@
 # Gorc
 
-[![Build Status](https://travis-ci.org/jdmclark/gorc.svg?branch=next)](https://travis-ci.org/jdmclark/gorc) [![Coverity Scan Build Status](https://scan.coverity.com/projects/2223/badge.svg)](https://scan.coverity.com/projects/2223)
+[![Build Status](https://travis-ci.org/jdmclark/gorc.svg?branch=next)](https://travis-ci.org/jdmclark/gorc) [![Coverage Status](https://coveralls.io/repos/jdmclark/gorc/badge.svg?branch=master&service=github)](https://coveralls.io/github/jdmclark/gorc?branch=master) [![Coverity Scan Build Status](https://scan.coverity.com/projects/2223/badge.svg)](https://scan.coverity.com/projects/2223)
 
 Gorc is an early-development Dark Forces II game engine recreation. The goal of the Gorc project is to replace the original game executable, allowing the original singleplayer and multiplayer levels to be played on new platforms.
 
