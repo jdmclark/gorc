@@ -141,7 +141,7 @@
 
     gorc::cog::ast::translation_unit* gorc::cog::grammar::parse()
     {
-        gra_parse(this);
+        yyparse(this);
         return tu;
     }
 
