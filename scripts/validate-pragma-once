@@ -1,0 +1,20 @@
+#!/bin/sh
+
+#
+# Check if header files contain a once-pragma
+#
+header_files=`git diff --cached --name-only | xargs stat -t -c "%n" 2>/dev/null | grep -E ".*\.(h|hpp)"`
+ 
+for f in $header_files; do
+    head -10 $f | grep -E "^#pragma once\$" 2>&1 1>/dev/null && continue
+
+    files_missing_pragma="$files_missing_pragma $f"
+done
+ 
+if [ -n "$files_missing_pragma" ]; then
+    echo "The following headers are missing #pragma once:"
+    for f in $files_missing_pragma; do
+        echo "    $f"
+    done
+    exit 1
+fi

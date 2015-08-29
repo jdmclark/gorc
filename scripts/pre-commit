@@ -1,0 +1,4 @@
+#!/bin/bash
+./scripts/validate-tabs && \
+./scripts/validate-pragma-once && \
+true

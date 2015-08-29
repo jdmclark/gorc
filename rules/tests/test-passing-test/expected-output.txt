@@ -1,0 +1,4 @@
+exit code: 0
+Running tests:
+Passed (XX.Xs) mock-test
+**** SUITE PASSED ****

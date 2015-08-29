@@ -1,0 +1,20 @@
+#!/bin/bash
+
+uname_platform=$(uname -s)
+
+is_uname_platform() {
+    echo $uname_platform | grep -q -i -e $1
+}
+
+die_with() {
+    >&2 echo $1
+    echo UNKNOWN
+    exit 1
+}
+
+if is_uname_platform "linux"
+then
+    echo "linux"
+else
+    die_with "error: platform not supported"
+fi

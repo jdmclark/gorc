@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Change directory into test dir
+cd $1
+
+export TESTSUITE_DIR=tempdir
+export INSIDE_PROJECT_TEST_RUNNER=1
+export TEST_LOG=${TESTSUITE_DIR}/test-log.txt
+export MAKEFLAGS=
+
+# Set up temporary directory
+if [ -d ${TESTSUITE_DIR} ]; then
+    rm -rf ${TESTSUITE_DIR}
+fi
+
+mkdir -p ${TESTSUITE_DIR}
+
+TIMEFORMAT=%1R
+test_time=$( { time make -s --no-print-directory test &> ${TEST_LOG}; } 2>&1 )
+result=$?
+
+timewidth=$(wc -m <<< ${test_time})
+time_padding=$(awk "BEGIN{i=${timewidth}; do { printf \" \"; i++} while (i < 5)}")
+
+formatted_test_time="(${time_padding}${test_time}s)"
+
+if [ $result -ne 0 ]; then
+    echo "FAILED ${formatted_test_time} $@"
+
+    echo >> ${TEST_LOG}
+    echo "FAILED ${formatted_test_time} $@" >> ${TEST_LOG}
+    echo "--------------------" >> ${TEST_LOG}
+    echo >> ${TEST_LOG}
+    flock ${FAILED_TEST_LOG} bash -c "cat ${TEST_LOG} >> ${FAILED_TEST_LOG}"
+    exit 1
+else
+    # Clean up artifacts from successful test
+    rm -rf ${TESTSUITE_DIR}
+    echo "Passed ${formatted_test_time} $@"
+    exit 0
+fi
