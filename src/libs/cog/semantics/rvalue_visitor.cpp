@@ -20,12 +20,12 @@ rvalue_visitor::rvalue_visitor(script &out_script,
 
 // The following function cannot be called during normal execution.
 // Immediate expressions are produced by rvalue_visitor during constant folding.
-// GCOVR_EXCL_START
+// LCOV_EXCL_START
 expr_val rvalue_visitor::visit(ast::immediate_expression &e)
 {
     return expr_val(e.value.get_type(), e.value);
 }
-// GCOVR_EXCL_STOP
+// LCOV_EXCL_STOP
 
 expr_val rvalue_visitor::visit(ast::string_literal_expression &e)
 {
@@ -150,7 +150,7 @@ expr_val rvalue_visitor::visit(ast::unary_expression &e)
             }
 
             // Catch-all: the above switch statement should handle all cases
-            LOG_FATAL("unhandled unary operator"); // GCOVR_EXCL_LINE
+            LOG_FATAL("unhandled unary operator"); // LCOV_EXCL_LINE
         });
 }
 

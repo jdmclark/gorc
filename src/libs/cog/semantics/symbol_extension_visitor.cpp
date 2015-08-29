@@ -43,7 +43,7 @@ namespace {
         }
 
         // Catch-all: above switch should handle all cases
-        return true; // GCOVR_EXCL_LINE
+        return true; // LCOV_EXCL_LINE
     }
 
     void check_accepted(value_type symbol_type,
