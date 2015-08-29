@@ -96,7 +96,7 @@ generate-test-coverage-report:
 .PHONY: generate-coveralls-test-coverage-report
 generate-coveralls-test-coverage-report:
 	cpp-coveralls --gcov-options '\-lp' \
-		--root $(PROJECT_ROOT) \
+		--root $(SRC) \
 		$(foreach excl,$(EXCLUDE_TEST_COVERAGE_PATHS),--exclude $(excl))
 
 endif
