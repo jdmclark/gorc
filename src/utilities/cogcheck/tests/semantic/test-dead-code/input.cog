@@ -1,0 +1,90 @@
+symbols
+message startup
+end
+
+code
+printint(5); // Dead
+printint(5);
+printint(5);
+
+foo: // Live, called
+printint(5);
+return;
+
+bar: // Dead
+printint(5);
+return;
+
+startup: // Live
+printint(5);
+call foo;
+
+baz: // Live, uncalled fall-through
+printint(5);
+
+while(1 == 1) {
+    printint(5);
+    return;
+    printint(5); // dead
+}
+
+while(1 == 1) {
+    printint(5);
+    break;
+    printint(5); // dead
+}
+
+for(;;) {
+    printint(5);
+    return;
+    printint(5); // dead
+}
+
+for(;;) {
+    printint(5);
+    break;
+    printint(5); // dead
+}
+
+do {
+    printint(5);
+    return;
+    printint(5); // dead
+} while(1 == 1);
+
+do {
+    printint(5);
+    break;
+    printint(5); // dead
+} while(1 == 1);
+
+if(1 == 1) {
+    printint(5);
+    return;
+    printint(5); // dead
+}
+
+if(1 == 1) {
+    return;
+}
+else {
+    printint(5);
+}
+
+if(1 == 1) {
+    printint(5);
+}
+else {
+    return;
+}
+
+if(1 == 1) {
+    return;
+}
+else {
+    return;
+}
+
+printint(5); // dead
+
+end

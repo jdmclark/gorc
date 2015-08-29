@@ -1,0 +1,14 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+
+CODE
+if 1:
+  if 1:
+    ;
+  else:
+    if 1:
+      ;
+    else:
+      ;

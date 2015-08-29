@@ -1,0 +1,1 @@
+[ERROR] input.cog:6:1-6:1: assignment target is not an lvalue

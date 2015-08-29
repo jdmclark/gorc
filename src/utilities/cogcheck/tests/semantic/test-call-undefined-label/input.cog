@@ -1,0 +1,7 @@
+symbols
+message startup
+end
+code
+startup:
+call foo;
+end

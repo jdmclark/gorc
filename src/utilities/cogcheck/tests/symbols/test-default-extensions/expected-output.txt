@@ -1,0 +1,128 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+message startup
+    index: 0
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+int a
+    index: 1
+    default value: int(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float b
+    index: 2
+    default value: float(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float c
+    index: 3
+    default value: float(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+vector d
+    index: 4
+    default value: vector(0, 0, 0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+sector e
+    index: 5
+    default value: void()
+    local: false
+    desc: 
+    mask: 400
+    linkid: 0
+    nolink: false
+surface f
+    index: 6
+    default value: void()
+    local: false
+    desc: 
+    mask: 400
+    linkid: 0
+    nolink: false
+thing g
+    index: 7
+    default value: void()
+    local: false
+    desc: 
+    mask: 404
+    linkid: 0
+    nolink: false
+ai h
+    index: 8
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+cog i
+    index: 9
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+keyframe j
+    index: 10
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+material k
+    index: 11
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+model l
+    index: 12
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+sound m
+    index: 13
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template n
+    index: 14
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+
+CODE
+startup:
+return;

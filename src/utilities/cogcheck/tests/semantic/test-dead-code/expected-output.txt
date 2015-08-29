@@ -1,0 +1,11 @@
+[WARNING] input.cog:6:1-8:12: dead code
+[WARNING] input.cog:15:1-16:7: dead code
+[WARNING] input.cog:22:1-23:12: label 'startup' flows into label 'baz'
+[WARNING] input.cog:28:5-28:16: dead code
+[WARNING] input.cog:34:5-34:16: dead code
+[WARNING] input.cog:40:5-40:16: dead code
+[WARNING] input.cog:46:5-46:16: dead code
+[WARNING] input.cog:52:5-52:16: dead code
+[WARNING] input.cog:58:5-58:16: dead code
+[WARNING] input.cog:64:5-64:16: dead code
+[WARNING] input.cog:88:1-88:12: dead code

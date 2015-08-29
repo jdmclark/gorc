@@ -1,0 +1,72 @@
+symbols
+vector foo
+message startup
+end
+code
+startup:
+// These should all error
+foo || (1 > 2);
+(1 > 2) || foo;
+foo || foo;
+
+foo && (1 > 2);
+(1 > 2) && foo;
+foo && foo;
+
+1 + foo;
+foo + 1;
+foo + foo;
+
+1 - foo;
+foo - 1;
+foo - foo;
+
+1 * foo;
+foo * 1;
+foo * foo;
+
+1 / foo;
+foo / 1;
+foo / foo;
+
+1 % foo;
+foo % 1;
+foo % foo;
+
+1 > foo;
+foo > 1;
+foo > foo;
+
+1 >= foo;
+foo >= 1;
+foo >= foo;
+
+1 < foo;
+foo < 1;
+foo < foo;
+
+1 <= foo;
+foo <= 1;
+foo <= foo;
+
+1 | foo;
+foo | 1;
+foo | foo;
+
+1 & foo;
+foo & 1;
+foo & foo;
+
+1 ^ foo;
+foo ^ 1;
+foo ^ foo;
+
+1 == foo;
+foo == 1;
+foo == foo;
+
+1 != foo;
+foo != 1;
+foo != foo;
+
+end

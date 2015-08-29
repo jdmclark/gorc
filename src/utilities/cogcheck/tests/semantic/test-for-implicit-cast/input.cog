@@ -1,0 +1,8 @@
+symbols
+message startup
+sector s
+end
+code
+startup:
+for( ; s; ) return;
+end

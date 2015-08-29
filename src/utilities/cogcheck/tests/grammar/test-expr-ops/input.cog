@@ -1,0 +1,39 @@
+symbols
+end
+
+code
+
+foo = bar;
+foo[i] = bar;
+foo = bar[i];
+foo = bar();
+foo = bar(baz, fnord);
+foo = -bar;
+foo = bar * baz;
+foo = bar / baz;
+foo = bar % baz;
+foo = bar + baz;
+foo = bar - baz;
+
+if(foo >= bar);
+if(foo <= bar);
+if(foo > bar);
+if(foo < bar);
+if(foo == bar);
+if(foo != bar);
+if(!(foo == bar));
+
+foo = bar & baz;
+foo = bar ^ baz;
+foo = bar | baz;
+
+if(foo == bar && foo == baz);
+if(foo == bar || foo == baz);
+
+if(foo = bar);
+
+foo, bar, baz;
+
+if(foo = bar, baz = fnord);
+
+end

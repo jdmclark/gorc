@@ -1,0 +1,5 @@
+[WARNING] input.cog:3:15-3:19: extension 'local' redefinition
+[WARNING] input.cog:4:16-4:21: extension 'nolink' redefinition
+[WARNING] input.cog:6:18-6:26: extension 'linkid' redefinition
+[WARNING] input.cog:7:18-7:25: extension 'mask' redefinition
+[WARNING] input.cog:9:18-9:25: extension 'desc' redefinition

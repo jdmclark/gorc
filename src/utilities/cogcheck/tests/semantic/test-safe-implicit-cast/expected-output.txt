@@ -1,0 +1,11 @@
+[WARNING] input.cog:12:20-12:20: cannot convert argument from int to sector
+[WARNING] input.cog:13:20-13:28: cannot convert argument from int to sector
+[WARNING] input.cog:14:20-14:28: cannot convert argument from int to sector
+[WARNING] input.cog:15:20-15:28: cannot convert argument from int to sector
+[WARNING] input.cog:16:20-16:28: cannot convert argument from int to sector
+[WARNING] input.cog:17:20-17:28: cannot convert argument from int to sector
+[WARNING] input.cog:18:20-18:28: cannot convert argument from int to sector
+[WARNING] input.cog:19:20-19:28: cannot convert argument from int to sector
+[WARNING] input.cog:20:20-20:28: cannot convert argument from int to sector
+[WARNING] input.cog:28:7-28:17: comparison between surface and sector ids
+[WARNING] input.cog:29:7-29:17: comparison between surface and sector ids

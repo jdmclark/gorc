@@ -1,0 +1,211 @@
+symbols
+message startup
+end
+
+code
+
+m01: // no fall-through
+    printint(5);
+
+m02: // fall-through
+    printint(5);
+    return;
+
+m03: // no fall-through
+    if(1 == 0) {
+    m04: // fall-through
+        printint(5);
+        return;
+    }
+
+    if(1 == 0) {
+    m05: // fall-through
+        printint(5);
+    }
+    else {
+    m06: // fall-through
+        printint(6);
+    }
+
+    while(1 == 1) {
+    m07: // fall-through
+        printint(5);
+        return;
+    }
+
+    for(;;) {
+    m08: // fall-through
+        printint(5);
+    }
+
+    do {
+    m09: // fall-through
+        printint(5);
+    } while(1 == 0);
+
+m10: // fall-through from m04
+    printint(5);
+
+    if(1 == 1) {
+        return;
+
+    m11:
+        printint(5);
+    } // fall-through
+
+    if(1 == 1) {
+        return;
+
+    m12:
+        printint(5);
+    } // fall-through
+    else {
+        return;
+
+    m13:
+        printint(5);
+    } // fall-through
+
+    while(1 == 0) {
+        return;
+
+    m14:
+        printint(5);
+    } // fall-through
+
+    while(1 == 0) {
+        break;
+    m15:
+        printint(5);
+    } // fall-through
+
+    for(;;) {
+        return;
+    m16:
+        printint(5);
+    } // fall-through
+
+    for(;;) {
+        break;
+    m17:
+        printint(5);
+    } // fall-through
+
+    do {
+        return;
+    m18:
+        printint(5);
+    } while(1 == 0); // fall-through
+
+    do {
+        break;
+    m19:
+        printint(5);
+    } while(1 == 0); // fall-through
+
+m20: // fall-through from m10
+    printint(5);
+
+    if(1 == 1) {
+        return;
+
+    m21:
+        printint(5);
+        return;
+    }
+
+    while(1 == 0) {
+        return;
+
+    m24:
+        printint(5);
+        return;
+    }
+
+    while(1 == 0) {
+        break;
+    m25:
+        printint(5);
+        break;
+    }
+
+    for(;;) {
+        return;
+    m26:
+        printint(5);
+        return;
+    }
+
+    for(;;) {
+        break;
+    m27:
+        printint(5);
+        break;
+    }
+
+    do {
+        return;
+    m28:
+        printint(5);
+        return;
+    } while(1 == 0);
+
+    do {
+        break;
+    m29:
+        printint(5);
+        break;
+    } while(1 == 0);
+
+    if(1 == 1) {
+        return;
+
+    m22:
+        printint(5);
+        return;
+    }
+    else {
+        return;
+
+    m23:
+        printint(5);
+        return;
+    }
+
+m30:
+    printint(5); // no flow-through
+    return;
+
+startup:
+    call m01;
+    call m02;
+    call m03;
+    call m04;
+    call m05;
+    call m06;
+    call m07;
+    call m08;
+    call m09;
+    call m10;
+    call m11;
+    call m12;
+    call m13;
+    call m14;
+    call m15;
+    call m16;
+    call m17;
+    call m18;
+    call m19;
+    call m20;
+    call m21;
+    call m22;
+    call m23;
+    call m24;
+    call m25;
+    call m26;
+    call m27;
+    call m28;
+    call m29;
+    call m30;
+
+end

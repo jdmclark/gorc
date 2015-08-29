@@ -1,0 +1,1 @@
+[ERROR] input.cog:6:5-6:34: verb 'verb_does_not_exist' does not exist

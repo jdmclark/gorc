@@ -1,0 +1,26 @@
+symbols
+
+message startup nolink
+message shutdown linkid=1
+message touched desc=foo
+message entered local
+message activated mask=0x404
+
+int a nolink
+int b linkid=1
+int c mask=0x404
+
+end
+
+code
+startup:
+return;
+shutdown:
+return;
+touched:
+return;
+entered:
+return;
+activated:
+    printint(5);
+end

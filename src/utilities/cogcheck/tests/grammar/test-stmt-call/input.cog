@@ -1,0 +1,11 @@
+symbols
+end
+code
+startup:
+return;
+
+activated:
+call startup;
+
+return;
+end

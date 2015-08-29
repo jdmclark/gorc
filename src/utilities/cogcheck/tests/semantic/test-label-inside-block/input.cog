@@ -1,0 +1,21 @@
+symbols
+end
+
+code
+
+l00:
+return;
+
+{
+l01:
+    return;
+}
+
+if(1 > 0) l02: return;
+if(1 > 0) return; else l03: return;
+
+while(1 > 0) l04: return;
+do l05: return; while(1 > 0);
+for(;;) l06: return;
+
+end

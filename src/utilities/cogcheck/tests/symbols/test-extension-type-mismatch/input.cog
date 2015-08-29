@@ -1,0 +1,12 @@
+symbols
+thing a linkid=3.0
+thing b linkid=hello
+thing c mask=3.0
+thing d mask=hello
+
+thing e desc=3.0
+thing f desc=0x3
+end
+
+code
+end

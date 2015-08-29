@@ -1,0 +1,23 @@
+symbols
+
+int a=critter.ai
+float b=critter.key
+flex c=critter.3do
+
+ai d=5
+keyframe e=5
+material f=5
+model g=5
+sound h=5
+template i=5
+
+ai j=5.0
+keyframe k=5.0
+material l=5.0
+model m=5.0
+sound n=5.0
+template o=5.0
+
+end
+code
+end

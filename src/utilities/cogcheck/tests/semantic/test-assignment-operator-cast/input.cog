@@ -1,0 +1,9 @@
+symbols
+vector foo
+message startup
+end
+code
+startup:
+foo = 5;
+
+end

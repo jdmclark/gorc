@@ -1,0 +1,2 @@
+[WARNING] input.cog:6:1-6:3: symbol 'foo' used without being defined
+[WARNING] input.cog:7:1-7:3: symbol 'bar' used without being defined

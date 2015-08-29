@@ -1,0 +1,7 @@
+symbols
+message startup
+end
+code
+startup:
+print("Unknown escape sequence: \k");
+end

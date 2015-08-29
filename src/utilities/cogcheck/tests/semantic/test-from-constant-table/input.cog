@@ -1,0 +1,8 @@
+symbols
+message touched
+end
+code
+touched:
+startup;
+
+end

@@ -1,0 +1,2 @@
+[ERROR] input.cog:3:20-3:22: unknown extension 'foo'
+[ERROR] input.cog:4:20-4:22: unknown extension 'bar'

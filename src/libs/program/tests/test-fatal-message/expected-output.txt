@@ -1,0 +1,4 @@
+==== shell code ====
+1
+==== standard output ====
+[ERROR] Fatality

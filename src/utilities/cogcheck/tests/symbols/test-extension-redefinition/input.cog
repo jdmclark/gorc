@@ -1,0 +1,14 @@
+symbols
+
+thing a local local
+thing b nolink nolink
+
+thing c linkid=5 linkid=10
+thing d mask=0x5 mask=0xa
+
+thing e desc=foo desc=bar
+
+end
+
+code
+end

@@ -1,0 +1,9 @@
+symbols
+
+int unknown_bare=5 foo
+int unknown_val=10 bar=38
+
+end
+
+code
+end

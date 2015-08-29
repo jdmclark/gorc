@@ -1,0 +1,46 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+int a
+    index: 0
+    default value: int(255)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+int b
+    index: 1
+    default value: int(255)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float c
+    index: 2
+    default value: float(5000)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float d
+    index: 3
+    default value: float(0.6)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float e
+    index: 4
+    default value: float(5000)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+
+CODE

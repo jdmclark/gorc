@@ -1,0 +1,1 @@
+[ERROR] input.cog:12:12-12:15: symbol does not accept a default value

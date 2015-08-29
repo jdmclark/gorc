@@ -1,0 +1,8 @@
+[WARNING] input.cog:3:17-3:22: symbol does not accept extension 'nolink'
+[WARNING] input.cog:4:18-4:25: symbol does not accept extension 'linkid'
+[WARNING] input.cog:5:17-5:24: symbol does not accept extension 'desc'
+[WARNING] input.cog:6:17-6:21: symbol does not accept extension 'local'
+[WARNING] input.cog:7:19-7:28: symbol does not accept extension 'mask'
+[WARNING] input.cog:9:7-9:12: symbol does not accept extension 'nolink'
+[WARNING] input.cog:10:7-10:14: symbol does not accept extension 'linkid'
+[WARNING] input.cog:11:7-11:16: symbol does not accept extension 'mask'

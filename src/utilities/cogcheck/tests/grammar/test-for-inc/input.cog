@@ -1,0 +1,7 @@
+symbols
+end
+code
+
+for(;; i = i + 1);
+
+end

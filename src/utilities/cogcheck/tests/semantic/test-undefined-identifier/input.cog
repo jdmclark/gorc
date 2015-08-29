@@ -1,0 +1,9 @@
+symbols
+message startup
+end
+code
+startup:
+foo;
+bar = 5;
+
+end

@@ -60,4 +60,28 @@ test_case(get_set)
     assert_eq(v.data[1], 85);
 }
 
+test_case(almost_equal)
+{
+    auto v = make_vector(5, 10, 15);
+    auto w = make_vector(5, 10, 15);
+
+    assert_true(almost_equal(v, w));
+}
+
+test_case(almost_unequal)
+{
+    auto v = make_vector(5, 10, 15);
+
+    auto v1 = make_vector(6, 10, 15);
+    auto v2 = make_vector(5, 11, 15);
+    auto v3 = make_vector(5, 10, 16);
+
+    assert_true(!almost_equal(v, v1));
+    assert_true(!almost_equal(v1, v));
+    assert_true(!almost_equal(v, v2));
+    assert_true(!almost_equal(v2, v));
+    assert_true(!almost_equal(v, v3));
+    assert_true(!almost_equal(v3, v));
+}
+
 end_suite(vector_test);

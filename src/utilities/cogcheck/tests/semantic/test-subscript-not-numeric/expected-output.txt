@@ -1,0 +1,1 @@
+[ERROR] input.cog:10:5-10:11: array subscript is not numeric

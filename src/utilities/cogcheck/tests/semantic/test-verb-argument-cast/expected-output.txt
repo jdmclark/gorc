@@ -1,0 +1,1 @@
+[WARNING] input.cog:6:11-6:19: cannot convert argument from vector to float

@@ -1,0 +1,5 @@
+[ERROR] input.cog:3:9-3:15: extension 'local' does not accept a value
+[ERROR] input.cog:4:9-4:17: extension 'nolink' does not accept a value
+[ERROR] input.cog:6:9-6:14: extension 'linkid' requires a value
+[ERROR] input.cog:7:9-7:12: extension 'mask' requires a value
+[ERROR] input.cog:8:9-8:12: extension 'desc' requires a value

@@ -1,0 +1,12 @@
+symbols
+end
+
+code
+
+foo:
+printint(5);
+return;
+foo:
+printint(10);
+
+end

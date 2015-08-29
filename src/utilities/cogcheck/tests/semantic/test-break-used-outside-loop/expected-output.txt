@@ -1,0 +1,6 @@
+[ERROR] input.cog:12:1-12:6: break used outside loop
+[ERROR] input.cog:13:3-13:8: break used outside loop
+[ERROR] input.cog:14:10-14:15: break used outside loop
+[ERROR] input.cog:15:11-15:16: break used outside loop
+[ERROR] input.cog:16:18-16:23: break used outside loop
+[WARNING] input.cog:14:1-14:15: label 'entered' flows into label 'startup'

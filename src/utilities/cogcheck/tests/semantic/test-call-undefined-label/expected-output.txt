@@ -1,0 +1,1 @@
+[ERROR] input.cog:6:1-6:9: label 'foo' called but not defined

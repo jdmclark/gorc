@@ -1,0 +1,30 @@
+==== Simple create/read ====
+---- Contents ----
+str and str2 match
+str and str3 match
+str and str4 match
+input_stream::read size exceeds bounds
+file read exception thrown
+f at end
+==== Overwrite existing ====
+==== Truncate failure ====
+Error message matches expected
+File create exception thrown
+==== Open failure ====
+Error message matches expected
+File open exception thrown
+==== Read failure ====
+input_stream::read size exceeds bounds
+File read exception thrown
+==== Seek failure ====
+native_file::seek invalid offset
+File seek exception thrown
+==== Position ====
+Current position: 0
+Current position: 3
+Current position: 5
+==== Size ====
+Small size: 6
+Medium size: 16
+==== Testsuite returns: 0 ====
+Contents overwritten

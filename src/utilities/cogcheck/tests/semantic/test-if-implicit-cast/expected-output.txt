@@ -1,0 +1,2 @@
+[WARNING] input.cog:7:4-7:4: implicit cast from sector to bool used in condition
+[WARNING] input.cog:8:4-8:4: implicit cast from sector to bool used in condition

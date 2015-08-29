@@ -1,0 +1,16 @@
+symbols
+
+int a=5
+float b=5
+flex c=5
+
+ai d=critter.ai
+keyframe e=critter.key
+material f=wall.mat
+model g=critter.3do
+sound h=howl.wav
+template i=+player
+
+end
+code
+end

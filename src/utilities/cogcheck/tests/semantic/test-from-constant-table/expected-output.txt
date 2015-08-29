@@ -1,0 +1,16 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+message touched
+    index: 0
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+
+CODE
+touched:
+message(3);

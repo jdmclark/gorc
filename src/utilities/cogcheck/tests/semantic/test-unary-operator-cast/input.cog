@@ -1,0 +1,10 @@
+symbols
+message startup
+end
+code
+startup:
++'3 5 10';
+-'3 5 10';
+!'3 5 10';
+
+end

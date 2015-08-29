@@ -1,0 +1,112 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+int foo
+    index: 0
+    default value: int(0)
+    local: true
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+message startup
+    index: 1
+    default value: void()
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+
+CODE
+startup:
+;
+int(5);
+float(5);
+string(five);
+vector(5, 6, 7);
+int(5);
+(+ foo);
+int(-5);
+(- foo);
+bool(false);
+(! (> int(1) foo));
+int(3);
+(+ foo int(1));
+(+ int(2) foo);
+int(1);
+(- foo int(1));
+(- int(2) foo);
+int(4);
+(* foo int(2));
+(* int(2) foo);
+int(2);
+(/ int(4) foo);
+(/ foo int(2));
+int(3);
+(% foo int(5));
+(% int(5) foo);
+int(3);
+(| int(1) foo);
+(| foo int(1));
+int(2);
+(& int(6) foo);
+(& foo int(3));
+int(5);
+(^ foo int(3));
+(^ int(6) foo);
+bool(true);
+(> foo int(0));
+(> int(1) foo);
+bool(true);
+(>= foo int(0));
+(>= int(1) foo);
+bool(false);
+(< foo int(0));
+(< int(1) foo);
+bool(false);
+(<= foo int(0));
+(<= int(1) foo);
+bool(false);
+(== foo int(0));
+(== int(1) foo);
+bool(true);
+(!= foo int(0));
+(!= int(1) foo);
+bool(true);
+(|| (< foo int(0)) bool(true));
+(|| bool(false) (> foo int(0)));
+bool(false);
+(&& (< foo int(0)) bool(true));
+(&& bool(false) (> foo int(0)));
+int(3);
+((foo int(2)) int(3));
+((int(1) foo) int(3));
+(int(2) foo);
+if bool(true):
+  foo;
+if (> foo int(0)):
+  foo;
+if bool(true):
+  foo;
+else:
+  foo;
+if (> foo int(0)):
+  foo;
+else:
+  foo;
+while bool(true):
+  foo;
+while (> foo int(0)):
+  foo;
+dowhile bool(true):
+  foo;
+dowhile (> int(1) foo):
+  foo;
+for int(3); bool(true); int(4):
+  foo;
+for foo; (> foo int(0)); foo:
+  foo;
+for ; ; :
+  foo;

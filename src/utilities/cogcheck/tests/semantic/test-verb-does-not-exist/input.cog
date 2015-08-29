@@ -1,0 +1,8 @@
+symbols
+message startup
+end
+code
+startup:
+3 + verb_does_not_exist(5, 10, 15);
+
+end

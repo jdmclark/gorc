@@ -1,0 +1,13 @@
+symbols
+
+int a=0xFF
+int b=255
+
+float c=+5e3
+float d=.6
+float e=5.e3
+
+end
+
+code
+end

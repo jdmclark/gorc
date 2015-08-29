@@ -1,0 +1,17 @@
+symbols
+int a = 3
+float b = 3
+flex c = 3
+ai d = foo.ai
+keyframe e = foo.key
+material f = foo.mat
+model g = foo.3do
+sound h = foo.wav
+template i = +foo
+
+sector j = 5183
+
+end
+
+code
+end

@@ -1,0 +1,1 @@
+[WARNING] input.cog:5:1-5:12: dead code

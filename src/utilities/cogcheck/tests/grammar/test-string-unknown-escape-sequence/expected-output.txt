@@ -1,0 +1,1 @@
+[ERROR] input.cog:6:33-6:34: unknown escape sequence '/k'

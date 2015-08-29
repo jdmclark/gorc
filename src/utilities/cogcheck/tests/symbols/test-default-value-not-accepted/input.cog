@@ -1,0 +1,20 @@
+symbols
+
+vector j=5
+sector k=5
+thing l=5
+surface m=5
+
+vector n=5.0
+sector o=5.0
+thing p=5.0
+surface q=5.0
+
+vector r=walkplayer
+sector s=walkplayer
+thing t=walkplayer
+surface u=walkplayer
+
+end
+code
+end

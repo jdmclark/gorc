@@ -1,0 +1,8 @@
+symbols
+message startup
+end
+code
+startup:
+printflex('5 10 15');
+
+end

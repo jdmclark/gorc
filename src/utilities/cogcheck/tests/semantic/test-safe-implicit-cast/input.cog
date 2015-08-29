@@ -1,0 +1,41 @@
+symbols
+sector sec
+surface surf
+message startup
+end
+code
+startup:
+printflex(sec); // safe cast to numeric
+printflex(-sec);
+printflex(+sec);
+
+firstthinginsector(5); // unsafe conversion of integer to sector
+firstthinginsector(sec + sec); // demotion to integer
+firstthinginsector(sec - sec);
+firstthinginsector(sec * sec);
+firstthinginsector(sec / sec);
+firstthinginsector(sec % sec);
+firstthinginsector(sec | sec);
+firstthinginsector(sec & sec);
+firstthinginsector(sec ^ sec);
+
+while(sec > 5); // safe conversion to integer for comparison
+while(5 > sec);
+
+while(sec == sec); // same type comparison ok
+while(sec != sec);
+
+while(surf == sec); // different type comparison not ok
+while(surf != sec);
+
+while(getsenderref() == sec); // comparison to dynamic ok
+while(sec == getsenderref());
+while(getsenderref() != sec);
+while(sec != getsenderref());
+
+while(sec == 5); // demotion to integer
+while(sec != 5);
+while(5 == sec);
+while(5 != sec);
+
+end

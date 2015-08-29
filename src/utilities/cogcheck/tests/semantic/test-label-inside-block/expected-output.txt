@@ -1,0 +1,6 @@
+[WARNING] input.cog:14:11-14:13: label 'l02' is defined inside block
+[WARNING] input.cog:15:24-15:26: label 'l03' is defined inside block
+[WARNING] input.cog:17:14-17:16: label 'l04' is defined inside block
+[WARNING] input.cog:18:4-18:6: label 'l05' is defined inside block
+[WARNING] input.cog:19:9-19:11: label 'l06' is defined inside block
+[WARNING] input.cog:7:1-19:20: dead code

@@ -1,0 +1,6 @@
+symbols
+end
+
+code
+printint(5); // dead
+end

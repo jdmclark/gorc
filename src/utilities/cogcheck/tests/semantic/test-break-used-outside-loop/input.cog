@@ -1,0 +1,18 @@
+symbols
+int x = 0 local
+message startup
+message entered
+end
+code
+entered:
+for(;;) break;
+while(x > 0) break;
+do break; while(x > 0);
+
+break;
+{ break; }
+startup: break;
+if(x > 0) break;
+if(x > 0) ; else break;
+
+end

@@ -1,0 +1,12 @@
+==== standard output ====
+Hello, World!
+this is informational
+[WARNING] warning message
+[ERROR] error message
+==== log output ====
+$ROOT$/src/libs/program/tests/example-program/main.cpp|30|trace> test_program::main
+$ROOT$/src/libs/program/tests/example-program/main.cpp|32|debug> handling message options
+$ROOT$/src/libs/program/tests/example-program/main.cpp|39|info> this is informational
+$ROOT$/src/libs/program/tests/example-program/main.cpp|43|warning> warning message
+$ROOT$/src/libs/program/tests/example-program/main.cpp|47|error> error message
+$ROOT$/src/libs/program/tests/example-program/main.cpp|67|debug> handling exception options

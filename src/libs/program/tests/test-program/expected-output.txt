@@ -1,0 +1,16 @@
+==== no args ====
+==== message ====
+Hello, World!
+==== throw std ====
+[ERROR] Exception thrown: standard exception thrown
+==== throw unk ====
+[ERROR] Unknown exception thrown
+==== diagnostics not on stdout ====
+---- stdout ----
+this is on stdout
+---- stderr ----
+this is informational
+==== diagnostics ====
+info message
+[WARNING] warning message
+[ERROR] error message

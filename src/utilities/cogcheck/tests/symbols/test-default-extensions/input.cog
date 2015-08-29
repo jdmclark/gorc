@@ -1,0 +1,22 @@
+symbols
+message startup
+int a
+float b
+flex c
+vector d
+sector e
+surface f
+thing g
+ai h
+cog i
+keyframe j
+material k
+model l
+sound m
+template n
+end
+
+code
+startup:
+return;
+end

@@ -1,0 +1,12 @@
+[ERROR] input.cog:3:10-3:10: symbol does not accept a default value
+[ERROR] input.cog:4:10-4:10: symbol does not accept a default value
+[ERROR] input.cog:5:9-5:9: symbol does not accept a default value
+[ERROR] input.cog:6:11-6:11: symbol does not accept a default value
+[ERROR] input.cog:8:10-8:12: symbol does not accept a default value
+[ERROR] input.cog:9:10-9:12: symbol does not accept a default value
+[ERROR] input.cog:10:9-10:11: symbol does not accept a default value
+[ERROR] input.cog:11:11-11:13: symbol does not accept a default value
+[ERROR] input.cog:13:10-13:19: symbol does not accept a default value
+[ERROR] input.cog:14:10-14:19: symbol does not accept a default value
+[ERROR] input.cog:15:9-15:18: symbol does not accept a default value
+[ERROR] input.cog:16:11-16:20: symbol does not accept a default value

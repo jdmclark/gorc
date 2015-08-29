@@ -1,0 +1,9 @@
+symbols
+end
+code
+
+for(i = 0; i < 10; i = i + 1)
+{
+}
+
+end

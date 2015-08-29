@@ -1,0 +1,7 @@
+symbols
+
+sector foo=x , linkid=3, nolink, mask=0x400 ,
+
+end
+code
+end

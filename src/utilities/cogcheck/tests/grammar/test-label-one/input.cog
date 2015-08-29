@@ -1,0 +1,7 @@
+symbols
+end
+code
+if(1) break;
+startup:
+return;
+end

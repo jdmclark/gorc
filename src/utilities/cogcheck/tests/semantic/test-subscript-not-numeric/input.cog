@@ -1,0 +1,12 @@
+symbols
+int foo
+int foo1
+int foo2
+int foo3
+message startup
+end
+code
+startup:
+foo['5 3 2'];
+
+end

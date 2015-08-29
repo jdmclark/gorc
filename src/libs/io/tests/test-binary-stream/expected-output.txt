@@ -1,0 +1,5 @@
+Input:  H  e  l  l  o  ,  ?  ?  W  o  r  l  d  !
+Input: 48 65 6c 6c 6f 2c 0d 0a 57 6f 72 6c 64 21
+Output: Message
+With
+Newlines

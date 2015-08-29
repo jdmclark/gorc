@@ -1,0 +1,79 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 1fa
+SYMBOLS
+
+CODE
+block:
+   (call phony);
+   startup:
+   ;
+   foo;
+   dowhile bar:
+     block:
+       foo;
+   while foo:
+     block:
+       bar;
+   for x; y; z:
+     block:
+      bar;
+  for ; y; z:
+    block:
+      bar;
+  for x; ; z:
+    block:
+      bar;
+  for x; y; :
+    block:
+      bar;
+  if foo:
+    bar;
+  if foo:
+    block:
+      bar;
+  if foo:
+    bar;
+  else:
+    baz;
+  if foo:
+    bar;
+  else:
+    block:
+      baz;
+  (call foo);
+  (call foo x);
+  (call foo x y z);
+  x[y];
+  (- x);
+  (+ x);
+  (! x);
+  (+ x y);
+  (- x y);
+  (* x y);
+  (/ x y);
+  (% x y);
+  (^ x y);
+  (| x y);
+  (& x y);
+  (|| x y);
+  (&& x y);
+  (> x y);
+  (>= x y);
+  (< x y);
+  (<= x y);
+  (== x y);
+  (!= x y);
+  (x <- y);
+  x;
+  (x y);
+  ((x y) (((z w) u) v));
+  while 1:
+    block:
+      break;
+  call startup;
+  5;
+  5;
+  five;
+  '5, 5, 5';
+  '5, 5, 5';

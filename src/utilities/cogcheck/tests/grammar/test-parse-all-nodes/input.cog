@@ -1,0 +1,85 @@
+flags = 0x1FA
+
+symbols
+
+int foo local
+
+end
+
+code
+
+{
+    phony();
+
+    startup:
+
+        ;
+
+        foo;
+
+        do {
+            foo;
+        }
+        while(bar);
+
+        while(foo) { bar; }
+
+        for(x; y; z) { bar; }
+        for( ; y; z) { bar; }
+        for(x; ; z) { bar; }
+        for(x; y; ) { bar; }
+
+        if(foo) bar;
+
+        if(foo) { bar; }
+
+        if(foo) bar; else baz;
+
+        if(foo) bar; else { baz; }
+
+        foo();
+        foo(x);
+        foo(x, y, z);
+
+        x[y];
+
+        -x;
+        +x;
+        !x;
+
+        x + y;
+        x - y;
+        x * y;
+        x / y;
+        x % y;
+        x ^ y;
+        x | y;
+        x & y;
+        x || y;
+        x && y;
+        x > y;
+        x >= y;
+        x < y;
+        x <= y;
+        x == y;
+        x != y;
+
+        x = y;
+
+        (x);
+
+        (x, y);
+        ((x, y), (z, w, u, v));
+
+        while(1) { break; }
+
+        call startup;
+
+        5;
+        5.0;
+        "five";
+        '5 5 5';
+        '5, 5, 5';
+}
+
+end
