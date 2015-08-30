@@ -47,4 +47,54 @@ test_case(verb_lookup)
     assert_log_empty();
 }
 
+test_case(verb_deprecation)
+{
+    verb_table vt;
+
+    vt.add_verb("myverb", [] { });
+
+    vt.get_verb_id("myverb");
+    assert_log_empty();
+
+    vt.add_deprecation("myverb");
+
+    assert_log_empty();
+    vt.get_verb_id("myverb");
+    assert_log_message(log_level::warning, "verb 'myverb' is deprecated");
+}
+
+test_case(verb_synonym_deprecation)
+{
+    verb_table vt;
+
+    vt.add_verb("myverb", [] { });
+    vt.add_synonym("myverb", "myverb2");
+    vt.add_synonym("myverb2", "myverb3");
+
+    vt.add_deprecation("myverb3");
+
+    vt.get_verb_id("myverb");
+    vt.get_verb_id("myverb2");
+
+    assert_log_empty();
+
+    vt.get_verb_id("myverb3");
+    assert_log_message(log_level::warning, "verb 'myverb3' is deprecated");
+    assert_log_empty();
+
+    vt.add_deprecation("myverb");
+
+    vt.get_verb_id("myverb2");
+    assert_log_empty();
+}
+
+test_case(undefined_deprecation)
+{
+    verb_table vt;
+
+    assert_throws_logged(vt.add_deprecation("myverb"));
+    assert_log_message(log_level::error, "undefined verb 'myverb' cannot be deprecated");
+    assert_log_empty();
+}
+
 end_suite(verb_table_test);

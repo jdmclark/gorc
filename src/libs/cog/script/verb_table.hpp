@@ -15,7 +15,7 @@ namespace gorc {
         class verb_table {
         private:
             std::vector<std::unique_ptr<verb>> verbs;
-            std::unordered_map<std::string, int> verb_index;
+            std::unordered_map<std::string, std::tuple<int, bool>> verb_index;
 
             void internal_add_verb(std::unique_ptr<verb> &&v);
 
@@ -33,6 +33,8 @@ namespace gorc {
             }
 
             void add_synonym(std::string const &name, std::string const &syn);
+
+            void add_deprecation(std::string const &name);
 
             verb_id get_verb_id(std::string const &name) const;
             verb const& get_verb(verb_id) const;

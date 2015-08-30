@@ -391,6 +391,8 @@ namespace gorc {
             mock_verb("jksettargetcolors", value_type::nothing, { value_type::integer,
                                                                   value_type::integer,
                                                                   value_type::integer });
+            mock_verb("parsearg", value_type::nothing, { value_type::thing,
+                                                         value_type::string });
             mock_verb("skilltarget", value_type::dynamic, { value_type::thing,
                                                             value_type::dynamic,
                                                             value_type::dynamic,
@@ -661,6 +663,11 @@ namespace gorc {
                                                         value_type::integer });
             mock_verb("getmastercog", value_type::cog, { });
             mock_verb("getselfcog", value_type::cog, { });
+            mock_verb("heapfree", value_type::nothing, { });
+            mock_verb("heapget", value_type::dynamic, { value_type::integer });
+            mock_verb("heapnew", value_type::nothing, { value_type::integer });
+            mock_verb("heapset", value_type::nothing, { value_type::integer,
+                                                        value_type::dynamic });
             mock_verb("loadkeyframe", value_type::keyframe, { value_type::string });
             mock_verb("loadmodel", value_type::model, { value_type::string });
             mock_verb("loadsound", value_type::sound, { value_type::string });
@@ -913,6 +920,17 @@ namespace gorc {
                                                             value_type::floating });
             mock_verb("setmountwait", value_type::nothing, { value_type::thing,
                                                              value_type::floating });
+
+            // Gorc will not support the following verbs. They are not used in the original
+            // game and they impose unreasonable implementation limits.
+            // Cogcheck will display a warning if these verbs are used. Gorc itself will fail
+            // to compile any cog that uses them.
+            verbs.add_deprecation("heapfree");
+            verbs.add_deprecation("heapget");
+            verbs.add_deprecation("heapnew");
+            verbs.add_deprecation("heapset");
+            verbs.add_deprecation("setthingtype");
+            verbs.add_deprecation("parsearg");
         }
     };
 
