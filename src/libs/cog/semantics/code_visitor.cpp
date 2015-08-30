@@ -37,7 +37,11 @@ void code_visitor::visit(ast::empty_statement &)
 
 void code_visitor::visit(ast::expression_statement &s)
 {
-    rvalue_visitor rvv(out_script, factory, constants, verbs);
+    rvalue_visitor rvv(out_script,
+                       factory,
+                       constants,
+                       verbs,
+                       /* result is used */ false);
     visit_and_fold(rvv, *s.value, factory);
 }
 
@@ -135,9 +139,19 @@ void code_visitor::visit(ast::do_statement &s)
 
 void code_visitor::visit(ast::for_statement &s)
 {
-    for_expression_visitor fev(out_script, factory, constants, verbs);
+    for_expression_visitor fev(out_script,
+                               factory,
+                               constants,
+                               verbs,
+                               /* result is used */ false);
+    for_expression_visitor few(out_script,
+                               factory,
+                               constants,
+                               verbs,
+                               /* result is used */ true);
+
     ast::visit(fev, *s.initializer);
-    auto cond_type = ast::visit(fev, *s.condition);
+    auto cond_type = ast::visit(few, *s.condition);
     if(!is_truth_value_type(cond_type)) {
         diagnostic_context dc(ast::visit(variant_location_visitor(), *s.condition));
         LOG_WARNING(format("implicit cast from %s to bool used in condition") %

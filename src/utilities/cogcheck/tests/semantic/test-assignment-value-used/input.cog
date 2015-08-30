@@ -1,0 +1,31 @@
+symbols
+int x
+int y
+sector z
+thing th
+message startup
+end
+code
+startup:
+
+// good:
+x = 5;
+for(x = 1; x < 5; x = 1) break;
+z = (x = 5, getthingsector(th));
+printflex(3), x = 5;
+
+// not good:
+x = y = 5;
+1 + (x = 5);
+(x = 5) + 1;
+-(x = 5);
+x[y = 5];
+y = (printflex(3), x = 5);
+printint(x = 5);
+for(x = 1; x = 1; x = 1) break;
+while(x = 1) break;
+do { } while(x = 1);
+if(x = 1) { }
+if(x = 1) { } else { }
+
+end

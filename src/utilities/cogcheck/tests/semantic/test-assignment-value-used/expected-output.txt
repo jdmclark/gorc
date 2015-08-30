@@ -1,0 +1,12 @@
+[WARNING] input.cog:18:5-18:9: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:19:6-19:10: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:20:2-20:6: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:21:3-21:7: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:22:3-22:7: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:23:20-23:24: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:24:10-24:14: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:25:12-25:16: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:26:7-26:11: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:27:14-27:18: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:28:4-28:8: result of an assignment expression is used: behavior differs from original implementation
+[WARNING] input.cog:29:4-29:8: result of an assignment expression is used: behavior differs from original implementation

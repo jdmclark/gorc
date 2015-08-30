@@ -15,12 +15,14 @@ namespace gorc {
             ast::factory &factory;
             constant_table const &constants;
             verb_table const &verbs;
+            bool result_is_used;
 
         public:
             for_expression_visitor(script &out_script,
                                    ast::factory &factory,
                                    constant_table const &constants,
-                                   verb_table const &verbs);
+                                   verb_table const &verbs,
+                                   bool result_is_used);
 
             value_type visit(ast::for_expression &);
             value_type visit(ast::for_empty_expression &);

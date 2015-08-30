@@ -9,11 +9,13 @@ using namespace gorc::cog;
 rvalue_visitor::rvalue_visitor(script &out_script,
                                ast::factory &factory,
                                constant_table const &constants,
-                               verb_table const &verbs)
+                               verb_table const &verbs,
+                               bool result_is_used)
     : out_script(out_script)
     , factory(factory)
     , constants(constants)
     , verbs(verbs)
+    , result_is_used(result_is_used)
 {
     return;
 }
@@ -100,8 +102,13 @@ expr_val rvalue_visitor::visit(ast::method_call_expression &e)
         return expr_val(v.return_type, nothing);
     }
 
+    rvalue_visitor rv(out_script,
+                      factory,
+                      constants,
+                      verbs,
+                      /* value is used */ true);
     for(auto const &arg_pair : zip(v.argument_types, e.arguments->elements)) {
-        auto folded_type = visit_and_fold(*this, *std::get<1>(arg_pair), factory);
+        auto folded_type = visit_and_fold(rv, *std::get<1>(arg_pair), factory);
         if(!can_convert_type(folded_type, std::get<0>(arg_pair))) {
             diagnostic_context dc(ast::visit(variant_location_visitor(), *std::get<1>(arg_pair)));
             LOG_WARNING(format("cannot convert argument from %s to %s") %
@@ -115,7 +122,13 @@ expr_val rvalue_visitor::visit(ast::method_call_expression &e)
 
 expr_val rvalue_visitor::visit(ast::unary_expression &e)
 {
-    auto sub_val = ast::visit(*this, *e.base);
+    rvalue_visitor rv(out_script,
+                      factory,
+                      constants,
+                      verbs,
+                      /* value used */ true);
+
+    auto sub_val = ast::visit(rv, *e.base);
     auto sub_type = std::get<0>(sub_val);
     auto return_type = sub_type;
 
@@ -156,10 +169,16 @@ expr_val rvalue_visitor::visit(ast::unary_expression &e)
 
 expr_val rvalue_visitor::visit(ast::infix_expression &e)
 {
-    auto left = ast::visit(*this, *e.left);
+    rvalue_visitor rv(out_script,
+                      factory,
+                      constants,
+                      verbs,
+                      /* value used */ true);
+
+    auto left = ast::visit(rv, *e.left);
     auto left_type = std::get<0>(left);
 
-    auto right = ast::visit(*this, *e.right);
+    auto right = ast::visit(rv, *e.right);
     auto right_type = std::get<0>(right);
 
     auto common_type = get_common_numeric_type(left_type, right_type);
@@ -323,7 +342,18 @@ expr_val rvalue_visitor::visit(ast::infix_expression &e)
 
 expr_val rvalue_visitor::visit(ast::assignment_expression &e)
 {
-    auto val = visit_and_fold(*this, *e.value, factory);
+    if(result_is_used) {
+        LOG_WARNING("result of an assignment expression is used: behavior differs from "
+                    "original implementation");
+    }
+
+    // The result of the right side is always used for assignment.
+    rvalue_visitor rv(out_script,
+                      factory,
+                      constants,
+                      verbs,
+                      /* value is used */ true);
+    auto val = visit_and_fold(rv, *e.value, factory);
     lvalue_visitor lv(out_script, factory, constants, verbs);
     auto lval_type = ast::visit(lv, *e.target);
 
@@ -339,7 +369,13 @@ expr_val rvalue_visitor::visit(ast::assignment_expression &e)
 
 expr_val rvalue_visitor::visit(ast::comma_expression &e)
 {
-    auto left = ast::visit(*this, *e.left);
+    // The value of the left side is never used
+    rvalue_visitor rv(out_script,
+                      factory,
+                      constants,
+                      verbs,
+                      /* value is used */ false);
+    auto left = ast::visit(rv, *e.left);
     auto right = ast::visit(*this, *e.right);
     if(std::get<1>(left).has_value() && std::get<1>(right).has_value()) {
         // This is a constant comma expression
@@ -365,7 +401,11 @@ void gorc::cog::visit_and_fold_boolean_condition(ast::expression &e,
                                                  constant_table const &constants,
                                                  verb_table const &verbs)
 {
-    rvalue_visitor rvv(out_script, factory, constants, verbs);
+    rvalue_visitor rvv(out_script,
+                       factory,
+                       constants,
+                       verbs,
+                       /* result is used */ true);
     auto cond_type = visit_and_fold(rvv, e, factory);
     if(!is_truth_value_type(cond_type)) {
         diagnostic_context dc(ast::visit(variant_location_visitor(), e));
@@ -380,7 +420,11 @@ void gorc::cog::visit_and_fold_array_subscript(ast::expression &e,
                                                constant_table const &constants,
                                                verb_table const &verbs)
 {
-    rvalue_visitor rvv(out_script, factory, constants, verbs);
+    rvalue_visitor rvv(out_script,
+                       factory,
+                       constants,
+                       verbs,
+                       /* result is used*/ true);
     auto cond_type = visit_and_fold(rvv, e, factory);
     if(!is_scalar_type(cond_type)) {
         diagnostic_context dc(ast::visit(variant_location_visitor(), e));

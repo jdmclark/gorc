@@ -16,12 +16,14 @@ namespace gorc {
             ast::factory &factory;
             constant_table const &constants;
             verb_table const &verbs;
+            bool result_is_used;
 
         public:
             rvalue_visitor(script &out_script,
                            ast::factory &factory,
                            constant_table const &constants,
-                           verb_table const &verbs);
+                           verb_table const &verbs,
+                           bool result_is_used);
 
             expr_val visit(ast::immediate_expression &);
             expr_val visit(ast::string_literal_expression &);
