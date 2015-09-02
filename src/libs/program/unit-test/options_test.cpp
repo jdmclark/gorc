@@ -647,4 +647,25 @@ test_case(bare_option_has_value)
     assert_true(!opts.has_bare_value());
 }
 
+test_case(at_least_one_input)
+{
+    std::vector<std::string> bare_opts;
+    bool a;
+
+    opts.insert_bare(gorc::make_bare_multi_value_option(std::back_inserter(bare_opts)));
+    opts.insert(gorc::make_switch_option("foo", a));
+
+    opts.emplace_constraint<gorc::at_least_one_input>();
+
+    std::vector<std::string> arg_list_1 { "--foo" };
+    assert_throws_logged(opts.load_from_arg_list(arg_list_1));
+    assert_log_message(gorc::log_level::error,
+                       "No input files specified");
+    assert_log_empty();
+
+    std::vector<std::string> arg_list_2 { "barevalue" };
+
+    opts.load_from_arg_list(arg_list_2);
+}
+
 end_suite(options_test);
