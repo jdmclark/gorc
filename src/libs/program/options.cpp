@@ -6,6 +6,11 @@ bool gorc::options::has_value(std::string const &alias) const
     return opt.has_value();
 }
 
+bool gorc::options::has_bare_value() const
+{
+    return bare_option && bare_option->has_value();
+}
+
 void gorc::options::add_alias(std::string const &option,
                               std::string const &alias)
 {
@@ -41,4 +46,9 @@ void gorc::options::insert(std::unique_ptr<abstract_option>&& opt)
 
     auto full_name = str(format("--%s") % reg_opt->name);
     add_alias(reg_opt->name, full_name);
+}
+
+void gorc::options::insert_bare(std::unique_ptr<abstract_bare_option> &&opt)
+{
+    bare_option = std::forward<std::unique_ptr<abstract_bare_option>>(opt);
 }

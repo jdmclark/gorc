@@ -6,4 +6,5 @@ SOURCES:= \
 	local.cpp \
 	uncopyable.cpp \
 	strcat.cpp \
+	string_search.cpp \
 	wrapped.cpp \

@@ -6,6 +6,7 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	abstract_argument_queue.cpp \
+	abstract_bare_option.cpp \
 	abstract_option.cpp \
 	mutual_exclusion.cpp \
 	option_constraint.cpp \

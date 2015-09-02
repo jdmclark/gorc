@@ -25,6 +25,7 @@ SOURCES:= \
 	range_test.cpp \
 	runtime_assert_test.cpp \
 	strcat_test.cpp \
+	string_search_test.cpp \
 	variant_test.cpp \
 	wrapped_test.cpp \
 	zip_test.cpp \
