@@ -27,7 +27,7 @@
 
     #define YY_USER_ACTION                                                          \
     {                                                                               \
-        *yylloc = ::gorc::diagnostic_context_location(nullptr,                      \
+        *yylloc = ::gorc::diagnostic_context_location(nothing,                      \
                                                       yylineno,                     \
                                                       yycolumn,                     \
                                                       yylineno,                     \

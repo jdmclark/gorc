@@ -17,7 +17,7 @@ namespace gorc {
 
             void *scanner;
 
-            ast::translation_unit *tu = nullptr;
+            maybe<ast::translation_unit *> tu;
 
         public:
             ast::factory &factory;
@@ -28,7 +28,7 @@ namespace gorc {
             char get_next();
             void* get_scanner() const;
 
-            ast::translation_unit* parse();
+            maybe<ast::translation_unit *> parse();
 
             std::string token_buffer;
 

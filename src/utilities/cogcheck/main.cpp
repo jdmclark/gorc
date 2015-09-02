@@ -44,12 +44,14 @@ namespace gorc {
 
             cog::ast::factory ast_factory;
             cog::grammar grammar(*f, ast_factory);
-            cog::ast::translation_unit *tu = grammar.parse();
+            auto maybe_tu = grammar.parse();
 
-            if(diagnostic_file_error_count() > 0) {
+            if(!maybe_tu.has_value() || diagnostic_file_error_count() > 0) {
                 // Abort after any syntax error: the AST is malformed
                 return false;
             }
+
+            cog::ast::translation_unit *tu = maybe_tu.get_value();
 
             cog::script script;
 

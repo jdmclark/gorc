@@ -22,14 +22,14 @@
     #define YYLLOC_DEFAULT(Cur, Rhs, N)                                                 \
     do {                                                                                \
         if(N) {                                                                         \
-            (Cur) = diagnostic_context_location(nullptr,                                \
+            (Cur) = diagnostic_context_location(nothing,                                \
                                                 YYRHSLOC(Rhs, 1).first_line,            \
                                                 YYRHSLOC(Rhs, 1).first_col,             \
                                                 YYRHSLOC(Rhs, N).last_line,             \
                                                 YYRHSLOC(Rhs, N).last_col);             \
         }                                                                               \
         else {                                                                          \
-            (Cur) = diagnostic_context_location(nullptr,                                \
+            (Cur) = diagnostic_context_location(nothing,                                \
                                                 YYRHSLOC(Rhs, 0).last_line,             \
                                                 YYRHSLOC(Rhs, 0).last_col,              \
                                                 YYRHSLOC(Rhs, 0).last_line,             \
@@ -140,7 +140,7 @@
         LOG_ERROR(err);
     }
 
-    gorc::cog::ast::translation_unit* gorc::cog::grammar::parse()
+    gorc::maybe<gorc::cog::ast::translation_unit *> gorc::cog::grammar::parse()
     {
         yyparse(this);
         return tu;

@@ -13,7 +13,7 @@ void gorc::stdio_log_backend::write_message(std::string const & /*filename*/,
                                             log_level level,
                                             std::string const &message)
 {
-    char const *tag = nullptr;
+    char const *tag = "";
 
     switch(level) {
     case log_level::error:
@@ -25,7 +25,6 @@ void gorc::stdio_log_backend::write_message(std::string const & /*filename*/,
         break;
 
     default:
-        tag = "";
         break;
     }
 

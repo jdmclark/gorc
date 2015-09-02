@@ -50,7 +50,7 @@ test_case(filename_col_only)
 
 test_case(no_filename)
 {
-    gorc::diagnostic_context diagnostic_context(nullptr);
+    gorc::diagnostic_context diagnostic_context(gorc::nothing);
 
     LOG_ERROR("some message");
 
@@ -60,7 +60,7 @@ test_case(no_filename)
 
 test_case(no_filename_line_col)
 {
-    gorc::diagnostic_context diagnostic_context(nullptr, 5, 10);
+    gorc::diagnostic_context diagnostic_context(gorc::nothing, 5, 10);
 
     LOG_ERROR("some message");
 
@@ -70,7 +70,7 @@ test_case(no_filename_line_col)
 
 test_case(end_line_only)
 {
-    gorc::diagnostic_context diagnostic_context(nullptr, 5, 10, 12);
+    gorc::diagnostic_context diagnostic_context(gorc::nothing, 5, 10, 12);
 
     LOG_ERROR("some message");
 
@@ -79,7 +79,7 @@ test_case(end_line_only)
 
 test_case(end_line_col)
 {
-    gorc::diagnostic_context diagnostic_context(nullptr, 5, 10, 12, 8);
+    gorc::diagnostic_context diagnostic_context(gorc::nothing, 5, 10, 12, 8);
 
     LOG_ERROR("some message");
 
@@ -102,7 +102,7 @@ test_case(nested_contexts)
         LOG_ERROR("outer_file outside scope");
 
         if(true) {
-            gorc::diagnostic_context inner_context(nullptr, 5);
+            gorc::diagnostic_context inner_context(gorc::nothing, 5);
             LOG_ERROR("outer_file inside scope");
 
             inner_file();
@@ -163,7 +163,7 @@ test_case(error_count_no_file)
 
 test_case(error_count_includes_errors_only)
 {
-    gorc::diagnostic_context dc(nullptr);
+    gorc::diagnostic_context dc(gorc::nothing);
 
     LOG_TRACE("foo");
     LOG_DEBUG("foo");
@@ -204,7 +204,7 @@ test_case(error_count_accumulates_nested)
     LOG_ERROR("bar");
 
     do {
-        gorc::diagnostic_context dd(nullptr, 5, 10);
+        gorc::diagnostic_context dd(gorc::nothing, 5, 10);
         assert_eq(gorc::diagnostic_file_error_count(), 2);
 
         LOG_ERROR("baz");
@@ -230,7 +230,7 @@ test_case(diagnostic_context_location_casts)
 test_case(diagnostic_context_location_default_constructor)
 {
     gorc::diagnostic_context_location dcl;
-    assert_eq(dcl.filename, nullptr);
+    assert_eq(dcl.filename, gorc::nothing);
     assert_eq(dcl.first_line, 0);
     assert_eq(dcl.first_col, 0);
     assert_eq(dcl.last_line, 0);
