@@ -9,7 +9,7 @@ namespace gorc {
 
     class cog_check_program : public program {
     private:
-        std::string cog_file;
+        std::vector<std::string> cog_files;
         bool dump_ast = false;
         bool parse_only = false;
 
@@ -18,11 +18,11 @@ namespace gorc {
     public:
         virtual void create_options(options &opts) override
         {
-            opts.insert(make_value_option("file", cog_file));
+            opts.insert_bare(make_bare_multi_value_option(std::back_inserter(cog_files)));
             opts.insert(make_switch_option("dump-ast", dump_ast));
             opts.insert(make_switch_option("parse-only", parse_only));
 
-            opts.emplace_constraint<required_option>("file");
+            opts.emplace_constraint<at_least_one_input>();
             return;
         }
 
@@ -30,6 +30,15 @@ namespace gorc {
         {
             mock_populate_verb_table();
 
+            bool success = true;
+            for(auto const &cog_file : cog_files) {
+                success = success && process_file(cog_file);
+            }
+
+            return success ? EXIT_SUCCESS : EXIT_FAILURE;
+        }
+
+        bool process_file(std::string const &cog_file) {
             auto f = make_native_read_only_file(cog_file);
             diagnostic_context dc(cog_file.c_str());
 
@@ -39,7 +48,7 @@ namespace gorc {
 
             if(diagnostic_file_error_count() > 0) {
                 // Abort after any syntax error: the AST is malformed
-                return EXIT_FAILURE;
+                return false;
             }
 
             cog::script script;
@@ -57,14 +66,14 @@ namespace gorc {
 
             if(diagnostic_file_error_count() > 0) {
                 // Abort after any semantic error
-                return EXIT_FAILURE;
+                return false;
             }
 
             if(dump_ast) {
                 print_ast(*tu, script);
             }
 
-            return EXIT_SUCCESS;
+            return true;
         }
 
         void print_ast(cog::ast::translation_unit &tu,
