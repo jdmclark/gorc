@@ -1,7 +1,7 @@
 #pragma once
 
 #include "io/path.hpp"
-#include "io/read_only_file.hpp"
+#include "io/input_stream.hpp"
 #include <memory>
 
 namespace gorc {
@@ -13,6 +13,6 @@ namespace gorc {
         virtual_file(path const &fn);
         virtual ~virtual_file();
 
-        virtual std::unique_ptr<read_only_file> open() const = 0;
+        virtual std::unique_ptr<input_stream> open() const = 0;
     };
 }

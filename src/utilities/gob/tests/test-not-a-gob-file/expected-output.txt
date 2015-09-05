@@ -1,0 +1,1 @@
+[ERROR] expected-output.txt: container is not a valid GOB

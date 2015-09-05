@@ -12,7 +12,7 @@ public:
         return;
     }
 
-    virtual std::unique_ptr<read_only_file> open() const override
+    virtual std::unique_ptr<input_stream> open() const override
     {
         LOG_FATAL("unimplemented");
     }

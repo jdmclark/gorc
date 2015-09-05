@@ -1,0 +1,1 @@
+[ERROR] file foo/bar.baz not in archive

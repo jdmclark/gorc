@@ -1,0 +1,4 @@
+1: dir/test.txt
+    Size:             1
+    Offset:         152
+Total: 1
