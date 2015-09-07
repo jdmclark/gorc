@@ -18,6 +18,8 @@ namespace gorc {
                                     int first_col,
                                     int last_line = 0,
                                     int last_col = 0);
+
+        bool operator==(diagnostic_context_location const &) const;
     };
 
 }

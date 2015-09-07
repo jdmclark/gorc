@@ -2,6 +2,8 @@
 #include "log/log.hpp"
 #include <thread>
 
+using namespace gorc;
+
 begin_suite(diagnostic_context_test);
 
 test_case(filename_only)
@@ -250,6 +252,22 @@ test_case(unordered_destruction)
     assert_log_message(gorc::log_level::error, "bar: first message");
     assert_log_message(gorc::log_level::error, "bar: second message");
     assert_log_empty();
+}
+
+test_case(diagnostic_location_equality)
+{
+    char const *fn = "foo";
+    char const *gn = "bar";
+
+    diagnostic_context_location a(fn, 5, 10, 15, 20);
+
+    assert_true(a == diagnostic_context_location(fn, 5, 10, 15, 20));
+
+    assert_true(!(a == diagnostic_context_location(gn, 5, 10, 15, 20)));
+    assert_true(!(a == diagnostic_context_location(fn, 6, 10, 15, 20)));
+    assert_true(!(a == diagnostic_context_location(fn, 5, 11, 15, 20)));
+    assert_true(!(a == diagnostic_context_location(fn, 5, 10, 16, 20)));
+    assert_true(!(a == diagnostic_context_location(fn, 5, 10, 15, 21)));
 }
 
 end_suite(diagnostic_context_test);

@@ -23,3 +23,12 @@ gorc::diagnostic_context_location::diagnostic_context_location(maybe<char const 
 {
     return;
 }
+
+bool gorc::diagnostic_context_location::operator==(diagnostic_context_location const &loc) const
+{
+    return (filename == loc.filename) &&
+           (first_line == loc.first_line) &&
+           (first_col == loc.first_col) &&
+           (last_line == loc.last_line) &&
+           (last_col == loc.last_col);
+}
