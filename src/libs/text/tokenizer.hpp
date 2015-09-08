@@ -56,11 +56,11 @@ namespace gorc {
         inline void advance_stream()
         {
             if(current_char == '\n') {
-                ++current_token_location.last_line;
-                current_token_location.last_col = 1;
+                ++current_line;
+                current_col = 1;
             }
             else {
-                ++current_token_location.last_col;
+                ++current_col;
             }
 
             try {

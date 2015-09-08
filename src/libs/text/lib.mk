@@ -6,3 +6,5 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	tokenizer.cpp \
+	json_input_stream.cpp \
+	json_output_stream.cpp \
