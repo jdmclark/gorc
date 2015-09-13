@@ -363,3 +363,16 @@ void gorc::tokenizer::advance()
         }
     }
 }
+
+void gorc::tokenizer::extract_string_fragment()
+{
+    // The current stored value is usually a stripped error token.
+    // Append to it until the next whitespace character.
+    while(current_char != '\0' && !isspace(current_char)) {
+        accept_current();
+    }
+
+    current_token_location.last_line = current_line;
+    current_token_location.last_col = current_col;
+    current_type = token_type::string;
+}

@@ -142,6 +142,8 @@ namespace gorc {
         {
             return reason;
         }
+
+        void extract_string_fragment();
     };
 
 }

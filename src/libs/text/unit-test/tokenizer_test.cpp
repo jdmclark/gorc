@@ -328,4 +328,26 @@ test_case(period_leading_is_still_punct)
     tok_eof();
 }
 
+test_case(simple_path_string_fragment)
+{
+    set_file("/usr/local/bin/bash");
+    tokenizer tok(mf);
+
+    assert_eq(tok.get_type(), token_type::punctuator);
+
+    tok.extract_string_fragment();
+    tok_assert(string, "/usr/local/bin/bash");
+}
+
+test_case(simple_path_with_whitespace_string_fragment)
+{
+    set_file("/usr/local/bin/bash version 0.22");
+    tokenizer tok(mf);
+
+    assert_eq(tok.get_type(), token_type::punctuator);
+
+    tok.extract_string_fragment();
+    tok_assert(string, "/usr/local/bin/bash");
+}
+
 end_suite(tokenizer_test);
