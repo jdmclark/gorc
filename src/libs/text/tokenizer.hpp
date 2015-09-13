@@ -51,6 +51,7 @@ namespace gorc {
         tokenizer_state current_state = tokenizer_state::initial;
         token_type current_type = token_type::error;
         std::string current_value;
+        std::string reason;
         diagnostic_context_location current_token_location;
 
         inline void advance_stream()
@@ -89,9 +90,9 @@ namespace gorc {
             current_state = tokenizer_state::accept;
         }
 
-        inline void reject_token(std::string const &reason)
+        inline void reject_token(std::string const &why)
         {
-            current_value = reason;
+            reason = why;
             current_state = tokenizer_state::reject;
         }
 
@@ -135,6 +136,11 @@ namespace gorc {
         inline diagnostic_context_location const & get_location() const
         {
             return current_token_location;
+        }
+
+        inline std::string const & get_reason() const
+        {
+            return reason;
         }
     };
 

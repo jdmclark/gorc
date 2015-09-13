@@ -28,7 +28,7 @@ void gorc::json_input_stream::advance_token()
     tok.advance();
     if(tok.get_type() == token_type::error) {
         diagnostic_context dc(get_diagnostic_context());
-        LOG_FATAL(tok.get_value());
+        LOG_FATAL(tok.get_reason());
     }
 }
 

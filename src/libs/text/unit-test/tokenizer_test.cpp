@@ -19,6 +19,11 @@ public:
     expect_eq(tok.get_value(), v); \
     tok.advance()
 
+#define tok_error(v, r) \
+    expect_eq(tok.get_type(), token_type::error); \
+    expect_eq(tok.get_value(), v); \
+    expect_eq(tok.get_reason(), r);
+
 #define tok_eof() \
     expect_eq(tok.get_type(), token_type::end_of_file)
 
@@ -80,7 +85,7 @@ test_case(eof_in_string_literal)
     set_file("\"asdf");
     tokenizer tok(mf);
 
-    tok_assert(error, "unexpected eof in string literal");
+    tok_error("asdf", "unexpected eof in string literal");
 }
 
 test_case(eof_in_string_escape_sequence)
@@ -88,7 +93,7 @@ test_case(eof_in_string_escape_sequence)
     set_file("\"asdf \\");
     tokenizer tok(mf);
 
-    tok_assert(error, "unexpected eof in string literal escape sequence");
+    tok_error("asdf ", "unexpected eof in string literal escape sequence");
 }
 
 test_case(unknown_string_escape_sequence)
@@ -96,7 +101,7 @@ test_case(unknown_string_escape_sequence)
     set_file("\"asdf \\z\"");
     tokenizer tok(mf);
 
-    tok_assert(error, "unknown escape sequence \\z");
+    tok_error("asdf ", "unknown escape sequence \\z");
 }
 
 test_case(hex_integers)
@@ -119,7 +124,7 @@ test_case(hex_integer_errors)
     tokenizer tok(mf);
 
     tok_assert(hex_integer, "0x0a");
-    tok_assert(error, "expected hex integer");
+    tok_error("0x", "expected hex integer");
 }
 
 test_case(hex_integer_out_of_range)
@@ -127,7 +132,7 @@ test_case(hex_integer_out_of_range)
     set_file("0x0afg");
     tokenizer tok(mf);
 
-    tok_assert(error, "digit out of range");
+    tok_error("0x0af", "digit out of range");
 }
 
 test_case(line_comments)
@@ -158,7 +163,7 @@ test_case(control_code_not_recognized)
     set_file(str);
     tokenizer tok(mf);
 
-    tok_assert(error, "unknown input value");
+    tok_error("", "unknown input value");
 }
 
 test_case(integers)
@@ -176,7 +181,7 @@ test_case(integers_out_of_range)
     set_file("182ABCD");
     tokenizer tok(mf);
 
-    tok_assert(error, "digit out of range");
+    tok_error("182", "digit out of range");
 }
 
 test_case(integer_signs)
@@ -229,7 +234,7 @@ test_case(octal_out_of_range)
     set_file("0128");
     tokenizer tok(mf);
 
-    tok_assert(error, "digit out of range");
+    tok_error("012", "digit out of range");
 }
 
 test_case(octal_first_out_of_range)
@@ -237,7 +242,7 @@ test_case(octal_first_out_of_range)
     set_file("09");
     tokenizer tok(mf);
 
-    tok_assert(error, "digit out of range");
+    tok_error("0", "digit out of range");
 }
 
 test_case(decimal)
@@ -260,7 +265,7 @@ test_case(decimal_out_of_range)
     set_file("0.1234X");
     tokenizer tok(mf);
 
-    tok_assert(error, "digit out of range");
+    tok_error("0.1234", "digit out of range");
 }
 
 test_case(decimal_fractional_part_missing)
@@ -268,7 +273,7 @@ test_case(decimal_fractional_part_missing)
     set_file("1234.  asdf");
     tokenizer tok(mf);
 
-    tok_assert(error, "expected fractional part");
+    tok_error("1234.", "expected fractional part");
 }
 
 test_case(decimal_exponent_part_missing)
@@ -276,7 +281,7 @@ test_case(decimal_exponent_part_missing)
     set_file("1234.1234e asdf");
     tokenizer tok(mf);
 
-    tok_assert(error, "expected exponent");
+    tok_error("1234.1234e", "expected exponent");
 }
 
 test_case(decimal_exponent_out_of_range)
@@ -284,7 +289,7 @@ test_case(decimal_exponent_out_of_range)
     set_file("1234.1234e12FX");
     tokenizer tok(mf);
 
-    tok_assert(error, "digit out of range");
+    tok_error("1234.1234e12", "digit out of range");
 }
 
 test_case(non_sign_before_number)
