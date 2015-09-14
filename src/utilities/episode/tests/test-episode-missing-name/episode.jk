@@ -1,0 +1,8 @@
+# Well-formed episode other than a missing name
+
+TYPE 1
+SEQ 1
+
+10: 1 1 CUT foo.smk 0 0 12 -1
+
+end

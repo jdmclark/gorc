@@ -1,0 +1,28 @@
+Episode information
+    Name: My Episode
+    Type: 1
+    Lines: 3
+
+    Line 1:
+        Disc: 1
+        Level: 1
+        Type: level
+        File: foo.jkl
+        On success: goto line 2
+        On failure: game over
+
+    Line 2:
+        Disc: 1
+        Level: 1
+        Type: decision
+        File: foo.jkl
+        If good: goto line 3
+        If evil: goto line1
+
+    Line 3:
+        Disc: 1
+        Level: 1
+        Type: level
+        File: baz.jkl
+        On success: goto line 3
+        On failure: game over

@@ -1,0 +1,13 @@
+[WARNING] stdin: expected 5 entries, found 1
+Episode information
+    Name: My Episode
+    Type: 1
+    Lines: 1
+
+    Line 10:
+        Disc: 1
+        Level: 1
+        Type: cutscene
+        File: foo.smk
+        On success: goto line 12
+        On failure: game over

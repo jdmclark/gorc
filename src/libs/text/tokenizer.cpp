@@ -20,6 +20,7 @@ void gorc::tokenizer::handle_initial_state()
     current_token_location.first_col = current_col;
 
     if(current_char == '\0') {
+        advance_stream();
         accept_token(token_type::end_of_file);
     }
     else if(std::isspace(current_char)) {
@@ -83,6 +84,7 @@ void gorc::tokenizer::handle_string_state()
         jump_to(tokenizer_state::escape_sequence);
     }
     else if(current_char == '\0') {
+        advance_stream();
         reject_token("unexpected eof in string literal");
     }
     else if(current_char == '\"') {
@@ -98,6 +100,7 @@ void gorc::tokenizer::handle_escape_sequence_state()
 {
     switch(current_char) {
     case '\0':
+        advance_stream();
         reject_token("unexpected eof in string literal escape sequence");
         return;
 
@@ -286,14 +289,10 @@ void gorc::tokenizer::advance()
     while(true) {
         switch(current_state) {
         case tokenizer_state::accept:
-            current_token_location.last_line = current_line;
-            current_token_location.last_col = current_col;
             return;
 
         case tokenizer_state::reject:
             // TODO: Throw exception?
-            current_token_location.last_line = current_line;
-            current_token_location.last_col = current_col;
             current_type = token_type::error;
             return;
 
@@ -372,7 +371,5 @@ void gorc::tokenizer::extract_string_fragment()
         accept_current();
     }
 
-    current_token_location.last_line = current_line;
-    current_token_location.last_col = current_col;
     current_type = token_type::string;
 }

@@ -9,5 +9,6 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	tokenizer_test.cpp \
+	token_helpers_test.cpp \
 	json_serialization_test.cpp \
 	json_specification_test.cpp \

@@ -73,7 +73,7 @@ test_case(redefinition)
     json_spec_test_triple triple;
     assert_throws_logged(gorc::json_deserialize_with_specification(jis, spec, triple));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:4:9-4:11: element 'a' redefinition");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:4:9-4:10: element 'a' redefinition");
     assert_log_empty();
 }
 
@@ -169,7 +169,7 @@ test_case(unknown_element)
     json_spec_test_triple triple;
     assert_throws_logged(gorc::json_deserialize_with_specification(jis, spec, triple));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:5:9-5:11: unknown element 'd'");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:5:9-5:10: unknown element 'd'");
     assert_log_empty();
 }
 

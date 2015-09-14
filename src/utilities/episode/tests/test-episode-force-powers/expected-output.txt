@@ -1,0 +1,32 @@
+Episode information
+    Name: My Episode
+    Type: 1
+    Lines: 3
+
+    Line 1:
+        Disc: 1
+        Level: 1
+        Type: level
+        File: foo.jkl
+        Light power: 1
+        Dark power: 5
+        On success: goto line 2
+        On failure: game over
+
+    Line 2:
+        Disc: 1
+        Level: 1
+        Type: level
+        File: bar.jkl
+        Dark power: 5
+        On success: goto line 3
+        On failure: game over
+
+    Line 3:
+        Disc: 1
+        Level: 1
+        Type: level
+        File: baz.jkl
+        Light power: 1
+        On success: game over
+        On failure: game over

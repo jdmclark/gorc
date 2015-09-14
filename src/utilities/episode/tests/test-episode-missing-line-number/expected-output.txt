@@ -1,0 +1,1 @@
+[ERROR] stdin:6:1-6:5: unexpected 'first', expected line number or end

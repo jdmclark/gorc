@@ -8,4 +8,5 @@ DEPENDENCIES:= \
 	libs/test \
 
 SOURCES:= \
+	episode_entry_type_test.cpp \
 	virtual_container_iterator_test.cpp \

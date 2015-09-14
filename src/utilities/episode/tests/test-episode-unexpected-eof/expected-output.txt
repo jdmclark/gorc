@@ -1,0 +1,1 @@
+[ERROR] stdin:8:1-8:1: unexpected end of file

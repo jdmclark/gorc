@@ -412,7 +412,7 @@ test_case(invalid_number)
 
     assert_throws_logged(json_deserialize_array<float>(jis, std::back_inserter(nums)));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:4-2:7: expected exponent");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:4-2:6: expected exponent");
     assert_log_empty();
 }
 
@@ -434,7 +434,7 @@ test_case(not_integer)
 
     assert_throws_logged(json_deserialize_array<int>(jis, std::back_inserter(nums)));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:7: expected integer");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:6: expected integer");
     assert_log_empty();
 
     assert_eq(nums.size(), 0UL);
@@ -458,7 +458,7 @@ test_case(not_double)
 
     assert_throws_logged(json_deserialize_array<double>(jis, std::back_inserter(nums)));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:7: expected real");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:6: expected real");
     assert_log_empty();
 
     assert_eq(nums.size(), 0UL);
@@ -513,7 +513,7 @@ test_case(invalid_escape_sequence)
 
     assert_throws_logged(json_deserialize_array<std::string>(jis, std::back_inserter(strs)));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:21: unknown escape sequence \\z");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:20: unknown escape sequence \\z");
     assert_log_empty();
 
     assert_eq(strs.size(), 0UL);
@@ -539,7 +539,7 @@ test_case(unknown_bareword_char)
         }));
 
     assert_log_message(gorc::log_level::error,
-                       "<BUFFER>:2:3-2:4: expected key, found '*'");
+                       "<BUFFER>:2:3-2:3: expected key, found '*'");
     assert_log_empty();
 }
 
@@ -563,7 +563,7 @@ test_case(missing_member_separator)
         }));
 
     assert_log_message(gorc::log_level::error,
-                       "<BUFFER>:2:12-2:13: expected ':', found '5'");
+                       "<BUFFER>:2:12-2:12: expected ':', found '5'");
     assert_log_empty();
 }
 
@@ -585,7 +585,7 @@ test_case(null_not_bool)
 
     assert_throws_logged(json_deserialize_array<bool>(jis, std::back_inserter(ems)));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:7: 'null' is not a boolean literal");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:3-2:6: 'null' is not a boolean literal");
     assert_log_empty();
 }
 
@@ -815,7 +815,7 @@ test_case(deserialize_object_from_erroneous_file)
     assert_throws_logged(json_deserialize<json_serializable_object>(jis));
 
     assert_log_message(gorc::log_level::error,
-                       "<BUFFER>:3:9-3:13: digit out of range");
+                       "<BUFFER>:3:9-3:12: digit out of range");
     assert_log_empty();
 }
 
@@ -984,7 +984,7 @@ test_case(invalid_type)
                 });
             return em_value;
         }));
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:5-2:8: expected type, found '857'");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:5-2:7: expected type, found '857'");
     assert_log_empty();
 }
 
@@ -1074,7 +1074,7 @@ test_case(deserialize_fixed_range_too_many)
     int values[4];
     assert_throws_logged(json_deserialize_array<int>(jis, &values[0], &values[0] + 4));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:1:15-1:16: array contains too many elements");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:1:15-1:15: array contains too many elements");
     assert_log_empty();
 }
 

@@ -4,21 +4,9 @@
 #include <sstream>
 #include "io/input_stream.hpp"
 #include "log/log.hpp"
+#include "token_type.hpp"
 
 namespace gorc {
-
-    enum class token_type {
-        error,
-        end_of_file,
-        end_of_line,
-        identifier,
-        string,
-        integer,
-        hex_integer,
-        oct_integer,
-        real,
-        punctuator
-    };
 
     class tokenizer {
     private:
@@ -56,6 +44,10 @@ namespace gorc {
 
         inline void advance_stream()
         {
+            // The previous character contributed to the current token.
+            current_token_location.last_line = current_line;
+            current_token_location.last_col = current_col;
+
             if(current_char == '\n') {
                 ++current_line;
                 current_col = 1;
