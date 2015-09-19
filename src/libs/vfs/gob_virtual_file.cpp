@@ -21,3 +21,8 @@ std::unique_ptr<gorc::input_stream> gorc::gob_virtual_file::open() const
                                  chunk_offset,
                                  chunk_length);
 }
+
+gorc::virtual_container const& gorc::gob_virtual_file::get_parent_container() const
+{
+    return parent_container;
+}

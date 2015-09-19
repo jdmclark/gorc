@@ -10,7 +10,7 @@ namespace gorc {
 
     class virtual_container_iterator {
     private:
-        virtual_container const *underlying_container;
+        virtual_container const *underlying_container = nullptr;
         size_t current_index;
         maybe<virtual_file const *> current_file;
 

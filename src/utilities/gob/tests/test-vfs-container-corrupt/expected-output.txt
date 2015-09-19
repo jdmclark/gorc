@@ -1,0 +1,4 @@
+[ERROR] res/junk.gob: container is not a valid GOB
+junk.gob => res
+--------------------
+Files: 1

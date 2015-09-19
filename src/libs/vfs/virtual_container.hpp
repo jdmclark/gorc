@@ -12,6 +12,9 @@ namespace gorc {
         virtual virtual_file const& get_file(size_t index) const = 0;
 
     public:
+        path const container_filename;
+
+        virtual_container(path const &container_filename);
         virtual ~virtual_container();
 
         virtual size_t size() const = 0;

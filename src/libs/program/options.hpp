@@ -8,6 +8,7 @@
 #include "required_option.hpp"
 #include "bare_multi_value_option.hpp"
 #include "at_least_one_input.hpp"
+#include "dependent_option.hpp"
 
 #include "utility/make_unique.hpp"
 #include "utility/string_search.hpp"

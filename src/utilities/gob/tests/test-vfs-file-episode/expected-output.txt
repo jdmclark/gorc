@@ -1,0 +1,16 @@
+==== default ====
+asset.txt: 1
+overridden.txt: 3
+modded.txt: 1
+==== mod1 ====
+asset.txt: 1
+overridden.txt: 3
+modded.txt: 2
+==== mod2 ====
+asset.txt: 1
+overridden.txt: 3
+modded.txt: 4
+==== episode1 ====
+"Test Episode 1"
+==== episode2 ====
+"Test Episode 2"

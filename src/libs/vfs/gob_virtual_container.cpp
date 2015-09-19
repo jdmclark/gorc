@@ -18,7 +18,7 @@ namespace {
 }
 
 gorc::gob_virtual_container::gob_virtual_container(path const &container_filename)
-    : container_filename(container_filename)
+    : virtual_container(container_filename)
 {
     std::string stk_filename = container_filename.generic_string();
     diagnostic_context dc(stk_filename.c_str());

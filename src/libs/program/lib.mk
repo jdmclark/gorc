@@ -9,6 +9,7 @@ SOURCES:= \
 	abstract_bare_option.cpp \
 	abstract_option.cpp \
 	at_least_one_input.cpp \
+	dependent_option.cpp \
 	mutual_exclusion.cpp \
 	option_constraint.cpp \
 	options.cpp \

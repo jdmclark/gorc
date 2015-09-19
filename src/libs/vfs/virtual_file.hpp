@@ -6,6 +6,8 @@
 
 namespace gorc {
 
+    class virtual_container;
+
     class virtual_file {
     public:
         path const name;
@@ -14,5 +16,6 @@ namespace gorc {
         virtual ~virtual_file();
 
         virtual std::unique_ptr<input_stream> open() const = 0;
+        virtual virtual_container const& get_parent_container() const = 0;
     };
 }

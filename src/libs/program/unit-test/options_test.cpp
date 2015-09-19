@@ -668,4 +668,28 @@ test_case(at_least_one_input)
     opts.load_from_arg_list(arg_list_2);
 }
 
+test_case(dependent_option_test)
+{
+    bool a;
+    bool b;
+
+    opts.insert(gorc::make_switch_option("foo", a));
+    opts.insert(gorc::make_switch_option("bar", b));
+
+    opts.emplace_constraint<gorc::dependent_option>("foo", "bar");
+
+    std::vector<std::string> arg_list_1 { "--bar" };
+    opts.load_from_arg_list(arg_list_1);
+    assert_log_empty();
+
+    std::vector<std::string> arg_list_2 { "--foo", "--bar" };
+    opts.load_from_arg_list(arg_list_2);
+    assert_log_empty();
+
+    std::vector<std::string> arg_list_3 { "--foo" };
+    assert_throws_logged(opts.load_from_arg_list(arg_list_3));
+    assert_log_message(gorc::log_level::error,
+                       "option foo requires option bar");
+}
+
 end_suite(options_test);

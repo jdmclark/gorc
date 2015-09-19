@@ -1,8 +1,10 @@
 #include "program/program.hpp"
 #include "vfs/gob_virtual_container.hpp"
+#include "vfs/jk_virtual_file_system.hpp"
 #include "io/std_output_stream.hpp"
 #include <iostream>
 #include <iomanip>
+#include <map>
 
 namespace gorc {
 
@@ -10,6 +12,11 @@ namespace gorc {
     private:
         // Archive modes
         std::string archive_file;
+
+        bool jk_mode = false;
+        std::string jk_game;
+        std::string jk_episode;
+        std::string jk_resource = "resource";
 
         // Sub-commands
         bool do_list = false;
@@ -20,7 +27,21 @@ namespace gorc {
         {
             // Archive modes
             opts.insert(make_value_option("file", archive_file));
-            opts.emplace_constraint<required_option>("file");
+            opts.insert(make_switch_option("jk", jk_mode));
+
+            opts.emplace_constraint<gorc::mutual_exclusion>(
+                    std::vector<std::string> { "file", "jk" },
+                    /* min set */ 1,
+                    /* max set */ 1);
+
+            opts.insert(make_value_option("game", jk_game));
+            opts.emplace_constraint<gorc::dependent_option>("game", "jk");
+
+            opts.insert(make_value_option("episode", jk_episode));
+            opts.emplace_constraint<gorc::dependent_option>("episode", "jk");
+
+            opts.insert(make_value_option("resource", jk_resource));
+            opts.emplace_constraint<gorc::dependent_option>("resource", "jk");
 
             // Sub-command modes
             opts.insert(make_switch_option("list", do_list));
@@ -33,7 +54,11 @@ namespace gorc {
 
         virtual int main() override
         {
-            if(!archive_file.empty()) {
+            if(jk_mode) {
+                // Handle JK VFS mode
+                return jk_vfs_main();
+            }
+            else if(!archive_file.empty()) {
                 // Handle single archive
                 return single_archive_main();
             }
@@ -42,6 +67,33 @@ namespace gorc {
             // Not possible - guards against future changes
             LOG_FATAL("unhandled option");
             // LCOV_EXCL_STOP
+        }
+
+        int jk_vfs_main()
+        {
+            std::unique_ptr<jk_virtual_file_system> vfs;
+            if(jk_game.empty()) {
+                vfs = make_unique<jk_virtual_file_system>(jk_resource);
+            }
+            else {
+                vfs = make_unique<jk_virtual_file_system>(jk_resource, jk_game);
+            }
+
+            std::unique_ptr<virtual_container> episode_gob;
+            if(!jk_episode.empty()) {
+                episode_gob = make_unique<gob_virtual_container>(jk_episode);
+                vfs->set_current_episode(*episode_gob);
+            }
+
+            // Handle sub-commands
+            if(do_list) {
+                return jk_vfs_list(*vfs);
+            }
+            else if(!extract_file.empty()) {
+                return jk_vfs_extract_file(*vfs);
+            }
+
+            return EXIT_SUCCESS;
         }
 
         int single_archive_main()
@@ -55,6 +107,19 @@ namespace gorc {
                 return single_archive_extract_file(gob);
             }
 
+            return EXIT_SUCCESS;
+        }
+
+        int jk_vfs_list(jk_virtual_file_system const &vfs)
+        {
+            auto vfs_map = vfs.list_files();
+            size_t num_files = 0;
+            for(auto const &f : vfs_map) {
+                std::cout << f.first << " => " << f.second << std::endl;
+                ++num_files;
+            }
+            std::cout << "--------------------" << std::endl;
+            std::cout << "Files: " << num_files << std::endl;
             return EXIT_SUCCESS;
         }
 
@@ -78,6 +143,26 @@ namespace gorc {
             }
 
             std::cout << "Total: " << gob.size() << std::endl;
+
+            return EXIT_SUCCESS;
+        }
+
+        int jk_vfs_extract_file(virtual_file_system const &vfs)
+        {
+            // Transform input filename to lowercase
+            std::transform(extract_file.begin(),
+                           extract_file.end(),
+                           extract_file.begin(),
+                           tolower);
+            path p = extract_file;
+
+            // Locate file in VFS
+            auto f = vfs.open(p);
+
+            // Print
+            std_output_stream out_stream;
+            out_stream.reopen_as_binary();
+            f->copy_to(out_stream);
 
             return EXIT_SUCCESS;
         }

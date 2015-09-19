@@ -5,9 +5,13 @@
 using namespace gorc;
 
 class mock_virtual_file : public virtual_file {
+private:
+    virtual_container const &parent_ctr;
 public:
-    mock_virtual_file(path const &fn)
+    mock_virtual_file(path const &fn,
+                      virtual_container const &parent_ctr)
         : virtual_file(fn)
+        , parent_ctr(parent_ctr)
     {
         return;
     }
@@ -15,6 +19,11 @@ public:
     virtual std::unique_ptr<input_stream> open() const override
     {
         LOG_FATAL("unimplemented");
+    }
+
+    virtual virtual_container const& get_parent_container() const override
+    {
+        return parent_ctr;
     }
 };
 
@@ -29,6 +38,12 @@ protected:
     }
 
 public:
+    mock_virtual_container()
+        : virtual_container("garbage")
+    {
+        return;
+    }
+
     virtual size_t size() const override
     {
         return files.size();
@@ -36,7 +51,7 @@ public:
 
     void add_file(std::string const &fn)
     {
-        files.emplace_back(fn);
+        files.emplace_back(fn, *this);
     }
 };
 

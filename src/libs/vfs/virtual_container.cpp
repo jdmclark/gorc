@@ -1,4 +1,11 @@
 #include "virtual_container.hpp"
+#include "log/log.hpp"
+
+gorc::virtual_container::virtual_container(path const &container_filename)
+    : container_filename(container_filename)
+{
+    return;
+}
 
 gorc::virtual_container::~virtual_container()
 {
