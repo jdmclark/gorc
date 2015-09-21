@@ -36,6 +36,18 @@ gorc::cog::symbol const& gorc::cog::symbol_table::get_symbol(std::string const &
     return get_symbol_by_index(get_symbol_index(name));
 }
 
+gorc::maybe<gorc::cog::symbol const *> gorc::cog::symbol_table::get_existing_symbol(
+                                                        std::string const &name) const
+{
+    auto it = index.find(name);
+    if(it == index.end()) {
+        return nothing;
+    }
+    else {
+        return &symbols[it->second];
+    }
+}
+
 size_t gorc::cog::symbol_table::size() const
 {
     return symbols.size();

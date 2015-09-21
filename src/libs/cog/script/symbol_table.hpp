@@ -1,6 +1,7 @@
 #pragma once
 
 #include "symbol.hpp"
+#include "utility/maybe.hpp"
 #include <unordered_map>
 #include <vector>
 
@@ -25,6 +26,8 @@ namespace gorc {
             symbol const& get_symbol(std::string const &name);
 
             symbol const& get_symbol_by_index(size_t index) const;
+
+            maybe<symbol const *> get_existing_symbol(std::string const &name) const;
 
             size_t size() const;
 

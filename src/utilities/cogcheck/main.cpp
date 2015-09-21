@@ -2,6 +2,7 @@
 #include "cog/grammar/grammar.hpp"
 #include "cog/script/script.hpp"
 #include "cog/semantics/analyzer.hpp"
+#include "cog/codegen/codegen.hpp"
 #include "io/native_file.hpp"
 #include "print_ast_visitor.hpp"
 
@@ -69,6 +70,13 @@ namespace gorc {
             if(diagnostic_file_error_count() > 0) {
                 // Abort after any semantic error
                 return false;
+            }
+
+            if(!parse_only) {
+                cog::perform_code_generation(script,
+                                             *tu,
+                                             verbs,
+                                             constants);
             }
 
             if(dump_ast) {

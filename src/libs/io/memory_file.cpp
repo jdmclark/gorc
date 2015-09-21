@@ -78,6 +78,20 @@ size_t gorc::memory_file::writer::write_some(void const *src, size_t size)
     return size;
 }
 
+void gorc::memory_file::writer::set_position(size_t off)
+{
+    if(off > mf.buffer.size()) {
+        throw std::range_error("memory_file::set_position invalid offset");
+    }
+
+    offset = off;
+}
+
+size_t gorc::memory_file::writer::position()
+{
+    return offset;
+}
+
 gorc::memory_file::memory_file()
     : reader_instance(*this)
     , writer_instance(*this)

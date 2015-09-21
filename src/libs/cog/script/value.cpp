@@ -8,6 +8,18 @@ namespace {
     constexpr float default_float = 0.0f;
 }
 
+gorc::cog::value::value(deserialization_constructor_tag, input_stream &f)
+{
+    type_flag = read<value_type>(f);
+    f.read(&data, sizeof(data));
+}
+
+void gorc::cog::value::serialize(output_stream &f) const
+{
+    write(f, type_flag);
+    f.write(&data, sizeof(data));
+}
+
 gorc::cog::value::value(char const *p)
 {
     *this = p;

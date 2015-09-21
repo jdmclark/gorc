@@ -2,6 +2,7 @@ NAME:=cogcheck
 
 DEPENDENCIES:= \
 	libs/program \
+	libs/cog/codegen \
 	libs/cog/grammar \
 	libs/cog/semantics \
 

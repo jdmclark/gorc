@@ -3,10 +3,12 @@ NAME:=script
 DEPENDENCIES:= \
 	libs/utility \
 	libs/math \
+	libs/io \
 
 SOURCES:= \
 	constant_table.cpp \
 	heap.cpp \
+	message_table.cpp \
 	message_type.cpp \
 	mock_verb.cpp \
 	script.cpp \

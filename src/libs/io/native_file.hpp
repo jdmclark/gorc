@@ -22,6 +22,9 @@ namespace gorc {
         native_file& operator=(native_file const&) = delete;
 
         virtual size_t write_some(void const *src, size_t size) override;
+
+        virtual void set_position(size_t offset) override;
+        virtual size_t position() override;
     };
 
     class native_read_only_file : public read_only_file {

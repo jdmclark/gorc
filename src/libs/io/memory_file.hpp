@@ -35,6 +35,8 @@ namespace gorc {
             writer(memory_file &mf);
 
             virtual size_t write_some(void const *src, size_t size) override;
+            virtual void set_position(size_t offset) override;
+            virtual size_t position() override;
         };
 
         friend class reader;

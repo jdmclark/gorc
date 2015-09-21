@@ -2,7 +2,10 @@
 
 #include "type.hpp"
 #include "id.hpp"
+#include "utility/constructor_tag.hpp"
 #include "math/vector.hpp"
+#include "io/input_stream.hpp"
+#include "io/output_stream.hpp"
 #include <string>
 
 namespace gorc {
@@ -23,6 +26,9 @@ namespace gorc {
             } data;
 
         public:
+            value(deserialization_constructor_tag, input_stream &);
+            void serialize(output_stream &) const;
+
             value() = default;
             value(value const &) = default;
             value& operator=(value const &) = default;

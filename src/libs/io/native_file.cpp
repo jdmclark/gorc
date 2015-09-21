@@ -31,6 +31,16 @@ size_t gorc::native_file::write_some(void const *src, size_t size)
     return std::fwrite(src, 1U, size, file_handle);
 }
 
+void gorc::native_file::set_position(size_t offset)
+{
+    fseek(file_handle, static_cast<long>(offset), SEEK_SET);
+}
+
+size_t gorc::native_file::position()
+{
+    return static_cast<size_t>(ftell(file_handle));
+}
+
 gorc::native_read_only_file::native_read_only_file(path const &filename)
     : filename(filename)
 {
