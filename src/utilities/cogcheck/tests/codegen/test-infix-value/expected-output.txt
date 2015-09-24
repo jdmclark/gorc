@@ -1,0 +1,68 @@
+DISASSEMBLY
+
+startup:
+    load 1
+    load 2
+    add
+    stor 3
+    load 1
+    load 2
+    sub
+    stor 3
+    load 1
+    load 2
+    mul
+    stor 3
+    load 1
+    load 2
+    div
+    stor 3
+    load 1
+    load 2
+    mod
+    stor 3
+    load 1
+    load 2
+    band
+    stor 3
+    load 1
+    load 2
+    bor
+    stor 3
+    load 1
+    load 2
+    bxor
+    stor 3
+    load 1
+    load 2
+    lor
+    stor 3
+    load 1
+    load 2
+    land
+    stor 3
+    load 1
+    load 2
+    lt
+    stor 3
+    load 1
+    load 2
+    le
+    stor 3
+    load 1
+    load 2
+    gt
+    stor 3
+    load 1
+    load 2
+    ge
+    stor 3
+    load 1
+    load 2
+    ne
+    stor 3
+    load 1
+    load 2
+    eq
+    stor 3
+    ret

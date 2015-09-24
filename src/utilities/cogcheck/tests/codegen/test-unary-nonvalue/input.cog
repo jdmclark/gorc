@@ -1,0 +1,10 @@
+symbols
+message startup
+int x
+end
+code
+startup:
+    +x;
+    -x;
+    !x;
+end

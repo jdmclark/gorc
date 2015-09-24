@@ -6,9 +6,7 @@ namespace gorc {
     namespace cog {
 
         enum class opcode : uint8_t {
-            nop,            // NOP : non-operation
-
-            push,           // PUSH [immediate] : push immediate
+            push = 1,       // PUSH [immediate] : push immediate
             dup,            // DUP : duplicate top value
 
             load,           // LOAD [address] : loads from heap

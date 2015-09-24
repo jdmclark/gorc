@@ -1,0 +1,10 @@
+symbols
+message startup
+int x = 5
+int x1 = 2
+end
+code
+startup:
+    x[0];
+    x[1];
+end

@@ -1,0 +1,5 @@
+DISASSEMBLY
+
+startup:
+    call getsithmode
+    ret

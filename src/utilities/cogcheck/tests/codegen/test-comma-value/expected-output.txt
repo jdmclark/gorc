@@ -1,0 +1,6 @@
+DISASSEMBLY
+
+startup:
+    load 2
+    stor 3
+    ret

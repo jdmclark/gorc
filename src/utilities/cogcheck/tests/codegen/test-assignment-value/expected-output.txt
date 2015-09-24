@@ -1,0 +1,9 @@
+[WARNING] input.cog:8:5-8:9: result of an assignment expression is used: behavior differs from original implementation
+DISASSEMBLY
+
+startup:
+    push int(1)
+    dup
+    stor 0
+    stor 1
+    ret

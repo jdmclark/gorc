@@ -1,0 +1,9 @@
+symbols
+message startup
+int x
+int y
+end
+code
+startup:
+    x, y;
+end

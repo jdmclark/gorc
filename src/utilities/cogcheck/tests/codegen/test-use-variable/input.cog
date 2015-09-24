@@ -1,0 +1,8 @@
+symbols
+int x=5
+message startup
+end
+code
+startup:
+    printint(x);
+end

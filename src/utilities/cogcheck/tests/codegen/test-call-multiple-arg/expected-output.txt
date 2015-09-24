@@ -1,0 +1,9 @@
+DISASSEMBLY
+
+startup:
+    push int(1)
+    push int(2)
+    push int(3)
+    callv vectorset
+    stor 1
+    ret

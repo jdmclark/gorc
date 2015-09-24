@@ -12,6 +12,11 @@ gorc::cog::ir_printer::ir_printer(file &program_text,
 
 void gorc::cog::ir_printer::finalize()
 {
+    if(!ends_with_ret) {
+        // End program text with ret
+        ret();
+    }
+
     // Loop over backpatch map, replacing temporary indices
     for(auto const &backpatch : backpatch_map) {
         int label_id;
@@ -76,35 +81,41 @@ void gorc::cog::ir_printer::label(label_id lid)
 
 void gorc::cog::ir_printer::push(value v)
 {
+    ends_with_ret = false;
     write(program_text, opcode::push);
     v.serialize(program_text);
 }
 
 void gorc::cog::ir_printer::dup()
 {
+    ends_with_ret = false;
     write(program_text, opcode::dup);
 }
 
 void gorc::cog::ir_printer::load(size_t addr)
 {
+    ends_with_ret = false;
     write(program_text, opcode::load);
     write(program_text, addr);
 }
 
 void gorc::cog::ir_printer::loadi(size_t addr)
 {
+    ends_with_ret = false;
     write(program_text, opcode::loadi);
     write(program_text, addr);
 }
 
 void gorc::cog::ir_printer::stor(size_t addr)
 {
+    ends_with_ret = false;
     write(program_text, opcode::stor);
     write(program_text, addr);
 }
 
 void gorc::cog::ir_printer::stori(size_t addr)
 {
+    ends_with_ret = false;
     write(program_text, opcode::stori);
     write(program_text, addr);
 }
@@ -122,127 +133,152 @@ void gorc::cog::ir_printer::write_branch_instruction(opcode op, label_id lid)
 
 void gorc::cog::ir_printer::jmp(label_id lid)
 {
+    ends_with_ret = false;
     write_branch_instruction(opcode::jmp, lid);
 }
 
 void gorc::cog::ir_printer::jal(label_id lid)
 {
+    ends_with_ret = false;
     write_branch_instruction(opcode::jal, lid);
 }
 
 void gorc::cog::ir_printer::bt(label_id lid)
 {
+    ends_with_ret = false;
     write_branch_instruction(opcode::bt, lid);
 }
 
 void gorc::cog::ir_printer::bf(label_id lid)
 {
+    ends_with_ret = false;
     write_branch_instruction(opcode::bf, lid);
 }
 
 void gorc::cog::ir_printer::ret()
 {
+    ends_with_ret = true;
     write(program_text, opcode::ret);
 }
 
 void gorc::cog::ir_printer::call(verb_id id)
 {
+    ends_with_ret = false;
     write(program_text, opcode::call);
     write(program_text, static_cast<int>(id));
 }
 
 void gorc::cog::ir_printer::callv(verb_id id)
 {
+    ends_with_ret = false;
     write(program_text, opcode::callv);
     write(program_text, static_cast<int>(id));
 }
 
 void gorc::cog::ir_printer::neg()
 {
+    ends_with_ret = false;
     write(program_text, opcode::neg);
 }
 
 void gorc::cog::ir_printer::lnot()
 {
+    ends_with_ret = false;
     write(program_text, opcode::lnot);
 }
 
 void gorc::cog::ir_printer::add()
 {
+    ends_with_ret = false;
     write(program_text, opcode::add);
 }
 
 void gorc::cog::ir_printer::sub()
 {
+    ends_with_ret = false;
     write(program_text, opcode::sub);
 }
 
 void gorc::cog::ir_printer::mul()
 {
+    ends_with_ret = false;
     write(program_text, opcode::mul);
 }
 
 void gorc::cog::ir_printer::div()
 {
+    ends_with_ret = false;
     write(program_text, opcode::div);
 }
 
 void gorc::cog::ir_printer::mod()
 {
+    ends_with_ret = false;
     write(program_text, opcode::mod);
 }
 
 void gorc::cog::ir_printer::bor()
 {
+    ends_with_ret = false;
     write(program_text, opcode::bor);
 }
 
 void gorc::cog::ir_printer::band()
 {
+    ends_with_ret = false;
     write(program_text, opcode::band);
 }
 
 void gorc::cog::ir_printer::bxor()
 {
+    ends_with_ret = false;
     write(program_text, opcode::bxor);
 }
 
 void gorc::cog::ir_printer::lor()
 {
+    ends_with_ret = false;
     write(program_text, opcode::lor);
 }
 
 void gorc::cog::ir_printer::land()
 {
+    ends_with_ret = false;
     write(program_text, opcode::land);
 }
 
 void gorc::cog::ir_printer::eq()
 {
+    ends_with_ret = false;
     write(program_text, opcode::eq);
 }
 
 void gorc::cog::ir_printer::ne()
 {
+    ends_with_ret = false;
     write(program_text, opcode::ne);
 }
 
 void gorc::cog::ir_printer::gt()
 {
+    ends_with_ret = false;
     write(program_text, opcode::gt);
 }
 
 void gorc::cog::ir_printer::ge()
 {
+    ends_with_ret = false;
     write(program_text, opcode::ge);
 }
 
 void gorc::cog::ir_printer::lt()
 {
+    ends_with_ret = false;
     write(program_text, opcode::lt);
 }
 
 void gorc::cog::ir_printer::le()
 {
+    ends_with_ret = false;
     write(program_text, opcode::le);
 }

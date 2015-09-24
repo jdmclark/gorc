@@ -23,6 +23,10 @@ void rval_expression_gen_visitor::visit(ast::immediate_expression &e)
     return;
 }
 
+// LCOV_EXCL_START
+//
+// Cannot be called - constant expressions should be lowered before this
+
 void rval_expression_gen_visitor::visit(ast::string_literal_expression &)
 {
     LOG_FATAL("unlowered string literal expression");
@@ -42,6 +46,8 @@ void rval_expression_gen_visitor::visit(ast::vector_literal_expression &)
 {
     LOG_FATAL("unlowered vector literal expression");
 }
+
+// LCOV_EXCL_STOP
 
 void rval_expression_gen_visitor::visit(ast::identifier_expression &e)
 {

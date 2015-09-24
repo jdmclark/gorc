@@ -1,0 +1,8 @@
+symbols
+message startup
+int x = 5
+end
+code
+startup:
+    x;
+end

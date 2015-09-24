@@ -1,0 +1,29 @@
+DISASSEMBLY
+
+startup:
+    push int(0)
+    loadi 0
+    call printint
+    push int(1)
+    loadi 0
+    call printint
+    push int(0)
+    stor 2
+    load 2
+    push int(2)
+    lt
+    bf L225
+L128:
+    load 2
+    loadi 0
+    call printint
+    load 2
+    push int(1)
+    add
+    stor 2
+    load 2
+    push int(2)
+    lt
+    bt L128
+L225:
+    ret

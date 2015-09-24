@@ -1,0 +1,9 @@
+DISASSEMBLY
+
+startup:
+    push int(1)
+    bf L32
+    call getsithmode
+L32:
+    call rand
+    ret

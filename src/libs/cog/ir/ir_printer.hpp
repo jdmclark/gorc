@@ -25,6 +25,8 @@ namespace gorc {
 
             std::unordered_multimap<int, size_t> backpatch_map;
 
+            bool ends_with_ret = false;
+
             void write_branch_instruction(opcode op, label_id lid);
 
         public:

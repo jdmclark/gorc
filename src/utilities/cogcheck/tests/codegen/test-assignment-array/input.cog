@@ -1,0 +1,14 @@
+symbols
+int x=1
+int x1=2
+int i
+message startup
+end
+code
+startup:
+    x[0] = 1;
+    x[1] = 2;
+    for(i = 0; i < 2; i = i + 1) {
+        x[i] = i + 1;
+    }
+end

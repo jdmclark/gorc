@@ -1,0 +1,13 @@
+DISASSEMBLY
+
+startup:
+    call randvec
+    push int(1)
+    bf L64
+L32:
+    call getsithmode
+    push int(1)
+    bt L32
+L64:
+    call rand
+    ret

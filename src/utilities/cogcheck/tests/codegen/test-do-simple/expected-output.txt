@@ -1,0 +1,10 @@
+DISASSEMBLY
+
+startup:
+    call randvec
+L5:
+    call getsithmode
+    push int(1)
+    bt L5
+    call rand
+    ret

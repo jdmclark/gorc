@@ -15,6 +15,16 @@ namespace gorc {
         public:
             void set_offset(message_type, size_t);
             maybe<size_t> get_offset(message_type) const;
+
+            auto begin() const -> decltype(offsets.begin())
+            {
+                return offsets.begin();
+            }
+
+            auto end() const -> decltype(offsets.end())
+            {
+                return offsets.end();
+            }
         };
 
     }

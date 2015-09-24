@@ -1,0 +1,8 @@
+symbols
+int x
+message startup
+end
+code
+startup:
+    x = getsithmode();
+end

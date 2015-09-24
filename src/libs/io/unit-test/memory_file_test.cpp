@@ -40,6 +40,14 @@ test_case(read_write_offset)
     f.set_position(1);
     assert_eq(read<unsigned char>(f), 0xCD);
     assert_eq(read<unsigned char>(f), 0x9B);
+
+    auto w = memory_file::writer(f);
+    w.set_position(1);
+    write<unsigned char>(w, 0xAB);
+
+    auto r = memory_file::reader(f);
+    r.set_position(1);
+    assert_eq(read<unsigned char>(r), 0xAB);
 }
 
 test_case(read_write_seek)
@@ -75,16 +83,30 @@ test_case(out_of_bounds_set_pos)
     f.set_position(3);
     f.set_position(4);
 
-    try {
-        f.set_position(5);
-    }
-    catch(std::runtime_error const &e) {
-        assert_eq(std::string(e.what()),
+    assert_throws(f.set_position(5),
+                  std::runtime_error,
                   "memory_file::set_position invalid offset");
-        return;
+}
+
+test_case(out_of_bounds_write_set_pos)
+{
+    memory_file f;
+
+    for(int i = 0; i < 4; ++i) {
+        write<unsigned char>(f, 0xFF);
     }
 
-    assert_always("did not catch exception");
+    memory_file::writer w(f);
+
+    w.set_position(0);
+    w.set_position(1);
+    w.set_position(2);
+    w.set_position(3);
+    w.set_position(4);
+
+    assert_throws(w.set_position(5),
+                  std::runtime_error,
+                  "memory_file::set_position invalid offset");
 }
 
 test_case(out_of_bounds_seek)

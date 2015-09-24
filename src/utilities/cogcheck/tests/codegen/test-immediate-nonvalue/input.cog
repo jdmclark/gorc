@@ -1,0 +1,10 @@
+symbols
+message startup
+end
+code
+startup:
+    "All of these should be ignored";
+    1;
+    1.0;
+    '1 2 3';
+end

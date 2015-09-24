@@ -1,0 +1,12 @@
+DISASSEMBLY
+
+startup:
+    load 1
+    stor 2
+    load 1
+    neg
+    stor 2
+    load 1
+    lnot
+    stor 2
+    ret

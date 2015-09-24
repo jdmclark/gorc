@@ -1,0 +1,14 @@
+symbols
+int x=1
+int x1=2
+int i
+message startup
+end
+code
+startup:
+    printint(x[0]);
+    printint(x[1]);
+    for(i = 0; i < 2; i = i + 1) {
+        printint(x[i]);
+    }
+end

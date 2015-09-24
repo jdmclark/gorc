@@ -1,0 +1,17 @@
+DISASSEMBLY
+
+startup:
+    push int(1)
+    call printint
+    jal L42
+    jal L75
+    ret
+L42:
+    push int(2)
+    call printint
+    jal L75
+    ret
+L75:
+    push int(3)
+    call printint
+    ret

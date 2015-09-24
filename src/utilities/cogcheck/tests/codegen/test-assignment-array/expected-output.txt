@@ -1,0 +1,31 @@
+DISASSEMBLY
+
+startup:
+    push int(1)
+    push int(0)
+    stori 0
+    push int(2)
+    push int(1)
+    stori 0
+    push int(0)
+    stor 2
+    load 2
+    push int(2)
+    lt
+    bf L274
+L154:
+    load 2
+    push int(1)
+    add
+    load 2
+    stori 0
+    load 2
+    push int(1)
+    add
+    stor 2
+    load 2
+    push int(2)
+    lt
+    bt L154
+L274:
+    ret

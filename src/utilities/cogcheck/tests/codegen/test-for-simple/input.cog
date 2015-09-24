@@ -1,0 +1,11 @@
+symbols
+message startup
+end
+code
+startup:
+    randvec();
+    for(getcamerastateflags(); getcurrentcamera(); cyclecamera()) {
+        getsithmode();
+    }
+    rand();
+end

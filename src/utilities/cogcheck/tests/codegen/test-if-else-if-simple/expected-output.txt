@@ -1,0 +1,14 @@
+DISASSEMBLY
+
+startup:
+    push int(1)
+    bf L41
+    call getsithmode
+    jmp L73
+L41:
+    push int(2)
+    bf L73
+    call randvec
+L73:
+    call rand
+    ret

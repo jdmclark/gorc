@@ -1,0 +1,11 @@
+symbols
+message startup
+end
+code
+startup:
+    randvec();
+    do {
+        getsithmode();
+    } while(1);
+    rand();
+end

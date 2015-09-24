@@ -50,6 +50,8 @@ namespace gorc {
             trigger             = 40
         };
 
+        char const* as_string(message_type);
+
         void add_messages_to_constant_table(constant_table &table);
     }
 }

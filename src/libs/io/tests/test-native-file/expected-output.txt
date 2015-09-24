@@ -26,5 +26,9 @@ Current position: 5
 ==== Size ====
 Small size: 6
 Medium size: 16
+==== Write position ====
+Overwritten character: 8
+After overwrite: 9
+Messages match
 ==== Testsuite returns: 0 ====
 Contents overwritten

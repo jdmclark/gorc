@@ -57,6 +57,7 @@ bool gorc::cog::is_id_type(value_type vt)
     case value_type::model:
     case value_type::sound:
     case value_type::thing_template:
+    case value_type::message:
         return true;
 
     default:

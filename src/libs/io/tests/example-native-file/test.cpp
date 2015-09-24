@@ -196,5 +196,33 @@ int main(int, char**)
         std::cout << "Exception thrown" << std::endl;
     }
 
+    std::cout << "==== Write position ====" << std::endl;
+
+    std::string write_pos_msg = "Hello, World!";
+    std::string expected_msg = "Hello, Wqrld!";
+
+    {
+        auto f = gorc::make_native_file("tempdir/patched.txt");
+        f->write(write_pos_msg.c_str(), write_pos_msg.size());
+        f->set_position(8);
+        std::cout << "Overwritten character: " << f->position() << std::endl;
+        gorc::write<char>(*f, 'q');
+        std::cout << "After overwrite: " << f->position() << std::endl;
+    }
+
+    {
+        auto f = gorc::make_native_read_only_file("tempdir/patched.txt");
+        std::string rel;
+        rel.resize(13);
+        f->read(&rel[0], rel.size());
+
+        if(expected_msg == rel) {
+            std::cout << "Messages match" << std::endl;
+        }
+        else {
+            std::cout << "Messages don't match" << std::endl;
+        }
+    }
+
     return 0;
 }

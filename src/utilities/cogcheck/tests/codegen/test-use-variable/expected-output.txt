@@ -1,0 +1,6 @@
+DISASSEMBLY
+
+startup:
+    load 0
+    call printint
+    ret

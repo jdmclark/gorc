@@ -1,0 +1,16 @@
+[WARNING] input.cog:10:9-10:22: dead code
+DISASSEMBLY
+
+startup:
+    call randvec
+    push int(1)
+    bf L78
+L32:
+    call getsithmode
+    jmp L78
+    call getsithmode
+    push int(1)
+    bt L32
+L78:
+    call rand
+    ret

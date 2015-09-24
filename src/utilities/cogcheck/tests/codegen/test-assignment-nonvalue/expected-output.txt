@@ -1,0 +1,6 @@
+DISASSEMBLY
+
+startup:
+    push int(1)
+    stor 0
+    ret

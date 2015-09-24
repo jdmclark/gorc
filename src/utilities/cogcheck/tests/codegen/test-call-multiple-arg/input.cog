@@ -1,0 +1,8 @@
+symbols
+message startup
+vector v
+end
+code
+startup:
+    v = vectorset(1, 2, 3);
+end

@@ -1,0 +1,19 @@
+symbols
+message startup
+end
+code
+startup:
+    printint(1);
+    call entered;
+    call not_a_message;
+    return;
+
+entered:
+    printint(2);
+    call not_a_message;
+    return;
+
+not_a_message:
+    printint(3);
+    return;
+end

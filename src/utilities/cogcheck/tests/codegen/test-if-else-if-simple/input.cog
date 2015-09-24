@@ -1,0 +1,13 @@
+symbols
+message startup
+end
+code
+startup:
+    if(1) {
+        getsithmode();
+    }
+    else if(2) {
+        randvec();
+    }
+    rand();
+end

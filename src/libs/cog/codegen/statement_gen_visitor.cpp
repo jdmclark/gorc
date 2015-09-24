@@ -37,7 +37,8 @@ void statement_gen_visitor::visit(ast::expression_statement &s)
 void statement_gen_visitor::visit(ast::break_statement &)
 {
     if(break_labels.empty()) {
-        LOG_FATAL("generated break instruction outside of loop");
+        // Assertion - already handled by earlier semantic analysis
+        LOG_FATAL("generated break instruction outside of loop"); // LCOV_EXCL_LINE
     }
 
     ir.jmp(break_labels.top());

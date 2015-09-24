@@ -11,6 +11,8 @@ SOURCES:= \
 	function_verb_test.cpp \
 	heap_test.cpp \
 	id_test.cpp \
+	message_table_test.cpp \
+	message_type_test.cpp \
 	mock_verb_test.cpp \
 	string_table_test.cpp \
 	symbol_table_test.cpp \

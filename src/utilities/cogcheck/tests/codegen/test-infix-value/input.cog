@@ -1,0 +1,25 @@
+symbols
+message startup
+int x
+int y
+int z
+end
+code
+startup:
+    z = x + y;
+    z = x - y;
+    z = x * y;
+    z = x / y;
+    z = x % y;
+    z = x & y;
+    z = x | y;
+    z = x ^ y;
+    z = x || y;
+    z = x && y;
+    z = x < y;
+    z = x <= y;
+    z = x > y;
+    z = x >= y;
+    z = x != y;
+    z = x == y;
+end

@@ -1,0 +1,6 @@
+DISASSEMBLY
+
+startup:
+    callv getsithmode
+    stor 0
+    ret

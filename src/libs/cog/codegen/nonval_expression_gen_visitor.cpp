@@ -23,29 +23,31 @@ void nonval_expression_gen_visitor::visit(ast::immediate_expression &)
     return;
 }
 
+// LCOV_EXCL_START
+//
+// Literal expressions are folded out. These are normally impossible. Assert.
+
 void nonval_expression_gen_visitor::visit(ast::string_literal_expression &)
 {
-    // Skip
-    return;
+    LOG_FATAL("unhandled string literal expression in code generation");
 }
 
 void nonval_expression_gen_visitor::visit(ast::integer_literal_expression &)
 {
-    // Skip
-    return;
+    LOG_FATAL("unhandled integer literal expression in code generation");
 }
 
 void nonval_expression_gen_visitor::visit(ast::float_literal_expression &)
 {
-    // Skip
-    return;
+    LOG_FATAL("unhandled float literal expression in code generation");
 }
 
 void nonval_expression_gen_visitor::visit(ast::vector_literal_expression &)
 {
-    // Skip
-    return;
+    LOG_FATAL("unhandled vector literal expression in code generation");
 }
+
+// LCOV_EXCL_STOP
 
 void nonval_expression_gen_visitor::visit(ast::identifier_expression &)
 {
