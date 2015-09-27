@@ -3,7 +3,7 @@
 #include <cmath>
 
 gorc::memory_file::reader::reader(memory_file const &mf)
-    : mf(mf)
+    : mf(&mf)
 {
     return;
 }
@@ -12,10 +12,10 @@ size_t gorc::memory_file::reader::read_some(void *dest, size_t size)
 {
     char *b = static_cast<char*>(dest);
 
-    size_t amt = std::min(mf.buffer.size() - offset, size);
+    size_t amt = std::min(mf->buffer.size() - offset, size);
 
     for(size_t i = 0; i < amt; ++i, ++offset) {
-        b[i] = mf.buffer[offset];
+        b[i] = mf->buffer[offset];
     }
 
     return amt;
@@ -25,7 +25,7 @@ void gorc::memory_file::reader::seek(ssize_t off)
 {
     ssize_t new_offset = static_cast<ssize_t>(offset) + off;
 
-    if(new_offset < 0 || new_offset > static_cast<ssize_t>(mf.buffer.size())) {
+    if(new_offset < 0 || new_offset > static_cast<ssize_t>(mf->buffer.size())) {
         throw std::range_error("memory_file::seek invalid offset");
     }
 
@@ -34,7 +34,7 @@ void gorc::memory_file::reader::seek(ssize_t off)
 
 void gorc::memory_file::reader::set_position(size_t off)
 {
-    if(off > mf.buffer.size()) {
+    if(off > mf->buffer.size()) {
         throw std::range_error("memory_file::set_position invalid offset");
     }
 
@@ -48,12 +48,19 @@ size_t gorc::memory_file::reader::position()
 
 size_t gorc::memory_file::reader::size()
 {
-    return mf.buffer.size();
+    return mf->buffer.size();
 }
 
 bool gorc::memory_file::reader::at_end()
 {
-    return offset >= mf.buffer.size();
+    return offset >= mf->buffer.size();
+}
+
+gorc::memory_file::reader& gorc::memory_file::reader::operator=(reader const &r)
+{
+    mf = r.mf;
+    offset = r.offset;
+    return *this;
 }
 
 gorc::memory_file::writer::writer(memory_file &mf)

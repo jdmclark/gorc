@@ -10,7 +10,7 @@ namespace gorc {
     public:
         class reader : public read_only_file {
         private:
-            memory_file const &mf;
+            memory_file const *mf;
             size_t offset = 0;
 
         public:
@@ -24,6 +24,8 @@ namespace gorc {
 
             virtual size_t size() override;
             virtual bool at_end() override;
+
+            reader& operator=(reader const &r);
         };
 
         class writer : public file {
