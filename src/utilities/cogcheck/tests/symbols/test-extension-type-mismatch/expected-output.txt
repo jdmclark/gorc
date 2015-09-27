@@ -2,3 +2,4 @@
 [ERROR] input.cog:3:16-3:20: extension 'linkid' value type mismatch
 [ERROR] input.cog:4:14-4:16: extension 'mask' value type mismatch
 [ERROR] input.cog:5:14-5:18: extension 'mask' value type mismatch
+[ERROR] input.cog: could not compile script

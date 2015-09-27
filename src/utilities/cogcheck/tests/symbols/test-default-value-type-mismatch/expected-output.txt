@@ -13,3 +13,4 @@
 [ERROR] input.cog:17:9-17:11: type mismatch
 [ERROR] input.cog:18:9-18:11: type mismatch
 [ERROR] input.cog:19:12-19:14: type mismatch
+[ERROR] input.cog: could not compile script

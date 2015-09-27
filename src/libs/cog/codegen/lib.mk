@@ -2,6 +2,7 @@ NAME:=codegen
 
 DEPENDENCIES:= \
 	libs/cog/ir \
+	libs/cog/ast \
 
 SOURCES:= \
 	codegen.cpp \

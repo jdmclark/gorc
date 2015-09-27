@@ -10,3 +10,4 @@
 [ERROR] input.cog:14:10-14:19: symbol does not accept a default value
 [ERROR] input.cog:15:9-15:18: symbol does not accept a default value
 [ERROR] input.cog:16:11-16:20: symbol does not accept a default value
+[ERROR] input.cog: could not compile script

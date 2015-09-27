@@ -1,1 +1,2 @@
 [ERROR] input.cog:2:1-2:9: unknown type 'foobarbaz'
+[ERROR] input.cog: could not compile script

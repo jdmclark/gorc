@@ -1,1 +1,2 @@
 [ERROR] input.cog:6:33-6:34: unknown escape sequence '/k'
+[ERROR] input.cog: could not compile script

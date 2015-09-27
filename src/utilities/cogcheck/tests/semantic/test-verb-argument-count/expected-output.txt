@@ -1,1 +1,2 @@
 [ERROR] input.cog:6:1-6:20: verb 'printflex' expects 1 arguments, found 3
+[ERROR] input.cog: could not compile script

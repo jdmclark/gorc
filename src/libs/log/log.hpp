@@ -56,3 +56,6 @@ namespace gorc {
 
 #define LOG_FATAL(x) \
     LOG_ERROR(x); throw ::gorc::logged_runtime_error()
+
+#define LOG_FATAL_ASSERT(x, y) \
+    do { if(!(x)) { LOG_FATAL(y); } } while(false)

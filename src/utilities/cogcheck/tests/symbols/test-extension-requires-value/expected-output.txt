@@ -3,3 +3,4 @@
 [ERROR] input.cog:6:9-6:14: extension 'linkid' requires a value
 [ERROR] input.cog:7:9-7:12: extension 'mask' requires a value
 [ERROR] input.cog:8:9-8:12: extension 'desc' requires a value
+[ERROR] input.cog: could not compile script

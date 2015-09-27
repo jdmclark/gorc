@@ -1,11 +1,6 @@
 #include "program/program.hpp"
-#include "cog/grammar/grammar.hpp"
-#include "cog/script/script.hpp"
-#include "cog/semantics/analyzer.hpp"
-#include "cog/codegen/codegen.hpp"
+#include "cogcheck_compiler.hpp"
 #include "io/native_file.hpp"
-#include "cog/vm/opcode.hpp"
-#include "print_ast_visitor.hpp"
 #include <map>
 
 namespace gorc {
@@ -35,11 +30,24 @@ namespace gorc {
         {
             mock_populate_verb_table();
 
+            cog::constant_table constants;
+            cog::default_populate_constant_table(constants);
+
+            cogcheck_compiler compiler(verbs,
+                                       constants,
+                                       dump_ast,
+                                       parse_only,
+                                       disassemble);
+
             bool success = true;
             for(auto const &cog_file : cog_files) {
                 diagnostic_context dc(cog_file.c_str());
                 try {
-                    success = success && process_file(cog_file);
+                    auto f = make_native_read_only_file(cog_file);
+                    compiler.compile(*f);
+                }
+                catch(logged_runtime_error const &) {
+                    success = false;
                 }
                 catch(std::exception const &e) {
                     success = false;
@@ -48,255 +56,6 @@ namespace gorc {
             }
 
             return success ? EXIT_SUCCESS : EXIT_FAILURE;
-        }
-
-        bool process_file(std::string const &cog_file) {
-            auto f = make_native_read_only_file(cog_file);
-
-            cog::ast::factory ast_factory;
-            cog::grammar grammar(*f, ast_factory);
-            auto maybe_tu = grammar.parse();
-
-            if(!maybe_tu.has_value() || diagnostic_file_error_count() > 0) {
-                // Abort after any syntax error: the AST is malformed
-                return false;
-            }
-
-            cog::ast::translation_unit *tu = maybe_tu.get_value();
-
-            cog::script script;
-
-            cog::constant_table constants;
-            cog::default_populate_constant_table(constants);
-
-            if(!parse_only) {
-                cog::perform_semantic_analysis(script,
-                                               *tu,
-                                               verbs,
-                                               constants,
-                                               ast_factory);
-            }
-
-            if(diagnostic_file_error_count() > 0) {
-                // Abort after any semantic error
-                return false;
-            }
-
-            if(dump_ast) {
-                print_ast(*tu, script);
-            }
-
-            if(!parse_only && disassemble) {
-                cog::perform_code_generation(script,
-                                             *tu,
-                                             verbs,
-                                             constants);
-                disassemble_code(script);
-            }
-
-            return !diagnostic_file_error_count();
-        }
-
-        void disassemble_code(cog::script &s) {
-            std::cout << "DISASSEMBLY" << std::endl << std::endl;;
-
-            std::map<size_t, std::tuple<std::string, maybe<size_t>>> lines;
-            std::map<size_t, std::string> labels;
-
-            // Pre-populate labels with exported message names
-            for(auto const &msg : s.exports) {
-                labels.emplace(msg.second, as_string(msg.first));
-            }
-
-            auto lazy_add_default_addr = [&](size_t addr)
-            {
-                auto it = labels.find(addr);
-                if(it == labels.end()) {
-                    labels.emplace(addr, str(format("L%d") % addr));
-                }
-
-                return addr;
-            };
-
-            memory_file::reader r(s.program);
-            while(!r.at_end()) {
-                size_t line_addr = r.position();
-                maybe<size_t> printed_address = nothing;
-                std::stringstream line;
-
-                auto op = read<cog::opcode>(r);
-                switch(op) {
-                case cog::opcode::push:
-                    line << "push ";
-                    line << cog::value(deserialization_constructor, r).as_string();
-                    break;
-                case cog::opcode::dup:
-                    line << "dup";
-                    break;
-                case cog::opcode::load:
-                    line << "load ";
-                    line << read<size_t>(r);
-                    break;
-                case cog::opcode::loadi:
-                    line << "loadi ";
-                    line << read<size_t>(r);
-                    break;
-                case cog::opcode::stor:
-                    line << "stor ";
-                    line << read<size_t>(r);
-                    break;
-                case cog::opcode::stori:
-                    line << "stori ";
-                    line << read<size_t>(r);
-                    break;
-                case cog::opcode::jmp:
-                    line << "jmp ";
-                    printed_address = lazy_add_default_addr(read<size_t>(r));
-                    break;
-                case cog::opcode::jal:
-                    line << "jal ";
-                    printed_address = lazy_add_default_addr(read<size_t>(r));
-                    break;
-                case cog::opcode::bt:
-                    line << "bt ";
-                    printed_address = lazy_add_default_addr(read<size_t>(r));
-                    break;
-                case cog::opcode::bf:
-                    line << "bf ";
-                    printed_address = lazy_add_default_addr(read<size_t>(r));
-                    break;
-                case cog::opcode::call:
-                    line << "call ";
-                    line << verbs.get_verb(cog::verb_id(read<int>(r))).name;
-                    break;
-                case cog::opcode::callv:
-                    line << "callv ";
-                    line << verbs.get_verb(cog::verb_id(read<int>(r))).name;
-                    break;
-                case cog::opcode::ret:
-                    line << "ret";
-                    break;
-                case cog::opcode::neg:
-                    line << "neg";
-                    break;
-                case cog::opcode::lnot:
-                    line << "lnot";
-                    break;
-                case cog::opcode::add:
-                    line << "add";
-                    break;
-                case cog::opcode::sub:
-                    line << "sub";
-                    break;
-                case cog::opcode::mul:
-                    line << "mul";
-                    break;
-                case cog::opcode::div:
-                    line << "div";
-                    break;
-                case cog::opcode::mod:
-                    line << "mod";
-                    break;
-                case cog::opcode::bor:
-                    line << "bor";
-                    break;
-                case cog::opcode::band:
-                    line << "band";
-                    break;
-                case cog::opcode::bxor:
-                    line << "bxor";
-                    break;
-                case cog::opcode::lor:
-                    line << "lor";
-                    break;
-                case cog::opcode::land:
-                    line << "land";
-                    break;
-                case cog::opcode::eq:
-                    line << "eq";
-                    break;
-                case cog::opcode::ne:
-                    line << "ne";
-                    break;
-                case cog::opcode::gt:
-                    line << "gt";
-                    break;
-                case cog::opcode::ge:
-                    line << "ge";
-                    break;
-                case cog::opcode::lt:
-                    line << "lt";
-                    break;
-                case cog::opcode::le:
-                    line << "le";
-                    break;
-                }
-
-                lines.emplace(line_addr, std::make_tuple(line.str(), printed_address));
-            }
-
-            // Write out lines
-            auto lbl_it = labels.begin();
-            auto code_it = lines.begin();
-            while(code_it != lines.end()) {
-                if(lbl_it != labels.end() && lbl_it->first <= code_it->first) {
-                    std::cout << lbl_it->second << ":" << std::endl;
-                    ++lbl_it;
-                }
-                else {
-                    std::cout << "    " << std::get<0>(code_it->second);
-                    maybe_if(std::get<1>(code_it->second),
-                             [&](size_t addr_print) {
-                        std::cout << labels[addr_print];
-                    });
-
-                    std::cout << std::endl;
-
-                    ++code_it;
-                }
-            }
-
-            // LCOV_EXCL_START
-            //
-            // Branch targets after the last instruction are out of bounds.
-            // This shouldn't happen normally.
-
-            while(lbl_it != labels.end()) {
-                std::cout << lbl_it->second << ":" << std::endl;
-                ++lbl_it;
-            }
-
-            // LCOV_EXCL_STOP
-        }
-
-        void print_ast(cog::ast::translation_unit &tu,
-                       cog::script &script)
-        {
-            char const *t = "    ";
-            std::cout << std::endl
-                      << "ABSTRACT SYNTAX TREE"
-                      << std::endl
-                      << "FLAGS = " << std::hex << tu.flags
-                      << std::endl
-                      << "SYMBOLS"
-                      << std::endl;
-            for(auto const &sym : script.symbols) {
-                std::cout << as_string(sym.type) << " " << sym.name << std::endl;
-                std::cout << t << "index: " << sym.sequence_number << std::endl;
-                std::cout << t << "default value: " << as_string(sym.default_value) << std::endl;
-                std::cout << t << "local: " << std::boolalpha << sym.local << std::endl;
-                std::cout << t << "desc: " << sym.desc << std::endl;
-                std::cout << t << "mask: " << std::hex << sym.mask << std::endl;
-                std::cout << t << "linkid: " << std::dec << sym.link_id << std::endl;
-                std::cout << t << "nolink: " << std::boolalpha << sym.no_link << std::endl;
-            }
-
-            std::cout << std::endl
-                      << "CODE"
-                      << std::endl;
-
-            print_ast_visitor pav;
-            cog::ast::visit(pav, tu.code);
         }
 
         void mock_verb(std::string const &str,

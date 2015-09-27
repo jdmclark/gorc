@@ -1,2 +1,3 @@
 [ERROR] input.cog:9:1-9:3: label 'foo' already defined
 [WARNING] input.cog:7:1-10:13: dead code
+[ERROR] input.cog: could not compile script
