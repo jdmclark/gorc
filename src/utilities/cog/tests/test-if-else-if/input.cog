@@ -1,0 +1,30 @@
+symbols
+message startup
+int x=1
+int y=1
+end
+code
+startup:
+
+    if(x) {
+        printint(1);
+    }
+    else if(y) {
+        printint(2);
+    }
+
+    if(!x) {
+        printint(3);
+    }
+    else if(y) {
+        printint(4);
+    }
+
+    if(!x) {
+        printint(5);
+    }
+    else if(!y) {
+        printint(6);
+    }
+
+end

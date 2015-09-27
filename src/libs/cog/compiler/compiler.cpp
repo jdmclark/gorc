@@ -58,3 +58,18 @@ std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
 
     return std::move(script);
 }
+
+bool gorc::cog::compiler::handle_parsed_ast(ast::translation_unit &)
+{
+    return true;
+}
+
+bool gorc::cog::compiler::handle_analyzed_ast(ast::translation_unit &, script &)
+{
+    return true;
+}
+
+bool gorc::cog::compiler::handle_generated_code(script &)
+{
+    return true;
+}

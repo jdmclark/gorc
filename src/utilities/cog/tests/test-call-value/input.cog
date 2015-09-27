@@ -1,0 +1,14 @@
+symbols
+message startup
+int x = 0x105
+int y = 0x007
+end
+code
+
+startup:
+
+printint(bitclear(x, y));
+printint(bitset(x, y));
+printint(bittest(x, y));
+
+end

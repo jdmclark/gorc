@@ -6,3 +6,6 @@ DEPENDENCIES:= \
 	libs/cog/script \
 
 SOURCES:= \
+	heap.cpp \
+	instance.cpp \
+	vm.cpp \

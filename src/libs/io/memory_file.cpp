@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <cmath>
 
-gorc::memory_file::reader::reader(memory_file &mf)
+gorc::memory_file::reader::reader(memory_file const &mf)
     : mf(mf)
 {
     return;

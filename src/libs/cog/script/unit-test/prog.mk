@@ -9,7 +9,6 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	function_verb_test.cpp \
-	heap_test.cpp \
 	id_test.cpp \
 	message_table_test.cpp \
 	message_type_test.cpp \

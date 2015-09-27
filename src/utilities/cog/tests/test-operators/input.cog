@@ -1,0 +1,44 @@
+symbols
+message startup
+int x = 5
+int y = 3
+int z = 0
+end
+code
+startup:
+
+    printint(+x);
+    printint(-x);
+
+    printint(!x);
+    printint(!z);
+
+    printint(x + y);
+    printint(x - y);
+    printint(x * y);
+    printint(x / y);
+    printint(x % y);
+
+    printint(x | y);
+    printint(x & y);
+    printint(x ^ y);
+
+    printint(x && y);
+    printint(x && z);
+
+    printint(x || y);
+    printint(x || z);
+
+    printint(x > y);
+    printint(x >= y);
+
+    printint(x < y);
+    printint(x <= y);
+
+    printint(x == y);
+    printint(x == x);
+
+    printint(x != y);
+    printint(x != x);
+
+end

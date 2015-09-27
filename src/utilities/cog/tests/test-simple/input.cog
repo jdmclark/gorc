@@ -1,0 +1,7 @@
+symbols
+message startup
+end
+code
+startup:
+    printint(192);
+end

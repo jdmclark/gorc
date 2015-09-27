@@ -10,11 +10,11 @@ namespace gorc {
     public:
         class reader : public read_only_file {
         private:
-            memory_file &mf;
+            memory_file const &mf;
             size_t offset = 0;
 
         public:
-            reader(memory_file &mf);
+            reader(memory_file const &mf);
 
             virtual size_t read_some(void *dest, size_t size) override;
 

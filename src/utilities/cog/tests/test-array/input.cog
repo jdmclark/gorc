@@ -1,0 +1,28 @@
+symbols
+message startup
+int i
+
+int fib = 0
+int fib1 = 1
+int fib2
+int fib3
+int fib4
+int fib5
+int fib6
+int fib7
+int fib8
+int fib9
+
+end
+code
+
+startup:
+    for(i = 2; i < 10; i = i + 1) {
+        fib[i] = fib[i - 1] + fib[i - 2];
+    }
+
+    for(i = 0; i < 10; i = i + 1) {
+        printint(fib[i]);
+    }
+
+end

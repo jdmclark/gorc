@@ -7,7 +7,6 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	constant_table.cpp \
-	heap.cpp \
 	message_table.cpp \
 	message_type.cpp \
 	mock_verb.cpp \

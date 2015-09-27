@@ -1,0 +1,3 @@
+[WARNING] input.cog:10:14-10:18: result of an assignment expression is used: behavior differs from original implementation
+1
+6

@@ -1,0 +1,22 @@
+symbols
+message startup
+int x=1
+end
+code
+startup:
+
+    if(x) {
+        printint(1);
+    }
+    else {
+        printint(2);
+    }
+
+    if(!x) {
+        printint(3);
+    }
+    else {
+        printint(4);
+    }
+
+end

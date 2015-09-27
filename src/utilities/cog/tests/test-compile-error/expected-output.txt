@@ -1,0 +1,2 @@
+[ERROR] input.cog:6:5-6:29: verb 'someverbthatdoesntexist' does not exist
+[ERROR] input.cog: could not compile script

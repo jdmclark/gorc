@@ -1,6 +1,6 @@
 #pragma once
 
-#include "value.hpp"
+#include "cog/script/value.hpp"
 #include <vector>
 
 namespace gorc {

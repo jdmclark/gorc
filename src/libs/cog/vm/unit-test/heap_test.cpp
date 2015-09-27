@@ -1,4 +1,4 @@
-#include "cog/script/heap.hpp"
+#include "cog/vm/heap.hpp"
 #include "test/test.hpp"
 
 using namespace gorc;

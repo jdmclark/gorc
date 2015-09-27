@@ -1,0 +1,16 @@
+symbols
+message startup
+int x=1
+end
+code
+startup:
+
+    if(x) {
+        printint(1);
+    }
+
+    if(!x) {
+        printint(2);
+    }
+
+end

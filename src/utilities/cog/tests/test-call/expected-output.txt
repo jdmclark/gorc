@@ -1,0 +1,9 @@
+[WARNING] input.cog:9:1-10:16: label 'calledthird' flows into label 'calledsecond'
+1
+3
+6
+4
+7
+6
+5
+2

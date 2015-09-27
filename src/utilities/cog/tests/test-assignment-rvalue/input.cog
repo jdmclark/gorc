@@ -1,0 +1,12 @@
+symbols
+message startup
+int x=1
+end
+code
+startup:
+
+    printint(x);
+
+    printint(x = 6);
+
+end

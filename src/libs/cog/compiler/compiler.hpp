@@ -21,9 +21,9 @@ namespace gorc {
 
             std::unique_ptr<script> compile(input_stream &);
 
-            virtual bool handle_parsed_ast(ast::translation_unit &) = 0;
-            virtual bool handle_analyzed_ast(ast::translation_unit &, script &) = 0;
-            virtual bool handle_generated_code(script &) = 0;
+            virtual bool handle_parsed_ast(ast::translation_unit &);
+            virtual bool handle_analyzed_ast(ast::translation_unit &, script &);
+            virtual bool handle_generated_code(script &);
         };
 
     }

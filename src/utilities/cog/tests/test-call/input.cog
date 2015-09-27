@@ -1,0 +1,26 @@
+symbols
+message startup
+end
+code
+
+calledthird:
+    printint(7);
+
+calledsecond:
+    printint(6);
+    return;
+
+calledfirst:
+    printint(3);
+    call calledsecond;
+    printint(4);
+    call calledthird;
+    printint(5);
+    return;
+
+startup:
+    printint(1);
+    call calledfirst;
+    printint(2);
+
+end
