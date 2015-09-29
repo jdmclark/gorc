@@ -1,10 +1,10 @@
-#include "vm.hpp"
+#include "virtual_machine.hpp"
 #include "opcode.hpp"
 #include "continuation.hpp"
 
-void gorc::cog::vm::execute(verb_table &verbs,
-                            service_registry &services,
-                            continuation &cc)
+void gorc::cog::virtual_machine::execute(verb_table &verbs,
+                                         service_registry &services,
+                                         continuation &cc)
 {
     if(cc.call_stack.empty()) {
         // Cannot execute in empty continuation

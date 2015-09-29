@@ -3,7 +3,7 @@
 #include "instance.hpp"
 #include "sleep_record.hpp"
 #include "cog/script/message_type.hpp"
-#include "vm.hpp"
+#include "virtual_machine.hpp"
 #include "cog/script/id.hpp"
 #include "cog/script/verb_table.hpp"
 #include "utility/service_registry.hpp"
@@ -16,7 +16,7 @@ namespace gorc {
         class executor {
         private:
             verb_table &verbs;
-            vm virtual_machine;
+            virtual_machine vm;
             service_registry services;
 
             std::vector<std::unique_ptr<instance>> instances;

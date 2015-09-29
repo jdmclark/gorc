@@ -13,4 +13,4 @@ SOURCES:= \
 	heap.cpp \
 	instance.cpp \
 	sleep_record.cpp \
-	vm.cpp \
+	virtual_machine.cpp \

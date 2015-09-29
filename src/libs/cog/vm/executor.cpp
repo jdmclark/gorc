@@ -4,7 +4,7 @@ gorc::cog::executor::executor(verb_table &verbs)
     : verbs(verbs)
 {
     services.add(*this);
-    services.add(virtual_machine);
+    services.add(vm);
     return;
 }
 
@@ -23,6 +23,6 @@ void gorc::cog::executor::send_to_all(message_type t)
 
         continuation cc(call_stack_frame(inst->cog, inst->memory, addr.get_value()));
 
-        virtual_machine.execute(verbs, services, cc);
+        vm.execute(verbs, services, cc);
     }
 }

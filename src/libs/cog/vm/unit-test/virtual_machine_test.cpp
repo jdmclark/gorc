@@ -1,21 +1,21 @@
 #include "test/test.hpp"
-#include "cog/vm/vm.hpp"
+#include "cog/vm/virtual_machine.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
 
-begin_suite(vm_test);
+begin_suite(virtual_machine_test);
 
 test_case(empty_continuation)
 {
     verb_table verbs;
     service_registry services;
 
-    vm virtual_machine;
+    virtual_machine vm;
 
     continuation empty_continuation;
 
-    virtual_machine.execute(verbs, services, empty_continuation);
+    vm.execute(verbs, services, empty_continuation);
 }
 
-end_suite(vm_test);
+end_suite(virtual_machine_test);

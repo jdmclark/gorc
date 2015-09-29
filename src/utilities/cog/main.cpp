@@ -1,8 +1,6 @@
 #include "program/program.hpp"
 #include "cog/compiler/compiler.hpp"
 #include "io/native_file.hpp"
-#include "cog/vm/vm.hpp"
-#include "cog/vm/instance.hpp"
 #include "cog/vm/executor.hpp"
 #include "cog/vm/default_verbs.hpp"
 #include <vector>

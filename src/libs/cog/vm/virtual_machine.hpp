@@ -6,7 +6,7 @@
 namespace gorc {
     namespace cog {
 
-        class vm {
+        class virtual_machine {
         public:
             void execute(verb_table &, service_registry &, continuation &cc);
         };
