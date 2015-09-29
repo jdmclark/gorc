@@ -9,7 +9,7 @@ namespace gorc {
         public:
             using verb::verb;
 
-            virtual value invoke(stack &) const override;
+            virtual value invoke(stack &, service_registry &) const override;
         };
 
     }

@@ -3,6 +3,8 @@
 #include "io/native_file.hpp"
 #include "cog/vm/vm.hpp"
 #include "cog/vm/instance.hpp"
+#include "cog/vm/executor.hpp"
+#include "cog/vm/default_verbs.hpp"
 #include <vector>
 
 namespace gorc {
@@ -22,6 +24,7 @@ namespace gorc {
 
         virtual int main() override
         {
+            cog::default_populate_verb_table(verbs);
             populate_verb_table();
 
             cog::constant_table constants;
@@ -47,21 +50,13 @@ namespace gorc {
             }
 
             // Construct instances:
-            std::vector<std::unique_ptr<cog::instance>> instances;
+            cog::executor executor(verbs);
             for(auto const &script : scripts) {
-                instances.push_back(make_unique<cog::instance>(*script));
+                executor.create_instance(*script);
             }
 
             // Execute startup messages:
-            for(auto &instance : instances) {
-                auto msg_addr = instance->cog.exports.get_offset(cog::message_type::startup);
-                if(!msg_addr.has_value()) {
-                    continue;
-                }
-
-                cog::vm vm;
-                vm.execute(verbs, instance->cog, instance->memory, msg_addr.get_value());
-            }
+            executor.send_to_all(cog::message_type::startup);
 
             return EXIT_SUCCESS;
         }

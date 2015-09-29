@@ -59,7 +59,7 @@ namespace gorc {
                 return;
             }
 
-            virtual value invoke(stack &s) const override
+            virtual value invoke(stack &s, service_registry &) const override
             {
                 return detail::apply_verb_arguments<arity, result_type>()(name, functor, s);
             }

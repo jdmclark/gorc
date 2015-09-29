@@ -18,7 +18,8 @@ test_case(function_verb_no_args)
 
     // Test call
     cog::stack stk;
-    auto rv = vn->invoke(stk);
+    service_registry sr;
+    auto rv = vn->invoke(stk, sr);
 
     sector_id rvid = rv;
     assert_eq(rvid, sector_id(5));
@@ -36,13 +37,14 @@ test_case(function_verb_arg_order)
     assert_eq(vn->argument_types.size(), size_t(3));
 
     cog::stack stk;
+    service_registry sr;
 
     // Push arguments left to right
     stk.push(5);
     stk.push(10);
     stk.push(3);
 
-    auto rv = vn->invoke(stk);
+    auto rv = vn->invoke(stk, sr);
     assert_eq(rv.get_type(), value_type::nothing);
 
     assert_log_message(log_level::info, "5 10 3");
@@ -61,12 +63,13 @@ test_case(function_verb_underflow)
     auto vn = make_function_verb("myverb", fn);
 
     cog::stack stk;
+    service_registry sr;
 
     // Push arguments left to right
     stk.push(5);
     stk.push(10);
 
-    assert_throws_logged(vn->invoke(stk));
+    assert_throws_logged(vn->invoke(stk, sr));
 
     assert_log_message(log_level::error, "stack underflow in verb 'myverb'");
     assert_log_empty();

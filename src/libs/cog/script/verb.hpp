@@ -2,6 +2,7 @@
 
 #include "value.hpp"
 #include "stack.hpp"
+#include "utility/service_registry.hpp"
 #include <vector>
 #include <string>
 
@@ -19,7 +20,7 @@ namespace gorc {
                  std::vector<value_type> &&argument_types);
             virtual ~verb();
 
-            virtual value invoke(stack &) const = 0;
+            virtual value invoke(stack &, service_registry &) const = 0;
         };
 
     }

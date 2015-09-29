@@ -9,3 +9,5 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	heap_test.cpp \
+	sleep_record_test.cpp \
+	vm_test.cpp \

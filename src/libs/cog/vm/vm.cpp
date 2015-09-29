@@ -2,12 +2,19 @@
 #include "opcode.hpp"
 #include "continuation.hpp"
 
-void gorc::cog::vm::execute(verb_table &verbs, script const &cog, heap &heap, size_t pc)
+void gorc::cog::vm::execute(verb_table &verbs,
+                            service_registry &services,
+                            continuation &cc)
 {
-    auto cc = continuation(call_stack_frame(cog, pc));
+    if(cc.call_stack.empty()) {
+        // Cannot execute in empty continuation
+        return;
+    }
 
-    memory_file::reader sr(cog.program);
-    sr.set_position(pc);
+    call_stack_frame *frame = &cc.call_stack.top();
+
+    memory_file::reader sr(frame->cog.program);
+    sr.set_position(frame->program_counter);
 
     while(true) {
         opcode op = read<opcode>(sr);
@@ -26,7 +33,7 @@ void gorc::cog::vm::execute(verb_table &verbs, script const &cog, heap &heap, si
 
         case opcode::load: {
                 size_t addr = read<size_t>(sr);
-                cc.data_stack.push(heap[addr]);
+                cc.data_stack.push(frame->memory[addr]);
             }
             break;
 
@@ -35,13 +42,13 @@ void gorc::cog::vm::execute(verb_table &verbs, script const &cog, heap &heap, si
                 int idx = static_cast<int>(cc.data_stack.top());
                 cc.data_stack.pop();
 
-                cc.data_stack.push(heap[addr + idx]);
+                cc.data_stack.push(frame->memory[addr + idx]);
             }
             break;
 
         case opcode::stor: {
                 size_t addr = read<size_t>(sr);
-                heap[addr] = cc.data_stack.top();
+                frame->memory[addr] = cc.data_stack.top();
                 cc.data_stack.pop();
             }
             break;
@@ -51,7 +58,7 @@ void gorc::cog::vm::execute(verb_table &verbs, script const &cog, heap &heap, si
                 int idx = static_cast<int>(cc.data_stack.top());
                 cc.data_stack.pop();
 
-                heap[addr + idx] = cc.data_stack.top();
+                frame->memory[addr + idx] = cc.data_stack.top();
                 cc.data_stack.pop();
             }
             break;
@@ -69,7 +76,7 @@ void gorc::cog::vm::execute(verb_table &verbs, script const &cog, heap &heap, si
                 cc.call_stack.top().program_counter = sr.position();
 
                 // Create new stack frame
-                cc.call_stack.push(call_stack_frame(cog, addr));
+                cc.call_stack.push(call_stack_frame(frame->cog, frame->memory, addr));
 
                 // Jump
                 sr.set_position(addr);
@@ -100,13 +107,13 @@ void gorc::cog::vm::execute(verb_table &verbs, script const &cog, heap &heap, si
 
         case opcode::call: {
                 int vid = read<int>(sr);
-                verbs.get_verb(verb_id(vid)).invoke(cc.data_stack);
+                verbs.get_verb(verb_id(vid)).invoke(cc.data_stack, services);
             }
             break;
 
         case opcode::callv: {
                 int vid = read<int>(sr);
-                cog::value rv = verbs.get_verb(verb_id(vid)).invoke(cc.data_stack);
+                cog::value rv = verbs.get_verb(verb_id(vid)).invoke(cc.data_stack, services);
                 cc.data_stack.push(rv);
             }
             break;

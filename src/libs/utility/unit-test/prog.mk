@@ -24,6 +24,7 @@ SOURCES:= \
 	oxford_join_test.cpp \
 	range_test.cpp \
 	runtime_assert_test.cpp \
+	service_registry_test.cpp \
 	strcat_test.cpp \
 	string_search_test.cpp \
 	string_view_test.cpp \

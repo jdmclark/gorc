@@ -29,6 +29,7 @@ test_case(not_found)
 test_case(verb_lookup)
 {
     verb_table vt;
+    service_registry sr;
 
     vt.add_verb("myverb", [] { LOG_INFO("called myverb"); });
 
@@ -40,7 +41,7 @@ test_case(verb_lookup)
     assert_log_empty();
 
     stack s;
-    verb.invoke(s);
+    verb.invoke(s, sr);
 
     assert_log_message(log_level::info, "called myverb");
 

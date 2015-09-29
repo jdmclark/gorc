@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stack>
+#include "cog/script/stack.hpp"
 #include "call_stack_frame.hpp"
 #include "cog/script/value.hpp"
 
@@ -10,8 +11,9 @@ namespace gorc {
         class continuation {
         public:
             std::stack<call_stack_frame> call_stack;
-            std::stack<value> data_stack;
+            cog::stack data_stack;
 
+            continuation() = default;
             continuation(call_stack_frame &&frame);
         };
 

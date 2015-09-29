@@ -11,7 +11,8 @@ test_case(invoke_mock)
     mock_verb v("myverb", value_type::nothing, std::vector<value_type> {});
 
     stack stk;
-    assert_throws_logged(v.invoke(stk));
+    service_registry sr;
+    assert_throws_logged(v.invoke(stk, sr));
 
     assert_log_message(log_level::error, "invoked mock verb 'myverb'");
     assert_log_empty();
