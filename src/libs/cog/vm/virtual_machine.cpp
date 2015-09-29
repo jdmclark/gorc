@@ -11,6 +11,10 @@ void gorc::cog::virtual_machine::execute(verb_table &verbs,
         return;
     }
 
+    // Add current continuation to services.
+    // System verbs must modify the current continuation.
+    services.add_or_replace(cc);
+
     call_stack_frame *frame = &cc.call_stack.top();
 
     memory_file::reader sr(frame->cog.program);
