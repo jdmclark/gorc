@@ -71,6 +71,9 @@ namespace gorc {
             public:
                 template <typename T>
                 operator T() const;
+
+                template <typename T>
+                operator T&();
             };
 
             template <typename FnT, typename ...ArgT>
@@ -228,6 +231,20 @@ namespace gorc {
         {
             std::vector<value_type> rv;
             compute_verb_argument_types(fn, std::back_inserter(rv));
+            return rv;
+        }
+
+        template <typename FnT, typename InsertIt>
+        void compute_service_verb_argument_types(FnT const &fn, InsertIt it)
+        {
+            detail::extract_verb_argument_types<1, compute_verb_arity(fn)>()(fn, it);
+        }
+
+        template <typename FnT>
+        std::vector<value_type> compute_service_verb_argument_types(FnT const &fn)
+        {
+            std::vector<value_type> rv;
+            compute_service_verb_argument_types(fn, std::back_inserter(rv));
             return rv;
         }
     }

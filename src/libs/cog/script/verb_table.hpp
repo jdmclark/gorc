@@ -26,6 +26,12 @@ namespace gorc {
                 internal_add_verb(make_function_verb(name, functor));
             }
 
+            template <typename FnT>
+            void add_service_verb(std::string const &name, FnT functor)
+            {
+                internal_add_verb(make_service_verb(name, functor));
+            }
+
             template <typename VerbT, typename ...ArgT>
             void emplace_verb(ArgT ...args)
             {

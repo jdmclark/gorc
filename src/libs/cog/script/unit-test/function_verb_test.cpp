@@ -75,4 +75,26 @@ test_case(function_verb_underflow)
     assert_log_empty();
 }
 
+test_case(service_verb_passes_service)
+{
+    cog::stack stk;
+    service_registry sr;
+    std::string msg = "Hello, World!";
+    sr.add(msg);
+
+    auto vn = make_service_verb("myverb", [](service_registry &sr, int a, int b, int c) -> int {
+            LOG_INFO(format("%s %d %d %d") % sr.get<std::string>() % a % b % c);
+            return 12;
+        });
+
+    stk.push(5);
+    stk.push(10);
+    stk.push(3);
+
+    assert_eq(static_cast<int>(vn->invoke(stk, sr)), 12);
+
+    assert_log_message(log_level::info, "Hello, World! 5 10 3");
+    assert_log_empty();
+}
+
 end_suite(function_verb_test);

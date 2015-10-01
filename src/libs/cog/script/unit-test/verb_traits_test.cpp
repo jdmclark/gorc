@@ -1,5 +1,6 @@
 #include "test/test.hpp"
 #include "cog/script/verb_traits.hpp"
+#include "utility/service_registry.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
@@ -53,6 +54,13 @@ test_case(multi_argument_store)
                                             value_type::string,
                                             value_type::vector,
                                             value_type::sector }));
+}
+
+test_case(service_verb_arity)
+{
+    auto fn = [](service_registry&, int, int, int) { return; };
+
+    assert_eq(compute_verb_arity(fn), size_t(4));
 }
 
 end_suite(verb_traits_test);
