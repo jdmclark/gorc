@@ -1,0 +1,11 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                int 5,
+                int 10
+            ]
+        }
+    ]
+}

@@ -25,7 +25,8 @@ namespace gorc {
         public:
             executor(verb_table &verbs);
 
-            void create_instance(cog::script const &);
+            instance& create_instance(cog::script const &);
+            instance& create_instance(cog::script const &, std::vector<value> const &);
 
             void send_to_all(message_type);
         };

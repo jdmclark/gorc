@@ -1,0 +1,11 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+        }
+    ],
+
+    resources: {
+        "foo.mat": material 5
+    }
+}

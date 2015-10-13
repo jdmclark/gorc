@@ -1,0 +1,10 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                vector [ 1, 4.2, 39, 2 ]
+            ]
+        }
+    ]
+}

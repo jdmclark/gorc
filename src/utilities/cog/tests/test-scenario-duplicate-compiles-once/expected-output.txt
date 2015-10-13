@@ -1,0 +1,3 @@
+[WARNING] input.cog:3:17-3:21: symbol does not accept extension 'local'
+5
+23

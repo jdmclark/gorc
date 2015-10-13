@@ -39,6 +39,7 @@ namespace gorc {
         char const* as_string(value_type);
 
         bool is_id_type(value_type vt);
+        bool is_resource_id_type(value_type vt);
         bool is_scalar_type(value_type vt);
         bool is_truth_value_type(value_type vt);
         bool can_convert_type(value_type vt_initial, value_type vt_target);

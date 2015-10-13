@@ -1,0 +1,10 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                foo "bar baz"
+            ]
+        }
+    ]
+}

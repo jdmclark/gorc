@@ -1,0 +1,8 @@
+symbols
+material mat=foo.mat
+message startup
+end
+code
+startup:
+printint(mat);
+end

@@ -18,6 +18,16 @@ namespace gorc {
             value operator[](size_t index) const;
 
             size_t size() const;
+
+            inline auto begin() -> decltype(values.begin())
+            {
+                return values.begin();
+            }
+
+            inline auto end() -> decltype(values.end())
+            {
+                return values.end();
+            }
         };
 
     }

@@ -13,7 +13,7 @@ int foo
 message startup
     index: 1
     default value: void()
-    local: false
+    local: true
     desc: 
     mask: ffffffff
     linkid: 0

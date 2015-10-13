@@ -65,6 +65,24 @@ bool gorc::cog::is_id_type(value_type vt)
     }
 }
 
+bool gorc::cog::is_resource_id_type(value_type vt)
+{
+    switch(vt) {
+    case value_type::ai:
+    case value_type::cog:
+    case value_type::colormap:
+    case value_type::keyframe:
+    case value_type::material:
+    case value_type::model:
+    case value_type::sound:
+    case value_type::thing_template:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
 bool gorc::cog::is_scalar_type(value_type vt)
 {
     switch(vt) {

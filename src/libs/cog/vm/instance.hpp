@@ -2,6 +2,7 @@
 
 #include "cog/script/script.hpp"
 #include "heap.hpp"
+#include <vector>
 
 namespace gorc {
     namespace cog {
@@ -12,6 +13,7 @@ namespace gorc {
             heap memory;
 
             instance(script const &);
+            instance(script const &, std::vector<value> const &);
         };
 
     }

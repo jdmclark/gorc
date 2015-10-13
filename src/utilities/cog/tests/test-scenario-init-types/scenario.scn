@@ -1,0 +1,28 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                void,
+                int 3,
+                float 94.5,
+                vector [ 1, 2, 3 ],
+                sector 12,
+                surface 24,
+                thing 48,
+                ai 49,
+                cog 50,
+                keyframe 51,
+                material 52,
+                model 53,
+                sound 54,
+                template 55,
+                string "Hello, World!"
+            ]
+        }
+    ],
+
+    resources: {
+        "bar.mat": material 25
+    }
+}

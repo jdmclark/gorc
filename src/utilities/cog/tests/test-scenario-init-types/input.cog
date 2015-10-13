@@ -1,0 +1,28 @@
+symbols
+message startup
+int i local
+
+flex em_void
+flex em_int
+flex em_float
+flex em_vector
+flex em_sector
+flex em_surface
+flex em_thing
+flex em_ai
+flex em_cog
+flex em_keyframe
+flex em_material
+flex em_model
+flex em_sound
+flex em_template
+flex em_string
+
+end
+
+code
+startup:
+for(i = 0; i < 15; i = i + 1) {
+    printvar(em_void[i]);
+}
+end

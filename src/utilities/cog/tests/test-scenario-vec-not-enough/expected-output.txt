@@ -1,0 +1,1 @@
+[ERROR] scenario.scn:6:24-6:24: not enough elements in vector

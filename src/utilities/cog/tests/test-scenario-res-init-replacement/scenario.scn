@@ -1,0 +1,8 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [ material 5 ]
+        }
+    ]
+}

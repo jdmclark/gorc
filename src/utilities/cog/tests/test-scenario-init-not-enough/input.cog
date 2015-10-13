@@ -1,0 +1,16 @@
+symbols
+message startup
+
+int x
+int y
+int z
+
+end
+
+code
+startup:
+    printint(x);
+    printint(y);
+    printint(z);
+    return;
+end

@@ -1,4 +1,5 @@
 #include "instance.hpp"
+#include "log/log.hpp"
 
 gorc::cog::instance::instance(script const &cog)
     : cog(cog)
@@ -8,4 +9,23 @@ gorc::cog::instance::instance(script const &cog)
     }
 
     return;
+}
+
+gorc::cog::instance::instance(script const &cog,
+                              std::vector<value> const &values)
+    : cog(cog)
+{
+    auto vt = values.begin();
+    for(auto const &sym : cog.symbols) {
+        if(sym.local) {
+            memory[sym.sequence_number] = sym.default_value;
+        }
+        else if(vt == values.end()) {
+            LOG_FATAL("not enough values to initialize heap");
+        }
+        else {
+            memory[sym.sequence_number] = *vt;
+            ++vt;
+        }
+    }
 }

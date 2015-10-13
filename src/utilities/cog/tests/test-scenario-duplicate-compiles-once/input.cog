@@ -1,0 +1,8 @@
+symbols
+int x
+message startup local
+end
+code
+startup:
+printint(x);
+end

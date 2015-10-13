@@ -8,9 +8,17 @@ gorc::cog::executor::executor(verb_table &verbs)
     return;
 }
 
-void gorc::cog::executor::create_instance(cog::script const &cog)
+gorc::cog::instance& gorc::cog::executor::create_instance(cog::script const &cog)
 {
     instances.push_back(make_unique<instance>(cog));
+    return *instances.back();
+}
+
+gorc::cog::instance& gorc::cog::executor::create_instance(cog::script const &cog,
+                                                          std::vector<value> const &values)
+{
+    instances.push_back(make_unique<instance>(cog, values));
+    return *instances.back();
 }
 
 void gorc::cog::executor::send_to_all(message_type t)

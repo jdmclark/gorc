@@ -1,0 +1,8 @@
+# Sample scenario - loads a single COG file with default symbols.
+{
+    instances: [
+        {
+            file: "input.cog"
+        }
+    ]
+}

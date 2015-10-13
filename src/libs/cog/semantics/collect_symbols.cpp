@@ -72,10 +72,15 @@ void gorc::cog::collect_symbols_visitor::visit(ast::symbol &symbol)
         break;
     }
 
+    bool default_local = false;
+    if(type == value_type::message) {
+        default_local = true;
+    }
+
     output_script.symbols.add_symbol(type,
                                      symbol.name->value,
                                      default_value,
-                                     w.local,
+                                     w.local || default_local,
                                      w.desc,
                                      maybe_if(w.mask, default_mask, [](int m) { return m; }),
                                      maybe_if(w.linkid, 0, [](int l) { return l; }),
