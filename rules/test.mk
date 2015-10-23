@@ -32,18 +32,19 @@ WORKING_OUTPUT:=$(TESTSUITE_DIR)/temp-output.txt
 EXPECTED_OUTPUT:=expected-output.txt
 PLATFORM_EXPECTED_OUTPUT:=expected-output-$(PLATFORM).txt
 
+BUILTIN_REGEX:= \
+	's?c:/?/c/?Ig' \
+	's?c:\\?/c/?Ig' \
+	's?\\?/?g' \
+	's?$(abspath .)?$$TESTDIR$$?g' \
+	's?$(PROJECT_ROOT)?$$ROOT$$?g' \
+	's?$(PLATFORM)?$$PLATFORM$$?g' \
+	's?\.EXE??Ig'
+
 process-raw-output:
-	# Strip PWD from output
-	-@sed \
-		-e 's?c:/?/c/?Ig' \
-		-e 's?c:\\?/c/?Ig' \
-		-e 's?\\?/?g' \
-		-e 's?$(abspath .)?$$TESTDIR$$?g' \
-		-e 's?$(PROJECT_ROOT)?$$ROOT$$?g' \
-		-e 's?$(PLATFORM)?$$PLATFORM$$?g' \
-		-e 's?\.EXE??Ig' \
-		$(foreach reg,$(EXTRA_REGEX),-e $(reg)) \
-		$(RAW_OUTPUT) > $(CURRENT_OUTPUT)
+	cp $(RAW_OUTPUT) $(CURRENT_OUTPUT)
+	-@$(foreach regex,$(BUILTIN_REGEX) $(EXTRA_REGEX), \
+		sed -i $(regex) $(CURRENT_OUTPUT); ) 
 
 compare-output:
 	if [ -e $(PLATFORM_EXPECTED_OUTPUT) ]; then \

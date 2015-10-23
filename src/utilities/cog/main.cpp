@@ -7,6 +7,7 @@
 #include "scenario.hpp"
 #include <vector>
 #include <unordered_map>
+#include <iostream>
 
 namespace gorc {
 

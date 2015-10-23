@@ -2,6 +2,7 @@
 #include "cog/vm/opcode.hpp"
 #include <map>
 #include <sstream>
+#include <iostream>
 
 void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
 {

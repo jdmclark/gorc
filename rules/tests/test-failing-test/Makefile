@@ -5,6 +5,8 @@ test: \
 	process-raw-output \
 	compare-output
 
+EXTRA_REGEX:='/recipe.for.target/d'
+
 generate-output:
 	-@$(MAKE) -f $(RULES)/testsuite.mk test \
 		ALLOWED_TEST_NAMES="mock-test" \
