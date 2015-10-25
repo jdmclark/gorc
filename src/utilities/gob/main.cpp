@@ -86,28 +86,26 @@ namespace gorc {
             }
 
             // Handle sub-commands
-            if(do_list) {
-                return jk_vfs_list(*vfs);
-            }
-            else if(!extract_file.empty()) {
+            if(!extract_file.empty()) {
                 return jk_vfs_extract_file(*vfs);
             }
-
-            return EXIT_SUCCESS;
+            else {
+                // Default: list files
+                return jk_vfs_list(*vfs);
+            }
         }
 
         int single_archive_main()
         {
             gob_virtual_container gob(archive_file);
 
-            if(do_list) {
-                return single_archive_list(gob);
-            }
-            else if(!extract_file.empty()) {
+            if(!extract_file.empty()) {
                 return single_archive_extract_file(gob);
             }
-
-            return EXIT_SUCCESS;
+            else {
+                // Default: list files
+                return single_archive_list(gob);
+            }
         }
 
         int jk_vfs_list(jk_virtual_file_system const &vfs)
