@@ -33,7 +33,7 @@ test_case(unknown_option_argv)
 
 test_case(option_redefinition)
 {
-    bool a, b;
+    bool a = false, b = false;
     opts.emplace<gorc::switch_option>("redefined-option", a);
 
     assert_throws_logged(opts.emplace<gorc::switch_option>("redefined-option", b));
@@ -45,7 +45,7 @@ test_case(option_redefinition)
 
 test_case(name_contains_space)
 {
-    bool a;
+    bool a = false;
     assert_throws_logged(opts.emplace<gorc::switch_option>("spaced option", a));
 
     assert_log_message(gorc::log_level::error,
@@ -57,8 +57,6 @@ test_case(switch_type_set_unset)
 {
     bool a;
     opts.emplace<gorc::switch_option>("user-option", a);
-
-    assert_true(!opts.has_value("user-option"));
 
     std::vector<std::string> arg_list_1 { };
 
@@ -75,9 +73,32 @@ test_case(switch_type_set_unset)
     assert_log_empty();
 }
 
+test_case(switch_type_orig_false)
+{
+    bool a = false;
+    opts.emplace<gorc::switch_option>("user-option", a);
+
+    assert_true(!opts.has_value("user-option"));
+}
+
+test_case(switch_type_overrides_true)
+{
+    bool a = true;
+    opts.emplace<gorc::switch_option>("user-option", a);
+
+    assert_true(opts.has_value("user-option"));
+
+    std::vector<std::string> arg_list { };
+
+    opts.load_from_arg_list(arg_list);
+
+    assert_true(!opts.has_value("user-option"));
+    assert_log_empty();
+}
+
 test_case(switch_type_set_twice)
 {
-    bool a;
+    bool a = false;
     opts.emplace<gorc::switch_option>("user-option", a);
     std::vector<std::string> arg_list { "--user-option", "--user-option" };
     opts.load_from_arg_list(arg_list);
@@ -89,7 +110,7 @@ test_case(switch_type_set_twice)
 
 test_case(switch_type_get_switch)
 {
-    bool a;
+    bool a = false;
     opts.emplace<gorc::switch_option>("user-option", a);
 
     auto const &sw = opts.get_option<gorc::switch_option>("user-option");
