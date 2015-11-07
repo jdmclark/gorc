@@ -163,7 +163,7 @@ test_case(control_code_not_recognized)
     set_file(str);
     generic_tokenizer tok(mf);
 
-    tok_error("", "unknown input value");
+    tok_error("\x0E", "unknown input value");
 }
 
 test_case(integers)

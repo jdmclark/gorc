@@ -345,7 +345,7 @@ test_case(eof_in_string_literal)
         }));
 
     assert_log_message(gorc::log_level::error,
-                       "<BUFFER>:2:3-2:15: unexpected eof in string literal");
+                       "<BUFFER>:2:3-2:14: unexpected eof in string literal");
     assert_log_empty();
 }
 
@@ -368,7 +368,7 @@ test_case(eof_in_escape_seq)
         }));
 
     assert_log_message(gorc::log_level::error,
-                       "<BUFFER>:2:3-2:16: unexpected eof in string literal escape sequence");
+                       "<BUFFER>:2:3-2:15: unexpected eof in string literal escape sequence");
 }
 
 test_case(allows_bare_identifier)

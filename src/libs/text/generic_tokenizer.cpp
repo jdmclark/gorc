@@ -1,377 +1,362 @@
 #include "generic_tokenizer.hpp"
 #include "log/log.hpp"
 
-gorc::generic_tokenizer::generic_tokenizer(input_stream &source)
-    : source(source)
+using tok_result = gorc::tokenizer_state_machine_result;
+
+tok_result gorc::generic_tokenizer_state_machine::handle_initial_state(char current_char)
 {
-    // Initialize the token stream look-ahead
-    advance();
-
-    return;
-}
-
-void gorc::generic_tokenizer::handle_initial_state()
-{
-    source.start_new_token();
-
-    char current_char = source.peek();
-
     if(current_char == '\0') {
-        source.advance_stream();
-        accept_token(token_type::end_of_file);
+        return append_then_accept(current_char, token_type::end_of_file);
     }
     else if(std::isspace(current_char)) {
-        source.advance_stream();
+        return discard_directive(tokenizer_state::initial);
     }
     else if(current_char == '#') {
-        jump_to(tokenizer_state::skip_line_comment);
+        return discard_directive(tokenizer_state::skip_line_comment);
     }
     else if(current_char == '_' || std::isalpha(current_char)) {
-        accept_current_and_jump_to(tokenizer_state::identifier);
+        return append_directive(tokenizer_state::identifier, current_char);
     }
     else if(current_char == '\"') {
-        source.advance_stream();
-        jump_to(tokenizer_state::string);
+        return skip_directive(tokenizer_state::string);
     }
     else if(current_char == '0') {
-        accept_current_and_jump_to(tokenizer_state::hex_octal_prefix);
+        return append_directive(tokenizer_state::hex_octal_prefix, current_char);
     }
     else if(std::isdigit(current_char)) {
-        accept_current_and_jump_to(tokenizer_state::digit_sequence);
+        return append_directive(tokenizer_state::digit_sequence, current_char);
+    }
+    else if(current_char == '.') {
+        return append_directive(tokenizer_state::period, current_char);
     }
     else if(std::ispunct(current_char)) {
-        accept_current_and_jump_to(tokenizer_state::punctuator);
+        return append_then_accept(current_char, token_type::punctuator);
     }
     else {
         // Current character is not a recognized, valid element.
-        source.advance_stream();
-        reject_token("unknown input value");
+        return append_then_reject(current_char, "unknown input value");
     }
 }
 
-void gorc::generic_tokenizer::handle_skip_line_comment_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_skip_line_comment_state(char ch)
 {
-    switch(source.peek()) {
-    case '\0':
-    case '\n':
-        source.advance_stream();
-        jump_to(tokenizer_state::initial);
-        break;
-
-    default:
-        source.advance_stream();
-        break;
-    }
-}
-
-void gorc::generic_tokenizer::handle_identifier_state()
-{
-    if(source.peek() == '_' || std::isalnum(source.peek())) {
-        accept_current();
+    if(ch == '\0' || ch == '\n') {
+        return discard_directive(tokenizer_state::initial);
     }
     else {
-        accept_token(token_type::identifier);
+        return discard_directive(tokenizer_state::skip_line_comment);
     }
 }
 
-void gorc::generic_tokenizer::handle_string_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_identifier_state(char ch)
 {
-    auto current_char = source.peek();
+    if(ch == '_' || std::isalnum(ch)) {
+        return append_directive(tokenizer_state::identifier, ch);
+    }
+    else {
+        return accept_immediately(token_type::identifier);
+    }
+}
+
+tok_result gorc::generic_tokenizer_state_machine::handle_string_state(char current_char)
+{
     if(current_char == '\\') {
-        source.advance_stream();
-        jump_to(tokenizer_state::escape_sequence);
+        return skip_directive(tokenizer_state::escape_sequence);
     }
     else if(current_char == '\0') {
-        source.advance_stream();
-        reject_token("unexpected eof in string literal");
+        return reject_immediately("unexpected eof in string literal");
     }
     else if(current_char == '\"') {
-        source.advance_stream();
-        accept_token(token_type::string);
+        return skip_then_accept(token_type::string);
     }
     else {
-        accept_current();
+        return append_directive(tokenizer_state::string, current_char);
     }
 }
 
-void gorc::generic_tokenizer::handle_escape_sequence_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_escape_sequence_state(char ch)
 {
-    switch(source.peek()) {
+    // Return to string state, unless there is an error
+    char append_char = '\0';
+
+    switch(ch) {
     case '\0':
-        source.advance_stream();
-        reject_token("unexpected eof in string literal escape sequence");
-        return;
+        return reject_immediately("unexpected eof in string literal escape sequence");
 
     case '\"':
-        source.push_back('\"');
+        append_char = '\"';
         break;
 
     case 'n':
-        source.push_back('\n');
+        append_char = '\n';
         break;
 
     case 't':
-        source.push_back('\t');
+        append_char = '\t';
         break;
 
     case '\\':
-        source.push_back('\\');
+        append_char = '\\';
         break;
 
     case '0':
-        source.push_back('\0');
+        append_char = '\0';
         break;
 
     default:
-        reject_token(str(format("unknown escape sequence \\%c") % source.peek()));
-        return;
+        return reject_immediately(str(format("unknown escape sequence \\%c") % ch));
     }
 
-    source.advance_stream();
-    jump_to(tokenizer_state::string);
+    return append_directive(tokenizer_state::string, append_char);
 }
 
-void gorc::generic_tokenizer::handle_punctuator_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_period_state(char ch)
 {
     // A dot followed by a decimal digit is a real
-    if(source.get_value() == "." &&
-       std::isdigit(source.peek())) {
-        jump_to(tokenizer_state::decimal_required_digit);
+    if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_digit_sequence, ch);
     }
     else {
-        // TODO: Multi-character punctuators
-        accept_token(token_type::punctuator);
+        return accept_immediately(token_type::punctuator);
     }
 }
 
-void gorc::generic_tokenizer::handle_hex_octal_prefix_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_hex_octal_prefix_state(char current_char)
 {
     // Previous digit was 0.
-    char current_char = source.peek();
     if(current_char == 'x' || current_char == 'X') {
-        accept_current_and_jump_to(tokenizer_state::hex_required_digit);
+        return append_directive(tokenizer_state::hex_required_digit, current_char);
     }
     else if(current_char == '.') {
-        accept_current_and_jump_to(tokenizer_state::decimal_required_digit);
+        return append_directive(tokenizer_state::decimal_required_digit, current_char);
     }
     else if(current_char >= '0' && current_char <= '7') {
-        accept_current_and_jump_to(tokenizer_state::oct_digit_sequence);
+        return append_directive(tokenizer_state::oct_digit_sequence, current_char);
     }
     else if(std::isalnum(current_char)) {
-        reject_token("digit out of range");
+        return reject_immediately("digit out of range");
     }
     else {
         // It's just zero.
-        accept_token(token_type::integer);
+        return accept_immediately(token_type::integer);
     }
 }
 
-void gorc::generic_tokenizer::handle_hex_required_digit_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_hex_required_digit_state(char ch)
 {
-    if(std::isxdigit(source.peek())) {
-        accept_current_and_jump_to(tokenizer_state::hex_digit_sequence);
+    if(std::isxdigit(ch)) {
+        return append_directive(tokenizer_state::hex_digit_sequence, ch);
     }
     else {
-        reject_token("expected hex integer");
+        return reject_immediately("expected hex integer");
     }
 }
 
-void gorc::generic_tokenizer::handle_hex_digit_sequence_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_hex_digit_sequence_state(char ch)
 {
-    if(std::isxdigit(source.peek())) {
-        accept_current();
+    if(std::isxdigit(ch)) {
+        return append_directive(tokenizer_state::hex_digit_sequence, ch);
     }
-    else if(std::isalnum(source.peek())) {
-        reject_token("digit out of range");
+    else if(std::isalnum(ch)) {
+        return reject_immediately("digit out of range");
     }
     else {
-        accept_token(token_type::hex_integer);
+        return accept_immediately(token_type::hex_integer);
     }
 }
 
-void gorc::generic_tokenizer::handle_oct_digit_sequence_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_oct_digit_sequence_state(char ch)
 {
-    char current_char = source.peek();
-    if(current_char >= '0' && current_char <= '7') {
-        accept_current();
+    if(ch >= '0' && ch <= '7') {
+        return append_directive(tokenizer_state::oct_digit_sequence, ch);
     }
-    else if(std::isalnum(current_char)) {
-        reject_token("digit out of range");
+    else if(std::isalnum(ch)) {
+        return reject_immediately("digit out of range");
     }
     else {
-        accept_token(token_type::oct_integer);
+        return accept_immediately(token_type::oct_integer);
     }
 }
 
-void gorc::generic_tokenizer::handle_digit_sequence_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_digit_sequence_state(char current_char)
 {
-    char current_char = source.peek();
     if(std::isdigit(current_char)) {
-        accept_current();
+        return append_directive(tokenizer_state::digit_sequence, current_char);
     }
     else if(current_char == 'e' || current_char == 'E') {
-        accept_current_and_jump_to(tokenizer_state::decimal_exponent_sign);
+        return append_directive(tokenizer_state::decimal_exponent_sign, current_char);
     }
     else if(current_char == '.') {
-        accept_current_and_jump_to(tokenizer_state::decimal_required_digit);
+        return append_directive(tokenizer_state::decimal_required_digit, current_char);
     }
     else if(std::isalpha(current_char)) {
-        reject_token("digit out of range");
+        return reject_immediately("digit out of range");
     }
     else {
-        accept_token(token_type::integer);
+        return accept_immediately(token_type::integer);
     }
 }
 
-void gorc::generic_tokenizer::handle_decimal_required_digit_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_decimal_required_digit_state(char ch)
 {
-    if(std::isdigit(source.peek())) {
-        accept_current_and_jump_to(tokenizer_state::decimal_digit_sequence);
+    if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_digit_sequence, ch);
     }
     else {
-        reject_token("expected fractional part");
+        return reject_immediately("expected fractional part");
     }
 }
 
-void gorc::generic_tokenizer::handle_decimal_digit_sequence_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_decimal_digit_sequence_state(char ch)
 {
-    char current_char = source.peek();
-    if(std::isdigit(current_char)) {
-        accept_current();
+    if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_digit_sequence, ch);
     }
-    else if(current_char == 'e' || current_char == 'E') {
-        accept_current_and_jump_to(tokenizer_state::decimal_exponent_sign);
+    else if(ch == 'e' || ch == 'E') {
+        return append_directive(tokenizer_state::decimal_exponent_sign, ch);
     }
-    else if(std::isalpha(current_char)) {
-        reject_token("digit out of range");
+    else if(std::isalpha(ch)) {
+        return reject_immediately("digit out of range");
     }
     else {
-        accept_token(token_type::real);
+        return accept_immediately(token_type::real);
     }
 }
 
-void gorc::generic_tokenizer::handle_decimal_exponent_sign_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_decimal_exponent_sign_state(char ch)
 {
-    char current_char = source.peek();
-    if(current_char == '+' || current_char == '-') {
-        accept_current();
-    }
-
-    jump_to(tokenizer_state::decimal_exponent_required_digit);
-}
-
-void gorc::generic_tokenizer::handle_decimal_exponent_required_digit_state()
-{
-    if(std::isdigit(source.peek())) {
-        accept_current_and_jump_to(tokenizer_state::decimal_exponent_sequence);
+    if(ch == '+' || ch == '-') {
+        return append_directive(tokenizer_state::decimal_exponent_required_digit, ch);
     }
     else {
-        reject_token("expected exponent");
+        return handle_decimal_exponent_required_digit_state(ch);
     }
 }
 
-void gorc::generic_tokenizer::handle_decimal_exponent_sequence_state()
+tok_result gorc::generic_tokenizer_state_machine::handle_decimal_exponent_required_digit_state(char ch)
 {
-    if(std::isdigit(source.peek())) {
-        accept_current();
-    }
-    else if(std::isalpha(source.peek())) {
-        reject_token("digit out of range");
+    if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_exponent_sequence, ch);
     }
     else {
-        accept_token(token_type::real);
+        return reject_immediately("expected exponent");
     }
 }
 
-void gorc::generic_tokenizer::advance()
+tok_result gorc::generic_tokenizer_state_machine::handle_decimal_exponent_sequence_state(char ch)
 {
-    current_state = tokenizer_state::initial;
-    current_type = token_type::error;
-
-    while(true) {
-        switch(current_state) {
-        case tokenizer_state::accept:
-            return;
-
-        case tokenizer_state::reject:
-            // TODO: Throw exception?
-            current_type = token_type::error;
-            return;
-
-        case tokenizer_state::initial:
-            handle_initial_state();
-            break;
-
-        case tokenizer_state::skip_line_comment:
-            handle_skip_line_comment_state();
-            break;
-
-        case tokenizer_state::identifier:
-            handle_identifier_state();
-            break;
-
-        case tokenizer_state::string:
-            handle_string_state();
-            break;
-
-        case tokenizer_state::escape_sequence:
-            handle_escape_sequence_state();
-            break;
-
-        case tokenizer_state::punctuator:
-            handle_punctuator_state();
-            break;
-
-        case tokenizer_state::hex_octal_prefix:
-            handle_hex_octal_prefix_state();
-            break;
-
-        case tokenizer_state::hex_required_digit:
-            handle_hex_required_digit_state();
-            break;
-
-        case tokenizer_state::hex_digit_sequence:
-            handle_hex_digit_sequence_state();
-            break;
-
-        case tokenizer_state::oct_digit_sequence:
-            handle_oct_digit_sequence_state();
-            break;
-
-        case tokenizer_state::digit_sequence:
-            handle_digit_sequence_state();
-            break;
-
-        case tokenizer_state::decimal_required_digit:
-            handle_decimal_required_digit_state();
-            break;
-
-        case tokenizer_state::decimal_digit_sequence:
-            handle_decimal_digit_sequence_state();
-            break;
-
-        case tokenizer_state::decimal_exponent_sign:
-            handle_decimal_exponent_sign_state();
-            break;
-
-        case tokenizer_state::decimal_exponent_required_digit:
-            handle_decimal_exponent_required_digit_state();
-            break;
-
-        case tokenizer_state::decimal_exponent_sequence:
-            handle_decimal_exponent_sequence_state();
-            break;
-        }
+    if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_exponent_sequence, ch);
     }
+    else if(std::isalpha(ch)) {
+        return reject_immediately("digit out of range");
+    }
+    else {
+        return accept_immediately(token_type::real);
+    }
+}
+
+tok_result gorc::generic_tokenizer_state_machine::handle_string_fragment_state(char ch)
+{
+    if(isspace(ch) || ch == '\0') {
+        return accept_immediately(token_type::string);
+    }
+
+    return append_directive(tokenizer_state::string_fragment, ch);
+}
+
+tok_result gorc::generic_tokenizer_state_machine::handle(char ch)
+{
+    switch(current_state) {
+    case tokenizer_state::accept:
+        current_state = tokenizer_state::initial;
+        return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
+
+    default:
+    case tokenizer_state::reject:
+        // TODO: Throw exception?
+        current_state = tokenizer_state::initial;
+        current_type = token_type::error;
+        return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
+
+    case tokenizer_state::initial:
+        return handle_initial_state(ch);
+
+    case tokenizer_state::skip_line_comment:
+        return handle_skip_line_comment_state(ch);
+
+    case tokenizer_state::identifier:
+        return handle_identifier_state(ch);
+
+    case tokenizer_state::string:
+        return handle_string_state(ch);
+
+    case tokenizer_state::escape_sequence:
+        return handle_escape_sequence_state(ch);
+
+    case tokenizer_state::period:
+        return handle_period_state(ch);
+
+    case tokenizer_state::hex_octal_prefix:
+        return handle_hex_octal_prefix_state(ch);
+
+    case tokenizer_state::hex_required_digit:
+        return handle_hex_required_digit_state(ch);
+
+    case tokenizer_state::hex_digit_sequence:
+        return handle_hex_digit_sequence_state(ch);
+
+    case tokenizer_state::oct_digit_sequence:
+        return handle_oct_digit_sequence_state(ch);
+
+    case tokenizer_state::digit_sequence:
+        return handle_digit_sequence_state(ch);
+
+    case tokenizer_state::decimal_required_digit:
+        return handle_decimal_required_digit_state(ch);
+
+    case tokenizer_state::decimal_digit_sequence:
+        return handle_decimal_digit_sequence_state(ch);
+
+    case tokenizer_state::decimal_exponent_sign:
+        return handle_decimal_exponent_sign_state(ch);
+
+    case tokenizer_state::decimal_exponent_required_digit:
+        return handle_decimal_exponent_required_digit_state(ch);
+
+    case tokenizer_state::decimal_exponent_sequence:
+        return handle_decimal_exponent_sequence_state(ch);
+
+    case tokenizer_state::string_fragment:
+        return handle_string_fragment_state(ch);
+    }
+}
+
+gorc::token_type gorc::generic_tokenizer_state_machine::get_type() const
+{
+    return current_type;
+}
+
+std::string const & gorc::generic_tokenizer_state_machine::get_reason() const
+{
+    return reason;
+}
+
+void gorc::generic_tokenizer_state_machine::set_string_fragment_state()
+{
+    current_state = tokenizer_state::string_fragment;
+}
+
+gorc::generic_tokenizer::generic_tokenizer(input_stream &input)
+    : tokenizer(input)
+{
+    return;
 }
 
 void gorc::generic_tokenizer::extract_string_fragment()
 {
     // The current stored value is usually a stripped error token.
     // Append to it until the next whitespace character.
-    while(source.peek() != '\0' && !isspace(source.peek())) {
-        accept_current();
-    }
-
-    current_type = token_type::string;
+    state_machine.set_string_fragment_state();
+    advance_with_current_token();
 }

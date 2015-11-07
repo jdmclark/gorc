@@ -20,28 +20,11 @@ namespace gorc {
         tokenizer_stream(input_stream &source);
 
         void advance_stream();
-        void accept_current();
         void start_new_token();
-
-        inline void push_back(char ch)
-        {
-            current_value.push_back(ch);
-        }
-
-        inline char peek() const
-        {
-            return current_char;
-        }
-
-        inline std::string const & get_value() const
-        {
-            return current_value;
-        }
-
-        inline diagnostic_context_location const & get_location() const
-        {
-            return current_token_location;
-        }
+        void append(std::string const &str);
+        char peek() const;
+        std::string const & get_value() const;
+        diagnostic_context_location const & get_location() const;
     };
 
 }

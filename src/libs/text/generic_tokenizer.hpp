@@ -5,11 +5,13 @@
 #include "io/input_stream.hpp"
 #include "log/log.hpp"
 #include "token_type.hpp"
-#include "tokenizer_stream.hpp"
+#include "tokenizer.hpp"
 
 namespace gorc {
 
-    class generic_tokenizer {
+    class generic_tokenizer_state_machine : public tokenizer_state_machine {
+        using tok_result = tokenizer_state_machine_result;
+
     private:
         enum class tokenizer_state {
             accept,
@@ -19,7 +21,7 @@ namespace gorc {
             identifier,
             string,
             escape_sequence,
-            punctuator,
+            period,
             hex_octal_prefix,
             hex_required_digit,
             hex_digit_sequence,
@@ -29,84 +31,102 @@ namespace gorc {
             decimal_digit_sequence,
             decimal_exponent_sign,
             decimal_exponent_required_digit,
-            decimal_exponent_sequence
+            decimal_exponent_sequence,
+            string_fragment
         };
 
-        tokenizer_stream source;
         tokenizer_state current_state = tokenizer_state::initial;
         token_type current_type = token_type::error;
         std::string reason;
+        std::string append_buffer;
 
-        inline void accept_current()
+        inline tok_result append_directive(tokenizer_state new_state,
+                                           char ch)
         {
-            source.accept_current();
+            append_buffer.clear();
+            append_buffer.push_back(ch);
+
+            current_state = new_state;
+
+            return tok_result(tokenizer_state_machine_result_type::append, append_buffer);
         }
 
-        inline void accept_current_and_jump_to(tokenizer_state s)
+        inline tok_result skip_directive(tokenizer_state new_state)
         {
-            source.accept_current();
-            current_state = s;
+            append_buffer.clear();
+            current_state = new_state;
+            return tok_result(tokenizer_state_machine_result_type::append, append_buffer);
         }
 
-        inline void accept_token(token_type tt)
+        inline tok_result discard_directive(tokenizer_state new_state)
         {
-            current_type = tt;
-            current_state = tokenizer_state::accept;
+            current_state = new_state;
+            return tok_result(tokenizer_state_machine_result_type::discard, append_buffer);
         }
 
-        inline void reject_token(std::string const &why)
+        inline tok_result accept_immediately(token_type type)
         {
-            reason = why;
-            current_state = tokenizer_state::reject;
+            current_type = type;
+            current_state = tokenizer_state::initial;
+            return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
         }
 
-        inline void jump_to(tokenizer_state s)
+        inline tok_result reject_immediately(std::string const &reason_msg)
         {
-            current_state = s;
+            current_type = token_type::error;
+            current_state = tokenizer_state::initial;
+            reason = reason_msg;
+            return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
         }
 
-        void handle_initial_state();
-        void handle_skip_line_comment_state();
-        void handle_identifier_state();
-        void handle_string_state();
-        void handle_escape_sequence_state();
-        void handle_punctuator_state();
-        void handle_hex_octal_prefix_state();
-        void handle_hex_required_digit_state();
-        void handle_hex_digit_sequence_state();
-        void handle_oct_digit_sequence_state();
-        void handle_digit_sequence_state();
-        void handle_decimal_required_digit_state();
-        void handle_decimal_digit_sequence_state();
-        void handle_decimal_exponent_sign_state();
-        void handle_decimal_exponent_required_digit_state();
-        void handle_decimal_exponent_sequence_state();
+        inline tok_result append_then_reject(char ch,
+                                             std::string const &reason_msg)
+        {
+            reason = reason_msg;
+            return append_directive(tokenizer_state::reject, ch);
+        }
+
+        inline tok_result append_then_accept(char ch, token_type type)
+        {
+            current_type = type;
+            return append_directive(tokenizer_state::accept, ch);
+        }
+
+        inline tok_result skip_then_accept(token_type type)
+        {
+            current_type = type;
+            return skip_directive(tokenizer_state::accept);
+        }
+
+        tok_result handle_initial_state(char ch);
+        tok_result handle_skip_line_comment_state(char ch);
+        tok_result handle_identifier_state(char ch);
+        tok_result handle_string_state(char ch);
+        tok_result handle_escape_sequence_state(char ch);
+        tok_result handle_period_state(char ch);
+        tok_result handle_hex_octal_prefix_state(char ch);
+        tok_result handle_hex_required_digit_state(char ch);
+        tok_result handle_hex_digit_sequence_state(char ch);
+        tok_result handle_oct_digit_sequence_state(char ch);
+        tok_result handle_digit_sequence_state(char ch);
+        tok_result handle_decimal_required_digit_state(char ch);
+        tok_result handle_decimal_digit_sequence_state(char ch);
+        tok_result handle_decimal_exponent_sign_state(char ch);
+        tok_result handle_decimal_exponent_required_digit_state(char ch);
+        tok_result handle_decimal_exponent_sequence_state(char ch);
+        tok_result handle_string_fragment_state(char ch);
 
     public:
+        virtual tokenizer_state_machine_result handle(char ch) override;
+        virtual std::string const & get_reason() const override;
+
+        token_type get_type() const;
+        void set_string_fragment_state();
+    };
+
+    class generic_tokenizer : public tokenizer<generic_tokenizer_state_machine> {
+    public:
         generic_tokenizer(input_stream &);
-
-        void advance();
-
-        inline token_type get_type() const
-        {
-            return current_type;
-        }
-
-        inline std::string const & get_value() const
-        {
-            return source.get_value();
-        }
-
-        inline diagnostic_context_location const & get_location() const
-        {
-            return source.get_location();
-        }
-
-        inline std::string const & get_reason() const
-        {
-            return reason;
-        }
-
         void extract_string_fragment();
     };
 

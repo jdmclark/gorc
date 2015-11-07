@@ -32,15 +32,29 @@ void gorc::tokenizer_stream::advance_stream()
     }
 }
 
-void gorc::tokenizer_stream::accept_current()
-{
-    current_value.push_back(current_char);
-    advance_stream();
-}
-
 void gorc::tokenizer_stream::start_new_token()
 {
     current_value.clear();
     current_token_location.first_line = current_line;
     current_token_location.first_col = current_col;
+}
+
+void gorc::tokenizer_stream::append(std::string const &str)
+{
+    current_value.append(str);
+}
+
+char gorc::tokenizer_stream::peek() const
+{
+    return current_char;
+}
+
+std::string const & gorc::tokenizer_stream::get_value() const
+{
+    return current_value;
+}
+
+gorc::diagnostic_context_location const & gorc::tokenizer_stream::get_location() const
+{
+    return current_token_location;
 }
