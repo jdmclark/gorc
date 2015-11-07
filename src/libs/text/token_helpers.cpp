@@ -1,7 +1,7 @@
 #include "token_helpers.hpp"
 #include "utility/string_search.hpp"
 
-void gorc::assert_identifier(tokenizer &t, std::string const &ident)
+void gorc::assert_identifier(generic_tokenizer &t, std::string const &ident)
 {
     if(t.get_type() == token_type::identifier &&
        iequal(t.get_value(), ident)) {
@@ -15,7 +15,7 @@ void gorc::assert_identifier(tokenizer &t, std::string const &ident)
     }
 }
 
-void gorc::assert_punctuator(tokenizer &t, std::string const &punct)
+void gorc::assert_punctuator(generic_tokenizer &t, std::string const &punct)
 {
     if(t.get_type() == token_type::punctuator &&
        iequal(t.get_value(), punct)) {

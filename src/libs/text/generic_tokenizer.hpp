@@ -5,10 +5,11 @@
 #include "io/input_stream.hpp"
 #include "log/log.hpp"
 #include "token_type.hpp"
+#include "tokenizer_stream.hpp"
 
 namespace gorc {
 
-    class tokenizer {
+    class generic_tokenizer {
     private:
         enum class tokenizer_state {
             accept,
@@ -31,48 +32,19 @@ namespace gorc {
             decimal_exponent_sequence
         };
 
-        input_stream &source;
-        char current_char = '\0';
-        int current_line = 1;
-        int current_col = 0;
-
+        tokenizer_stream source;
         tokenizer_state current_state = tokenizer_state::initial;
         token_type current_type = token_type::error;
-        std::string current_value;
         std::string reason;
-        diagnostic_context_location current_token_location;
-
-        inline void advance_stream()
-        {
-            // The previous character contributed to the current token.
-            current_token_location.last_line = current_line;
-            current_token_location.last_col = current_col;
-
-            if(current_char == '\n') {
-                ++current_line;
-                current_col = 1;
-            }
-            else {
-                ++current_col;
-            }
-
-            try {
-                source.read(&current_char, sizeof(char));
-            }
-            catch(...) {
-                current_char = '\0';
-            }
-        }
 
         inline void accept_current()
         {
-            current_value.push_back(current_char);
-            advance_stream();
+            source.accept_current();
         }
 
         inline void accept_current_and_jump_to(tokenizer_state s)
         {
-            accept_current();
+            source.accept_current();
             current_state = s;
         }
 
@@ -111,7 +83,7 @@ namespace gorc {
         void handle_decimal_exponent_sequence_state();
 
     public:
-        tokenizer(input_stream &);
+        generic_tokenizer(input_stream &);
 
         void advance();
 
@@ -122,12 +94,12 @@ namespace gorc {
 
         inline std::string const & get_value() const
         {
-            return current_value;
+            return source.get_value();
         }
 
         inline diagnostic_context_location const & get_location() const
         {
-            return current_token_location;
+            return source.get_location();
         }
 
         inline std::string const & get_reason() const

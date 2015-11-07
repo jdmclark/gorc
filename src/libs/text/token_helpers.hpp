@@ -1,17 +1,17 @@
 #pragma once
 
-#include "tokenizer.hpp"
+#include "generic_tokenizer.hpp"
 #include "log/log.hpp"
 #include "utility/string_view.hpp"
 #include "utility/string_search.hpp"
 
 namespace gorc {
 
-    void assert_identifier(tokenizer &t, std::string const &ident);
-    void assert_punctuator(tokenizer &t, std::string const &punct);
+    void assert_identifier(generic_tokenizer &t, std::string const &ident);
+    void assert_punctuator(generic_tokenizer &t, std::string const &punct);
 
     template <typename T>
-    T get_number(tokenizer &t)
+    T get_number(generic_tokenizer &t)
     {
         bool format_success = false;
         T result = T(0);

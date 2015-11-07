@@ -1,12 +1,12 @@
 #include "episode.hpp"
 #include "log/log.hpp"
-#include "text/tokenizer.hpp"
+#include "text/generic_tokenizer.hpp"
 #include "utility/string_search.hpp"
 #include "text/token_helpers.hpp"
 #include "utility/string_view.hpp"
 
 gorc::episode::episode(input_stream &f) {
-    tokenizer t(f);
+    generic_tokenizer t(f);
 
     if(t.get_type() != token_type::string) {
         diagnostic_context dc(t.get_location());

@@ -20,7 +20,7 @@ begin_suite_fixture(token_helpers_test, token_helpers_fixture);
 test_case(assert_identifier_not_identifier)
 {
     set_file("%");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_throws_logged(assert_identifier(t, "id"));
     assert_log_message(log_level::error,
@@ -31,7 +31,7 @@ test_case(assert_identifier_not_identifier)
 test_case(assert_identifier_non_matching)
 {
     set_file("ia");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_throws_logged(assert_identifier(t, "id"));
     assert_log_message(log_level::error,
@@ -42,7 +42,7 @@ test_case(assert_identifier_non_matching)
 test_case(assert_identifier_success)
 {
     set_file("id Xd yD KD");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_identifier(t, "id");
     assert_identifier(t, "xd");
@@ -55,7 +55,7 @@ test_case(assert_identifier_success)
 test_case(assert_punctuator_not_punctuator)
 {
     set_file("id");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_throws_logged(assert_punctuator(t, "%"));
     assert_log_message(log_level::error,
@@ -66,7 +66,7 @@ test_case(assert_punctuator_not_punctuator)
 test_case(assert_punctuator_not_matching)
 {
     set_file(":");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_throws_logged(assert_punctuator(t, "%"));
     assert_log_message(log_level::error,
@@ -77,7 +77,7 @@ test_case(assert_punctuator_not_matching)
 test_case(assert_punctuator_success)
 {
     set_file(": % + -");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_punctuator(t, ":");
     assert_punctuator(t, "%");
@@ -90,7 +90,7 @@ test_case(assert_punctuator_success)
 test_case(get_number_format_failure)
 {
     set_file("id");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_throws_logged(get_number<int>(t));
     assert_log_message(log_level::error,
@@ -100,7 +100,7 @@ test_case(get_number_format_failure)
 test_case(get_number_format_int)
 {
     set_file("5 0x10 010 122.3 3e2");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_eq(get_number<int>(t), 5);
     assert_eq(get_number<int>(t), 16);
@@ -112,7 +112,7 @@ test_case(get_number_format_int)
 test_case(get_number_format_real)
 {
     set_file("5 0x10 010 122.3 3e2");
-    tokenizer t(mf);
+    generic_tokenizer t(mf);
 
     assert_true(almost_equal(get_number<float>(t), 5.0f));
     assert_true(almost_equal(get_number<float>(t), 16.0f));

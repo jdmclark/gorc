@@ -5,7 +5,8 @@ DEPENDENCIES:= \
 	libs/io \
 
 SOURCES:= \
-	tokenizer.cpp \
+	generic_tokenizer.cpp \
 	token_helpers.cpp \
+	tokenizer_stream.cpp \
 	json_input_stream.cpp \
 	json_output_stream.cpp \
