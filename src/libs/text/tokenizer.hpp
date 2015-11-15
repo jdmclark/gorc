@@ -41,13 +41,14 @@ namespace gorc {
                     stream.advance_stream();
                     break;
 
+                case tokenizer_state_machine_result_type::halt:
+                    stream.append(result.value);
+                    return;
+
                 case tokenizer_state_machine_result_type::discard:
                     stream.advance_stream();
                     stream.start_new_token();
                     break;
-
-                case tokenizer_state_machine_result_type::halt:
-                    return;
                 }
             }
         }

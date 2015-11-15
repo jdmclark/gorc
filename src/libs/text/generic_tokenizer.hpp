@@ -68,6 +68,7 @@ namespace gorc {
         {
             current_type = type;
             current_state = tokenizer_state::initial;
+            append_buffer.clear();
             return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
         }
 
@@ -76,6 +77,7 @@ namespace gorc {
             current_type = token_type::error;
             current_state = tokenizer_state::initial;
             reason = reason_msg;
+            append_buffer.clear();
             return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
         }
 

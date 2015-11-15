@@ -8,8 +8,6 @@ DEPENDENCIES:= \
 	libs/text \
 
 SOURCES:= \
-	cog_sub_tokenizer_state_machine.cpp \
-	cog_tokenizer_state_machine.cpp \
 	grammar.cpp \
 	lexer.cpp \
 	parser.cpp \

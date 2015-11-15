@@ -270,6 +270,7 @@ tok_result gorc::generic_tokenizer_state_machine::handle(char ch)
     switch(current_state) {
     case tokenizer_state::accept:
         current_state = tokenizer_state::initial;
+        append_buffer.clear();
         return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
 
     default:
@@ -277,6 +278,7 @@ tok_result gorc::generic_tokenizer_state_machine::handle(char ch)
         // TODO: Throw exception?
         current_state = tokenizer_state::initial;
         current_type = token_type::error;
+        append_buffer.clear();
         return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
 
     case tokenizer_state::initial:
