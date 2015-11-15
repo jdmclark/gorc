@@ -306,14 +306,38 @@ labeled_statement::labeled_statement(diagnostic_context_location const &loc,
     return;
 }
 
+flags_section::flags_section(diagnostic_context_location const &loc,
+                             unsigned int flags)
+    : visitable_node(loc)
+    , flags(flags)
+{
+    return;
+}
+
+symbols_section::symbols_section(diagnostic_context_location const &loc,
+                                 list_node<symbol*> *symbols)
+    : visitable_node(loc)
+    , symbols(symbols)
+{
+    return;
+}
+
+code_section::code_section(diagnostic_context_location const &loc,
+                           list_node<statement*> *code)
+    : visitable_node(loc)
+    , code(code)
+{
+    return;
+}
+
 translation_unit::translation_unit(diagnostic_context_location const &loc,
-                                   unsigned int flags,
-                                   list_node<symbol*> *symbols,
-                                   list_node<statement*> *statements)
+                                   flags_section *flags,
+                                   symbols_section *symbols,
+                                   code_section *code)
     : visitable_node(loc)
     , flags(flags)
     , symbols(symbols)
-    , code(statements)
+    , code(code)
 {
     return;
 }

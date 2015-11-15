@@ -1,33 +1,15 @@
 #include "grammar.hpp"
+#include "parser.hpp"
 
 gorc::cog::grammar::grammar(input_stream &file, ast::factory &factory)
     : file(file)
     , factory(factory)
+    , scanner(file)
 {
-    init_scanner();
     return;
 }
 
-gorc::cog::grammar::~grammar()
+gorc::maybe<gorc::cog::ast::translation_unit *> gorc::cog::grammar::parse()
 {
-    destroy_scanner();
-}
-
-char gorc::cog::grammar::get_next()
-{
-    if(!file.at_end()) {
-        try {
-            return read<char>(file);
-        }
-        catch(...) {
-            // Ignore
-        }
-    }
-
-    return '\0';
-}
-
-void* gorc::cog::grammar::get_scanner() const
-{
-    return scanner;
+    return parse_cog(factory, scanner);
 }

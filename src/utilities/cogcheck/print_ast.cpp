@@ -29,5 +29,5 @@ void gorc::print_ast(cog::ast::translation_unit &tu,
               << std::endl;
 
     print_ast_visitor pav;
-    cog::ast::visit(pav, tu.code);
+    cog::ast::visit(pav, tu.code->code);
 }

@@ -399,16 +399,40 @@ namespace gorc {
 
             /* Translation unit */
 
-            class translation_unit : public visitable_node<translation_unit> {
+            class flags_section : public visitable_node<flags_section> {
             public:
                 unsigned int flags;
+
+                flags_section(diagnostic_context_location const &loc,
+                              unsigned int flags);
+            };
+
+            class symbols_section : public visitable_node<symbols_section> {
+            public:
                 list_node<symbol*> *symbols;
+
+                symbols_section(diagnostic_context_location const &loc,
+                                list_node<symbol*> *symbols);
+            };
+
+            class code_section : public visitable_node<code_section> {
+            public:
                 list_node<statement*> *code;
 
+                code_section(diagnostic_context_location const &loc,
+                             list_node<statement*> *code);
+            };
+
+            class translation_unit : public visitable_node<translation_unit> {
+            public:
+                flags_section *flags;
+                symbols_section *symbols;
+                code_section *code;
+
                 translation_unit(diagnostic_context_location const &loc,
-                                 unsigned int flags,
-                                 list_node<symbol*> *symbols,
-                                 list_node<statement*> *statements);
+                                 flags_section *flags,
+                                 symbols_section *symbols,
+                                 code_section *code);
             };
         }
     }
