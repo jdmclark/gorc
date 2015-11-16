@@ -1,6 +1,6 @@
 #include "code_visitor.hpp"
 #include "rvalue_visitor.hpp"
-#include "variant_location_visitor.hpp"
+#include "cog/ast/variant_location_visitor.hpp"
 #include "for_expression_visitor.hpp"
 #include "log/log.hpp"
 

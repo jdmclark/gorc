@@ -1,7 +1,7 @@
 #include "rvalue_visitor.hpp"
 #include "lvalue_visitor.hpp"
 #include "utility/zip.hpp"
-#include "variant_location_visitor.hpp"
+#include "cog/ast/variant_location_visitor.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;

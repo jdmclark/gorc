@@ -4,7 +4,7 @@
 #include "cog/script/type.hpp"
 #include "utility/maybe.hpp"
 #include "cog/ast/factory.hpp"
-#include "variant_location_visitor.hpp"
+#include "cog/ast/variant_location_visitor.hpp"
 #include "log/log.hpp"
 #include <tuple>
 

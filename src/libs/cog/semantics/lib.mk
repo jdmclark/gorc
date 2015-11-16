@@ -18,4 +18,3 @@ SOURCES:= \
 	symbol_extension_type.cpp \
 	symbol_extension_visitor.cpp \
 	symbol_field_visitor.cpp \
-	variant_location_visitor.cpp \

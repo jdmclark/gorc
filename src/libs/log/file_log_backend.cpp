@@ -16,4 +16,5 @@ void gorc::file_log_backend::write_message(std::string const &filename,
          << log_level_to_string(level) << "> "
          << message
          << std::endl;
+    file.flush();
 }

@@ -9,3 +9,4 @@ SOURCES:= \
 	ast.cpp \
 	factory.cpp \
 	node.cpp \
+	variant_location_visitor.cpp \
