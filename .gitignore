@@ -4,7 +4,3 @@ test-log.txt
 .ycm_extra_conf.py
 *.pyc
 pkg/
-*.output
-src/libs/cog/grammar/lexer.cpp
-src/libs/cog/grammar/parser.hpp
-src/libs/cog/grammar/parser.cpp
