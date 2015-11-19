@@ -137,6 +137,7 @@ namespace gorc {
         public:
             virtual tokenizer_state_machine_result handle(char ch) override;
             virtual std::string const & get_reason() const override;
+            virtual bool is_fatal_error() const override;
 
             cog_token_type get_type() const;
             void set_string_fragment_state();

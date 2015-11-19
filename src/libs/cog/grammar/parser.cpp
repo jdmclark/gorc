@@ -15,17 +15,11 @@ namespace {
     using cog_la_tokenizer = token_lookahead<cog_tokenizer>;
 
     template <typename TokenizerT>
-    bool is_identifier(TokenizerT &tok, std::string const &expected)
-    {
-        return tok.get_type() == cog_token_type::identifier &&
-               iequal(tok.get_value(), expected);
-    }
-
-    template <typename TokenizerT>
     void assert_identifier(TokenizerT &tok, std::string const &expected)
     {
         if(tok.get_type() != cog_token_type::identifier ||
            tok.get_value() != expected) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected '%s', found '%s'") % expected % tok.get_value());
         }
     }
@@ -34,6 +28,7 @@ namespace {
     void assert_punctuator(TokenizerT &tok, cog_token_type type)
     {
         if(tok.get_type() != type) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("unexpected '%s'") % tok.get_value());
         }
     }
@@ -150,6 +145,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::identifier) {
+            diagnostic_context dc(tok.get_location());
             LOG_ERROR(format("expected symbol name, found '%s'") % tok.get_value());
         }
 
@@ -182,6 +178,7 @@ namespace {
                                                            *exts->elements.back()));
             }
             else {
+                diagnostic_context dc(tok.get_location());
                 LOG_FATAL(format("expected extension name, found '%s'") % tok.get_value());
             }
         }
@@ -233,6 +230,7 @@ namespace {
                     continue;
                 }
                 else if(tok.get_type() == cog_token_type::end_of_file) {
+                    diagnostic_context dc(tok.get_location());
                     LOG_FATAL("unexpected end of file inside symbols section");
                 }
                 else if(iequal(tok.get_value(), "end"_sv)) {
@@ -245,6 +243,7 @@ namespace {
                                                        symbols->elements.back()->location);
                 }
                 else {
+                    diagnostic_context dc(tok.get_location());
                     LOG_FATAL(format("expected symbol type, found '%s'") % tok.get_value());
                 }
             }
@@ -364,6 +363,7 @@ namespace {
     }
 
     ast::expression* parse_expression(ast::factory &, cog_la_tokenizer &);
+    ast::expression* parse_assignment_expression(ast::factory &, cog_la_tokenizer &);
 
     ast::expression* parse_literal_expression(ast::factory &ast, cog_la_tokenizer &tok)
     {
@@ -392,6 +392,7 @@ namespace {
             tok.advance();
 
             if(tok.get_type() != cog_token_type::punc_apos) {
+                diagnostic_context dc(tok.get_location());
                 LOG_FATAL(format("expected end of vector literal, found '%s'") % tok.get_value());
             }
 
@@ -416,7 +417,15 @@ namespace {
             tok.advance();
             return rv;
         }
+        else if(tok.get_type() == cog_token_type::string) {
+            ast::expression *rv = ast.make_var<ast::expression, ast::string_literal_expression>(
+                    tok.get_location(),
+                    tok.get_value());
+            tok.advance();
+            return rv;
+        }
         else {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected expression, found '%s'") % tok.get_value());
         }
     }
@@ -436,19 +445,24 @@ namespace {
                 // Parse argument list
                 ast::list_node<ast::expression *> *args =
                     ast.make<ast::list_node<ast::expression *>>(tok.get_location());
-                while(true) {
-                    args->elements.push_back(parse_expression(ast, tok));
-                    args->location = location_union(args->location, tok.get_location());
 
-                    if(tok.get_type() == cog_token_type::punc_comma) {
-                        tok.advance();
-                        continue;
-                    }
-                    else if(tok.get_type() == cog_token_type::punc_rparen) {
-                        break;
-                    }
-                    else {
-                        LOG_FATAL(format("expected ',' or ')', found '%s'") % tok.get_value());
+                if(tok.get_type() != cog_token_type::punc_rparen) {
+                    // Argument list is not empty
+                    while(true) {
+                        args->elements.push_back(parse_assignment_expression(ast, tok));
+                        args->location = location_union(args->location, tok.get_location());
+
+                        if(tok.get_type() == cog_token_type::punc_comma) {
+                            tok.advance();
+                            continue;
+                        }
+                        else if(tok.get_type() == cog_token_type::punc_rparen) {
+                            break;
+                        }
+                        else {
+                            diagnostic_context dc(tok.get_location());
+                            LOG_FATAL(format("expected ',' or ')', found '%s'") % tok.get_value());
+                        }
                     }
                 }
 
@@ -467,6 +481,7 @@ namespace {
                 ast::expression *subscript = parse_expression(ast, tok);
 
                 if(tok.get_type() != cog_token_type::punc_rbracket) {
+                    diagnostic_context dc(tok.get_location());
                     LOG_FATAL(format("expected ']', found '%s'") % tok.get_value());
                 }
 
@@ -490,6 +505,7 @@ namespace {
             ast::expression *primary_expr = parse_expression(ast, tok);
 
             if(tok.get_type() != cog_token_type::punc_rparen) {
+                diagnostic_context dc(tok.get_location());
                 LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
             }
             tok.advance();
@@ -631,6 +647,7 @@ namespace {
         ast::expression *value = parse_expression(ast, tok);
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
 
@@ -648,6 +665,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
 
@@ -664,6 +682,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
 
@@ -680,6 +699,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::identifier) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected destination label, found '%s'") % tok.get_value());
         }
 
@@ -687,6 +707,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
 
@@ -703,6 +724,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_lparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected '(', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -710,6 +732,7 @@ namespace {
         ast::expression *cond = parse_expression(ast, tok);
 
         if(tok.get_type() != cog_token_type::punc_rparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -726,6 +749,7 @@ namespace {
         }
 
         // if statement is followed by an else term
+        tok.advance();
         ast::statement *else_code = parse_statement(ast, tok);
 
         return ast.make_var<ast::statement, ast::if_else_statement>(
@@ -742,6 +766,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_lparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected '(', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -749,6 +774,7 @@ namespace {
         ast::expression *cond = parse_expression(ast, tok);
 
         if(tok.get_type() != cog_token_type::punc_rparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -770,11 +796,13 @@ namespace {
         ast::statement *code = parse_statement(ast, tok);
 
         if(!iequal(tok.get_value(), "while"_sv)) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected 'while', found '%s'") % tok.get_value());
         }
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_lparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected '(', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -782,11 +810,13 @@ namespace {
         ast::expression *cond = parse_expression(ast, tok);
 
         if(tok.get_type() != cog_token_type::punc_rparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
         }
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
 
@@ -805,6 +835,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_lparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected '(', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -818,12 +849,12 @@ namespace {
             ast::expression *sub_expr = parse_expression(ast, tok);
 
             init = ast.make_var<ast::for_optional_expression, ast::for_expression>(
-                    location_union(ast::visit(variant_location_visitor(), *sub_expr),
-                                   tok.get_location()),
+                    ast::visit(variant_location_visitor(), *sub_expr),
                     sub_expr);
         }
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -837,12 +868,12 @@ namespace {
             ast::expression *sub_expr = parse_expression(ast, tok);
 
             cond = ast.make_var<ast::for_optional_expression, ast::for_expression>(
-                    location_union(ast::visit(variant_location_visitor(), *sub_expr),
-                                   tok.get_location()),
+                    ast::visit(variant_location_visitor(), *sub_expr),
                     sub_expr);
         }
 
         if(tok.get_type() != cog_token_type::punc_semicolon) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -856,12 +887,12 @@ namespace {
             ast::expression *sub_expr = parse_expression(ast, tok);
 
             iter = ast.make_var<ast::for_optional_expression, ast::for_expression>(
-                    location_union(ast::visit(variant_location_visitor(), *sub_expr),
-                                   tok.get_location()),
+                    ast::visit(variant_location_visitor(), *sub_expr),
                     sub_expr);
         }
 
         if(tok.get_type() != cog_token_type::punc_rparen) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
         }
         tok.advance();
@@ -937,6 +968,7 @@ namespace {
 
         while(true) {
             if(tok.get_type() == cog_token_type::end_of_file) {
+                diagnostic_context dc(tok.get_location());
                 LOG_FATAL(format("unexpected end of file in compound statement"));
             }
             else if(tok.get_type() == cog_token_type::punc_rbrace) {
@@ -988,6 +1020,7 @@ namespace {
 
         while(true) {
             if(tok.get_type() == cog_token_type::end_of_file) {
+                diagnostic_context dc(tok.get_location());
                 LOG_FATAL(format("unexpected end of file in code section"));
             }
             else if(iequal(tok.get_value(), "end"_sv)) {
@@ -1010,7 +1043,7 @@ namespace {
 
     ast::flags_section* parse_flags_section(ast::factory &factory, cog_tokenizer &tok)
     {
-        if(!is_identifier(tok, "flags")) {
+        if(!iequal(tok.get_value(), "flags"_sv)) {
             // No flags section
             return factory.make<ast::flags_section>(diagnostic_context_location(nothing, 0, 0), 0);
         }

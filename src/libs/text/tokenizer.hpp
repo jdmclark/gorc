@@ -23,6 +23,7 @@ namespace gorc {
         virtual ~tokenizer_state_machine();
         virtual tokenizer_state_machine_result handle(char ch) = 0;
         virtual std::string const & get_reason() const = 0;
+        virtual bool is_fatal_error() const;
     };
 
     template <typename StateMachineT>
@@ -73,6 +74,11 @@ namespace gorc {
         {
             stream.start_new_token();
             advance_with_current_token();
+
+            if(state_machine.is_fatal_error()) {
+                diagnostic_context dc(stream.get_location());
+                LOG_FATAL(state_machine.get_reason());
+            }
         }
 
         auto get_type() const -> decltype(state_machine.get_type())

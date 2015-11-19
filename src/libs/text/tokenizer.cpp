@@ -13,3 +13,8 @@ gorc::tokenizer_state_machine::~tokenizer_state_machine()
 {
     return;
 }
+
+bool gorc::tokenizer_state_machine::is_fatal_error() const
+{
+    return false;
+}

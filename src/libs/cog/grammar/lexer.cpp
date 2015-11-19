@@ -22,6 +22,9 @@ tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
     else if(current_char == '_' || std::isalpha(current_char)) {
         return append_directive(tokenizer_state::identifier, current_char);
     }
+    else if(current_char == '\"') {
+        return skip_directive(tokenizer_state::string);
+    }
     else if(current_char == '0') {
         return append_directive(tokenizer_state::hex_prefix, current_char);
     }
@@ -60,7 +63,7 @@ tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
     }
     else {
         // Current character is not a recognized, valid element.
-        return reject_immediately(str(format("unrecognized input '\\%c'") % current_char));
+        return reject_immediately(str(format("unrecognized input '%c'") % current_char));
     }
 }
 
@@ -503,6 +506,11 @@ cog_token_type cog_tokenizer_state_machine::get_type() const
 std::string const& cog_tokenizer_state_machine::get_reason() const
 {
     return reason;
+}
+
+bool cog_tokenizer_state_machine::is_fatal_error() const
+{
+    return current_type == cog_token_type::error;
 }
 
 void cog_tokenizer_state_machine::set_string_fragment_state()

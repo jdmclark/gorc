@@ -9,7 +9,7 @@ void gorc::print_ast(cog::ast::translation_unit &tu,
     std::cout << std::endl
               << "ABSTRACT SYNTAX TREE"
               << std::endl
-              << "FLAGS = " << std::hex << tu.flags
+              << "FLAGS = " << std::hex << tu.flags->flags
               << std::endl
               << "SYMBOLS"
               << std::endl;
