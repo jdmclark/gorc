@@ -95,6 +95,9 @@ tok_result cog_tokenizer_state_machine::handle_string_state(char current_char)
     else if(current_char == '\0') {
         return reject_immediately("unexpected eof in string literal");
     }
+    else if(current_char == '\n') {
+        return reject_immediately("unescaped newline in string literal");
+    }
     else if(current_char == '\"') {
         return skip_then_accept(cog_token_type::string);
     }
@@ -129,7 +132,7 @@ tok_result cog_tokenizer_state_machine::handle_escape_sequence_state(char ch)
         return skip_directive(tokenizer_state::string);
 
     default:
-        return reject_immediately(str(format("unknown escape sequence \\%c") % ch));
+        return reject_immediately(str(format("unknown escape sequence '\\%c'") % ch));
     }
 
     return append_directive(tokenizer_state::string, append_char);
@@ -510,7 +513,8 @@ std::string const& cog_tokenizer_state_machine::get_reason() const
 
 bool cog_tokenizer_state_machine::is_fatal_error() const
 {
-    return current_type == cog_token_type::error;
+    return current_type == cog_token_type::error &&
+           should_raise_fatal_errors;
 }
 
 void cog_tokenizer_state_machine::set_string_fragment_state()
@@ -521,6 +525,11 @@ void cog_tokenizer_state_machine::set_string_fragment_state()
 void cog_tokenizer_state_machine::return_newlines(bool state)
 {
     should_return_newlines = state;
+}
+
+void cog_tokenizer_state_machine::set_raise_fatal_errors(bool state)
+{
+    should_raise_fatal_errors = state;
 }
 
 cog_tokenizer::cog_tokenizer(input_stream &input)
@@ -540,4 +549,9 @@ void cog_tokenizer::extract_string_fragment()
 void cog_tokenizer::return_newlines(bool state)
 {
     state_machine.return_newlines(state);
+}
+
+void cog_tokenizer::set_raise_fatal_errors(bool state)
+{
+    state_machine.set_raise_fatal_errors(state);
 }

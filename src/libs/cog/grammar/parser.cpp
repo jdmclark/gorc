@@ -88,6 +88,26 @@ namespace {
     // Symbols:
     ast::symbol_field* parse_symbol_field(ast::factory &ast, cog_tokenizer &tok)
     {
+        class scoped_set_raise_fatal_errors {
+        private:
+            cog_tokenizer &tok;
+        public:
+            scoped_set_raise_fatal_errors(cog_tokenizer &tok)
+                : tok(tok)
+            {
+                tok.set_raise_fatal_errors(false);
+            }
+
+            ~scoped_set_raise_fatal_errors()
+            {
+                tok.set_raise_fatal_errors(true);
+            }
+        };
+
+        scoped_set_raise_fatal_errors ssrfe(tok);
+
+        tok.advance();
+
         if(tok.get_type() == cog_token_type::integer ||
            tok.get_type() == cog_token_type::hex_integer) {
             ast::symbol_field *rv = ast.make_var<ast::symbol_field, ast::integer_field>(
@@ -122,7 +142,6 @@ namespace {
 
         if(tok.get_type() == cog_token_type::punc_assign) {
             // Valued extension
-            tok.advance();
             ast::symbol_field *value = parse_symbol_field(ast, tok);
             return ast.make_var<ast::symbol_extension, ast::valued_extension>(
                     location_union(extension_name->location,
@@ -155,7 +174,6 @@ namespace {
 
         maybe<ast::symbol_field*> default_value;
         if(tok.get_type() == cog_token_type::punc_assign) {
-            tok.advance();
             default_value = parse_symbol_field(ast, tok);
         }
 

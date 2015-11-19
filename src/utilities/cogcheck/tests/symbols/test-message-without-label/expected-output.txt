@@ -1,1 +1,1 @@
-[WARNING] input.cog:2:1-2:15: message 'startup' was exported but label not defined
+[WARNING] input.cog:2:1-2:16: message 'startup' was exported but label not defined

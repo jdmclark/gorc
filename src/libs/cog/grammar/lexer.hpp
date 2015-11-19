@@ -44,6 +44,7 @@ namespace gorc {
             std::string reason;
             std::string append_buffer;
             bool should_return_newlines = false;
+            bool should_raise_fatal_errors = true;
 
             inline tok_result append_directive(tokenizer_state new_state,
                                                char ch)
@@ -142,6 +143,7 @@ namespace gorc {
             cog_token_type get_type() const;
             void set_string_fragment_state();
             void return_newlines(bool state);
+            void set_raise_fatal_errors(bool state);
         };
 
         class cog_tokenizer : public tokenizer<cog_tokenizer_state_machine> {
@@ -149,6 +151,7 @@ namespace gorc {
             cog_tokenizer(input_stream &);
             void extract_string_fragment();
             void return_newlines(bool state);
+            void set_raise_fatal_errors(bool state);
         };
 
     }
