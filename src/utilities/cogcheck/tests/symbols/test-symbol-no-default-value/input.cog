@@ -9,7 +9,7 @@ model g = foo.3do
 sound h = foo.wav
 template i = +foo
 
-sector j = 5183
+sector j =     5183
 
 end
 

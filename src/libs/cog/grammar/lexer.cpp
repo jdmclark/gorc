@@ -403,13 +403,199 @@ tok_result cog_tokenizer_state_machine::handle_decimal_exponent_sequence_state(c
     }
 }
 
-tok_result cog_tokenizer_state_machine::handle_string_fragment_state(char ch)
+tok_result cog_tokenizer_state_machine::handle_sf_initial_state(char ch)
 {
-    if(isspace(ch) || ch == '\0') {
+    if(ch == '\0') {
+        return accept_immediately(cog_token_type::end_of_file);
+    }
+    else if(std::isspace(ch)) {
+        return discard_directive(tokenizer_state::sf_initial);
+    }
+    else if(ch == '+' || ch == '-') {
+        // Maybe a number
+        return append_directive(tokenizer_state::sf_seen_sign, ch);
+    }
+    else if(ch == '.') {
+        // Maybe decimal
+        return append_directive(tokenizer_state::sf_decimal_required_digit, ch);
+    }
+    else if(ch == '0') {
+        // Maybe hex, maybe decimal, maybe zero
+        return append_directive(tokenizer_state::sf_hex_prefix, ch);
+    }
+    else if(std::isdigit(ch)) {
+        // Maybe integer, maybe decimal
+        return append_directive(tokenizer_state::sf_digit_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_seen_sign_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        // Just + or -
         return accept_immediately(cog_token_type::string);
     }
+    else if(ch == '.') {
+        // Maybe decimal
+        return append_directive(tokenizer_state::sf_decimal_required_digit, ch);
+    }
+    else if(ch == '0') {
+        // Maybe hex, maybe decimal, maybe zero
+        return append_directive(tokenizer_state::sf_hex_prefix, ch);
+    }
+    else if(std::isdigit(ch)) {
+        // Maybe integer, maybe decimal
+        return append_directive(tokenizer_state::sf_digit_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
 
-    return append_directive(tokenizer_state::string_fragment, ch);
+tok_result cog_tokenizer_state_machine::handle_sf_hex_prefix_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        // Just zero
+        return accept_immediately(cog_token_type::integer);
+    }
+    else if(ch == 'x' || ch == 'X') {
+        // This is a hex sequence
+        return append_directive(tokenizer_state::sf_hex_required_digit, ch);
+    }
+    else if(ch == '.') {
+        // 0.
+        return append_directive(tokenizer_state::sf_decimal_digit_sequence, ch);
+    }
+    else if(ch == 'e' || ch == 'E') {
+        // 0e
+        return append_directive(tokenizer_state::sf_decimal_exponent_sign, ch);
+    }
+    else if(std::isdigit(ch)) {
+        // An integer, although not a very well written one
+        return append_directive(tokenizer_state::sf_digit_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_hex_required_digit_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        // "0x"
+        return accept_immediately(cog_token_type::string);
+    }
+    else if(std::isxdigit(ch)) {
+        return append_directive(tokenizer_state::sf_hex_digit_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_hex_digit_sequence_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        return accept_immediately(cog_token_type::hex_integer);
+    }
+    else if(std::isxdigit(ch)) {
+        return append_directive(tokenizer_state::sf_hex_digit_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_digit_sequence_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        return accept_immediately(cog_token_type::integer);
+    }
+    else if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::sf_digit_sequence, ch);
+    }
+    else if(ch == 'e' || ch == 'E') {
+        return append_directive(tokenizer_state::sf_decimal_exponent_sign, ch);
+    }
+    else if(ch == '.') {
+        // Already seen at least one number before the dot.
+        // Be more permissive.
+        return append_directive(tokenizer_state::sf_decimal_digit_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_decimal_required_digit_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        // No digits seen - sign and dot
+        return accept_immediately(cog_token_type::string);
+    }
+    else if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::sf_decimal_digit_sequence, ch);
+    }
+    else {
+        // No digits seen
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_decimal_digit_sequence_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        // At least one digit seen
+        return accept_immediately(cog_token_type::real);
+    }
+    else if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::sf_decimal_digit_sequence, ch);
+    }
+    else if(ch == 'e' || ch == 'E') {
+        return append_directive(tokenizer_state::sf_decimal_exponent_sign, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sign_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        return accept_immediately(cog_token_type::real);
+    }
+    else if(ch == '+' || ch == '-' || std::isdigit(ch)) {
+        return append_directive(tokenizer_state::sf_decimal_exponent_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sequence_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        return accept_immediately(cog_token_type::real);
+    }
+    else if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::sf_decimal_exponent_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_string_fragment_state(char ch)
+{
+    if(ch == '\0' || isspace(ch)) {
+        return accept_immediately(cog_token_type::string);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
 }
 
 tok_result cog_tokenizer_state_machine::handle(char ch)
@@ -496,8 +682,38 @@ tok_result cog_tokenizer_state_machine::handle(char ch)
     case tokenizer_state::decimal_exponent_sequence:
         return handle_decimal_exponent_sequence_state(ch);
 
-    case tokenizer_state::string_fragment:
-        return handle_string_fragment_state(ch);
+    case tokenizer_state::sf_initial:
+        return handle_sf_initial_state(ch);
+
+    case tokenizer_state::sf_seen_sign:
+        return handle_sf_seen_sign_state(ch);
+
+    case tokenizer_state::sf_hex_prefix:
+        return handle_sf_hex_prefix_state(ch);
+
+    case tokenizer_state::sf_hex_required_digit:
+        return handle_sf_hex_required_digit_state(ch);
+
+    case tokenizer_state::sf_hex_digit_sequence:
+        return handle_sf_hex_digit_sequence_state(ch);
+
+    case tokenizer_state::sf_digit_sequence:
+        return handle_sf_digit_sequence_state(ch);
+
+    case tokenizer_state::sf_decimal_required_digit:
+        return handle_sf_decimal_required_digit_state(ch);
+
+    case tokenizer_state::sf_decimal_digit_sequence:
+        return handle_sf_decimal_digit_sequence_state(ch);
+
+    case tokenizer_state::sf_decimal_exponent_sign:
+        return handle_sf_decimal_exponent_sign_state(ch);
+
+    case tokenizer_state::sf_decimal_exponent_sequence:
+        return handle_sf_decimal_exponent_sequence_state(ch);
+
+    case tokenizer_state::sf_string_fragment:
+        return handle_sf_string_fragment_state(ch);
     }
 }
 
@@ -513,23 +729,17 @@ std::string const& cog_tokenizer_state_machine::get_reason() const
 
 bool cog_tokenizer_state_machine::is_fatal_error() const
 {
-    return current_type == cog_token_type::error &&
-           should_raise_fatal_errors;
+    return current_type == cog_token_type::error;
 }
 
-void cog_tokenizer_state_machine::set_string_fragment_state()
+void cog_tokenizer_state_machine::set_symbol_field_state()
 {
-    current_state = tokenizer_state::string_fragment;
+    current_state = tokenizer_state::sf_initial;
 }
 
 void cog_tokenizer_state_machine::return_newlines(bool state)
 {
     should_return_newlines = state;
-}
-
-void cog_tokenizer_state_machine::set_raise_fatal_errors(bool state)
-{
-    should_raise_fatal_errors = state;
 }
 
 cog_tokenizer::cog_tokenizer(input_stream &input)
@@ -538,20 +748,12 @@ cog_tokenizer::cog_tokenizer(input_stream &input)
     return;
 }
 
-void cog_tokenizer::extract_string_fragment()
+void cog_tokenizer::set_symbol_field_state()
 {
-    // The current stored value is usually a stripped error token.
-    // Append to it until the next whitespace character.
-    state_machine.set_string_fragment_state();
-    advance_with_current_token();
+    state_machine.set_symbol_field_state();
 }
 
 void cog_tokenizer::return_newlines(bool state)
 {
     state_machine.return_newlines(state);
-}
-
-void cog_tokenizer::set_raise_fatal_errors(bool state)
-{
-    state_machine.set_raise_fatal_errors(state);
 }

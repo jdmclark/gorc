@@ -36,7 +36,18 @@ namespace gorc {
                 decimal_exponent_sign,
                 decimal_exponent_required_digit,
                 decimal_exponent_sequence,
-                string_fragment
+
+                sf_initial,
+                sf_seen_sign,
+                sf_hex_prefix,
+                sf_hex_required_digit,
+                sf_hex_digit_sequence,
+                sf_digit_sequence,
+                sf_decimal_required_digit,
+                sf_decimal_digit_sequence,
+                sf_decimal_exponent_sign,
+                sf_decimal_exponent_sequence,
+                sf_string_fragment
             };
 
             tokenizer_state current_state = tokenizer_state::initial;
@@ -44,7 +55,6 @@ namespace gorc {
             std::string reason;
             std::string append_buffer;
             bool should_return_newlines = false;
-            bool should_raise_fatal_errors = true;
 
             inline tok_result append_directive(tokenizer_state new_state,
                                                char ch)
@@ -133,7 +143,18 @@ namespace gorc {
             tok_result handle_decimal_exponent_sign_state(char ch);
             tok_result handle_decimal_exponent_required_digit_state(char ch);
             tok_result handle_decimal_exponent_sequence_state(char ch);
-            tok_result handle_string_fragment_state(char ch);
+
+            tok_result handle_sf_initial_state(char ch);
+            tok_result handle_sf_seen_sign_state(char ch);
+            tok_result handle_sf_hex_prefix_state(char ch);
+            tok_result handle_sf_hex_required_digit_state(char ch);
+            tok_result handle_sf_hex_digit_sequence_state(char ch);
+            tok_result handle_sf_digit_sequence_state(char ch);
+            tok_result handle_sf_decimal_required_digit_state(char ch);
+            tok_result handle_sf_decimal_digit_sequence_state(char ch);
+            tok_result handle_sf_decimal_exponent_sign_state(char ch);
+            tok_result handle_sf_decimal_exponent_sequence_state(char ch);
+            tok_result handle_sf_string_fragment_state(char ch);
 
         public:
             virtual tokenizer_state_machine_result handle(char ch) override;
@@ -141,17 +162,15 @@ namespace gorc {
             virtual bool is_fatal_error() const override;
 
             cog_token_type get_type() const;
-            void set_string_fragment_state();
+            void set_symbol_field_state();
             void return_newlines(bool state);
-            void set_raise_fatal_errors(bool state);
         };
 
         class cog_tokenizer : public tokenizer<cog_tokenizer_state_machine> {
         public:
             cog_tokenizer(input_stream &);
-            void extract_string_fragment();
+            void set_symbol_field_state();
             void return_newlines(bool state);
-            void set_raise_fatal_errors(bool state);
         };
 
     }

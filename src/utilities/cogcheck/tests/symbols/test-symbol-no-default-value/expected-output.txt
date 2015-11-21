@@ -1,2 +1,2 @@
-[ERROR] input.cog:12:12-12:15: symbol does not accept a default value
+[ERROR] input.cog:12:16-12:19: symbol does not accept a default value
 [ERROR] input.cog: could not compile script

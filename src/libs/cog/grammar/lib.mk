@@ -1,7 +1,5 @@
 NAME:=grammar
 
-EXCLUDE_TEST_COVERAGE:=1
-
 DEPENDENCIES:= \
 	libs/log \
 	libs/cog/ast \

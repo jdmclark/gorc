@@ -88,24 +88,9 @@ namespace {
     // Symbols:
     ast::symbol_field* parse_symbol_field(ast::factory &ast, cog_tokenizer &tok)
     {
-        class scoped_set_raise_fatal_errors {
-        private:
-            cog_tokenizer &tok;
-        public:
-            scoped_set_raise_fatal_errors(cog_tokenizer &tok)
-                : tok(tok)
-            {
-                tok.set_raise_fatal_errors(false);
-            }
-
-            ~scoped_set_raise_fatal_errors()
-            {
-                tok.set_raise_fatal_errors(true);
-            }
-        };
-
-        scoped_set_raise_fatal_errors ssrfe(tok);
-
+        // Current token is the assignment operator
+        // Advance in symbol field mode
+        tok.set_symbol_field_state();
         tok.advance();
 
         if(tok.get_type() == cog_token_type::integer ||
@@ -124,7 +109,6 @@ namespace {
             return rv;
         }
         else {
-            tok.extract_string_fragment();
             ast::symbol_field *rv = ast.make_var<ast::symbol_field, ast::string_fragment_field>(
                     tok.get_location(),
                     tok.get_value());
