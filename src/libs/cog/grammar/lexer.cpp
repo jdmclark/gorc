@@ -8,7 +8,7 @@ using tok_result = gorc::tokenizer_state_machine_result;
 tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
 {
     if(current_char == '\0') {
-        return append_then_accept(current_char, cog_token_type::end_of_file);
+        return accept_immediately(cog_token_type::end_of_file);
     }
     else if(should_return_newlines && current_char == '\n') {
         return append_then_accept(current_char, cog_token_type::end_of_line);

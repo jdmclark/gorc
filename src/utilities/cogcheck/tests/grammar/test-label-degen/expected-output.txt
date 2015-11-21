@@ -1,2 +1,2 @@
-[ERROR] input.cog:5:1-5:3: syntax error, unexpected END
+[ERROR] input.cog:6:1-6:1: expected ';', found ''
 [ERROR] input.cog: could not compile script

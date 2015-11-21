@@ -35,8 +35,8 @@ void gorc::tokenizer_stream::advance_stream()
 void gorc::tokenizer_stream::start_new_token()
 {
     current_value.clear();
-    current_token_location.first_line = current_line;
-    current_token_location.first_col = current_col;
+    current_token_location.first_line = current_token_location.last_line = current_line;
+    current_token_location.first_col = current_token_location.last_col = current_col;
 }
 
 void gorc::tokenizer_stream::append(std::string const &str)
