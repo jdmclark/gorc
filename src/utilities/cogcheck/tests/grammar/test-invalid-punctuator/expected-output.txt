@@ -1,0 +1,2 @@
+[ERROR] input.cog:1:1-1:1: unrecognized punctuator '?'
+[ERROR] input.cog: could not compile script

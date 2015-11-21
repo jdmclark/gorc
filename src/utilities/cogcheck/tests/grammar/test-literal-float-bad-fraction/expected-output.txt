@@ -1,0 +1,2 @@
+[ERROR] input.cog:5:5-5:8: digit out of range
+[ERROR] input.cog: could not compile script

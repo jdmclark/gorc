@@ -1,0 +1,2 @@
+[ERROR] input.cog:6:7-6:32: unexpected eof in string literal escape sequence
+[ERROR] input.cog: could not compile script

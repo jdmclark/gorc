@@ -9,4 +9,7 @@ i = 0x1;
 i = 0x01;
 i = 0X9ABCDEF;
 
+i = +0x1;
+i = -0x1;
+
 end

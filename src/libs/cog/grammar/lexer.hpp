@@ -12,7 +12,6 @@ namespace gorc {
         private:
             enum class tokenizer_state {
                 accept,
-                reject,
                 initial,
                 skip_line_comment,
                 identifier,
@@ -46,6 +45,7 @@ namespace gorc {
                 sf_decimal_required_digit,
                 sf_decimal_digit_sequence,
                 sf_decimal_exponent_sign,
+                sf_decimal_exponent_required_digit,
                 sf_decimal_exponent_sequence,
                 sf_string_fragment
             };
@@ -100,13 +100,6 @@ namespace gorc {
                 return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
             }
 
-            inline tok_result append_then_reject(char ch,
-                                                 std::string const &reason_msg)
-            {
-                reason = reason_msg;
-                return append_directive(tokenizer_state::reject, ch);
-            }
-
             inline tok_result append_then_accept(char ch, cog_token_type type)
             {
                 current_type = type;
@@ -153,6 +146,7 @@ namespace gorc {
             tok_result handle_sf_decimal_required_digit_state(char ch);
             tok_result handle_sf_decimal_digit_sequence_state(char ch);
             tok_result handle_sf_decimal_exponent_sign_state(char ch);
+            tok_result handle_sf_decimal_exponent_required_digit_state(char ch);
             tok_result handle_sf_decimal_exponent_sequence_state(char ch);
             tok_result handle_sf_string_fragment_state(char ch);
 

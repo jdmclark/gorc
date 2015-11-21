@@ -1,0 +1,2 @@
+[ERROR] input.cog:2:9-2:9: unexpected end of file inside symbols section
+[ERROR] input.cog: could not compile script

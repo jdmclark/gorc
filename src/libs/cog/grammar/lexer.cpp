@@ -63,7 +63,8 @@ tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
     }
     else {
         // Current character is not a recognized, valid element.
-        return reject_immediately(str(format("unrecognized input '%c'") % current_char));
+        int chval = *reinterpret_cast<unsigned char*>(&current_char);
+        return reject_immediately(str(format("illegal character 0x%X") % chval));
     }
 }
 
@@ -253,9 +254,6 @@ tok_result cog_tokenizer_state_machine::handle_single_punctuator_state(char ch)
     case '*':
         return append_then_accept(ch, cog_token_type::punc_times);
 
-    case '/':
-        return append_then_accept(ch, cog_token_type::punc_div);
-
     case '%':
         return append_then_accept(ch, cog_token_type::punc_mod);
 
@@ -282,7 +280,7 @@ tok_result cog_tokenizer_state_machine::handle_single_punctuator_state(char ch)
 
     default:
         // Current character is not a recognized, valid element.
-        return reject_immediately(str(format("unrecognized input '\\%c'") % ch));
+        return reject_immediately(str(format("unrecognized punctuator '%c'") % ch));
     }
 }
 
@@ -296,6 +294,7 @@ tok_result cog_tokenizer_state_machine::handle_hex_prefix_state(char current_cha
         return append_directive(tokenizer_state::decimal_required_digit, current_char);
     }
     else if(std::isdigit(current_char)) {
+        // cog doesn't allow octal integers - treat this as any other
         return append_directive(tokenizer_state::digit_sequence, current_char);
     }
     else {
@@ -310,7 +309,7 @@ tok_result cog_tokenizer_state_machine::handle_hex_required_digit_state(char ch)
         return append_directive(tokenizer_state::hex_digit_sequence, ch);
     }
     else {
-        return reject_immediately("expected hex integer");
+        return reject_immediately("expected hex digit");
     }
 }
 
@@ -377,8 +376,11 @@ tok_result cog_tokenizer_state_machine::handle_decimal_exponent_sign_state(char 
     if(ch == '+' || ch == '-') {
         return append_directive(tokenizer_state::decimal_exponent_required_digit, ch);
     }
+    else if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_exponent_sequence, ch);
+    }
     else {
-        return handle_decimal_exponent_required_digit_state(ch);
+        return reject_immediately("expected exponent");
     }
 }
 
@@ -565,9 +567,27 @@ tok_result cog_tokenizer_state_machine::handle_sf_decimal_digit_sequence_state(c
 tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sign_state(char ch)
 {
     if(ch == '\0' || std::isspace(ch)) {
-        return accept_immediately(cog_token_type::real);
+        // Not a valid real
+        return accept_immediately(cog_token_type::string);
     }
-    else if(ch == '+' || ch == '-' || std::isdigit(ch)) {
+    else if(ch == '+' || ch == '-') {
+        return append_directive(tokenizer_state::sf_decimal_exponent_required_digit, ch);
+    }
+    else if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::sf_decimal_exponent_sequence, ch);
+    }
+    else {
+        return append_directive(tokenizer_state::sf_string_fragment, ch);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_required_digit_state(char ch)
+{
+    if(ch == '\0' || std::isspace(ch)) {
+        // Not a valid real
+        return accept_immediately(cog_token_type::string);
+    }
+    else if(std::isdigit(ch)) {
         return append_directive(tokenizer_state::sf_decimal_exponent_sequence, ch);
     }
     else {
@@ -603,13 +623,6 @@ tok_result cog_tokenizer_state_machine::handle(char ch)
     switch(current_state) {
     case tokenizer_state::accept:
         current_state = tokenizer_state::initial;
-        append_buffer.clear();
-        return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
-
-    default:
-    case tokenizer_state::reject:
-        current_state = tokenizer_state::initial;
-        current_type = cog_token_type::error;
         append_buffer.clear();
         return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
 
@@ -709,13 +722,21 @@ tok_result cog_tokenizer_state_machine::handle(char ch)
     case tokenizer_state::sf_decimal_exponent_sign:
         return handle_sf_decimal_exponent_sign_state(ch);
 
+    case tokenizer_state::sf_decimal_exponent_required_digit:
+        return handle_sf_decimal_exponent_required_digit_state(ch);
+
     case tokenizer_state::sf_decimal_exponent_sequence:
         return handle_sf_decimal_exponent_sequence_state(ch);
 
     case tokenizer_state::sf_string_fragment:
         return handle_sf_string_fragment_state(ch);
+
+    // LCOV_EXCL_START
     }
+
+    LOG_FATAL("unhandled cog tokenizer state");
 }
+// LCOV_EXCL_STOP
 
 cog_token_type cog_tokenizer_state_machine::get_type() const
 {

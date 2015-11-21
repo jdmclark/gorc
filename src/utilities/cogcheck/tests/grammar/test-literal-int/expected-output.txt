@@ -1,0 +1,10 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+
+CODE
+(i <- 16);
+(i <- -16);
+(i <- 0);
+(i <- 58);

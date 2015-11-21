@@ -1,0 +1,2 @@
+[ERROR] input.cog:1:1-1:1: illegal character 0xC3
+[ERROR] input.cog: could not compile script

@@ -1,3 +1,3 @@
 include ../../test.mk
 
-COGCHECK_OPTS:=--parse-only
+COGCHECK_OPTS:=--parse-only --dump-ast

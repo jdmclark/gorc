@@ -142,12 +142,12 @@ void print_ast_visitor::visit(ast::string_literal_expression &s)
 
 void print_ast_visitor::visit(ast::integer_literal_expression &s)
 {
-    std::cout << s.value;
+    std::cout << std::dec << s.value;
 }
 
 void print_ast_visitor::visit(ast::float_literal_expression &s)
 {
-    std::cout << s.value;
+    std::cout << std::dec << s.value;
 }
 
 void print_ast_visitor::visit(ast::vector_literal_expression &s)

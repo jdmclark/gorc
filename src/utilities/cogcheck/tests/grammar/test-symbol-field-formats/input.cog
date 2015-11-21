@@ -1,0 +1,42 @@
+symbols
+
+template bareplus= +
+template bareminus = -
+template baredot= .
+template bareword=foo
+int barezero = 0
+
+template plusword= +foo
+template minusword= -foo
+template dotword = .foo
+template zeroword = 0foo
+int pluszero = +0
+int minuszero = -0
+float dotzero = .0
+
+int notoctal = 00023
+
+template plusdot= +.
+template minusdot= -.
+
+float zerodot = 0.
+template zeroe = 0e
+template zerocape = 0E
+float zeroezero = 0e0
+template zeroesign = 0e+
+float zeroesignzero = 0e+0
+
+template zerox = 0x
+template zeroxword = 0xzap
+template hexword = 0xabcdefg
+
+template floatword = 16.0foo
+template floateword = 16.0efoo
+template floatesword = 16.0e-foo
+template floatexpword = 16.0e+2foo
+
+float floatexpfull = 16.0e-10
+
+end
+code
+end

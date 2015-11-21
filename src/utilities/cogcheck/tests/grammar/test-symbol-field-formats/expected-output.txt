@@ -1,0 +1,238 @@
+
+ABSTRACT SYNTAX TREE
+FLAGS = 0
+SYMBOLS
+template bareplus
+    index: 0
+    default value: string(+)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template bareminus
+    index: 1
+    default value: string(-)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template baredot
+    index: 2
+    default value: string(.)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template bareword
+    index: 3
+    default value: string(foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+int barezero
+    index: 4
+    default value: int(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template plusword
+    index: 5
+    default value: string(+foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template minusword
+    index: 6
+    default value: string(-foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template dotword
+    index: 7
+    default value: string(.foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template zeroword
+    index: 8
+    default value: string(0foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+int pluszero
+    index: 9
+    default value: int(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+int minuszero
+    index: 10
+    default value: int(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float dotzero
+    index: 11
+    default value: float(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+int notoctal
+    index: 12
+    default value: int(23)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template plusdot
+    index: 13
+    default value: string(+.)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template minusdot
+    index: 14
+    default value: string(-.)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float zerodot
+    index: 15
+    default value: float(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template zeroe
+    index: 16
+    default value: string(0e)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template zerocape
+    index: 17
+    default value: string(0E)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float zeroezero
+    index: 18
+    default value: float(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template zeroesign
+    index: 19
+    default value: string(0e+)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float zeroesignzero
+    index: 20
+    default value: float(0)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template zerox
+    index: 21
+    default value: string(0x)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template zeroxword
+    index: 22
+    default value: string(0xzap)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template hexword
+    index: 23
+    default value: string(0xabcdefg)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template floatword
+    index: 24
+    default value: string(16.0foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template floateword
+    index: 25
+    default value: string(16.0efoo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template floatesword
+    index: 26
+    default value: string(16.0e-foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+template floatexpword
+    index: 27
+    default value: string(16.0e+2foo)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+float floatexpfull
+    index: 28
+    default value: float(1.6e-09)
+    local: false
+    desc: 
+    mask: ffffffff
+    linkid: 0
+    nolink: false
+
+CODE

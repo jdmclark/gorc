@@ -1,0 +1,2 @@
+[ERROR] input.cog:5:5-5:6: expected hex digit
+[ERROR] input.cog: could not compile script
