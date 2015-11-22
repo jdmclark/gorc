@@ -11,7 +11,6 @@ SOURCES:= \
 	abs_test.cpp \
 	apply_test.cpp \
 	contains_type_test.cpp \
-	env_test.cpp \
 	flag_set_test.cpp \
 	foreach_test.cpp \
 	gcd_test.cpp \

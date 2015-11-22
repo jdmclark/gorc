@@ -1,5 +1,8 @@
 NAME:=io
 
+DEPENDENCIES:= \
+	libs/utility \
+
 SOURCES:= \
 	file.cpp \
 	input_stream.cpp \

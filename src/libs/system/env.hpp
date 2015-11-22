@@ -1,6 +1,6 @@
 #pragma once
 
-#include "maybe.hpp"
+#include "utility/maybe.hpp"
 #include <string>
 
 namespace gorc {

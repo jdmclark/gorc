@@ -1,7 +1,6 @@
 NAME:=utility
 
 SOURCES:= \
-	env.cpp \
 	global.cpp \
 	local.cpp \
 	uncopyable.cpp \

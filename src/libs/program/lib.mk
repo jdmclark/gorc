@@ -2,6 +2,7 @@ NAME:=program
 
 DEPENDENCIES:= \
 	libs/utility \
+	libs/system \
 	libs/log \
 
 SOURCES:= \
