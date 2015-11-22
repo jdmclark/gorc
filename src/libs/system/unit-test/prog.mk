@@ -9,3 +9,4 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	env_test.cpp \
+	pipe_test.cpp \
