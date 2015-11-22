@@ -2,6 +2,7 @@
 #include "system/pipe.hpp"
 #include <pthread.h>
 #include <signal.h>
+#include <system_error>
 
 using namespace gorc;
 

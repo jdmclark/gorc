@@ -23,11 +23,15 @@ gorc::pipe_input_stream::~pipe_input_stream()
 
 size_t gorc::pipe_input_stream::read_some(void *dest, size_t size)
 {
+    // LCOV_EXCL_START
     ssize_t rv = 0;
-    do { // LCOV_EXCL_LINE
+    do {
+    // LCOV_EXCL_STOP
         rv = ::read(fd, dest, size);
+    // LCOV_EXCL_START
     }
     while(rv < 0 && errno == EINTR);
+    // LCOV_EXCL_STOP
 
     if(rv == 0) {
         is_at_end = true;
