@@ -1,0 +1,5 @@
+symbols
+end
+code
+while(1) { break 2; }
+end

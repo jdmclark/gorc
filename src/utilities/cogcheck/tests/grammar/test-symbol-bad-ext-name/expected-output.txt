@@ -1,0 +1,2 @@
+[ERROR] input.cog:2:11-2:13: expected extension name, found '958'
+[ERROR] input.cog: could not compile script

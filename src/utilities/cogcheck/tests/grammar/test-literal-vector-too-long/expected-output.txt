@@ -1,0 +1,2 @@
+[ERROR] input.cog:5:12-5:12: expected end of vector literal, found '4'
+[ERROR] input.cog: could not compile script

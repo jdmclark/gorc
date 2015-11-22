@@ -1,0 +1,2 @@
+[ERROR] input.cog:4:10-4:12: expected ';', found 'bar'
+[ERROR] input.cog: could not compile script

@@ -1,0 +1,2 @@
+[ERROR] input.cog: expected '=', found '>'
+[ERROR] input.cog: could not compile script

@@ -1,0 +1,5 @@
+symbols
+end
+code
+call 2;
+end

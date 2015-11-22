@@ -1,0 +1,2 @@
+[ERROR] input.cog:4:1-4:1: unexpected end of file in code section
+[ERROR] input.cog: could not compile script

@@ -1,0 +1,5 @@
+symbols
+end
+code
+return 2;
+end

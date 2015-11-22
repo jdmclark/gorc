@@ -1,0 +1,2 @@
+[ERROR] input.cog:5:1-5:1: unexpected end of file in compound statement
+[ERROR] input.cog: could not compile script

@@ -1,0 +1,2 @@
+[ERROR] input.cog:2:5-2:6: expected symbol name, found '59'
+[ERROR] input.cog: could not compile script

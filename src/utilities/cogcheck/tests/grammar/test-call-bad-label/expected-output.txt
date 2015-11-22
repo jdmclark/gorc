@@ -1,0 +1,2 @@
+[ERROR] input.cog:4:6-4:6: expected destination label, found '2'
+[ERROR] input.cog: could not compile script

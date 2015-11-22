@@ -1,0 +1,2 @@
+[ERROR] input.cog:1:9-1:11: expected a numeric value, found 'foo'
+[ERROR] input.cog: could not compile script

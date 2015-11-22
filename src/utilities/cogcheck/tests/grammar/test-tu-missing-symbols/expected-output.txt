@@ -1,0 +1,2 @@
+[ERROR] input.cog:2:1-2:4: expected 'symbols', found 'code'
+[ERROR] input.cog: could not compile script

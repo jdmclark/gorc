@@ -1,0 +1,2 @@
+[ERROR] input.cog:4:10-4:10: expected ')', found '4'
+[ERROR] input.cog: could not compile script

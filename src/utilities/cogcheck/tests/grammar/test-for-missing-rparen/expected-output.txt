@@ -1,0 +1,2 @@
+[ERROR] input.cog:4:14-4:14: expected ')', found '{'
+[ERROR] input.cog: could not compile script

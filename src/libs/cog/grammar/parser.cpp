@@ -15,16 +15,6 @@ namespace {
     using cog_la_tokenizer = token_lookahead<cog_tokenizer>;
 
     template <typename TokenizerT>
-    void assert_identifier(TokenizerT &tok, std::string const &expected)
-    {
-        if(tok.get_type() != cog_token_type::identifier ||
-           tok.get_value() != expected) {
-            diagnostic_context dc(tok.get_location());
-            LOG_FATAL(format("expected '%s', found '%s'") % expected % tok.get_value());
-        }
-    }
-
-    template <typename TokenizerT>
     void assert_punctuator(TokenizerT &tok, cog_token_type type)
     {
         if(tok.get_type() != type) {
@@ -214,7 +204,11 @@ namespace {
             }
         };
 
-        assert_identifier(tok, "symbols");
+        if(!iequal(tok.get_value(), "symbols"_sv)) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected 'symbols', found '%s'") % tok.get_value());
+        }
+
         auto start_loc = tok.get_location();
 
         // Parse symbol seq
@@ -249,8 +243,6 @@ namespace {
                     LOG_FATAL(format("expected symbol type, found '%s'") % tok.get_value());
                 }
             }
-
-            assert_identifier(tok, "end");
         }
 
         auto end_loc = tok.get_location();
@@ -299,11 +291,11 @@ namespace {
         case cog_token_type::punc_minus:
             return ast::unary_operator::minus;
 
+        // LCOV_EXCL_START
         default:
-            break;
+            LOG_FATAL("unimplemented unary operator");
         }
-
-        LOG_FATAL("unimplemented unary operator");
+        // LCOV_EXCL_STOP
     }
 
     ast::infix_operator infix_operator_map(cog_token_type t)
@@ -357,11 +349,11 @@ namespace {
         case cog_token_type::punc_logical_or:
             return ast::infix_operator::logical_or;
 
+        // LCOV_EXCL_START
         default:
-            break;
+            LOG_FATAL("unimplemented infix operator");
         }
-
-        LOG_FATAL("unimplemented infix operator");
+        // LCOV_EXCL_STOP
     }
 
     ast::expression* parse_expression(ast::factory &, cog_la_tokenizer &);
@@ -1012,7 +1004,10 @@ namespace {
 
     ast::code_section* parse_code_section(ast::factory &ast, cog_la_tokenizer &tok)
     {
-        assert_identifier(tok, "code");
+        if(!iequal(tok.get_value(), "code"_sv)) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected 'code', found '%s'") % tok.get_value());
+        }
 
         auto start_loc = tok.get_location();
         tok.advance();
@@ -1053,7 +1048,11 @@ namespace {
         auto start_loc = tok.get_location();
         tok.advance();
 
-        assert_punctuator(tok, cog_token_type::punc_assign);
+        if(tok.get_type() != cog_token_type::punc_assign) {
+            diagnostic_context_location dc(tok.get_location());
+            LOG_FATAL(format("expected '=', found '%s'") % tok.get_value());
+        }
+
         tok.advance();
 
         unsigned int flags = get_number<unsigned int>(tok);
