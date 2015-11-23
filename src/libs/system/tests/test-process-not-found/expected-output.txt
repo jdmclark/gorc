@@ -1,0 +1,7 @@
+= executing doesnotexist
+==== stdout ====
+
+==== stderr ====
+[ERROR] Cannot execute: No such file or directory
+
+= exit code 126

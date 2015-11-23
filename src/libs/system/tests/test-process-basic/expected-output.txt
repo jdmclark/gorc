@@ -1,0 +1,6 @@
+= executing true
+==== stdout ====
+
+==== stderr ====
+
+= exit code 0

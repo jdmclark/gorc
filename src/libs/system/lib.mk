@@ -7,3 +7,4 @@ DEPENDENCIES:= \
 SOURCES:= \
 	env.cpp \
 	pipe.cpp \
+	process.cpp \

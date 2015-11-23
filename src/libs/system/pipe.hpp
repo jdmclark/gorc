@@ -12,7 +12,7 @@ namespace gorc {
         bool is_at_end = false;
 
     public:
-        const int fd;
+        int const fd;
 
         pipe_input_stream(int fd);
         ~pipe_input_stream();
@@ -22,10 +22,9 @@ namespace gorc {
     };
 
     class pipe_output_stream : public output_stream {
-    private:
-        int fd;
-
     public:
+        int const fd;
+
         pipe_output_stream(int fd);
         ~pipe_output_stream();
 
