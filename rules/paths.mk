@@ -15,6 +15,7 @@ OBJ:=$(PKG)/obj
 LIB:=$(PKG)/lib
 BIN:=$(PKG)/bin
 TEST_BIN:=$(PKG)/test-bin
+BUILD_BIN:=$(PKG)/build-bin
 
 FAILED_TEST_LOG:=$(PROJECT_ROOT)/test-log.txt
 
