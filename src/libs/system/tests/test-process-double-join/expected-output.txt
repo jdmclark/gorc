@@ -1,0 +1,11 @@
+= executing $ROOT$/pkg/test-bin/child-program
+==== stdout ====
+HELLO, WORLD!
+
+
+==== stderr ====
+READ 14 BYTES
+
+= exit code 0
+= joining again
+[ERROR] Exception thrown: no process

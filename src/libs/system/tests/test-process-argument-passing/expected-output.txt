@@ -1,0 +1,10 @@
+= executing $ROOT$/pkg/test-bin/child-program
+==== stdout ====
+HELLO, WORLD!
+
+
+==== stderr ====
+READ 14 BYTES
+SOME ERROR HAPPENED
+
+= exit code 1

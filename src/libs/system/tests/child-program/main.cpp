@@ -1,14 +1,17 @@
 #include <algorithm>
+#include <iostream>
 #include "program/program.hpp"
 #include "io/std_input_stream.hpp"
 
 class child_program : public gorc::program {
 public:
     bool fail = false;
+    bool failmsg = false;
 
     virtual void create_options(gorc::options &opts) override
     {
         opts.insert(gorc::make_switch_option("fail", fail));
+        opts.insert(gorc::make_switch_option("failmsg", failmsg));
     }
 
     virtual int main() override
@@ -30,7 +33,9 @@ public:
         std::cout << data << std::endl;
 
         if(fail) {
-            std::cerr << "SOME ERROR HAPPENED" << std::endl;
+            if(failmsg) {
+                std::cerr << "SOME ERROR HAPPENED" << std::endl;
+            }
             return EXIT_FAILURE;
         }
         else {

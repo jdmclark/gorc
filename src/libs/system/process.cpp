@@ -4,34 +4,25 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <system_error>
-
-gorc::process::process()
-{
-    return;
-}
+#include <iostream>
 
 gorc::process::~process()
 {
     if(pid.has_value()) {
-        join();
+        LOG_ERROR("zombie process not reaped");
+        try {
+            join();
+// LCOV_EXCL_START
+        }
+        catch(std::exception const &e) {
+            LOG_ERROR(format("error while reaping: %s") % e.what());
+        }
+// LCOV_EXCL_STOP
     }
 }
 
-void gorc::process::redirect_standard_input(std::unique_ptr<pipe_input_stream> &&pipe)
-{
-    std_input = std::forward<std::unique_ptr<pipe_input_stream>>(pipe);
-}
-
-void gorc::process::redirect_standard_output(std::unique_ptr<pipe_output_stream> &&pipe)
-{
-    std_output = std::forward<std::unique_ptr<pipe_output_stream>>(pipe);
-}
-
-void gorc::process::redirect_standard_error(std::unique_ptr<pipe_output_stream> &&pipe)
-{
-    std_error = std::forward<std::unique_ptr<pipe_output_stream>>(pipe);
-}
-
+// LCOV_EXCL_START
+// Inside child process between fork and exec
 namespace {
     void safe_dup2(int old_fd, int new_fd)
     {
@@ -47,74 +38,58 @@ namespace {
     }
 }
 
-void gorc::process::execute(path const &executable,
-                            std::vector<std::string> const &arguments)
+void gorc::process::internal_inside_child(path const &executable,
+                                          std::vector<char *> const &args)
 {
-    if(pid.has_value()) {
-        throw std::logic_error("process already exists");
+    // Inside child.
+    // Close parent ends of pipes.
+    // Redirect and close original pipes.
+
+    if(std_input.has_value()) {
+        safe_dup2(std_input.get_value()->input->fd, STDIN_FILENO);
+        std_input.get_value()->input.reset();
+        std_input.get_value()->output.reset();
     }
 
-    pid_t result = ::fork();
-    if(result < 0) {
-        throw std::system_error(errno, std::generic_category());
+    if(std_output.has_value()) {
+        safe_dup2(std_output.get_value()->output->fd, STDOUT_FILENO);
+        std_output.get_value()->input.reset();
+        std_output.get_value()->output.reset();
     }
 
-    if(result == 0) {
-        // Inside child
-        if(std_input.has_value()) {
-            safe_dup2(std_input.get_value()->fd, STDIN_FILENO);
-            std_input = nothing;
-        }
-
-        if(std_output.has_value()) {
-            safe_dup2(std_output.get_value()->fd, STDOUT_FILENO);
-            std_output = nothing;
-        }
-
-        if(std_error.has_value()) {
-            safe_dup2(std_error.get_value()->fd, STDERR_FILENO);
-            std_error = nothing;
-        }
-
-        std::string prog_name = executable.string();
-        std::string prog_finalname = executable.filename().string();
-
-        std::vector<char *> finalargs;
-        finalargs.reserve(arguments.size() + 2);
-
-        finalargs.push_back(&prog_finalname[0]);
-        for(std::string const &arg : arguments) {
-            finalargs.push_back(::strdup(arg.c_str()));
-        }
-
-        finalargs.push_back(nullptr);
-
-        ::execvp(prog_name.c_str(), finalargs.data());
-
-        // Still here? Must be an error.
-        LOG_ERROR(format("Cannot execute: %s") % std::generic_category().message(errno));
-
-        // Exit 126 - cannot execute
-        exit(126);
+    if(std_error.has_value()) {
+        safe_dup2(std_error.get_value()->output->fd, STDERR_FILENO);
+        std_error.get_value()->input.reset();
+        std_error.get_value()->output.reset();
     }
-    else {
-        // Inside parent
-        pid = result;
 
-        if(std_input.has_value()) {
-            std::cerr << "input closed" << std::endl;
-            std_input.get_value().reset();
-        }
+    std::string prog_name = executable.string();
 
-        if(std_output.has_value()) {
-            std::cerr << "output closed" << std::endl;
-            std_output.get_value().reset();
-        }
+    ::execvp(prog_name.c_str(), args.data());
 
-        if(std_error.has_value()) {
-            std::cerr << "error closed" << std::endl;
-            std_error.get_value().reset();
-        }
+    // Still here? Must be an error.
+    std::cerr << "[ERROR] Cannot execute: "
+              << std::generic_category().message(errno)
+              << std::endl;
+    exit(126);
+}
+// LCOV_EXCL_STOP
+
+void gorc::process::internal_inside_parent(::pid_t child_pid)
+{
+    pid = child_pid;
+
+    // Close child ends of pipe
+    if(std_input.has_value()) {
+        std_input.get_value()->input.reset();
+    }
+
+    if(std_output.has_value()) {
+        std_output.get_value()->output.reset();
+    }
+
+    if(std_error.has_value()) {
+        std_error.get_value()->output.reset();
     }
 }
 
@@ -124,13 +99,16 @@ int gorc::process::join()
         int status = 0;
         pid_t result = -1;
 
+        // LCOV_EXCL_START
         do {
             result = ::waitpid(pid.get_value(), &status, 0);
         } while(result < 0 && errno == EINTR);
 
         if(result < 0) {
+            // Essentially uncoverable - system would need to be in a bad state
             throw std::system_error(errno, std::generic_category());
         }
+        // LCOV_EXCL_STOP
 
         pid = nothing;
 
@@ -138,6 +116,7 @@ int gorc::process::join()
             return WEXITSTATUS(status);
         }
         else {
+            LOG_ERROR("process terminated abnormally");
             return 1;
         }
     }
