@@ -1,2 +1,0 @@
-= executing $ROOT$/pkg/test-bin/child-program
-==== stdout ====

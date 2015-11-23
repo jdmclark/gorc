@@ -11,14 +11,12 @@ public:
     std::vector<std::string> extra_args;
     bool no_join = false;
     bool double_join = false;
-    bool kill_child = false;
 
     virtual void create_options(gorc::options &opts) override
     {
         opts.insert(gorc::make_value_option("run", prog_to_run));
         opts.insert(gorc::make_switch_option("no-join", no_join));
         opts.insert(gorc::make_switch_option("double-join", double_join));
-        opts.insert(gorc::make_switch_option("kill-child", kill_child));
         opts.insert(gorc::make_multi_value_option("extra", std::back_inserter(extra_args)));
         opts.emplace_constraint<gorc::required_option>("run");
     }
@@ -33,10 +31,6 @@ public:
         gorc::pipe std_input;
         gorc::pipe std_output;
         gorc::pipe std_error;
-
-        if(kill_child) {
-            std_output.input.reset();
-        }
 
         gorc::process child(prog_to_run,
                             extra_args,

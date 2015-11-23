@@ -115,10 +115,12 @@ int gorc::process::join()
         if(WIFEXITED(status)) {
             return WEXITSTATUS(status);
         }
+        // LCOV_EXCL_START
         else {
             LOG_ERROR("process terminated abnormally");
             return 1;
         }
+        // LCOV_EXCL_STOP
     }
     else {
         throw std::logic_error("no process");
