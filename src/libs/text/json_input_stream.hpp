@@ -10,7 +10,7 @@
 #include "io/output_stream.hpp"
 #include "io/file.hpp"
 #include "log/log.hpp"
-#include "generic_tokenizer.hpp"
+#include "json_tokenizer.hpp"
 
 namespace gorc {
 
@@ -35,7 +35,7 @@ namespace gorc {
             json_deserialize(json_input_stream &f);
 
     private:
-        generic_tokenizer tok;
+        json_tokenizer tok;
 
         void advance_token();
         void assert_token(std::string const &);

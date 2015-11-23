@@ -11,3 +11,4 @@ SOURCES:= \
 	tokenizer_stream.cpp \
 	json_input_stream.cpp \
 	json_output_stream.cpp \
+	json_tokenizer.cpp \

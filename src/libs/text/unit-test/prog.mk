@@ -12,3 +12,4 @@ SOURCES:= \
 	token_helpers_test.cpp \
 	json_serialization_test.cpp \
 	json_specification_test.cpp \
+	json_tokenizer_test.cpp \

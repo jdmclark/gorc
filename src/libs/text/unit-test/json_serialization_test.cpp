@@ -398,7 +398,7 @@ test_case(invalid_number)
 {
     std::string doc =
             "[\n"
-            "  +.5eG\n"
+            "  +0.5eG\n"
             "]";
 
     memory_file f;
@@ -412,7 +412,7 @@ test_case(invalid_number)
 
     assert_throws_logged(json_deserialize_array<float>(jis, std::back_inserter(nums)));
 
-    assert_log_message(gorc::log_level::error, "<BUFFER>:2:4-2:6: expected exponent");
+    assert_log_message(gorc::log_level::error, "<BUFFER>:2:4-2:7: expected exponent");
     assert_log_empty();
 }
 
