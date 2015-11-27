@@ -15,6 +15,27 @@ namespace gorc {
              std::string const &value);
     };
 
+    /* Commands */
+
+    class subcommand : public visitable_ast_node<subcommand> {
+    public:
+        ast_list_node<word*> *arguments;
+
+        subcommand(diagnostic_context_location const &loc,
+                   ast_list_node<word*> *arguments);
+    };
+
+    class pipe_command;
+    using command = variant<pipe_command*>;
+
+    class pipe_command : public visitable_ast_node<pipe_command> {
+    public:
+        ast_list_node<subcommand*> *subcommands;
+
+        pipe_command(diagnostic_context_location const &loc,
+                     ast_list_node<subcommand*> *subcommands);
+    };
+
     /* Statements */
 
     class command_statement;
@@ -22,10 +43,10 @@ namespace gorc {
 
     class command_statement : public visitable_ast_node<command_statement> {
     public:
-        ast_list_node<word*> *arguments;
+        command *cmd;
 
         command_statement(diagnostic_context_location const &loc,
-                          ast_list_node<word*> *arguments);
+                          command *cmd);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

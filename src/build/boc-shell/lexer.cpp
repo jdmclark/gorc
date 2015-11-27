@@ -15,6 +15,9 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     else if(ch == '#') {
         return discard_directive(tokenizer_state::skip_line_comment);
     }
+    else if(ch == '|') {
+        return append_then_accept(ch, shell_token_type::punc_pipe);
+    }
     else if(ch == ';') {
         return append_then_accept(ch, shell_token_type::punc_end_command);
     }

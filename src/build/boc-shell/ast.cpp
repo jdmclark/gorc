@@ -8,10 +8,26 @@ gorc::word::word(diagnostic_context_location const &loc,
     return;
 }
 
-gorc::command_statement::command_statement(diagnostic_context_location const &loc,
-                                           ast_list_node<word*> *arguments)
+gorc::subcommand::subcommand(diagnostic_context_location const &loc,
+                             ast_list_node<word*> *arguments)
     : visitable_ast_node(loc)
     , arguments(arguments)
+{
+    return;
+}
+
+gorc::pipe_command::pipe_command(diagnostic_context_location const &loc,
+                                 ast_list_node<subcommand*> *subcommands)
+    : visitable_ast_node(loc)
+    , subcommands(subcommands)
+{
+    return;
+}
+
+gorc::command_statement::command_statement(diagnostic_context_location const &loc,
+                                           command *cmd)
+    : visitable_ast_node(loc)
+    , cmd(cmd)
 {
     return;
 }

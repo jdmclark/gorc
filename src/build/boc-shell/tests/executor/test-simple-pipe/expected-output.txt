@@ -1,0 +1,10 @@
+bar
+bar
+baz
+baz
+fnord
+fnord
+foo
+foo
+foo
+foo

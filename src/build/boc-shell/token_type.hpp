@@ -7,6 +7,7 @@ namespace gorc {
         end_of_file,
         word,
 
+        punc_pipe,
         punc_end_command
     };
 

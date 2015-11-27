@@ -23,17 +23,46 @@ namespace {
                                            last.last_col);
     }
 
+    /* Statements */
+
     statement* parse_statement(ast_factory &, shell_la_tokenizer &tok);
 
     statement* parse_command_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         auto start_loc = tok.get_location();
 
+        ast_list_node<subcommand*> *subcommands =
+            ast.make<ast_list_node<subcommand*>>(start_loc);
+
         ast_list_node<word*> *arguments =
             ast.make<ast_list_node<word*>>(start_loc);
 
         while(true) {
-            if(tok.get_type() == shell_token_type::punc_end_command) {
+            if(tok.get_type() == shell_token_type::punc_pipe) {
+                // Finish current subcommand, start new one
+                if(arguments->elements.empty()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL(format("expected command word, found '%s'") % tok.get_value());
+                }
+
+                subcommands->elements.push_back(
+                        ast.make<subcommand>(arguments->location, arguments));
+                subcommands->location = location_union(subcommands->location,
+                                                       tok.get_location());
+                arguments = ast.make<ast_list_node<word*>>(start_loc);
+                tok.advance();
+            }
+            else if(tok.get_type() == shell_token_type::punc_end_command) {
+                // Finish current subcommand and return
+                if(arguments->elements.empty()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL(format("expected command word, found '%s'") % tok.get_value());
+                }
+
+                subcommands->elements.push_back(
+                        ast.make<subcommand>(arguments->location, arguments));
+                subcommands->location = location_union(subcommands->location,
+                                                       tok.get_location());
                 break;
             }
             else if(tok.get_type() == shell_token_type::word) {
@@ -52,8 +81,10 @@ namespace {
         auto end_loc = tok.get_location();
         tok.advance();
 
-        return ast.make_var<statement, command_statement>(location_union(start_loc, end_loc),
-                                                          arguments);
+        command *cmd = ast.make_var<command, pipe_command>(location_union(start_loc, end_loc),
+                                                           subcommands);
+
+        return ast.make_var<statement, command_statement>(location_union(start_loc, end_loc), cmd);
     }
 
     statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok)
