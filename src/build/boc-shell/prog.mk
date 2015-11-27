@@ -6,6 +6,7 @@ DEPENDENCIES:= \
 	libs/program \
 	libs/text \
 	libs/ast \
+	libs/system \
 
 SOURCES:= \
 	ast.cpp \

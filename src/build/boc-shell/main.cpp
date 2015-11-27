@@ -3,14 +3,54 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "io/native_file.hpp"
+#include "system/process.hpp"
+#include <algorithm>
 
 namespace gorc {
 
     class boc_shell_program_visitor {
     public:
-        int visit(translation_unit &)
+        int visit(command_statement &cmd)
         {
-            return EXIT_FAILURE;
+            if(cmd.arguments->elements.empty()) {
+                return EXIT_SUCCESS;
+            }
+
+            // First token is the program to execute
+            std::string prog = cmd.arguments->elements.front()->value;
+            std::vector<std::string> args;
+            for(auto it = cmd.arguments->elements.begin() + 1;
+                it != cmd.arguments->elements.end();
+                ++it) {
+                args.push_back((*it)->value);
+            }
+
+            process subprocess(prog,
+                               args,
+                               /* cin */ nothing,
+                               /* out */ nothing,
+                               /* err */ nothing);
+
+            return subprocess.join();
+        }
+
+        int visit(ast_list_node<statement*> &stmt_seq)
+        {
+            for(auto &stmt : stmt_seq.elements) {
+                int result = ast_visit(*this, *stmt);
+                if(result != 0) {
+                    // Abort executing a statement sequence after the first error
+                    LOG_ERROR(format("command failed with code %d") % result);
+                    return EXIT_FAILURE;
+                }
+            }
+
+            return EXIT_SUCCESS;
+        }
+
+        int visit(translation_unit &tu)
+        {
+            return ast_visit(*this, tu.code);
         }
     };
 
