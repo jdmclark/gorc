@@ -1,5 +1,5 @@
 #include "test/test.hpp"
-#include "cog/ast/factory.hpp"
+#include "ast/factory.hpp"
 #include "log/log.hpp"
 
 class mock_node {
@@ -22,7 +22,7 @@ begin_suite(ast_factory_test);
 
 test_case(destructors_called)
 {
-    auto fac = gorc::make_unique<gorc::cog::ast::factory>();
+    auto fac = gorc::make_unique<gorc::ast_factory>();
 
     assert_log_empty();
 

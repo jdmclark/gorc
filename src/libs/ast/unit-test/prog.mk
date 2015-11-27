@@ -5,7 +5,7 @@ EXCLUDE_TEST_COVERAGE:=1
 
 DEPENDENCIES:= \
 	libs/test \
-	libs/cog/ast \
+	libs/ast \
 
 SOURCES:= \
 	factory_test.cpp \

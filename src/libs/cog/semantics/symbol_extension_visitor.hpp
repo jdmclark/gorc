@@ -17,7 +17,7 @@ namespace gorc {
 
             symbol_extension_visitor(value_type type);
 
-            void visit(ast::list_node<ast::symbol_extension*> &);
+            void visit(ast_list_node<ast::symbol_extension*> &);
             void visit(ast::bare_extension &);
             void visit(ast::valued_extension &);
         };

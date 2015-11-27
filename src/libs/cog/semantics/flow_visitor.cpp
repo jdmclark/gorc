@@ -64,7 +64,7 @@ void flow_visitor::check_flow_out(std::string const &out_label)
 
 void flow_visitor::visit(ast::compound_statement &s)
 {
-    ast::visit(*this, s.code);
+    ast_visit(*this, s.code);
 }
 
 void flow_visitor::visit(ast::empty_statement &s)
@@ -113,7 +113,7 @@ void flow_visitor::visit(ast::if_statement &s)
                          /* inside dead code */ false,
                          /* inside loop */ false,
                          inside_label);
-        ast::visit(dcv, *s.code);
+        ast_visit(dcv, *s.code);
 
         check_flow_out(dcv.inside_label);
     }
@@ -129,14 +129,14 @@ void flow_visitor::visit(ast::if_else_statement &s)
                            /* inside dead code */ false,
                            /* inside loop */ false,
                            inside_label);
-        ast::visit(dcv_o, *s.else_code);
+        ast_visit(dcv_o, *s.else_code);
 
         flow_visitor dcv(out_script,
                          called_labels,
                          /* inside dead code */ false,
                          /* inside loop */ false,
                          inside_label);
-        ast::visit(dcv, *s.code);
+        ast_visit(dcv, *s.code);
 
         check_flow_out(dcv.inside_label);
         check_flow_out(dcv_o.inside_label);
@@ -160,7 +160,7 @@ void flow_visitor::visit(ast::while_statement &s)
                          /* inside dead code */ false,
                          /* inside loop */ true,
                          inside_label);
-        ast::visit(dcv, *s.code);
+        ast_visit(dcv, *s.code);
 
         check_flow_out(dcv.inside_label);
     }
@@ -176,7 +176,7 @@ void flow_visitor::visit(ast::do_statement &s)
                          /* inside dead code */ false,
                          /* inside loop */ true,
                          inside_label);
-        ast::visit(dcv, *s.code);
+        ast_visit(dcv, *s.code);
 
         check_flow_out(dcv.inside_label);
     }
@@ -192,7 +192,7 @@ void flow_visitor::visit(ast::for_statement &s)
                          /* inside dead code */ false,
                          /* inside loop */ true,
                          inside_label);
-        ast::visit(dcv, *s.code);
+        ast_visit(dcv, *s.code);
 
         check_flow_out(dcv.inside_label);
     }
@@ -211,12 +211,12 @@ void flow_visitor::visit(ast::labeled_statement &s)
     }
 
     inside_label = s.label->value;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
-void flow_visitor::visit(ast::list_node<ast::statement*> &s)
+void flow_visitor::visit(ast_list_node<ast::statement*> &s)
 {
     for(auto &stmt : s.elements) {
-        ast::visit(*this, *stmt);
+        ast_visit(*this, *stmt);
     }
 }

@@ -5,7 +5,7 @@ using namespace gorc;
 using namespace gorc::cog;
 
 for_expression_visitor::for_expression_visitor(script &out_script,
-                                               ast::factory &factory,
+                                               ast_factory &factory,
                                                constant_table const &constants,
                                                verb_table const &verbs,
                                                bool result_is_used)

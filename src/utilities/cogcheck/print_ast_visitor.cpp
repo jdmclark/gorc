@@ -11,10 +11,10 @@ void print_ast_visitor::print_tabs()
     }
 }
 
-void print_ast_visitor::visit(ast::list_node<ast::statement*> &s)
+void print_ast_visitor::visit(ast_list_node<ast::statement*> &s)
 {
     for(auto const &stmt : s.elements) {
-        ast::visit(*this, *stmt);
+        ast_visit(*this, *stmt);
     }
 }
 
@@ -23,7 +23,7 @@ void print_ast_visitor::visit(ast::compound_statement &s)
     print_tabs();
     std::cout << "block:" << std::endl;
     ++indentation;
-    ast::visit(*this, s.code);
+    ast_visit(*this, s.code);
     --indentation;
 }
 
@@ -36,7 +36,7 @@ void print_ast_visitor::visit(ast::empty_statement &)
 void print_ast_visitor::visit(ast::expression_statement &s)
 {
     print_tabs();
-    ast::visit(*this, *s.value);
+    ast_visit(*this, *s.value);
     std::cout << ";" << std::endl;
 }
 
@@ -62,10 +62,10 @@ void print_ast_visitor::visit(ast::if_statement &s)
 {
     print_tabs();
     std::cout << "if ";
-    ast::visit(*this, *s.condition);
+    ast_visit(*this, *s.condition);
     std::cout << ":" << std::endl;
     ++indentation;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
     --indentation;
 }
 
@@ -73,15 +73,15 @@ void print_ast_visitor::visit(ast::if_else_statement &s)
 {
     print_tabs();
     std::cout << "if ";
-    ast::visit(*this, *s.condition);
+    ast_visit(*this, *s.condition);
     std::cout << ":" << std::endl;
     ++indentation;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
     --indentation;
     print_tabs();
     std::cout << "else:" << std::endl;
     ++indentation;
-    ast::visit(*this, *s.else_code);
+    ast_visit(*this, *s.else_code);
     --indentation;
 }
 
@@ -89,10 +89,10 @@ void print_ast_visitor::visit(ast::while_statement &s)
 {
     print_tabs();
     std::cout << "while ";
-    ast::visit(*this, *s.condition);
+    ast_visit(*this, *s.condition);
     std::cout << ":" << std::endl;
     ++indentation;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
     --indentation;
 }
 
@@ -100,10 +100,10 @@ void print_ast_visitor::visit(ast::do_statement &s)
 {
     print_tabs();
     std::cout << "dowhile ";
-    ast::visit(*this, *s.condition);
+    ast_visit(*this, *s.condition);
     std::cout << ":" << std::endl;
     ++indentation;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
     --indentation;
 }
 
@@ -111,14 +111,14 @@ void print_ast_visitor::visit(ast::for_statement &s)
 {
     print_tabs();
     std::cout << "for ";
-    ast::visit(*this, *s.initializer);
+    ast_visit(*this, *s.initializer);
     std::cout << "; ";
-    ast::visit(*this, *s.condition);
+    ast_visit(*this, *s.condition);
     std::cout << "; ";
-    ast::visit(*this, *s.incrementer);
+    ast_visit(*this, *s.incrementer);
     std::cout << ":" << std::endl;
     ++indentation;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
     --indentation;
 }
 
@@ -126,7 +126,7 @@ void print_ast_visitor::visit(ast::labeled_statement &s)
 {
     print_tabs();
     std::cout << s.label->value << ":" << std::endl;
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
 
@@ -163,7 +163,7 @@ void print_ast_visitor::visit(ast::identifier_expression &s)
 void print_ast_visitor::visit(ast::subscript_expression &s)
 {
     std::cout << s.base->value << "[";
-    ast::visit(*this, *s.index);
+    ast_visit(*this, *s.index);
     std::cout << "]";
 }
 
@@ -172,7 +172,7 @@ void print_ast_visitor::visit(ast::method_call_expression &s)
     std::cout << "(call " << s.base->value;
     for(auto const &arg : s.arguments->elements) {
         std::cout << " ";
-        ast::visit(*this, *arg);
+        ast_visit(*this, *arg);
     }
     std::cout << ")";
 }
@@ -193,7 +193,7 @@ void print_ast_visitor::visit(ast::unary_expression &s)
         break;
     }
 
-    ast::visit(*this, *s.base);
+    ast_visit(*this, *s.base);
     std::cout << ")";
 }
 
@@ -265,27 +265,27 @@ void print_ast_visitor::visit(ast::infix_expression &s)
         break;
     }
 
-    ast::visit(*this, *s.left);
+    ast_visit(*this, *s.left);
     std::cout << " ";
-    ast::visit(*this, *s.right);
+    ast_visit(*this, *s.right);
     std::cout << ")";
 }
 
 void print_ast_visitor::visit(ast::assignment_expression &s)
 {
     std::cout << "(";
-    ast::visit(*this, *s.target);
+    ast_visit(*this, *s.target);
     std::cout << " <- ";
-    ast::visit(*this, *s.value);
+    ast_visit(*this, *s.value);
     std::cout << ")";
 }
 
 void print_ast_visitor::visit(ast::comma_expression &s)
 {
     std::cout << "(";
-    ast::visit(*this, *s.left);
+    ast_visit(*this, *s.left);
     std::cout << " ";
-    ast::visit(*this, *s.right);
+    ast_visit(*this, *s.right);
     std::cout << ")";
 }
 
@@ -297,6 +297,6 @@ void print_ast_visitor::visit(ast::for_empty_expression &)
 
 void print_ast_visitor::visit(ast::for_expression &s)
 {
-    ast::visit(*this, *s.condition);
+    ast_visit(*this, *s.condition);
 }
 

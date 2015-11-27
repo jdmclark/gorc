@@ -38,7 +38,7 @@ namespace gorc {
             void visit(ast::for_statement &);
             void visit(ast::labeled_statement &);
 
-            void visit(ast::list_node<ast::statement*> &);
+            void visit(ast_list_node<ast::statement*> &);
         };
 
     }

@@ -5,7 +5,7 @@ using namespace gorc::cog::ast;
 
 identifier::identifier(diagnostic_context_location const &loc,
                        std::string const &v)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(v)
 {
     // COG identifiers are case-insensitive.
@@ -16,7 +16,7 @@ identifier::identifier(diagnostic_context_location const &loc,
 
 string_fragment_field::string_fragment_field(diagnostic_context_location const &loc,
                                              std::string const &value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -24,7 +24,7 @@ string_fragment_field::string_fragment_field(diagnostic_context_location const &
 
 integer_field::integer_field(diagnostic_context_location const &loc,
                              int value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -32,7 +32,7 @@ integer_field::integer_field(diagnostic_context_location const &loc,
 
 float_field::float_field(diagnostic_context_location const &loc,
                          float value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -40,7 +40,7 @@ float_field::float_field(diagnostic_context_location const &loc,
 
 bare_extension::bare_extension(diagnostic_context_location const &loc,
                                identifier *name)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , name(name)
 {
     return;
@@ -49,7 +49,7 @@ bare_extension::bare_extension(diagnostic_context_location const &loc,
 valued_extension::valued_extension(diagnostic_context_location const &loc,
                                    identifier *name,
                                    symbol_field *value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , name(name)
     , value(value)
 {
@@ -59,9 +59,9 @@ valued_extension::valued_extension(diagnostic_context_location const &loc,
 symbol::symbol(diagnostic_context_location const &loc,
                identifier *type,
                identifier *name,
-               list_node<symbol_extension*> *extensions,
+               ast_list_node<symbol_extension*> *extensions,
                maybe<symbol_field*> value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , type(type)
     , name(name)
     , extensions(extensions)
@@ -72,7 +72,7 @@ symbol::symbol(diagnostic_context_location const &loc,
 
 immediate_expression::immediate_expression(diagnostic_context_location const &loc,
                                            cog::value value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -80,7 +80,7 @@ immediate_expression::immediate_expression(diagnostic_context_location const &lo
 
 string_literal_expression::string_literal_expression(diagnostic_context_location const &loc,
                                                      std::string const &value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -88,7 +88,7 @@ string_literal_expression::string_literal_expression(diagnostic_context_location
 
 integer_literal_expression::integer_literal_expression(diagnostic_context_location const &loc,
                                                        int value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -96,7 +96,7 @@ integer_literal_expression::integer_literal_expression(diagnostic_context_locati
 
 float_literal_expression::float_literal_expression(diagnostic_context_location const &loc,
                                                    float value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -106,7 +106,7 @@ vector_literal_expression::vector_literal_expression(diagnostic_context_location
                                                      float x,
                                                      float y,
                                                      float z)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , x(x)
     , y(y)
     , z(z)
@@ -116,7 +116,7 @@ vector_literal_expression::vector_literal_expression(diagnostic_context_location
 
 identifier_expression::identifier_expression(diagnostic_context_location const &loc,
                                              identifier *value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
@@ -125,7 +125,7 @@ identifier_expression::identifier_expression(diagnostic_context_location const &
 subscript_expression::subscript_expression(diagnostic_context_location const &loc,
                                            identifier *base,
                                            expression *index)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , base(base)
     , index(index)
 {
@@ -134,8 +134,8 @@ subscript_expression::subscript_expression(diagnostic_context_location const &lo
 
 method_call_expression::method_call_expression(diagnostic_context_location const &loc,
                                                identifier *base,
-                                               list_node<expression*> *arguments)
-    : visitable_node(loc)
+                                               ast_list_node<expression*> *arguments)
+    : visitable_ast_node(loc)
     , base(base)
     , arguments(arguments)
 {
@@ -145,7 +145,7 @@ method_call_expression::method_call_expression(diagnostic_context_location const
 unary_expression::unary_expression(diagnostic_context_location const &loc,
                                    expression *base,
                                    unary_operator op)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , base(base)
     , op(op)
 {
@@ -156,7 +156,7 @@ infix_expression::infix_expression(diagnostic_context_location const &loc,
                                    expression *left,
                                    expression *right,
                                    infix_operator op)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , left(left)
     , right(right)
     , op(op)
@@ -167,7 +167,7 @@ infix_expression::infix_expression(diagnostic_context_location const &loc,
 assignment_expression::assignment_expression(diagnostic_context_location const &loc,
                                              expression *target,
                                              expression *value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , target(target)
     , value(value)
 {
@@ -177,7 +177,7 @@ assignment_expression::assignment_expression(diagnostic_context_location const &
 comma_expression::comma_expression(diagnostic_context_location const &loc,
                                    expression *left,
                                    expression *right)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , left(left)
     , right(right)
 {
@@ -185,42 +185,42 @@ comma_expression::comma_expression(diagnostic_context_location const &loc,
 }
 
 compound_statement::compound_statement(diagnostic_context_location const &loc,
-                                       list_node<statement*> *code)
-    : visitable_node(loc)
+                                       ast_list_node<statement*> *code)
+    : visitable_ast_node(loc)
     , code(code)
 {
     return;
 }
 
 empty_statement::empty_statement(diagnostic_context_location const &loc)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
 {
     return;
 }
 
 expression_statement::expression_statement(diagnostic_context_location const &loc,
                                            expression *value)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , value(value)
 {
     return;
 }
 
 break_statement::break_statement(diagnostic_context_location const &loc)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
 {
     return;
 }
 
 return_statement::return_statement(diagnostic_context_location const &loc)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
 {
     return;
 }
 
 call_statement::call_statement(diagnostic_context_location const &loc,
                                identifier *label)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , label(label)
 {
     return;
@@ -229,7 +229,7 @@ call_statement::call_statement(diagnostic_context_location const &loc,
 if_statement::if_statement(diagnostic_context_location const &loc,
                            expression *condition,
                            statement *code)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , condition(condition)
     , code(code)
 {
@@ -240,7 +240,7 @@ if_else_statement::if_else_statement(diagnostic_context_location const &loc,
                                      expression *condition,
                                      statement *code,
                                      statement *else_code)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , condition(condition)
     , code(code)
     , else_code(else_code)
@@ -251,7 +251,7 @@ if_else_statement::if_else_statement(diagnostic_context_location const &loc,
 while_statement::while_statement(diagnostic_context_location const &loc,
                                  expression *condition,
                                  statement *code)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , condition(condition)
     , code(code)
 {
@@ -261,7 +261,7 @@ while_statement::while_statement(diagnostic_context_location const &loc,
 do_statement::do_statement(diagnostic_context_location const &loc,
                            statement *code,
                            expression *condition)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , code(code)
     , condition(condition)
 {
@@ -269,14 +269,14 @@ do_statement::do_statement(diagnostic_context_location const &loc,
 }
 
 for_empty_expression::for_empty_expression(diagnostic_context_location const &loc)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
 {
     return;
 }
 
 for_expression::for_expression(diagnostic_context_location const &loc,
                                expression *condition)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , condition(condition)
 {
     return;
@@ -287,7 +287,7 @@ for_statement::for_statement(diagnostic_context_location const &loc,
                              for_optional_expression *condition,
                              for_optional_expression *incrementer,
                              statement *code)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , initializer(initializer)
     , condition(condition)
     , incrementer(incrementer)
@@ -299,7 +299,7 @@ for_statement::for_statement(diagnostic_context_location const &loc,
 labeled_statement::labeled_statement(diagnostic_context_location const &loc,
                                      identifier *label,
                                      statement *code)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , label(label)
     , code(code)
 {
@@ -308,23 +308,23 @@ labeled_statement::labeled_statement(diagnostic_context_location const &loc,
 
 flags_section::flags_section(diagnostic_context_location const &loc,
                              unsigned int flags)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , flags(flags)
 {
     return;
 }
 
 symbols_section::symbols_section(diagnostic_context_location const &loc,
-                                 list_node<symbol*> *symbols)
-    : visitable_node(loc)
+                                 ast_list_node<symbol*> *symbols)
+    : visitable_ast_node(loc)
     , symbols(symbols)
 {
     return;
 }
 
 code_section::code_section(diagnostic_context_location const &loc,
-                           list_node<statement*> *code)
-    : visitable_node(loc)
+                           ast_list_node<statement*> *code)
+    : visitable_ast_node(loc)
     , code(code)
 {
     return;
@@ -334,7 +334,7 @@ translation_unit::translation_unit(diagnostic_context_location const &loc,
                                    flags_section *flags,
                                    symbols_section *symbols,
                                    code_section *code)
-    : visitable_node(loc)
+    : visitable_ast_node(loc)
     , flags(flags)
     , symbols(symbols)
     , code(code)

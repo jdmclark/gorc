@@ -57,7 +57,7 @@ void nonval_expression_gen_visitor::visit(ast::identifier_expression &)
 
 void nonval_expression_gen_visitor::visit(ast::subscript_expression &e)
 {
-    ast::visit(*this, *e.index);
+    ast_visit(*this, *e.index);
 }
 
 void nonval_expression_gen_visitor::visit(ast::method_call_expression &e)
@@ -66,7 +66,7 @@ void nonval_expression_gen_visitor::visit(ast::method_call_expression &e)
 
     // Push values from left to right
     for(auto &arg : e.arguments->elements) {
-        ast::visit(rv, *arg);
+        ast_visit(rv, *arg);
     }
 
     ir.call(verbs.get_verb_id(e.base->value));
@@ -74,30 +74,30 @@ void nonval_expression_gen_visitor::visit(ast::method_call_expression &e)
 
 void nonval_expression_gen_visitor::visit(ast::unary_expression &e)
 {
-    ast::visit(*this, *e.base);
+    ast_visit(*this, *e.base);
 }
 
 void nonval_expression_gen_visitor::visit(ast::infix_expression &e)
 {
-    ast::visit(*this, *e.left);
-    ast::visit(*this, *e.right);
+    ast_visit(*this, *e.left);
+    ast_visit(*this, *e.right);
 }
 
 void nonval_expression_gen_visitor::visit(ast::assignment_expression &e)
 {
     // Push value
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *e.value);
+    ast_visit(ev, *e.value);
 
     // Push index and store
     lval_expression_gen_visitor lev(out_script, ir, verbs, constants);
-    ast::visit(lev, *e.target);
+    ast_visit(lev, *e.target);
 }
 
 void nonval_expression_gen_visitor::visit(ast::comma_expression &e)
 {
-    ast::visit(*this, *e.left);
-    ast::visit(*this, *e.right);
+    ast_visit(*this, *e.left);
+    ast_visit(*this, *e.right);
 }
 
 void nonval_expression_gen_visitor::visit(ast::for_empty_expression &)
@@ -108,5 +108,5 @@ void nonval_expression_gen_visitor::visit(ast::for_empty_expression &)
 
 void nonval_expression_gen_visitor::visit(ast::for_expression &e)
 {
-    ast::visit(*this, *e.condition);
+    ast_visit(*this, *e.condition);
 }

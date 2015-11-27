@@ -18,7 +18,7 @@ namespace gorc {
             collect_symbols_visitor(script &output_script,
                                     seen_label_set const &seen_labels);
 
-            void visit(ast::list_node<ast::symbol*> &);
+            void visit(ast_list_node<ast::symbol*> &);
             void visit(ast::symbol &);
         };
 

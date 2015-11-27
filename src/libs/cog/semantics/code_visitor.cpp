@@ -1,6 +1,6 @@
 #include "code_visitor.hpp"
 #include "rvalue_visitor.hpp"
-#include "cog/ast/variant_location_visitor.hpp"
+#include "ast/variant_location_visitor.hpp"
 #include "for_expression_visitor.hpp"
 #include "log/log.hpp"
 
@@ -8,7 +8,7 @@ using namespace gorc;
 using namespace gorc::cog;
 
 code_visitor::code_visitor(script &out_script,
-                           ast::factory &factory,
+                           ast_factory &factory,
                            constant_table const &constants,
                            verb_table const &verbs,
                            seen_label_set const &labels,
@@ -27,7 +27,7 @@ code_visitor::code_visitor(script &out_script,
 
 void code_visitor::visit(ast::compound_statement &s)
 {
-    ast::visit(*this, s.code);
+    ast_visit(*this, s.code);
 }
 
 void code_visitor::visit(ast::empty_statement &)
@@ -79,7 +79,7 @@ void code_visitor::visit(ast::if_statement &s)
                     labels,
                     inside_loop,
                     /* inside block */ true);
-    ast::visit(cv, *s.code);
+    ast_visit(cv, *s.code);
 }
 
 void code_visitor::visit(ast::if_else_statement &s)
@@ -97,8 +97,8 @@ void code_visitor::visit(ast::if_else_statement &s)
                     labels,
                     inside_loop,
                     /* inside block */ true);
-    ast::visit(cv, *s.code);
-    ast::visit(cv, *s.else_code);
+    ast_visit(cv, *s.code);
+    ast_visit(cv, *s.else_code);
 }
 
 void code_visitor::visit(ast::while_statement &s)
@@ -116,7 +116,7 @@ void code_visitor::visit(ast::while_statement &s)
                     labels,
                     /* inside loop */ true,
                     /* inside block */ true);
-    ast::visit(cv, *s.code);
+    ast_visit(cv, *s.code);
 }
 
 void code_visitor::visit(ast::do_statement &s)
@@ -134,7 +134,7 @@ void code_visitor::visit(ast::do_statement &s)
                     labels,
                     /* inside loop */ true,
                     /* inside block */ true);
-    ast::visit(cv, *s.code);
+    ast_visit(cv, *s.code);
 }
 
 void code_visitor::visit(ast::for_statement &s)
@@ -150,14 +150,14 @@ void code_visitor::visit(ast::for_statement &s)
                                verbs,
                                /* result is used */ true);
 
-    ast::visit(fev, *s.initializer);
-    auto cond_type = ast::visit(few, *s.condition);
+    ast_visit(fev, *s.initializer);
+    auto cond_type = ast_visit(few, *s.condition);
     if(!is_truth_value_type(cond_type)) {
-        diagnostic_context dc(ast::visit(variant_location_visitor(), *s.condition));
+        diagnostic_context dc(ast_visit(variant_location_visitor(), *s.condition));
         LOG_WARNING(format("implicit cast from %s to bool used in condition") %
                     as_string(cond_type));
     }
-    ast::visit(fev, *s.incrementer);
+    ast_visit(fev, *s.incrementer);
 
     code_visitor cv(out_script,
                     factory,
@@ -166,7 +166,7 @@ void code_visitor::visit(ast::for_statement &s)
                     labels,
                     /* inside loop */ true,
                     /* inside block */ true);
-    ast::visit(cv, *s.code);
+    ast_visit(cv, *s.code);
 }
 
 void code_visitor::visit(ast::labeled_statement &s)
@@ -176,12 +176,12 @@ void code_visitor::visit(ast::labeled_statement &s)
         LOG_WARNING(format("label '%s' is defined inside block") % s.label->value);
     }
 
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
-void code_visitor::visit(ast::list_node<ast::statement*> &s)
+void code_visitor::visit(ast_list_node<ast::statement*> &s)
 {
     for(auto &stmt : s.elements) {
-        ast::visit(*this, *stmt);
+        ast_visit(*this, *stmt);
     }
 }

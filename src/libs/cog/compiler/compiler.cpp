@@ -1,5 +1,5 @@
 #include "compiler.hpp"
-#include "cog/ast/factory.hpp"
+#include "ast/factory.hpp"
 #include "cog/grammar/grammar.hpp"
 #include "log/log.hpp"
 #include "utility/make_unique.hpp"
@@ -16,7 +16,7 @@ gorc::cog::compiler::compiler(verb_table &verbs,
 
 std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
 {
-    cog::ast::factory ast_factory;
+    ast_factory ast_factory;
     cog::grammar grammar(f, ast_factory);
     auto maybe_tu = grammar.parse();
 

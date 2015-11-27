@@ -18,7 +18,7 @@ gorc::cog::value gorc::cog::collect_symbols_visitor::get_value(ast::symbol &symb
 {
     return maybe_if_else(symbol.value,
                          [&](ast::symbol_field *field) {
-            return ast::visit(symbol_field_visitor(output_script, type), *field);
+            return ast_visit(symbol_field_visitor(output_script, type), *field);
         },
                          [&] {
             switch(type) {
@@ -37,10 +37,10 @@ gorc::cog::value gorc::cog::collect_symbols_visitor::get_value(ast::symbol &symb
         });
 }
 
-void gorc::cog::collect_symbols_visitor::visit(ast::list_node<ast::symbol*> &symbols)
+void gorc::cog::collect_symbols_visitor::visit(ast_list_node<ast::symbol*> &symbols)
 {
     for(auto &symbol : symbols.elements) {
-        ast::visit(*this, symbol);
+        ast_visit(*this, symbol);
     }
 }
 
@@ -51,7 +51,7 @@ void gorc::cog::collect_symbols_visitor::visit(ast::symbol &symbol)
 
     // Visit extensions
     symbol_extension_visitor w(type);
-    ast::visit(w, symbol.extensions);
+    ast_visit(w, symbol.extensions);
 
     int default_mask = 0;
     switch(type) {

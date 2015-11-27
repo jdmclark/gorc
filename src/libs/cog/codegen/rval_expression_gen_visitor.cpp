@@ -57,7 +57,7 @@ void rval_expression_gen_visitor::visit(ast::identifier_expression &e)
 void rval_expression_gen_visitor::visit(ast::subscript_expression &e)
 {
     // Push index
-    ast::visit(*this, *e.index);
+    ast_visit(*this, *e.index);
 
     ir.loadi(out_script.symbols.get_symbol_index(e.base->value));
 }
@@ -66,7 +66,7 @@ void rval_expression_gen_visitor::visit(ast::method_call_expression &e)
 {
     // Push arguments, left to right
     for(auto &arg : e.arguments->elements) {
-        ast::visit(*this, *arg);
+        ast_visit(*this, *arg);
     }
 
     ir.callv(verbs.get_verb_id(e.base->value));
@@ -74,7 +74,7 @@ void rval_expression_gen_visitor::visit(ast::method_call_expression &e)
 
 void rval_expression_gen_visitor::visit(ast::unary_expression &e)
 {
-    ast::visit(*this, *e.base);
+    ast_visit(*this, *e.base);
 
     switch(e.op) {
     case ast::unary_operator::plus:
@@ -93,8 +93,8 @@ void rval_expression_gen_visitor::visit(ast::unary_expression &e)
 
 void rval_expression_gen_visitor::visit(ast::infix_expression &e)
 {
-    ast::visit(*this, *e.left);
-    ast::visit(*this, *e.right);
+    ast_visit(*this, *e.left);
+    ast_visit(*this, *e.right);
 
     switch(e.op) {
     case ast::infix_operator::addition:
@@ -166,22 +166,22 @@ void rval_expression_gen_visitor::visit(ast::infix_expression &e)
 void rval_expression_gen_visitor::visit(ast::assignment_expression &e)
 {
     // Push value
-    ast::visit(*this, *e.value);
+    ast_visit(*this, *e.value);
 
     // Need value on stack after
     ir.dup();
 
     // Push index and store
     lval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *e.target);
+    ast_visit(ev, *e.target);
 }
 
 void rval_expression_gen_visitor::visit(ast::comma_expression &e)
 {
     nonval_expression_gen_visitor ev(out_script, ir, verbs, constants);
 
-    ast::visit(ev, *e.left);
-    ast::visit(*this, *e.right);
+    ast_visit(ev, *e.left);
+    ast_visit(*this, *e.right);
 }
 
 void rval_expression_gen_visitor::visit(ast::for_empty_expression &)
@@ -191,5 +191,5 @@ void rval_expression_gen_visitor::visit(ast::for_empty_expression &)
 
 void rval_expression_gen_visitor::visit(ast::for_expression &e)
 {
-    ast::visit(*this, *e.condition);
+    ast_visit(*this, *e.condition);
 }

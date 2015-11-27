@@ -1,12 +1,13 @@
 #pragma once
 
 #include "lexer.hpp"
-#include "cog/ast/factory.hpp"
+#include "ast/factory.hpp"
+#include "cog/ast/ast.hpp"
 
 namespace gorc {
     namespace cog {
 
-        ast::translation_unit* parse_cog(ast::factory &factory, cog_tokenizer &);
+        ast::translation_unit* parse_cog(ast_factory &factory, cog_tokenizer &);
 
     }
 }

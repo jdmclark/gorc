@@ -21,7 +21,7 @@ lval_expression_gen_visitor::lval_expression_gen_visitor(script &out_script,
 //
 // Assertion - already handled by earlier semantic analysis
 
-void lval_expression_gen_visitor::visit(ast::node &)
+void lval_expression_gen_visitor::visit(ast_node &)
 {
     LOG_FATAL("generated assignment for target which is not an l-value");
 }
@@ -37,7 +37,7 @@ void lval_expression_gen_visitor::visit(ast::subscript_expression &e)
 {
     // Generate code for subscript
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *e.index);
+    ast_visit(ev, *e.index);
 
     ir.stori(out_script.symbols.get_symbol_index(e.base->value));
 }

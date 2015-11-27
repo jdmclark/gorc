@@ -1,6 +1,6 @@
 #include "parser.hpp"
 #include "utility/string_search.hpp"
-#include "cog/ast/variant_location_visitor.hpp"
+#include "ast/variant_location_visitor.hpp"
 #include "utility/string_view.hpp"
 #include "text/lookahead_tokenizer.hpp"
 #include <sstream>
@@ -76,7 +76,7 @@ namespace {
     }
 
     // Symbols:
-    ast::symbol_field* parse_symbol_field(ast::factory &ast, cog_tokenizer &tok)
+    ast::symbol_field* parse_symbol_field(ast_factory &ast, cog_tokenizer &tok)
     {
         // Current token is the assignment operator
         // Advance in symbol field mode
@@ -107,7 +107,7 @@ namespace {
         }
     }
 
-    ast::symbol_extension* parse_symbol_extension(ast::factory &ast, cog_tokenizer &tok)
+    ast::symbol_extension* parse_symbol_extension(ast_factory &ast, cog_tokenizer &tok)
     {
         // Already sitting on extname
         ast::identifier *extension_name = ast.make<ast::identifier>(tok.get_location(),
@@ -119,7 +119,7 @@ namespace {
             ast::symbol_field *value = parse_symbol_field(ast, tok);
             return ast.make_var<ast::symbol_extension, ast::valued_extension>(
                     location_union(extension_name->location,
-                                   ast::visit(variant_location_visitor(), *value)),
+                                   ast_visit(variant_location_visitor(), *value)),
                     extension_name,
                     value);
         }
@@ -130,7 +130,7 @@ namespace {
         }
     }
 
-    ast::symbol* parse_symbol(ast::factory &ast, cog_tokenizer &tok)
+    ast::symbol* parse_symbol(ast_factory &ast, cog_tokenizer &tok)
     {
         // Already sitting on typename
         ast::identifier *symbol_type = ast.make<ast::identifier>(tok.get_location(),
@@ -151,8 +151,8 @@ namespace {
             default_value = parse_symbol_field(ast, tok);
         }
 
-        ast::list_node<ast::symbol_extension*> *exts =
-            ast.make<ast::list_node<ast::symbol_extension*>>(tok.get_location());
+        ast_list_node<ast::symbol_extension*> *exts =
+            ast.make<ast_list_node<ast::symbol_extension*>>(tok.get_location());
         while(true) {
             if(tok.get_type() == cog_token_type::end_of_line ||
                tok.get_type() == cog_token_type::end_of_file) {
@@ -166,8 +166,8 @@ namespace {
             else if(tok.get_type() == cog_token_type::identifier) {
                 exts->elements.push_back(parse_symbol_extension(ast, tok));
                 exts->location = location_union(exts->location,
-                                                ast::visit(variant_location_visitor(),
-                                                           *exts->elements.back()));
+                                                ast_visit(variant_location_visitor(),
+                                                          *exts->elements.back()));
             }
             else {
                 diagnostic_context dc(tok.get_location());
@@ -186,7 +186,7 @@ namespace {
         return rv;
     }
 
-    ast::symbols_section* parse_symbols_section(ast::factory &ast, cog_tokenizer &tok)
+    ast::symbols_section* parse_symbols_section(ast_factory &ast, cog_tokenizer &tok)
     {
         class scoped_return_newlines {
         public:
@@ -212,8 +212,8 @@ namespace {
         auto start_loc = tok.get_location();
 
         // Parse symbol seq
-        ast::list_node<ast::symbol*> *symbols =
-            ast.make<ast::list_node<ast::symbol*>>(start_loc);
+        ast_list_node<ast::symbol*> *symbols =
+            ast.make<ast_list_node<ast::symbol*>>(start_loc);
 
         {
             scoped_return_newlines return_newlines(tok);
@@ -255,7 +255,7 @@ namespace {
     // Expressions:
 
 #define LEFT_ASSOCIATIVE_INFIX_EXPR(self_name, super_name, is_indicator) \
-    ast::expression* parse_##self_name(ast::factory &ast, cog_la_tokenizer &tok) \
+    ast::expression* parse_##self_name(ast_factory &ast, cog_la_tokenizer &tok) \
     { \
         ast::expression *rv = parse_##super_name(ast, tok); \
         while(is_indicator(tok.get_type())) { \
@@ -263,8 +263,8 @@ namespace {
             tok.advance(); \
             ast::expression *right = parse_##super_name(ast, tok); \
             rv = ast.make_var<ast::expression, ast::infix_expression>( \
-                    location_union(ast::visit(variant_location_visitor(), *rv), \
-                                   ast::visit(variant_location_visitor(), *right)), \
+                    location_union(ast_visit(variant_location_visitor(), *rv), \
+                                   ast_visit(variant_location_visitor(), *right)), \
                     rv, \
                     right, \
                     infix_operator_map(indicator)); \
@@ -356,10 +356,10 @@ namespace {
         // LCOV_EXCL_STOP
     }
 
-    ast::expression* parse_expression(ast::factory &, cog_la_tokenizer &);
-    ast::expression* parse_assignment_expression(ast::factory &, cog_la_tokenizer &);
+    ast::expression* parse_expression(ast_factory &, cog_la_tokenizer &);
+    ast::expression* parse_assignment_expression(ast_factory &, cog_la_tokenizer &);
 
-    ast::expression* parse_literal_expression(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::expression* parse_literal_expression(ast_factory &ast, cog_la_tokenizer &tok)
     {
         if(tok.get_type() == cog_token_type::punc_apos) {
             // Vector literal
@@ -424,7 +424,7 @@ namespace {
         }
     }
 
-    ast::expression* parse_postfix_expression(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::expression* parse_postfix_expression(ast_factory &ast, cog_la_tokenizer &tok)
     {
         if(tok.get_type() == cog_token_type::identifier) {
             // May be bare name, array index, or function call
@@ -437,8 +437,8 @@ namespace {
                 tok.advance();
 
                 // Parse argument list
-                ast::list_node<ast::expression *> *args =
-                    ast.make<ast::list_node<ast::expression *>>(tok.get_location());
+                ast_list_node<ast::expression *> *args =
+                    ast.make<ast_list_node<ast::expression *>>(tok.get_location());
 
                 if(tok.get_type() != cog_token_type::punc_rparen) {
                     // Argument list is not empty
@@ -511,7 +511,7 @@ namespace {
         }
     }
 
-    ast::expression* parse_unary_expression(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::expression* parse_unary_expression(ast_factory &ast, cog_la_tokenizer &tok)
     {
         if(tok.get_type() == cog_token_type::punc_plus ||
            tok.get_type() == cog_token_type::punc_minus ||
@@ -523,7 +523,7 @@ namespace {
             ast::expression *rv = parse_unary_expression(ast, tok);
 
             return ast.make_var<ast::expression, ast::unary_expression>(
-                    location_union(start_loc, ast::visit(variant_location_visitor(), *rv)),
+                    location_union(start_loc, ast_visit(variant_location_visitor(), *rv)),
                     rv,
                     op);
         }
@@ -595,7 +595,7 @@ namespace {
                                        logical_and_expression,
                                        cog_token_type::punc_logical_or)
 
-    ast::expression* parse_assignment_expression(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::expression* parse_assignment_expression(ast_factory &ast, cog_la_tokenizer &tok)
     {
         // Right associative
         ast::expression *lhs = parse_logical_or_expression(ast, tok);
@@ -605,8 +605,8 @@ namespace {
             ast::expression *rhs = parse_assignment_expression(ast, tok);
 
             return ast.make_var<ast::expression, ast::assignment_expression>(
-                    location_union(ast::visit(variant_location_visitor(), *lhs),
-                                   ast::visit(variant_location_visitor(), *rhs)),
+                    location_union(ast_visit(variant_location_visitor(), *lhs),
+                                   ast_visit(variant_location_visitor(), *rhs)),
                     lhs,
                     rhs);
         }
@@ -615,7 +615,7 @@ namespace {
         }
     }
 
-    ast::expression* parse_expression(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::expression* parse_expression(ast_factory &ast, cog_la_tokenizer &tok)
     {
         // Left associative
         ast::expression *rv = parse_assignment_expression(ast, tok);
@@ -623,8 +623,8 @@ namespace {
             tok.advance();
             ast::expression *right = parse_assignment_expression(ast, tok);
             rv = ast.make_var<ast::expression, ast::comma_expression>(
-                    location_union(ast::visit(variant_location_visitor(), *rv),
-                                   ast::visit(variant_location_visitor(), *right)),
+                    location_union(ast_visit(variant_location_visitor(), *rv),
+                                   ast_visit(variant_location_visitor(), *right)),
                     rv,
                     right);
         }
@@ -634,9 +634,9 @@ namespace {
 
     // Code:
 
-    ast::statement* parse_statement(ast::factory &, cog_la_tokenizer &);
+    ast::statement* parse_statement(ast_factory &, cog_la_tokenizer &);
 
-    ast::statement* parse_expression_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_expression_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         ast::expression *value = parse_expression(ast, tok);
 
@@ -649,11 +649,11 @@ namespace {
         tok.advance();
 
         return ast.make_var<ast::statement, ast::expression_statement>(
-                location_union(ast::visit(variant_location_visitor(), *value), end_loc),
+                location_union(ast_visit(variant_location_visitor(), *value), end_loc),
                 value);
     }
 
-    ast::statement* parse_break_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_break_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -670,7 +670,7 @@ namespace {
                 location_union(start_pos, end_pos));
     }
 
-    ast::statement* parse_return_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_return_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -687,7 +687,7 @@ namespace {
                 location_union(start_pos, end_pos));
     }
 
-    ast::statement* parse_call_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_call_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -712,7 +712,7 @@ namespace {
                 location_union(start_pos, end_pos), target);
     }
 
-    ast::statement* parse_if_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_if_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -737,7 +737,7 @@ namespace {
             // if statement is not followed by an else term
             return ast.make_var<ast::statement, ast::if_statement>(
                     location_union(start_pos,
-                                   ast::visit(variant_location_visitor(), *code)),
+                                   ast_visit(variant_location_visitor(), *code)),
                     cond,
                     code);
         }
@@ -748,13 +748,13 @@ namespace {
 
         return ast.make_var<ast::statement, ast::if_else_statement>(
                 location_union(start_pos,
-                               ast::visit(variant_location_visitor(), *else_code)),
+                               ast_visit(variant_location_visitor(), *else_code)),
                 cond,
                 code,
                 else_code);
     }
 
-    ast::statement* parse_while_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_while_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -777,12 +777,12 @@ namespace {
 
         return ast.make_var<ast::statement, ast::while_statement>(
                 location_union(start_pos,
-                               ast::visit(variant_location_visitor(), *code)),
+                               ast_visit(variant_location_visitor(), *code)),
                 cond,
                 code);
     }
 
-    ast::statement* parse_do_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_do_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -823,7 +823,7 @@ namespace {
                 cond);
     }
 
-    ast::statement* parse_for_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_for_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         tok.advance();
@@ -843,7 +843,7 @@ namespace {
             ast::expression *sub_expr = parse_expression(ast, tok);
 
             init = ast.make_var<ast::for_optional_expression, ast::for_expression>(
-                    ast::visit(variant_location_visitor(), *sub_expr),
+                    ast_visit(variant_location_visitor(), *sub_expr),
                     sub_expr);
         }
 
@@ -862,7 +862,7 @@ namespace {
             ast::expression *sub_expr = parse_expression(ast, tok);
 
             cond = ast.make_var<ast::for_optional_expression, ast::for_expression>(
-                    ast::visit(variant_location_visitor(), *sub_expr),
+                    ast_visit(variant_location_visitor(), *sub_expr),
                     sub_expr);
         }
 
@@ -881,7 +881,7 @@ namespace {
             ast::expression *sub_expr = parse_expression(ast, tok);
 
             iter = ast.make_var<ast::for_optional_expression, ast::for_expression>(
-                    ast::visit(variant_location_visitor(), *sub_expr),
+                    ast_visit(variant_location_visitor(), *sub_expr),
                     sub_expr);
         }
 
@@ -895,14 +895,14 @@ namespace {
 
         return ast.make_var<ast::statement, ast::for_statement>(
                 location_union(start_pos,
-                               ast::visit(variant_location_visitor(), *code)),
+                               ast_visit(variant_location_visitor(), *code)),
                 init,
                 cond,
                 iter,
                 code);
     }
 
-    ast::statement* parse_labeled_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_labeled_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         auto start_pos = tok.get_location();
         ast::identifier *label = ast.make<ast::identifier>(start_pos, tok.get_value());
@@ -915,12 +915,12 @@ namespace {
 
         return ast.make_var<ast::statement, ast::labeled_statement>(
                 location_union(start_pos,
-                               ast::visit(variant_location_visitor(), *stmt)),
+                               ast_visit(variant_location_visitor(), *stmt)),
                 label,
                 stmt);
     }
 
-    ast::statement* parse_leading_identifier_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_leading_identifier_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         if(iequal(tok.get_value(), "break"_sv)) {
             return parse_break_statement(ast, tok);
@@ -951,14 +951,14 @@ namespace {
         }
     }
 
-    ast::statement* parse_compound_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_compound_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         // Starts on left brace
         auto start_loc = tok.get_location();
         tok.advance();
 
-        ast::list_node<ast::statement*> *code =
-            ast.make<ast::list_node<ast::statement*>>(start_loc);
+        ast_list_node<ast::statement*> *code =
+            ast.make<ast_list_node<ast::statement*>>(start_loc);
 
         while(true) {
             if(tok.get_type() == cog_token_type::end_of_file) {
@@ -971,8 +971,8 @@ namespace {
 
             code->elements.push_back(parse_statement(ast, tok));
             code->location = location_union(code->location,
-                                            ast::visit(variant_location_visitor(),
-                                                       *code->elements.back()));
+                                            ast_visit(variant_location_visitor(),
+                                                      *code->elements.back()));
         }
 
         auto end_loc = tok.get_location();
@@ -982,7 +982,7 @@ namespace {
                 location_union(start_loc, end_loc), code);
     }
 
-    ast::statement* parse_statement(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::statement* parse_statement(ast_factory &ast, cog_la_tokenizer &tok)
     {
         if(tok.get_type() == cog_token_type::identifier) {
             // Leads with identifier or keyword
@@ -1002,7 +1002,7 @@ namespace {
         }
     }
 
-    ast::code_section* parse_code_section(ast::factory &ast, cog_la_tokenizer &tok)
+    ast::code_section* parse_code_section(ast_factory &ast, cog_la_tokenizer &tok)
     {
         if(!iequal(tok.get_value(), "code"_sv)) {
             diagnostic_context dc(tok.get_location());
@@ -1012,8 +1012,8 @@ namespace {
         auto start_loc = tok.get_location();
         tok.advance();
 
-        ast::list_node<ast::statement*> *code =
-            ast.make<ast::list_node<ast::statement*>>(start_loc);
+        ast_list_node<ast::statement*> *code =
+            ast.make<ast_list_node<ast::statement*>>(start_loc);
 
         while(true) {
             if(tok.get_type() == cog_token_type::end_of_file) {
@@ -1026,8 +1026,8 @@ namespace {
 
             code->elements.push_back(parse_statement(ast, tok));
             code->location = location_union(code->location,
-                                            ast::visit(variant_location_visitor(),
-                                                       *code->elements.back()));
+                                            ast_visit(variant_location_visitor(),
+                                                      *code->elements.back()));
         }
 
         auto end_loc = tok.get_location();
@@ -1038,7 +1038,7 @@ namespace {
 
     // Translation unit:
 
-    ast::flags_section* parse_flags_section(ast::factory &factory, cog_tokenizer &tok)
+    ast::flags_section* parse_flags_section(ast_factory &factory, cog_tokenizer &tok)
     {
         if(!iequal(tok.get_value(), "flags"_sv)) {
             // No flags section
@@ -1064,7 +1064,7 @@ namespace {
                                                 flags);
     }
 
-    ast::translation_unit* parse_translation_unit(ast::factory &factory, cog_tokenizer &tok)
+    ast::translation_unit* parse_translation_unit(ast_factory &factory, cog_tokenizer &tok)
     {
         // Symbols section requires one-token lookahead with string fragment hacks.
         // Don't construct lookahead tokenizer until after.
@@ -1086,7 +1086,7 @@ namespace {
 
 }
 
-ast::translation_unit* gorc::cog::parse_cog(ast::factory &factory, cog_tokenizer &tok)
+ast::translation_unit* gorc::cog::parse_cog(ast_factory &factory, cog_tokenizer &tok)
 {
     return parse_translation_unit(factory, tok);
 }

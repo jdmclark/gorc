@@ -22,7 +22,7 @@ namespace gorc {
                                         verb_table const &verbs,
                                         constant_table const &constants);
 
-            void visit(ast::node &);
+            void visit(ast_node &);
             void visit(ast::identifier_expression &);
             void visit(ast::subscript_expression &);
         };

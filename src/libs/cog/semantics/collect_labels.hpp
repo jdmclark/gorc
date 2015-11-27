@@ -20,7 +20,7 @@ namespace gorc {
 
             void visit(ast::identifier&);
 
-            void visit(ast::list_node<ast::statement*>&);
+            void visit(ast_list_node<ast::statement*>&);
             void visit(ast::compound_statement&);
             void visit(ast::empty_statement&);
             void visit(ast::expression_statement&);

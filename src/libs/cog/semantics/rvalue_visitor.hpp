@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cog/ast/ast.hpp"
-#include "cog/ast/factory.hpp"
+#include "ast/factory.hpp"
 #include "cog/script/script.hpp"
 #include "cog/script/constant_table.hpp"
 #include "cog/script/verb_table.hpp"
@@ -13,14 +13,14 @@ namespace gorc {
         class rvalue_visitor {
         private:
             script &out_script;
-            ast::factory &factory;
+            ast_factory &factory;
             constant_table const &constants;
             verb_table const &verbs;
             bool result_is_used;
 
         public:
             rvalue_visitor(script &out_script,
-                           ast::factory &factory,
+                           ast_factory &factory,
                            constant_table const &constants,
                            verb_table const &verbs,
                            bool result_is_used);
@@ -41,13 +41,13 @@ namespace gorc {
 
         void visit_and_fold_boolean_condition(ast::expression &e,
                                               script &out_script,
-                                              ast::factory &factory,
+                                              ast_factory &factory,
                                               constant_table const &constants,
                                               verb_table const &verbs);
 
         void visit_and_fold_array_subscript(ast::expression &e,
                                             script &out_script,
-                                            ast::factory &factory,
+                                            ast_factory &factory,
                                             constant_table const &constants,
                                             verb_table const &verbs);
     }

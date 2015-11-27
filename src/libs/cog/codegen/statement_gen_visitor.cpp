@@ -20,7 +20,7 @@ statement_gen_visitor::statement_gen_visitor(script &out_script,
 
 void statement_gen_visitor::visit(ast::compound_statement &s)
 {
-    ast::visit(*this, s.code);
+    ast_visit(*this, s.code);
 }
 
 void statement_gen_visitor::visit(ast::empty_statement &)
@@ -31,7 +31,7 @@ void statement_gen_visitor::visit(ast::empty_statement &)
 void statement_gen_visitor::visit(ast::expression_statement &s)
 {
     nonval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *s.value);
+    ast_visit(ev, *s.value);
 }
 
 void statement_gen_visitor::visit(ast::break_statement &)
@@ -60,13 +60,13 @@ void statement_gen_visitor::visit(ast::if_statement &s)
 
     // Push condition onto stack
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *s.condition);
+    ast_visit(ev, *s.condition);
 
     // Skip body if condition is false
     ir.bf(after_code_label);
 
     // Body code
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 
     // Set label after body
     ir.label(after_code_label);
@@ -79,13 +79,13 @@ void statement_gen_visitor::visit(ast::if_else_statement &s)
 
     // Push condition onto stack
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *s.condition);
+    ast_visit(ev, *s.condition);
 
     // Skip to else if condition is false
     ir.bf(after_code_label);
 
     // Body code
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 
     // Skip to end of statement after body
     ir.jmp(after_else_label);
@@ -94,7 +94,7 @@ void statement_gen_visitor::visit(ast::if_else_statement &s)
     ir.label(after_code_label);
 
     // Else code
-    ast::visit(*this, *s.else_code);
+    ast_visit(*this, *s.else_code);
 
     // Set end of statement label
     ir.label(after_else_label);
@@ -109,7 +109,7 @@ void statement_gen_visitor::visit(ast::while_statement &s)
 
     // Push condition onto stack
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *s.condition);
+    ast_visit(ev, *s.condition);
 
     // Skip body if condition is false
     ir.bf(break_label);
@@ -118,10 +118,10 @@ void statement_gen_visitor::visit(ast::while_statement &s)
     ir.label(body_label);
 
     // Body code
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 
     // Evaluate condition again
-    ast::visit(ev, *s.condition);
+    ast_visit(ev, *s.condition);
 
     // Return to start of body if condition is true
     ir.bt(body_label);
@@ -143,11 +143,11 @@ void statement_gen_visitor::visit(ast::do_statement &s)
     ir.label(body_label);
 
     // Body code
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 
     // Evaluate condition
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
-    ast::visit(ev, *s.condition);
+    ast_visit(ev, *s.condition);
 
     // Return to start of body if condition is true
     ir.bt(body_label);
@@ -167,11 +167,11 @@ void statement_gen_visitor::visit(ast::for_statement &s)
 
     // Run initializer code
     nonval_expression_gen_visitor nev(out_script, ir, verbs, constants);
-    ast::visit(nev, *s.initializer);
+    ast_visit(nev, *s.initializer);
 
     // Run first condition
     rval_expression_gen_visitor rev(out_script, ir, verbs, constants);
-    ast::visit(rev, *s.condition);
+    ast_visit(rev, *s.condition);
 
     // Escape out of loop if condition is false
     ir.bf(break_label);
@@ -180,13 +180,13 @@ void statement_gen_visitor::visit(ast::for_statement &s)
     ir.label(body_label);
 
     // Body code
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 
     // Incrementation code
-    ast::visit(nev, *s.incrementer);
+    ast_visit(nev, *s.incrementer);
 
     // Evaluate condition again
-    ast::visit(rev, *s.condition);
+    ast_visit(rev, *s.condition);
 
     // Return to start of loop if condition is true
     ir.bt(body_label);
@@ -215,12 +215,12 @@ void statement_gen_visitor::visit(ast::labeled_statement &s)
     }
 
     // Generate code for labeled statement
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
-void statement_gen_visitor::visit(ast::list_node<ast::statement*> &s)
+void statement_gen_visitor::visit(ast_list_node<ast::statement*> &s)
 {
     for(auto &stmt : s.elements) {
-        ast::visit(*this, *stmt);
+        ast_visit(*this, *stmt);
     }
 }

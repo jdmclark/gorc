@@ -17,16 +17,16 @@ void gorc::cog::collect_labels_visitor::visit(ast::identifier &id)
     }
 }
 
-void gorc::cog::collect_labels_visitor::visit(ast::list_node<ast::statement*> &statements)
+void gorc::cog::collect_labels_visitor::visit(ast_list_node<ast::statement*> &statements)
 {
     for(auto &stmt : statements.elements) {
-        ast::visit(*this, *stmt);
+        ast_visit(*this, *stmt);
     }
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::compound_statement &s)
 {
-    ast::visit(*this, s.code);
+    ast_visit(*this, s.code);
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::empty_statement &)
@@ -57,32 +57,32 @@ void gorc::cog::collect_labels_visitor::visit(ast::call_statement &s)
 
 void gorc::cog::collect_labels_visitor::visit(ast::if_statement &s)
 {
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::if_else_statement &s)
 {
-    ast::visit(*this, *s.code);
-    ast::visit(*this, *s.else_code);
+    ast_visit(*this, *s.code);
+    ast_visit(*this, *s.else_code);
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::while_statement &s)
 {
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::do_statement &s)
 {
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::for_statement &s)
 {
-    ast::visit(*this, *s.code);
+    ast_visit(*this, *s.code);
 }
 
 void gorc::cog::collect_labels_visitor::visit(ast::labeled_statement &s)
 {
-    ast::visit(*this, s.label);
-    ast::visit(*this, *s.code);
+    ast_visit(*this, s.label);
+    ast_visit(*this, *s.code);
 }

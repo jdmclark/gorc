@@ -2,7 +2,8 @@
 
 #include <string>
 #include "io/input_stream.hpp"
-#include "cog/ast/factory.hpp"
+#include "ast/factory.hpp"
+#include "cog/ast/ast.hpp"
 
 namespace gorc {
     namespace cog {
@@ -12,9 +13,9 @@ namespace gorc {
             input_stream &file;
 
         public:
-            ast::factory &factory;
+            ast_factory &factory;
 
-            grammar(input_stream &file, ast::factory &factory);
+            grammar(input_stream &file, ast_factory &factory);
 
             maybe<ast::translation_unit *> parse();
         };

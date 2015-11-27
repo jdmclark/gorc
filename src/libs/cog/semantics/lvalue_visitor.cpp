@@ -1,12 +1,12 @@
 #include "lvalue_visitor.hpp"
 #include "rvalue_visitor.hpp"
-#include "cog/ast/variant_location_visitor.hpp"
+#include "ast/variant_location_visitor.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
 
 lvalue_visitor::lvalue_visitor(script &out_script,
-                               ast::factory &factory,
+                               ast_factory &factory,
                                constant_table const &constants,
                                verb_table const &verbs)
     : out_script(out_script)
@@ -17,7 +17,7 @@ lvalue_visitor::lvalue_visitor(script &out_script,
     return;
 }
 
-value_type lvalue_visitor::visit(ast::node &)
+value_type lvalue_visitor::visit(ast_node &)
 {
     LOG_ERROR("assignment target is not an lvalue");
     return value_type::dynamic;

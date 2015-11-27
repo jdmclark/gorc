@@ -2,7 +2,7 @@
 #include "parser.hpp"
 #include "lexer.hpp"
 
-gorc::cog::grammar::grammar(input_stream &file, ast::factory &factory)
+gorc::cog::grammar::grammar(input_stream &file, ast_factory &factory)
     : file(file)
     , factory(factory)
 {

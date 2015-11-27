@@ -15,7 +15,7 @@ void gorc::cog::perform_code_generation(script &out_script,
                               ir,
                               verbs,
                               constants);
-    ast::visit(sgv, tu.code->code);
+    ast_visit(sgv, tu.code->code);
 
     ir.finalize();
 

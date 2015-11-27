@@ -15,7 +15,7 @@ namespace gorc {
                 return;
             }
 
-            int visit(ast::node &) const;
+            int visit(ast_node &) const;
             int visit(ast::integer_field &) const;
         };
     }

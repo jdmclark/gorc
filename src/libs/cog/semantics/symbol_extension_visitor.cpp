@@ -62,17 +62,17 @@ gorc::cog::symbol_extension_visitor::symbol_extension_visitor(value_type type)
     return;
 }
 
-void gorc::cog::symbol_extension_visitor::visit(ast::list_node<ast::symbol_extension*> &exts)
+void gorc::cog::symbol_extension_visitor::visit(ast_list_node<ast::symbol_extension*> &exts)
 {
     for(auto &ext : exts.elements) {
-        ast::visit(*this, *ext);
+        ast_visit(*this, *ext);
     }
 }
 
 void gorc::cog::symbol_extension_visitor::visit(ast::bare_extension &ext)
 {
     auto const &name = ext.name->value;
-    auto ext_type = ast::visit(get_symbol_extension_type_visitor(), ext.name);
+    auto ext_type = ast_visit(get_symbol_extension_type_visitor(), ext.name);
     maybe_if(ext_type, [&](symbol_extension_type type) {
             check_accepted(symbol_type, type, name);
 
@@ -99,7 +99,7 @@ void gorc::cog::symbol_extension_visitor::visit(ast::bare_extension &ext)
 void gorc::cog::symbol_extension_visitor::visit(ast::valued_extension &ext)
 {
     auto const &name = ext.name->value;
-    auto ext_type = ast::visit(get_symbol_extension_type_visitor(), ext.name);
+    auto ext_type = ast_visit(get_symbol_extension_type_visitor(), ext.name);
     maybe_if(ext_type, [&](symbol_extension_type type) {
             check_accepted(symbol_type, type, name);
 
@@ -111,19 +111,19 @@ void gorc::cog::symbol_extension_visitor::visit(ast::valued_extension &ext)
 
             case symbol_extension_type::linkid:
                 redefinition(name, linkid.has_value());
-                linkid = ast::visit(symbol_extension_field_integer_visitor(name),
+                linkid = ast_visit(symbol_extension_field_integer_visitor(name),
                                     *ext.value);
                 break;
 
             case symbol_extension_type::mask:
                 redefinition(name, mask.has_value());
-                mask = ast::visit(symbol_extension_field_integer_visitor(name),
+                mask = ast_visit(symbol_extension_field_integer_visitor(name),
                                   *ext.value);
                 break;
 
             case symbol_extension_type::desc:
                 redefinition(name, !desc.empty());
-                desc = ast::visit(symbol_extension_field_string_visitor(),
+                desc = ast_visit(symbol_extension_field_string_visitor(),
                                   *ext.value);
                 break;
             }

@@ -10,7 +10,7 @@ namespace gorc {
         void print_tabs();
 
     public:
-        void visit(cog::ast::list_node<cog::ast::statement*> &);
+        void visit(ast_list_node<cog::ast::statement*> &);
         void visit(cog::ast::compound_statement &);
         void visit(cog::ast::empty_statement &);
         void visit(cog::ast::expression_statement &);
