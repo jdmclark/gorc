@@ -50,9 +50,12 @@ namespace gorc {
             current_type = type;
             current_state = tokenizer_state::initial;
             append_buffer.clear();
+            // LCOV_EXCL_START
+            // TODO: This exclusion should be removed once compound punctuators are parsed
             if(ch.has_value()) {
                 append_buffer.push_back(ch.get_value());
             }
+            // LCOV_EXCL_STOP
 
             return tok_result(tokenizer_state_machine_result_type::halt, append_buffer);
         }

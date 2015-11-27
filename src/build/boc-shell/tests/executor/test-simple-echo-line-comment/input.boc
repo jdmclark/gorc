@@ -1,0 +1,5 @@
+echo
+
+# This line comment should not appear in the output
+
+hello;
