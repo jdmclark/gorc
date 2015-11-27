@@ -7,18 +7,23 @@ using tok_result = gorc::tokenizer_state_machine_result;
 tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
 {
     if(ch == '\0') {
+        seen_whitespace = true;
         return accept_immediately(shell_token_type::end_of_file);
     }
     else if(std::isspace(ch)) {
+        seen_whitespace = true;
         return discard_directive(tokenizer_state::initial);
     }
     else if(ch == '#') {
+        seen_whitespace = true;
         return discard_directive(tokenizer_state::skip_line_comment);
     }
     else if(ch == '|') {
+        seen_whitespace = true;
         return append_then_accept(ch, shell_token_type::punc_pipe);
     }
     else if(ch == ';') {
+        seen_whitespace = true;
         return append_then_accept(ch, shell_token_type::punc_end_command);
     }
     else if(ch == '\"') {
@@ -42,9 +47,16 @@ tok_result shell_tokenizer_state_machine::handle_skip_line_comment_state(char ch
 tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
 {
     if(ch == '\0' ||
+       ch == '#' ||
+       ch == '|' ||
        ch == ';' ||
+       ch == '\"' ||
        std::isspace(ch)) {
-        return accept_immediately(shell_token_type::word);
+        shell_token_type rtype = seen_whitespace ?
+                                 shell_token_type::first_word :
+                                 shell_token_type::successor_word;
+        seen_whitespace = false;
+        return accept_immediately(rtype);
     }
     else {
         return append_directive(tokenizer_state::bareword, ch);
@@ -63,7 +75,11 @@ tok_result shell_tokenizer_state_machine::handle_string_state(char ch)
         return reject_immediately("unescaped newline in string literal");
     }
     else if(ch == '\"') {
-        return skip_then_accept(shell_token_type::word);
+        shell_token_type rtype = seen_whitespace ?
+                                 shell_token_type::first_word :
+                                 shell_token_type::successor_word;
+        seen_whitespace = false;
+        return skip_then_accept(rtype);
     }
     else {
         return append_directive(tokenizer_state::string, ch);

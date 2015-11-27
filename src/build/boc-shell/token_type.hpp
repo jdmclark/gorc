@@ -5,7 +5,8 @@ namespace gorc {
     enum class shell_token_type {
         error,
         end_of_file,
-        word,
+        first_word,
+        successor_word,
 
         punc_pipe,
         punc_end_command

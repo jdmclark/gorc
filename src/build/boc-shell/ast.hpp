@@ -15,14 +15,22 @@ namespace gorc {
              std::string const &value);
     };
 
+    class argument : public visitable_ast_node<argument> {
+    public:
+        ast_list_node<word*> *words;
+
+        argument(diagnostic_context_location const &loc,
+                 ast_list_node<word*> *words);
+    };
+
     /* Commands */
 
     class subcommand : public visitable_ast_node<subcommand> {
     public:
-        ast_list_node<word*> *arguments;
+        ast_list_node<argument*> *arguments;
 
         subcommand(diagnostic_context_location const &loc,
-                   ast_list_node<word*> *arguments);
+                   ast_list_node<argument*> *arguments);
     };
 
     class pipe_command;

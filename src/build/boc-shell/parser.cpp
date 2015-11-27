@@ -23,6 +23,25 @@ namespace {
                                            last.last_col);
     }
 
+    /* Words */
+
+    argument* parse_argument(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // Currently sitting on a first word token
+        ast_list_node<word*> *words =
+            ast.make<ast_list_node<word*>>(tok.get_location());
+        words->elements.push_back(ast.make<word>(tok.get_location(), tok.get_value()));
+        tok.advance();
+
+        while(tok.get_type() == shell_token_type::successor_word) {
+            words->elements.push_back(ast.make<word>(tok.get_location(), tok.get_value()));
+            words->location = location_union(words->location, tok.get_location());
+            tok.advance();
+        }
+
+        return ast.make<argument>(words->location, words);
+    }
+
     /* Statements */
 
     statement* parse_statement(ast_factory &, shell_la_tokenizer &tok);
@@ -34,8 +53,8 @@ namespace {
         ast_list_node<subcommand*> *subcommands =
             ast.make<ast_list_node<subcommand*>>(start_loc);
 
-        ast_list_node<word*> *arguments =
-            ast.make<ast_list_node<word*>>(start_loc);
+        ast_list_node<argument*> *arguments =
+            ast.make<ast_list_node<argument*>>(start_loc);
 
         while(true) {
             if(tok.get_type() == shell_token_type::punc_pipe) {
@@ -49,7 +68,7 @@ namespace {
                         ast.make<subcommand>(arguments->location, arguments));
                 subcommands->location = location_union(subcommands->location,
                                                        tok.get_location());
-                arguments = ast.make<ast_list_node<word*>>(start_loc);
+                arguments = ast.make<ast_list_node<argument*>>(start_loc);
                 tok.advance();
             }
             else if(tok.get_type() == shell_token_type::punc_end_command) {
@@ -65,12 +84,8 @@ namespace {
                                                        tok.get_location());
                 break;
             }
-            else if(tok.get_type() == shell_token_type::word) {
-                arguments->elements.push_back(ast.make<word>(tok.get_location(),
-                                                             tok.get_value()));
-                arguments->location = location_union(arguments->location,
-                                                     tok.get_location());
-                tok.advance();
+            else if(tok.get_type() == shell_token_type::first_word) {
+                arguments->elements.push_back(parse_argument(ast, tok));
             }
             else {
                 diagnostic_context dc(tok.get_location());

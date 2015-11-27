@@ -9,6 +9,26 @@
 
 namespace gorc {
 
+    class boc_shell_word_visitor {
+    public:
+        std::string visit(word &w) {
+            return w.value;
+        }
+    };
+
+    class boc_shell_argument_visitor {
+    public:
+        std::string visit(argument &arg) {
+            boc_shell_word_visitor bswv;
+            std::string assembled_arg;
+            for(auto &part : arg.words->elements) {
+                assembled_arg += ast_visit(bswv, part);
+            }
+
+            return assembled_arg;
+        }
+    };
+
     class boc_shell_program_visitor {
     public:
         int visit(pipe_command &cmd)
@@ -41,18 +61,19 @@ namespace gorc {
 
             std::vector<std::unique_ptr<process>> processes;
 
+            boc_shell_argument_visitor bsav;
             while(sub_it != cmd.subcommands->elements.end() &&
                   stdin_it != stdin_pipes.end() &&
                   stdout_it != stdout_pipes.end()) {
                 auto &sub_args = (*sub_it)->arguments->elements;
 
                 // First token is the program to execute
-                std::string prog = sub_args.front()->value;
+                std::string prog = ast_visit(bsav, sub_args.front());
                 std::vector<std::string> args;
                 for(auto it = sub_args.begin() + 1;
                     it != sub_args.end();
                     ++it) {
-                    args.push_back((*it)->value);
+                    args.push_back(ast_visit(bsav, *it));
                 }
 
                 processes.push_back(make_unique<process>(prog,

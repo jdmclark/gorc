@@ -8,8 +8,16 @@ gorc::word::word(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::argument::argument(diagnostic_context_location const &loc,
+                         ast_list_node<word*> *words)
+    : visitable_ast_node(loc)
+    , words(words)
+{
+    return;
+}
+
 gorc::subcommand::subcommand(diagnostic_context_location const &loc,
-                             ast_list_node<word*> *arguments)
+                             ast_list_node<argument*> *arguments)
     : visitable_ast_node(loc)
     , arguments(arguments)
 {
