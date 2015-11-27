@@ -21,6 +21,9 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     else if(ch == ';') {
         return append_then_accept(ch, shell_token_type::punc_end_command);
     }
+    else if(ch == '\"') {
+        return skip_directive(tokenizer_state::string);
+    }
     else {
         return append_directive(tokenizer_state::bareword, ch);
     }
@@ -48,6 +51,53 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
     }
 }
 
+tok_result shell_tokenizer_state_machine::handle_string_state(char ch)
+{
+    if(ch == '\\') {
+        return skip_directive(tokenizer_state::escape_sequence);
+    }
+    else if(ch == '\0') {
+        return reject_immediately("unexpected eof in string literal");
+    }
+    else if(ch == '\n') {
+        return reject_immediately("unescaped newline in string literal");
+    }
+    else if(ch == '\"') {
+        return skip_then_accept(shell_token_type::word);
+    }
+    else {
+        return append_directive(tokenizer_state::string, ch);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_escape_sequence_state(char ch)
+{
+    char append_char = '\0';
+
+    switch(ch) {
+    case '\0':
+        return reject_immediately("unexpected eof in string literal escape sequence");
+
+    case '\"':
+    case '\\':
+        append_char = ch;
+        break;
+
+    case 'n':
+        append_char = '\n';
+        break;
+
+    case '\n':
+        // Consume escaped newlines
+        return skip_directive(tokenizer_state::string);
+
+    default:
+        return reject_immediately(str(format("unknown escape sequence '\\%c'") % ch));
+    };
+
+    return append_directive(tokenizer_state::string, append_char);
+}
+
 tok_result shell_tokenizer_state_machine::handle(char ch)
 {
     switch(current_state) {
@@ -64,6 +114,12 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::bareword:
         return handle_bareword_state(ch);
+
+    case tokenizer_state::string:
+        return handle_string_state(ch);
+
+    case tokenizer_state::escape_sequence:
+        return handle_escape_sequence_state(ch);
 
 // LCOV_EXCL_START
     }
