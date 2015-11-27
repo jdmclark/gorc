@@ -13,10 +13,7 @@ namespace gorc {
             accept,
             initial,
             skip_line_comment,
-            bareword,
-            string,
-            escape_sequence,
-            seen_dollar
+            bareword
         };
 
         tokenizer_state current_state = tokenizer_state::initial;
@@ -84,9 +81,6 @@ namespace gorc {
         tok_result handle_initial_state(char ch);
         tok_result handle_skip_line_comment_state(char ch);
         tok_result handle_bareword_state(char ch);
-        tok_result handle_string_state(char ch);
-        tok_result handle_escape_sequence_state(char ch);
-        tok_result handle_seen_dollar_state(char ch);
 
     public:
         virtual tokenizer_state_machine_result handle(char ch) override;
