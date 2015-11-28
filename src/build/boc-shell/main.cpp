@@ -5,14 +5,33 @@
 #include "io/native_file.hpp"
 #include "system/process.hpp"
 #include "system/pipe.hpp"
+#include "system/env.hpp"
 #include <algorithm>
+#include <unordered_map>
 
 namespace gorc {
 
+    std::unordered_map<std::string, std::string> variable_map;
+
     class boc_shell_word_visitor {
     public:
-        std::string visit(word &w) {
+        std::string visit(simple_word &w) {
             return w.value;
+        }
+
+        std::string visit(variable_name &var) {
+            auto it = variable_map.find(var.name);
+            if(it != variable_map.end()) {
+                return it->second;
+            }
+
+            auto value = get_environment_variable(var.name);
+            if(value.has_value()) {
+                return value.get_value();
+            }
+            else {
+                LOG_FATAL(format("variable '%s' is undefined") % var.name);
+            }
         }
     };
 
@@ -22,7 +41,7 @@ namespace gorc {
             boc_shell_word_visitor bswv;
             std::string assembled_arg;
             for(auto &part : arg.words->elements) {
-                assembled_arg += ast_visit(bswv, part);
+                assembled_arg += ast_visit(bswv, *part);
             }
 
             return assembled_arg;
@@ -97,6 +116,14 @@ namespace gorc {
         int visit(command_statement &cmd)
         {
             return ast_visit(*this, *cmd.cmd);
+        }
+
+        int visit(assignment_statement &s)
+        {
+            boc_shell_argument_visitor bsav;
+            variable_map.emplace(s.var->name, ast_visit(bsav, s.value));
+
+            return EXIT_SUCCESS;
         }
 
         int visit(ast_list_node<statement*> &stmt_seq)

@@ -1,9 +1,17 @@
 #include "ast.hpp"
 
-gorc::word::word(diagnostic_context_location const &loc,
-                 std::string const &v)
+gorc::simple_word::simple_word(diagnostic_context_location const &loc,
+                               std::string const &v)
     : visitable_ast_node(loc)
     , value(v)
+{
+    return;
+}
+
+gorc::variable_name::variable_name(diagnostic_context_location const &loc,
+                                   std::string const &name)
+    : visitable_ast_node(loc)
+    , name(name)
 {
     return;
 }
@@ -36,6 +44,16 @@ gorc::command_statement::command_statement(diagnostic_context_location const &lo
                                            command *cmd)
     : visitable_ast_node(loc)
     , cmd(cmd)
+{
+    return;
+}
+
+gorc::assignment_statement::assignment_statement(diagnostic_context_location const &loc,
+                                                 variable_name *var,
+                                                 argument *value)
+    : visitable_ast_node(loc)
+    , var(var)
+    , value(value)
 {
     return;
 }

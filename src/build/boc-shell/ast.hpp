@@ -7,12 +7,26 @@ namespace gorc {
 
     /* General */
 
-    class word : public visitable_ast_node<word> {
+    class simple_word;
+    class variable_name;
+
+    using word = variant<simple_word*,
+                         variable_name*>;
+
+    class simple_word : public visitable_ast_node<simple_word> {
     public:
         std::string value;
 
-        word(diagnostic_context_location const &loc,
-             std::string const &value);
+        simple_word(diagnostic_context_location const &loc,
+                    std::string const &value);
+    };
+
+    class variable_name : public visitable_ast_node<variable_name> {
+    public:
+        std::string name;
+
+        variable_name(diagnostic_context_location const &loc,
+                      std::string const &name);
     };
 
     class argument : public visitable_ast_node<argument> {
@@ -47,7 +61,9 @@ namespace gorc {
     /* Statements */
 
     class command_statement;
-    using statement = variant<command_statement*>;
+    class assignment_statement;
+    using statement = variant<command_statement*,
+                              assignment_statement*>;
 
     class command_statement : public visitable_ast_node<command_statement> {
     public:
@@ -55,6 +71,16 @@ namespace gorc {
 
         command_statement(diagnostic_context_location const &loc,
                           command *cmd);
+    };
+
+    class assignment_statement : public visitable_ast_node<assignment_statement> {
+    public:
+        variable_name *var;
+        argument *value;
+
+        assignment_statement(diagnostic_context_location const &loc,
+                             variable_name *var,
+                             argument *value);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

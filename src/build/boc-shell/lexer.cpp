@@ -7,7 +7,6 @@ using tok_result = gorc::tokenizer_state_machine_result;
 tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
 {
     if(ch == '\0') {
-        seen_whitespace = true;
         return accept_immediately(shell_token_type::end_of_file);
     }
     else if(std::isspace(ch)) {
@@ -19,17 +18,30 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
         return discard_directive(tokenizer_state::skip_line_comment);
     }
     else if(ch == '|') {
-        seen_whitespace = true;
         return append_then_accept(ch, shell_token_type::punc_pipe);
     }
     else if(ch == ';') {
-        seen_whitespace = true;
         return append_then_accept(ch, shell_token_type::punc_end_command);
     }
+    else if(ch == '=') {
+        return append_then_accept(ch, shell_token_type::punc_assign);
+    }
+    else if(seen_whitespace &&
+            (current_type == shell_token_type::word ||
+             current_type == shell_token_type::variable_name)) {
+        // Glue token separated by whitespace. Delimit.
+        return accept_immediately(shell_token_type::punc_whitespace);
+    }
+    else if(ch == '$') {
+        seen_whitespace = false;
+        return skip_directive(tokenizer_state::seen_dollar);
+    }
     else if(ch == '\"') {
+        seen_whitespace = false;
         return skip_directive(tokenizer_state::string);
     }
     else {
+        seen_whitespace = false;
         return append_directive(tokenizer_state::bareword, ch);
     }
 }
@@ -52,11 +64,7 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
        ch == ';' ||
        ch == '\"' ||
        std::isspace(ch)) {
-        shell_token_type rtype = seen_whitespace ?
-                                 shell_token_type::first_word :
-                                 shell_token_type::successor_word;
-        seen_whitespace = false;
-        return accept_immediately(rtype);
+        return accept_immediately(shell_token_type::word);
     }
     else {
         return append_directive(tokenizer_state::bareword, ch);
@@ -75,11 +83,7 @@ tok_result shell_tokenizer_state_machine::handle_string_state(char ch)
         return reject_immediately("unescaped newline in string literal");
     }
     else if(ch == '\"') {
-        shell_token_type rtype = seen_whitespace ?
-                                 shell_token_type::first_word :
-                                 shell_token_type::successor_word;
-        seen_whitespace = false;
-        return skip_then_accept(rtype);
+        return skip_then_accept(shell_token_type::word);
     }
     else {
         return append_directive(tokenizer_state::string, ch);
@@ -114,6 +118,29 @@ tok_result shell_tokenizer_state_machine::handle_escape_sequence_state(char ch)
     return append_directive(tokenizer_state::string, append_char);
 }
 
+tok_result shell_tokenizer_state_machine::handle_seen_dollar_state(char ch)
+{
+    if(ch == '(') {
+        return skip_directive(tokenizer_state::variable_name);
+    }
+    else {
+        return reject_immediately("expected subshell or variable name");
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_variable_name_state(char ch)
+{
+    if(ch == '\0') {
+        return reject_immediately("unexpected eof in subshell or variable name");
+    }
+    else if(ch == ')') {
+        return skip_then_accept(shell_token_type::variable_name);
+    }
+    else {
+        return append_directive(tokenizer_state::variable_name, ch);
+    }
+}
+
 tok_result shell_tokenizer_state_machine::handle(char ch)
 {
     switch(current_state) {
@@ -136,6 +163,12 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::escape_sequence:
         return handle_escape_sequence_state(ch);
+
+    case tokenizer_state::seen_dollar:
+        return handle_seen_dollar_state(ch);
+
+    case tokenizer_state::variable_name:
+        return handle_variable_name_state(ch);
 
 // LCOV_EXCL_START
     }

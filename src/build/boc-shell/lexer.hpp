@@ -14,15 +14,17 @@ namespace gorc {
             initial,
             skip_line_comment,
             bareword,
+            seen_dollar,
             string,
-            escape_sequence
+            escape_sequence,
+            variable_name
         };
 
         tokenizer_state current_state = tokenizer_state::initial;
         shell_token_type current_type = shell_token_type::error;
         std::string reason;
         std::string append_buffer;
-        bool seen_whitespace = true;
+        bool seen_whitespace = false;
 
         inline tok_result append_directive(tokenizer_state new_state,
                                            char ch)
@@ -89,6 +91,8 @@ namespace gorc {
         tok_result handle_bareword_state(char ch);
         tok_result handle_string_state(char ch);
         tok_result handle_escape_sequence_state(char ch);
+        tok_result handle_seen_dollar_state(char ch);
+        tok_result handle_variable_name_state(char ch);
 
     public:
         virtual tokenizer_state_machine_result handle(char ch) override;

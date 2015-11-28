@@ -1,0 +1,3 @@
+$(A_DOT_T) = "a.t";
+
+cat "dat"$(A_DOT_T)"xt";

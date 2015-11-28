@@ -1,0 +1,1 @@
+[ERROR] input.boc:1:1-1:1: expected subshell or variable name
