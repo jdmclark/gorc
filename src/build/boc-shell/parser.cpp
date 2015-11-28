@@ -246,7 +246,7 @@ namespace {
         }
     }
 
-    ast_list_node<statement*>* parse_script_file_contents(ast_factory &ast, shell_la_tokenizer &tok)
+    ast_list_node<statement*>* parse_statement_seq(ast_factory &ast, shell_la_tokenizer &tok)
     {
         auto start_loc = tok.get_location();
 
@@ -309,7 +309,7 @@ namespace {
         shell_tokenizer tok(*nf);
         shell_la_tokenizer latok(tok, 2);
 
-        return parse_script_file_contents(ast, latok);
+        return parse_statement_seq(ast, latok);
     }
 }
 
