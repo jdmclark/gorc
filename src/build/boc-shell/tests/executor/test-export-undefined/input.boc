@@ -1,0 +1,3 @@
+export $(HELLO_MSG);
+
+$(BOC_SHELL) --script echo.boc;

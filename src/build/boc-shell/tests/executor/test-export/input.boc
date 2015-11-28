@@ -1,0 +1,4 @@
+$(HELLO_MSG) = "Hello, World!";
+export $(HELLO_MSG);
+
+$(BOC_SHELL) --script echo.boc;

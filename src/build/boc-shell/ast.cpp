@@ -58,6 +58,14 @@ gorc::assignment_statement::assignment_statement(diagnostic_context_location con
     return;
 }
 
+gorc::export_statement::export_statement(diagnostic_context_location const &loc,
+                                         variable_name *var)
+    : visitable_ast_node(loc)
+    , var(var)
+{
+    return;
+}
+
 gorc::translation_unit::translation_unit(diagnostic_context_location const &loc,
                                          ast_list_node<statement*> *code)
     : visitable_ast_node(loc)

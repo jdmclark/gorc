@@ -1,0 +1,1 @@
+[ERROR] input.boc:1:7-1:12: expected whitespace, found 'FOO'

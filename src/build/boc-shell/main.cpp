@@ -126,6 +126,17 @@ namespace gorc {
             return EXIT_SUCCESS;
         }
 
+        int visit(export_statement &s)
+        {
+            auto it = variable_map.find(s.var->name);
+            if(it == variable_map.end()) {
+                LOG_FATAL(format("variable '%s' is undefined") % s.var->name);
+            }
+
+            set_environment_variable(s.var->name, it->second);
+            return EXIT_SUCCESS;
+        }
+
         int visit(ast_list_node<statement*> &stmt_seq)
         {
             for(auto &stmt : stmt_seq.elements) {

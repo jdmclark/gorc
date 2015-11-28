@@ -62,6 +62,8 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
        ch == '#' ||
        ch == '|' ||
        ch == ';' ||
+       ch == '=' ||
+       ch == '$' ||
        ch == '\"' ||
        std::isspace(ch)) {
         return accept_immediately(shell_token_type::word);

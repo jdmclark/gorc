@@ -104,6 +104,7 @@ namespace {
         argument *value = parse_argument(ast, tok);
 
         if(tok.get_type() != shell_token_type::punc_end_command) {
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
         }
 
@@ -111,6 +112,40 @@ namespace {
                 location_union(vn->location, tok.get_location()),
                 vn,
                 value);
+        tok.advance();
+        return rv;
+    }
+
+    statement* parse_export_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // On 'export'
+        auto start_loc = tok.get_location();
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_whitespace) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected whitespace, found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::variable_name) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected variable name, found '%s'") % tok.get_value());
+        }
+
+        variable_name *vn = ast.make<variable_name>(tok.get_location(),
+                                                    tok.get_value());
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_end_command) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
+        }
+
+        statement *rv = ast.make_var<statement, export_statement>(
+                location_union(start_loc, tok.get_location()),
+                vn);
         tok.advance();
         return rv;
     }
@@ -152,8 +187,10 @@ namespace {
 
     statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
-        // TODO: Other statement types
-        if(tok.get_token(1).type == shell_token_type::punc_assign) {
+        if(tok.get_value() == "export") {
+            return parse_export_statement(ast, tok);
+        }
+        else if(tok.get_token(1).type == shell_token_type::punc_assign) {
             return parse_assignment_statement(ast, tok);
         }
         else {

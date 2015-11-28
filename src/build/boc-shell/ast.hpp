@@ -62,8 +62,10 @@ namespace gorc {
 
     class command_statement;
     class assignment_statement;
+    class export_statement;
     using statement = variant<command_statement*,
-                              assignment_statement*>;
+                              assignment_statement*,
+                              export_statement*>;
 
     class command_statement : public visitable_ast_node<command_statement> {
     public:
@@ -81,6 +83,14 @@ namespace gorc {
         assignment_statement(diagnostic_context_location const &loc,
                              variable_name *var,
                              argument *value);
+    };
+
+    class export_statement : public visitable_ast_node<export_statement> {
+    public:
+        variable_name *var;
+
+        export_statement(diagnostic_context_location const &loc,
+                         variable_name *var);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

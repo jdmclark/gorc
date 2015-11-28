@@ -1,6 +1,6 @@
 include ../../../../../../rules/test.mk
 
-BOC_SHELL:=$(BUILD_BIN)/boc-shell
+export BOC_SHELL:=$(BUILD_BIN)/boc-shell
 BOC_SHELL_OPTS:=
 
 run-input-boc:
