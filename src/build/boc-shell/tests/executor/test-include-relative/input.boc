@@ -1,0 +1,2 @@
+include subdir/a.boc;
+echo "from input";

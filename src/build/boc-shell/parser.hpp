@@ -1,11 +1,11 @@
 #pragma once
 
-#include "lexer.hpp"
-#include "ast/factory.hpp"
+#include "io/path.hpp"
 #include "ast.hpp"
+#include "ast/factory.hpp"
 
 namespace gorc {
 
-    translation_unit* parse_shell_script(ast_factory &factory, shell_tokenizer &);
+    translation_unit* parse_shell_script(path const &fn, ast_factory &);
 
 }

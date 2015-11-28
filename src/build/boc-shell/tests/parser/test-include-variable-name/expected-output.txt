@@ -1,0 +1,1 @@
+[ERROR] input.boc:1:9-1:14: expected constant filename, found 'FOO'

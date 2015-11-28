@@ -3,7 +3,12 @@
 #include "ast/variant_location_visitor.hpp"
 #include "utility/string_view.hpp"
 #include "text/lookahead_tokenizer.hpp"
+#include "io/native_file.hpp"
+#include "ast/factory.hpp"
+#include "lexer.hpp"
+#include <stack>
 #include <sstream>
+#include <boost/filesystem.hpp>
 
 using namespace gorc;
 
@@ -11,17 +16,22 @@ namespace {
 
     // Helpers
 
+    std::stack<char const *> current_filename_stack;
+    std::stack<path> current_path_stack;
+
     using shell_la_tokenizer = token_lookahead<shell_tokenizer>;
 
     diagnostic_context_location location_union(diagnostic_context_location const &first,
                                                diagnostic_context_location const &last)
     {
-        return diagnostic_context_location(nothing,
+        return diagnostic_context_location(first.filename,
                                            first.first_line,
                                            first.first_col,
                                            last.last_line,
                                            last.last_col);
     }
+
+    ast_list_node<statement*>* parse_shell_script_file(path const &filename, ast_factory &ast);
 
     /* Words */
 
@@ -116,6 +126,41 @@ namespace {
         return rv;
     }
 
+    statement* parse_include_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // On 'include'
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_whitespace) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected whitespace, found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::word) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected constant filename, found '%s'") % tok.get_value());
+        }
+
+        std::string fn = tok.get_value();
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_end_command) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        // Process include
+        ast_list_node<statement*> *contents = parse_shell_script_file(fn, ast);
+
+        return ast.make_var<statement, compound_statement>(
+                contents->location,
+                contents);
+    }
+
     statement* parse_export_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         // On 'export'
@@ -187,7 +232,10 @@ namespace {
 
     statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
-        if(tok.get_value() == "export") {
+        if(tok.get_value() == "include") {
+            return parse_include_statement(ast, tok);
+        }
+        else if(tok.get_value() == "export") {
             return parse_export_statement(ast, tok);
         }
         else if(tok.get_token(1).type == shell_token_type::punc_assign) {
@@ -198,7 +246,7 @@ namespace {
         }
     }
 
-    translation_unit* parse_translation_unit(ast_factory &ast, shell_la_tokenizer &tok)
+    ast_list_node<statement*>* parse_script_file_contents(ast_factory &ast, shell_la_tokenizer &tok)
     {
         auto start_loc = tok.get_location();
 
@@ -216,15 +264,57 @@ namespace {
                                                       *code->elements.back()));
         }
 
-        return ast.make<translation_unit>(location_union(start_loc,
-                                                         tok.get_location()),
-                                          code);
+        code->location.filename = current_filename_stack.top();
+
+        return code;
     }
 
+    ast_list_node<statement*>* parse_shell_script_file(path const &filename, ast_factory &ast)
+    {
+        class scoped_fn_details {
+        public:
+            scoped_fn_details(char const *fn, path const &p)
+            {
+                current_filename_stack.push(fn);
+                current_path_stack.push(p);
+            }
+
+            ~scoped_fn_details()
+            {
+                current_filename_stack.pop();
+                current_path_stack.pop();
+            }
+        };
+
+        path adjusted_filename;
+        if(current_path_stack.empty() || filename.is_absolute()) {
+            adjusted_filename = filename;
+        }
+        else {
+            adjusted_filename = current_path_stack.top().parent_path() / filename;
+        }
+
+        std::string *fn_node = ast.make<std::string>(adjusted_filename.native());
+        scoped_fn_details sfd(fn_node->c_str(), adjusted_filename);
+
+        diagnostic_context dc(fn_node->c_str());
+        std::unique_ptr<input_stream> nf;
+        try {
+            nf = make_native_read_only_file(adjusted_filename);
+        }
+        catch(std::exception const &e) {
+            LOG_FATAL(e.what());
+        }
+
+        shell_tokenizer tok(*nf);
+        shell_la_tokenizer latok(tok, 2);
+
+        return parse_script_file_contents(ast, latok);
+    }
 }
 
-translation_unit* gorc::parse_shell_script(ast_factory &factory, shell_tokenizer &tok)
+translation_unit* gorc::parse_shell_script(path const &filename, ast_factory &ast)
 {
-    shell_la_tokenizer latok(tok, 2);
-    return parse_translation_unit(factory, latok);
+    ast_list_node<statement*> *code = parse_shell_script_file(filename, ast);
+    return ast.make<translation_unit>(code->location, code);
 }

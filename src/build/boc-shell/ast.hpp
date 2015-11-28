@@ -60,12 +60,22 @@ namespace gorc {
 
     /* Statements */
 
+    class compound_statement;
     class command_statement;
     class assignment_statement;
     class export_statement;
-    using statement = variant<command_statement*,
+    using statement = variant<compound_statement*,
+                              command_statement*,
                               assignment_statement*,
                               export_statement*>;
+
+    class compound_statement : public visitable_ast_node<compound_statement> {
+    public:
+        ast_list_node<statement*> *code;
+
+        compound_statement(diagnostic_context_location const &loc,
+                           ast_list_node<statement*> *code);
+    };
 
     class command_statement : public visitable_ast_node<command_statement> {
     public:

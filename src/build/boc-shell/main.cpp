@@ -1,6 +1,5 @@
 #include "program/program.hpp"
 #include "ast.hpp"
-#include "lexer.hpp"
 #include "parser.hpp"
 #include "io/native_file.hpp"
 #include "system/process.hpp"
@@ -151,6 +150,11 @@ namespace gorc {
             return EXIT_SUCCESS;
         }
 
+        int visit(compound_statement &stmt)
+        {
+            return ast_visit(*this, stmt.code);
+        }
+
         int visit(translation_unit &tu)
         {
             return ast_visit(*this, tu.code);
@@ -173,11 +177,8 @@ namespace gorc {
         virtual int main() override
         {
             // Parse script file
-            diagnostic_context dc(script_filename.c_str());
-            auto nf = make_native_read_only_file(script_filename);
             ast_factory ast;
-            shell_tokenizer tok(*nf);
-            translation_unit *tu = parse_shell_script(ast, tok);
+            translation_unit *tu = parse_shell_script(script_filename, ast);
 
             if(parse_only) {
                 return EXIT_SUCCESS;

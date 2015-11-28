@@ -1,0 +1,3 @@
+include a.boc;
+echo "from input";
+include b.boc;

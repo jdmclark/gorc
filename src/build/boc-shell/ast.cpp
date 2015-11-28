@@ -40,6 +40,14 @@ gorc::pipe_command::pipe_command(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::compound_statement::compound_statement(diagnostic_context_location const &loc,
+                                             ast_list_node<statement*> *code)
+    : visitable_ast_node(loc)
+    , code(code)
+{
+    return;
+}
+
 gorc::command_statement::command_statement(diagnostic_context_location const &loc,
                                            command *cmd)
     : visitable_ast_node(loc)
