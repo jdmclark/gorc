@@ -17,7 +17,8 @@ namespace gorc {
             seen_dollar,
             string,
             escape_sequence,
-            variable_name
+            variable_name,
+            environment_variable_name
         };
 
         tokenizer_state current_state = tokenizer_state::initial;
@@ -93,6 +94,7 @@ namespace gorc {
         tok_result handle_escape_sequence_state(char ch);
         tok_result handle_seen_dollar_state(char ch);
         tok_result handle_variable_name_state(char ch);
+        tok_result handle_environment_variable_name_state(char ch);
 
     public:
         virtual tokenizer_state_machine_result handle(char ch) override;

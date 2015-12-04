@@ -9,9 +9,14 @@ namespace gorc {
 
     class simple_word;
     class variable_name;
+    class environment_variable_name;
+
+    using lvalue = variant<variable_name*,
+                           environment_variable_name*>;
 
     using word = variant<simple_word*,
-                         variable_name*>;
+                         variable_name*,
+                         environment_variable_name*>;
 
     class simple_word : public visitable_ast_node<simple_word> {
     public:
@@ -27,6 +32,14 @@ namespace gorc {
 
         variable_name(diagnostic_context_location const &loc,
                       std::string const &name);
+    };
+
+    class environment_variable_name : public visitable_ast_node<environment_variable_name> {
+    public:
+        std::string name;
+
+        environment_variable_name(diagnostic_context_location const &loc,
+                                  std::string const &name);
     };
 
     class argument : public visitable_ast_node<argument> {
@@ -63,11 +76,9 @@ namespace gorc {
     class compound_statement;
     class command_statement;
     class assignment_statement;
-    class export_statement;
     using statement = variant<compound_statement*,
                               command_statement*,
-                              assignment_statement*,
-                              export_statement*>;
+                              assignment_statement*>;
 
     class compound_statement : public visitable_ast_node<compound_statement> {
     public:
@@ -87,20 +98,12 @@ namespace gorc {
 
     class assignment_statement : public visitable_ast_node<assignment_statement> {
     public:
-        variable_name *var;
+        lvalue *var;
         argument *value;
 
         assignment_statement(diagnostic_context_location const &loc,
-                             variable_name *var,
+                             lvalue *var,
                              argument *value);
-    };
-
-    class export_statement : public visitable_ast_node<export_statement> {
-    public:
-        variable_name *var;
-
-        export_statement(diagnostic_context_location const &loc,
-                         variable_name *var);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

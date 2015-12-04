@@ -1,4 +1,2 @@
-$(HELLO_MSG) = "Hello, World!";
-export $(HELLO_MSG);
-
-$(BOC_SHELL) --script echo.boc;
+$[HELLO_MSG] = "Hello, World!";
+$[BOC_SHELL] --script echo.boc;

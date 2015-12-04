@@ -28,7 +28,8 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     }
     else if(seen_whitespace &&
             (current_type == shell_token_type::word ||
-             current_type == shell_token_type::variable_name)) {
+             current_type == shell_token_type::variable_name ||
+             current_type == shell_token_type::environment_variable_name)) {
         // Glue token separated by whitespace. Delimit.
         return accept_immediately(shell_token_type::punc_whitespace);
     }
@@ -125,6 +126,9 @@ tok_result shell_tokenizer_state_machine::handle_seen_dollar_state(char ch)
     if(ch == '(') {
         return skip_directive(tokenizer_state::variable_name);
     }
+    else if(ch == '[') {
+        return skip_directive(tokenizer_state::environment_variable_name);
+    }
     else {
         return reject_immediately("expected subshell or variable name");
     }
@@ -133,13 +137,26 @@ tok_result shell_tokenizer_state_machine::handle_seen_dollar_state(char ch)
 tok_result shell_tokenizer_state_machine::handle_variable_name_state(char ch)
 {
     if(ch == '\0') {
-        return reject_immediately("unexpected eof in subshell or variable name");
+        return reject_immediately("unexpected eof in variable name");
     }
     else if(ch == ')') {
         return skip_then_accept(shell_token_type::variable_name);
     }
     else {
         return append_directive(tokenizer_state::variable_name, ch);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_environment_variable_name_state(char ch)
+{
+    if(ch == '\0') {
+        return reject_immediately("unexpected eof in environment variable name");
+    }
+    else if(ch == ']') {
+        return skip_then_accept(shell_token_type::environment_variable_name);
+    }
+    else {
+        return append_directive(tokenizer_state::environment_variable_name, ch);
     }
 }
 
@@ -171,6 +188,9 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::variable_name:
         return handle_variable_name_state(ch);
+
+    case tokenizer_state::environment_variable_name:
+        return handle_environment_variable_name_state(ch);
 
 // LCOV_EXCL_START
     }

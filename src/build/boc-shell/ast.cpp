@@ -16,6 +16,14 @@ gorc::variable_name::variable_name(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::environment_variable_name::environment_variable_name(diagnostic_context_location const &loc,
+                                                           std::string const &name)
+    : visitable_ast_node(loc)
+    , name(name)
+{
+    return;
+}
+
 gorc::argument::argument(diagnostic_context_location const &loc,
                          ast_list_node<word*> *words)
     : visitable_ast_node(loc)
@@ -57,19 +65,11 @@ gorc::command_statement::command_statement(diagnostic_context_location const &lo
 }
 
 gorc::assignment_statement::assignment_statement(diagnostic_context_location const &loc,
-                                                 variable_name *var,
+                                                 lvalue *var,
                                                  argument *value)
     : visitable_ast_node(loc)
     , var(var)
     , value(value)
-{
-    return;
-}
-
-gorc::export_statement::export_statement(diagnostic_context_location const &loc,
-                                         variable_name *var)
-    : visitable_ast_node(loc)
-    , var(var)
 {
     return;
 }

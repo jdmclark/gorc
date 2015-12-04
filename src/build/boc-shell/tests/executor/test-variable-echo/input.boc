@@ -1,1 +1,2 @@
+$(HELLO_MSG) = ThisIsTheExpectedMessage;
 echo $(HELLO_MSG);

@@ -1,1 +1,1 @@
-[ERROR] input.boc:1:1-1:20: variable 'HELLO_MSG' is undefined
+[ERROR] input.boc:1:6-1:17: environment variable 'HELLO_MSG' is undefined

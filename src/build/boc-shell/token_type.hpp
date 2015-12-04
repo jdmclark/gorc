@@ -7,6 +7,7 @@ namespace gorc {
         end_of_file,
         word,
         variable_name,
+        environment_variable_name,
 
         punc_assign,
         punc_whitespace,

@@ -12,6 +12,27 @@ namespace gorc {
 
     std::unordered_map<std::string, std::string> variable_map;
 
+    class boc_shell_assign_lvalue_visitor {
+    public:
+        std::string const &value;
+
+        boc_shell_assign_lvalue_visitor(std::string const &value)
+            : value(value)
+        {
+            return;
+        }
+
+        void visit(variable_name &var) const
+        {
+            variable_map[var.name] = value;
+        }
+
+        void visit(environment_variable_name &var) const
+        {
+            set_environment_variable(var.name, value);
+        }
+    };
+
     class boc_shell_word_visitor {
     public:
         std::string visit(simple_word &w) {
@@ -24,12 +45,16 @@ namespace gorc {
                 return it->second;
             }
 
+            LOG_FATAL(format("variable '%s' is undefined") % var.name);
+        }
+
+        std::string visit(environment_variable_name &var) {
             auto value = get_environment_variable(var.name);
             if(value.has_value()) {
                 return value.get_value();
             }
             else {
-                LOG_FATAL(format("variable '%s' is undefined") % var.name);
+                LOG_FATAL(format("environment variable '%s' is undefined") % var.name);
             }
         }
     };
@@ -120,19 +145,10 @@ namespace gorc {
         int visit(assignment_statement &s)
         {
             boc_shell_argument_visitor bsav;
-            variable_map.emplace(s.var->name, ast_visit(bsav, s.value));
+            std::string value = ast_visit(bsav, s.value);
 
-            return EXIT_SUCCESS;
-        }
+            ast_visit(boc_shell_assign_lvalue_visitor(value), *s.var);
 
-        int visit(export_statement &s)
-        {
-            auto it = variable_map.find(s.var->name);
-            if(it == variable_map.end()) {
-                LOG_FATAL(format("variable '%s' is undefined") % s.var->name);
-            }
-
-            set_environment_variable(s.var->name, it->second);
             return EXIT_SUCCESS;
         }
 
