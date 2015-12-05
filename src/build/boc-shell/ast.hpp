@@ -5,6 +5,54 @@
 
 namespace gorc {
 
+    enum class unary_operator {
+        logical_not
+    };
+
+    enum class infix_operator {
+        equal,
+        not_equal
+    };
+
+    /* Expression */
+    class argument_expression;
+    class unary_expression;
+    class infix_expression;
+    using expression = variant<argument_expression*,
+                               unary_expression*,
+                               infix_expression*>;
+
+    class argument;
+    class argument_expression : public visitable_ast_node<argument_expression> {
+    public:
+        argument *value;
+
+        argument_expression(diagnostic_context_location const &loc,
+                            argument *value);
+    };
+
+    class unary_expression : public visitable_ast_node<unary_expression> {
+    public:
+        expression *value;
+        unary_operator op;
+
+        unary_expression(diagnostic_context_location const &loc,
+                         expression *value,
+                         unary_operator op);
+    };
+
+    class infix_expression : public visitable_ast_node<infix_expression> {
+    public:
+        expression *left;
+        expression *right;
+        infix_operator op;
+
+        infix_expression(diagnostic_context_location const &loc,
+                         expression *left,
+                         expression *right,
+                         infix_operator op);
+    };
+
     /* General */
 
     class simple_word;
@@ -77,10 +125,14 @@ namespace gorc {
     class command_statement;
     class var_declaration_statement;
     class assignment_statement;
+    class if_statement;
+    class if_else_statement;
     using statement = variant<compound_statement*,
                               command_statement*,
                               var_declaration_statement*,
-                              assignment_statement*>;
+                              assignment_statement*,
+                              if_statement*,
+                              if_else_statement*>;
 
     class compound_statement : public visitable_ast_node<compound_statement> {
     public:
@@ -116,6 +168,28 @@ namespace gorc {
         assignment_statement(diagnostic_context_location const &loc,
                              lvalue *var,
                              argument *value);
+    };
+
+    class if_statement : public visitable_ast_node<if_statement> {
+    public:
+        expression *condition;
+        statement *code;
+
+        if_statement(diagnostic_context_location const &loc,
+                     expression *condition,
+                     statement *code);
+    };
+
+    class if_else_statement : public visitable_ast_node<if_else_statement> {
+    public:
+        expression *condition;
+        statement *code;
+        statement *elsecode;
+
+        if_else_statement(diagnostic_context_location const &loc,
+                          expression *condition,
+                          statement *code,
+                          statement *elsecode);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

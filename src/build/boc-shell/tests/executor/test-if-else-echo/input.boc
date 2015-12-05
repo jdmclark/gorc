@@ -1,0 +1,13 @@
+if(true) {
+    echo "first success";
+}
+else {
+    echo "failure";
+}
+
+if(false) {
+    echo "failure";
+}
+else {
+    echo "second success";
+}

@@ -1,0 +1,7 @@
+if(true) {
+    echo "This message should be printed";
+}
+
+if(false) {
+    echo "This message should not";
+}

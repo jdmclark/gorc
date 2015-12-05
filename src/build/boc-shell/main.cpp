@@ -36,15 +36,18 @@ namespace gorc {
 
     class boc_shell_word_visitor {
     public:
-        std::string visit(simple_word &w) {
+        std::string visit(simple_word &w)
+        {
             return w.value;
         }
 
-        std::string visit(variable_name &var) {
+        std::string visit(variable_name &var)
+        {
             return get_variable_value(var.name);
         }
 
-        std::string visit(environment_variable_name &var) {
+        std::string visit(environment_variable_name &var)
+        {
             auto value = get_environment_variable(var.name);
             if(value.has_value()) {
                 return value.get_value();
@@ -57,7 +60,8 @@ namespace gorc {
 
     class boc_shell_argument_visitor {
     public:
-        std::string visit(argument &arg) {
+        std::string visit(argument &arg) const
+        {
             boc_shell_word_visitor bswv;
             std::string assembled_arg;
             for(auto &part : arg.words->elements) {
@@ -65,6 +69,63 @@ namespace gorc {
             }
 
             return assembled_arg;
+        }
+    };
+
+    class boc_shell_expression_visitor {
+    public:
+        std::string visit(argument_expression &e) const
+        {
+            return ast_visit(boc_shell_argument_visitor(), e.value);
+        }
+
+        std::string visit(unary_expression &e) const
+        {
+            auto sub_value = ast_visit(boc_shell_expression_visitor(), *e.value);
+
+            switch(e.op) {
+            case unary_operator::logical_not:
+                if(sub_value == "true") {
+                    return "false";
+                }
+                else {
+                    return "true";
+                }
+
+// LCOV_EXCL_START
+            }
+
+            // Not coverable
+            LOG_FATAL("unhandled unary operator");
+
+// LCOV_EXCL_STOP
+        }
+
+        std::string visit(infix_expression &e) const
+        {
+            auto left_value = ast_visit(boc_shell_expression_visitor(), *e.left);
+            auto right_value = ast_visit(boc_shell_expression_visitor(), *e.right);
+
+            switch(e.op) {
+            case infix_operator::equal:
+                if(left_value == right_value) {
+                    return "true";
+                }
+                else {
+                    return "false";
+                }
+
+            case infix_operator::not_equal:
+                if(left_value != right_value) {
+                    return "true";
+                }
+                else {
+                    return "false";
+                }
+            }
+
+            // Not coverable
+            LOG_FATAL("unhandled infix operator");
         }
     };
 
@@ -157,6 +218,29 @@ namespace gorc {
             }
 
             create_variable(s.var->name, value);
+
+            return EXIT_SUCCESS;
+        }
+
+        int visit(if_statement &s)
+        {
+            auto cond = ast_visit(boc_shell_expression_visitor(), *s.condition);
+            if(cond == "true") {
+                ast_visit(*this, *s.code);
+            }
+
+            return EXIT_SUCCESS;
+        }
+
+        int visit(if_else_statement &s)
+        {
+            auto cond = ast_visit(boc_shell_expression_visitor(), *s.condition);
+            if(cond == "true") {
+                ast_visit(*this, *s.code);
+            }
+            else {
+                ast_visit(*this, *s.elsecode);
+            }
 
             return EXIT_SUCCESS;
         }

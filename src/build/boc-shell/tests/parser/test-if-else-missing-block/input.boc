@@ -1,0 +1,4 @@
+if(true) {
+    echo foo;
+}
+else echo bar;

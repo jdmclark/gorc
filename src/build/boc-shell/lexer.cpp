@@ -7,6 +7,8 @@ using tok_result = gorc::tokenizer_state_machine_result;
 
 namespace {
     std::unordered_map<std::string, shell_token_type> keyword_map {
+        { "else", shell_token_type::kw_else },
+        { "if", shell_token_type::kw_if },
         { "include", shell_token_type::kw_include },
         { "var", shell_token_type::kw_var }
     };
@@ -31,6 +33,12 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     else if(ch == '}') {
         return append_then_accept(ch, shell_token_type::punc_end_block);
     }
+    else if(ch == '(') {
+        return append_then_accept(ch, shell_token_type::punc_begin_expr);
+    }
+    else if(ch == ')') {
+        return append_then_accept(ch, shell_token_type::punc_end_expr);
+    }
     else if(ch == '|') {
         return append_then_accept(ch, shell_token_type::punc_pipe);
     }
@@ -38,7 +46,10 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
         return append_then_accept(ch, shell_token_type::punc_end_command);
     }
     else if(ch == '=') {
-        return append_then_accept(ch, shell_token_type::punc_assign);
+        return append_directive(tokenizer_state::seen_equal, ch);
+    }
+    else if(ch == '!') {
+        return append_directive(tokenizer_state::seen_excl, ch);
     }
     else if(seen_whitespace &&
             (current_type == shell_token_type::word ||
@@ -83,6 +94,9 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
        ch == '$' ||
        ch == '{' ||
        ch == '}' ||
+       ch == '!' ||
+       ch == '(' ||
+       ch == ')' ||
        ch == '\"' ||
        std::isspace(ch)) {
         // Check if this bare word is a reserved keyword
@@ -144,6 +158,26 @@ tok_result shell_tokenizer_state_machine::handle_escape_sequence_state(char ch)
     };
 
     return append_directive(tokenizer_state::string, append_char);
+}
+
+tok_result shell_tokenizer_state_machine::handle_seen_equal_state(char ch)
+{
+    if(ch == '=') {
+        return append_then_accept(ch, shell_token_type::punc_equal);
+    }
+    else {
+        return accept_immediately(shell_token_type::punc_assign);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_seen_excl_state(char ch)
+{
+    if(ch == '=') {
+        return append_then_accept(ch, shell_token_type::punc_notequal);
+    }
+    else {
+        return accept_immediately(shell_token_type::punc_not);
+    }
 }
 
 tok_result shell_tokenizer_state_machine::handle_seen_dollar_state(char ch)
@@ -210,6 +244,12 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::seen_dollar:
         return handle_seen_dollar_state(ch);
+
+    case tokenizer_state::seen_equal:
+        return handle_seen_equal_state(ch);
+
+    case tokenizer_state::seen_excl:
+        return handle_seen_excl_state(ch);
 
     case tokenizer_state::variable_name:
         return handle_variable_name_state(ch);

@@ -1,5 +1,35 @@
 #include "ast.hpp"
 
+gorc::argument_expression::argument_expression(diagnostic_context_location const &loc,
+                                               argument *value)
+    : visitable_ast_node(loc)
+    , value(value)
+{
+    return;
+}
+
+gorc::unary_expression::unary_expression(diagnostic_context_location const &loc,
+                                         expression *value,
+                                         unary_operator op)
+    : visitable_ast_node(loc)
+    , value(value)
+    , op(op)
+{
+    return;
+}
+
+gorc::infix_expression::infix_expression(diagnostic_context_location const &loc,
+                                         expression *left,
+                                         expression *right,
+                                         infix_operator op)
+    : visitable_ast_node(loc)
+    , left(left)
+    , right(right)
+    , op(op)
+{
+    return;
+}
+
 gorc::simple_word::simple_word(diagnostic_context_location const &loc,
                                std::string const &v)
     : visitable_ast_node(loc)
@@ -80,6 +110,28 @@ gorc::assignment_statement::assignment_statement(diagnostic_context_location con
     : visitable_ast_node(loc)
     , var(var)
     , value(value)
+{
+    return;
+}
+
+gorc::if_statement::if_statement(diagnostic_context_location const &loc,
+                                 expression *condition,
+                                 statement *code)
+    : visitable_ast_node(loc)
+    , condition(condition)
+    , code(code)
+{
+    return;
+}
+
+gorc::if_else_statement::if_else_statement(diagnostic_context_location const &loc,
+                                           expression *condition,
+                                           statement *code,
+                                           statement *elsecode)
+    : visitable_ast_node(loc)
+    , condition(condition)
+    , code(code)
+    , elsecode(elsecode)
 {
     return;
 }

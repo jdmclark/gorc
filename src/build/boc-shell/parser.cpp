@@ -109,6 +109,95 @@ namespace {
         return ast.make<subcommand>(arguments->location, arguments);
     }
 
+    /* Expressions */
+
+    expression* parse_expression(ast_factory &ast, shell_la_tokenizer &tok);
+
+    expression* parse_argument_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        argument *arg = parse_argument(ast, tok);
+        return ast.make_var<expression, argument_expression>(arg->location, arg);
+    }
+
+    expression* parse_primary_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        if(tok.get_type() == shell_token_type::punc_begin_expr) {
+            tok.advance();
+
+            expression *rv = parse_expression(ast, tok);
+
+            if(tok.get_type() != shell_token_type::punc_end_expr) {
+                diagnostic_context dc(tok.get_location());
+                LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
+            }
+
+            tok.advance();
+
+            return rv;
+        }
+        else {
+            return parse_argument_expression(ast, tok);
+        }
+    }
+
+    expression* parse_unary_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        if(tok.get_type() == shell_token_type::punc_not) {
+            auto op = unary_operator::logical_not;
+            auto start_loc = tok.get_location();
+            tok.advance();
+
+            expression *rv = parse_unary_expression(ast, tok);
+
+            return ast.make_var<expression, unary_expression>(
+                    location_union(start_loc, ast_visit(variant_location_visitor(), *rv)),
+                    rv,
+                    op);
+        }
+        else {
+            return parse_primary_expression(ast, tok);
+        }
+    }
+
+    expression* parse_equality_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        expression *rv = parse_unary_expression(ast, tok);
+        while(tok.get_type() == shell_token_type::punc_equal ||
+              tok.get_type() == shell_token_type::punc_notequal) {
+            infix_operator op = infix_operator::equal;
+            switch(tok.get_type()) {
+            case shell_token_type::punc_equal:
+                op = infix_operator::equal;
+                break;
+
+            case shell_token_type::punc_notequal:
+                op = infix_operator::not_equal;
+                break;
+
+// LCOV_EXCL_START
+            default:
+                LOG_FATAL("unhandled infix operator");
+            }
+// LCOV_EXCL_STOP
+
+            tok.advance();
+            expression *right = parse_unary_expression(ast, tok);
+            rv = ast.make_var<expression, infix_expression>(
+                    location_union(ast_visit(variant_location_visitor(), *rv),
+                                   ast_visit(variant_location_visitor(), *right)),
+                    rv,
+                    right,
+                    op);
+        }
+
+        return rv;
+    }
+
+    expression* parse_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        return parse_equality_expression(ast, tok);
+    }
+
     /* Statements */
 
     lvalue* parse_lvalue(ast_factory &ast, shell_la_tokenizer &tok)
@@ -301,13 +390,70 @@ namespace {
                 code);
     }
 
+    statement* parse_if_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // On 'if'
+        auto start_loc = tok.get_location();
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_begin_expr) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected '(', found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        expression *cond = parse_expression(ast, tok);
+
+        if(tok.get_type() != shell_token_type::punc_end_expr) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        statement* body = parse_compound_statement(ast, tok);
+
+        if(tok.get_type() == shell_token_type::kw_else) {
+            tok.advance();
+
+            statement* else_body = nullptr;
+            if(tok.get_type() == shell_token_type::kw_if) {
+                else_body = parse_if_statement(ast, tok);
+            }
+            else if(tok.get_type() == shell_token_type::punc_begin_block) {
+                else_body = parse_compound_statement(ast, tok);
+            }
+            else {
+                diagnostic_context dc(tok.get_location());
+                LOG_FATAL(format("expected block or 'if' after 'else', found '%s'") %
+                          tok.get_value());
+            }
+
+            return ast.make_var<statement, if_else_statement>(
+                    location_union(start_loc, ast_visit(variant_location_visitor(), *else_body)),
+                    cond,
+                    body,
+                    else_body);
+        }
+        else {
+            return ast.make_var<statement, if_statement>(
+                    location_union(start_loc, ast_visit(variant_location_visitor(), *body)),
+                    cond,
+                    body);
+        }
+    }
+
     statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
-        if(tok.get_value() == "include") {
+        if(tok.get_type() == shell_token_type::kw_include) {
             return parse_include_statement(ast, tok);
         }
-        else if(tok.get_value() == "var") {
+        else if(tok.get_type() == shell_token_type::kw_var) {
             return parse_var_declaration_statement(ast, tok);
+        }
+        else if(tok.get_type() == shell_token_type::kw_if) {
+            return parse_if_statement(ast, tok);
         }
         else if(tok.get_type() == shell_token_type::punc_begin_block) {
             return parse_compound_statement(ast, tok);

@@ -15,6 +15,8 @@ namespace gorc {
             skip_line_comment,
             bareword,
             seen_dollar,
+            seen_equal,
+            seen_excl,
             string,
             escape_sequence,
             variable_name,
@@ -94,6 +96,8 @@ namespace gorc {
         tok_result handle_string_state(char ch);
         tok_result handle_escape_sequence_state(char ch);
         tok_result handle_seen_dollar_state(char ch);
+        tok_result handle_seen_equal_state(char ch);
+        tok_result handle_seen_excl_state(char ch);
         tok_result handle_variable_name_state(char ch);
         tok_result handle_environment_variable_name_state(char ch);
 

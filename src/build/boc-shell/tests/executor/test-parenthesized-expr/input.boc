@@ -1,0 +1,7 @@
+if((!true == true) == "false") {
+    echo "success";
+}
+
+if((!true == false) == "false") {
+    echo "failed";
+}

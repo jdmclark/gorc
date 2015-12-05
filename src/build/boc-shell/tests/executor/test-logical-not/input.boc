@@ -1,0 +1,7 @@
+if(!false) {
+    echo "success";
+}
+
+if(!true) {
+    echo "failure";
+}

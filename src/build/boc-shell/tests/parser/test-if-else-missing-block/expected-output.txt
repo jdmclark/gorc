@@ -1,0 +1,1 @@
+[ERROR] input.boc:4:6-4:9: expected block or 'if' after 'else', found 'echo'
