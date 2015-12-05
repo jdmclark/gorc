@@ -75,9 +75,11 @@ namespace gorc {
 
     class compound_statement;
     class command_statement;
+    class var_declaration_statement;
     class assignment_statement;
     using statement = variant<compound_statement*,
                               command_statement*,
+                              var_declaration_statement*,
                               assignment_statement*>;
 
     class compound_statement : public visitable_ast_node<compound_statement> {
@@ -94,6 +96,16 @@ namespace gorc {
 
         command_statement(diagnostic_context_location const &loc,
                           command *cmd);
+    };
+
+    class var_declaration_statement : public visitable_ast_node<var_declaration_statement> {
+    public:
+        variable_name *var;
+        maybe<argument*> value;
+
+        var_declaration_statement(diagnostic_context_location const &loc,
+                                  variable_name *var,
+                                  maybe<argument*> value);
     };
 
     class assignment_statement : public visitable_ast_node<assignment_statement> {

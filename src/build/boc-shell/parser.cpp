@@ -131,6 +131,50 @@ namespace {
         }
     }
 
+    statement* parse_var_declaration_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // Current token is "var"
+        auto start_loc = tok.get_location();
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_whitespace) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected whitespace, found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::variable_name) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected variable name, found '%s'") % tok.get_value());
+        }
+
+        variable_name *vn = ast.make<variable_name>(tok.get_location(), tok.get_value());
+        tok.advance();
+
+        maybe<argument*> value;
+
+        if(tok.get_type() == shell_token_type::punc_assign) {
+            // Variable has a default value
+            tok.advance();
+
+            value = parse_argument(ast, tok);
+        }
+
+        if(tok.get_type() != shell_token_type::punc_end_command) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
+        }
+
+        auto end_loc = tok.get_location();
+        tok.advance();
+
+        return ast.make_var<statement, var_declaration_statement>(
+                location_union(start_loc, end_loc),
+                vn,
+                value);
+    }
+
     statement* parse_assignment_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         lvalue *vn = parse_lvalue(ast, tok);
@@ -227,6 +271,9 @@ namespace {
     {
         if(tok.get_value() == "include") {
             return parse_include_statement(ast, tok);
+        }
+        else if(tok.get_value() == "var") {
+            return parse_var_declaration_statement(ast, tok);
         }
         else if(tok.get_token(1).type == shell_token_type::punc_assign) {
             return parse_assignment_statement(ast, tok);

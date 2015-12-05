@@ -5,12 +5,13 @@
 #include "system/process.hpp"
 #include "system/pipe.hpp"
 #include "system/env.hpp"
+#include "utility/range.hpp"
+#include "stack.hpp"
 #include <algorithm>
 #include <unordered_map>
+#include <vector>
 
 namespace gorc {
-
-    std::unordered_map<std::string, std::string> variable_map;
 
     class boc_shell_assign_lvalue_visitor {
     public:
@@ -24,7 +25,7 @@ namespace gorc {
 
         void visit(variable_name &var) const
         {
-            variable_map[var.name] = value;
+            set_variable_value(var.name, value);
         }
 
         void visit(environment_variable_name &var) const
@@ -40,12 +41,7 @@ namespace gorc {
         }
 
         std::string visit(variable_name &var) {
-            auto it = variable_map.find(var.name);
-            if(it != variable_map.end()) {
-                return it->second;
-            }
-
-            LOG_FATAL(format("variable '%s' is undefined") % var.name);
+            return get_variable_value(var.name);
         }
 
         std::string visit(environment_variable_name &var) {
@@ -148,6 +144,19 @@ namespace gorc {
             std::string value = ast_visit(bsav, s.value);
 
             ast_visit(boc_shell_assign_lvalue_visitor(value), *s.var);
+
+            return EXIT_SUCCESS;
+        }
+
+        int visit(var_declaration_statement &s)
+        {
+            std::string value;
+            if(s.value.has_value()) {
+                boc_shell_argument_visitor bsav;
+                value = ast_visit(bsav, s.value.get_value());
+            }
+
+            create_variable(s.var->name, value);
 
             return EXIT_SUCCESS;
         }

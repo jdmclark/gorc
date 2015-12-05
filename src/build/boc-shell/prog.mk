@@ -13,5 +13,6 @@ SOURCES:= \
 	lexer.cpp \
 	main.cpp \
 	parser.cpp \
+	stack.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

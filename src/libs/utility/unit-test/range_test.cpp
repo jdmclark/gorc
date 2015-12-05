@@ -78,4 +78,16 @@ test_case(range_empty)
     assert_true(!gorc::make_range(full).empty());
 }
 
+test_case(reverse_range)
+{
+    std::vector<int> input { 0, 1, 2, 3, 4 };
+    std::vector<int> output;
+
+    for(auto const &e : gorc::make_reverse_range(input)) {
+        output.emplace_back(e);
+    }
+
+    assert_range_eq(output, std::vector<int>({ 4, 3, 2, 1, 0 }));
+}
+
 end_suite(range_test);

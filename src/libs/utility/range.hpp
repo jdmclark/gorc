@@ -57,4 +57,11 @@ namespace gorc {
         return make_range(rng.begin(), rng.end());
     }
 
+    template <typename ContainerT>
+    auto make_reverse_range(ContainerT &rng)
+        -> decltype(make_range(rng.rbegin(), rng.rend()))
+    {
+        return make_range(rng.rbegin(), rng.rend());
+    }
+
 }
