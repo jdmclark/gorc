@@ -25,6 +25,7 @@ namespace gorc {
         shell_token_type current_type = shell_token_type::error;
         std::string reason;
         std::string append_buffer;
+        std::string kw_buffer;
         bool seen_whitespace = false;
 
         inline tok_result append_directive(tokenizer_state new_state,

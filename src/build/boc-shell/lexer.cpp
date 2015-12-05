@@ -1,8 +1,16 @@
 #include "lexer.hpp"
 #include "log/log.hpp"
+#include <unordered_map>
 
 using namespace gorc;
 using tok_result = gorc::tokenizer_state_machine_result;
+
+namespace {
+    std::unordered_map<std::string, shell_token_type> keyword_map {
+        { "include", shell_token_type::kw_include },
+        { "var", shell_token_type::kw_var }
+    };
+}
 
 tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
 {
@@ -43,6 +51,8 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     }
     else {
         seen_whitespace = false;
+        kw_buffer.clear();
+        kw_buffer.push_back(ch);
         return append_directive(tokenizer_state::bareword, ch);
     }
 }
@@ -67,9 +77,16 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
        ch == '$' ||
        ch == '\"' ||
        std::isspace(ch)) {
+        // Check if this bare word is a reserved keyword
+        auto it = keyword_map.find(kw_buffer);
+        if(it != keyword_map.end()) {
+            return accept_immediately(it->second);
+        }
+
         return accept_immediately(shell_token_type::word);
     }
     else {
+        kw_buffer.push_back(ch);
         return append_directive(tokenizer_state::bareword, ch);
     }
 }

@@ -12,7 +12,10 @@ namespace gorc {
         punc_assign,
         punc_whitespace,
         punc_pipe,
-        punc_end_command
+        punc_end_command,
+
+        kw_include,
+        kw_var
     };
 
 }

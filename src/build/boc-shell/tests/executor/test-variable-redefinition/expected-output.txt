@@ -1,0 +1,1 @@
+[ERROR] input.boc:2:1-2:17: variable 'HELLO_MSG' redefinition

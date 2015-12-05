@@ -137,13 +137,6 @@ namespace {
         auto start_loc = tok.get_location();
         tok.advance();
 
-        if(tok.get_type() != shell_token_type::punc_whitespace) {
-            diagnostic_context dc(tok.get_location());
-            LOG_FATAL(format("expected whitespace, found '%s'") % tok.get_value());
-        }
-
-        tok.advance();
-
         if(tok.get_type() != shell_token_type::variable_name) {
             diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected variable name, found '%s'") % tok.get_value());
@@ -200,13 +193,6 @@ namespace {
     statement* parse_include_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         // On 'include'
-        tok.advance();
-
-        if(tok.get_type() != shell_token_type::punc_whitespace) {
-            diagnostic_context dc(tok.get_location());
-            LOG_FATAL(format("expected whitespace, found '%s'") % tok.get_value());
-        }
-
         tok.advance();
 
         if(tok.get_type() != shell_token_type::word) {
