@@ -253,6 +253,54 @@ namespace {
                                                                          end_loc), cmd);
     }
 
+    statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok);
+
+    ast_list_node<statement*>* parse_comp_stmt_seq(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        auto start_loc = tok.get_location();
+
+        ast_list_node<statement*> *code =
+            ast.make<ast_list_node<statement*>>(start_loc);
+
+        while(true) {
+            if(tok.get_type() == shell_token_type::punc_end_block) {
+                break;
+            }
+
+            code->elements.push_back(parse_statement(ast, tok));
+            code->location = location_union(code->location,
+                                            ast_visit(variant_location_visitor(),
+                                                      *code->elements.back()));
+        }
+
+        code->location.filename = current_filename_stack.top();
+
+        return code;
+    }
+
+    statement* parse_compound_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // On open brace
+        auto start_loc = tok.get_location();
+
+        if(tok.get_type() != shell_token_type::punc_begin_block) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected '{', found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        ast_list_node<statement*> *code = parse_comp_stmt_seq(ast, tok);
+
+        auto end_loc = tok.get_location();
+
+        tok.advance();
+
+        return ast.make_var<statement, compound_statement>(
+                location_union(start_loc, end_loc),
+                code);
+    }
+
     statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         if(tok.get_value() == "include") {
@@ -260,6 +308,9 @@ namespace {
         }
         else if(tok.get_value() == "var") {
             return parse_var_declaration_statement(ast, tok);
+        }
+        else if(tok.get_type() == shell_token_type::punc_begin_block) {
+            return parse_compound_statement(ast, tok);
         }
         else if(tok.get_token(1).type == shell_token_type::punc_assign) {
             return parse_assignment_statement(ast, tok);
@@ -269,7 +320,7 @@ namespace {
         }
     }
 
-    ast_list_node<statement*>* parse_statement_seq(ast_factory &ast, shell_la_tokenizer &tok)
+    ast_list_node<statement*>* parse_global_stmt_seq(ast_factory &ast, shell_la_tokenizer &tok)
     {
         auto start_loc = tok.get_location();
 
@@ -332,7 +383,7 @@ namespace {
         shell_tokenizer tok(*nf);
         shell_la_tokenizer latok(tok, 2);
 
-        return parse_statement_seq(ast, latok);
+        return parse_global_stmt_seq(ast, latok);
     }
 }
 

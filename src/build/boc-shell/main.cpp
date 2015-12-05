@@ -177,6 +177,7 @@ namespace gorc {
 
         int visit(compound_statement &stmt)
         {
+            scoped_stack_frame sf;
             return ast_visit(*this, stmt.code);
         }
 

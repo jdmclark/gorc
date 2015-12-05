@@ -1,0 +1,9 @@
+var $(HELLO_MSG) = OuterMessage;
+echo $(HELLO_MSG);
+
+{
+    var $(HELLO_MSG) = InnerMessage;
+    echo $(HELLO_MSG);
+}
+
+echo $(HELLO_MSG);

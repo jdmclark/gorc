@@ -1,0 +1,1 @@
+[ERROR] input.boc:3:1-3:1: expected command word, found '}'

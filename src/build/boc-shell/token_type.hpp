@@ -13,6 +13,8 @@ namespace gorc {
         punc_whitespace,
         punc_pipe,
         punc_end_command,
+        punc_begin_block,
+        punc_end_block,
 
         kw_include,
         kw_var

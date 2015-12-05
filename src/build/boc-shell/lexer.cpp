@@ -25,6 +25,12 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
         seen_whitespace = true;
         return discard_directive(tokenizer_state::skip_line_comment);
     }
+    else if(ch == '{') {
+        return append_then_accept(ch, shell_token_type::punc_begin_block);
+    }
+    else if(ch == '}') {
+        return append_then_accept(ch, shell_token_type::punc_end_block);
+    }
     else if(ch == '|') {
         return append_then_accept(ch, shell_token_type::punc_pipe);
     }
@@ -75,6 +81,8 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
        ch == ';' ||
        ch == '=' ||
        ch == '$' ||
+       ch == '{' ||
+       ch == '}' ||
        ch == '\"' ||
        std::isspace(ch)) {
         // Check if this bare word is a reserved keyword
