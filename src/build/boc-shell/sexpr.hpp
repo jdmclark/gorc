@@ -7,40 +7,40 @@
 
 namespace gorc {
 
-    class sexpr_int_type;
-    using sexpr_int = std::shared_ptr<sexpr_int_type>;
-
-    class sexpr_leaf_type;
-    using sexpr_leaf = std::shared_ptr<sexpr_leaf_type>;
-
-    using sexpr_node = variant<sexpr_int, sexpr_leaf>;
-    using sexpr = maybe<sexpr_node>;
-
-    class sexpr_int_type {
-    public:
-        sexpr left;
-        sexpr right;
-
-        sexpr_int_type(sexpr left, sexpr right);
+    enum class sexpr_node_type {
+        atom,
+        cons
     };
 
-    class sexpr_leaf_type {
+    class sexpr_node {
     public:
-        std::string value;
+        sexpr_node_type type;
+        std::string atom;
+        std::shared_ptr<sexpr_node> left;
+        std::shared_ptr<sexpr_node> right;
 
-        sexpr_leaf_type(bool value);
-        sexpr_leaf_type(std::string const &value);
+        sexpr_node();
+        explicit sexpr_node(std::string const &atom);
+        explicit sexpr_node(bool atom);
 
-        operator bool() const;
-        operator std::string() const;
+        sexpr_node(std::shared_ptr<sexpr_node> left,
+                   std::shared_ptr<sexpr_node> right);
     };
 
+    using sexpr = std::shared_ptr<sexpr_node>;
+
+    sexpr make_sexpr();
     sexpr make_sexpr(sexpr left, sexpr right);
 
     template <typename T>
     sexpr make_sexpr(T const &value)
     {
-        return sexpr(sexpr_node(std::make_shared<sexpr_leaf_type>(value)));
+        return std::make_shared<sexpr_node>(value);
     }
 
+    bool atom(sexpr);
+    bool null(sexpr);
+
+    sexpr car(sexpr);
+    sexpr cdr(sexpr);
 }

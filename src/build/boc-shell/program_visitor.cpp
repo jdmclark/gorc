@@ -1,6 +1,7 @@
 #include "program_visitor.hpp"
 #include "log/log.hpp"
 #include "stack.hpp"
+#include "sexpr_helpers.hpp"
 #include "system/pipe.hpp"
 #include "system/process.hpp"
 #include "argument_visitor.hpp"
@@ -98,7 +99,7 @@ int gorc::program_visitor::visit(var_declaration_statement &s) const
 int gorc::program_visitor::visit(if_statement &s) const
 {
     auto cond = ast_visit(expression_visitor(), *s.condition);
-    if(cond == "true") {
+    if(as_boolean_value(cond)) {
         ast_visit(*this, *s.code);
     }
 
@@ -108,7 +109,7 @@ int gorc::program_visitor::visit(if_statement &s) const
 int gorc::program_visitor::visit(if_else_statement &s) const
 {
     auto cond = ast_visit(expression_visitor(), *s.condition);
-    if(cond == "true") {
+    if(as_boolean_value(cond)) {
         ast_visit(*this, *s.code);
     }
     else {
