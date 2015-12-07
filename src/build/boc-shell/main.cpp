@@ -122,10 +122,13 @@ namespace gorc {
                 else {
                     return "false";
                 }
+// LCOV_EXCL_START
             }
 
             // Not coverable
             LOG_FATAL("unhandled infix operator");
+
+// LCOV_EXCL_STOP
         }
     };
 
