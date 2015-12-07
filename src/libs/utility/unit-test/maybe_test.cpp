@@ -377,6 +377,10 @@ test_case(object_ctor_dtor_calls)
     assert_log_message(log_level::info, "destructor called");
     assert_log_empty();
     assert_true(!m.has_value());
+
+    m = maybe<complicated_object>();
+    assert_log_empty();
+    assert_true(!m.has_value());
 }
 
 test_case(uncopyable)
