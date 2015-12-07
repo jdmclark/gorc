@@ -41,15 +41,16 @@ int gorc::program_visitor::visit(pipe_command &cmd) const
     while(sub_it != cmd.subcommands->elements.end() &&
           stdin_it != stdin_pipes.end() &&
           stdout_it != stdout_pipes.end()) {
-        auto &sub_args = (*sub_it)->arguments->elements;
+        sexpr arg_list = ast_visit(argument_visitor(), (*sub_it)->arguments);
+        std::vector<std::string> argv = argument_list_to_argv(arg_list);
 
         // First token is the program to execute
-        std::string prog = ast_visit(argument_visitor(), sub_args.front());
+        std::string prog = argv.front();
         std::vector<std::string> args;
-        for(auto it = sub_args.begin() + 1;
-            it != sub_args.end();
+        for(auto it = argv.begin() + 1;
+            it != argv.end();
             ++it) {
-            args.push_back(ast_visit(argument_visitor(), *it));
+            args.push_back(*it);
         }
 
         processes.push_back(make_unique<process>(prog,
@@ -77,7 +78,7 @@ int gorc::program_visitor::visit(command_statement &cmd) const
 
 int gorc::program_visitor::visit(assignment_statement &s) const
 {
-    sexpr value = make_sexpr(ast_visit(argument_visitor(), s.value));
+    sexpr value = ast_visit(argument_visitor(), s.value);
 
     ast_visit(assign_lvalue_visitor(value), *s.var);
 
@@ -88,7 +89,7 @@ int gorc::program_visitor::visit(var_declaration_statement &s) const
 {
     sexpr value;
     if(s.value.has_value()) {
-        value = make_sexpr(ast_visit(argument_visitor(), s.value.get_value()));
+        value = ast_visit(argument_visitor(), s.value.get_value());
     }
 
     create_variable(s.var->name, value);

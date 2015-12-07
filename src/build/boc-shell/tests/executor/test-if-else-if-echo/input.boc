@@ -16,7 +16,7 @@ if(false) {
     echo "failure";
 }
 else if(false) {
-    ecoh "failure";
+    echo "failure";
 }
 
 if(false) {

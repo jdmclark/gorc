@@ -5,7 +5,7 @@
 
 gorc::sexpr gorc::expression_visitor::visit(argument_expression &e) const
 {
-    return make_sexpr(ast_visit(argument_visitor(), e.value));
+    return ast_visit(argument_visitor(), e.value);
 }
 
 gorc::sexpr gorc::expression_visitor::visit(unary_expression &e) const
