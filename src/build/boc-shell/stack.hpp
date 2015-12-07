@@ -2,12 +2,13 @@
 
 #include <string>
 #include <unordered_map>
+#include "sexpr.hpp"
 
 namespace gorc {
 
     class stack_frame {
     public:
-        std::unordered_map<std::string, std::string> variable_map;
+        std::unordered_map<std::string, sexpr> variable_map;
     };
 
     class scoped_stack_frame {
@@ -16,7 +17,7 @@ namespace gorc {
         ~scoped_stack_frame();
     };
 
-    void create_variable(std::string const &name, std::string const &value);
-    std::string const& get_variable_value(std::string const &name);
-    void set_variable_value(std::string const &name, std::string const &value);
+    void create_variable(std::string const &name, sexpr);
+    sexpr get_variable_value(std::string const &name);
+    void set_variable_value(std::string const &name, sexpr);
 }

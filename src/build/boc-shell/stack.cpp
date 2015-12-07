@@ -33,7 +33,7 @@ gorc::scoped_stack_frame::~scoped_stack_frame()
     stack_frames.pop_back();
 }
 
-void gorc::create_variable(std::string const &name, std::string const &value)
+void gorc::create_variable(std::string const &name, sexpr value)
 {
     auto res = stack_frames.back().variable_map.emplace(name, value);
     if(!res.second) {
@@ -41,12 +41,12 @@ void gorc::create_variable(std::string const &name, std::string const &value)
     }
 }
 
-std::string const& gorc::get_variable_value(std::string const &name)
+gorc::sexpr gorc::get_variable_value(std::string const &name)
 {
     return get_variable(name)->second;
 }
 
-void gorc::set_variable_value(std::string const &name, std::string const &value)
+void gorc::set_variable_value(std::string const &name, sexpr value)
 {
     get_variable(name)->second = value;
 }

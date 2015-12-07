@@ -13,6 +13,8 @@ SOURCES:= \
 	lexer.cpp \
 	main.cpp \
 	parser.cpp \
+	sexpr.cpp \
+	sexpr_helpers.cpp \
 	stack.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

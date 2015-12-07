@@ -7,6 +7,7 @@
 #include "system/env.hpp"
 #include "utility/range.hpp"
 #include "stack.hpp"
+#include "sexpr_helpers.hpp"
 #include <algorithm>
 #include <unordered_map>
 #include <vector>
@@ -15,9 +16,9 @@ namespace gorc {
 
     class boc_shell_assign_lvalue_visitor {
     public:
-        std::string const &value;
+        sexpr value;
 
-        boc_shell_assign_lvalue_visitor(std::string const &value)
+        boc_shell_assign_lvalue_visitor(sexpr value)
             : value(value)
         {
             return;
@@ -30,7 +31,7 @@ namespace gorc {
 
         void visit(environment_variable_name &var) const
         {
-            set_environment_variable(var.name, value);
+            set_environment_variable(var.name, as_string_value(value));
         }
     };
 
@@ -43,7 +44,7 @@ namespace gorc {
 
         std::string visit(variable_name &var)
         {
-            return get_variable_value(var.name);
+            return as_string_value(get_variable_value(var.name));
         }
 
         std::string visit(environment_variable_name &var)
@@ -205,7 +206,7 @@ namespace gorc {
         int visit(assignment_statement &s)
         {
             boc_shell_argument_visitor bsav;
-            std::string value = ast_visit(bsav, s.value);
+            sexpr value = make_sexpr(ast_visit(bsav, s.value));
 
             ast_visit(boc_shell_assign_lvalue_visitor(value), *s.var);
 
@@ -214,10 +215,10 @@ namespace gorc {
 
         int visit(var_declaration_statement &s)
         {
-            std::string value;
+            sexpr value;
             if(s.value.has_value()) {
                 boc_shell_argument_visitor bsav;
-                value = ast_visit(bsav, s.value.get_value());
+                value = make_sexpr(ast_visit(bsav, s.value.get_value()));
             }
 
             create_variable(s.var->name, value);
