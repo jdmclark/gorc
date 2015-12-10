@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast.hpp"
-#include "sexpr.hpp"
+#include "sexpr/sexpr.hpp"
 
 namespace gorc {
 

@@ -2,7 +2,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "sexpr.hpp"
+#include "sexpr/sexpr.hpp"
 
 namespace gorc {
 

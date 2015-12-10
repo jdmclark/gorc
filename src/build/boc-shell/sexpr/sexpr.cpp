@@ -14,6 +14,13 @@ gorc::sexpr_node::sexpr_node(std::string const &atom)
     return;
 }
 
+gorc::sexpr_node::sexpr_node(char const *atom)
+    : type(sexpr_node_type::atom)
+    , atom(atom)
+{
+    return;
+}
+
 gorc::sexpr_node::sexpr_node(bool value)
     : type(sexpr_node_type::atom)
     , atom(value ? "true" : "false")

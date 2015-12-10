@@ -1,6 +1,6 @@
 #include "expression_visitor.hpp"
 #include "argument_visitor.hpp"
-#include "sexpr_helpers.hpp"
+#include "sexpr/sexpr_helpers.hpp"
 #include "log/log.hpp"
 
 gorc::sexpr gorc::expression_visitor::visit(argument_expression &e) const

@@ -1,5 +1,5 @@
 #include "assignment_visitor.hpp"
-#include "sexpr_helpers.hpp"
+#include "sexpr/sexpr_helpers.hpp"
 #include "system/env.hpp"
 #include "stack.hpp"
 

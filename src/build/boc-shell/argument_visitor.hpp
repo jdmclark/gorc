@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast.hpp"
-#include "sexpr.hpp"
+#include "sexpr/sexpr.hpp"
 
 namespace gorc {
 
@@ -10,7 +10,5 @@ namespace gorc {
         sexpr visit(argument &) const;
         sexpr visit(ast_list_node<argument*> &) const;
     };
-
-    std::vector<std::string> argument_list_to_argv(sexpr);
 
 }

@@ -7,6 +7,7 @@ DEPENDENCIES:= \
 	libs/text \
 	libs/ast \
 	libs/system \
+	build/boc-shell/sexpr \
 
 SOURCES:= \
 	argument_visitor.cpp \
@@ -17,8 +18,6 @@ SOURCES:= \
 	main.cpp \
 	parser.cpp \
 	program_visitor.cpp \
-	sexpr.cpp \
-	sexpr_helpers.cpp \
 	stack.cpp \
 	word_visitor.cpp \
 

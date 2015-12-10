@@ -1,6 +1,6 @@
 #include "word_visitor.hpp"
 #include "stack.hpp"
-#include "sexpr_helpers.hpp"
+#include "sexpr/sexpr_helpers.hpp"
 #include "system/env.hpp"
 #include "log/log.hpp"
 

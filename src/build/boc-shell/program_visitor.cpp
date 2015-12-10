@@ -1,7 +1,7 @@
 #include "program_visitor.hpp"
 #include "log/log.hpp"
 #include "stack.hpp"
-#include "sexpr_helpers.hpp"
+#include "sexpr/sexpr_helpers.hpp"
 #include "system/pipe.hpp"
 #include "system/process.hpp"
 #include "argument_visitor.hpp"
