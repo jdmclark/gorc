@@ -1,0 +1,10 @@
+var $(INNER) = a b c;
+var $(OUTER) = a b $(INNER) c d;
+var $(COPY) = $(OUTER);
+
+if($(OUTER) == $(COPY)) {
+    echo "Duplicate";
+}
+else {
+    echo "Do not match";
+}
