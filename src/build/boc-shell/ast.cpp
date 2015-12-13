@@ -96,7 +96,7 @@ gorc::command_statement::command_statement(diagnostic_context_location const &lo
 
 gorc::var_declaration_statement::var_declaration_statement(diagnostic_context_location const &loc,
                                                            variable_name *var,
-                                                           maybe<argument*> value)
+                                                           maybe<ast_list_node<argument*>*> value)
     : visitable_ast_node(loc)
     , var(var)
     , value(value)
@@ -106,7 +106,7 @@ gorc::var_declaration_statement::var_declaration_statement(diagnostic_context_lo
 
 gorc::assignment_statement::assignment_statement(diagnostic_context_location const &loc,
                                                  lvalue *var,
-                                                 argument *value)
+                                                 ast_list_node<argument*> *value)
     : visitable_ast_node(loc)
     , var(var)
     , value(value)

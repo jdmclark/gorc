@@ -244,4 +244,12 @@ test_case(nested_arg_list_to_argv)
     assert_eq(rv, expected);
 }
 
+test_case(atom_to_argv)
+{
+    sexpr arg = make_sexpr("foo");
+    auto rv = argument_list_to_argv(arg);
+    std::vector<std::string> expected = { "foo" };
+    assert_eq(rv, expected);
+}
+
 end_suite(sexpr_helpers_test);

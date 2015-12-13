@@ -29,6 +29,10 @@ gorc::sexpr gorc::argument_visitor::visit(ast_list_node<argument*> &args) const
         arg_list.push_back(ast_visit(*this, arg));
     }
 
+    if(arg_list.size() == 1) {
+        return arg_list.front();
+    }
+
     auto assembled_args = make_sexpr();
     for(auto &arg : make_reverse_range(arg_list)) {
         assembled_args = make_sexpr(arg, assembled_args);

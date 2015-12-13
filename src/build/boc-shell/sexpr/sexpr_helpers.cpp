@@ -93,9 +93,16 @@ std::vector<std::string> gorc::argument_list_to_argv(sexpr e)
 
     auto current = e;
     while(!null(current)) {
-        auto tv = argument_to_argv(car(current));
-        std::copy(tv.begin(), tv.end(), std::back_inserter(rv));
-        current = cdr(current);
+        if(atom(current)) {
+            auto tv = argument_to_argv(current);
+            std::copy(tv.begin(), tv.end(), std::back_inserter(rv));
+            break;
+        }
+        else {
+            auto tv = argument_to_argv(car(current));
+            std::copy(tv.begin(), tv.end(), std::back_inserter(rv));
+            current = cdr(current);
+        }
     }
 
     return rv;

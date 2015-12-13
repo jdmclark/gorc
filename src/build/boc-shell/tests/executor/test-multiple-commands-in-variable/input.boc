@@ -1,0 +1,5 @@
+var $(INNER) = a.txt fileb.txt f;
+var $(LAST) = ilec.txt;
+var $(FIRST) = file;
+var $(CMD) = cat $(FIRST)$(INNER)$(LAST);
+$(CMD);

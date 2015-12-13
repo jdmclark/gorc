@@ -234,13 +234,13 @@ namespace {
         variable_name *vn = ast.make<variable_name>(tok.get_location(), tok.get_value());
         tok.advance();
 
-        maybe<argument*> value;
+        maybe<ast_list_node<argument*>*> value;
 
         if(tok.get_type() == shell_token_type::punc_assign) {
             // Variable has a default value
             tok.advance();
 
-            value = parse_argument(ast, tok);
+            value = parse_argument_list(ast, tok);
         }
 
         if(tok.get_type() != shell_token_type::punc_end_command) {
@@ -264,7 +264,7 @@ namespace {
         // Equals - already checked via lookahead
         tok.advance();
 
-        argument *value = parse_argument(ast, tok);
+        ast_list_node<argument*> *value = parse_argument_list(ast, tok);
 
         if(tok.get_type() != shell_token_type::punc_end_command) {
             diagnostic_context dc(tok.get_location());

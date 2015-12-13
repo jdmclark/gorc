@@ -153,21 +153,21 @@ namespace gorc {
     class var_declaration_statement : public visitable_ast_node<var_declaration_statement> {
     public:
         variable_name *var;
-        maybe<argument*> value;
+        maybe<ast_list_node<argument*>*> value;
 
         var_declaration_statement(diagnostic_context_location const &loc,
                                   variable_name *var,
-                                  maybe<argument*> value);
+                                  maybe<ast_list_node<argument*>*> value);
     };
 
     class assignment_statement : public visitable_ast_node<assignment_statement> {
     public:
         lvalue *var;
-        argument *value;
+        ast_list_node<argument*> *value;
 
         assignment_statement(diagnostic_context_location const &loc,
                              lvalue *var,
-                             argument *value);
+                             ast_list_node<argument*> *value);
     };
 
     class if_statement : public visitable_ast_node<if_statement> {
