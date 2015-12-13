@@ -1,9 +1,9 @@
-var $(FOO)=foo;
+var $FOO=foo;
 
-if($(FOO) != foo) {
+if($FOO != foo) {
     echo "failure";
 }
 
-if($(FOO) != bar) {
+if($FOO != bar) {
     echo "success";
 }

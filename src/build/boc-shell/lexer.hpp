@@ -20,6 +20,7 @@ namespace gorc {
             string,
             escape_sequence,
             variable_name,
+            bareword_variable_name,
             environment_variable_name
         };
 
@@ -99,6 +100,7 @@ namespace gorc {
         tok_result handle_seen_equal_state(char ch);
         tok_result handle_seen_excl_state(char ch);
         tok_result handle_variable_name_state(char ch);
+        tok_result handle_bareword_variable_name_state(char ch);
         tok_result handle_environment_variable_name_state(char ch);
 
     public:

@@ -20,6 +20,25 @@ namespace {
         { "return", shell_token_type::kw_return },
         { "var", shell_token_type::kw_var }
     };
+
+    bool is_bareword_delimiter(char ch)
+    {
+        return ch == '\0' ||
+               ch == '#' ||
+               ch == '|' ||
+               ch == ';' ||
+               ch == '=' ||
+               ch == '$' ||
+               ch == '{' ||
+               ch == '}' ||
+               ch == '!' ||
+               ch == '@' ||
+               ch == ',' ||
+               ch == '(' ||
+               ch == ')' ||
+               ch == '\"' ||
+               std::isspace(ch);
+    }
 }
 
 tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
@@ -100,21 +119,7 @@ tok_result shell_tokenizer_state_machine::handle_skip_line_comment_state(char ch
 
 tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
 {
-    if(ch == '\0' ||
-       ch == '#' ||
-       ch == '|' ||
-       ch == ';' ||
-       ch == '=' ||
-       ch == '$' ||
-       ch == '{' ||
-       ch == '}' ||
-       ch == '!' ||
-       ch == '@' ||
-       ch == ',' ||
-       ch == '(' ||
-       ch == ')' ||
-       ch == '\"' ||
-       std::isspace(ch)) {
+    if(is_bareword_delimiter(ch)) {
         // Check if this bare word is a reserved keyword
         auto it = keyword_map.find(kw_buffer);
         if(it != keyword_map.end()) {
@@ -204,6 +209,9 @@ tok_result shell_tokenizer_state_machine::handle_seen_dollar_state(char ch)
     else if(ch == '[') {
         return skip_directive(tokenizer_state::environment_variable_name);
     }
+    else if(!is_bareword_delimiter(ch)) {
+        return append_directive(tokenizer_state::bareword_variable_name, ch);
+    }
     else {
         return reject_immediately("expected subshell or variable name");
     }
@@ -219,6 +227,17 @@ tok_result shell_tokenizer_state_machine::handle_variable_name_state(char ch)
     }
     else {
         return append_directive(tokenizer_state::variable_name, ch);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_bareword_variable_name_state(char ch)
+{
+    if(is_bareword_delimiter(ch)) {
+        return accept_immediately(shell_token_type::variable_name);
+    }
+    else {
+        kw_buffer.push_back(ch);
+        return append_directive(tokenizer_state::bareword_variable_name, ch);
     }
 }
 
@@ -269,6 +288,9 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::variable_name:
         return handle_variable_name_state(ch);
+
+    case tokenizer_state::bareword_variable_name:
+        return handle_bareword_variable_name_state(ch);
 
     case tokenizer_state::environment_variable_name:
         return handle_environment_variable_name_state(ch);

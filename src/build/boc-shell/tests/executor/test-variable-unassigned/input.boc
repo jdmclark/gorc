@@ -1,1 +1,1 @@
-echo $(HELLO_MSG);
+echo $HELLO_MSG;

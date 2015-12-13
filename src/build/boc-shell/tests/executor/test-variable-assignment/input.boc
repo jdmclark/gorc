@@ -1,4 +1,4 @@
-var $(HELLO_MSG);
-$(HELLO_MSG) = "Hello, World!";
+var $HELLO_MSG;
+$HELLO_MSG = "Hello, World!";
 
-echo $(HELLO_MSG);
+echo $HELLO_MSG;
