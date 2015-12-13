@@ -10,6 +10,12 @@
 
 int gorc::program_visitor::visit(pipe_command &cmd)
 {
+    // Open redirection pipes
+    pipe redirected_stdin_pipe;
+    if(!cmd.stdin_source.has_value()) {
+        redirected_stdin_pipe.output.reset();
+    }
+
     // Open interprocess pipes
     size_t num_subcommands = cmd.subcommands->elements.size();
 
@@ -22,7 +28,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     std::vector<maybe<pipe*>> stdout_pipes;
 
     // First process takes stdin from console
-    stdin_pipes.push_back(nothing); // TODO: stdin redirection
+    stdin_pipes.push_back(&redirected_stdin_pipe); // TODO: stdin redirection
 
     for(auto &pipe : pipes) {
         stdin_pipes.push_back(pipe.get());

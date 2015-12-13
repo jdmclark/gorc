@@ -1,0 +1,3 @@
+# Run a command which normally reads from stdin.
+# This will hang if default stdin is not closed.
+sort;
