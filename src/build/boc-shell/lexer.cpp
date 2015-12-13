@@ -26,6 +26,7 @@ namespace {
         return ch == '\0' ||
                ch == '#' ||
                ch == '|' ||
+               ch == '&' ||
                ch == ';' ||
                ch == '=' ||
                ch == '$' ||
@@ -67,7 +68,10 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
         return append_then_accept(ch, shell_token_type::punc_end_expr);
     }
     else if(ch == '|') {
-        return append_then_accept(ch, shell_token_type::punc_pipe);
+        return append_directive(tokenizer_state::seen_pipe, ch);
+    }
+    else if(ch == '&') {
+        return append_directive(tokenizer_state::seen_and, ch);
     }
     else if(ch == ';') {
         return append_then_accept(ch, shell_token_type::punc_end_command);
@@ -181,6 +185,26 @@ tok_result shell_tokenizer_state_machine::handle_escape_sequence_state(char ch)
     return append_directive(tokenizer_state::string, append_char);
 }
 
+tok_result shell_tokenizer_state_machine::handle_seen_pipe_state(char ch)
+{
+    if(ch == '|') {
+        return append_then_accept(ch, shell_token_type::punc_logical_or);
+    }
+    else {
+        return accept_immediately(shell_token_type::punc_pipe);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_seen_and_state(char ch)
+{
+    if(ch == '&') {
+        return append_then_accept(ch, shell_token_type::punc_logical_and);
+    }
+    else {
+        return reject_immediately(str(format("expected '&', found '%c'") % ch));
+    }
+}
+
 tok_result shell_tokenizer_state_machine::handle_seen_equal_state(char ch)
 {
     if(ch == '=') {
@@ -276,6 +300,12 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::escape_sequence:
         return handle_escape_sequence_state(ch);
+
+    case tokenizer_state::seen_pipe:
+        return handle_seen_pipe_state(ch);
+
+    case tokenizer_state::seen_and:
+        return handle_seen_and_state(ch);
 
     case tokenizer_state::seen_dollar:
         return handle_seen_dollar_state(ch);

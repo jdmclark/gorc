@@ -22,6 +22,8 @@ namespace gorc {
         punc_not,
         punc_cons,
         punc_comma,
+        punc_logical_or,
+        punc_logical_and,
 
         kw_atom,
         kw_call,

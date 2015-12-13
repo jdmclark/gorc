@@ -144,6 +144,7 @@ namespace gorc {
     };
 
     class pipe_command;
+    class infix_command;
     using command = variant<pipe_command*>;
 
     class pipe_command : public visitable_ast_node<pipe_command> {
@@ -152,6 +153,23 @@ namespace gorc {
 
         pipe_command(diagnostic_context_location const &loc,
                      ast_list_node<subcommand*> *subcommands);
+    };
+
+    enum class command_infix_operator {
+        logical_or,
+        logical_and
+    };
+
+    class infix_command : public visitable_ast_node<infix_command> {
+    public:
+        command_infix_operator op;
+        command *left;
+        command *right;
+
+        infix_command(diagnostic_context_location const &loc,
+                      command_infix_operator op,
+                      command *left,
+                      command *right);
     };
 
     /* Statements */

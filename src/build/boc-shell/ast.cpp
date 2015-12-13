@@ -102,6 +102,18 @@ gorc::pipe_command::pipe_command(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::infix_command::infix_command(diagnostic_context_location const &loc,
+                                   command_infix_operator op,
+                                   command *left,
+                                   command *right)
+    : visitable_ast_node(loc)
+    , op(op)
+    , left(left)
+    , right(right)
+{
+    return;
+}
+
 gorc::compound_statement::compound_statement(diagnostic_context_location const &loc,
                                              ast_list_node<statement*> *code)
     : visitable_ast_node(loc)
