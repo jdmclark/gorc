@@ -145,7 +145,8 @@ namespace gorc {
 
     class pipe_command;
     class infix_command;
-    using command = variant<pipe_command*>;
+    using command = variant<pipe_command*,
+                            infix_command*>;
 
     class pipe_command : public visitable_ast_node<pipe_command> {
     public:

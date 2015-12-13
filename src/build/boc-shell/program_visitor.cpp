@@ -75,6 +75,27 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     return last_exit_code;
 }
 
+int gorc::program_visitor::visit(infix_command &cmd)
+{
+    int left_return_code = ast_visit(*this, *cmd.left);
+
+    switch(cmd.op) {
+    case command_infix_operator::logical_or:
+        if(left_return_code == 0) {
+            return left_return_code;
+        }
+        break;
+
+    case command_infix_operator::logical_and:
+        if(left_return_code != 0) {
+            return left_return_code;
+        }
+        break;
+    }
+
+    return ast_visit(*this, *cmd.right);
+}
+
 void gorc::program_visitor::visit(command_statement &cmd)
 {
     int return_code = ast_visit(*this, *cmd.cmd);

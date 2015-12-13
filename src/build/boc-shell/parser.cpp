@@ -154,6 +154,40 @@ namespace {
         return ast.make_var<command, pipe_command>(subcommands->location, subcommands);
     }
 
+    command* parse_and_infix_command(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        command *rv = parse_pipe_command(ast, tok);
+        while(tok.get_type() == shell_token_type::punc_logical_and) {
+            tok.advance();
+            command *right = parse_pipe_command(ast, tok);
+            rv = ast.make_var<command, infix_command>(
+                    location_union(ast_visit(variant_location_visitor(), *rv),
+                                   ast_visit(variant_location_visitor(), *right)),
+                    command_infix_operator::logical_and,
+                    rv,
+                    right);
+        }
+
+        return rv;
+    }
+
+    command* parse_or_infix_command(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        command *rv = parse_and_infix_command(ast, tok);
+        while(tok.get_type() == shell_token_type::punc_logical_or) {
+            tok.advance();
+            command *right = parse_and_infix_command(ast, tok);
+            rv = ast.make_var<command, infix_command>(
+                    location_union(ast_visit(variant_location_visitor(), *rv),
+                                   ast_visit(variant_location_visitor(), *right)),
+                    command_infix_operator::logical_or,
+                    rv,
+                    right);
+        }
+
+        return rv;
+    }
+
     /* Expressions */
 
     expression* parse_expression(ast_factory &ast, shell_la_tokenizer &tok);
@@ -495,7 +529,7 @@ namespace {
 
     statement* parse_command_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
-        command *cmd = parse_pipe_command(ast, tok);
+        command *cmd = parse_or_infix_command(ast, tok);
 
         if(tok.get_type() != shell_token_type::punc_end_command) {
             diagnostic_context dc(tok.get_location());

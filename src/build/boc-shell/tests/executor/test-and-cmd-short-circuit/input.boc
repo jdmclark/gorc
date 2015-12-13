@@ -1,0 +1,1 @@
+echo "printed" && echo "also printed" && false && echo "not printed";

@@ -10,6 +10,8 @@ namespace gorc {
         maybe<sexpr> return_value;
 
         int visit(pipe_command &);
+        int visit(infix_command &);
+
         void visit(command_statement &);
 
         void visit(assignment_statement &);

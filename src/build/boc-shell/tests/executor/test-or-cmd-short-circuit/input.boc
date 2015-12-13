@@ -1,0 +1,1 @@
+false || echo "printed" || echo "not printed";

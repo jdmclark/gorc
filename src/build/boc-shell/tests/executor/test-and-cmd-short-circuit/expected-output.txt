@@ -1,0 +1,3 @@
+printed
+also printed
+[ERROR] input.boc:1:1-1:69: command failed with code 1
