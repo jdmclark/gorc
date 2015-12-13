@@ -136,6 +136,10 @@ namespace {
         ast_list_node<subcommand*> *subcommands =
             ast.make<ast_list_node<subcommand*>>(tok.get_location());
 
+        maybe<pipe_io_redirection*> stdin_source;
+        maybe<pipe_io_redirection*> stdout_target;
+        maybe<pipe_io_redirection*> stderr_target;
+
         while(true) {
             subcommand *subcmd = parse_subcommand(ast, tok);
             subcommands->elements.push_back(subcmd);
@@ -151,7 +155,98 @@ namespace {
             }
         }
 
-        return ast.make_var<command, pipe_command>(subcommands->location, subcommands);
+        // Parse redirections
+        while(true) {
+            if(tok.get_type() == shell_token_type::punc_stdin_redirect) {
+                if(stdin_source.has_value()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL("stdin already redirected");
+                }
+
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                argument *dest = parse_argument(ast, tok);
+
+                stdin_source = ast.make<pipe_io_redirection>(
+                        location_union(start_loc, dest->location),
+                        false,
+                        dest);
+            }
+            else if(tok.get_type() == shell_token_type::punc_stdout_redirect) {
+                if(stdout_target.has_value()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL("stdout already redirected");
+                }
+
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                argument *dest = parse_argument(ast, tok);
+
+                stdout_target = ast.make<pipe_io_redirection>(
+                        location_union(start_loc, dest->location),
+                        false,
+                        dest);
+            }
+            else if(tok.get_type() == shell_token_type::punc_stdout_append) {
+                if(stdout_target.has_value()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL("stdout already redirected");
+                }
+
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                argument *dest = parse_argument(ast, tok);
+
+                stdout_target = ast.make<pipe_io_redirection>(
+                        location_union(start_loc, dest->location),
+                        true,
+                        dest);
+            }
+            else if(tok.get_type() == shell_token_type::punc_stderr_redirect) {
+                if(stderr_target.has_value()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL("stderr already redirected");
+                }
+
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                argument *dest = parse_argument(ast, tok);
+
+                stderr_target = ast.make<pipe_io_redirection>(
+                        location_union(start_loc, dest->location),
+                        false,
+                        dest);
+            }
+            else if(tok.get_type() == shell_token_type::punc_stderr_append) {
+                if(stderr_target.has_value()) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL("stderr already redirected");
+                }
+
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                argument *dest = parse_argument(ast, tok);
+
+                stderr_target = ast.make<pipe_io_redirection>(
+                        location_union(start_loc, dest->location),
+                        true,
+                        dest);
+            }
+            else {
+                break;
+            }
+        }
+
+        return ast.make_var<command, pipe_command>(subcommands->location,
+                                                   subcommands,
+                                                   stdin_source,
+                                                   stdout_target,
+                                                   stderr_target);
     }
 
     command* parse_and_infix_command(ast_factory &ast, shell_la_tokenizer &tok)

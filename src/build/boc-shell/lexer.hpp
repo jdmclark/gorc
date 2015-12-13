@@ -19,6 +19,9 @@ namespace gorc {
             seen_dollar,
             seen_equal,
             seen_excl,
+            seen_2,
+            seen_2_greater,
+            seen_greater,
             string,
             escape_sequence,
             variable_name,
@@ -106,6 +109,9 @@ namespace gorc {
         tok_result handle_variable_name_state(char ch);
         tok_result handle_bareword_variable_name_state(char ch);
         tok_result handle_environment_variable_name_state(char ch);
+        tok_result handle_seen_2_state(char ch);
+        tok_result handle_seen_2_greater_state(char ch);
+        tok_result handle_seen_greater_state(char ch);
 
     public:
         virtual tokenizer_state_machine_result handle(char ch) override;

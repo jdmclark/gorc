@@ -24,6 +24,11 @@ namespace gorc {
         punc_comma,
         punc_logical_or,
         punc_logical_and,
+        punc_stdin_redirect,
+        punc_stdout_redirect,
+        punc_stdout_append,
+        punc_stderr_redirect,
+        punc_stderr_append,
 
         kw_atom,
         kw_call,

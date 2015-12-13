@@ -1,0 +1,1 @@
+[ERROR] input.boc:1:22-1:22: stdout already redirected

@@ -88,6 +88,15 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     else if(ch == '@') {
         return append_then_accept(ch, shell_token_type::punc_cons);
     }
+    else if(ch == '2') {
+        return append_directive(tokenizer_state::seen_2, ch);
+    }
+    else if(ch == '>') {
+        return append_directive(tokenizer_state::seen_greater, ch);
+    }
+    else if(ch == '<') {
+        return append_then_accept(ch, shell_token_type::punc_stdin_redirect);
+    }
     else if(seen_whitespace &&
             (current_type == shell_token_type::word ||
              current_type == shell_token_type::variable_name ||
@@ -108,6 +117,36 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
         kw_buffer.clear();
         kw_buffer.push_back(ch);
         return append_directive(tokenizer_state::bareword, ch);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_seen_2_state(char ch)
+{
+    if(ch == '>') {
+        return append_directive(tokenizer_state::seen_2_greater, ch);
+    }
+    else {
+        return reject_immediately("expected stderr stream redirection");
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_seen_2_greater_state(char ch)
+{
+    if(ch == '>') {
+        return append_then_accept(ch, shell_token_type::punc_stderr_append);
+    }
+    else {
+        return accept_immediately(shell_token_type::punc_stderr_redirect);
+    }
+}
+
+tok_result shell_tokenizer_state_machine::handle_seen_greater_state(char ch)
+{
+    if(ch == '>') {
+        return append_then_accept(ch, shell_token_type::punc_stdout_append);
+    }
+    else {
+        return accept_immediately(shell_token_type::punc_stdout_redirect);
     }
 }
 
@@ -300,6 +339,15 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::escape_sequence:
         return handle_escape_sequence_state(ch);
+
+    case tokenizer_state::seen_2:
+        return handle_seen_2_state(ch);
+
+    case tokenizer_state::seen_2_greater:
+        return handle_seen_2_greater_state(ch);
+
+    case tokenizer_state::seen_greater:
+        return handle_seen_greater_state(ch);
 
     case tokenizer_state::seen_pipe:
         return handle_seen_pipe_state(ch);

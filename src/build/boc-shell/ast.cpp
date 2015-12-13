@@ -94,10 +94,26 @@ gorc::subcommand::subcommand(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::pipe_io_redirection::pipe_io_redirection(diagnostic_context_location const &loc,
+                                               bool append,
+                                               argument *target)
+    : visitable_ast_node(loc)
+    , append(append)
+    , target(target)
+{
+    return;
+}
+
 gorc::pipe_command::pipe_command(diagnostic_context_location const &loc,
-                                 ast_list_node<subcommand*> *subcommands)
+                                 ast_list_node<subcommand*> *subcommands,
+                                 maybe<pipe_io_redirection*> stdin_source,
+                                 maybe<pipe_io_redirection*> stdout_target,
+                                 maybe<pipe_io_redirection*> stderr_target)
     : visitable_ast_node(loc)
     , subcommands(subcommands)
+    , stdin_source(stdin_source)
+    , stdout_target(stdout_target)
+    , stderr_target(stderr_target)
 {
     return;
 }

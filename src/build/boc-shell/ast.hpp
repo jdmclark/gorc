@@ -148,12 +148,28 @@ namespace gorc {
     using command = variant<pipe_command*,
                             infix_command*>;
 
+    class pipe_io_redirection : public visitable_ast_node<pipe_io_redirection> {
+    public:
+        bool append;
+        argument *target;
+
+        pipe_io_redirection(diagnostic_context_location const &loc,
+                            bool append,
+                            argument *target);
+    };
+
     class pipe_command : public visitable_ast_node<pipe_command> {
     public:
         ast_list_node<subcommand*> *subcommands;
+        maybe<pipe_io_redirection*> stdin_source;
+        maybe<pipe_io_redirection*> stdout_target;
+        maybe<pipe_io_redirection*> stderr_target;
 
         pipe_command(diagnostic_context_location const &loc,
-                     ast_list_node<subcommand*> *subcommands);
+                     ast_list_node<subcommand*> *subcommands,
+                     maybe<pipe_io_redirection*> stdin_source,
+                     maybe<pipe_io_redirection*> stdout_target,
+                     maybe<pipe_io_redirection*> stderr_target);
     };
 
     enum class command_infix_operator {

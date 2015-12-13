@@ -1,0 +1,1 @@
+cat foo.txt 2>bar.txt 2>>baz.txt;
