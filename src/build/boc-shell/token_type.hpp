@@ -21,15 +21,19 @@ namespace gorc {
         punc_notequal,
         punc_not,
         punc_cons,
+        punc_comma,
 
         kw_atom,
+        kw_call,
         kw_car,
         kw_cdr,
         kw_else,
+        kw_function,
         kw_if,
         kw_include,
         kw_nil,
         kw_null,
+        kw_return,
         kw_var
     };
 

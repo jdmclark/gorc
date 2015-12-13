@@ -1,0 +1,8 @@
+var $(a) = 5;
+
+function called(a, b, c)
+{
+    echo $(a) $(b) $(c);
+}
+
+call called(6, 7, 8);

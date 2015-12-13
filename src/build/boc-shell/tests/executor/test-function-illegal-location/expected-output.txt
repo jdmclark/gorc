@@ -1,0 +1,1 @@
+[ERROR] input.boc:4:5-4:22: function 'foo' declaration is in disallowed context

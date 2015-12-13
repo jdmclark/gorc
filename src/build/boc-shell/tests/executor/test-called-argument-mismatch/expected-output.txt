@@ -1,0 +1,1 @@
+[ERROR] input.boc:6:6-6:17: function 'called' expected 3 arguments, found 2

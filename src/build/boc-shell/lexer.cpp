@@ -8,13 +8,16 @@ using tok_result = gorc::tokenizer_state_machine_result;
 namespace {
     std::unordered_map<std::string, shell_token_type> keyword_map {
         { "atom", shell_token_type::kw_atom },
+        { "call", shell_token_type::kw_call },
         { "car", shell_token_type::kw_car },
         { "cdr", shell_token_type::kw_cdr },
         { "else", shell_token_type::kw_else },
+        { "function", shell_token_type::kw_function },
         { "if", shell_token_type::kw_if },
         { "include", shell_token_type::kw_include },
         { "nil", shell_token_type::kw_nil },
         { "null", shell_token_type::kw_null },
+        { "return", shell_token_type::kw_return },
         { "var", shell_token_type::kw_var }
     };
 }
@@ -49,6 +52,9 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     }
     else if(ch == ';') {
         return append_then_accept(ch, shell_token_type::punc_end_command);
+    }
+    else if(ch == ',') {
+        return append_then_accept(ch, shell_token_type::punc_comma);
     }
     else if(ch == '=') {
         return append_directive(tokenizer_state::seen_equal, ch);
@@ -103,6 +109,8 @@ tok_result shell_tokenizer_state_machine::handle_bareword_state(char ch)
        ch == '{' ||
        ch == '}' ||
        ch == '!' ||
+       ch == '@' ||
+       ch == ',' ||
        ch == '(' ||
        ch == ')' ||
        ch == '\"' ||

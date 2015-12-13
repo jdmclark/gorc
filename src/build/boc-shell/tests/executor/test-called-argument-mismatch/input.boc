@@ -1,0 +1,6 @@
+function called(a, b, c)
+{
+    echo "Should be printed third";
+}
+
+call called(a, b);

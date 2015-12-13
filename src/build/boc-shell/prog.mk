@@ -19,6 +19,8 @@ SOURCES:= \
 	parser.cpp \
 	program_visitor.cpp \
 	stack.cpp \
+	symbols.cpp \
+	symbol_visitor.cpp \
 	word_visitor.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

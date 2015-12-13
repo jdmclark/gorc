@@ -1,0 +1,7 @@
+echo "This should be printed";
+if(nil == nil) {
+    echo "This should also be printed";
+    return;
+    echo "This shouldn't";
+}
+echo "Neither should this";

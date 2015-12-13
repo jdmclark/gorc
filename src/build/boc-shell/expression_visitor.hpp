@@ -11,6 +11,7 @@ namespace gorc {
         sexpr visit(unary_expression &) const;
         sexpr visit(infix_expression &) const;
         sexpr visit(nil_expression &) const;
+        sexpr visit(call_expression &) const;
     };
 
 }

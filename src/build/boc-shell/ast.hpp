@@ -22,10 +22,12 @@ namespace gorc {
     /* Expression */
     class argument_expression;
     class nil_expression;
+    class call_expression;
     class unary_expression;
     class infix_expression;
     using expression = variant<argument_expression*,
                                nil_expression*,
+                               call_expression*,
                                unary_expression*,
                                infix_expression*>;
 
@@ -41,6 +43,17 @@ namespace gorc {
     class nil_expression : public visitable_ast_node<nil_expression> {
     public:
         nil_expression(diagnostic_context_location const &loc);
+    };
+
+    class simple_word;
+    class call_expression : public visitable_ast_node<call_expression> {
+    public:
+        simple_word *name;
+        ast_list_node<expression*> *arguments;
+
+        call_expression(diagnostic_context_location const &loc,
+                        simple_word *name,
+                        ast_list_node<expression*> *arguments);
     };
 
     class unary_expression : public visitable_ast_node<unary_expression> {
@@ -146,15 +159,21 @@ namespace gorc {
     class compound_statement;
     class command_statement;
     class var_declaration_statement;
+    class func_declaration_statement;
     class assignment_statement;
     class if_statement;
     class if_else_statement;
+    class return_statement;
+    class call_statement;
     using statement = variant<compound_statement*,
                               command_statement*,
                               var_declaration_statement*,
+                              func_declaration_statement*,
                               assignment_statement*,
                               if_statement*,
-                              if_else_statement*>;
+                              if_else_statement*,
+                              return_statement*,
+                              call_statement*>;
 
     class compound_statement : public visitable_ast_node<compound_statement> {
     public:
@@ -180,6 +199,18 @@ namespace gorc {
         var_declaration_statement(diagnostic_context_location const &loc,
                                   variable_name *var,
                                   maybe<ast_list_node<argument*>*> value);
+    };
+
+    class func_declaration_statement : public visitable_ast_node<func_declaration_statement> {
+    public:
+        simple_word *name;
+        ast_list_node<simple_word *> *arguments;
+        statement *code;
+
+        func_declaration_statement(diagnostic_context_location const &loc,
+                                   simple_word *name,
+                                   ast_list_node<simple_word *> *arguments,
+                                   statement *code);
     };
 
     class assignment_statement : public visitable_ast_node<assignment_statement> {
@@ -212,6 +243,22 @@ namespace gorc {
                           expression *condition,
                           statement *code,
                           statement *elsecode);
+    };
+
+    class return_statement : public visitable_ast_node<return_statement> {
+    public:
+        maybe<expression*> value;
+
+        return_statement(diagnostic_context_location const &loc,
+                         maybe<expression*> value);
+    };
+
+    class call_statement : public visitable_ast_node<call_statement> {
+    public:
+        expression *value;
+
+        call_statement(diagnostic_context_location const &loc,
+                       expression *value);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

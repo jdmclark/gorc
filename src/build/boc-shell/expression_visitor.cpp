@@ -1,7 +1,11 @@
 #include "expression_visitor.hpp"
 #include "argument_visitor.hpp"
 #include "sexpr/sexpr_helpers.hpp"
+#include "program_visitor.hpp"
+#include "symbols.hpp"
+#include "stack.hpp"
 #include "log/log.hpp"
+#include "utility/zip.hpp"
 
 gorc::sexpr gorc::expression_visitor::visit(argument_expression &e) const
 {
@@ -64,4 +68,33 @@ gorc::sexpr gorc::expression_visitor::visit(infix_expression &e) const
 gorc::sexpr gorc::expression_visitor::visit(nil_expression &) const
 {
     return make_sexpr();
+}
+
+gorc::sexpr gorc::expression_visitor::visit(call_expression &e) const
+{
+    auto &fn_node = get_function(e.name->value);
+
+    if(fn_node.arguments->elements.size() != e.arguments->elements.size()) {
+        LOG_FATAL(format("function '%s' expected %d arguments, found %d") %
+                  e.name->value %
+                  fn_node.arguments->elements.size() %
+                  e.arguments->elements.size());
+    }
+
+    scoped_stack_frame fn_stack;
+
+    for(auto arg : zip(fn_node.arguments->elements, e.arguments->elements)) {
+        create_variable(std::get<0>(arg)->value,
+                        ast_visit(expression_visitor(), *std::get<1>(arg)));
+    }
+
+    program_visitor pv;
+    ast_visit(pv, *fn_node.code);
+
+    if(pv.return_value.has_value()) {
+        return pv.return_value.get_value();
+    }
+    else {
+        return make_sexpr();
+    }
 }

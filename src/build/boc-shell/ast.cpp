@@ -14,6 +14,16 @@ gorc::nil_expression::nil_expression(diagnostic_context_location const &loc)
     return;
 }
 
+gorc::call_expression::call_expression(diagnostic_context_location const &loc,
+                                       simple_word *name,
+                                       ast_list_node<expression*> *args)
+    : visitable_ast_node(loc)
+    , name(name)
+    , arguments(args)
+{
+    return;
+}
+
 gorc::unary_expression::unary_expression(diagnostic_context_location const &loc,
                                          expression *value,
                                          unary_operator op)
@@ -118,6 +128,18 @@ gorc::var_declaration_statement::var_declaration_statement(diagnostic_context_lo
     return;
 }
 
+gorc::func_declaration_statement::func_declaration_statement(diagnostic_context_location const &loc,
+                                                             simple_word *name,
+                                                             ast_list_node<simple_word *> *args,
+                                                             statement *code)
+    : visitable_ast_node(loc)
+    , name(name)
+    , arguments(args)
+    , code(code)
+{
+    return;
+}
+
 gorc::assignment_statement::assignment_statement(diagnostic_context_location const &loc,
                                                  lvalue *var,
                                                  ast_list_node<argument*> *value)
@@ -146,6 +168,22 @@ gorc::if_else_statement::if_else_statement(diagnostic_context_location const &lo
     , condition(condition)
     , code(code)
     , elsecode(elsecode)
+{
+    return;
+}
+
+gorc::return_statement::return_statement(diagnostic_context_location const &loc,
+                                         maybe<expression*> value)
+    : visitable_ast_node(loc)
+    , value(value)
+{
+    return;
+}
+
+gorc::call_statement::call_statement(diagnostic_context_location const &loc,
+                                     expression *value)
+    : visitable_ast_node(loc)
+    , value(value)
 {
     return;
 }

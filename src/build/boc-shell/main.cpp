@@ -1,5 +1,6 @@
 #include "program/program.hpp"
 #include "program_visitor.hpp"
+#include "symbol_visitor.hpp"
 #include "ast/factory.hpp"
 #include "parser.hpp"
 
@@ -28,7 +29,11 @@ namespace gorc {
                 return EXIT_SUCCESS;
             }
 
-            return ast_visit(program_visitor(), tu);
+            ast_visit(symbol_visitor(true), tu);
+
+            program_visitor pg;
+            ast_visit(pg, tu);
+            return EXIT_SUCCESS;
         }
     };
 

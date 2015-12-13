@@ -1,0 +1,1 @@
+[ERROR] input.boc:1:6-1:10: function 'foo' is not defined

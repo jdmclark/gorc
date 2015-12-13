@@ -1,0 +1,10 @@
+echo "Should be printed";
+
+function called()
+{
+    echo "Should be printed third";
+}
+
+echo "Should also be printed";
+
+call called();

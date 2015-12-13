@@ -1,0 +1,8 @@
+echo "Should be printed";
+
+function uncalled()
+{
+    echo "Should not be printed";
+}
+
+echo "Should also be printed";

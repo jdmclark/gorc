@@ -8,7 +8,7 @@
 #include "expression_visitor.hpp"
 #include "assignment_visitor.hpp"
 
-int gorc::program_visitor::visit(pipe_command &cmd) const
+int gorc::program_visitor::visit(pipe_command &cmd)
 {
     // Open interprocess pipes
     size_t num_subcommands = cmd.subcommands->elements.size();
@@ -44,6 +44,10 @@ int gorc::program_visitor::visit(pipe_command &cmd) const
         sexpr arg_list = ast_visit(argument_visitor(), (*sub_it)->arguments);
         std::vector<std::string> argv = argument_list_to_argv(arg_list);
 
+        if(argv.empty()) {
+            LOG_FATAL("cannot execute empty command");
+        }
+
         // First token is the program to execute
         std::string prog = argv.front();
         std::vector<std::string> args;
@@ -71,21 +75,22 @@ int gorc::program_visitor::visit(pipe_command &cmd) const
     return last_exit_code;
 }
 
-int gorc::program_visitor::visit(command_statement &cmd) const
+void gorc::program_visitor::visit(command_statement &cmd)
 {
-    return ast_visit(*this, *cmd.cmd);
+    int return_code = ast_visit(*this, *cmd.cmd);
+    if(return_code != 0) {
+        LOG_FATAL(format("command failed with code %d") % return_code);
+    }
 }
 
-int gorc::program_visitor::visit(assignment_statement &s) const
+void gorc::program_visitor::visit(assignment_statement &s)
 {
     sexpr value = ast_visit(argument_visitor(), s.value);
 
     ast_visit(assign_lvalue_visitor(value), *s.var);
-
-    return EXIT_SUCCESS;
 }
 
-int gorc::program_visitor::visit(var_declaration_statement &s) const
+void gorc::program_visitor::visit(var_declaration_statement &s)
 {
     sexpr value;
     if(s.value.has_value()) {
@@ -93,21 +98,17 @@ int gorc::program_visitor::visit(var_declaration_statement &s) const
     }
 
     create_variable(s.var->name, value);
-
-    return EXIT_SUCCESS;
 }
 
-int gorc::program_visitor::visit(if_statement &s) const
+void gorc::program_visitor::visit(if_statement &s)
 {
     auto cond = ast_visit(expression_visitor(), *s.condition);
     if(as_boolean_value(cond)) {
         ast_visit(*this, *s.code);
     }
-
-    return EXIT_SUCCESS;
 }
 
-int gorc::program_visitor::visit(if_else_statement &s) const
+void gorc::program_visitor::visit(if_else_statement &s)
 {
     auto cond = ast_visit(expression_visitor(), *s.condition);
     if(as_boolean_value(cond)) {
@@ -116,31 +117,47 @@ int gorc::program_visitor::visit(if_else_statement &s) const
     else {
         ast_visit(*this, *s.elsecode);
     }
-
-    return EXIT_SUCCESS;
 }
 
-int gorc::program_visitor::visit(ast_list_node<statement*> &stmt_seq) const
+void gorc::program_visitor::visit(return_statement &s)
+{
+    if(s.value.has_value()) {
+        return_value = ast_visit(expression_visitor(), *s.value.get_value());
+    }
+    else {
+        return_value = make_sexpr();
+    }
+}
+
+void gorc::program_visitor::visit(call_statement &s)
+{
+    ast_visit(expression_visitor(), *s.value);
+}
+
+void gorc::program_visitor::visit(ast_list_node<statement*> &stmt_seq)
 {
     for(auto &stmt : stmt_seq.elements) {
-        int result = ast_visit(*this, *stmt);
-        if(result != 0) {
-            // Abort executing a statement sequence after the first error
-            LOG_ERROR(format("command failed with code %d") % result);
-            return EXIT_FAILURE;
+        // Abort executing a statement sequence after the first return statement
+        if(return_value.has_value()) {
+            return;
         }
-    }
 
-    return EXIT_SUCCESS;
+        ast_visit(*this, *stmt);
+    }
 }
 
-int gorc::program_visitor::visit(compound_statement &stmt) const
+void gorc::program_visitor::visit(compound_statement &stmt)
 {
     scoped_stack_frame sf;
     return ast_visit(*this, stmt.code);
 }
 
-int gorc::program_visitor::visit(translation_unit &tu) const
+void gorc::program_visitor::visit(translation_unit &tu)
 {
     return ast_visit(*this, tu.code);
+}
+
+void gorc::program_visitor::visit(func_declaration_statement &)
+{
+    // Ignore function nodes during execution
 }

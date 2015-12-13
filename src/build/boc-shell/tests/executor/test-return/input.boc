@@ -1,0 +1,3 @@
+echo "This should be printed";
+return;
+echo "This shouldn't be printed";
