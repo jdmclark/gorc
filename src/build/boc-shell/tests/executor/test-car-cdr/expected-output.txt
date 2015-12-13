@@ -1,0 +1,5 @@
+First argument matches
+Second argument matches
+Third argument matches
+List is terminated with an atom
+List is null terminated

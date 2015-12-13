@@ -6,19 +6,26 @@
 namespace gorc {
 
     enum class unary_operator {
-        logical_not
+        atom,
+        car,
+        cdr,
+        logical_not,
+        null
     };
 
     enum class infix_operator {
+        cons,
         equal,
         not_equal
     };
 
     /* Expression */
     class argument_expression;
+    class nil_expression;
     class unary_expression;
     class infix_expression;
     using expression = variant<argument_expression*,
+                               nil_expression*,
                                unary_expression*,
                                infix_expression*>;
 
@@ -29,6 +36,11 @@ namespace gorc {
 
         argument_expression(diagnostic_context_location const &loc,
                             argument *value);
+    };
+
+    class nil_expression : public visitable_ast_node<nil_expression> {
+    public:
+        nil_expression(diagnostic_context_location const &loc);
     };
 
     class unary_expression : public visitable_ast_node<unary_expression> {
@@ -56,6 +68,7 @@ namespace gorc {
     /* General */
 
     class simple_word;
+    class expression_word;
     class variable_name;
     class environment_variable_name;
 
@@ -63,6 +76,7 @@ namespace gorc {
                            environment_variable_name*>;
 
     using word = variant<simple_word*,
+                         expression_word*,
                          variable_name*,
                          environment_variable_name*>;
 
@@ -72,6 +86,14 @@ namespace gorc {
 
         simple_word(diagnostic_context_location const &loc,
                     std::string const &value);
+    };
+
+    class expression_word : public visitable_ast_node<expression_word> {
+    public:
+        expression *value;
+
+        expression_word(diagnostic_context_location const &loc,
+                        expression *value);
     };
 
     class variable_name : public visitable_ast_node<variable_name> {

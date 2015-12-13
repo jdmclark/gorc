@@ -1,0 +1,19 @@
+# boc-shell uses @ for cons because . is too common in filenames
+var $(LIST) = (a @ (b @ (c @ (d @ nil))));
+var $(EXPECTED) = a b c d;
+
+if($(LIST) == $(EXPECTED)) {
+    echo "Lists match";
+}
+else {
+    echo "Lists do not match";
+}
+
+var $(LIST2) = (a @ (b @ (c @ d)));
+
+if($(LIST2) == $(EXPECTED)) {
+    echo "Lists match";
+}
+else {
+    echo "Lists do not match";
+}

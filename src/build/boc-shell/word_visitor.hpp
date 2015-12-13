@@ -10,6 +10,7 @@ namespace gorc {
         sexpr visit(simple_word &) const;
         sexpr visit(variable_name &) const;
         sexpr visit(environment_variable_name &) const;
+        sexpr visit(expression_word &) const;
     };
 
 }

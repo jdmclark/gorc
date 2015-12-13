@@ -35,13 +35,33 @@ namespace {
 
     /* Words */
 
+    expression* parse_expression(ast_factory &ast, shell_la_tokenizer &tok);
+
     argument* parse_argument(ast_factory &ast, shell_la_tokenizer &tok)
     {
         ast_list_node<word*> *words =
             ast.make<ast_list_node<word*>>(tok.get_location());
 
         while(true) {
-            if(tok.get_type() == shell_token_type::word) {
+            if(tok.get_type() == shell_token_type::punc_begin_expr) {
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                expression *value = parse_expression(ast, tok);
+
+                if(tok.get_type() != shell_token_type::punc_end_expr) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
+                }
+
+                auto end_loc = tok.get_location();
+                tok.advance();
+
+                words->elements.push_back(
+                        ast.make_var<word, expression_word>(location_union(start_loc, end_loc),
+                                                            value));
+            }
+            else if(tok.get_type() == shell_token_type::word) {
                 words->elements.push_back(
                         ast.make_var<word, simple_word>(tok.get_location(),
                                                         tok.get_value()));
@@ -121,7 +141,12 @@ namespace {
 
     expression* parse_primary_expression(ast_factory &ast, shell_la_tokenizer &tok)
     {
-        if(tok.get_type() == shell_token_type::punc_begin_expr) {
+        if(tok.get_type() == shell_token_type::kw_nil) {
+            expression *rv = ast.make_var<expression, nil_expression>(tok.get_location());
+            tok.advance();
+            return rv;
+        }
+        else if(tok.get_type() == shell_token_type::punc_begin_expr) {
             tok.advance();
 
             expression *rv = parse_expression(ast, tok);
@@ -142,8 +167,35 @@ namespace {
 
     expression* parse_unary_expression(ast_factory &ast, shell_la_tokenizer &tok)
     {
-        if(tok.get_type() == shell_token_type::punc_not) {
-            auto op = unary_operator::logical_not;
+        maybe<unary_operator> op;
+
+        switch(tok.get_type()) {
+        case shell_token_type::punc_not:
+            op = unary_operator::logical_not;
+            break;
+
+        case shell_token_type::kw_car:
+            op = unary_operator::car;
+            break;
+
+        case shell_token_type::kw_cdr:
+            op = unary_operator::cdr;
+            break;
+
+        case shell_token_type::kw_null:
+            op = unary_operator::null;
+            break;
+
+        case shell_token_type::kw_atom:
+            op = unary_operator::atom;
+            break;
+
+        default:
+            // Deliberately not handled
+            break;
+        }
+
+        if(op.has_value()) {
             auto start_loc = tok.get_location();
             tok.advance();
 
@@ -152,16 +204,33 @@ namespace {
             return ast.make_var<expression, unary_expression>(
                     location_union(start_loc, ast_visit(variant_location_visitor(), *rv)),
                     rv,
-                    op);
+                    op.get_value());
         }
         else {
             return parse_primary_expression(ast, tok);
         }
     }
 
-    expression* parse_equality_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    expression* parse_cons_expression(ast_factory &ast, shell_la_tokenizer &tok)
     {
         expression *rv = parse_unary_expression(ast, tok);
+        while(tok.get_type() == shell_token_type::punc_cons) {
+            tok.advance();
+            expression *right = parse_unary_expression(ast, tok);
+            rv = ast.make_var<expression, infix_expression>(
+                    location_union(ast_visit(variant_location_visitor(), *rv),
+                                   ast_visit(variant_location_visitor(), *right)),
+                    rv,
+                    right,
+                    infix_operator::cons);
+        }
+
+        return rv;
+    }
+
+    expression* parse_equality_expression(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        expression *rv = parse_cons_expression(ast, tok);
         while(tok.get_type() == shell_token_type::punc_equal ||
               tok.get_type() == shell_token_type::punc_notequal) {
             infix_operator op = infix_operator::equal;
@@ -181,7 +250,7 @@ namespace {
 // LCOV_EXCL_STOP
 
             tok.advance();
-            expression *right = parse_unary_expression(ast, tok);
+            expression *right = parse_cons_expression(ast, tok);
             rv = ast.make_var<expression, infix_expression>(
                     location_union(ast_visit(variant_location_visitor(), *rv),
                                    ast_visit(variant_location_visitor(), *right)),

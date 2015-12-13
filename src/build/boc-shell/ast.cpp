@@ -8,6 +8,12 @@ gorc::argument_expression::argument_expression(diagnostic_context_location const
     return;
 }
 
+gorc::nil_expression::nil_expression(diagnostic_context_location const &loc)
+    : visitable_ast_node(loc)
+{
+    return;
+}
+
 gorc::unary_expression::unary_expression(diagnostic_context_location const &loc,
                                          expression *value,
                                          unary_operator op)
@@ -34,6 +40,14 @@ gorc::simple_word::simple_word(diagnostic_context_location const &loc,
                                std::string const &v)
     : visitable_ast_node(loc)
     , value(v)
+{
+    return;
+}
+
+gorc::expression_word::expression_word(diagnostic_context_location const &loc,
+                                       expression *value)
+    : visitable_ast_node(loc)
+    , value(value)
 {
     return;
 }

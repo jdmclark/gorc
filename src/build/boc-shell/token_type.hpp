@@ -20,10 +20,16 @@ namespace gorc {
         punc_equal,
         punc_notequal,
         punc_not,
+        punc_cons,
 
+        kw_atom,
+        kw_car,
+        kw_cdr,
         kw_else,
         kw_if,
         kw_include,
+        kw_nil,
+        kw_null,
         kw_var
     };
 

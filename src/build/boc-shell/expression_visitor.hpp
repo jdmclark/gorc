@@ -10,6 +10,7 @@ namespace gorc {
         sexpr visit(argument_expression &) const;
         sexpr visit(unary_expression &) const;
         sexpr visit(infix_expression &) const;
+        sexpr visit(nil_expression &) const;
     };
 
 }

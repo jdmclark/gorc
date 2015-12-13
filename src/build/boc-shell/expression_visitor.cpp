@@ -16,6 +16,18 @@ gorc::sexpr gorc::expression_visitor::visit(unary_expression &e) const
     case unary_operator::logical_not:
         return make_sexpr(!as_boolean_value(sub_value));
 
+    case unary_operator::car:
+        return car(sub_value);
+
+    case unary_operator::cdr:
+        return cdr(sub_value);
+
+    case unary_operator::atom:
+        return make_sexpr(atom(sub_value));
+
+    case unary_operator::null:
+        return make_sexpr(null(sub_value));
+
 // LCOV_EXCL_START
     }
 
@@ -36,6 +48,10 @@ gorc::sexpr gorc::expression_visitor::visit(infix_expression &e) const
 
     case infix_operator::not_equal:
         return make_sexpr(!sexpr_equal(left_value, right_value));
+
+    case infix_operator::cons:
+        return make_sexpr(left_value, right_value);
+
 // LCOV_EXCL_START
     }
 
@@ -43,4 +59,9 @@ gorc::sexpr gorc::expression_visitor::visit(infix_expression &e) const
     LOG_FATAL("unhandled infix operator");
 
 // LCOV_EXCL_STOP
+}
+
+gorc::sexpr gorc::expression_visitor::visit(nil_expression &) const
+{
+    return make_sexpr();
 }
