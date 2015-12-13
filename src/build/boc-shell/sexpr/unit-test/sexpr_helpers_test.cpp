@@ -252,4 +252,40 @@ test_case(atom_to_argv)
     assert_eq(rv, expected);
 }
 
+test_case(numeric_atom_to_numeric)
+{
+    assert_eq(as_numeric_value(make_sexpr("5")), 5);
+    assert_eq(as_numeric_value(make_sexpr("-12")), -12);
+    assert_eq(as_numeric_value(make_sexpr("0xFE")), 254);
+}
+
+test_case(non_numeric_atom_to_numeric)
+{
+    assert_throws_logged(as_numeric_value(make_sexpr("h3l10")));
+    assert_log_message(log_level::error, "value 'h3l10' is not a number");
+    assert_log_empty();
+}
+
+test_case(nil_to_numeric)
+{
+    assert_throws_logged(as_numeric_value(make_sexpr()));
+    assert_log_message(log_level::error, "value '' is not a number");
+    assert_log_empty();
+}
+
+test_case(big_number_to_numeric)
+{
+    assert_throws_logged(as_numeric_value(make_sexpr("0xFFFFFFFFFFFFFFFFF")));
+    assert_log_message(log_level::error, "value '0xFFFFFFFFFFFFFFFFF' cannot be "
+                                         "represented as an integer");
+    assert_log_empty();
+}
+
+test_case(cons_to_numeric)
+{
+    assert_throws_logged(as_numeric_value(make_sexpr(make_sexpr(), make_sexpr())));
+    assert_log_message(log_level::error, "expected number, found data structure");
+    assert_log_empty();
+}
+
 end_suite(sexpr_helpers_test);

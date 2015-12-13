@@ -8,6 +8,7 @@ namespace gorc {
 
     std::string as_string_value(sexpr);
     bool as_boolean_value(sexpr);
+    int as_numeric_value(sexpr);
     bool sexpr_equal(sexpr, sexpr);
 
     std::vector<std::string> argument_to_argv(sexpr);

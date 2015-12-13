@@ -1,5 +1,6 @@
 #include "sexpr_helpers.hpp"
 #include "log/log.hpp"
+#include <string>
 
 std::string gorc::as_string_value(sexpr s)
 {
@@ -25,6 +26,25 @@ bool gorc::as_boolean_value(sexpr s)
     }
 
     LOG_FATAL("expected boolean, found data structure");
+}
+
+int gorc::as_numeric_value(sexpr s)
+{
+    if(atom(s)) {
+        try {
+            return std::stoi(s->atom,
+                             /* offset */ 0,
+                             /* automatically detect base */ 0);
+        }
+        catch(std::invalid_argument const &) {
+            LOG_FATAL(format("value '%s' is not a number") % s->atom);
+        }
+        catch(std::out_of_range const &) {
+            LOG_FATAL(format("value '%s' cannot be represented as an integer") % s->atom);
+        }
+    }
+
+    LOG_FATAL("expected number, found data structure");
 }
 
 bool gorc::sexpr_equal(sexpr left, sexpr right)
