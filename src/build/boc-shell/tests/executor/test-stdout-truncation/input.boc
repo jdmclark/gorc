@@ -1,0 +1,4 @@
+echo "this shouldn't be printed" > $[TESTSUITE_DIR]/out.txt;
+echo "this should be printed" > $[TESTSUITE_DIR]/out.txt;
+echo "this also should be printed" >> $[TESTSUITE_DIR]/out.txt;
+cat $[TESTSUITE_DIR]/out.txt;

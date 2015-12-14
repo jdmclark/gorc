@@ -115,7 +115,15 @@ gorc::pipe gorc::make_input_file_pipe(path const &p)
 {
     std::string native_filename = p.native();
 
-    int res = ::open(native_filename.c_str(), O_RDONLY);
+    // LCOV_EXCL_START
+    int res = -1;
+    do {
+    // LCOV_EXCL_STOP
+        res = ::open(native_filename.c_str(), O_RDONLY);
+    // LCOV_EXCL_START
+    } while(res == -1 && errno == EINTR);
+    // LCOV_EXCL_STOP
+
     if(res == -1) {
         throw std::system_error(errno, std::generic_category());
     }
@@ -128,9 +136,17 @@ gorc::pipe gorc::make_output_file_pipe(path const &p)
 {
     std::string native_filename = p.native();
 
-    int res = ::open(native_filename.c_str(),
+    // LCOV_EXCL_START
+    int res = -1;
+    do {
+    // LCOV_EXCL_STOP
+        res = ::open(native_filename.c_str(),
                      O_WRONLY | O_APPEND | O_CREAT | O_TRUNC,
                      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    // LCOV_EXCL_START
+    } while(res == -1 && errno == EINTR);
+    // LCOV_EXCL_STOP
+
     if(res == -1) {
         throw std::system_error(errno, std::generic_category());
     }
@@ -143,9 +159,17 @@ gorc::pipe gorc::make_output_file_append_pipe(path const &p)
 {
     std::string native_filename = p.native();
 
-    int res = ::open(native_filename.c_str(),
+    // LCOV_EXCL_START
+    int res = -1;
+    do {
+    // LCOV_EXCL_STOP
+        res = ::open(native_filename.c_str(),
                      O_WRONLY | O_APPEND | O_CREAT,
                      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    // LCOV_EXCL_START
+    } while(res == -1 && errno == EINTR);
+    // LCOV_EXCL_STOP
+
     if(res == -1) {
         throw std::system_error(errno, std::generic_category());
     }

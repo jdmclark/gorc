@@ -1,0 +1,2 @@
+printed before error
+[ERROR] Unrecognized option --error-that-does-not-exist

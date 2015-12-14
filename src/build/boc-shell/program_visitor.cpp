@@ -24,6 +24,22 @@ int gorc::program_visitor::visit(pipe_command &cmd)
         stored_redirected_stdin_pipe->output.reset();
     }
 
+    std::unique_ptr<pipe> stored_redirected_stdout_pipe;
+    maybe<pipe*> redirected_stdout_pipe;
+    if(cmd.stdout_target.has_value()) {
+        stored_redirected_stdout_pipe = ast_visit(io_redirection_visitor(/* input */ false),
+                                                  cmd.stdout_target.get_value());
+        redirected_stdout_pipe = stored_redirected_stdout_pipe.get();
+    }
+
+    std::unique_ptr<pipe> stored_redirected_stderr_pipe;
+    maybe<pipe*> redirected_stderr_pipe;
+    if(cmd.stderr_target.has_value()) {
+        stored_redirected_stderr_pipe = ast_visit(io_redirection_visitor(/* input */ false),
+                                                  cmd.stderr_target.get_value());
+        redirected_stderr_pipe = stored_redirected_stderr_pipe.get();
+    }
+
     // Open interprocess pipes
     size_t num_subcommands = cmd.subcommands->elements.size();
 
@@ -44,7 +60,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     }
 
     // Last process sends stdout to console
-    stdout_pipes.push_back(nothing); // TODO: stdout redirection
+    stdout_pipes.push_back(redirected_stdout_pipe);
 
     auto sub_it = cmd.subcommands->elements.begin();
     auto stdin_it = stdin_pipes.begin();
@@ -75,7 +91,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
                                                  args,
                                                  *stdin_it,
                                                  *stdout_it,
-                                                 /* err */ nothing));
+                                                 redirected_stderr_pipe));
         ++sub_it;
         ++stdin_it;
         ++stdout_it;

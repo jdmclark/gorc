@@ -1,0 +1,3 @@
+$[BOC_SHELL] --error-that-does-not-exist 2>>$[TESTSUITE_DIR]/out.txt || true;
+echo "printed before error";
+cat $[TESTSUITE_DIR]/out.txt;

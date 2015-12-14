@@ -1,0 +1,2 @@
+sort <words.txt >$[TESTSUITE_DIR]/out.txt;
+wc -l <$[TESTSUITE_DIR]/out.txt;
