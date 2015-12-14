@@ -14,6 +14,7 @@ SOURCES:= \
 	assignment_visitor.cpp \
 	ast.cpp \
 	expression_visitor.cpp \
+	io_redirection_visitor.cpp \
 	lexer.cpp \
 	main.cpp \
 	parser.cpp \

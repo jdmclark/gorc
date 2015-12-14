@@ -4,6 +4,9 @@
 #include <system_error>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 gorc::pipe_input_stream::pipe_input_stream(int fd)
     : fd(fd)
@@ -98,4 +101,55 @@ gorc::pipe::pipe()
 
     input = make_unique<pipe_input_stream>(pipefd[0]);
     output = make_unique<pipe_output_stream>(pipefd[1]);
+}
+
+gorc::pipe::pipe(std::unique_ptr<pipe_input_stream> &&input,
+                 std::unique_ptr<pipe_output_stream> &&output)
+    : input(std::forward<std::unique_ptr<pipe_input_stream>>(input))
+    , output(std::forward<std::unique_ptr<pipe_output_stream>>(output))
+{
+    return;
+}
+
+gorc::pipe gorc::make_input_file_pipe(path const &p)
+{
+    std::string native_filename = p.native();
+
+    int res = ::open(native_filename.c_str(), O_RDONLY);
+    if(res == -1) {
+        throw std::system_error(errno, std::generic_category());
+    }
+
+    return pipe(make_unique<pipe_input_stream>(res),
+                nullptr);
+}
+
+gorc::pipe gorc::make_output_file_pipe(path const &p)
+{
+    std::string native_filename = p.native();
+
+    int res = ::open(native_filename.c_str(),
+                     O_WRONLY | O_APPEND | O_CREAT | O_TRUNC,
+                     S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    if(res == -1) {
+        throw std::system_error(errno, std::generic_category());
+    }
+
+    return pipe(nullptr,
+                make_unique<pipe_output_stream>(res));
+}
+
+gorc::pipe gorc::make_output_file_append_pipe(path const &p)
+{
+    std::string native_filename = p.native();
+
+    int res = ::open(native_filename.c_str(),
+                     O_WRONLY | O_APPEND | O_CREAT,
+                     S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    if(res == -1) {
+        throw std::system_error(errno, std::generic_category());
+    }
+
+    return pipe(nullptr,
+                make_unique<pipe_output_stream>(res));
 }

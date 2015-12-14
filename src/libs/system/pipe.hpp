@@ -2,6 +2,7 @@
 
 #include "io/input_stream.hpp"
 #include "io/output_stream.hpp"
+#include "io/path.hpp"
 #include <tuple>
 #include <memory>
 
@@ -34,9 +35,15 @@ namespace gorc {
     class pipe {
     public:
         pipe();
+        pipe(std::unique_ptr<pipe_input_stream> &&input,
+             std::unique_ptr<pipe_output_stream> &&output);
 
         std::unique_ptr<pipe_input_stream> input;
         std::unique_ptr<pipe_output_stream> output;
     };
+
+    pipe make_input_file_pipe(path const &p);
+    pipe make_output_file_pipe(path const &p);
+    pipe make_output_file_append_pipe(path const &p);
 
 }

@@ -10,7 +10,7 @@ begin_suite(pipe_test);
 
 test_case(simple_pipe_test)
 {
-    pipe p;
+    gorc::pipe p;
 
     std::string out_msg = "Hello, World!";
     p.output->write(out_msg.data(), out_msg.size());
@@ -29,7 +29,7 @@ test_case(broken_pipe_test)
     ::sigaddset(&set, SIGPIPE);
     ::pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
-    pipe p;
+    gorc::pipe p;
 
     p.input.reset();
 
@@ -49,7 +49,7 @@ test_case(broken_pipe_test)
 
 test_case(eof_test)
 {
-    pipe p;
+    gorc::pipe p;
 
     p.output.reset();
 

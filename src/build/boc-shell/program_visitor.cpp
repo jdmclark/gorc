@@ -7,13 +7,21 @@
 #include "argument_visitor.hpp"
 #include "expression_visitor.hpp"
 #include "assignment_visitor.hpp"
+#include "io_redirection_visitor.hpp"
 
 int gorc::program_visitor::visit(pipe_command &cmd)
 {
     // Open redirection pipes
-    pipe redirected_stdin_pipe;
-    if(!cmd.stdin_source.has_value()) {
-        redirected_stdin_pipe.output.reset();
+    std::unique_ptr<pipe> stored_redirected_stdin_pipe;
+    if(cmd.stdin_source.has_value()) {
+        stored_redirected_stdin_pipe = ast_visit(io_redirection_visitor(/* input */ true),
+                                                 cmd.stdin_source.get_value());
+    }
+    else {
+        // Use a normal pipe, but close the output end.
+        // This will cause the child process to exit with SIGPIPE instead of halting.
+        stored_redirected_stdin_pipe = make_unique<pipe>();
+        stored_redirected_stdin_pipe->output.reset();
     }
 
     // Open interprocess pipes
@@ -27,8 +35,8 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     std::vector<maybe<pipe*>> stdin_pipes;
     std::vector<maybe<pipe*>> stdout_pipes;
 
-    // First process takes stdin from console
-    stdin_pipes.push_back(&redirected_stdin_pipe); // TODO: stdin redirection
+    // First process takes stdin from redirection
+    stdin_pipes.push_back(stored_redirected_stdin_pipe.get());
 
     for(auto &pipe : pipes) {
         stdin_pipes.push_back(pipe.get());
