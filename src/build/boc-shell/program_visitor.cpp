@@ -170,6 +170,26 @@ void gorc::program_visitor::visit(if_else_statement &s)
     }
 }
 
+void gorc::program_visitor::visit(for_statement &s)
+{
+    auto list = ast_visit(expression_visitor(), *s.list);
+
+    sexpr curr = list;
+    while(!null(curr)) {
+        scoped_stack_frame sf;
+        if(atom(curr)) {
+            create_variable(s.varname->value, curr);
+            ast_visit(*this, *s.code);
+            break;
+        }
+        else {
+            create_variable(s.varname->value, car(curr));
+            ast_visit(*this, *s.code);
+            curr = cdr(curr);
+        }
+    }
+}
+
 void gorc::program_visitor::visit(return_statement &s)
 {
     if(s.value.has_value()) {

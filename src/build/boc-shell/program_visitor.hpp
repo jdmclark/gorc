@@ -18,6 +18,7 @@ namespace gorc {
         void visit(var_declaration_statement &);
         void visit(if_statement &);
         void visit(if_else_statement &);
+        void visit(for_statement &);
         void visit(return_statement &);
         void visit(call_statement &);
 

@@ -741,6 +741,37 @@ namespace {
         }
     }
 
+    statement* parse_for_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // On 'for'
+        auto start_loc = tok.get_location();
+        tok.advance();
+
+        simple_word *word = ast.make<simple_word>(tok.get_location(), tok.get_value());
+        tok.advance();
+
+        if(tok.get_type() == shell_token_type::punc_whitespace) {
+            // Skip whitespace
+            tok.advance();
+        }
+
+        if(tok.get_type() != shell_token_type::kw_in) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected 'in', found '%s'") % tok.get_value());
+        }
+
+        tok.advance();
+
+        expression *list = parse_expression(ast, tok);
+        statement* body = parse_compound_statement(ast, tok);
+
+        return ast.make_var<statement, for_statement>(
+                location_union(start_loc, ast_visit(variant_location_visitor(), *body)),
+                word,
+                list,
+                body);
+    }
+
     statement* parse_return_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         auto start_loc = tok.get_location();
@@ -805,6 +836,9 @@ namespace {
         }
         else if(tok.get_type() == shell_token_type::kw_if) {
             return parse_if_statement(ast, tok);
+        }
+        else if(tok.get_type() == shell_token_type::kw_for) {
+            return parse_for_statement(ast, tok);
         }
         else if(tok.get_type() == shell_token_type::punc_begin_block) {
             return parse_compound_statement(ast, tok);

@@ -44,6 +44,11 @@ void gorc::symbol_visitor::visit(if_else_statement &s) const
     ast_visit(symbol_visitor(false), *s.elsecode);
 }
 
+void gorc::symbol_visitor::visit(for_statement &s) const
+{
+    ast_visit(symbol_visitor(false), *s.code);
+}
+
 void gorc::symbol_visitor::visit(return_statement &) const
 {
     return;

@@ -200,6 +200,18 @@ gorc::if_else_statement::if_else_statement(diagnostic_context_location const &lo
     return;
 }
 
+gorc::for_statement::for_statement(diagnostic_context_location const &loc,
+                                   simple_word *varname,
+                                   expression *list,
+                                   statement *code)
+    : visitable_ast_node(loc)
+    , varname(varname)
+    , list(list)
+    , code(code)
+{
+    return;
+}
+
 gorc::return_statement::return_statement(diagnostic_context_location const &loc,
                                          maybe<expression*> value)
     : visitable_ast_node(loc)

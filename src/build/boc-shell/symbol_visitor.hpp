@@ -17,6 +17,7 @@ namespace gorc {
         void visit(func_declaration_statement &) const;
         void visit(if_statement &) const;
         void visit(if_else_statement &) const;
+        void visit(for_statement &) const;
         void visit(return_statement &) const;
         void visit(call_statement &) const;
 

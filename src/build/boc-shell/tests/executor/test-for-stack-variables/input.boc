@@ -1,0 +1,7 @@
+var $list = a b c d e f g;
+
+for x in $list
+{
+    var $y = "List entry: "$(x);
+    echo $y;
+}

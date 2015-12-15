@@ -1,0 +1,6 @@
+var $list = (nil);
+
+for x in nil
+{
+    echo "Should not be printed";
+}

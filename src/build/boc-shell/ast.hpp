@@ -198,6 +198,7 @@ namespace gorc {
     class assignment_statement;
     class if_statement;
     class if_else_statement;
+    class for_statement;
     class return_statement;
     class call_statement;
     using statement = variant<compound_statement*,
@@ -207,6 +208,7 @@ namespace gorc {
                               assignment_statement*,
                               if_statement*,
                               if_else_statement*,
+                              for_statement*,
                               return_statement*,
                               call_statement*>;
 
@@ -278,6 +280,18 @@ namespace gorc {
                           expression *condition,
                           statement *code,
                           statement *elsecode);
+    };
+
+    class for_statement : public visitable_ast_node<for_statement> {
+    public:
+        simple_word *varname;
+        expression *list;
+        statement *code;
+
+        for_statement(diagnostic_context_location const &loc,
+                      simple_word *varname,
+                      expression *list,
+                      statement *code);
     };
 
     class return_statement : public visitable_ast_node<return_statement> {
