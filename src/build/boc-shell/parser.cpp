@@ -617,7 +617,7 @@ namespace {
         // Process include
         ast_list_node<statement*> *contents = parse_shell_script_file(fn, ast);
 
-        return ast.make_var<statement, compound_statement>(
+        return ast.make_var<statement, include_statement>(
                 contents->location,
                 contents);
     }

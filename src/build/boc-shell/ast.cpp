@@ -130,6 +130,14 @@ gorc::infix_command::infix_command(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::include_statement::include_statement(diagnostic_context_location const &loc,
+                                           ast_list_node<statement*> *code)
+    : visitable_ast_node(loc)
+    , code(code)
+{
+    return;
+}
+
 gorc::compound_statement::compound_statement(diagnostic_context_location const &loc,
                                              ast_list_node<statement*> *code)
     : visitable_ast_node(loc)

@@ -23,6 +23,7 @@ namespace gorc {
         void visit(call_statement &);
 
         void visit(ast_list_node<statement*> &);
+        void visit(include_statement &);
         void visit(compound_statement &);
         void visit(translation_unit &);
 

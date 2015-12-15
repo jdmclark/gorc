@@ -22,6 +22,7 @@ namespace gorc {
         void visit(call_statement &) const;
 
         void visit(ast_list_node<statement*> &) const;
+        void visit(include_statement &) const;
         void visit(compound_statement &) const;
         void visit(translation_unit &) const;
     };

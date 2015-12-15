@@ -1,0 +1,3 @@
+include libfile.boc;
+
+echo $libvar;

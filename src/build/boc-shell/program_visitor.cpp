@@ -217,6 +217,11 @@ void gorc::program_visitor::visit(ast_list_node<statement*> &stmt_seq)
     }
 }
 
+void gorc::program_visitor::visit(include_statement &stmt)
+{
+    return ast_visit(*this, stmt.code);
+}
+
 void gorc::program_visitor::visit(compound_statement &stmt)
 {
     scoped_stack_frame sf;

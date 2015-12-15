@@ -66,6 +66,11 @@ void gorc::symbol_visitor::visit(ast_list_node<statement*> &stmt_seq) const
     }
 }
 
+void gorc::symbol_visitor::visit(include_statement &stmt) const
+{
+    return ast_visit(*this, stmt.code);
+}
+
 void gorc::symbol_visitor::visit(compound_statement &stmt) const
 {
     return ast_visit(*this, stmt.code);

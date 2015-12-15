@@ -191,6 +191,7 @@ namespace gorc {
 
     /* Statements */
 
+    class include_statement;
     class compound_statement;
     class command_statement;
     class var_declaration_statement;
@@ -201,7 +202,8 @@ namespace gorc {
     class for_statement;
     class return_statement;
     class call_statement;
-    using statement = variant<compound_statement*,
+    using statement = variant<include_statement*,
+                              compound_statement*,
                               command_statement*,
                               var_declaration_statement*,
                               func_declaration_statement*,
@@ -211,6 +213,14 @@ namespace gorc {
                               for_statement*,
                               return_statement*,
                               call_statement*>;
+
+    class include_statement : public visitable_ast_node<include_statement> {
+    public:
+        ast_list_node<statement*> *code;
+
+        include_statement(diagnostic_context_location const &loc,
+                          ast_list_node<statement*> *code);
+    };
 
     class compound_statement : public visitable_ast_node<compound_statement> {
     public:
