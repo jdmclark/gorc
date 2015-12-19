@@ -24,6 +24,7 @@ namespace gorc {
         explicit sexpr_node(std::string const &atom);
         explicit sexpr_node(char const *atom);
         explicit sexpr_node(bool atom);
+        explicit sexpr_node(int atom);
 
         sexpr_node(std::shared_ptr<sexpr_node> left,
                    std::shared_ptr<sexpr_node> right);

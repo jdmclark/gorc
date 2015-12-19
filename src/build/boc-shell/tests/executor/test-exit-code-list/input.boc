@@ -1,0 +1,14 @@
+function dump_sexpr(arg)
+{
+    if(null($arg)) {
+        return;
+    }
+
+    echo (car($arg));
+    call dump_sexpr(cdr($arg));
+}
+
+# Run some commands, some of which pass, some of which fail.
+echo "em1\nem2\nem4\nem3" | sort > $[TESTSUITE_DIR]/dump.txt && false || true || false;
+
+call dump_sexpr($?);

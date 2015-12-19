@@ -100,6 +100,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     int last_exit_code = 0;
     for(auto &proc : processes) {
         last_exit_code = proc->join();
+        exit_code_sequence.push_back(last_exit_code);
     }
 
     return last_exit_code;
@@ -128,7 +129,11 @@ int gorc::program_visitor::visit(infix_command &cmd)
 
 void gorc::program_visitor::visit(command_statement &cmd)
 {
+    exit_code_sequence.clear();
+
     int return_code = ast_visit(*this, *cmd.cmd);
+    set_variable_value("?", make_sexpr_from_range(exit_code_sequence));
+
     if(return_code != 0) {
         LOG_FATAL(format("command failed with code %d") % return_code);
     }

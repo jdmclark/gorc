@@ -28,6 +28,13 @@ gorc::sexpr_node::sexpr_node(bool value)
     return;
 }
 
+gorc::sexpr_node::sexpr_node(int value)
+    : type(sexpr_node_type::atom)
+    , atom(std::to_string(value))
+{
+    return;
+}
+
 gorc::sexpr_node::sexpr_node(sexpr left, sexpr right)
     : type(sexpr_node_type::cons)
     , left(left)
