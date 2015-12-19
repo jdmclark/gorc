@@ -370,22 +370,6 @@ namespace {
             op = unary_operator::logical_not;
             break;
 
-        case shell_token_type::kw_car:
-            op = unary_operator::car;
-            break;
-
-        case shell_token_type::kw_cdr:
-            op = unary_operator::cdr;
-            break;
-
-        case shell_token_type::kw_null:
-            op = unary_operator::null;
-            break;
-
-        case shell_token_type::kw_atom:
-            op = unary_operator::atom;
-            break;
-
         default:
             // Deliberately not handled
             break;

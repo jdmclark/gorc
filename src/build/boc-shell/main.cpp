@@ -3,6 +3,8 @@
 #include "symbol_visitor.hpp"
 #include "ast/factory.hpp"
 #include "parser.hpp"
+#include "symbols.hpp"
+#include "builtins.hpp"
 
 namespace gorc {
 
@@ -21,6 +23,8 @@ namespace gorc {
 
         virtual int main() override
         {
+            register_builtins();
+
             // Parse script file
             ast_factory ast;
             translation_unit *tu = parse_shell_script(script_filename, ast);

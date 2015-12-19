@@ -1,21 +1,21 @@
 var $(LIST) = a b c;
 
-if(car $(LIST) == a) {
+if(car($LIST) == a) {
     echo "First argument matches";
 }
 
-if(car cdr $(LIST) == b) {
+if(car(cdr($LIST)) == b) {
     echo "Second argument matches";
 }
 
-if(car cdr cdr $(LIST) == c) {
+if(car(cdr(cdr($LIST))) == c) {
     echo "Third argument matches";
 }
 
-if(atom cdr cdr cdr $(LIST)) {
+if(atom(cdr(cdr(cdr($LIST))))) {
     echo "List is terminated with an atom";
 }
 
-if(null cdr cdr cdr $(LIST)) {
+if(null(cdr(cdr(cdr($LIST))))) {
     echo "List is null terminated";
 }

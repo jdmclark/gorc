@@ -7,10 +7,7 @@ using tok_result = gorc::tokenizer_state_machine_result;
 
 namespace {
     std::unordered_map<std::string, shell_token_type> keyword_map {
-        { "atom", shell_token_type::kw_atom },
         { "call", shell_token_type::kw_call },
-        { "car", shell_token_type::kw_car },
-        { "cdr", shell_token_type::kw_cdr },
         { "else", shell_token_type::kw_else },
         { "for", shell_token_type::kw_for },
         { "function", shell_token_type::kw_function },
@@ -18,7 +15,6 @@ namespace {
         { "in", shell_token_type::kw_in },
         { "include", shell_token_type::kw_include },
         { "nil", shell_token_type::kw_nil },
-        { "null", shell_token_type::kw_null },
         { "return", shell_token_type::kw_return },
         { "var", shell_token_type::kw_var }
     };

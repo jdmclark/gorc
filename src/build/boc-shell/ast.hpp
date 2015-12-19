@@ -6,11 +6,7 @@
 namespace gorc {
 
     enum class unary_operator {
-        atom,
-        car,
-        cdr,
-        logical_not,
-        null
+        logical_not
     };
 
     enum class infix_operator {

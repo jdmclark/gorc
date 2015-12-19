@@ -20,18 +20,6 @@ gorc::sexpr gorc::expression_visitor::visit(unary_expression &e) const
     case unary_operator::logical_not:
         return make_sexpr(!as_boolean_value(sub_value));
 
-    case unary_operator::car:
-        return car(sub_value);
-
-    case unary_operator::cdr:
-        return cdr(sub_value);
-
-    case unary_operator::atom:
-        return make_sexpr(atom(sub_value));
-
-    case unary_operator::null:
-        return make_sexpr(null(sub_value));
-
 // LCOV_EXCL_START
     }
 
@@ -72,6 +60,26 @@ gorc::sexpr gorc::expression_visitor::visit(nil_expression &) const
 
 gorc::sexpr gorc::expression_visitor::visit(call_expression &e) const
 {
+    // Try for a builtin first
+    auto builtin_ptr = get_builtin(e.name->value);
+    if(builtin_ptr.has_value()) {
+        auto &builtin = *builtin_ptr.get_value();
+
+        if(builtin.args != e.arguments->elements.size()) {
+            LOG_FATAL(format("builtin '%s' expected %d arguments, found %d") %
+                      e.name->value %
+                      builtin.args %
+                      e.arguments->elements.size());
+        }
+
+        std::vector<sexpr> args;
+        for(auto const &arg : e.arguments->elements) {
+            args.push_back(ast_visit(expression_visitor(), *arg));
+        }
+
+        return builtin.code(args);
+    }
+
     auto &fn_node = get_function(e.name->value);
 
     if(fn_node.arguments->elements.size() != e.arguments->elements.size()) {

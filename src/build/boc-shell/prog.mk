@@ -13,6 +13,7 @@ SOURCES:= \
 	argument_visitor.cpp \
 	assignment_visitor.cpp \
 	ast.cpp \
+	builtins.cpp \
 	expression_visitor.cpp \
 	io_redirection_visitor.cpp \
 	lexer.cpp \

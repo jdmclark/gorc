@@ -30,10 +30,7 @@ namespace gorc {
         punc_stderr_redirect,
         punc_stderr_append,
 
-        kw_atom,
         kw_call,
-        kw_car,
-        kw_cdr,
         kw_else,
         kw_for,
         kw_function,
@@ -41,7 +38,6 @@ namespace gorc {
         kw_in,
         kw_include,
         kw_nil,
-        kw_null,
         kw_return,
         kw_var
     };

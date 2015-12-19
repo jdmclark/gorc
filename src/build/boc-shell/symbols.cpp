@@ -1,6 +1,34 @@
 #include "symbols.hpp"
 #include "log/log.hpp"
 #include <unordered_map>
+#include "utility/runtime_assert.hpp"
+
+namespace {
+    std::unordered_map<std::string, std::unique_ptr<gorc::builtin>> builtins;
+}
+
+gorc::builtin::builtin(size_t args, std::function<sexpr(std::vector<sexpr> const &)> code)
+    : args(args)
+    , code(code)
+{
+    return;
+}
+
+void gorc::register_builtin(std::string const &name, std::unique_ptr<builtin> &&obj)
+{
+    runtime_assert(builtins.emplace(name, std::forward<std::unique_ptr<builtin>>(obj)).second,
+                   str(format("builtin '%s' redefinition") % name));
+}
+
+gorc::maybe<gorc::builtin*> gorc::get_builtin(std::string const &name)
+{
+    auto it = builtins.find(name);
+    if(it != builtins.end()) {
+        return it->second.get();
+    }
+
+    return nothing;
+}
 
 namespace {
     std::unordered_map<std::string, gorc::func_declaration_statement*> functions;
