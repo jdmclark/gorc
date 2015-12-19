@@ -3,7 +3,7 @@ compiler:
   - gcc
 
 before_script:
-  - wget http://sfml-dev.org/download/sfml/2.1/SFML-2.1-linux-gcc-64bits.tar.bz2 -O /tmp/sfml.tar.bz2
+  - wget http://www.sfml-dev.org/files/SFML-2.1-linux-gcc-64bits.tar.bz2 -O /tmp/sfml.tar.bz2
   - tar -xjf /tmp/sfml.tar.bz2
   - sudo cp -r SFML-2.1/* /usr/
   - rm -rf SFML-2.1
