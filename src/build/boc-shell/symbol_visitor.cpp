@@ -59,6 +59,16 @@ void gorc::symbol_visitor::visit(call_statement &) const
     return;
 }
 
+void gorc::symbol_visitor::visit(pushd_statement &) const
+{
+    return;
+}
+
+void gorc::symbol_visitor::visit(popd_statement &) const
+{
+    return;
+}
+
 void gorc::symbol_visitor::visit(ast_list_node<statement*> &stmt_seq) const
 {
     for(auto &stmt : stmt_seq.elements) {

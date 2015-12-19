@@ -20,6 +20,8 @@ namespace gorc {
         void visit(for_statement &) const;
         void visit(return_statement &) const;
         void visit(call_statement &) const;
+        void visit(pushd_statement &) const;
+        void visit(popd_statement &) const;
 
         void visit(ast_list_node<statement*> &) const;
         void visit(include_statement &) const;

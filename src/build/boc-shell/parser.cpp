@@ -786,6 +786,43 @@ namespace {
                                                        value);
     }
 
+    statement* parse_pushd_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // Currently on pushd token
+        auto start_loc = tok.get_location();
+        tok.advance();
+
+        argument *new_dir = parse_argument(ast, tok);
+
+        if(tok.get_type() != shell_token_type::punc_end_command) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
+        }
+
+        auto end_loc = tok.get_location();
+        tok.advance();
+
+        return ast.make_var<statement, pushd_statement>(location_union(start_loc, end_loc),
+                                                        new_dir);
+    }
+
+    statement* parse_popd_statement(ast_factory &ast, shell_la_tokenizer &tok)
+    {
+        // Currently on popd token
+        auto start_loc = tok.get_location();
+        tok.advance();
+
+        if(tok.get_type() != shell_token_type::punc_end_command) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected ';', found '%s'") % tok.get_value());
+        }
+
+        auto end_loc = tok.get_location();
+        tok.advance();
+
+        return ast.make_var<statement, popd_statement>(location_union(start_loc, end_loc));
+    }
+
     statement* parse_statement(ast_factory &ast, shell_la_tokenizer &tok)
     {
         if(tok.get_type() == shell_token_type::kw_include) {
@@ -808,6 +845,12 @@ namespace {
         }
         else if(tok.get_type() == shell_token_type::kw_for) {
             return parse_for_statement(ast, tok);
+        }
+        else if(tok.get_type() == shell_token_type::kw_pushd) {
+            return parse_pushd_statement(ast, tok);
+        }
+        else if(tok.get_type() == shell_token_type::kw_popd) {
+            return parse_popd_statement(ast, tok);
         }
         else if(tok.get_type() == shell_token_type::punc_begin_block) {
             return parse_compound_statement(ast, tok);

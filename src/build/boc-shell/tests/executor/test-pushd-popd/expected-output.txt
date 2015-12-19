@@ -1,0 +1,4 @@
+parent
+child
+parent
+[ERROR] input.boc:6:1-6:5: cannot popd, working directory stack is empty

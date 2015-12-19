@@ -8,6 +8,9 @@
 #include "expression_visitor.hpp"
 #include "assignment_visitor.hpp"
 #include "io_redirection_visitor.hpp"
+#include "io/path.hpp"
+#include <boost/filesystem.hpp>
+#include <stack>
 
 int gorc::program_visitor::visit(pipe_command &cmd)
 {
@@ -208,6 +211,34 @@ void gorc::program_visitor::visit(return_statement &s)
 void gorc::program_visitor::visit(call_statement &s)
 {
     ast_visit(expression_visitor(), *s.value);
+}
+
+namespace {
+    std::stack<gorc::path> working_directory_stack;
+}
+
+void gorc::program_visitor::visit(pushd_statement &s)
+{
+    // Get new directory
+    auto arg_value = argument_to_argv(ast_visit(argument_visitor(), s.new_dir));
+    if(arg_value.size() != 1) {
+        LOG_FATAL(format("expected working directory path, found '%s' path fragments") %
+                  arg_value.size());
+    }
+
+    // Store current working directory
+    working_directory_stack.push(boost::filesystem::current_path());
+    boost::filesystem::current_path(arg_value.at(0));
+}
+
+void gorc::program_visitor::visit(popd_statement &)
+{
+    if(working_directory_stack.empty()) {
+        LOG_FATAL("cannot popd, working directory stack is empty");
+    }
+
+    boost::filesystem::current_path(working_directory_stack.top());
+    working_directory_stack.pop();
 }
 
 void gorc::program_visitor::visit(ast_list_node<statement*> &stmt_seq)

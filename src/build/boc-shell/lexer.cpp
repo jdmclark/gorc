@@ -15,6 +15,8 @@ namespace {
         { "in", shell_token_type::kw_in },
         { "include", shell_token_type::kw_include },
         { "nil", shell_token_type::kw_nil },
+        { "popd", shell_token_type::kw_popd },
+        { "pushd", shell_token_type::kw_pushd },
         { "return", shell_token_type::kw_return },
         { "var", shell_token_type::kw_var }
     };

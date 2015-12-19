@@ -198,6 +198,8 @@ namespace gorc {
     class for_statement;
     class return_statement;
     class call_statement;
+    class pushd_statement;
+    class popd_statement;
     using statement = variant<include_statement*,
                               compound_statement*,
                               command_statement*,
@@ -208,7 +210,9 @@ namespace gorc {
                               if_else_statement*,
                               for_statement*,
                               return_statement*,
-                              call_statement*>;
+                              call_statement*,
+                              pushd_statement*,
+                              popd_statement*>;
 
     class include_statement : public visitable_ast_node<include_statement> {
     public:
@@ -314,6 +318,19 @@ namespace gorc {
 
         call_statement(diagnostic_context_location const &loc,
                        expression *value);
+    };
+
+    class pushd_statement : public visitable_ast_node<pushd_statement> {
+    public:
+        argument *new_dir;
+
+        pushd_statement(diagnostic_context_location const &loc,
+                        argument *new_dir);
+    };
+
+    class popd_statement : public visitable_ast_node<popd_statement> {
+    public:
+        popd_statement(diagnostic_context_location const &loc);
     };
 
     class translation_unit : public visitable_ast_node<translation_unit> {

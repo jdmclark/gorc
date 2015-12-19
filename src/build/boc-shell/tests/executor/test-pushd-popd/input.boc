@@ -1,0 +1,6 @@
+cat file.txt;
+pushd subdir;
+cat file.txt;
+popd;
+cat file.txt;
+popd;

@@ -236,6 +236,20 @@ gorc::call_statement::call_statement(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::pushd_statement::pushd_statement(diagnostic_context_location const &loc,
+                                       argument *new_dir)
+    : visitable_ast_node(loc)
+    , new_dir(new_dir)
+{
+    return;
+}
+
+gorc::popd_statement::popd_statement(diagnostic_context_location const &loc)
+    : visitable_ast_node(loc)
+{
+    return;
+}
+
 gorc::translation_unit::translation_unit(diagnostic_context_location const &loc,
                                          ast_list_node<statement*> *code)
     : visitable_ast_node(loc)

@@ -38,6 +38,8 @@ namespace gorc {
         kw_in,
         kw_include,
         kw_nil,
+        kw_popd,
+        kw_pushd,
         kw_return,
         kw_var
     };

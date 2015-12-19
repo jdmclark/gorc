@@ -1,0 +1,2 @@
+var $foo = subdir1 subdir2;
+pushd "arg"$foo;
