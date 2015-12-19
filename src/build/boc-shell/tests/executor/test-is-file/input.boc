@@ -1,0 +1,14 @@
+if is_file(somedir/somefile.txt)
+{
+    echo "somefile is a file";
+}
+
+if is_file(somedir/doesnotexist.txt)
+{
+    echo "dne exists: should not be printed";
+}
+
+if is_file(somedir)
+{
+    echo "somedir is file: should not be printed";
+}

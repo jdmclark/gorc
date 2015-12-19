@@ -677,22 +677,7 @@ namespace {
         auto start_loc = tok.get_location();
         tok.advance();
 
-        if(tok.get_type() != shell_token_type::punc_begin_expr) {
-            diagnostic_context dc(tok.get_location());
-            LOG_FATAL(format("expected '(', found '%s'") % tok.get_value());
-        }
-
-        tok.advance();
-
         expression *cond = parse_expression(ast, tok);
-
-        if(tok.get_type() != shell_token_type::punc_end_expr) {
-            diagnostic_context dc(tok.get_location());
-            LOG_FATAL(format("expected ')', found '%s'") % tok.get_value());
-        }
-
-        tok.advance();
-
         statement* body = parse_compound_statement(ast, tok);
 
         if(tok.get_type() == shell_token_type::kw_else) {
