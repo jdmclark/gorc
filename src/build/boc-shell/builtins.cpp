@@ -41,4 +41,10 @@ void gorc::register_builtins()
                 path top_arg = as_string_value(args.at(0));
                 return make_sexpr(boost::filesystem::is_regular_file(top_arg));
             });
+
+    register_builtin("absolute_path", 1, [](arglist const &args)
+            {
+                path top_arg = as_string_value(args.at(0));
+                return make_sexpr(boost::filesystem::absolute(top_arg).generic_string());
+            });
 }
