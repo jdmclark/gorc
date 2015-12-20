@@ -1,34 +1,13 @@
 var $(list) = (((e @ f) @ (g @ h)) @ ((c @ (a @ b)) @ d));
 
-function print_spaces(depth)
+function print_list(list)
 {
-    if(!null($depth)) {
-        echo -n "  ";
-        call print_spaces(cdr($depth));
-    }
-}
-
-function print_tree_inner(tree, depth)
-{
-    if(null($tree)) {
+    if null($list) {
         return;
     }
-    else if(atom($tree)) {
-        call print_spaces($depth);
-        echo "* "$(tree);
-    }
-    else {
-        call print_spaces($depth);
-        echo "*-+";
-        var $(child_depth) = (nil @ $(depth));
-        call print_tree_inner(car($tree), $(child_depth));
-        call print_tree_inner(cdr($tree), $(child_depth));
-    }
+
+    echo (head($list));
+    call print_list(tail($list));
 }
 
-function print_tree(tree)
-{
-    call print_tree_inner($(tree), nil);
-}
-
-call print_tree($(list));
+call print_list($list);

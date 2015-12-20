@@ -1,8 +1,8 @@
 var $(list) = a b c d e;
 
 function called(mylist) {
-    return cdr($mylist);
+    return tail($mylist);
 }
 
 echo (called($(list)));
-echo (called(cdr($list)));
+echo (called(tail($list)));

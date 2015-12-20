@@ -1,0 +1,4 @@
+var $(BASE_PATH)=/foo/bar;
+var $(SUB_PATH)=$(BASE_PATH)/baz;
+
+echo $(SUB_PATH)/file.txt;

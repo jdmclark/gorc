@@ -12,6 +12,7 @@ namespace gorc {
         enum class tokenizer_state {
             accept,
             initial,
+            skip_whitespace,
             skip_line_comment,
             bareword,
             seen_pipe,
@@ -34,7 +35,6 @@ namespace gorc {
         std::string reason;
         std::string append_buffer;
         std::string kw_buffer;
-        bool seen_whitespace = false;
 
         inline tok_result append_directive(tokenizer_state new_state,
                                            char ch)
@@ -97,6 +97,7 @@ namespace gorc {
         }
 
         tok_result handle_initial_state(char ch);
+        tok_result handle_skip_whitespace_state(char ch);
         tok_result handle_skip_line_comment_state(char ch);
         tok_result handle_bareword_state(char ch);
         tok_result handle_string_state(char ch);

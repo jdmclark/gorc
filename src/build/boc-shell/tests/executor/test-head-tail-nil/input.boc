@@ -1,0 +1,8 @@
+# Check that it is safe to take head/tail of nil
+if null(head(nil)) {
+    echo "head is nil: expected";
+}
+
+if null(tail(nil)) {
+    echo "tail is nil: expected";
+}

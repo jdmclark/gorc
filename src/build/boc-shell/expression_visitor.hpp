@@ -1,17 +1,17 @@
 #pragma once
 
 #include "ast.hpp"
-#include "sexpr/sexpr.hpp"
+#include "value.hpp"
 
 namespace gorc {
 
     class expression_visitor {
     public:
-        sexpr visit(argument_expression &) const;
-        sexpr visit(unary_expression &) const;
-        sexpr visit(infix_expression &) const;
-        sexpr visit(nil_expression &) const;
-        sexpr visit(call_expression &) const;
+        shvalue visit(argument_expression &) const;
+        shvalue visit(unary_expression &) const;
+        shvalue visit(infix_expression &) const;
+        shvalue visit(nil_expression &) const;
+        shvalue visit(call_expression &) const;
     };
 
 }

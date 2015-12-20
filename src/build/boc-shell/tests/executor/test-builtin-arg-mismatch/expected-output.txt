@@ -1,1 +1,1 @@
-[ERROR] input.boc:1:6-1:18: builtin 'cdr' expected 1 arguments, found 2
+[ERROR] input.boc:1:6-1:28: builtin 'absolute_path' expected 1 arguments, found 2

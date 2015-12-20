@@ -1,0 +1,8 @@
+var $list = a b c d;
+
+if $list {
+    echo "fail: implicit cast list to boolean";
+}
+else {
+    echo "fail: implicit cast list to boolean";
+}

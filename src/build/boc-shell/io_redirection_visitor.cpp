@@ -1,8 +1,7 @@
 #include "io_redirection_visitor.hpp"
 #include "argument_visitor.hpp"
 #include "utility/make_unique.hpp"
-#include "sexpr/sexpr.hpp"
-#include "sexpr/sexpr_helpers.hpp"
+#include "value.hpp"
 #include "log/log.hpp"
 
 gorc::io_redirection_visitor::io_redirection_visitor(bool input)
@@ -13,7 +12,7 @@ gorc::io_redirection_visitor::io_redirection_visitor(bool input)
 
 std::unique_ptr<gorc::pipe> gorc::io_redirection_visitor::visit(pipe_io_redirection &target) const
 {
-    auto target_file_vec = argument_to_argv(ast_visit(argument_visitor(), target.target));
+    auto target_file_vec = ast_visit(argument_visitor(), target.target);
     if(target_file_vec.size() != 1) {
         LOG_FATAL("redirection target is not a filename");
     }

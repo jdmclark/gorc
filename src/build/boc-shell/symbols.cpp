@@ -7,7 +7,7 @@ namespace {
     std::unordered_map<std::string, std::unique_ptr<gorc::builtin>> builtins;
 }
 
-gorc::builtin::builtin(size_t args, std::function<sexpr(std::vector<sexpr> const &)> code)
+gorc::builtin::builtin(size_t args, std::function<shvalue(arglist const &)> code)
     : args(args)
     , code(code)
 {

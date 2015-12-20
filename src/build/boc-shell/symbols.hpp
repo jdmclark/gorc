@@ -1,19 +1,21 @@
 #pragma once
 
 #include "ast.hpp"
-#include "sexpr/sexpr.hpp"
+#include "value.hpp"
 #include "utility/make_unique.hpp"
 #include <functional>
 #include <vector>
 
 namespace gorc {
 
+    using arglist = std::vector<shvalue>;
+
     class builtin {
     public:
         size_t args;
-        std::function<sexpr(std::vector<sexpr> const &)> code;
+        std::function<shvalue(arglist const &)> code;
 
-        builtin(size_t args, std::function<sexpr(std::vector<sexpr> const &)> code);
+        builtin(size_t args, std::function<shvalue(arglist const &)> code);
     };
 
     void register_builtin(std::string const &name,

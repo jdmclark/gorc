@@ -1,0 +1,8 @@
+var $list = foo;
+
+if $list {
+    echo "fail: implicit cast junk to boolean";
+}
+else {
+    echo "fail: implicit cast junk to boolean";
+}

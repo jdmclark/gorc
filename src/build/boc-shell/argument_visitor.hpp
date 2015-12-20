@@ -1,14 +1,14 @@
 #pragma once
 
 #include "ast.hpp"
-#include "sexpr/sexpr.hpp"
+#include "value.hpp"
 
 namespace gorc {
 
     class argument_visitor {
     public:
-        sexpr visit(argument &) const;
-        sexpr visit(ast_list_node<argument*> &) const;
+        shvalue visit(argument &) const;
+        shvalue visit(ast_list_node<argument*> &) const;
     };
 
 }

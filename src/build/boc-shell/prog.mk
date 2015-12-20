@@ -7,7 +7,6 @@ DEPENDENCIES:= \
 	libs/text \
 	libs/ast \
 	libs/system \
-	build/boc-shell/sexpr \
 
 SOURCES:= \
 	argument_visitor.cpp \
@@ -23,6 +22,7 @@ SOURCES:= \
 	stack.cpp \
 	symbols.cpp \
 	symbol_visitor.cpp \
+	value.cpp \
 	word_visitor.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

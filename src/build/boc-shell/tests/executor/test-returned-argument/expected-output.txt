@@ -1,2 +1,2 @@
-bcde
-cde
+b c d e
+c d e

@@ -1,0 +1,2 @@
+head is nil: expected
+tail is nil: expected

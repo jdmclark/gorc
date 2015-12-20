@@ -19,7 +19,63 @@ namespace {
     std::stack<char const *> current_filename_stack;
     std::stack<path> current_path_stack;
 
-    using shell_la_tokenizer = token_lookahead<shell_tokenizer>;
+    class ignore_whitespace_tokenizer {
+    public:
+        token_lookahead<shell_tokenizer> &internal_tok;
+        bool ignore_whitespace = true;
+
+        ignore_whitespace_tokenizer(token_lookahead<shell_tokenizer> &internal_tok)
+            : internal_tok(internal_tok)
+        {
+            advance_past_whitespace();
+            return;
+        }
+
+        void advance_past_whitespace()
+        {
+            if(ignore_whitespace) {
+                while(internal_tok.get_type() == shell_token_type::punc_whitespace) {
+                    internal_tok.advance();
+                }
+            }
+        }
+
+        void advance()
+        {
+            internal_tok.advance();
+            advance_past_whitespace();
+        }
+
+        inline shell_token_type get_type() const
+        {
+            return internal_tok.get_type();
+        }
+
+        inline std::string const& get_value() const
+        {
+            return internal_tok.get_value();
+        }
+
+        inline diagnostic_context_location const& get_location() const
+        {
+            return internal_tok.get_location();
+        }
+
+        bool lookahead_is(shell_token_type t) const
+        {
+            if(internal_tok.get_token(1).type == t) {
+                return true;
+            }
+            else if(internal_tok.get_token(1).type == shell_token_type::punc_whitespace &&
+                    internal_tok.get_token(2).type == t) {
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    using shell_la_tokenizer = ignore_whitespace_tokenizer;
 
     diagnostic_context_location location_union(diagnostic_context_location const &first,
                                                diagnostic_context_location const &last)
@@ -39,11 +95,16 @@ namespace {
 
     argument* parse_argument(ast_factory &ast, shell_la_tokenizer &tok)
     {
+        tok.ignore_whitespace = false;
+        tok.advance_past_whitespace();
+
         ast_list_node<word*> *words =
             ast.make<ast_list_node<word*>>(tok.get_location());
 
         while(true) {
             if(tok.get_type() == shell_token_type::punc_begin_expr) {
+                tok.ignore_whitespace = true;
+
                 auto start_loc = tok.get_location();
                 tok.advance();
 
@@ -55,6 +116,7 @@ namespace {
                 }
 
                 auto end_loc = tok.get_location();
+                tok.ignore_whitespace = false;
                 tok.advance();
 
                 words->elements.push_back(
@@ -88,14 +150,17 @@ namespace {
                 tok.advance();
             }
             else {
-                if(words->elements.empty()) {
-                    diagnostic_context dc(tok.get_location());
-                    LOG_FATAL(format("expected command word, found '%s'") % tok.get_value());
-                }
                 break;
             }
         }
 
+        if(words->elements.empty()) {
+            diagnostic_context dc(tok.get_location());
+            LOG_FATAL(format("expected command word, found '%s'") % tok.get_value());
+        }
+
+        tok.ignore_whitespace = true;
+        tok.advance_past_whitespace();
         return ast.make<argument>(words->location, words);
     }
 
@@ -110,14 +175,10 @@ namespace {
                                                  ast_visit(variant_location_visitor(),
                                                            arguments->elements.back()));
 
-            if(tok.get_type() == shell_token_type::punc_whitespace) {
-                // Ignore whitespace
-                tok.advance();
-            }
-
             if(tok.get_type() != shell_token_type::word &&
                tok.get_type() != shell_token_type::variable_name &&
-               tok.get_type() != shell_token_type::environment_variable_name) {
+               tok.get_type() != shell_token_type::environment_variable_name &&
+               tok.get_type() != shell_token_type::punc_begin_expr) {
                 return arguments;
             }
         }
@@ -339,7 +400,7 @@ namespace {
             return rv;
         }
         else if(tok.get_type() == shell_token_type::word &&
-                tok.get_token(1).type == shell_token_type::punc_begin_expr) {
+                tok.lookahead_is(shell_token_type::punc_begin_expr)) {
             return parse_call_expression(ast, tok);
         }
         else if(tok.get_type() == shell_token_type::punc_begin_expr) {
@@ -719,11 +780,6 @@ namespace {
         simple_word *word = ast.make<simple_word>(tok.get_location(), tok.get_value());
         tok.advance();
 
-        if(tok.get_type() == shell_token_type::punc_whitespace) {
-            // Skip whitespace
-            tok.advance();
-        }
-
         if(tok.get_type() != shell_token_type::kw_in) {
             diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected 'in', found '%s'") % tok.get_value());
@@ -855,7 +911,7 @@ namespace {
         else if(tok.get_type() == shell_token_type::punc_begin_block) {
             return parse_compound_statement(ast, tok);
         }
-        else if(tok.get_token(1).type == shell_token_type::punc_assign) {
+        else if(tok.lookahead_is(shell_token_type::punc_assign)) {
             return parse_assignment_statement(ast, tok);
         }
         else {
@@ -924,7 +980,8 @@ namespace {
         }
 
         shell_tokenizer tok(*nf);
-        shell_la_tokenizer latok(tok, 2);
+        token_lookahead<shell_tokenizer> tok_la(tok, 3);
+        shell_la_tokenizer latok(tok_la);
 
         return parse_global_stmt_seq(ast, latok);
     }

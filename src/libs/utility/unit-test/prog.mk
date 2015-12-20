@@ -15,6 +15,7 @@ SOURCES:= \
 	foreach_test.cpp \
 	gcd_test.cpp \
 	global_test.cpp \
+	join_test.cpp \
 	lcm_test.cpp \
 	local_test.cpp \
 	make_unique_test.cpp \

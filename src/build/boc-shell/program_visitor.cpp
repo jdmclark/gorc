@@ -1,7 +1,6 @@
 #include "program_visitor.hpp"
 #include "log/log.hpp"
 #include "stack.hpp"
-#include "sexpr/sexpr_helpers.hpp"
 #include "system/pipe.hpp"
 #include "system/process.hpp"
 #include "argument_visitor.hpp"
@@ -74,8 +73,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     while(sub_it != cmd.subcommands->elements.end() &&
           stdin_it != stdin_pipes.end() &&
           stdout_it != stdout_pipes.end()) {
-        sexpr arg_list = ast_visit(argument_visitor(), (*sub_it)->arguments);
-        std::vector<std::string> argv = argument_list_to_argv(arg_list);
+        shvalue argv = ast_visit(argument_visitor(), (*sub_it)->arguments);
 
         if(argv.empty()) {
             LOG_FATAL("cannot execute empty command");
@@ -103,7 +101,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     int last_exit_code = 0;
     for(auto &proc : processes) {
         last_exit_code = proc->join();
-        exit_code_sequence.push_back(last_exit_code);
+        exit_code_sequence.push_back(std::to_string(last_exit_code));
     }
 
     return last_exit_code;
@@ -135,7 +133,7 @@ void gorc::program_visitor::visit(command_statement &cmd)
     exit_code_sequence.clear();
 
     int return_code = ast_visit(*this, *cmd.cmd);
-    set_variable_value("?", make_sexpr_from_range(exit_code_sequence));
+    set_variable_value("?", exit_code_sequence);
 
     if(return_code != 0) {
         LOG_FATAL(format("command failed with code %d") % return_code);
@@ -144,14 +142,14 @@ void gorc::program_visitor::visit(command_statement &cmd)
 
 void gorc::program_visitor::visit(assignment_statement &s)
 {
-    sexpr value = ast_visit(argument_visitor(), s.value);
+    shvalue value = ast_visit(argument_visitor(), s.value);
 
     ast_visit(assign_lvalue_visitor(value), *s.var);
 }
 
 void gorc::program_visitor::visit(var_declaration_statement &s)
 {
-    sexpr value;
+    shvalue value;
     if(s.value.has_value()) {
         value = ast_visit(argument_visitor(), s.value.get_value());
     }
@@ -162,7 +160,7 @@ void gorc::program_visitor::visit(var_declaration_statement &s)
 void gorc::program_visitor::visit(if_statement &s)
 {
     auto cond = ast_visit(expression_visitor(), *s.condition);
-    if(as_boolean_value(cond)) {
+    if(shvalue_to_boolean(cond)) {
         ast_visit(*this, *s.code);
     }
 }
@@ -170,7 +168,7 @@ void gorc::program_visitor::visit(if_statement &s)
 void gorc::program_visitor::visit(if_else_statement &s)
 {
     auto cond = ast_visit(expression_visitor(), *s.condition);
-    if(as_boolean_value(cond)) {
+    if(shvalue_to_boolean(cond)) {
         ast_visit(*this, *s.code);
     }
     else {
@@ -181,20 +179,10 @@ void gorc::program_visitor::visit(if_else_statement &s)
 void gorc::program_visitor::visit(for_statement &s)
 {
     auto list = ast_visit(expression_visitor(), *s.list);
-
-    sexpr curr = list;
-    while(!null(curr)) {
+    for(auto const &em : list) {
         scoped_stack_frame sf;
-        if(atom(curr)) {
-            create_variable(s.varname->value, curr);
-            ast_visit(*this, *s.code);
-            break;
-        }
-        else {
-            create_variable(s.varname->value, car(curr));
-            ast_visit(*this, *s.code);
-            curr = cdr(curr);
-        }
+        create_variable(s.varname->value, shvalue_from_string(em));
+        ast_visit(*this, *s.code);
     }
 }
 
@@ -204,7 +192,7 @@ void gorc::program_visitor::visit(return_statement &s)
         return_value = ast_visit(expression_visitor(), *s.value.get_value());
     }
     else {
-        return_value = make_sexpr();
+        return_value = shvalue();
     }
 }
 
@@ -220,7 +208,7 @@ namespace {
 void gorc::program_visitor::visit(pushd_statement &s)
 {
     // Get new directory
-    auto arg_value = argument_to_argv(ast_visit(argument_visitor(), s.new_dir));
+    auto arg_value = ast_visit(argument_visitor(), s.new_dir);
     if(arg_value.size() != 1) {
         LOG_FATAL(format("expected working directory path, found '%s' path fragments") %
                   arg_value.size());

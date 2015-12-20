@@ -47,13 +47,8 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     if(ch == '\0') {
         return accept_immediately(shell_token_type::end_of_file);
     }
-    else if(std::isspace(ch)) {
-        seen_whitespace = true;
-        return discard_directive(tokenizer_state::initial);
-    }
-    else if(ch == '#') {
-        seen_whitespace = true;
-        return discard_directive(tokenizer_state::skip_line_comment);
+    else if(std::isspace(ch) || ch == '#') {
+        return handle_skip_whitespace_state(ch);
     }
     else if(ch == '{') {
         return append_then_accept(ch, shell_token_type::punc_begin_block);
@@ -97,23 +92,13 @@ tok_result shell_tokenizer_state_machine::handle_initial_state(char ch)
     else if(ch == '<') {
         return append_then_accept(ch, shell_token_type::punc_stdin_redirect);
     }
-    else if(seen_whitespace &&
-            (current_type == shell_token_type::word ||
-             current_type == shell_token_type::variable_name ||
-             current_type == shell_token_type::environment_variable_name)) {
-        // Glue token separated by whitespace. Delimit.
-        return accept_immediately(shell_token_type::punc_whitespace);
-    }
     else if(ch == '$') {
-        seen_whitespace = false;
         return skip_directive(tokenizer_state::seen_dollar);
     }
     else if(ch == '\"') {
-        seen_whitespace = false;
         return skip_directive(tokenizer_state::string);
     }
     else {
-        seen_whitespace = false;
         kw_buffer.clear();
         kw_buffer.push_back(ch);
         return append_directive(tokenizer_state::bareword, ch);
@@ -150,10 +135,23 @@ tok_result shell_tokenizer_state_machine::handle_seen_greater_state(char ch)
     }
 }
 
+tok_result shell_tokenizer_state_machine::handle_skip_whitespace_state(char ch)
+{
+    if(ch == '#') {
+        return discard_directive(tokenizer_state::skip_line_comment);
+    }
+    else if(isspace(ch)) {
+        return discard_directive(tokenizer_state::skip_whitespace);
+    }
+    else {
+        return accept_immediately(shell_token_type::punc_whitespace);
+    }
+}
+
 tok_result shell_tokenizer_state_machine::handle_skip_line_comment_state(char ch)
 {
     if(ch == '\n' || ch == '\0') {
-        return discard_directive(tokenizer_state::initial);
+        return discard_directive(tokenizer_state::skip_whitespace);
     }
     else {
         return discard_directive(tokenizer_state::skip_line_comment);
@@ -327,6 +325,9 @@ tok_result shell_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::initial:
         return handle_initial_state(ch);
+
+    case tokenizer_state::skip_whitespace:
+        return handle_skip_whitespace_state(ch);
 
     case tokenizer_state::skip_line_comment:
         return handle_skip_line_comment_state(ch);

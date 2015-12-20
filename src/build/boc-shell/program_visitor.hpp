@@ -1,15 +1,15 @@
 #pragma once
 
 #include "ast.hpp"
-#include "sexpr/sexpr.hpp"
+#include "value.hpp"
 #include <vector>
 
 namespace gorc {
 
     class program_visitor {
     public:
-        maybe<sexpr> return_value;
-        std::vector<int> exit_code_sequence;
+        maybe<shvalue> return_value;
+        shvalue exit_code_sequence;
 
         int visit(pipe_command &);
         int visit(infix_command &);

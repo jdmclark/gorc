@@ -1,24 +1,23 @@
 #include "expression_visitor.hpp"
 #include "argument_visitor.hpp"
-#include "sexpr/sexpr_helpers.hpp"
 #include "program_visitor.hpp"
 #include "symbols.hpp"
 #include "stack.hpp"
 #include "log/log.hpp"
 #include "utility/zip.hpp"
 
-gorc::sexpr gorc::expression_visitor::visit(argument_expression &e) const
+gorc::shvalue gorc::expression_visitor::visit(argument_expression &e) const
 {
     return ast_visit(argument_visitor(), e.value);
 }
 
-gorc::sexpr gorc::expression_visitor::visit(unary_expression &e) const
+gorc::shvalue gorc::expression_visitor::visit(unary_expression &e) const
 {
     auto sub_value = ast_visit(expression_visitor(), *e.value);
 
     switch(e.op) {
     case unary_operator::logical_not:
-        return make_sexpr(!as_boolean_value(sub_value));
+        return shvalue_from_boolean(!shvalue_to_boolean(sub_value));
 
 // LCOV_EXCL_START
     }
@@ -29,20 +28,23 @@ gorc::sexpr gorc::expression_visitor::visit(unary_expression &e) const
 // LCOV_EXCL_STOP
 }
 
-gorc::sexpr gorc::expression_visitor::visit(infix_expression &e) const
+gorc::shvalue gorc::expression_visitor::visit(infix_expression &e) const
 {
     auto left_value = ast_visit(expression_visitor(), *e.left);
     auto right_value = ast_visit(expression_visitor(), *e.right);
 
     switch(e.op) {
     case infix_operator::equal:
-        return make_sexpr(sexpr_equal(left_value, right_value));
+        return shvalue_from_boolean(left_value == right_value);
 
     case infix_operator::not_equal:
-        return make_sexpr(!sexpr_equal(left_value, right_value));
+        return shvalue_from_boolean(left_value != right_value);
 
-    case infix_operator::cons:
-        return make_sexpr(left_value, right_value);
+    case infix_operator::cons: {
+            shvalue rv = left_value;
+            std::copy(right_value.begin(), right_value.end(), std::back_inserter(rv));
+            return rv;
+        }
 
 // LCOV_EXCL_START
     }
@@ -53,12 +55,12 @@ gorc::sexpr gorc::expression_visitor::visit(infix_expression &e) const
 // LCOV_EXCL_STOP
 }
 
-gorc::sexpr gorc::expression_visitor::visit(nil_expression &) const
+gorc::shvalue gorc::expression_visitor::visit(nil_expression &) const
 {
-    return make_sexpr();
+    return shvalue();
 }
 
-gorc::sexpr gorc::expression_visitor::visit(call_expression &e) const
+gorc::shvalue gorc::expression_visitor::visit(call_expression &e) const
 {
     // Try for a builtin first
     auto builtin_ptr = get_builtin(e.name->value);
@@ -72,7 +74,7 @@ gorc::sexpr gorc::expression_visitor::visit(call_expression &e) const
                       e.arguments->elements.size());
         }
 
-        std::vector<sexpr> args;
+        std::vector<shvalue> args;
         for(auto const &arg : e.arguments->elements) {
             args.push_back(ast_visit(expression_visitor(), *arg));
         }
@@ -103,6 +105,6 @@ gorc::sexpr gorc::expression_visitor::visit(call_expression &e) const
         return pv.return_value.get_value();
     }
     else {
-        return make_sexpr();
+        return shvalue();
     }
 }
