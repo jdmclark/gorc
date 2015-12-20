@@ -17,7 +17,7 @@ Episode information
         Type: decision
         File: foo.jkl
         If good: goto line 3
-        If evil: goto line1
+        If evil: goto line 1
 
     Line 3:
         Disc: 1

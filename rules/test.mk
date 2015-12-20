@@ -48,9 +48,9 @@ process-raw-output:
 
 compare-output:
 	if [ -e $(PLATFORM_EXPECTED_OUTPUT) ]; then \
-		diff -u -w $(PLATFORM_EXPECTED_OUTPUT) $(CURRENT_OUTPUT); \
+		diff -u $(PLATFORM_EXPECTED_OUTPUT) $(CURRENT_OUTPUT); \
 	else \
-		diff -u -w $(EXPECTED_OUTPUT) $(CURRENT_OUTPUT); \
+		diff -u $(EXPECTED_OUTPUT) $(CURRENT_OUTPUT); \
 	fi
 
 endif

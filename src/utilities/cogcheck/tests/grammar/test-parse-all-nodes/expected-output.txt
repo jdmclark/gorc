@@ -5,18 +5,18 @@ SYMBOLS
 
 CODE
 block:
-   (call phony);
-   startup:
-   ;
-   foo;
-   dowhile bar:
-     block:
-       foo;
-   while foo:
-     block:
-       bar;
-   for x; y; z:
-     block:
+  (call phony);
+  startup:
+  ;
+  foo;
+  dowhile bar:
+    block:
+      foo;
+  while foo:
+    block:
+      bar;
+  for x; y; z:
+    block:
       bar;
   for ; y; z:
     block:

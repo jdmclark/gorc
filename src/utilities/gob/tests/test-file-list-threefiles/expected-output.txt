@@ -1,10 +1,10 @@
 1: first.txt
-    Size:             1
-    Offset:         424
+    Size:            1
+    Offset:        424
 2: second.txt
-    Size:             1
-    Offset:         425
+    Size:            1
+    Offset:        425
 3: third.txt
-    Size:             1
-    Offset:         426
+    Size:            1
+    Offset:        426
 Total: 3
