@@ -1,0 +1,3 @@
+include ../../../../../rules/test.boc;
+
+$(TEST_BIN)/vm-test;

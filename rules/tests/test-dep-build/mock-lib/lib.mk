@@ -1,1 +1,0 @@
-NAME:=mock-lib

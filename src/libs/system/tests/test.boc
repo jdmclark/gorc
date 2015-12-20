@@ -1,0 +1,4 @@
+include ../../../../rules/test.boc;
+
+var $PARENT_PROGRAM=$(TEST_BIN)/parent-program;
+var $CHILD_PROGRAM=$(TEST_BIN)/child-program;

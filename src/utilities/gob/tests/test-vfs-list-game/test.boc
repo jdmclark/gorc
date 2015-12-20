@@ -1,0 +1,11 @@
+include ../test.boc;
+
+echo "==== default ====" >> $(RAW_OUTPUT);
+$(GOB) --jk --resource ../sample-vfs/resource --list >> $(RAW_OUTPUT);
+echo "==== mod1 ====" >> $(RAW_OUTPUT);
+$(GOB) --jk --resource ../sample-vfs/resource --game ../sample-vfs/mod1 --list >> $(RAW_OUTPUT);
+echo "==== mod2 ====" >> $(RAW_OUTPUT);
+$(GOB) --jk --resource ../sample-vfs/resource --game ../sample-vfs/mod2 --list >> $(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

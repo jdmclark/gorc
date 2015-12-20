@@ -1,0 +1,5 @@
+include ../test.boc;
+
+$(COGCHECK_OPTS)=--disassemble;
+
+call run_cogcheck();

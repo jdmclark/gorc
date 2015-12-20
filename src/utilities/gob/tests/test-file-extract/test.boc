@@ -1,0 +1,6 @@
+include ../test.boc;
+
+$(GOB) --file ../sample-vfs/resource/res.gob --extract overridden.txt >> $(RAW_OUTPUT);
+echo >> $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

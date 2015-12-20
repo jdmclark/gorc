@@ -1,0 +1,3 @@
+include ../test.boc;
+
+$(BOC_SHELL_OPTS)=--parse-only;

@@ -1,0 +1,12 @@
+include ../test.boc;
+
+echo "==== default ====" >> $(RAW_OUTPUT);
+$(GOB) --jk --resource ../sample-vfs/resource --list >> $(RAW_OUTPUT);
+echo "==== episode1 ====" >> $(RAW_OUTPUT);
+$(GOB) --jk --resource ../sample-vfs/resource --episode ../sample-vfs/episode/test1.gob
+    --list >> $(RAW_OUTPUT);
+echo "==== episode2 ====" >> $(RAW_OUTPUT);
+$(GOB) --jk --resource ../sample-vfs/resource --episode ../sample-vfs/episode/test2.gob
+    --list >> $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

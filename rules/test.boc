@@ -1,0 +1,50 @@
+# Helpers for shell test cases run under run-test
+
+# Useful variables
+var $PLATFORM=$[PLATFORM];
+var $PROJECT_ROOT=$[PROJECT_ROOT];
+var $PKG=$(PROJECT_ROOT)/pkg;
+var $BIN=$(PKG)/bin;
+var $TEST_BIN=$(PKG)/test-bin;
+var $BUILD_BIN=$(PKG)/build-bin;
+
+var $FAILED_TEST_LOG=$(PROJECT_ROOT)/test-log.txt;
+
+var $TESTSUITE_DIR=$[TESTSUITE_DIR];
+
+# Word wrap causes output instability. Disable it.
+$[GORC_NO_WORD_WRAP]=1;
+
+# Output comparison helpers
+
+var $RAW_OUTPUT=$(TESTSUITE_DIR)/raw-output.txt;
+var $CURRENT_OUTPUT=$(TESTSUITE_DIR)/current-output.txt;
+var $WORKING_OUTPUT=$(TESTSUITE_DIR)/temp-output.txt;
+var $EXPECTED_OUTPUT=expected-output.txt;
+var $PLATFORM_EXPECTED_OUTPUT=expected-output-$(PLATFORM).txt;
+
+var $BUILTIN_REGEX=
+    "s?c:/?/c/?Ig"
+    "s?c:\\\\?/c/?Ig"
+    "s?\\\\?/?g"
+    "s?"(absolute_path($[PWD]))"?$TESTDIR$?g"
+    "s?"$(PROJECT_ROOT)"?$ROOT$?g"
+    "s?\\.EXE??Ig";
+
+function process_raw_output()
+{
+    cp $(RAW_OUTPUT) $(CURRENT_OUTPUT);
+    for regex in $(BUILTIN_REGEX) {
+        sed -i $(regex) $(CURRENT_OUTPUT);
+    }
+}
+
+function compare_output()
+{
+    if is_file($PLATFORM_EXPECTED_OUTPUT) {
+        diff -u $(PLATFORM_EXPECTED_OUTPUT) $(CURRENT_OUTPUT);
+    }
+    else {
+        diff -u $(EXPECTED_OUTPUT) $(CURRENT_OUTPUT);
+    }
+}

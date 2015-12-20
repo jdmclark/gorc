@@ -1,0 +1,11 @@
+include ../../../../rules/test.boc;
+
+var $(BOC_SHELL)=$(BUILD_BIN)/boc-shell;
+var $(BOC_SHELL_OPTS);
+
+function run_input_boc_test()
+{
+    $(BOC_SHELL) $(BOC_SHELL_OPTS) --script input.boc >>$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+    call process_raw_output();
+    call compare_output();
+}

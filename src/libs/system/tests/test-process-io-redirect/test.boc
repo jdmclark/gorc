@@ -1,0 +1,7 @@
+include ../test.boc;
+
+echo "Hello, World!"
+    | $(PARENT_PROGRAM) --run $(CHILD_PROGRAM)
+    >> $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

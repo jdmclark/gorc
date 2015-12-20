@@ -1,0 +1,10 @@
+include ../../../../rules/test.boc;
+
+var $(EPISODE)=$(BIN)/episode;
+
+function simple_episode()
+{
+    $(EPISODE) <episode.jk >$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+    call process_raw_output();
+    call compare_output();
+}

@@ -1,0 +1,5 @@
+include ../test.boc;
+
+$(GOB) --file expected-output.txt --list 2> $(RAW_OUTPUT) || true;
+call process_raw_output();
+call compare_output();

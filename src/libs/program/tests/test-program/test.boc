@@ -1,0 +1,35 @@
+# Exercises program features.
+
+include ../test.boc;
+
+var $PROGRAM=$(TEST_BIN)/example-program;
+
+echo "==== no args ====" >> $(RAW_OUTPUT);
+$(PROGRAM) >> $(RAW_OUTPUT);
+
+echo "==== message ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --message "Hello, World!" >> $(RAW_OUTPUT);
+
+echo "==== throw std ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --throw-std-exception >>$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+
+echo "==== throw unk ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --throw-unk-exception >>$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+
+echo "==== diagnostics not on stdout ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --message "this is on stdout"
+    --info-message "this is informational"
+    > $(TESTSUITE_DIR)/diag-stdout.txt
+    2> $(TESTSUITE_DIR)/diag-stderr.txt;
+echo "---- stdout ----" >> $(RAW_OUTPUT);
+cat $(TESTSUITE_DIR)/diag-stdout.txt >> $(RAW_OUTPUT);
+echo "---- stderr ----" >> $(RAW_OUTPUT);
+cat $(TESTSUITE_DIR)/diag-stderr.txt >> $(RAW_OUTPUT);
+
+echo "==== diagnostics ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --info-message "info message"
+    --warning-message "warning message"
+    --error-message "error message" >>$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+
+call process_raw_output();
+call compare_output();

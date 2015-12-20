@@ -1,0 +1,6 @@
+include ../../../../../rules/test.boc;
+
+$(TEST_BIN)/example-file-log $(TESTSUITE_DIR)/logfile.txt;
+cat $(TESTSUITE_DIR)/logfile.txt > $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

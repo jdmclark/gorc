@@ -1,0 +1,12 @@
+include ../test.boc;
+
+var $PROGRAM=$(TEST_BIN)/example-program;
+
+echo "==== shell code ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --fatal-message "Fatality" || true;
+echo (head($?)) >> $(RAW_OUTPUT);
+echo "==== standard output ====" >> $(RAW_OUTPUT);
+$(PROGRAM) --fatal-message "Fatality" >>$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+
+call process_raw_output();
+call compare_output();

@@ -1,5 +1,0 @@
-exit code: 0
-Adding program mock-prog to targets
-Adding library mock-lib to targets
-Adding library mock-lib2 to targets
-tempdir/bin/mock-prog

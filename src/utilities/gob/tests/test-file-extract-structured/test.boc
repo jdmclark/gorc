@@ -1,0 +1,6 @@
+include ../test.boc;
+
+$(GOB) --file ../structured.gob --extract dir/test.txt >> $(RAW_OUTPUT);
+echo >> $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

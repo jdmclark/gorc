@@ -1,6 +1,0 @@
-exit code: 2
-Running tests:
-FAILED (XX.Xs) mock-test
-Failed tests:
-FAILED (XX.Xs) mock-test
---------------------

@@ -1,0 +1,5 @@
+include ../../test.boc;
+
+$COGCHECK_OPTS=--dump-ast --parse-only;
+
+call run_cogcheck();

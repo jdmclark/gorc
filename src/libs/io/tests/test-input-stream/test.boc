@@ -1,0 +1,8 @@
+# Creates a simple executable which runs stdin through a std_input_stream.
+
+include ../test.boc;
+
+echo -n "Hello, World!" | $(TEST_BIN)/example-input-stream > $(RAW_OUTPUT);
+echo "==== Testsuite returns: "(head(tail($?)))" ====" >> $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

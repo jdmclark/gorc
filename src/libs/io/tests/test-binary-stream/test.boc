@@ -1,0 +1,8 @@
+# Creates a simple executable which runs stdin through a binary std_input_stream.
+
+include ../test.boc;
+
+echo -n "Hello,\r\nWorld!" | $(TEST_BIN)/example-binary-stream > $(TESTSUITE_DIR)/temp.txt;
+tr ["\r"] [X] <$(TESTSUITE_DIR)/temp.txt >$(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

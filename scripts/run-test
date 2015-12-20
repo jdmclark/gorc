@@ -16,7 +16,7 @@ fi
 mkdir -p ${TESTSUITE_DIR}
 
 TIMEFORMAT=%1R
-test_time=$( { time make -s --no-print-directory test &> ${TEST_LOG}; } 2>&1 )
+test_time=$( { time ${BOC_SHELL} --script test.boc &> ${TEST_LOG}; } 2>&1 )
 result=$?
 
 timewidth=$(wc -m <<< ${test_time})

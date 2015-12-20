@@ -9,6 +9,8 @@ test:
 include $(dir $(lastword $(MAKEFILE_LIST)))paths.mk
 export FAILED_TEST_LOG
 
+export BOC_SHELL:=$(BUILD_BIN)/boc-shell
+
 test:
 	@echo "Running tests:"
 	-@rm -f $(FAILED_TEST_LOG)

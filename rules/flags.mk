@@ -5,7 +5,7 @@ FLAGS_INCLUDED:=1
 
 include $(dir $(lastword $(MAKEFILE_LIST)))paths.mk
 
-PLATFORM:=$(shell $(SCRIPTS)/get-platform-tag)
+export PLATFORM:=$(shell $(SCRIPTS)/get-platform-tag)
 PLATFORM_DEFINE:=PLATFORM_$(shell echo $(PLATFORM) | tr a-z A-Z)
 
 BUILD_CONFIG?=release

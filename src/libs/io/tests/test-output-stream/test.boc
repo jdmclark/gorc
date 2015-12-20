@@ -1,0 +1,8 @@
+# Creates a simple executable which runs stdout through a std_output_stream.
+
+include ../test.boc;
+
+$(TEST_BIN)/example-output-stream > $(RAW_OUTPUT) || true;
+echo "==== Testsuite returns: "(head($?))" ====" >> $(RAW_OUTPUT);
+call process_raw_output();
+call compare_output();

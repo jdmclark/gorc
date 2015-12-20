@@ -211,6 +211,10 @@ tok_result shell_tokenizer_state_machine::handle_escape_sequence_state(char ch)
         append_char = '\n';
         break;
 
+    case 'r':
+        append_char = '\r';
+        break;
+
     case '\n':
         // Consume escaped newlines
         return skip_directive(tokenizer_state::string);

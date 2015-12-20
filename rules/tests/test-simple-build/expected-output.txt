@@ -1,3 +1,0 @@
-exit code: 0
-Adding program mock-prog to targets
-tempdir/bin/mock-prog

@@ -1,0 +1,5 @@
+include ../../test.boc;
+
+$(COGCHECK_OPTS)=--parse-only;
+
+call run_cogcheck();

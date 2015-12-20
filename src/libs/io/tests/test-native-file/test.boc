@@ -1,0 +1,18 @@
+# Creates a simple executable which tests various errors in native_file.
+
+include ../test.boc;
+
+echo "Some existing content" > $(TESTSUITE_DIR)/existing.txt;
+touch $(TESTSUITE_DIR)/write_denied.txt;
+chmod a-w $(TESTSUITE_DIR)/write_denied.txt;
+echo "small" > $(TESTSUITE_DIR)/small.txt;
+echo "somewhat larger" > $(TESTSUITE_DIR)/medium.txt;
+
+$(TEST_BIN)/example-native-file > $(RAW_OUTPUT) || true;
+echo "==== Testsuite returns: "$(?)" ====" >> $(RAW_OUTPUT);
+
+cat $(TESTSUITE_DIR)/existing.txt >> $(RAW_OUTPUT);
+chmod a+w $(TESTSUITE_DIR)/write_denied.txt;
+
+call process_raw_output();
+call compare_output();

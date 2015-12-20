@@ -1,0 +1,11 @@
+include ../../../../rules/test.boc;
+
+var $(COGCHECK)=$(BIN)/cogcheck;
+var $(COGCHECK_OPTS);
+
+function run_cogcheck()
+{
+    $(COGCHECK) $(COGCHECK_OPTS) input.cog >>$(RAW_OUTPUT) 2>>$(RAW_OUTPUT) || true;
+    call process_raw_output();
+    call compare_output();
+}
