@@ -32,6 +32,10 @@ public:
         gorc::pipe std_output;
         gorc::pipe std_error;
 
+        // Prevent this pipe from being closed in the parent process.
+        // This avoids a race condition involving processes that quickly close stdin.
+        std_input.set_reusable(true);
+
         gorc::process child(prog_to_run,
                             extra_args,
                             &std_input,
@@ -39,7 +43,9 @@ public:
                             &std_error);
 
         std_input_stream.copy_to(std_input.get_output());
+        std_input.set_reusable(false);
         std_input.close_output();
+        std_input.close_input();
 
         std::cout << "==== stdout ====" << std::endl;
         std_output.get_input().copy_to(std_output_stream);
