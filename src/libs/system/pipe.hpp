@@ -33,13 +33,24 @@ namespace gorc {
     };
 
     class pipe {
+    private:
+        std::unique_ptr<pipe_input_stream> input;
+        std::unique_ptr<pipe_output_stream> output;
+
+        bool reusable = false;
+
     public:
         pipe();
         pipe(std::unique_ptr<pipe_input_stream> &&input,
              std::unique_ptr<pipe_output_stream> &&output);
 
-        std::unique_ptr<pipe_input_stream> input;
-        std::unique_ptr<pipe_output_stream> output;
+        pipe_input_stream& get_input();
+        pipe_output_stream& get_output();
+
+        void close_input();
+        void close_output();
+
+        void set_reusable(bool is_reusable);
     };
 
     pipe make_input_file_pipe(path const &p);

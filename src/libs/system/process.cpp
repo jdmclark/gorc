@@ -46,21 +46,21 @@ void gorc::process::internal_inside_child(path const &executable,
     // Redirect and close original pipes.
 
     if(std_input.has_value()) {
-        safe_dup2(std_input.get_value()->input->fd, STDIN_FILENO);
-        std_input.get_value()->input.reset();
-        std_input.get_value()->output.reset();
+        safe_dup2(std_input.get_value()->get_input().fd, STDIN_FILENO);
+        std_input.get_value()->close_input();
+        std_input.get_value()->close_output();
     }
 
     if(std_output.has_value()) {
-        safe_dup2(std_output.get_value()->output->fd, STDOUT_FILENO);
-        std_output.get_value()->input.reset();
-        std_output.get_value()->output.reset();
+        safe_dup2(std_output.get_value()->get_output().fd, STDOUT_FILENO);
+        std_output.get_value()->close_input();
+        std_output.get_value()->close_output();
     }
 
     if(std_error.has_value()) {
-        safe_dup2(std_error.get_value()->output->fd, STDERR_FILENO);
-        std_error.get_value()->input.reset();
-        std_error.get_value()->output.reset();
+        safe_dup2(std_error.get_value()->get_output().fd, STDERR_FILENO);
+        std_error.get_value()->close_input();
+        std_error.get_value()->close_output();
     }
 
     std::string prog_name = executable.string();
@@ -81,15 +81,15 @@ void gorc::process::internal_inside_parent(::pid_t child_pid)
 
     // Close child ends of pipe
     if(std_input.has_value()) {
-        std_input.get_value()->input.reset();
+        std_input.get_value()->close_input();
     }
 
     if(std_output.has_value()) {
-        std_output.get_value()->output.reset();
+        std_output.get_value()->close_output();
     }
 
     if(std_error.has_value()) {
-        std_error.get_value()->output.reset();
+        std_error.get_value()->close_output();
     }
 }
 

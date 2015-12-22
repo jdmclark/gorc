@@ -23,7 +23,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
         // Use a normal pipe, but close the output end.
         // This will cause the child process to exit with SIGPIPE instead of halting.
         stored_redirected_stdin_pipe = make_unique<pipe>();
-        stored_redirected_stdin_pipe->output.reset();
+        stored_redirected_stdin_pipe->close_output();
     }
 
     std::unique_ptr<pipe> stored_redirected_stdout_pipe;
@@ -39,6 +39,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     if(cmd.stderr_target.has_value()) {
         stored_redirected_stderr_pipe = ast_visit(io_redirection_visitor(/* input */ false),
                                                   cmd.stderr_target.get_value());
+        stored_redirected_stderr_pipe->set_reusable(true);
         redirected_stderr_pipe = stored_redirected_stderr_pipe.get();
     }
 

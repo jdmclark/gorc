@@ -38,15 +38,15 @@ public:
                             &std_output,
                             &std_error);
 
-        std_input_stream.copy_to(*std_input.output);
-        std_input.output.reset();
+        std_input_stream.copy_to(std_input.get_output());
+        std_input.close_output();
 
         std::cout << "==== stdout ====" << std::endl;
-        std_output.input->copy_to(std_output_stream);
+        std_output.get_input().copy_to(std_output_stream);
         std::cout << std::endl;
 
         std::cout << "==== stderr ====" << std::endl;
-        std_error.input->copy_to(std_output_stream);
+        std_error.get_input().copy_to(std_output_stream);
         std::cout << std::endl;
 
         if(no_join) {

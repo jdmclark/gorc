@@ -91,7 +91,7 @@ size_t gorc::pipe_output_stream::write_some(void const *src, size_t size)
 gorc::pipe::pipe()
 {
     int pipefd[2];
-    int result = ::pipe(pipefd);
+    int result = ::pipe2(pipefd, O_CLOEXEC);
 
     // LCOV_EXCL_START - system call
     if(result != 0) {
@@ -111,6 +111,35 @@ gorc::pipe::pipe(std::unique_ptr<pipe_input_stream> &&input,
     return;
 }
 
+gorc::pipe_input_stream& gorc::pipe::get_input()
+{
+    return *input;
+}
+
+gorc::pipe_output_stream& gorc::pipe::get_output()
+{
+    return *output;
+}
+
+void gorc::pipe::close_input()
+{
+    if(!reusable) {
+        input.reset();
+    }
+}
+
+void gorc::pipe::close_output()
+{
+    if(!reusable) {
+        output.reset();
+    }
+}
+
+void gorc::pipe::set_reusable(bool is_reusable)
+{
+    reusable = is_reusable;
+}
+
 gorc::pipe gorc::make_input_file_pipe(path const &p)
 {
     std::string native_filename = p.native();
@@ -119,7 +148,7 @@ gorc::pipe gorc::make_input_file_pipe(path const &p)
     int res = -1;
     do {
     // LCOV_EXCL_STOP
-        res = ::open(native_filename.c_str(), O_RDONLY);
+        res = ::open(native_filename.c_str(), O_RDONLY | O_CLOEXEC);
     // LCOV_EXCL_START
     } while(res == -1 && errno == EINTR);
     // LCOV_EXCL_STOP
@@ -141,7 +170,7 @@ gorc::pipe gorc::make_output_file_pipe(path const &p)
     do {
     // LCOV_EXCL_STOP
         res = ::open(native_filename.c_str(),
-                     O_WRONLY | O_APPEND | O_CREAT | O_TRUNC,
+                     O_WRONLY | O_APPEND | O_CREAT | O_TRUNC | O_CLOEXEC,
                      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     // LCOV_EXCL_START
     } while(res == -1 && errno == EINTR);
@@ -164,7 +193,7 @@ gorc::pipe gorc::make_output_file_append_pipe(path const &p)
     do {
     // LCOV_EXCL_STOP
         res = ::open(native_filename.c_str(),
-                     O_WRONLY | O_APPEND | O_CREAT,
+                     O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC,
                      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     // LCOV_EXCL_START
     } while(res == -1 && errno == EINTR);
