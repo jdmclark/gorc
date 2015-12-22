@@ -116,6 +116,11 @@ int gorc::process::join()
             return WEXITSTATUS(status);
         }
         // LCOV_EXCL_START
+        else if(WIFSIGNALED(status)) {
+            LOG_ERROR(format("process terminated with signal: %s") %
+                      strsignal(WTERMSIG(status)));
+            return 128 + WTERMSIG(status);
+        }
         else {
             LOG_ERROR("process terminated abnormally");
             return 1;
