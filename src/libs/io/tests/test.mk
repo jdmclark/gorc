@@ -1,1 +1,0 @@
-include ../../../../../rules/test.mk
