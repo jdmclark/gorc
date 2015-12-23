@@ -1,0 +1,6 @@
+include ../test.boc;
+
+$(BOC_BUILD) --override-root-name does-not-exist.bson 2>>$(RAW_OUTPUT) || true;
+
+call process_raw_output();
+call compare_output();
