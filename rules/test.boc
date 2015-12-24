@@ -10,7 +10,7 @@ var $BUILD_BIN=$(PKG)/build-bin;
 
 var $FAILED_TEST_LOG=$(PROJECT_ROOT)/test-log.txt;
 
-var $TESTSUITE_DIR=$[TESTSUITE_DIR];
+var $TESTSUITE_DIR=(absolute_path($[TESTSUITE_DIR]));
 
 # Word wrap causes output instability. Disable it.
 $[GORC_NO_WORD_WRAP]=1;
