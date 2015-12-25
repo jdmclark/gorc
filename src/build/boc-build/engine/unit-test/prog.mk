@@ -11,6 +11,7 @@ SOURCES:= \
 	adjacency_list_test.cpp \
 	dirty_list_test.cpp \
 	entity_closure_test.cpp \
+	entity_scheduler_test.cpp \
 	mock_entity.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

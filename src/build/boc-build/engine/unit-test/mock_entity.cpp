@@ -1,5 +1,6 @@
 #include "mock_entity.hpp"
 #include "utility/make_unique.hpp"
+#include "log/log.hpp"
 
 mock_entity::mock_entity(std::string const &name)
     : name_value(name)
@@ -24,8 +25,11 @@ bool mock_entity::is_dirty()
 
 bool mock_entity::update()
 {
+    LOG_INFO(gorc::format("%s build %s") %
+             name_value %
+             (will_update_succeed ? "succeeded" : "failed"));
     is_dirty_value = false;
-    return true;
+    return will_update_succeed;
 }
 
 namespace {
@@ -44,7 +48,8 @@ namespace {
 
 std::unordered_map<std::string, std::unique_ptr<gorc::entity>> construct_mock_entity_graph(
         std::vector<std::tuple<char const *, char const *>> const &edges,
-        std::unordered_set<std::string> const &dirty_nodes)
+        std::unordered_set<std::string> const &dirty_nodes,
+        std::unordered_set<std::string> const &fail_nodes)
 {
     std::unordered_map<std::string, std::unique_ptr<gorc::entity>> rv;
 
@@ -54,6 +59,10 @@ std::unordered_map<std::string, std::unique_ptr<gorc::entity>> construct_mock_en
 
     for(auto const &dirty : dirty_nodes) {
         get_node(dirty, rv)->is_dirty_value = true;
+    }
+
+    for(auto const &failed : fail_nodes) {
+        get_node(failed, rv)->will_update_succeed = false;
     }
 
     return rv;

@@ -22,12 +22,15 @@ public:
     virtual std::unordered_set<gorc::entity*> const& dependencies() override;
 
     virtual bool is_dirty() override;
+
+    bool will_update_succeed = true;
     virtual bool update() override;
 };
 
 std::unordered_map<std::string, std::unique_ptr<gorc::entity>> construct_mock_entity_graph(
         std::vector<std::tuple<char const *, char const *>> const &edges,
-        std::unordered_set<std::string> const &dirty_nodes = std::unordered_set<std::string>());
+        std::unordered_set<std::string> const &dirty_nodes = std::unordered_set<std::string>(),
+        std::unordered_set<std::string> const &fail_nodes = std::unordered_set<std::string>());
 
 template <typename RangeT>
 std::set<std::string> mock_entities_to_strings(RangeT const &rng)
