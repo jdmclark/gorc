@@ -19,7 +19,7 @@ public:
     std::unordered_set<gorc::entity*> dependencies_value;
 
     virtual std::string const& name() override;
-    virtual std::unordered_set<gorc::entity*> dependencies() override;
+    virtual std::unordered_set<gorc::entity*> const& dependencies() override;
 
     virtual bool is_dirty() override;
     virtual bool update() override;

@@ -9,6 +9,7 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	adjacency_list_test.cpp \
+	dirty_list_test.cpp \
 	entity_closure_test.cpp \
 	mock_entity.cpp \
 

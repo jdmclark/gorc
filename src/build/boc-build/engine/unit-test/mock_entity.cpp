@@ -12,7 +12,7 @@ std::string const& mock_entity::name()
     return name_value;
 }
 
-std::unordered_set<gorc::entity*> mock_entity::dependencies()
+std::unordered_set<gorc::entity*> const& mock_entity::dependencies()
 {
     return dependencies_value;
 }

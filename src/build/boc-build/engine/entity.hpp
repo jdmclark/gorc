@@ -10,7 +10,7 @@ namespace gorc {
         virtual ~entity();
 
         virtual std::string const& name() = 0;
-        virtual std::unordered_set<entity*> dependencies() = 0;
+        virtual std::unordered_set<entity*> const& dependencies() = 0;
 
         virtual bool is_dirty() = 0;
         virtual bool update() = 0;

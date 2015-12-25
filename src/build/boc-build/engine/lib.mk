@@ -5,5 +5,6 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	adjacency_list.cpp \
+	dirty_list.cpp \
 	entity.cpp \
 	entity_closure.cpp \
