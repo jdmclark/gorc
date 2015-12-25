@@ -5,6 +5,8 @@
 
 namespace gorc {
 
-    std::unordered_set<entity*> compute_target_closure(std::unordered_set<entity*> const &);
+    using entity_closure = std::unordered_set<entity*>;
+
+    entity_closure compute_target_closure(std::unordered_set<entity*> const &);
 
 }

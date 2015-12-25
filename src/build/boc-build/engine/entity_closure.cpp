@@ -2,10 +2,10 @@
 #include "utility/maybe.hpp"
 #include <unordered_map>
 
-std::unordered_set<gorc::entity*> gorc::compute_target_closure(
+gorc::entity_closure gorc::compute_target_closure(
         std::unordered_set<entity*> const &root_targets)
 {
-    std::unordered_set<entity*> closure;
+    entity_closure closure;
 
     std::unordered_set<entity*> open = root_targets;
 
