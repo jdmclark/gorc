@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_set>
+#include "utility/service_registry.hpp"
 
 namespace gorc {
 
@@ -13,7 +14,7 @@ namespace gorc {
         virtual std::unordered_set<entity*> const& dependencies() = 0;
 
         virtual bool is_dirty() = 0;
-        virtual bool update() = 0;
+        virtual bool update(service_registry const &services) = 0;
     };
 
 }

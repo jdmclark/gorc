@@ -23,7 +23,7 @@ bool mock_entity::is_dirty()
     return is_dirty_value;
 }
 
-bool mock_entity::update()
+bool mock_entity::update(gorc::service_registry const &)
 {
     LOG_INFO(gorc::format("%s build %s") %
              name_value %

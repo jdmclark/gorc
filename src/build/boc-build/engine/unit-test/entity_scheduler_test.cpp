@@ -7,6 +7,8 @@ using namespace gorc;
 
 namespace {
 
+    gorc::service_registry services;
+
     void run_build(entity_scheduler &sched)
     {
         while(!sched.done()) {
@@ -16,7 +18,7 @@ namespace {
             }
 
             entity *curr = sched.issue();
-            bool succeeded = curr->update();
+            bool succeeded = curr->update(services);
             sched.retire(curr, succeeded);
         }
 
