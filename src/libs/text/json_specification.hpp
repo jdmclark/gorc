@@ -44,7 +44,7 @@ namespace gorc {
                            std::set<std::string> &&required_members = {})
             : members(members)
             , required_members(required_members)
-            {
+        {
             return;
         }
 
