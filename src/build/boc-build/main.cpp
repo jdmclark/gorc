@@ -9,6 +9,7 @@ namespace gorc {
     class boc_build_program : public program {
     public:
         std::string boc_root_filename = "project.json";
+        bool list_only = false;
 
         path original_working_directory;
         path project_root_path;
@@ -17,6 +18,7 @@ namespace gorc {
         {
             // Test and debugging options
             opts.insert(make_value_option("override-root-name", boc_root_filename));
+            opts.insert(make_switch_option("list", list_only));
             return;
         }
 
@@ -28,11 +30,13 @@ namespace gorc {
                     return;
                 }
 
-                if(!current_path().has_parent_path()) {
+                auto canonical_current_path = canonical(current_path());
+
+                if(!canonical_current_path.has_parent_path()) {
                     LOG_FATAL("current directory is not a boc project");
                 }
 
-                current_path(current_path().parent_path());
+                current_path(canonical_current_path.parent_path());
             }
         }
 

@@ -6,8 +6,12 @@ DEPENDENCIES:= \
 	libs/program \
 	libs/text \
 	libs/ast \
+	libs/log \
+	build/boc-build/engine \
+	build/boc-build/entities \
 
 SOURCES:= \
 	main.cpp \
+	paths.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)
