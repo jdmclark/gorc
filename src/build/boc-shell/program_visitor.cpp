@@ -216,8 +216,8 @@ void gorc::program_visitor::visit(pushd_statement &s)
     }
 
     // Store current working directory
-    working_directory_stack.push(boost::filesystem::current_path());
-    boost::filesystem::current_path(arg_value.at(0));
+    working_directory_stack.push(boost::filesystem::absolute(boost::filesystem::current_path()));
+    boost::filesystem::current_path(boost::filesystem::absolute(arg_value.at(0)));
 }
 
 void gorc::program_visitor::visit(popd_statement &)
