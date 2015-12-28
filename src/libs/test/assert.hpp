@@ -122,6 +122,28 @@
         }(x, y);                                                                    \
     } while(false)
 
+// Assertion that fails if an exception is not thrown. Ignores contents.
+#define assert_throws_type(expr, throw_type)                                        \
+    do {                                                                            \
+        try {                                                                       \
+            (expr);                                                                 \
+            assert_always("exception not thrown");                                  \
+        }                                                                           \
+        catch(throw_type const &e) {                                                \
+            /* ignored */                                                           \
+        }                                                                           \
+        catch(test::exception const &) {                                            \
+            throw;                                                                  \
+        }                                                                           \
+        catch(std::exception const &e) {                                            \
+            assert_always(::gorc::strcat(                                           \
+                "incorrect exception type thrown: ", e.what()));                    \
+        }                                                                           \
+        catch(...) {                                                                \
+            assert_always("incorrect exception type thrown");                       \
+        }                                                                           \
+    } while(false)
+
 // Assertion that fails if an exception is not thrown.
 #define assert_throws(expr, throw_type, whatstr)                                    \
     do {                                                                            \

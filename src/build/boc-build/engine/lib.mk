@@ -8,4 +8,5 @@ SOURCES:= \
 	dirty_list.cpp \
 	entity.cpp \
 	entity_closure.cpp \
+	entity_registry.cpp \
 	entity_scheduler.cpp \
