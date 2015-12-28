@@ -1,4 +1,5 @@
 #include "mock_entity.hpp"
+#include "../entity_serializer.hpp"
 #include "utility/make_unique.hpp"
 #include "log/log.hpp"
 
@@ -30,6 +31,14 @@ bool mock_entity::update(gorc::service_registry const &)
              (will_update_succeed ? "succeeded" : "failed"));
     is_dirty_value = false;
     return will_update_succeed;
+}
+
+void mock_entity::serialize(gorc::entity_output_stream &os)
+{
+    os.write_entity_type_id<mock_entity>();
+    os.write_string(name_value);
+
+    LOG_INFO(gorc::format("%s serialized") % name_value);
 }
 
 namespace {

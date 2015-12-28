@@ -25,6 +25,8 @@ public:
 
     bool will_update_succeed = true;
     virtual bool update(gorc::service_registry const &) override;
+
+    virtual void serialize(gorc::entity_output_stream &) override;
 };
 
 std::unordered_map<std::string, std::unique_ptr<gorc::entity>> construct_mock_entity_graph(

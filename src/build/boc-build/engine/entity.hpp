@@ -6,6 +6,8 @@
 
 namespace gorc {
 
+    class entity_output_stream;
+
     class entity {
     public:
         virtual ~entity();
@@ -15,6 +17,8 @@ namespace gorc {
 
         virtual bool is_dirty() = 0;
         virtual bool update(service_registry const &services) = 0;
+
+        virtual void serialize(entity_output_stream &) = 0;
     };
 
 }
