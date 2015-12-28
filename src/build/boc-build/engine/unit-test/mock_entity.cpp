@@ -1,7 +1,17 @@
 #include "mock_entity.hpp"
 #include "../entity_serializer.hpp"
+#include "../entity_deserializer.hpp"
 #include "utility/make_unique.hpp"
 #include "log/log.hpp"
+
+mock_entity::mock_entity(gorc::entity_input_stream &is)
+    : name_value(is.read_string())
+{
+    uint32_t num_deps = is.read_uint32();
+    for(uint32_t i = 0; i < num_deps; ++i) {
+        dependencies_value.insert(is.read_entity_reference<gorc::entity>());
+    }
+}
 
 mock_entity::mock_entity(std::string const &name)
     : name_value(name)
@@ -38,7 +48,10 @@ void mock_entity::serialize(gorc::entity_output_stream &os)
     os.write_entity_type_id<mock_entity>();
     os.write_string(name_value);
 
-    LOG_INFO(gorc::format("%s serialized") % name_value);
+    os.write_uint32(static_cast<uint32_t>(dependencies_value.size()));
+    for(entity *dep : dependencies_value) {
+        os.write_entity_reference(dep);
+    }
 }
 
 namespace {

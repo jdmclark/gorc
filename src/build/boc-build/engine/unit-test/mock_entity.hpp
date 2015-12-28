@@ -13,6 +13,7 @@ private:
     std::string const name_value;
 
 public:
+    mock_entity(gorc::entity_input_stream &);
     mock_entity(std::string const &name);
 
     bool is_dirty_value = false;

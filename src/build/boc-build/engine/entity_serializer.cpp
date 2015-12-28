@@ -15,11 +15,12 @@ gorc::entity_output_stream::~entity_output_stream()
     return;
 }
 
-void gorc::entity_output_stream::write_entity_reference(entity* ent)
+void gorc::entity_output_stream::write_entity_reference(entity *ent)
 {
     auto it = entity_id_map.find(ent);
     if(it == entity_id_map.end()) {
-        LOG_FATAL(format("cycle found in entity '%s'") % ent->name());
+        LOG_FATAL(format("cannot write database: reference to unserialized entity '%s'") %
+                  ent->name());
     }
 
     write_uint32(it->second);
@@ -50,12 +51,26 @@ gorc::entity_serializer::entity_serializer(entity_registry const &reg,
 
 void gorc::entity_serializer::serialize_entity(entity *ent)
 {
+    if(closed_entities.find(ent) != closed_entities.end()) {
+        LOG_FATAL(format("cannot write database: cycle detected in entity '%s'") %
+                  ent->name());
+    }
+
+    if(entity_id_map.find(ent) != entity_id_map.end()) {
+        // Skip serializing entities that are already serialized
+        return;
+    }
+
+    closed_entities.insert(ent);
+
     // First serialize all dependencies
     for(entity *dep : ent->dependencies()) {
         serialize_entity(dep);
     }
 
     ent->serialize(*this);
+    entity_id_map.emplace(ent, static_cast<uint32_t>(entity_id_map.size()));
+    closed_entities.erase(ent);
 }
 
 void gorc::entity_serializer::serialize_root(entity *ent)

@@ -13,6 +13,7 @@ SOURCES:= \
 	entity_closure_test.cpp \
 	entity_registry_test.cpp \
 	entity_scheduler_test.cpp \
+	entity_serialization_test.cpp \
 	mock_entity.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

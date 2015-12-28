@@ -11,6 +11,7 @@ SOURCES:= \
 	entity.cpp \
 	entity_allocator.cpp \
 	entity_closure.cpp \
+	entity_deserializer.cpp \
 	entity_registry.cpp \
 	entity_scheduler.cpp \
 	entity_serializer.cpp \

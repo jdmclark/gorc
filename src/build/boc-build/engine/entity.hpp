@@ -6,6 +6,7 @@
 
 namespace gorc {
 
+    class entity_input_stream;
     class entity_output_stream;
 
     class entity {

@@ -13,6 +13,7 @@ namespace gorc {
     protected:
         entity_registry const &reg;
         output_stream &os;
+        std::unordered_set<entity*> closed_entities;
         std::unordered_map<entity*, uint32_t> entity_id_map;
 
     public:
