@@ -7,6 +7,7 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	adjacency_list.cpp \
+	base_file_entity.cpp \
 	dirty_list.cpp \
 	entity.cpp \
 	entity_allocator.cpp \

@@ -10,6 +10,7 @@ DEPENDENCIES:= \
 SOURCES:= \
 	adjacency_list_test.cpp \
 	dirty_list_test.cpp \
+	entity_allocator_test.cpp \
 	entity_closure_test.cpp \
 	entity_registry_test.cpp \
 	entity_scheduler_test.cpp \

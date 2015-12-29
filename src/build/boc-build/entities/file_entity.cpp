@@ -7,8 +7,7 @@ namespace {
 
 gorc::file_entity::file_entity(path const &new_filename,
                                std::time_t previous_timestamp)
-    : entity_name(new_filename.generic_string())
-    , filename(new_filename)
+    : base_file_entity(new_filename)
     , previous_timestamp(previous_timestamp)
 {
     return;

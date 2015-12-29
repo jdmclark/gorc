@@ -1,14 +1,12 @@
 #pragma once
 
-#include "build/boc-build/engine/entity.hpp"
+#include "build/boc-build/engine/base_file_entity.hpp"
 #include "io/path.hpp"
 
 namespace gorc {
 
-    class file_entity : public entity {
+    class file_entity : public base_file_entity {
     private:
-        std::string entity_name;
-        path const filename;
         std::time_t previous_timestamp;
 
     public:
