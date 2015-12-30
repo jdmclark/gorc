@@ -1,0 +1,2 @@
+Loading dependency graph from project files
+[ERROR] testproject.json: program 'myprog' is included multiple times

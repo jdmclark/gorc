@@ -1,5 +1,7 @@
 #include "program/program.hpp"
 #include "io/path.hpp"
+#include "register_entities.hpp"
+#include "project_graph.hpp"
 #include <boost/filesystem.hpp>
 
 using namespace boost::filesystem;
@@ -9,6 +11,11 @@ namespace gorc {
     class boc_build_program : public program {
     public:
         std::string boc_root_filename = "project.json";
+        std::string boc_root_filename_override;
+
+        std::string boc_cache_filename = ".boc-cache";
+        std::string boc_cache_filename_override;
+
         bool list_only = false;
 
         path original_working_directory;
@@ -17,7 +24,8 @@ namespace gorc {
         virtual void create_options(options &opts) override
         {
             // Test and debugging options
-            opts.insert(make_value_option("override-root-name", boc_root_filename));
+            opts.insert(make_value_option("override-root-name", boc_root_filename_override));
+            opts.insert(make_value_option("override-cache-name", boc_cache_filename_override));
             opts.insert(make_switch_option("list", list_only));
             return;
         }
@@ -42,8 +50,25 @@ namespace gorc {
 
         virtual int main() override
         {
+            if(!boc_root_filename_override.empty()) {
+                boc_root_filename = boc_root_filename_override;
+            }
+
+            if(!boc_cache_filename_override.empty()) {
+                boc_cache_filename = boc_cache_filename_override;
+            }
+
             original_working_directory = canonical(current_path());
             change_to_project_root();
+
+            // Project root was located. Set up engine.
+            entity_registry reg;
+            register_boc_entities(reg);
+
+            // Initialize graph
+            project_graph(reg, boc_root_filename, boc_cache_filename);
+
+            // TODO: Perform operation
 
             return EXIT_SUCCESS;
         }

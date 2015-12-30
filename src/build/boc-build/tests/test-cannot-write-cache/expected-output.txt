@@ -1,0 +1,4 @@
+Loading dependency graph from project files
+Dependency graph generated
+Caching dependency graph
+[ERROR] Cannot write cache to file notadir/project.cache: No such file or directory

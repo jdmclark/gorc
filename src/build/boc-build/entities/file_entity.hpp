@@ -14,7 +14,6 @@ namespace gorc {
         file_entity(path const &filename,
                     std::time_t previous_timestamp = 0);
 
-        virtual std::string const& name() override;
         virtual std::unordered_set<entity*> const& dependencies() override;
 
         virtual bool is_dirty() override;

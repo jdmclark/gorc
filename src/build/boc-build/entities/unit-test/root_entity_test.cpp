@@ -18,4 +18,15 @@ test_case(update_aborts)
     assert_log_empty();
 }
 
+test_case(constant_properties)
+{
+    std::unordered_set<entity*> empty_project;
+    graph_entity empty_graph(empty_project);
+
+    root_entity empty_root(&empty_graph);
+
+    assert_eq(empty_root.name(), "root");
+    assert_true(!empty_root.is_dirty());
+}
+
 end_suite(root_entity_test);

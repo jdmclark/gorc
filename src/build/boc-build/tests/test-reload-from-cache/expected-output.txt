@@ -1,0 +1,16 @@
+==== initial run ====
+Loading dependency graph from project files
+Dependency graph generated
+Caching dependency graph
+Finished writing cache
+==== clean run ====
+Loading dependency graph from cache
+Caching dependency graph
+Finished writing cache
+==== modified run ====
+Loading dependency graph from cache
+Cached dependency graph is out-of-date
+Loading dependency graph from project files
+Dependency graph generated
+Caching dependency graph
+Finished writing cache

@@ -21,11 +21,6 @@ gorc::file_entity::file_entity(path const &new_filename,
     return;
 }
 
-std::string const& gorc::file_entity::name()
-{
-    return entity_name;
-}
-
 std::unordered_set<gorc::entity*> const& gorc::file_entity::dependencies()
 {
     return empty_dependencies;

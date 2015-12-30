@@ -13,5 +13,8 @@ DEPENDENCIES:= \
 SOURCES:= \
 	main.cpp \
 	paths.cpp \
+	project_file.cpp \
+	project_graph.cpp \
+	register_entities.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

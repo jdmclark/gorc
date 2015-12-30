@@ -1,0 +1,19 @@
+include ../test.boc;
+
+cp testproject.json $(TESTSUITE_DIR)/testproject.json;
+pushd $(TESTSUITE_DIR);
+
+$(BOC_BUILD) --override-root-name testproject.json
+             --override-cache-name testproject.cache;
+
+if(is_file(testproject.cache)) {
+    echo "cache override worked" >> $(RAW_OUTPUT);
+}
+else {
+    echo "override failed" >> $(RAW_OUTPUT);
+}
+
+popd;
+
+call process_raw_output();
+call compare_output();

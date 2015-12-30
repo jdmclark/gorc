@@ -40,9 +40,17 @@ namespace gorc {
                 return val;
             }
 
-            T *ent = inner_emplace<T, ArgT...>(name, std::forward<ArgT>(args)...);
+            T *ent = inner_emplace<T, path const &, ArgT...>(name, std::forward<ArgT>(args)...);
             file_map.emplace(name, ent);
             return ent;
+        }
+
+        template <typename T>
+        typename std::enable_if<std::is_base_of<base_file_entity, T>::value, T*>::type
+            emplace(entity_input_stream &is)
+        {
+            // Always assume deserialized graph is normalized
+            return inner_emplace<T>(is);
         }
 
         template <typename T, typename ...ArgT>
@@ -51,6 +59,8 @@ namespace gorc {
         {
             return inner_emplace<T, ArgT...>(std::forward<ArgT>(args)...);
         }
+
+        void clear();
     };
 
 }

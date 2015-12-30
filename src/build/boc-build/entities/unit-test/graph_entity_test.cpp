@@ -15,4 +15,12 @@ test_case(update_aborts)
     assert_log_empty();
 }
 
+test_case(name)
+{
+    std::unordered_set<entity*> empty_project;
+    graph_entity empty_graph(empty_project);
+
+    assert_eq(empty_graph.name(), std::string("graph"));
+}
+
 end_suite(graph_entity_test);
