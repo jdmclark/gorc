@@ -6,3 +6,5 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	file_entity.cpp \
+	graph_entity.cpp \
+	root_entity.cpp \

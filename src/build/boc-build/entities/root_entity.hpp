@@ -1,18 +1,18 @@
 #pragma once
 
-#include "build/boc-build/engine/base_file_entity.hpp"
-#include "io/path.hpp"
+#include "graph_entity.hpp"
 
 namespace gorc {
 
-    class file_entity : public base_file_entity {
+    class root_entity : public entity {
     private:
-        std::time_t previous_timestamp;
+        std::unordered_set<entity*> dependencies_value;
 
     public:
-        file_entity(entity_input_stream &);
-        file_entity(path const &filename,
-                    std::time_t previous_timestamp = 0);
+        graph_entity * const graph;
+
+        root_entity(entity_input_stream &);
+        root_entity(graph_entity *graph);
 
         virtual std::string const& name() override;
         virtual std::unordered_set<entity*> const& dependencies() override;

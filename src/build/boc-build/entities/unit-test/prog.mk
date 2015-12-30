@@ -8,5 +8,7 @@ DEPENDENCIES:= \
 	libs/test \
 
 SOURCES:= \
+	graph_entity_test.cpp \
+	root_entity_test.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)
