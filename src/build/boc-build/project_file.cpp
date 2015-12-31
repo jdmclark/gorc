@@ -43,16 +43,6 @@ namespace {
         json_deserialize_with_specification(jis, root_project_data_spec, *this);
     }
 
-    class program_data {
-    public:
-        std::string name;
-        path source_directory;
-        std::vector<path> sources;
-        std::vector<path> dependencies;
-
-        program_data(path const &filename);
-    };
-
     json_specification<program_data> program_data_spec(
             /* Members */
             {
@@ -66,35 +56,6 @@ namespace {
 
             /* Required */
             { "name" });
-
-    program_data::program_data(path const &filename)
-    {
-        source_directory = filename.parent_path();
-
-        auto str_filename = filename.generic_string();
-        diagnostic_context dc(str_filename.c_str());
-
-        std::unique_ptr<input_stream> in_file;
-        try {
-            in_file = make_native_read_only_file(filename);
-        }
-        catch(std::exception const &e) {
-            LOG_FATAL(e.what());
-        }
-
-        json_input_stream jis(*in_file);
-        json_deserialize_with_specification(jis, program_data_spec, *this);
-    }
-
-    class library_data {
-    public:
-        std::string name;
-        path source_directory;
-        std::vector<path> sources;
-        std::vector<path> dependencies;
-
-        library_data(path const &filename);
-    };
 
     json_specification<library_data> library_data_spec(
             /* Members */
@@ -110,24 +71,44 @@ namespace {
             /* Required */
             { "name" });
 
-    library_data::library_data(path const &filename)
-    {
-        source_directory = filename.parent_path();
+}
 
-        auto str_filename = filename.generic_string();
-        diagnostic_context dc(str_filename.c_str());
+program_data::program_data(path const &filename)
+{
+    source_directory = filename.parent_path();
 
-        std::unique_ptr<input_stream> in_file;
-        try {
-            in_file = make_native_read_only_file(filename);
-        }
-        catch(std::exception const &e) {
-            LOG_FATAL(e.what());
-        }
+    auto str_filename = filename.generic_string();
+    diagnostic_context dc(str_filename.c_str());
 
-        json_input_stream jis(*in_file);
-        json_deserialize_with_specification(jis, library_data_spec, *this);
+    std::unique_ptr<input_stream> in_file;
+    try {
+        in_file = make_native_read_only_file(filename);
     }
+    catch(std::exception const &e) {
+        LOG_FATAL(e.what());
+    }
+
+    json_input_stream jis(*in_file);
+    json_deserialize_with_specification(jis, program_data_spec, *this);
+}
+
+library_data::library_data(path const &filename)
+{
+    source_directory = filename.parent_path();
+
+    auto str_filename = filename.generic_string();
+    diagnostic_context dc(str_filename.c_str());
+
+    std::unique_ptr<input_stream> in_file;
+    try {
+        in_file = make_native_read_only_file(filename);
+    }
+    catch(std::exception const &e) {
+        LOG_FATAL(e.what());
+    }
+
+    json_input_stream jis(*in_file);
+    json_deserialize_with_specification(jis, library_data_spec, *this);
 }
 
 gorc::project_file::project_file(path const &project_filename)
@@ -142,7 +123,6 @@ gorc::project_file::project_file(path const &project_filename)
     std::set<path> unmet_dependencies;
 
     // Load programs
-    std::map<path, std::unique_ptr<program_data>> programs;
     for(auto const &prog : root_data.programs) {
         auto prog_path = boc_src_directory / prog / boc_prog_filename;
         project_files.insert(prog_path);
@@ -159,7 +139,6 @@ gorc::project_file::project_file(path const &project_filename)
     }
 
     // Load libraries
-    std::map<path, std::unique_ptr<library_data>> libraries;
     while(!unmet_dependencies.empty()) {
         auto libit = unmet_dependencies.begin();
         path libpath = *libit;
