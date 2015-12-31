@@ -3,6 +3,7 @@
 #include "../entity_serializer.hpp"
 #include "../entity_deserializer.hpp"
 #include "io/memory_file.hpp"
+#include "utility/service_registry.hpp"
 #include <map>
 
 using namespace gorc;
@@ -51,8 +52,9 @@ test_case(simple_round_trip)
     es.serialize_root(mock_graph.at("A").get());
 
     // Deserialize graph
+    service_registry services;
     entity_allocator ea;
-    entity_deserializer ed(er, ea, mf);
+    entity_deserializer ed(services, er, ea, mf);
 
     mock_entity *root_duplicate = ed.deserialize_root<mock_entity>();
     dump_graph(root_duplicate);
@@ -103,9 +105,10 @@ test_case(deserialize_empty)
 {
     memory_file mf;
 
+    service_registry services;
     entity_registry er;
     entity_allocator ea;
-    entity_deserializer ed(er, ea, mf);
+    entity_deserializer ed(services, er, ea, mf);
 
     assert_throws_logged(ed.deserialize_root<mock_entity>());
     assert_log_message(log_level::error, "database corrupt: no root node exists");
@@ -117,9 +120,10 @@ test_case(deserialize_partial_id)
     memory_file mf;
     write<uint16_t>(mf, uint16_t(5));
 
+    service_registry services;
     entity_registry er;
     entity_allocator ea;
-    entity_deserializer ed(er, ea, mf);
+    entity_deserializer ed(services, er, ea, mf);
 
     assert_throws_logged(ed.deserialize_root<mock_entity>());
     assert_log_message(log_level::error, "database corrupt: could not read next entity type id");
@@ -207,8 +211,9 @@ test_case(deserialize_root_type_mismatch)
     es.serialize_root(mock_graph.at("A").get());
 
     // Deserialize graph
+    service_registry services;
     entity_allocator ea;
-    entity_deserializer ed(er, ea, mf);
+    entity_deserializer ed(services, er, ea, mf);
 
     assert_throws_logged(ed.deserialize_root<other_ent>());
     assert_log_message(log_level::error, "database corrupt: root node type mismatch");
@@ -288,8 +293,9 @@ test_case(deserialize_inner_type_mismatch)
     es.serialize_root(&root);
 
     // Deserialize graph
+    service_registry services;
     entity_allocator ea;
-    entity_deserializer ed(er, ea, mf);
+    entity_deserializer ed(services, er, ea, mf);
 
     assert_throws_logged(ed.deserialize_root<mock_entity>());
     assert_log_message(log_level::error, "database corrupt: "

@@ -4,6 +4,7 @@
 #include "io/output_stream.hpp"
 #include "io/path.hpp"
 #include <unordered_map>
+#include <unordered_set>
 
 namespace gorc {
 
@@ -29,6 +30,15 @@ namespace gorc {
         void write_entity_type_id()
         {
             write_uint32(reg.get_type_id<T>());
+        }
+
+        template <typename EntitySetT>
+        void write_entity_set(EntitySetT const &set)
+        {
+            write_uint32(static_cast<uint32_t>(set.size()));
+            for(entity *ent : set) {
+                write_entity_reference(ent);
+            }
         }
     };
 

@@ -14,6 +14,7 @@ namespace gorc {
         base_file_entity(path const &filename);
 
         virtual std::string const& name() override;
+        virtual path const& file_path();
     };
 
 }

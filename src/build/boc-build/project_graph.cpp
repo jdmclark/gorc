@@ -12,10 +12,12 @@
 #include "entities/file_entity.hpp"
 #include <boost/filesystem.hpp>
 
-gorc::project_graph::project_graph(entity_registry const &reg,
+gorc::project_graph::project_graph(service_registry const &services,
+                                   entity_registry const &reg,
                                    path const &project_filename,
                                    path const &cache_filename)
-    : reg(reg)
+    : services(services)
+    , reg(reg)
     , cache_filename(cache_filename)
 {
     if(boost::filesystem::is_regular_file(cache_filename)) {
@@ -23,7 +25,7 @@ gorc::project_graph::project_graph(entity_registry const &reg,
         LOG_INFO("Loading dependency graph from cache");
 
         auto nf = make_native_read_only_file(cache_filename);
-        entity_deserializer ed(reg, ea, *nf);
+        entity_deserializer ed(services, reg, ea, *nf);
 
         root = ed.deserialize_root<root_entity>();
 

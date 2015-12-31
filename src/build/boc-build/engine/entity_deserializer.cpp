@@ -3,8 +3,9 @@
 #include "utility/maybe.hpp"
 #include "log/log.hpp"
 
-gorc::entity_input_stream::entity_input_stream(input_stream &is)
+gorc::entity_input_stream::entity_input_stream(service_registry const &services, input_stream &is)
     : is(is)
+    , services(services)
 {
     return;
 }
@@ -41,10 +42,11 @@ uint32_t gorc::entity_input_stream::read_uint32()
     return read<uint32_t>(is);
 }
 
-gorc::entity_deserializer::entity_deserializer(entity_registry const &reg,
+gorc::entity_deserializer::entity_deserializer(service_registry const &services,
+                                               entity_registry const &reg,
                                                entity_allocator &alloc,
                                                input_stream &is)
-    : entity_input_stream(is)
+    : entity_input_stream(services, is)
     , reg(reg)
     , alloc(alloc)
 {

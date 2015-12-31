@@ -5,6 +5,7 @@
 #include "io/input_stream.hpp"
 #include "io/path.hpp"
 #include "log/log.hpp"
+#include "utility/service_registry.hpp"
 #include <unordered_map>
 
 namespace gorc {
@@ -17,7 +18,9 @@ namespace gorc {
         std::unordered_map<uint32_t, entity*> entity_id_map;
 
     public:
-        entity_input_stream(input_stream &is);
+        service_registry const &services;
+
+        entity_input_stream(service_registry const &services, input_stream &is);
         virtual ~entity_input_stream();
 
         entity* read_abstract_entity_reference();
@@ -39,6 +42,19 @@ namespace gorc {
         std::string read_string();
         path read_path();
         uint32_t read_uint32();
+
+        template <typename EntityT>
+        std::unordered_set<EntityT*> read_entity_set()
+        {
+            std::unordered_set<EntityT*> rv;
+
+            uint32_t count = read_uint32();
+            for(uint32_t i = 0; i < count; ++i) {
+                rv.insert(read_entity_reference<EntityT>());
+            }
+
+            return rv;
+        }
     };
 
     class entity_deserializer : private entity_input_stream {
@@ -49,7 +65,10 @@ namespace gorc {
         entity* deserialize_abstract_root();
 
     public:
-        entity_deserializer(entity_registry const &reg, entity_allocator &, input_stream &is);
+        entity_deserializer(service_registry const &services,
+                            entity_registry const &reg,
+                            entity_allocator &,
+                            input_stream &is);
 
         template <typename T>
         T* deserialize_root()

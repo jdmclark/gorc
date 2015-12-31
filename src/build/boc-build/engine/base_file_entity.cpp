@@ -11,3 +11,8 @@ std::string const& gorc::base_file_entity::name()
 {
     return entity_name;
 }
+
+gorc::path const& gorc::base_file_entity::file_path()
+{
+    return filename;
+}

@@ -2,6 +2,8 @@
 #include "io/path.hpp"
 #include "register_entities.hpp"
 #include "project_graph.hpp"
+#include "utility/service_registry.hpp"
+#include "entities/gnu_compiler_properties.hpp"
 #include <boost/filesystem.hpp>
 
 using namespace boost::filesystem;
@@ -62,11 +64,22 @@ namespace gorc {
             change_to_project_root();
 
             // Project root was located. Set up engine.
+            service_registry services;
+
+            // TODO: Compiler selection
+            gnu_compiler_properties comp_props(
+                    "pkg/obj" /* obj path */,
+                    "pkg/lib" /* lib path */,
+                    "pkg/bin" /* release bin path */,
+                    "pkg/test-bin" /* test bin path */,
+                    "pkg/build-bin" /* build bin path */);
+            services.add<compiler_properties>(comp_props);
+
             entity_registry reg;
             register_boc_entities(reg);
 
             // Initialize graph
-            project_graph(reg, boc_root_filename, boc_cache_filename);
+            project_graph(services, reg, boc_root_filename, boc_cache_filename);
 
             // TODO: Perform operation
 
