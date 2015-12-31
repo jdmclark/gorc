@@ -1,0 +1,9 @@
+{
+    "name" : "program",
+    "sources" : [
+        "options.cpp"
+    ],
+    "dependencies" : [
+        "libs/log"
+    ]
+}

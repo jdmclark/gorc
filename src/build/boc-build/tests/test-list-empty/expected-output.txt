@@ -1,0 +1,17 @@
+==== stderr ====
+Loading dependency graph from project files
+Dependency graph generated
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+graph:
+    testproject.json
+
+project:
+
+root:
+    graph
+    project
+
+testproject.json:
+

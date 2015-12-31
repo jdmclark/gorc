@@ -8,7 +8,9 @@
 #include "entities/object_file_entity.hpp"
 #include "entities/program_file_entity.hpp"
 #include "entities/project_entity.hpp"
+#include "utility/join.hpp"
 
+#include <vector>
 #include <boost/filesystem.hpp>
 
 using namespace gorc;
@@ -18,7 +20,7 @@ namespace {
     object_file_entity* get_or_create_object(path const &psf_name,
                                              service_registry const &services,
                                              entity_allocator &ea,
-                                             std::map<path, object_file_entity*> objects)
+                                             std::map<path, object_file_entity*> &objects)
     {
         auto existing_it = objects.find(psf_name);
         if(existing_it != objects.end()) {
@@ -31,6 +33,61 @@ namespace {
         objects.emplace(psf_name, obj_ent);
 
         return obj_ent;
+    }
+
+    library_file_entity* get_or_create_library(path const &lib_name,
+                                               library_data const &libdata,
+                                               service_registry const &services,
+                                               entity_allocator &ea,
+                                               std::map<path, object_file_entity*> &objects,
+                                               std::map<path, library_file_entity*> &libraries,
+                                               project_file const &pf,
+                                               std::vector<path> &library_stack)
+    {
+        library_stack.push_back(lib_name);
+        auto existing_it = libraries.find(lib_name);
+        if(existing_it != libraries.end()) {
+            if(existing_it->second == nullptr) {
+                LOG_FATAL(format("cannot generate dependency graph: "
+                                 "cycle detected in libraries\n%s") %
+                          join(library_stack, " =>\n"));
+            }
+
+            library_stack.pop_back();
+            return existing_it->second;
+        }
+
+        // Add nullptr to indicate that processing has started
+        libraries.emplace(lib_name, nullptr);
+
+        std::unordered_set<object_file_entity*> library_objects;
+        for(auto const &src : libdata.sources) {
+            path assembled_src = (libdata.source_directory / src).normalize();
+            library_objects.insert(get_or_create_object(assembled_src, services, ea, objects));
+        }
+
+        std::unordered_set<library_file_entity*> library_deps;
+        for(auto const &lib : libdata.dependencies) {
+            library_deps.insert(get_or_create_library(lib,
+                                                      *pf.libraries.at(lib),
+                                                      services,
+                                                      ea,
+                                                      objects,
+                                                      libraries,
+                                                      pf,
+                                                      library_stack));
+        }
+
+        library_file_entity *libent = ea.emplace<library_file_entity>(libdata.name,
+                                                                      library_objects,
+                                                                      library_deps,
+                                                                      services);
+
+        // Replace nullptr with assembled library
+        libraries[lib_name] = libent;
+
+        library_stack.pop_back();
+        return libent;
     }
 
 }
@@ -53,17 +110,17 @@ root_entity* gorc::create_graph_nodes(project_file const &pf,
     std::map<path, object_file_entity*> objects;
     std::map<path, library_file_entity*> libraries;
 
+    std::vector<path> library_stack;
+
     for(auto const &library : pf.libraries) {
-        std::unordered_set<object_file_entity*> library_objects;
-        for(auto const &src : library.second->sources) {
-            library_objects.insert(get_or_create_object(src, services, ea, objects));
-        }
-
-        library_file_entity *libent = ea.emplace<library_file_entity>(library.second->name,
-                                                                      library_objects,
-                                                                      services);
-
-        libraries.emplace(library.first, libent);
+        libraries.emplace(library.first, get_or_create_library(library.first,
+                                                               *library.second,
+                                                               services,
+                                                               ea,
+                                                               objects,
+                                                               libraries,
+                                                               pf,
+                                                               library_stack));
     }
 
     std::unordered_set<program_file_entity*> programs;
@@ -71,32 +128,13 @@ root_entity* gorc::create_graph_nodes(project_file const &pf,
     for(auto const &prog : pf.programs) {
         std::unordered_set<object_file_entity*> program_objects;
         for(auto const &src : prog.second->sources) {
-            program_objects.insert(get_or_create_object(src, services, ea, objects));
+            path assembled_src = (prog.second->source_directory / src).normalize();
+            program_objects.insert(get_or_create_object(assembled_src, services, ea, objects));
         }
 
-        // Compute unique closure of static library dependencies
-        std::set<path> open_libs;
-        std::copy(prog.second->dependencies.begin(),
-                  prog.second->dependencies.end(),
-                  std::inserter(open_libs, open_libs.begin()));
-
-        std::set<path> closed_libs;
         std::unordered_set<library_file_entity*> program_libraries;
-
-        while(!open_libs.empty()) {
-            auto it = open_libs.begin();
-            path opened_lib = *it;
-            open_libs.erase(it);
-
-            closed_libs.insert(opened_lib);
-            program_libraries.insert(libraries.at(opened_lib));
-
-            for(auto const &next_lib : pf.libraries.at(opened_lib)->dependencies) {
-                if(closed_libs.find(next_lib) != closed_libs.end()) {
-                    // Library has not been visited yet
-                    open_libs.insert(next_lib);
-                }
-            }
+        for(auto const &lib : prog.second->dependencies) {
+            program_libraries.insert(libraries.at(lib));
         }
 
         program_file_entity *prog_ent = ea.emplace<program_file_entity>(prog.second->name,

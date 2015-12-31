@@ -1,0 +1,29 @@
+==== stderr ====
+Loading dependency graph from project files
+Dependency graph generated
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+graph:
+    src/myprog/prog.json
+    testproject.json
+
+pkg/bin/myprog:
+    pkg/obj/src/myprog/main.o
+
+pkg/obj/src/myprog/main.o:
+    src/myprog/main.cpp
+
+project:
+    pkg/bin/myprog
+
+root:
+    graph
+    project
+
+src/myprog/main.cpp:
+
+src/myprog/prog.json:
+
+testproject.json:
+

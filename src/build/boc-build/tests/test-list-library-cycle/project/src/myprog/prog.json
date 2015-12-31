@@ -1,0 +1,9 @@
+{
+    "name" : "myprog",
+    "sources" : [
+        "main.cpp"
+    ],
+    "dependencies" : [
+        "libs/program"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "name" : "mytest",
+    "sources" : [
+        "../main.cpp"
+    ]
+}

@@ -2,6 +2,7 @@
 #include "io/path.hpp"
 #include "register_entities.hpp"
 #include "project_graph.hpp"
+#include "list_targets.hpp"
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
 #include <boost/filesystem.hpp>
@@ -18,7 +19,8 @@ namespace gorc {
         std::string boc_cache_filename = ".boc-cache";
         std::string boc_cache_filename_override;
 
-        bool list_only = false;
+        bool do_nothing = false;
+        bool list_targets_only = false;
 
         path original_working_directory;
         path project_root_path;
@@ -28,7 +30,14 @@ namespace gorc {
             // Test and debugging options
             opts.insert(make_value_option("override-root-name", boc_root_filename_override));
             opts.insert(make_value_option("override-cache-name", boc_cache_filename_override));
-            opts.insert(make_switch_option("list", list_only));
+
+            opts.insert(make_switch_option("do-nothing", do_nothing));
+            opts.insert(make_switch_option("list-targets", list_targets_only));
+
+            opts.emplace_constraint<mutual_exclusion>(
+                    std::vector<std::string> { "do-nothing",
+                                               "list-targets" });
+
             return;
         }
 
@@ -79,9 +88,16 @@ namespace gorc {
             register_boc_entities(reg);
 
             // Initialize graph
-            project_graph(services, reg, boc_root_filename, boc_cache_filename);
+            project_graph pg(services, reg, boc_root_filename, boc_cache_filename);
 
-            // TODO: Perform operation
+            // Perform operation
+            if(do_nothing) {
+                return EXIT_SUCCESS;
+            }
+            else if(list_targets_only) {
+                list_targets(pg.get_root());
+                return EXIT_SUCCESS;
+            }
 
             return EXIT_SUCCESS;
         }
