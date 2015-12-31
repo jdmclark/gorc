@@ -30,8 +30,8 @@ gorc::library_file_entity_internal_properties::~library_file_entity_internal_pro
 
 gorc::library_file_entity::library_file_entity(entity_input_stream &is)
     : library_file_entity_internal_properties(is)
-    , base_file_entity(is.services.get<compiler_properties>()
-                                  .make_library_filename(library_name))
+    , generated_file_entity(is.services.get<compiler_properties>()
+                                       .make_library_filename(library_name))
 {
     return;
 }
@@ -40,8 +40,8 @@ gorc::library_file_entity::library_file_entity(std::string const &name,
                                                std::unordered_set<object_file_entity*> const &objs,
                                                service_registry const &services)
     : library_file_entity_internal_properties(name, objs)
-    , base_file_entity(services.get<compiler_properties>()
-                               .make_library_filename(library_name))
+    , generated_file_entity(services.get<compiler_properties>()
+                                    .make_library_filename(library_name))
 {
     return;
 }
@@ -49,11 +49,6 @@ gorc::library_file_entity::library_file_entity(std::string const &name,
 std::unordered_set<gorc::entity*> const& gorc::library_file_entity::dependencies()
 {
     return dependencies_value;
-}
-
-bool gorc::library_file_entity::is_dirty()
-{
-    return !boost::filesystem::is_regular_file(filename);
 }
 
 bool gorc::library_file_entity::update(service_registry const &)

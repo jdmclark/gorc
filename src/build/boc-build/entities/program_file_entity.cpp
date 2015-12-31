@@ -40,8 +40,8 @@ gorc::program_file_entity_internal_properties::~program_file_entity_internal_pro
 
 gorc::program_file_entity::program_file_entity(entity_input_stream &is)
     : program_file_entity_internal_properties(is)
-    , base_file_entity(is.services.get<compiler_properties>()
-                                  .make_program_filename(program_name, type))
+    , generated_file_entity(is.services.get<compiler_properties>()
+                                       .make_program_filename(program_name, type))
 {
     return;
 }
@@ -55,8 +55,8 @@ gorc::program_file_entity::program_file_entity(std::string const &program_name,
                                               type,
                                               objs,
                                               libs)
-    , base_file_entity(services.get<compiler_properties>()
-                               .make_program_filename(program_name, type))
+    , generated_file_entity(services.get<compiler_properties>()
+                                    .make_program_filename(program_name, type))
 {
     return;
 }
@@ -64,11 +64,6 @@ gorc::program_file_entity::program_file_entity(std::string const &program_name,
 std::unordered_set<gorc::entity*> const& gorc::program_file_entity::dependencies()
 {
     return dependencies_value;
-}
-
-bool gorc::program_file_entity::is_dirty()
-{
-    return !boost::filesystem::is_regular_file(filename);
 }
 
 bool gorc::program_file_entity::update(service_registry const &)

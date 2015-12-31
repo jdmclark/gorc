@@ -1,10 +1,11 @@
 #pragma once
 
 #include "source_file_entity.hpp"
+#include "generated_file_entity.hpp"
 
 namespace gorc {
 
-    class object_file_entity : public base_file_entity {
+    class object_file_entity : public generated_file_entity {
     private:
         source_file_entity *primary_source_file;
         std::unordered_set<entity*> dependencies_value;
@@ -16,7 +17,6 @@ namespace gorc {
 
         virtual std::unordered_set<entity*> const& dependencies() override;
 
-        virtual bool is_dirty() override;
         virtual bool update(service_registry const &) override;
 
         virtual void serialize(entity_output_stream &) override;

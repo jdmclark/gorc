@@ -13,8 +13,8 @@ gorc::object_file_entity::object_file_entity(entity_input_stream &is)
 
 gorc::object_file_entity::object_file_entity(source_file_entity *primary_source_file,
                                              service_registry const &services)
-    : base_file_entity(services.get<compiler_properties>()
-                               .make_object_filename_from_psf(primary_source_file->file_path()))
+    : generated_file_entity(services.get<compiler_properties>()
+                                .make_object_filename_from_psf(primary_source_file->file_path()))
     , primary_source_file(primary_source_file)
 {
     dependencies_value.insert(primary_source_file);
@@ -23,11 +23,6 @@ gorc::object_file_entity::object_file_entity(source_file_entity *primary_source_
 std::unordered_set<gorc::entity*> const& gorc::object_file_entity::dependencies()
 {
     return dependencies_value;
-}
-
-bool gorc::object_file_entity::is_dirty()
-{
-    return !boost::filesystem::is_regular_file(filename);
 }
 
 bool gorc::object_file_entity::update(service_registry const &)

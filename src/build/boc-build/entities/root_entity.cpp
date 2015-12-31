@@ -9,8 +9,10 @@ namespace {
 
 gorc::root_entity::root_entity(entity_input_stream &is)
     : graph(is.read_entity_reference<graph_entity>())
+    , project(is.read_entity_reference<project_entity>())
 {
     dependencies_value.insert(graph);
+    dependencies_value.insert(project);
     return;
 }
 
@@ -18,12 +20,16 @@ void gorc::root_entity::serialize(entity_output_stream &os)
 {
     os.write_entity_type_id<root_entity>();
     os.write_entity_reference(graph);
+    os.write_entity_reference(project);
 }
 
-gorc::root_entity::root_entity(graph_entity *graph)
+gorc::root_entity::root_entity(graph_entity *graph,
+                               project_entity *project)
     : graph(graph)
+    , project(project)
 {
     dependencies_value.insert(graph);
+    dependencies_value.insert(project);
     return;
 }
 

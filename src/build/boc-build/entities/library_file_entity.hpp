@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object_file_entity.hpp"
+#include "generated_file_entity.hpp"
 
 namespace gorc {
 
@@ -17,7 +18,7 @@ namespace gorc {
     };
 
     class library_file_entity : private library_file_entity_internal_properties
-                              , public base_file_entity {
+                              , public generated_file_entity {
     public:
         library_file_entity(entity_input_stream &);
         library_file_entity(std::string const &library_name,
@@ -26,7 +27,6 @@ namespace gorc {
 
         virtual std::unordered_set<entity*> const& dependencies() override;
 
-        virtual bool is_dirty() override;
         virtual bool update(service_registry const &) override;
 
         virtual void serialize(entity_output_stream &) override;

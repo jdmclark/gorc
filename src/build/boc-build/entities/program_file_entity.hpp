@@ -3,6 +3,7 @@
 #include "object_file_entity.hpp"
 #include "library_file_entity.hpp"
 #include "program_type.hpp"
+#include "generated_file_entity.hpp"
 
 namespace gorc {
 
@@ -24,7 +25,7 @@ namespace gorc {
     };
 
     class program_file_entity : private program_file_entity_internal_properties
-                              , public base_file_entity {
+                              , public generated_file_entity {
     public:
         program_file_entity(entity_input_stream &);
         program_file_entity(std::string const &program_name,
@@ -35,7 +36,6 @@ namespace gorc {
 
         virtual std::unordered_set<entity*> const& dependencies() override;
 
-        virtual bool is_dirty() override;
         virtual bool update(service_registry const &) override;
 
         virtual void serialize(entity_output_stream &) override;

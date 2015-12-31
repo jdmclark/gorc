@@ -47,7 +47,7 @@ gorc::project_graph::project_graph(service_registry const &services,
     ea.clear();
 
     project_file pf(project_filename);
-    root = create_graph_nodes(pf, ea);
+    root = create_graph_nodes(pf, services, ea);
 
     LOG_INFO("Dependency graph generated");
 }
