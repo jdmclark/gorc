@@ -1,0 +1,6 @@
+{
+    "name" : "io",
+    "sources" : [
+        "memory_file.cpp"
+    ]
+}

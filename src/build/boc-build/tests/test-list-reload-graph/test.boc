@@ -1,0 +1,31 @@
+include ../test.boc;
+
+cp -r project $(TESTSUITE_DIR)/project;
+pushd $(TESTSUITE_DIR)/project;
+
+echo "---- first run ----" >> $(TESTSUITE_DIR)/stdout;
+echo "---- first run ----" >> $(TESTSUITE_DIR)/stderr;
+
+$(BOC_BUILD) --override-root-name testproject.json --list-targets
+    >> $(TESTSUITE_DIR)/stdout
+    2>> $(TESTSUITE_DIR)/stderr
+    || true;
+
+echo "---- second run ----" >> $(TESTSUITE_DIR)/stdout;
+echo "---- second run ----" >> $(TESTSUITE_DIR)/stderr;
+
+$(BOC_BUILD) --override-root-name testproject.json --list-targets
+    >> $(TESTSUITE_DIR)/stdout
+    2>> $(TESTSUITE_DIR)/stderr
+    || true;
+
+popd;
+
+echo "==== stderr ====" >> $(RAW_OUTPUT);
+cat $(TESTSUITE_DIR)/stderr >> $(RAW_OUTPUT);
+
+echo "==== stdout ====" >> $(RAW_OUTPUT);
+cat $(TESTSUITE_DIR)/stdout >> $(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

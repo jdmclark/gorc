@@ -1,0 +1,4 @@
+==== stderr ====
+Loading dependency graph from project files
+[ERROR] src/myprog/prog.json:6:14-6:30: unknown program type 'someinvalidtype'
+==== stdout ====

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io/path.hpp"
+#include "entities/program_type.hpp"
 #include <unordered_map>
 #include <memory>
 #include <set>
@@ -14,6 +15,7 @@ namespace gorc {
         path source_directory;
         std::vector<path> sources;
         std::vector<path> dependencies;
+        program_type type = program_type::release;
 
         program_data(path const &filename);
     };

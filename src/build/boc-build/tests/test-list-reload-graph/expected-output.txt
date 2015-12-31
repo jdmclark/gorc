@@ -1,0 +1,169 @@
+==== stderr ====
+---- first run ----
+Loading dependency graph from project files
+Dependency graph generated
+Caching dependency graph
+Finished writing cache
+---- second run ----
+Loading dependency graph from cache
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+---- first run ----
+graph:
+    src/libs/io/lib.json
+    src/libs/log/lib.json
+    src/libs/program/lib.json
+    src/libs/utility/lib.json
+    src/myprog/prog.json
+    testproject.json
+
+pkg/bin/myprog:
+    pkg/lib/liblog.a
+    pkg/lib/libprogram.a
+    pkg/obj/src/myprog/main.o
+
+pkg/lib/libio.a:
+    pkg/obj/src/libs/io/memory_file.o
+
+pkg/lib/liblog.a:
+    pkg/lib/libio.a
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/log/log.o
+
+pkg/lib/libprogram.a:
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/program/options.o
+
+pkg/lib/libutility.a:
+    pkg/obj/src/libs/utility/make_unique.o
+    pkg/obj/src/libs/utility/range.o
+
+pkg/obj/src/libs/io/memory_file.o:
+    src/libs/io/memory_file.cpp
+
+pkg/obj/src/libs/log/log.o:
+    src/libs/log/log.cpp
+
+pkg/obj/src/libs/program/options.o:
+    src/libs/program/options.cpp
+
+pkg/obj/src/libs/utility/make_unique.o:
+    src/libs/utility/make_unique.cpp
+
+pkg/obj/src/libs/utility/range.o:
+    src/libs/utility/range.cpp
+
+pkg/obj/src/myprog/main.o:
+    src/myprog/main.cpp
+
+project:
+    pkg/bin/myprog
+
+root:
+    graph
+    project
+
+src/libs/io/lib.json:
+
+src/libs/io/memory_file.cpp:
+
+src/libs/log/lib.json:
+
+src/libs/log/log.cpp:
+
+src/libs/program/lib.json:
+
+src/libs/program/options.cpp:
+
+src/libs/utility/lib.json:
+
+src/libs/utility/make_unique.cpp:
+
+src/libs/utility/range.cpp:
+
+src/myprog/main.cpp:
+
+src/myprog/prog.json:
+
+testproject.json:
+
+---- second run ----
+graph:
+    src/libs/io/lib.json
+    src/libs/log/lib.json
+    src/libs/program/lib.json
+    src/libs/utility/lib.json
+    src/myprog/prog.json
+    testproject.json
+
+pkg/bin/myprog:
+    pkg/lib/liblog.a
+    pkg/lib/libprogram.a
+    pkg/obj/src/myprog/main.o
+
+pkg/lib/libio.a:
+    pkg/obj/src/libs/io/memory_file.o
+
+pkg/lib/liblog.a:
+    pkg/lib/libio.a
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/log/log.o
+
+pkg/lib/libprogram.a:
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/program/options.o
+
+pkg/lib/libutility.a:
+    pkg/obj/src/libs/utility/make_unique.o
+    pkg/obj/src/libs/utility/range.o
+
+pkg/obj/src/libs/io/memory_file.o:
+    src/libs/io/memory_file.cpp
+
+pkg/obj/src/libs/log/log.o:
+    src/libs/log/log.cpp
+
+pkg/obj/src/libs/program/options.o:
+    src/libs/program/options.cpp
+
+pkg/obj/src/libs/utility/make_unique.o:
+    src/libs/utility/make_unique.cpp
+
+pkg/obj/src/libs/utility/range.o:
+    src/libs/utility/range.cpp
+
+pkg/obj/src/myprog/main.o:
+    src/myprog/main.cpp
+
+project:
+    pkg/bin/myprog
+
+root:
+    graph
+    project
+
+src/libs/io/lib.json:
+
+src/libs/io/memory_file.cpp:
+
+src/libs/log/lib.json:
+
+src/libs/log/log.cpp:
+
+src/libs/program/lib.json:
+
+src/libs/program/options.cpp:
+
+src/libs/utility/lib.json:
+
+src/libs/utility/make_unique.cpp:
+
+src/libs/utility/range.cpp:
+
+src/myprog/main.cpp:
+
+src/myprog/prog.json:
+
+testproject.json:
+

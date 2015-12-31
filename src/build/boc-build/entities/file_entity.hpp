@@ -6,7 +6,7 @@
 namespace gorc {
 
     class file_entity : public base_file_entity {
-    private:
+    protected:
         std::time_t previous_timestamp;
 
     public:

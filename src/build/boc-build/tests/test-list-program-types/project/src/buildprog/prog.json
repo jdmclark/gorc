@@ -1,0 +1,7 @@
+{
+    "name" : "buildprog",
+    "type" : "build",
+    "sources" : [
+        "main.cpp"
+    ]
+}

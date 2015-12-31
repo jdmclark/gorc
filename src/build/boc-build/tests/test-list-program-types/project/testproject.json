@@ -1,0 +1,8 @@
+{
+    "programs" : [
+        "defaultprog",
+        "releaseprog",
+        "testprog",
+        "buildprog"
+    ]
+}

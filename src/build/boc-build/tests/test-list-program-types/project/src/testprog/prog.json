@@ -1,0 +1,7 @@
+{
+    "name" : "testprog",
+    "type" : "test",
+    "sources" : [
+        "main.cpp"
+    ]
+}

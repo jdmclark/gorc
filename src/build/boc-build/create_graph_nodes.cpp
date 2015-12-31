@@ -138,7 +138,7 @@ root_entity* gorc::create_graph_nodes(project_file const &pf,
         }
 
         program_file_entity *prog_ent = ea.emplace<program_file_entity>(prog.second->name,
-                                                                        program_type::release, // TODO
+                                                                        prog.second->type,
                                                                         program_objects,
                                                                         program_libraries,
                                                                         services);
