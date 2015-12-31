@@ -7,9 +7,7 @@
 #include "engine/adjacency_list.hpp"
 #include "io/native_file.hpp"
 #include "log/log.hpp"
-#include "entities/root_entity.hpp"
-#include "entities/graph_entity.hpp"
-#include "entities/file_entity.hpp"
+#include "create_graph_nodes.hpp"
 #include <boost/filesystem.hpp>
 
 gorc::project_graph::project_graph(service_registry const &services,
@@ -49,17 +47,7 @@ gorc::project_graph::project_graph(service_registry const &services,
     ea.clear();
 
     project_file pf(project_filename);
-
-    // Create graph nodes
-    std::unordered_set<entity*> project_files;
-    for(auto const &subfile : pf.project_files) {
-        project_files.insert(ea.emplace<file_entity>(
-                    subfile,
-                    boost::filesystem::last_write_time(subfile)));
-    }
-
-    graph_entity *graph_ent = ea.emplace<graph_entity>(project_files);
-    root = ea.emplace<root_entity>(graph_ent);
+    root = create_graph_nodes(pf, ea);
 
     LOG_INFO("Dependency graph generated");
 }

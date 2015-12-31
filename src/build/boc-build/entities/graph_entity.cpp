@@ -8,20 +8,15 @@ namespace {
 }
 
 gorc::graph_entity::graph_entity(entity_input_stream &is)
+    : project_files(is.read_entity_set<entity>())
 {
-    uint32_t num_files = is.read_uint32();
-    for(uint32_t i = 0; i < num_files; ++i) {
-        project_files.insert(is.read_abstract_entity_reference());
-    }
+    return;
 }
 
 void gorc::graph_entity::serialize(entity_output_stream &os)
 {
     os.write_entity_type_id<graph_entity>();
-    os.write_uint32(static_cast<uint32_t>(project_files.size()));
-    for(entity *file : project_files) {
-        os.write_entity_reference(file);
-    }
+    os.write_entity_set(project_files);
 }
 
 gorc::graph_entity::graph_entity(std::unordered_set<entity*> const &project_files)

@@ -11,6 +11,7 @@ DEPENDENCIES:= \
 	build/boc-build/entities \
 
 SOURCES:= \
+	create_graph_nodes.cpp \
 	main.cpp \
 	paths.cpp \
 	project_file.cpp \
