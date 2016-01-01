@@ -3,6 +3,7 @@
 #include "register_entities.hpp"
 #include "project_graph.hpp"
 #include "list_targets.hpp"
+#include "run_build.hpp"
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
 #include <boost/filesystem.hpp>
@@ -100,8 +101,9 @@ namespace gorc {
                 list_targets(pg.get_root());
                 return EXIT_SUCCESS;
             }
-
-            return EXIT_SUCCESS;
+            else {
+                return run_build(services, pg.get_root());
+            }
         }
     };
 

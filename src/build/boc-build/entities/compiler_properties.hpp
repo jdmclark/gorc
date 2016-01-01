@@ -17,6 +17,10 @@ namespace gorc {
         path build_bin_path;
     };
 
+    class object_file_entity;
+    class library_file_entity;
+    class program_file_entity;
+
     class compiler_properties {
     protected:
         compiler_configuration const &config;
@@ -29,6 +33,10 @@ namespace gorc {
         virtual path make_library_filename(std::string const &name) = 0;
         virtual path make_program_filename(std::string const &name,
                                            program_type type) = 0;
+
+        virtual bool compile_object_file(object_file_entity *) = 0;
+        virtual bool archive_static_library(library_file_entity *) = 0;
+        virtual bool link_program(program_file_entity *) = 0;
     };
 
 }

@@ -18,5 +18,6 @@ SOURCES:= \
 	project_file.cpp \
 	project_graph.cpp \
 	register_entities.cpp \
+	run_build.cpp \
 
 LIBRARIES:=$(SYSTEM_LIBRARIES)

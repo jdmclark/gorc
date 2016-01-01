@@ -59,10 +59,9 @@ std::unordered_set<gorc::entity*> const& gorc::library_file_entity::dependencies
     return dependencies_value;
 }
 
-bool gorc::library_file_entity::update(service_registry const &)
+bool gorc::library_file_entity::update(service_registry const &services)
 {
-    // TODO
-    return true;
+    return services.get<compiler_properties>().archive_static_library(this);
 }
 
 void gorc::library_file_entity::serialize(entity_output_stream &os)
@@ -71,4 +70,21 @@ void gorc::library_file_entity::serialize(entity_output_stream &os)
     os.write_string(library_name);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
+}
+
+std::unordered_set<gorc::object_file_entity*> const&
+    gorc::library_file_entity::get_objects() const
+{
+    return objects;
+}
+
+std::unordered_set<gorc::library_file_entity*> const&
+    gorc::library_file_entity::get_libraries() const
+{
+    return libraries;
+}
+
+std::string const& gorc::library_file_entity::get_library_name() const
+{
+    return library_name;
 }

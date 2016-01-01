@@ -35,6 +35,11 @@ namespace gorc {
         virtual bool update(service_registry const &) override;
 
         virtual void serialize(entity_output_stream &) override;
+
+        std::unordered_set<object_file_entity*> const& get_objects() const;
+        std::unordered_set<library_file_entity*> const& get_libraries() const;
+
+        std::string const& get_library_name() const;
     };
 
 }

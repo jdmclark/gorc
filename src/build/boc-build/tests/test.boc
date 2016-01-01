@@ -2,16 +2,14 @@ include ../../../../rules/test.boc;
 
 var $(BOC_BUILD)=$(BUILD_BIN)/boc-build;
 
-function run_list_test()
+function setup_test_project()
 {
     cp -r project $(TESTSUITE_DIR)/project;
     pushd $(TESTSUITE_DIR)/project;
+}
 
-    $(BOC_BUILD) --override-root-name testproject.json --list-targets
-        >>$(TESTSUITE_DIR)/stdout
-        2>>$(TESTSUITE_DIR)/stderr
-        || true;
-
+function teardown_test_project()
+{
     popd;
 
     echo "==== stderr ====" >> $(RAW_OUTPUT);
@@ -22,4 +20,27 @@ function run_list_test()
 
     call process_raw_output();
     call compare_output();
+}
+
+function run_list_test_body()
+{
+    $(BOC_BUILD) --override-root-name testproject.json --list-targets
+        >>$(TESTSUITE_DIR)/stdout
+        2>>$(TESTSUITE_DIR)/stderr
+        || true;
+}
+
+function run_list_test()
+{
+    call setup_test_project();
+    call run_list_test_body();
+    call teardown_test_project();
+}
+
+function build_test_project()
+{
+    $(BOC_BUILD) --override-root-name testproject.json
+        >>$(TESTSUITE_DIR)/stdout
+        2>>$(TESTSUITE_DIR)/stderr
+        || true;
 }

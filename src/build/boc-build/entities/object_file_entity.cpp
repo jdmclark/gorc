@@ -25,10 +25,13 @@ std::unordered_set<gorc::entity*> const& gorc::object_file_entity::dependencies(
     return dependencies_value;
 }
 
-bool gorc::object_file_entity::update(service_registry const &)
+bool gorc::object_file_entity::update(service_registry const &services)
 {
-    // TODO
-    return true;
+    auto &comp_props = services.get<compiler_properties>();
+
+    // TODO: Create header file dependencies
+
+    return comp_props.compile_object_file(this);
 }
 
 void gorc::object_file_entity::serialize(entity_output_stream &os)

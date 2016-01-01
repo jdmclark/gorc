@@ -1,0 +1,27 @@
+---- first run ----
+Hello, World!
+Hello, Other World!
+---- second run ----
+Hello, Other World!
+Hello, Other World!
+==== stderr ====
+---- first run ----
+Loading dependency graph from project files
+Dependency graph generated
+Compiling pkg/obj/src/myprog/main.o
+Linking pkg/bin/myprog
+Compiling pkg/obj/src/myprog2/main.o
+Linking pkg/bin/myprog2
+Build succeeded
+Caching dependency graph
+Finished writing cache
+---- second run ----
+Loading dependency graph from cache
+Compiling pkg/obj/src/myprog/main.o
+Linking pkg/bin/myprog
+Build succeeded
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+---- first run ----
+---- second run ----

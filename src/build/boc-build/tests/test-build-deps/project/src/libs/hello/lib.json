@@ -1,0 +1,9 @@
+{
+    "name" : "hello",
+    "sources" : [
+        "print_hello.cpp"
+    ],
+    "dependencies" : [
+        "libs/utility"
+    ]
+}

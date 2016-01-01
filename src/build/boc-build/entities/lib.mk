@@ -3,6 +3,7 @@ NAME:=boc-build-entities
 DEPENDENCIES:= \
 	libs/utility \
 	build/boc-build/engine \
+	libs/system \
 
 SOURCES:= \
 	compiler_properties.cpp \

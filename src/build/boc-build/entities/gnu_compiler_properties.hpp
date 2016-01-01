@@ -12,6 +12,10 @@ namespace gorc {
         virtual path make_library_filename(std::string const &name) override;
         virtual path make_program_filename(std::string const &name,
                                            program_type type) override;
+
+        virtual bool compile_object_file(object_file_entity *) override;
+        virtual bool archive_static_library(library_file_entity *) override;
+        virtual bool link_program(program_file_entity *) override;
     };
 
 }

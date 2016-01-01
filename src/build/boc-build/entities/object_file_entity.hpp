@@ -6,8 +6,10 @@
 namespace gorc {
 
     class object_file_entity : public generated_file_entity {
+    public:
+        source_file_entity * const primary_source_file;
+
     private:
-        source_file_entity *primary_source_file;
         std::unordered_set<entity*> dependencies_value;
 
     public:

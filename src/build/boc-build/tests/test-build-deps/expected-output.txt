@@ -1,0 +1,28 @@
+---- first run ----
+Hello, World!
+---- second run ----
+Hello, World!
+==== stderr ====
+---- first run ----
+Loading dependency graph from project files
+Dependency graph generated
+Compiling pkg/obj/src/libs/hello/print_hello.o
+Compiling pkg/obj/src/myprog/main.o
+Compiling pkg/obj/src/libs/utility/print_message.o
+Archiving pkg/lib/libutility.a
+Archiving pkg/lib/libhello.a
+Linking pkg/bin/myprog
+Build succeeded
+Caching dependency graph
+Finished writing cache
+---- second run ----
+Loading dependency graph from cache
+Compiling pkg/obj/src/libs/hello/print_hello.o
+Archiving pkg/lib/libhello.a
+Linking pkg/bin/myprog
+Build succeeded
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+---- first run ----
+---- second run ----
