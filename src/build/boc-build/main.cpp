@@ -76,12 +76,14 @@ namespace gorc {
             service_registry services;
 
             // TODO: Compiler selection
-            gnu_compiler_properties comp_props(
-                    "pkg/obj" /* obj path */,
-                    "pkg/lib" /* lib path */,
-                    "pkg/bin" /* release bin path */,
-                    "pkg/test-bin" /* test bin path */,
-                    "pkg/build-bin" /* build bin path */);
+            compiler_configuration comp_config;
+            comp_config.obj_path = "pkg/obj";
+            comp_config.lib_path = "pkg/lib";
+            comp_config.bin_path = "pkg/bin";
+            comp_config.test_bin_path = "pkg/test-bin";
+            comp_config.build_bin_path = "pkg/build-bin";
+
+            gnu_compiler_properties comp_props(comp_config);
             services.add<compiler_properties>(comp_props);
 
             entity_registry reg;
