@@ -2,6 +2,8 @@
 
 #include <string>
 #include <unordered_set>
+#include <typeindex>
+#include <type_traits>
 #include "utility/service_registry.hpp"
 
 namespace gorc {
@@ -20,6 +22,7 @@ namespace gorc {
         virtual bool update(service_registry const &services) = 0;
 
         virtual void serialize(entity_output_stream &) = 0;
+        virtual std::type_index get_type_index() const = 0;
     };
 
 }

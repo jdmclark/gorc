@@ -18,7 +18,6 @@ gorc::root_entity::root_entity(entity_input_stream &is)
 
 void gorc::root_entity::serialize(entity_output_stream &os)
 {
-    os.write_entity_type_id<root_entity>();
     os.write_entity_reference(graph);
     os.write_entity_reference(project);
 }
@@ -53,4 +52,9 @@ bool gorc::root_entity::update(service_registry const &)
     // Root entity cannot be updated internally via the engine.
     // Updating the root requires purging the existing graph.
     LOG_FATAL("cannot update root natively");
+}
+
+std::type_index gorc::root_entity::get_type_index() const
+{
+    return typeid(root_entity);
 }

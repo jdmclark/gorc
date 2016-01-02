@@ -40,6 +40,8 @@ namespace gorc {
         std::unordered_set<library_file_entity*> const& get_libraries() const;
 
         std::string const& get_library_name() const;
+
+        virtual std::type_index get_type_index() const override;
     };
 
 }

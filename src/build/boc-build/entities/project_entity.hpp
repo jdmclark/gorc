@@ -20,6 +20,8 @@ namespace gorc {
         virtual bool update(service_registry const &) override;
 
         virtual void serialize(entity_output_stream &) override;
+
+        virtual std::type_index get_type_index() const override;
     };
 
 }

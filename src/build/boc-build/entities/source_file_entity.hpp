@@ -9,6 +9,8 @@ namespace gorc {
         using file_entity::file_entity;
 
         virtual void serialize(entity_output_stream &) override;
+
+        virtual std::type_index get_type_index() const override;
     };
 
 }

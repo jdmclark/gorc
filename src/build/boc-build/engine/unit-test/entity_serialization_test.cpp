@@ -174,6 +174,11 @@ test_case(serialize_non_dep_reference)
             os.write_string(name_value);
             os.write_entity_reference(non_dep_ent);
         }
+
+        virtual std::type_index get_type_index() const override
+        {
+            return typeid(non_dep_entity);
+        }
     };
 
     mock_entity other("OTHER");
@@ -265,12 +270,16 @@ test_case(deserialize_inner_type_mismatch)
 
         virtual void serialize(entity_output_stream &os) override
         {
-            os.write_entity_type_id<other_ent>();
             os.write_string(name_val);
             os.write_uint32(static_cast<uint32_t>(deps.size()));
             for(entity *dep : deps) {
                 os.write_entity_reference(dep);
             }
+        }
+
+        virtual std::type_index get_type_index() const override
+        {
+            return typeid(other_ent);
         }
     };
 

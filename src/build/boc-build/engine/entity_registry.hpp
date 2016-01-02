@@ -52,6 +52,8 @@ namespace gorc {
             return entity_type_map.at(typeid(T));
         }
 
+        uint32_t get_type_id(std::type_index) const;
+
         entity* deserialize(uint32_t type,
                             entity_input_stream &,
                             entity_allocator &) const;

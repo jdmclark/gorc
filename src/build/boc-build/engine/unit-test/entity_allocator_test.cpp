@@ -30,6 +30,11 @@ namespace {
         {
             return;
         }
+
+        virtual std::type_index get_type_index() const override
+        {
+            return typeid(mock_file_entity);
+        }
     };
 
     class child_mock_file_entity : public mock_file_entity {

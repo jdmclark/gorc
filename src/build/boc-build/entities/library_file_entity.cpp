@@ -66,7 +66,6 @@ bool gorc::library_file_entity::update(service_registry const &services)
 
 void gorc::library_file_entity::serialize(entity_output_stream &os)
 {
-    os.write_entity_type_id<library_file_entity>();
     os.write_string(library_name);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
@@ -87,4 +86,9 @@ std::unordered_set<gorc::library_file_entity*> const&
 std::string const& gorc::library_file_entity::get_library_name() const
 {
     return library_name;
+}
+
+std::type_index gorc::library_file_entity::get_type_index() const
+{
+    return typeid(library_file_entity);
 }

@@ -15,7 +15,6 @@ gorc::graph_entity::graph_entity(entity_input_stream &is)
 
 void gorc::graph_entity::serialize(entity_output_stream &os)
 {
-    os.write_entity_type_id<graph_entity>();
     os.write_entity_set(project_files);
 }
 
@@ -45,4 +44,9 @@ bool gorc::graph_entity::update(service_registry const &)
     // Graph entity cannot be updated internally via the engine.
     // Updating the graph requires purging the existing graph.
     LOG_FATAL("cannot update graph natively");
+}
+
+std::type_index gorc::graph_entity::get_type_index() const
+{
+    return typeid(graph_entity);
 }

@@ -68,6 +68,9 @@ void gorc::entity_serializer::serialize_entity(entity *ent)
         serialize_entity(dep);
     }
 
+    // Write entity type id before the entity body
+    write_uint32(static_cast<uint32_t>(reg.get_type_id(ent->get_type_index())));
+
     ent->serialize(*this);
     entity_id_map.emplace(ent, static_cast<uint32_t>(entity_id_map.size()));
     closed_entities.erase(ent);

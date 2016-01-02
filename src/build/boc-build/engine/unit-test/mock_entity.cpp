@@ -45,13 +45,17 @@ bool mock_entity::update(gorc::service_registry const &)
 
 void mock_entity::serialize(gorc::entity_output_stream &os)
 {
-    os.write_entity_type_id<mock_entity>();
     os.write_string(name_value);
 
     os.write_uint32(static_cast<uint32_t>(dependencies_value.size()));
     for(entity *dep : dependencies_value) {
         os.write_entity_reference(dep);
     }
+}
+
+std::type_index mock_entity::get_type_index() const
+{
+    return typeid(mock_entity);
 }
 
 namespace {

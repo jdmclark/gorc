@@ -87,6 +87,11 @@ namespace gorc {
             gnu_compiler_properties comp_props(comp_config);
             services.add<compiler_properties>(comp_props);
 
+            // Build is allowed to create new entities to track real (file) dependencies.
+            // Add entity allocator as a service to store these until project_graph destructor.
+            entity_allocator ea;
+            services.add<entity_allocator>(ea);
+
             entity_registry reg;
             register_boc_entities(reg);
 

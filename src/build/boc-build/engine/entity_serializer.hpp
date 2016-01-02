@@ -26,12 +26,6 @@ namespace gorc {
         void write_path(path const &);
         void write_uint32(uint32_t value);
 
-        template <typename T>
-        void write_entity_type_id()
-        {
-            write_uint32(reg.get_type_id<T>());
-        }
-
         template <typename EntitySetT>
         void write_entity_set(EntitySetT const &set)
         {

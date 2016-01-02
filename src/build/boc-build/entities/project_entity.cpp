@@ -14,7 +14,6 @@ gorc::project_entity::project_entity(entity_input_stream &is)
 
 void gorc::project_entity::serialize(entity_output_stream &os)
 {
-    os.write_entity_type_id<project_entity>();
     os.write_entity_set(programs);
 }
 
@@ -43,4 +42,9 @@ bool gorc::project_entity::is_dirty()
 bool gorc::project_entity::update(service_registry const &)
 {
     return true;
+}
+
+std::type_index gorc::project_entity::get_type_index() const
+{
+    return typeid(project_entity);
 }

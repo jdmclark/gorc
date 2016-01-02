@@ -36,6 +36,10 @@ bool gorc::object_file_entity::update(service_registry const &services)
 
 void gorc::object_file_entity::serialize(entity_output_stream &os)
 {
-    os.write_entity_type_id<object_file_entity>();
     os.write_entity_reference(primary_source_file);
+}
+
+std::type_index gorc::object_file_entity::get_type_index() const
+{
+    return typeid(object_file_entity);
 }
