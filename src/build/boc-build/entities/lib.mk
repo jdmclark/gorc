@@ -13,6 +13,7 @@ SOURCES:= \
 	graph_entity.cpp \
 	library_file_entity.cpp \
 	object_file_entity.cpp \
+	parse_source_file.cpp \
 	program_file_entity.cpp \
 	project_entity.cpp \
 	root_entity.cpp \

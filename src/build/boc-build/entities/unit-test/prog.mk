@@ -9,6 +9,7 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	graph_entity_test.cpp \
+	parse_source_file_test.cpp \
 	project_entity_test.cpp \
 	root_entity_test.cpp \
 
