@@ -6,10 +6,10 @@ Hello, World!
 ---- first run ----
 Loading dependency graph from project files
 Dependency graph generated
-Compiling pkg/obj/src/libs/hello/print_hello.o
-Compiling pkg/obj/src/myprog/main.o
 Compiling pkg/obj/src/libs/utility/print_message.o
 Archiving pkg/lib/libutility.a
+Compiling pkg/obj/src/myprog/main.o
+Compiling pkg/obj/src/libs/hello/print_hello.o
 Archiving pkg/lib/libhello.a
 Linking pkg/bin/myprog
 Build succeeded

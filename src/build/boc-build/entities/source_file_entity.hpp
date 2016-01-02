@@ -5,10 +5,15 @@
 namespace gorc {
 
     class source_file_entity : public file_entity {
+    private:
+        std::unordered_set<entity*> dependencies_value;
+
     public:
         source_file_entity(entity_input_stream &);
         source_file_entity(path const &filename,
                            std::time_t previous_timestamp = 0);
+
+        virtual std::unordered_set<entity*> const& dependencies() override;
 
         virtual void serialize(entity_output_stream &) override;
 
