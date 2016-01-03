@@ -10,3 +10,4 @@ DEPENDENCIES:= \
 SOURCES:= \
 	env_test.cpp \
 	pipe_test.cpp \
+	self_test.cpp \
