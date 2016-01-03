@@ -9,6 +9,12 @@
 
 namespace gorc {
 
+    enum class build_type {
+        release,
+        debug,
+        coverage
+    };
+
     class compiler_configuration {
     public:
         path obj_path;
@@ -17,6 +23,7 @@ namespace gorc {
         path test_bin_path;
         path build_bin_path;
         std::vector<path> header_search_paths;
+        build_type type = build_type::release;
     };
 
     class object_file_entity;

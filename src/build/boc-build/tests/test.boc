@@ -1,6 +1,7 @@
 include ../../../../rules/test.boc;
 
 var $(BOC_BUILD)=$(BUILD_BIN)/boc-build;
+var $(BOC_BUILD_OPTS);
 
 function setup_test_project()
 {
@@ -40,6 +41,7 @@ function run_list_test()
 function build_test_project()
 {
     $(BOC_BUILD) --override-root-name testproject.json
+        $(BOC_BUILD_OPTS)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;

@@ -44,6 +44,34 @@ namespace {
     std::vector<std::string> release_cflags {
         "-O3"
     };
+
+    std::vector<std::string> debug_cflags {
+        "-O0",
+        "-ggdb"
+    };
+
+    std::vector<std::string> coverage_cflags {
+        "-O0",
+        "-fprofile-arcs",
+        "-ftest-coverage",
+        "-fPIC",
+        "-fno-elide-constructors"
+    };
+
+    std::vector<std::string> const& get_type_cflags(gorc::build_type t)
+    {
+        switch(t) {
+        default:
+        case gorc::build_type::release:
+            return release_cflags;
+
+        case gorc::build_type::debug:
+            return debug_cflags;
+
+        case gorc::build_type::coverage:
+            return coverage_cflags;
+        }
+    }
 }
 
 gorc::gnu_compiler_properties::gnu_compiler_properties(compiler_configuration const &config)
@@ -95,7 +123,8 @@ bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *enti
 
     std::vector<std::string> args;
 
-    std::copy(release_cflags.begin(), release_cflags.end(), std::back_inserter(args));
+    auto const &type_cflags = get_type_cflags(config.type);
+    std::copy(type_cflags.begin(), type_cflags.end(), std::back_inserter(args));
     std::copy(common_cflags.begin(), common_cflags.end(), std::back_inserter(args));
     std::copy(header_search_cflags.begin(), header_search_cflags.end(), std::back_inserter(args));
 
@@ -175,7 +204,8 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
 
     std::vector<std::string> args;
 
-    std::copy(release_cflags.begin(), release_cflags.end(), std::back_inserter(args));
+    auto const &type_cflags = get_type_cflags(config.type);
+    std::copy(type_cflags.begin(), type_cflags.end(), std::back_inserter(args));
     std::copy(common_cflags.begin(), common_cflags.end(), std::back_inserter(args));
     std::copy(header_search_cflags.begin(), header_search_cflags.end(), std::back_inserter(args));
 

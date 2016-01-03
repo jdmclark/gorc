@@ -10,6 +10,16 @@
 
 using namespace boost::filesystem;
 
+namespace {
+
+    std::unordered_map<std::string, gorc::build_type> build_type_map {
+        { "release", gorc::build_type::release },
+        { "debug", gorc::build_type::debug },
+        { "coverage", gorc::build_type::coverage }
+    };
+
+}
+
 namespace gorc {
 
     class boc_build_program : public program {
@@ -26,18 +36,38 @@ namespace gorc {
         path original_working_directory;
         path project_root_path;
 
+        std::string custom_build_type;
+
+        build_type get_build_type() const
+        {
+            if(custom_build_type.empty()) {
+                return build_type::release;
+            }
+
+            auto it = build_type_map.find(custom_build_type);
+            if(it == build_type_map.end()) {
+                LOG_FATAL(format("Unknown build type '%s'") % custom_build_type);
+            }
+
+            return it->second;
+        }
+
         virtual void create_options(options &opts) override
         {
             // Test and debugging options
             opts.insert(make_value_option("override-root-name", boc_root_filename_override));
             opts.insert(make_value_option("override-cache-name", boc_cache_filename_override));
 
+            // Commands
             opts.insert(make_switch_option("do-nothing", do_nothing));
             opts.insert(make_switch_option("list-targets", list_targets_only));
 
             opts.emplace_constraint<mutual_exclusion>(
                     std::vector<std::string> { "do-nothing",
                                                "list-targets" });
+
+            // Build options
+            opts.insert(make_value_option("type", custom_build_type));
 
             return;
         }
@@ -83,6 +113,7 @@ namespace gorc {
             comp_config.bin_path = "pkg/bin";
             comp_config.test_bin_path = "pkg/test-bin";
             comp_config.build_bin_path = "pkg/build-bin";
+            comp_config.type = get_build_type();
             comp_config.header_search_paths = {
                 "src",
                 "src/libs"
