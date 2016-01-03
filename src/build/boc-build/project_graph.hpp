@@ -13,12 +13,13 @@ namespace gorc {
         root_entity *root = nullptr;
         service_registry const &services;
         entity_registry const &reg;
-        entity_allocator ea;
+        entity_allocator &ea;
         path cache_filename;
 
     public:
         project_graph(service_registry const &services,
                       entity_registry const &reg,
+                      entity_allocator &ea,
                       path const &project_filename,
                       path const &cache_filename);
 

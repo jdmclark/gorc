@@ -1,6 +1,7 @@
 {
     "name" : "utility",
     "sources" : [
+        "message.cpp",
         "print_message.cpp"
     ]
 }

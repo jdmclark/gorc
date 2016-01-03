@@ -1,6 +1,7 @@
 {
     "name" : "hello",
     "sources" : [
+        "hello_message.cpp",
         "print_hello.cpp"
     ],
     "dependencies" : [

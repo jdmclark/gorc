@@ -21,4 +21,15 @@ call build_test_project();
 
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
 
+echo "---- third run ----" >> $(TESTSUITE_DIR)/stdout;
+echo "---- third run ----" >> $(TESTSUITE_DIR)/stderr;
+echo "---- third run ----" >> $(RAW_OUTPUT);
+
+sleep 1;
+touch src/libs/utility/message.hpp;
+
+call build_test_project();
+
+./pkg/bin/myprog >> $(RAW_OUTPUT);
+
 call teardown_test_project();

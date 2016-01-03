@@ -13,8 +13,6 @@ namespace {
     std::vector<std::string> common_cflags {
         "-std=c++11",
         "-DPLATFORM_LINUX",
-        "-Isrc",
-        "-Isrc/libs",
         "-pthread",
         "-Werror",
         "-Wall",
@@ -46,6 +44,15 @@ namespace {
     std::vector<std::string> release_cflags {
         "-O3"
     };
+}
+
+gorc::gnu_compiler_properties::gnu_compiler_properties(compiler_configuration const &config)
+    : compiler_properties(config)
+{
+    for(auto const &search_path : config.header_search_paths) {
+        header_search_cflags.push_back(str(format("-I%s") % search_path.native()));
+    }
+    return;
 }
 
 gorc::path gorc::gnu_compiler_properties::make_object_filename_from_psf(path const &psf)
@@ -90,6 +97,7 @@ bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *enti
 
     std::copy(release_cflags.begin(), release_cflags.end(), std::back_inserter(args));
     std::copy(common_cflags.begin(), common_cflags.end(), std::back_inserter(args));
+    std::copy(header_search_cflags.begin(), header_search_cflags.end(), std::back_inserter(args));
 
     args.push_back("-c");
     args.push_back(entity->primary_source_file->file_path().native());
@@ -169,6 +177,7 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
 
     std::copy(release_cflags.begin(), release_cflags.end(), std::back_inserter(args));
     std::copy(common_cflags.begin(), common_cflags.end(), std::back_inserter(args));
+    std::copy(header_search_cflags.begin(), header_search_cflags.end(), std::back_inserter(args));
 
     // Target name
     args.push_back("-o");

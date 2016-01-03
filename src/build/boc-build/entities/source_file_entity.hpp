@@ -13,7 +13,11 @@ namespace gorc {
         source_file_entity(path const &filename,
                            std::time_t previous_timestamp = 0);
 
+        void set_header_dependencies(std::unordered_set<entity*> const &);
+
         virtual std::unordered_set<entity*> const& dependencies() override;
+
+        virtual bool update(service_registry const &) override;
 
         virtual void serialize(entity_output_stream &) override;
 

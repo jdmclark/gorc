@@ -1,12 +1,17 @@
 #pragma once
 
 #include "compiler_properties.hpp"
+#include <vector>
+#include <string>
 
 namespace gorc {
 
     class gnu_compiler_properties : public compiler_properties {
+    private:
+        std::vector<std::string> header_search_cflags;
+
     public:
-        using compiler_properties::compiler_properties;
+        gnu_compiler_properties(compiler_configuration const &config);
 
         virtual path make_object_filename_from_psf(path const &psf) override;
         virtual path make_library_filename(std::string const &name) override;

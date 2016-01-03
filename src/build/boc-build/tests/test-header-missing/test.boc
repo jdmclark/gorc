@@ -1,0 +1,7 @@
+include ../test.boc;
+
+$(BOC_BUILD) --override-root-name testproject.json
+             --override-cache-name $(TESTSUITE_DIR)/test.cache 2>>$(RAW_OUTPUT) || true;
+
+call process_raw_output();
+call compare_output();

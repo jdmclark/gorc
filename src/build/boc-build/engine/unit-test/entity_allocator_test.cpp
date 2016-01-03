@@ -56,6 +56,19 @@ test_case(basic_filename_entity_reuse)
     assert_eq(ent1, ent2);
 }
 
+test_case(basic_filename_entity_maybe_reuse)
+{
+    entity_allocator ea;
+
+    auto ent1 = ea.maybe_emplace_file<mock_file_entity>("foo.bar");
+    assert_true(std::get<1>(ent1));
+
+    auto ent2 = ea.maybe_emplace_file<mock_file_entity>("foo.bar");
+    assert_true(!std::get<1>(ent2));
+
+    assert_eq(std::get<0>(ent1), std::get<0>(ent2));
+}
+
 test_case(filename_down_cast)
 {
     entity_allocator ea;
@@ -73,6 +86,17 @@ test_case(filename_incompatible_cast)
     ea.emplace<mock_file_entity>("foo.bar");
 
     assert_throws_logged(ea.emplace<child_mock_file_entity>("foo.bar"));
+    assert_log_message(log_level::error, "entity 'foo.bar' type mismatch");
+    assert_log_empty();
+}
+
+test_case(maybe_emplace_file_incompatible_cast)
+{
+    entity_allocator ea;
+
+    ea.maybe_emplace_file<mock_file_entity>("foo.bar");
+
+    assert_throws_logged(ea.maybe_emplace_file<child_mock_file_entity>("foo.bar"));
     assert_log_message(log_level::error, "entity 'foo.bar' type mismatch");
     assert_log_empty();
 }

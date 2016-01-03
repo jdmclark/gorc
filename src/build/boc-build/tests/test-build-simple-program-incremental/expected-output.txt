@@ -8,8 +8,10 @@ Hello, Other World!
 ---- first run ----
 Loading dependency graph from project files
 Dependency graph generated
+Updating 'src/myprog/main.cpp' header dependencies
 Compiling pkg/obj/src/myprog/main.o
 Linking pkg/bin/myprog
+Updating 'src/myprog2/main.cpp' header dependencies
 Compiling pkg/obj/src/myprog2/main.o
 Linking pkg/bin/myprog2
 Build succeeded
@@ -17,6 +19,7 @@ Caching dependency graph
 Finished writing cache
 ---- second run ----
 Loading dependency graph from cache
+Updating 'src/myprog/main.cpp' header dependencies
 Compiling pkg/obj/src/myprog/main.o
 Linking pkg/bin/myprog
 Build succeeded

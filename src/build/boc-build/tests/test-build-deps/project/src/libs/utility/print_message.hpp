@@ -1,5 +1,5 @@
 #pragma once
 
-#include <string>
+#include "message.hpp"
 
-void print_message(std::string const &);
+void print_message(message const &msg);

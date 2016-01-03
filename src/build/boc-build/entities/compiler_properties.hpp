@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io/path.hpp"
+#include "utility/service_registry.hpp"
 #include "program_type.hpp"
 #include <vector>
 #include <string>
@@ -15,11 +16,13 @@ namespace gorc {
         path bin_path;
         path test_bin_path;
         path build_bin_path;
+        std::vector<path> header_search_paths;
     };
 
     class object_file_entity;
     class library_file_entity;
     class program_file_entity;
+    class source_file_entity;
 
     class compiler_properties {
     protected:
@@ -37,6 +40,8 @@ namespace gorc {
         virtual bool compile_object_file(object_file_entity *) = 0;
         virtual bool archive_static_library(library_file_entity *) = 0;
         virtual bool link_program(program_file_entity *) = 0;
+
+        bool create_dependencies(source_file_entity *, service_registry const &);
     };
 
 }

@@ -1,7 +1,7 @@
 #include "print_message.hpp"
 #include <iostream>
 
-void print_message(std::string const &msg)
+void print_message(message const &msg)
 {
-    std::cout << msg << std::endl;
+    std::cout << msg.str() << std::endl;
 }

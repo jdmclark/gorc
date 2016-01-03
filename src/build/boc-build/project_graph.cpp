@@ -12,10 +12,12 @@
 
 gorc::project_graph::project_graph(service_registry const &services,
                                    entity_registry const &reg,
+                                   entity_allocator &ea,
                                    path const &project_filename,
                                    path const &cache_filename)
     : services(services)
     , reg(reg)
+    , ea(ea)
     , cache_filename(cache_filename)
 {
     if(boost::filesystem::is_regular_file(cache_filename)) {

@@ -83,6 +83,10 @@ namespace gorc {
             comp_config.bin_path = "pkg/bin";
             comp_config.test_bin_path = "pkg/test-bin";
             comp_config.build_bin_path = "pkg/build-bin";
+            comp_config.header_search_paths = {
+                "src",
+                "src/libs"
+            };
 
             gnu_compiler_properties comp_props(comp_config);
             services.add<compiler_properties>(comp_props);
@@ -96,7 +100,7 @@ namespace gorc {
             register_boc_entities(reg);
 
             // Initialize graph
-            project_graph pg(services, reg, boc_root_filename, boc_cache_filename);
+            project_graph pg(services, reg, ea, boc_root_filename, boc_cache_filename);
 
             // Perform operation
             if(do_nothing) {

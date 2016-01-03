@@ -1,4 +1,5 @@
 #include "source_file_entity.hpp"
+#include "compiler_properties.hpp"
 #include "build/boc-build/engine/entity_serializer.hpp"
 #include "build/boc-build/engine/entity_deserializer.hpp"
 
@@ -30,4 +31,15 @@ void gorc::source_file_entity::serialize(entity_output_stream &os)
 std::type_index gorc::source_file_entity::get_type_index() const
 {
     return typeid(source_file_entity);
+}
+
+bool gorc::source_file_entity::update(service_registry const &services)
+{
+    return file_entity::update(services) &&
+           services.get<compiler_properties>().create_dependencies(this, services);
+}
+
+void gorc::source_file_entity::set_header_dependencies(std::unordered_set<entity*> const &deps)
+{
+    dependencies_value = deps;
 }
