@@ -9,6 +9,7 @@ DEPENDENCIES:= \
 	libs/log \
 	build/boc-build/engine \
 	build/boc-build/entities \
+	build/common \
 
 SOURCES:= \
 	create_graph_nodes.cpp \

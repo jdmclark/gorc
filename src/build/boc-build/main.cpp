@@ -6,6 +6,7 @@
 #include "run_build.hpp"
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
+#include "build/common/change_to_project_root.hpp"
 #include <boost/filesystem.hpp>
 
 using namespace boost::filesystem;
@@ -35,6 +36,7 @@ namespace gorc {
 
         path original_working_directory;
         path project_root_path;
+        path original_working_directory_rel;
 
         std::string custom_build_type;
 
@@ -72,24 +74,6 @@ namespace gorc {
             return;
         }
 
-        void change_to_project_root()
-        {
-            while(true) {
-                if(is_regular_file(boc_root_filename)) {
-                    project_root_path = canonical(current_path());
-                    return;
-                }
-
-                auto canonical_current_path = canonical(current_path());
-
-                if(!canonical_current_path.has_parent_path()) {
-                    LOG_FATAL("current directory is not a boc project");
-                }
-
-                current_path(canonical_current_path.parent_path());
-            }
-        }
-
         virtual int main() override
         {
             if(!boc_root_filename_override.empty()) {
@@ -100,8 +84,10 @@ namespace gorc {
                 boc_cache_filename = boc_cache_filename_override;
             }
 
-            original_working_directory = canonical(current_path());
-            change_to_project_root();
+            change_to_project_root(boc_root_filename,
+                                   original_working_directory,
+                                   project_root_path,
+                                   original_working_directory_rel);
 
             // Project root was located. Set up engine.
             service_registry services;
