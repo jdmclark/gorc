@@ -8,6 +8,7 @@ gorc::program_file_entity_internal_properties::program_file_entity_internal_prop
         entity_input_stream &is)
     : program_name(is.read_string())
     , type(static_cast<program_type>(is.read_uint32()))
+    , external_libs(read_ext_lib_set(is))
     , objects(is.read_entity_set<object_file_entity>())
     , libraries(is.read_entity_set<library_file_entity>())
 {
@@ -20,10 +21,12 @@ gorc::program_file_entity_internal_properties::program_file_entity_internal_prop
 gorc::program_file_entity_internal_properties::program_file_entity_internal_properties(
         std::string const &program_name,
         program_type type,
+        ext_lib_set const &ext_libs,
         std::unordered_set<object_file_entity*> const &objs,
         std::unordered_set<library_file_entity*> const &libs)
     : program_name(program_name)
     , type(type)
+    , external_libs(ext_libs)
     , objects(objs)
     , libraries(libs)
 {
@@ -48,11 +51,13 @@ gorc::program_file_entity::program_file_entity(entity_input_stream &is)
 
 gorc::program_file_entity::program_file_entity(std::string const &program_name,
                                                program_type type,
+                                               ext_lib_set const &ext_libs,
                                                std::unordered_set<object_file_entity*> const &objs,
                                                std::unordered_set<library_file_entity*> const &libs,
                                                service_registry const &services)
     : program_file_entity_internal_properties(program_name,
                                               type,
+                                              ext_libs,
                                               objs,
                                               libs)
     , generated_file_entity(services.get<compiler_properties>()
@@ -75,6 +80,7 @@ void gorc::program_file_entity::serialize(entity_output_stream &os)
 {
     os.write_string(program_name);
     os.write_uint32(static_cast<uint32_t>(type));
+    write_ext_lib_set(external_libs, os);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
 }
@@ -82,6 +88,11 @@ void gorc::program_file_entity::serialize(entity_output_stream &os)
 std::type_index gorc::program_file_entity::get_type_index() const
 {
     return typeid(program_file_entity);
+}
+
+gorc::ext_lib_set const& gorc::program_file_entity::get_external_libraries() const
+{
+    return external_libs;
 }
 
 std::unordered_set<gorc::object_file_entity*> const&

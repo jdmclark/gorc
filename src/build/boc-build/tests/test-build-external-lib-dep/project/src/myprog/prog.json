@@ -4,10 +4,6 @@
         "main.cpp"
     ],
     "dependencies" : [
-        "libs/log",
-        "libs/program"
-    ],
-    "libraries" : [
-        "boost"
+        "mylib"
     ]
 }

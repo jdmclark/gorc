@@ -3,6 +3,7 @@
 #include "object_file_entity.hpp"
 #include "library_file_entity.hpp"
 #include "program_type.hpp"
+#include "external_lib_type.hpp"
 #include "generated_file_entity.hpp"
 
 namespace gorc {
@@ -11,6 +12,7 @@ namespace gorc {
     protected:
         std::string program_name;
         program_type type;
+        ext_lib_set external_libs;
         std::unordered_set<object_file_entity*> objects;
         std::unordered_set<library_file_entity*> libraries;
 
@@ -19,6 +21,7 @@ namespace gorc {
         program_file_entity_internal_properties(entity_input_stream &);
         program_file_entity_internal_properties(std::string const &program_name,
                                                 program_type type,
+                                                ext_lib_set const &ext_libs,
                                                 std::unordered_set<object_file_entity*> const &obj,
                                                 std::unordered_set<library_file_entity*> const &lib);
         virtual ~program_file_entity_internal_properties();
@@ -30,6 +33,7 @@ namespace gorc {
         program_file_entity(entity_input_stream &);
         program_file_entity(std::string const &program_name,
                             program_type type,
+                            ext_lib_set const &ext_libs,
                             std::unordered_set<object_file_entity*> const &objs,
                             std::unordered_set<library_file_entity*> const &libs,
                             service_registry const &);
@@ -42,6 +46,7 @@ namespace gorc {
 
         virtual std::type_index get_type_index() const override;
 
+        ext_lib_set const& get_external_libraries() const;
         std::unordered_set<object_file_entity*> const& get_objects() const;
         std::unordered_set<library_file_entity*> const& get_libraries() const;
     };

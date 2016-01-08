@@ -1,7 +1,7 @@
 {
-    "name" : "io",
+    "name" : "mylib",
     "sources" : [
-        "memory_file.cpp"
+        "does_test_boc_exist.cpp"
     ],
     "libraries" : [
         "boost"

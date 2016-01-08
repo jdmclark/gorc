@@ -58,6 +58,11 @@ namespace {
         "-fno-elide-constructors"
     };
 
+    std::vector<std::string> lib_boost_cflags {
+        "-lboost_system",
+        "-lboost_filesystem"
+    };
+
     std::vector<std::string> const& get_type_cflags(gorc::build_type t)
     {
         switch(t) {
@@ -221,8 +226,18 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
     // Libraries
     args.push_back(str(format("-L%s") % config.lib_path.native()));
 
+    ext_lib_set external_libs = prog->get_external_libraries();
     for(library_file_entity *lib : make_reverse_range(prog_libs)) {
         args.push_back(str(format("-l%s") % lib->get_library_name()));
+
+        auto const &lib_extlibs = lib->get_external_libraries();
+        std::copy(lib_extlibs.begin(), lib_extlibs.end(), std::inserter(external_libs,
+                                                                        external_libs.begin()));
+    }
+
+    // Add external lib arguments in correct order
+    if(external_libs.find(external_lib_type::boost) != external_libs.end()) {
+        std::copy(lib_boost_cflags.begin(), lib_boost_cflags.end(), std::back_inserter(args));
     }
 
     process gcc("g++", // TODO: Compiler selection

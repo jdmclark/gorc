@@ -26,13 +26,21 @@ namespace gorc {
         void write_path(path const &);
         void write_uint32(uint32_t value);
 
+        template <typename RangeT, typename TransformFnT>
+        void write_range(RangeT const &rng, TransformFnT trns_fn)
+        {
+            write_uint32(static_cast<uint32_t>(rng.size()));
+            for(auto const &em : rng) {
+                trns_fn(em, *this);
+            }
+        }
+
         template <typename EntitySetT>
         void write_entity_set(EntitySetT const &set)
         {
-            write_uint32(static_cast<uint32_t>(set.size()));
-            for(entity *ent : set) {
-                write_entity_reference(ent);
-            }
+            write_range(set, [](entity *em, entity_output_stream &os) {
+                    os.write_entity_reference(em);
+                });
         }
     };
 

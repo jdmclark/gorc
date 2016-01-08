@@ -43,17 +43,26 @@ namespace gorc {
         path read_path();
         uint32_t read_uint32();
 
-        template <typename EntityT>
-        std::unordered_set<EntityT*> read_entity_set()
+        template <typename ResultT, typename InsertFnT>
+        ResultT read_range(InsertFnT ins_fn)
         {
-            std::unordered_set<EntityT*> rv;
+            ResultT rv;
 
             uint32_t count = read_uint32();
             for(uint32_t i = 0; i < count; ++i) {
-                rv.insert(read_entity_reference<EntityT>());
+                ins_fn(rv, *this);
             }
 
             return rv;
+        }
+
+        template <typename EntityT>
+        std::unordered_set<EntityT*> read_entity_set()
+        {
+            return read_range<std::unordered_set<EntityT*>>(
+                    [](std::unordered_set<EntityT*> &rv, entity_input_stream &is) {
+                        rv.insert(is.read_entity_reference<EntityT>());
+                    });
         }
     };
 

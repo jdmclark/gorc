@@ -43,12 +43,6 @@ namespace {
         json_deserialize_with_specification(jis, root_project_data_spec, *this);
     }
 
-    std::unordered_map<std::string, program_type> program_type_map {
-        { "release", program_type::release },
-        { "test", program_type::test },
-        { "build", program_type::build }
-    };
-
     json_specification<program_data> program_data_spec(
             /* Members */
             {
@@ -60,12 +54,16 @@ namespace {
                                                         std::back_inserter(obj.dependencies)); } },
                 { "type", [](json_input_stream &jis, program_data &obj) {
                     std::string type = json_deserialize<std::string>(jis);
-                    auto it = program_type_map.find(type);
-                    if(it == program_type_map.end()) {
-                        LOG_FATAL(format("unknown program type '%s'") % type);
-                    }
-
-                    obj.type = it->second;
+                    obj.type = to_program_type(type);
+                } },
+                { "libraries", [](json_input_stream &jis, program_data &obj) {
+                    json_deserialize_array(jis,
+                                           std::inserter(obj.external_libraries,
+                                                         obj.external_libraries.begin()),
+                                           [](json_input_stream &jis) {
+                        std::string lib = json_deserialize<std::string>(jis);
+                        return to_external_lib_type(lib);
+                    });
                 } }
             },
 
@@ -80,7 +78,16 @@ namespace {
                     json_deserialize_array<std::string>(jis, std::back_inserter(obj.sources)); } },
                 { "dependencies", [](json_input_stream &jis, library_data &obj) {
                     json_deserialize_array<std::string>(jis,
-                                                        std::back_inserter(obj.dependencies)); } }
+                                                        std::back_inserter(obj.dependencies)); } },
+                { "libraries", [](json_input_stream &jis, library_data &obj) {
+                    json_deserialize_array(jis,
+                                           std::inserter(obj.external_libraries,
+                                                         obj.external_libraries.begin()),
+                                           [](json_input_stream &jis) {
+                        std::string lib = json_deserialize<std::string>(jis);
+                        return to_external_lib_type(lib);
+                    });
+                } }
             },
 
             /* Required */

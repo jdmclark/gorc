@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace gorc {
 
     enum class program_type {
@@ -7,5 +9,7 @@ namespace gorc {
         test,
         build
     };
+
+    program_type to_program_type(std::string const &);
 
 }

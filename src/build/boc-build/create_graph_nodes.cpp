@@ -79,6 +79,7 @@ namespace {
         }
 
         library_file_entity *libent = ea.emplace<library_file_entity>(libdata.name,
+                                                                      libdata.external_libraries,
                                                                       library_objects,
                                                                       library_deps,
                                                                       services);
@@ -137,11 +138,13 @@ root_entity* gorc::create_graph_nodes(project_file const &pf,
             program_libraries.insert(libraries.at(lib));
         }
 
-        program_file_entity *prog_ent = ea.emplace<program_file_entity>(prog.second->name,
-                                                                        prog.second->type,
-                                                                        program_objects,
-                                                                        program_libraries,
-                                                                        services);
+        program_file_entity *prog_ent =
+            ea.emplace<program_file_entity>(prog.second->name,
+                                            prog.second->type,
+                                            prog.second->external_libraries,
+                                            program_objects,
+                                            program_libraries,
+                                            services);
         programs.insert(prog_ent);
     }
 
