@@ -1,4 +1,7 @@
+==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
+Build succeeded
 Caching dependency graph
-[ERROR] Cannot write cache to file notadir/project.cache: No such file or directory
+[ERROR] Cannot write cache to file .boc-cache: Is a directory
+==== stdout ====

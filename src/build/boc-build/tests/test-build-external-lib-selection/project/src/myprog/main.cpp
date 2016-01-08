@@ -4,7 +4,7 @@
 
 int main(int, char **)
 {
-    if(boost::filesystem::is_regular_file("testproject.json")) {
+    if(boost::filesystem::is_regular_file("project.json")) {
         std::cout << "test.boc exists" << std::endl;
     }
     else {

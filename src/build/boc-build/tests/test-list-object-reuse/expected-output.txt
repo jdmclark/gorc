@@ -5,9 +5,9 @@ Caching dependency graph
 Finished writing cache
 ==== stdout ====
 graph:
+    project.json
     src/myprog/mytest/prog.json
     src/myprog/prog.json
-    testproject.json
 
 pkg/bin/myprog:
     pkg/obj/src/myprog/main.o
@@ -22,6 +22,8 @@ project:
     pkg/bin/myprog
     pkg/bin/mytest
 
+project.json:
+
 root:
     graph
     project
@@ -31,6 +33,4 @@ src/myprog/main.cpp:
 src/myprog/mytest/prog.json:
 
 src/myprog/prog.json:
-
-testproject.json:
 

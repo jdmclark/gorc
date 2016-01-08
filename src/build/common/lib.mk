@@ -6,3 +6,4 @@ DEPENDENCIES:= \
 
 SOURCES:= \
 	change_to_project_root.cpp \
+	paths.cpp \

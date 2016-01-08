@@ -1,6 +1,8 @@
 include ../test.boc;
 
-$(BOC_BUILD) --override-root-name testproject.json --type foobar 2>>$(RAW_OUTPUT) || true;
+call setup_test_project();
 
-call process_raw_output();
-call compare_output();
+$(BOC_BUILD_OPTS) = --type foobar;
+call build_test_project();
+
+call teardown_test_project();

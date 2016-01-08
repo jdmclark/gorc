@@ -1,11 +1,11 @@
 #include "change_to_project_root.hpp"
 #include "log/log.hpp"
+#include "paths.hpp"
 #include <boost/filesystem.hpp>
 
 using namespace boost::filesystem;
 
-void gorc::change_to_project_root(path const &boc_root_filename,
-                                  path &out_original_working_directory,
+void gorc::change_to_project_root(path &out_original_working_directory,
                                   path &out_project_root,
                                   path &out_original_working_directory_rel)
 {
@@ -13,7 +13,7 @@ void gorc::change_to_project_root(path const &boc_root_filename,
 
     path leftover = ".";
     while(true) {
-        if(is_regular_file(boc_root_filename)) {
+        if(is_regular_file(boc_project_filename)) {
             break;
         }
 

@@ -2,24 +2,17 @@ include ../test.boc;
 
 call setup_test_project();
 
-echo "---- first run ----" >> $(TESTSUITE_DIR)/stdout;
-echo "---- first run ----" >> $(TESTSUITE_DIR)/stderr;
-echo "---- first run ----" >> $(RAW_OUTPUT);
+call begin_project_phase("first run");
 
 call build_test_project();
-
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
 ./pkg/bin/myprog2 >> $(RAW_OUTPUT);
 
-echo "---- second run ----" >> $(TESTSUITE_DIR)/stdout;
-echo "---- second run ----" >> $(TESTSUITE_DIR)/stderr;
-echo "---- second run ----" >> $(RAW_OUTPUT);
+call begin_project_phase("second run");
 
 sleep 1;
 cp src/myprog2/main.cpp src/myprog/main.cpp;
-
 call build_test_project();
-
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
 ./pkg/bin/myprog2 >> $(RAW_OUTPUT);
 

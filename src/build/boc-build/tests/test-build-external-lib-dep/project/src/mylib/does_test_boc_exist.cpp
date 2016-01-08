@@ -4,5 +4,5 @@
 
 bool does_test_boc_exist()
 {
-    return boost::filesystem::is_regular_file("testproject.json");
+    return boost::filesystem::is_regular_file("project.json");
 }

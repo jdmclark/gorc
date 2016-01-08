@@ -1,3 +1,5 @@
+---- first run ----
+---- second run ----
 ==== stderr ====
 ---- first run ----
 Loading dependency graph from project files
@@ -11,12 +13,12 @@ Finished writing cache
 ==== stdout ====
 ---- first run ----
 graph:
+    project.json
     src/libs/io/lib.json
     src/libs/log/lib.json
     src/libs/program/lib.json
     src/libs/utility/lib.json
     src/myprog/prog.json
-    testproject.json
 
 pkg/bin/myprog:
     pkg/lib/liblog.a
@@ -60,6 +62,8 @@ pkg/obj/src/myprog/main.o:
 project:
     pkg/bin/myprog
 
+project.json:
+
 root:
     graph
     project
@@ -85,17 +89,15 @@ src/libs/utility/range.cpp:
 src/myprog/main.cpp:
 
 src/myprog/prog.json:
-
-testproject.json:
 
 ---- second run ----
 graph:
+    project.json
     src/libs/io/lib.json
     src/libs/log/lib.json
     src/libs/program/lib.json
     src/libs/utility/lib.json
     src/myprog/prog.json
-    testproject.json
 
 pkg/bin/myprog:
     pkg/lib/liblog.a
@@ -139,6 +141,8 @@ pkg/obj/src/myprog/main.o:
 project:
     pkg/bin/myprog
 
+project.json:
+
 root:
     graph
     project
@@ -164,6 +168,4 @@ src/libs/utility/range.cpp:
 src/myprog/main.cpp:
 
 src/myprog/prog.json:
-
-testproject.json:
 

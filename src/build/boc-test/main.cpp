@@ -28,8 +28,7 @@ namespace gorc {
 
         virtual int main() override
         {
-            change_to_project_root("project.json",
-                                   original_working_directory,
+            change_to_project_root(original_working_directory,
                                    project_root_path,
                                    original_working_directory_rel);
 

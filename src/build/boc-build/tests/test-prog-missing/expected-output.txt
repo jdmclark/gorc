@@ -1,2 +1,4 @@
+==== stderr ====
 Loading dependency graph from project files
 [ERROR] src/notadir/notaprogram/prog.json: No such file or directory
+==== stdout ====

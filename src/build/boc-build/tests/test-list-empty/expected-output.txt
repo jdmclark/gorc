@@ -5,13 +5,13 @@ Caching dependency graph
 Finished writing cache
 ==== stdout ====
 graph:
-    testproject.json
+    project.json
 
 project:
+
+project.json:
 
 root:
     graph
     project
-
-testproject.json:
 

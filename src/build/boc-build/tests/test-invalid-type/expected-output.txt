@@ -1,1 +1,3 @@
+==== stderr ====
 [ERROR] Unknown build type 'foobar'
+==== stdout ====

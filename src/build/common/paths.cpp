@@ -3,3 +3,5 @@
 gorc::path const gorc::boc_src_directory("src");
 gorc::path const gorc::boc_prog_filename("prog.json");
 gorc::path const gorc::boc_lib_filename("lib.json");
+gorc::path const gorc::boc_project_filename("project.json");
+gorc::path const gorc::boc_cache_filename(".boc-cache");

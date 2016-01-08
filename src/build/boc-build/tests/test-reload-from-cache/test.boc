@@ -1,20 +1,18 @@
 include ../test.boc;
 
-cp testproject.json $(TESTSUITE_DIR)/testproject.json;
-pushd $(TESTSUITE_DIR);
+$(BOC_BUILD_OPTS) = --do-nothing;
 
-echo "==== initial run ====" >> $(RAW_OUTPUT);
-$(BOC_BUILD) --do-nothing --override-root-name testproject.json 2>>$(RAW_OUTPUT);
+call setup_test_project();
 
-echo "==== clean run ====" >> $(RAW_OUTPUT);
-$(BOC_BUILD) --do-nothing --override-root-name testproject.json 2>>$(RAW_OUTPUT);
+call begin_project_phase("initial run");
+call build_test_project();
 
-echo "==== modified run ====" >> $(RAW_OUTPUT);
+call begin_project_phase("clean run");
+call build_test_project();
+
+call begin_project_phase("modified run");
 sleep 1;
-touch testproject.json;
-$(BOC_BUILD) --do-nothing --override-root-name testproject.json 2>>$(RAW_OUTPUT);
+touch project.json;
+call build_test_project();
 
-popd;
-
-call process_raw_output();
-call compare_output();
+call teardown_test_project();

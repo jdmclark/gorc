@@ -1,13 +1,10 @@
 include ../test.boc;
 
-cp testproject.json $(TESTSUITE_DIR)/testproject.json;
-pushd $(TESTSUITE_DIR);
+call setup_test_project();
 
-$(BOC_BUILD) --do-nothing
-             --override-root-name testproject.json
-             --override-cache-name notadir/project.cache 2>>$(RAW_OUTPUT);
+# Create a directory with the cache name, to prevent reuse
+mkdir .boc-cache;
 
-popd;
+call build_test_project();
 
-call process_raw_output();
-call compare_output();
+call teardown_test_project();

@@ -7,6 +7,7 @@
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
 #include "build/common/change_to_project_root.hpp"
+#include "build/common/paths.hpp"
 #include <boost/filesystem.hpp>
 
 using namespace boost::filesystem;
@@ -25,12 +26,6 @@ namespace gorc {
 
     class boc_build_program : public program {
     public:
-        std::string boc_root_filename = "project.json";
-        std::string boc_root_filename_override;
-
-        std::string boc_cache_filename = ".boc-cache";
-        std::string boc_cache_filename_override;
-
         bool do_nothing = false;
         bool list_targets_only = false;
 
@@ -56,10 +51,6 @@ namespace gorc {
 
         virtual void create_options(options &opts) override
         {
-            // Test and debugging options
-            opts.insert(make_value_option("override-root-name", boc_root_filename_override));
-            opts.insert(make_value_option("override-cache-name", boc_cache_filename_override));
-
             // Commands
             opts.insert(make_switch_option("do-nothing", do_nothing));
             opts.insert(make_switch_option("list-targets", list_targets_only));
@@ -76,16 +67,7 @@ namespace gorc {
 
         virtual int main() override
         {
-            if(!boc_root_filename_override.empty()) {
-                boc_root_filename = boc_root_filename_override;
-            }
-
-            if(!boc_cache_filename_override.empty()) {
-                boc_cache_filename = boc_cache_filename_override;
-            }
-
-            change_to_project_root(boc_root_filename,
-                                   original_working_directory,
+            change_to_project_root(original_working_directory,
                                    project_root_path,
                                    original_working_directory_rel);
 
@@ -117,7 +99,7 @@ namespace gorc {
             register_boc_entities(reg);
 
             // Initialize graph
-            project_graph pg(services, reg, ea, boc_root_filename, boc_cache_filename);
+            project_graph pg(services, reg, ea, boc_project_filename, boc_cache_filename);
 
             // Perform operation
             if(do_nothing) {

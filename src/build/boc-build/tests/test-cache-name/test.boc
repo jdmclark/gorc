@@ -1,0 +1,13 @@
+include ../test.boc;
+
+call setup_test_project();
+
+call build_test_project();
+if(is_file(.boc-cache)) {
+    echo "cache exists" >> $(RAW_OUTPUT);
+}
+else {
+    echo "cache does not exist" >> $(RAW_OUTPUT);
+}
+
+call teardown_test_project();

@@ -23,26 +23,32 @@ function teardown_test_project()
     call compare_output();
 }
 
-function run_list_test_body()
+function list_test_project()
 {
-    $(BOC_BUILD) --override-root-name testproject.json --list-targets
+    $(BOC_BUILD)
+        --list-targets
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;
-}
-
-function run_list_test()
-{
-    call setup_test_project();
-    call run_list_test_body();
-    call teardown_test_project();
 }
 
 function build_test_project()
 {
-    $(BOC_BUILD) --override-root-name testproject.json
+    $(BOC_BUILD)
         $(BOC_BUILD_OPTS)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;
+}
+
+function inner_begin_project_phase(phase)
+{
+    echo $(phase) >>$(TESTSUITE_DIR)/stdout;
+    echo $(phase) >>$(TESTSUITE_DIR)/stderr;
+    echo $(phase) >>$(RAW_OUTPUT);
+}
+
+function begin_project_phase(phase)
+{
+    call inner_begin_project_phase("---- "$(phase)" ----");
 }

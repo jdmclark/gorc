@@ -1,3 +1,5 @@
 include ../test.boc;
 
-call run_list_test();
+call setup_test_project();
+call list_test_project();
+call teardown_test_project();

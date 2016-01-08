@@ -4,7 +4,7 @@
 #include "text/json_input_stream.hpp"
 #include "text/json_specification.hpp"
 #include "utility/make_unique.hpp"
-#include "paths.hpp"
+#include "../common/paths.hpp"
 #include <set>
 #include <map>
 
