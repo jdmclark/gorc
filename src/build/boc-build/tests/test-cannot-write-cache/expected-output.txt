@@ -1,6 +1,7 @@
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
+Building out-of-date targets
 Build succeeded
 Caching dependency graph
 [ERROR] Cannot write cache to file .boc-cache: Is a directory

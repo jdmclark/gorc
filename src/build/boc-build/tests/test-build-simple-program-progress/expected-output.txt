@@ -1,0 +1,15 @@
+Hello, World!
+==== stderr ====
+Loading dependency graph from project files
+Dependency graph generated
+Building out-of-date targets
+[-                                                                             ][------------------/                                                           ][--------------------------------------|                                       ][---------------------------------------------------------/                    ][------------------------------------------------------------------------------][------------------------------------------------------------------------------]
+Build succeeded
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+Succeeded:
+    pkg/bin/myprog
+    pkg/obj/src/myprog/main.o
+    project
+    src/myprog/main.cpp

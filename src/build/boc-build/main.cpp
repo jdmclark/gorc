@@ -5,6 +5,8 @@
 #include "list_targets.hpp"
 #include "run_build.hpp"
 #include "print_status.hpp"
+#include "utility/shell_progress.hpp"
+#include "utility/file_progress.hpp"
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
 #include "build/common/change_to_project_root.hpp"
@@ -31,6 +33,7 @@ namespace gorc {
         bool list_targets_only = false;
         bool print_build_summary = false;
         bool print_status = false;
+        bool no_progress = false;
 
         path original_working_directory;
         path project_root_path;
@@ -61,11 +64,13 @@ namespace gorc {
 
             opts.emplace_constraint<mutual_exclusion>(
                     std::vector<std::string> { "do-nothing",
-                                               "list-targets" });
+                                               "list-targets",
+                                               "status" });
 
             // Build options
             opts.insert(make_value_option("type", custom_build_type));
             opts.insert(make_switch_option("print-summary", print_build_summary));
+            opts.insert(make_switch_option("no-progress", no_progress));
 
             return;
         }
@@ -94,6 +99,16 @@ namespace gorc {
 
             gnu_compiler_properties comp_props(comp_config);
             services.add<compiler_properties>(comp_props);
+
+            std::unique_ptr<progress_factory> prog_fac;
+            if(no_progress) {
+                prog_fac = make_unique<file_progress_factory>();
+            }
+            else {
+                prog_fac = make_unique<shell_progress_factory>();
+            }
+
+            services.add<progress_factory>(*prog_fac);
 
             // Build is allowed to create new entities to track real (file) dependencies.
             // Add entity allocator as a service to store these until project_graph destructor.

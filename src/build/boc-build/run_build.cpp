@@ -7,6 +7,7 @@
 
 #include "entities/root_entity.hpp"
 
+#include "utility/progress.hpp"
 #include "log/log.hpp"
 
 #include <set>
@@ -56,6 +57,9 @@ int gorc::run_build(service_registry const &services, root_entity *root, bool ne
     dirty_entity_list dirty(closure, edges);
     entity_scheduler scheduler(dirty, edges);
 
+    LOG_INFO("Building out-of-date targets");
+    auto pbar = services.get<progress_factory>().make_progress(dirty.dirty_entities.size());
+
     // TODO: Multithreading
     while(!scheduler.done()) {
         if(scheduler.await()) {
@@ -66,7 +70,10 @@ int gorc::run_build(service_registry const &services, root_entity *root, bool ne
         entity *curr = scheduler.issue();
         bool succeeded = curr->update(services);
         scheduler.retire(curr, succeeded);
+        pbar->advance();
     }
+
+    pbar->finished();
 
     if(scheduler.succeeded()) {
         LOG_INFO("Build succeeded");

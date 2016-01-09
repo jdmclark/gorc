@@ -1,0 +1,10 @@
+include ../test.boc;
+
+$BOC_BUILD_NO_PROGRESS=--print-summary;
+
+call setup_test_project();
+call build_test_project();
+
+./pkg/bin/myprog >> $(RAW_OUTPUT);
+
+call teardown_test_project();

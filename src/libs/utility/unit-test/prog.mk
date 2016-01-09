@@ -25,6 +25,7 @@ SOURCES:= \
 	range_test.cpp \
 	runtime_assert_test.cpp \
 	service_registry_test.cpp \
+	shell_progress_test.cpp \
 	strcat_test.cpp \
 	string_search_test.cpp \
 	string_view_test.cpp \

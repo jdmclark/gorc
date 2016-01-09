@@ -1,6 +1,7 @@
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
+Building out-of-date targets
 [ERROR] Cannot find header file 'foo.hpp' in search path
 [ERROR] Build failed
 Caching dependency graph

@@ -1,6 +1,7 @@
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
+Building out-of-date targets
 src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
  this
  ^
