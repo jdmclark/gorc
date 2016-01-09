@@ -42,6 +42,16 @@ function build_test_project()
         || true;
 }
 
+function test_project_status()
+{
+    $(BOC_BUILD)
+        --status
+        $(BOC_BUILD_OPTS)
+        >>$(TESTSUITE_DIR)/stdout
+        2>>$(TESTSUITE_DIR)/stderr
+        || true;
+}
+
 function inner_begin_project_phase(phase)
 {
     echo $(phase) >>$(TESTSUITE_DIR)/stdout;

@@ -15,6 +15,7 @@ SOURCES:= \
 	create_graph_nodes.cpp \
 	list_targets.cpp \
 	main.cpp \
+	print_status.cpp \
 	project_file.cpp \
 	project_graph.cpp \
 	register_entities.cpp \

@@ -4,6 +4,7 @@
 #include "project_graph.hpp"
 #include "list_targets.hpp"
 #include "run_build.hpp"
+#include "print_status.hpp"
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
 #include "build/common/change_to_project_root.hpp"
@@ -29,6 +30,7 @@ namespace gorc {
         bool do_nothing = false;
         bool list_targets_only = false;
         bool print_build_summary = false;
+        bool print_status = false;
 
         path original_working_directory;
         path project_root_path;
@@ -55,6 +57,7 @@ namespace gorc {
             // Commands
             opts.insert(make_switch_option("do-nothing", do_nothing));
             opts.insert(make_switch_option("list-targets", list_targets_only));
+            opts.insert(make_switch_option("status", print_status));
 
             opts.emplace_constraint<mutual_exclusion>(
                     std::vector<std::string> { "do-nothing",
@@ -109,6 +112,10 @@ namespace gorc {
             }
             else if(list_targets_only) {
                 list_targets(pg.get_root());
+                return EXIT_SUCCESS;
+            }
+            else if(print_status) {
+                gorc::print_status(pg.get_root());
                 return EXIT_SUCCESS;
             }
             else {

@@ -4,23 +4,33 @@ $(BOC_BUILD_OPTS)=--print-summary;
 
 call setup_test_project();
 
+call begin_project_phase("initial");
+call test_project_status();
+
 call begin_project_phase("first run");
 
 call build_test_project();
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
 
-call begin_project_phase("second run");
-
+call begin_project_phase("touch source file");
 sleep 1;
 touch src/libs/hello/print_hello.cpp;
+call test_project_status();
+
+call begin_project_phase("second run");
 call build_test_project();
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
 
-call begin_project_phase("third run");
-
+call begin_project_phase("touch header file");
 sleep 1;
 touch src/libs/utility/message.hpp;
+call test_project_status();
+
+call begin_project_phase("third run");
 call build_test_project();
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
+
+call begin_project_phase("all clean");
+call test_project_status();
 
 call teardown_test_project();

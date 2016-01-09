@@ -1,14 +1,26 @@
+---- initial ----
 ---- first run ----
 Hello, World!
+---- touch source file ----
 ---- second run ----
 Hello, World!
+---- touch header file ----
 ---- third run ----
 Hello, World!
+---- all clean ----
 ==== stderr ====
----- first run ----
+---- initial ----
 Loading dependency graph from project files
 Dependency graph generated
+Caching dependency graph
+Finished writing cache
+---- first run ----
+Loading dependency graph from cache
 Build succeeded
+Caching dependency graph
+Finished writing cache
+---- touch source file ----
+Loading dependency graph from cache
 Caching dependency graph
 Finished writing cache
 ---- second run ----
@@ -16,12 +28,36 @@ Loading dependency graph from cache
 Build succeeded
 Caching dependency graph
 Finished writing cache
+---- touch header file ----
+Loading dependency graph from cache
+Caching dependency graph
+Finished writing cache
 ---- third run ----
 Loading dependency graph from cache
 Build succeeded
+Caching dependency graph
+Finished writing cache
+---- all clean ----
+Loading dependency graph from cache
 Caching dependency graph
 Finished writing cache
 ==== stdout ====
+---- initial ----
+Out-of-date targets:
+    pkg/bin/myprog
+    pkg/lib/libhello.a
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/hello/hello_message.o
+    pkg/obj/src/libs/hello/print_hello.o
+    pkg/obj/src/libs/utility/message.o
+    pkg/obj/src/libs/utility/print_message.o
+    pkg/obj/src/myprog/main.o
+    project
+    src/libs/hello/hello_message.cpp
+    src/libs/hello/print_hello.cpp
+    src/libs/utility/message.cpp
+    src/libs/utility/print_message.cpp
+    src/myprog/main.cpp
 ---- first run ----
 Succeeded:
     pkg/bin/myprog
@@ -38,6 +74,13 @@ Succeeded:
     src/libs/utility/message.cpp
     src/libs/utility/print_message.cpp
     src/myprog/main.cpp
+---- touch source file ----
+Out-of-date targets:
+    pkg/bin/myprog
+    pkg/lib/libhello.a
+    pkg/obj/src/libs/hello/print_hello.o
+    project
+    src/libs/hello/print_hello.cpp
 ---- second run ----
 Succeeded:
     pkg/bin/myprog
@@ -45,6 +88,23 @@ Succeeded:
     pkg/obj/src/libs/hello/print_hello.o
     project
     src/libs/hello/print_hello.cpp
+---- touch header file ----
+Out-of-date targets:
+    pkg/bin/myprog
+    pkg/lib/libhello.a
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/hello/hello_message.o
+    pkg/obj/src/libs/hello/print_hello.o
+    pkg/obj/src/libs/utility/message.o
+    pkg/obj/src/libs/utility/print_message.o
+    project
+    src/libs/hello/hello_message.cpp
+    src/libs/hello/hello_message.hpp
+    src/libs/hello/print_hello.cpp
+    src/libs/utility/message.cpp
+    src/libs/utility/message.hpp
+    src/libs/utility/print_message.cpp
+    src/libs/utility/print_message.hpp
 ---- third run ----
 Succeeded:
     pkg/bin/myprog
@@ -62,3 +122,5 @@ Succeeded:
     src/libs/utility/message.hpp
     src/libs/utility/print_message.cpp
     src/libs/utility/print_message.hpp
+---- all clean ----
+All targets are up-to-date.
