@@ -72,6 +72,7 @@ int gorc::run_build(service_registry const &services, root_entity *root, bool ne
         LOG_INFO("Build succeeded");
     }
     else {
+        needs_summary = true;
         LOG_ERROR("Build failed");
     }
 

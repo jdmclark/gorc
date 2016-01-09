@@ -1,0 +1,17 @@
+==== stderr ====
+Loading dependency graph from project files
+Dependency graph generated
+src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
+ this
+ ^
+[ERROR] Build failed
+Caching dependency graph
+Finished writing cache
+==== stdout ====
+Succeeded:
+    src/myprog/main.cpp
+Failed:
+    pkg/obj/src/myprog/main.o
+Unsatisfiable:
+    pkg/bin/myprog
+    project
