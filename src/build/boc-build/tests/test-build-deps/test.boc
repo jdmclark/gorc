@@ -1,5 +1,7 @@
 include ../test.boc;
 
+$(BOC_BUILD_OPTS)=--print-summary;
+
 call setup_test_project();
 
 call begin_project_phase("first run");

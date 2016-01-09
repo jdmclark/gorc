@@ -2,12 +2,6 @@ test.boc exists
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
-Updating 'src/mylib/does_test_boc_exist.cpp' header dependencies
-Compiling pkg/obj/src/mylib/does_test_boc_exist.o
-Archiving pkg/lib/libmylib.a
-Updating 'src/myprog/main.cpp' header dependencies
-Compiling pkg/obj/src/myprog/main.o
-Linking pkg/bin/myprog
 Build succeeded
 Caching dependency graph
 Finished writing cache

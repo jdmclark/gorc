@@ -1,10 +1,14 @@
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
-Updating 'src/myprog/main.cpp' header dependencies
 [ERROR] Cannot find header file 'foo.hpp' in search path
-[ERROR] Build stalled
 [ERROR] Build failed
 Caching dependency graph
 Finished writing cache
 ==== stdout ====
+Failed:
+    src/myprog/main.cpp
+Unsatisfiable:
+    pkg/bin/myprog
+    pkg/obj/src/myprog/main.o
+    project

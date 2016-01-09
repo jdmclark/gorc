@@ -31,7 +31,7 @@ bool gorc::entity_scheduler::done()
 
 bool gorc::entity_scheduler::succeeded()
 {
-    return unsatisfiable_entities.empty() && failed_entities.empty();
+    return failed_entities.empty();
 }
 
 bool gorc::entity_scheduler::await()
@@ -51,12 +51,33 @@ gorc::entity* gorc::entity_scheduler::issue()
     return rv;
 }
 
+namespace {
+    void retire_parents_unsatisfiable(gorc::entity *ent,
+                                      std::unordered_set<gorc::entity*> &unsat,
+                                      std::unordered_set<gorc::entity*> &pending,
+                                      gorc::entity_adjacency_list const &edges)
+    {
+        for(auto const &dep : make_range(edges.dependents.equal_range(ent))) {
+            pending.erase(dep.second);
+            if(unsat.find(dep.second) == unsat.end()) {
+                unsat.insert(dep.second);
+                retire_parents_unsatisfiable(dep.second,
+                                             unsat,
+                                             pending,
+                                             edges);
+            }
+        }
+    }
+}
+
 void gorc::entity_scheduler::retire(gorc::entity *done_ent, bool successful)
 {
     // Mark entity as completed
     issued_entities.erase(done_ent);
 
     if(successful) {
+        succeeded_entities.insert(done_ent);
+
         // Decrement dependency counts of all dependents.
         for(auto const &dep : make_range(edges.dependents.equal_range(done_ent))) {
             --dirty_dependency_count[dep.second];
@@ -69,10 +90,21 @@ void gorc::entity_scheduler::retire(gorc::entity *done_ent, bool successful)
     }
     else {
         failed_entities.insert(done_ent);
-
-        for(auto const &dep : make_range(edges.dependents.equal_range(done_ent))) {
-            pending_entities.erase(dep.second);
-            unsatisfiable_entities.insert(dep.second);
-        }
+        retire_parents_unsatisfiable(done_ent, unsatisfiable_entities, pending_entities, edges);
     }
+}
+
+std::unordered_set<gorc::entity*> const& gorc::entity_scheduler::get_unsatisfiable_entities() const
+{
+    return unsatisfiable_entities;
+}
+
+std::unordered_set<gorc::entity*> const& gorc::entity_scheduler::get_failed_entities() const
+{
+    return failed_entities;
+}
+
+std::unordered_set<gorc::entity*> const& gorc::entity_scheduler::get_succeeded_entities() const
+{
+    return succeeded_entities;
 }

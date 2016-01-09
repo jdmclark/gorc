@@ -18,8 +18,9 @@ namespace gorc {
 
         std::unordered_set<entity*> ready_entities;
 
-        std::unordered_set<entity*> unsatisfiable_entities;
         std::unordered_set<entity*> failed_entities;
+        std::unordered_set<entity*> succeeded_entities;
+        std::unordered_set<entity*> unsatisfiable_entities;
 
     public:
         entity_scheduler(dirty_entity_list const &dirty_list,
@@ -33,6 +34,10 @@ namespace gorc {
         entity* issue();
 
         void retire(entity*, bool successful);
+
+        std::unordered_set<entity*> const& get_unsatisfiable_entities() const;
+        std::unordered_set<entity*> const& get_failed_entities() const;
+        std::unordered_set<entity*> const& get_succeeded_entities() const;
     };
 
 }

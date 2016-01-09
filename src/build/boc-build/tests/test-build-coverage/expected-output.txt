@@ -2,9 +2,6 @@ Hello, World!
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
-Updating 'src/myprog/main.cpp' header dependencies
-Compiling pkg/obj/src/myprog/main.o
-Linking pkg/bin/myprog
 Build succeeded
 Caching dependency graph
 Finished writing cache

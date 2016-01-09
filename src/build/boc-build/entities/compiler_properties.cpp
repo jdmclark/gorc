@@ -19,7 +19,7 @@ gorc::compiler_properties::~compiler_properties()
 bool gorc::compiler_properties::create_dependencies(source_file_entity *sf,
                                                     service_registry const &services)
 {
-    LOG_INFO(format("Updating '%s' header dependencies") % sf->name());
+    LOG_DEBUG(format("Updating '%s' header dependencies") % sf->name());
 
     entity_allocator &ea = services.get<entity_allocator>();
     std::unordered_set<source_file_entity*> remaining = { sf };

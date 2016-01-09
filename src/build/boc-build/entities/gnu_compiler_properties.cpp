@@ -122,7 +122,7 @@ gorc::path gorc::gnu_compiler_properties::make_program_filename(std::string cons
 
 bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *entity)
 {
-    LOG_INFO(format("Compiling %s") % entity->name());
+    LOG_DEBUG(format("Compiling %s") % entity->name());
 
     boost::filesystem::create_directories(entity->file_path().parent_path());
 
@@ -149,7 +149,7 @@ bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *enti
 
 bool gorc::gnu_compiler_properties::archive_static_library(library_file_entity *entity)
 {
-    LOG_INFO(format("Archiving %s") % entity->name());
+    LOG_DEBUG(format("Archiving %s") % entity->name());
 
     boost::filesystem::create_directories(entity->file_path().parent_path());
 
@@ -196,7 +196,7 @@ namespace {
 
 bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
 {
-    LOG_INFO(format("Linking %s") % prog->name());
+    LOG_DEBUG(format("Linking %s") % prog->name());
 
     boost::filesystem::create_directories(prog->file_path().parent_path());
 

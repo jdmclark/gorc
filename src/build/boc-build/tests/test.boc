@@ -27,6 +27,7 @@ function list_test_project()
 {
     $(BOC_BUILD)
         --list-targets
+        $(BOC_BUILD_OPTS)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;

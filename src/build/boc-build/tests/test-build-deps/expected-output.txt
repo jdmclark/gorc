@@ -8,54 +8,57 @@ Hello, World!
 ---- first run ----
 Loading dependency graph from project files
 Dependency graph generated
-Updating 'src/libs/hello/print_hello.cpp' header dependencies
-Updating 'src/libs/utility/print_message.cpp' header dependencies
-Compiling pkg/obj/src/libs/utility/print_message.o
-Compiling pkg/obj/src/libs/hello/print_hello.o
-Updating 'src/libs/utility/message.cpp' header dependencies
-Updating 'src/myprog/main.cpp' header dependencies
-Compiling pkg/obj/src/myprog/main.o
-Compiling pkg/obj/src/libs/utility/message.o
-Archiving pkg/lib/libutility.a
-Updating 'src/libs/hello/hello_message.cpp' header dependencies
-Compiling pkg/obj/src/libs/hello/hello_message.o
-Archiving pkg/lib/libhello.a
-Linking pkg/bin/myprog
 Build succeeded
 Caching dependency graph
 Finished writing cache
 ---- second run ----
 Loading dependency graph from cache
-Updating 'src/libs/hello/print_hello.cpp' header dependencies
-Compiling pkg/obj/src/libs/hello/print_hello.o
-Archiving pkg/lib/libhello.a
-Linking pkg/bin/myprog
 Build succeeded
 Caching dependency graph
 Finished writing cache
 ---- third run ----
 Loading dependency graph from cache
-Updating 'src/libs/utility/message.hpp' header dependencies
-Updating 'src/libs/utility/message.cpp' header dependencies
-Updating 'src/libs/utility/print_message.hpp' header dependencies
-Updating 'src/libs/utility/print_message.cpp' header dependencies
-Compiling pkg/obj/src/libs/utility/print_message.o
-Compiling pkg/obj/src/libs/utility/message.o
-Archiving pkg/lib/libutility.a
-Updating 'src/libs/hello/hello_message.hpp' header dependencies
-Updating 'src/libs/hello/hello_message.cpp' header dependencies
-Compiling pkg/obj/src/libs/hello/hello_message.o
-Updating 'src/libs/utility/message.hpp' header dependencies
-Updating 'src/libs/utility/print_message.hpp' header dependencies
-Updating 'src/libs/hello/hello_message.hpp' header dependencies
-Updating 'src/libs/hello/print_hello.cpp' header dependencies
-Compiling pkg/obj/src/libs/hello/print_hello.o
-Archiving pkg/lib/libhello.a
-Linking pkg/bin/myprog
 Build succeeded
 Caching dependency graph
 Finished writing cache
 ==== stdout ====
 ---- first run ----
+Succeeded:
+    pkg/bin/myprog
+    pkg/lib/libhello.a
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/hello/hello_message.o
+    pkg/obj/src/libs/hello/print_hello.o
+    pkg/obj/src/libs/utility/message.o
+    pkg/obj/src/libs/utility/print_message.o
+    pkg/obj/src/myprog/main.o
+    project
+    src/libs/hello/hello_message.cpp
+    src/libs/hello/print_hello.cpp
+    src/libs/utility/message.cpp
+    src/libs/utility/print_message.cpp
+    src/myprog/main.cpp
 ---- second run ----
+Succeeded:
+    pkg/bin/myprog
+    pkg/lib/libhello.a
+    pkg/obj/src/libs/hello/print_hello.o
+    project
+    src/libs/hello/print_hello.cpp
 ---- third run ----
+Succeeded:
+    pkg/bin/myprog
+    pkg/lib/libhello.a
+    pkg/lib/libutility.a
+    pkg/obj/src/libs/hello/hello_message.o
+    pkg/obj/src/libs/hello/print_hello.o
+    pkg/obj/src/libs/utility/message.o
+    pkg/obj/src/libs/utility/print_message.o
+    project
+    src/libs/hello/hello_message.cpp
+    src/libs/hello/hello_message.hpp
+    src/libs/hello/print_hello.cpp
+    src/libs/utility/message.cpp
+    src/libs/utility/message.hpp
+    src/libs/utility/print_message.cpp
+    src/libs/utility/print_message.hpp

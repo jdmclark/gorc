@@ -56,7 +56,9 @@ namespace gorc {
             std::lock_guard<std::mutex> lg(atomic_allocate_lock);
 
             // Always assume deserialized graph is normalized
-            return inner_emplace<T>(is);
+            T *ent = inner_emplace<T>(is);
+            file_map.emplace(ent->file_path(), ent);
+            return ent;
         }
 
         template <typename T, typename ...ArgT>
