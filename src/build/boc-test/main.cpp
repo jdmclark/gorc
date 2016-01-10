@@ -70,7 +70,7 @@ namespace gorc {
             set_environment_variable("PROJECT_ROOT", project_root_path.native());
             set_environment_variable("BOC_SHELL", shell_path.native());
 
-            return run_tests(tests, boc_test_log_filename, services, print_summary);
+            return run_tests(tests, shell_path, boc_test_log_filename, services, print_summary);
         }
     };
 

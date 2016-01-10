@@ -5,5 +5,5 @@ Current directory is project root
 Running 1 tests
 **** SUITE PASSED ****
 ==== stdout ====
-Failed tests:
+Passed tests:
     src/ztest-one

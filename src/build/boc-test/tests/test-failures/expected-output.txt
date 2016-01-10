@@ -3,9 +3,18 @@ Finding project root directory
 Finding tests
 Current directory is project root
 Running 3 tests
-**** SUITE PASSED ****
+[ERROR] Failed tests:
+
+FAILED src/ztest-one
+--------------------
+[ERROR] test.boc:1:1-1:6: command failed with code 1
+
+FAILED src/ztest-three
+--------------------
+[ERROR] test.boc:1:1-1:6: command failed with code 1
 ==== stdout ====
+Passed tests:
+    src/ztest-two
 Failed tests:
     src/ztest-one
     src/ztest-three
-    src/ztest-two

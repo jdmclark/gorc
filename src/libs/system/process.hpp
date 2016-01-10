@@ -18,6 +18,7 @@ namespace gorc {
         maybe<gorc::pipe*> std_input;
         maybe<gorc::pipe*> std_output;
         maybe<gorc::pipe*> std_error;
+        maybe<path> working_directory;
 
         void internal_inside_parent(::pid_t child_pid);
         void internal_inside_child(path const &executable,
@@ -29,10 +30,12 @@ namespace gorc {
                 ArgRangeT const &args,
                 maybe<gorc::pipe*> std_input,
                 maybe<gorc::pipe*> std_output,
-                maybe<gorc::pipe*> std_error)
+                maybe<gorc::pipe*> std_error,
+                maybe<path> working_directory = nothing)
             : std_input(std_input)
             , std_output(std_output)
             , std_error(std_error)
+            , working_directory(working_directory)
         {
             // LCOV_EXCL_START
             // Not much hope capturing coverage between fork-exec

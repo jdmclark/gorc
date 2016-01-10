@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <system_error>
 #include <iostream>
+#include <boost/filesystem.hpp>
 
 gorc::process::~process()
 {
@@ -61,6 +62,10 @@ void gorc::process::internal_inside_child(path const &executable,
         safe_dup2(std_error.get_value()->get_output().fd, STDERR_FILENO);
         std_error.get_value()->close_input();
         std_error.get_value()->close_output();
+    }
+
+    if(working_directory.has_value()) {
+        boost::filesystem::current_path(working_directory.get_value());
     }
 
     std::string prog_name = executable.string();

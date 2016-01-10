@@ -32,7 +32,8 @@ function run_tests()
         $(BOC_TEST_NO_PROGRESS)
         $(BOC_TEST_NAMES)
         >>$(TESTSUITE_DIR)/stdout
-        2>>$(TESTSUITE_DIR)/stderr;
+        2>>$(TESTSUITE_DIR)/stderr
+        || true;
 }
 
 function inner_begin_project_phase(phase)

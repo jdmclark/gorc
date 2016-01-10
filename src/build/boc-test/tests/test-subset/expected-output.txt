@@ -5,6 +5,6 @@ Current directory is a test subset
 Running 2 tests
 **** SUITE PASSED ****
 ==== stdout ====
-Failed tests:
+Passed tests:
     src/subdir/ztest-incl-one
     src/subdir/ztest-incl-two
