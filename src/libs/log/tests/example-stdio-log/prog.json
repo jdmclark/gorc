@@ -1,0 +1,10 @@
+{
+    "name" : "example-stdio-log",
+    "type" : "test",
+    "dependencies" : [
+        "libs/log"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "name" : "example-binary-stream",
+    "type" : "test",
+    "dependencies" : [
+        "libs/io"
+    ],
+    "sources" : [
+        "test.cpp"
+    ]
+}

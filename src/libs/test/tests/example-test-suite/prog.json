@@ -1,0 +1,10 @@
+{
+    "name" : "example-test-suite",
+    "type" : "test",
+    "dependencies" : [
+        "libs/test"
+    ],
+    "sources" : [
+        "suite.cpp"
+    ]
+}

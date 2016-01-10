@@ -1,0 +1,11 @@
+{
+    "name" : "parent-program",
+    "type" : "test",
+    "dependencies" : [
+        "libs/system",
+        "libs/program"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}

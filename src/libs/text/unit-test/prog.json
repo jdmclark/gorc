@@ -1,0 +1,15 @@
+{
+    "name" : "text-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/test",
+        "libs/text"
+    ],
+    "sources" : [
+        "generic_tokenizer_test.cpp",
+        "token_helpers_test.cpp",
+        "json_serialization_test.cpp",
+        "json_specification_test.cpp",
+        "json_tokenizer_test.cpp"
+    ]
+}

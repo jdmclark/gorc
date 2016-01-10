@@ -1,0 +1,11 @@
+{
+    "name" : "ir",
+    "dependencies" : [
+        "libs/log",
+        "libs/io",
+        "libs/cog/vm"
+    ],
+    "sources" : [
+        "ir_printer.cpp"
+    ]
+}

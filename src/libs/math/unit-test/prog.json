@@ -1,0 +1,12 @@
+{
+    "name" : "math-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/math",
+        "libs/test"
+    ],
+    "sources" : [
+        "almost_equal_test.cpp",
+        "vector_test.cpp"
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "name" : "grammar",
+    "dependencies" : [
+        "libs/log",
+        "libs/cog/ast",
+        "libs/text"
+    ],
+    "sources" : [
+        "grammar.cpp",
+        "lexer.cpp",
+        "parser.cpp"
+    ]
+}

@@ -1,6 +1,8 @@
+bin/
 tempdir/
 test-log.txt
 *.swp
 .ycm_extra_conf.py
 *.pyc
 pkg/
+.boc-cache

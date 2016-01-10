@@ -1,0 +1,10 @@
+{
+    "name" : "example-output-stream",
+    "type" : "test",
+    "dependencies" : [
+        "libs/io"
+    ],
+    "sources" : [
+        "test.cpp"
+    ]
+}

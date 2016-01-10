@@ -1,0 +1,10 @@
+{
+    "name" : "gob",
+    "dependencies" : [
+        "libs/program",
+        "libs/vfs"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}

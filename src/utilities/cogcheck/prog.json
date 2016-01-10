@@ -1,0 +1,14 @@
+{
+    "name" : "cogcheck",
+    "dependencies" : [
+        "libs/program",
+        "libs/cog/compiler"
+    ],
+    "sources" : [
+        "cogcheck_compiler.cpp",
+        "disassembler.cpp",
+        "main.cpp",
+        "print_ast.cpp",
+        "print_ast_visitor.cpp"
+    ]
+}

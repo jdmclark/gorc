@@ -1,0 +1,10 @@
+{
+    "name" : "episode",
+    "dependencies" : [
+        "libs/program",
+        "libs/vfs"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}

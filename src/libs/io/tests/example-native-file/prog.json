@@ -1,0 +1,10 @@
+{
+    "name" : "example-native-file",
+    "type" : "test",
+    "dependencies" : [
+        "libs/io"
+    ],
+    "sources" : [
+        "test.cpp"
+    ]
+}

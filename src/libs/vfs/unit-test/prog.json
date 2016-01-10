@@ -1,0 +1,12 @@
+{
+    "name" : "vfs-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/vfs",
+        "libs/test"
+    ],
+    "sources" : [
+        "episode_entry_type_test.cpp",
+        "virtual_container_iterator_test.cpp"
+    ]
+}

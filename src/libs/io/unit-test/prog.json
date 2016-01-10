@@ -1,0 +1,13 @@
+{
+    "name" : "io-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/io",
+        "libs/test"
+    ],
+    "sources" : [
+        "input_stream_test.cpp",
+        "memory_file_test.cpp",
+        "output_stream_test.cpp"
+    ]
+}

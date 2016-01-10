@@ -1,0 +1,10 @@
+{
+    "name" : "example-program",
+    "type" : "test",
+    "dependencies" : [
+        "libs/program"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}

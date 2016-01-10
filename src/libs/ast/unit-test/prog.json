@@ -1,0 +1,12 @@
+{
+    "name" : "ast-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/test",
+        "libs/ast"
+    ],
+    "sources" : [
+        "factory_test.cpp",
+        "node_test.cpp"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "name" : "math",
+    "dependencies" : [
+        "libs/utility"
+    ]
+}

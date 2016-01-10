@@ -1,0 +1,13 @@
+{
+    "name" : "cog",
+    "dependencies" : [
+        "libs/program",
+        "libs/cog/compiler",
+        "libs/cog/vm",
+        "libs/text"
+    ],
+    "sources" : [
+        "main.cpp",
+        "scenario.cpp"
+    ]
+}

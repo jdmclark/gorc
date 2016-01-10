@@ -1,0 +1,13 @@
+{
+    "name" : "system-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/test",
+        "libs/system"
+    ],
+    "sources" : [
+        "env_test.cpp",
+        "pipe_test.cpp",
+        "self_test.cpp"
+    ]
+}

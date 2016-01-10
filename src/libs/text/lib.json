@@ -1,0 +1,16 @@
+{
+    "name" : "text",
+    "dependencies" : [
+        "libs/log",
+        "libs/io"
+    ],
+    "sources" : [
+        "generic_tokenizer.cpp",
+        "token_helpers.cpp",
+        "tokenizer.cpp",
+        "tokenizer_stream.cpp",
+        "json_input_stream.cpp",
+        "json_output_stream.cpp",
+        "json_tokenizer.cpp"
+    ]
+}

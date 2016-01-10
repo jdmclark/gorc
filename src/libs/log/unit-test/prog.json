@@ -1,0 +1,12 @@
+{
+    "name" : "log-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/log",
+        "libs/test"
+    ],
+    "sources" : [
+        "diagnostic_context_test.cpp",
+        "log_level_test.cpp"
+    ]
+}

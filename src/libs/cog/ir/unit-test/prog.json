@@ -1,0 +1,11 @@
+{
+    "name" : "ir-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/test",
+        "libs/cog/ir"
+    ],
+    "sources" : [
+        "ir_printer_test.cpp"
+    ]
+}

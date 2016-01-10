@@ -1,0 +1,15 @@
+{
+    "name" : "test-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/test"
+    ],
+    "sources" : [
+        "mock_reporter.cpp",
+        "test_assert_test.cpp",
+        "test_case_order.cpp",
+        "test_expect_test.cpp",
+        "test_framework_test.cpp",
+        "test_strings_test.cpp"
+    ]
+}

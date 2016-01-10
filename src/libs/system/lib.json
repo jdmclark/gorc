@@ -1,0 +1,16 @@
+{
+    "name" : "system",
+    "dependencies" : [
+        "libs/io",
+        "libs/log"
+    ],
+    "libraries" : [
+        "boost"
+    ],
+    "sources" : [
+        "env.cpp",
+        "pipe.cpp",
+        "process.cpp",
+        "self.cpp"
+    ]
+}

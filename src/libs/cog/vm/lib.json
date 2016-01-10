@@ -1,0 +1,18 @@
+{
+    "name" : "vm",
+    "dependencies" : [
+        "libs/log",
+        "libs/io",
+        "libs/cog/script"
+    ],
+    "sources" : [
+        "call_stack_frame.cpp",
+        "continuation.cpp",
+        "default_verbs.cpp",
+        "executor.cpp",
+        "heap.cpp",
+        "instance.cpp",
+        "sleep_record.cpp",
+        "virtual_machine.cpp"
+    ]
+}

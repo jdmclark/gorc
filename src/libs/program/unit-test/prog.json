@@ -1,0 +1,11 @@
+{
+    "name" : "program-test",
+    "type" : "test",
+    "dependencies" : [
+        "libs/program",
+        "libs/test"
+    ],
+    "sources" : [
+        "options_test.cpp"
+    ]
+}
