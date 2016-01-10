@@ -5,6 +5,11 @@
 #include "run_tests.hpp"
 #include "system/self.hpp"
 #include "system/env.hpp"
+#include "build/common/paths.hpp"
+#include "utility/service_registry.hpp"
+#include "utility/shell_progress.hpp"
+#include "utility/file_progress.hpp"
+#include "log/log.hpp"
 
 namespace gorc {
 
@@ -19,19 +24,39 @@ namespace gorc {
         path project_root_path;
         path original_working_directory_rel;
 
+        bool no_progress = false;
+        bool print_summary = false;
+
         virtual void create_options(options &opts) override
         {
             // Test and debugging options
             opts.insert(make_multi_value_option("add-test-name",
                                                 std::back_inserter(boc_test_directory)));
+
+            opts.insert(make_switch_option("no-progress", no_progress));
+            opts.insert(make_switch_option("print-summary", print_summary));
         }
 
         virtual int main() override
         {
+            LOG_INFO("Finding project root directory");
             change_to_project_root(original_working_directory,
                                    project_root_path,
                                    original_working_directory_rel);
 
+            service_registry services;
+
+            std::unique_ptr<progress_factory> prog_fac;
+            if(no_progress) {
+                prog_fac = make_unique<file_progress_factory>();
+            }
+            else {
+                prog_fac = make_unique<shell_progress_factory>();
+            }
+
+            services.add<progress_factory>(*prog_fac);
+
+            LOG_INFO("Finding tests");
             auto tests = find_tests(boc_test_directory,
                                     original_working_directory_rel);
 
@@ -41,11 +66,11 @@ namespace gorc {
 
             set_environment_variable("PLATFORM", "linux");
             set_environment_variable("FAILED_TEST_LOG",
-                                     (project_root_path / "test-log.txt").native());
+                                     (project_root_path / boc_test_log_filename).native());
             set_environment_variable("PROJECT_ROOT", project_root_path.native());
             set_environment_variable("BOC_SHELL", shell_path.native());
 
-            return run_tests(tests, "test-log.txt");
+            return run_tests(tests, boc_test_log_filename, services, print_summary);
         }
     };
 

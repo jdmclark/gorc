@@ -1,0 +1,9 @@
+include ../test.boc;
+
+call setup_test_project();
+
+pushd src/subdir/ztest-incl-one;
+call run_tests();
+popd;
+
+call teardown_test_project();

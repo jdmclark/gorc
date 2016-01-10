@@ -1,0 +1,5 @@
+include ../test.boc;
+
+call setup_test_project();
+call run_tests();
+call teardown_test_project();

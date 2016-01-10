@@ -11,7 +11,7 @@ void gorc::change_to_project_root(path &out_original_working_directory,
 {
     out_original_working_directory = canonical(current_path());
 
-    path leftover = ".";
+    path leftover;
     while(true) {
         if(is_regular_file(boc_project_filename)) {
             break;
@@ -28,5 +28,11 @@ void gorc::change_to_project_root(path &out_original_working_directory,
     }
 
     out_project_root = canonical(current_path());
-    out_original_working_directory_rel = leftover.normalize();
+
+    if(!leftover.has_filename()) {
+        leftover = ".";
+    }
+
+    leftover.normalize();
+    out_original_working_directory_rel = leftover;
 }

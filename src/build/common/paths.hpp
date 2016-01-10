@@ -9,5 +9,6 @@ namespace gorc {
     extern path const boc_lib_filename;
     extern path const boc_project_filename;
     extern path const boc_cache_filename;
+    extern path const boc_test_log_filename;
 
 }

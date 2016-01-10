@@ -1,5 +1,6 @@
 #include "shell_progress.hpp"
 #include "make_unique.hpp"
+#include <numeric>
 #include <vector>
 
 namespace {
@@ -26,7 +27,7 @@ void gorc::shell_progress::render(bool draw_spinner)
     stream << "\r[";
 
     size_t max_num = width - 2;
-    size_t num_filled = (current * max_num) / steps;
+    size_t num_filled = steps ? ((std::min(current, steps) * max_num) / steps) : 0;
 
     size_t i = 1;
     for(; i < num_filled; ++i) {

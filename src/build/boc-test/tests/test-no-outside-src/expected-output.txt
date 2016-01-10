@@ -1,0 +1,9 @@
+==== stderr ====
+Finding project root directory
+Finding tests
+Current directory is project root
+Running 1 tests
+**** SUITE PASSED ****
+==== stdout ====
+Failed tests:
+    src/ztest-one
