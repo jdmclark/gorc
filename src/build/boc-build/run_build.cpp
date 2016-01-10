@@ -14,6 +14,8 @@
 #include <map>
 #include <algorithm>
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 namespace {
 
@@ -46,7 +48,10 @@ namespace {
 
 }
 
-int gorc::run_build(service_registry const &services, root_entity *root, bool needs_summary)
+int gorc::run_build(service_registry const &services,
+                    root_entity *root,
+                    size_t threads,
+                    bool needs_summary)
 {
     // Build everything for now.
     // TODO: Need to prune this based on original working directory.
@@ -65,17 +70,50 @@ int gorc::run_build(service_registry const &services, root_entity *root, bool ne
     LOG_INFO(format("Building %d out-of-date targets") % dirty.dirty_entities.size());
     auto pbar = services.get<progress_factory>().make_progress(dirty.dirty_entities.size());
 
-    // TODO: Multithreading
-    while(!scheduler.done()) {
-        if(scheduler.await()) {
-            LOG_ERROR("Build stalled");
-            break;
-        }
+    std::mutex scheduler_lock;
 
-        entity *curr = scheduler.issue();
-        bool succeeded = curr->update(services);
-        scheduler.retire(curr, succeeded);
+    auto get_next_job = [&]() -> maybe<entity*> {
+        while(true) {
+            std::unique_lock<std::mutex> ul(scheduler_lock);
+            if(scheduler.exhausted()) {
+                return nothing;
+            }
+            else if(scheduler.await()) {
+                ul.unlock();
+                std::this_thread::yield();
+            }
+            else {
+                return scheduler.issue();
+            }
+        }
+    };
+
+    auto retire_job = [&](entity *ent, bool successful) {
+        std::lock_guard<std::mutex> lg(scheduler_lock);
+        scheduler.retire(ent, successful);
         pbar->advance();
+    };
+
+    auto build_thread = [&]() {
+        while(true) {
+            auto curr = get_next_job();
+            if(!curr.has_value()) {
+                // Queue is exhausted
+                return;
+            }
+
+            bool succeeded = curr.get_value()->update(services);
+            retire_job(curr.get_value(), succeeded);
+        }
+    };
+
+    std::vector<std::thread> thread_pool;
+    for(size_t i = 0; i < std::max(size_t(1), threads); ++i) {
+        thread_pool.emplace_back(build_thread);
+    }
+
+    for(auto &thread : thread_pool) {
+        thread.join();
     }
 
     pbar->finished();

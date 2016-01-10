@@ -8,6 +8,7 @@ namespace gorc {
 
     int run_build(service_registry const &,
                   root_entity*,
+                  size_t threads,
                   bool print_summary);
 
 }

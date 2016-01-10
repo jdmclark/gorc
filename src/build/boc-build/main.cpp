@@ -34,6 +34,7 @@ namespace gorc {
         bool print_build_summary = false;
         bool print_status = false;
         bool no_progress = false;
+        size_t threads = 1;
 
         path original_working_directory;
         path project_root_path;
@@ -71,6 +72,9 @@ namespace gorc {
             opts.insert(make_value_option("type", custom_build_type));
             opts.insert(make_switch_option("print-summary", print_build_summary));
             opts.insert(make_switch_option("no-progress", no_progress));
+
+            opts.insert(make_value_option("threads", threads));
+            opts.add_alias("threads", "-j");
 
             return;
         }
@@ -134,7 +138,7 @@ namespace gorc {
                 return EXIT_SUCCESS;
             }
             else {
-                return run_build(services, pg.get_root(), print_build_summary);
+                return run_build(services, pg.get_root(), threads, print_build_summary);
             }
         }
     };
