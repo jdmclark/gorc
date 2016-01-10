@@ -18,6 +18,7 @@ before_script:
   - sudo pip install cpp-coveralls
 
 script:
-  - make BUILD_CONFIG=test-coverage
-  - make test BUILD_CONFIG=test-coverage
-  - make coveralls-test-coverage-report
+  - make bootstrap -j2 THREADS=2
+  - ./activate.sh
+  - boc-build -j 2
+  - boc-test -j 2

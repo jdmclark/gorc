@@ -1,3 +1,21 @@
+CXX=g++
+THREADS=2
+
+CFLAGS:= \
+	-std=c++11 \
+	-DPLATFORM_LINUX \
+	-Isrc \
+	-Isrc/libs \
+	-pthread \
+	-Wno-format \
+	-Wl,--no-as-needed
+
+LDFLAGS:= \
+	-lboost_system \
+	-lboost_filesystem \
+
+MAKEFLAGS+=-s
+
 BOC_BUILD_SRC_DIRS:= \
 	src/build/boc-build \
 	src/build/boc-build/entities \
@@ -11,45 +29,43 @@ BOC_BUILD_SRC_DIRS:= \
 	src/libs/text \
 	src/libs/utility \
 
-BOC_BUILD_CFLAGS:= \
-	-std=c++11 \
-	-DPLATFORM_LINUX \
-	-Isrc \
-	-Isrc/libs \
-	-pthread \
-	-Wno-format \
-	-Wl,--no-as-needed
+BOC_BUILD_SRC_FILES:= \
+	$(wildcard $(foreach dir,$(strip $(BOC_BUILD_SRC_DIRS)),$(dir)/*.cpp))
 
-BOC_BUILD_LDFLAGS:= \
-	-lboost_system \
-	-lboost_filesystem \
-	-lboost_thread \
+BOC_BUILD_OBJ_FILES:= \
+	$(foreach src,$(BOC_BUILD_SRC_FILES),bin/obj/$(patsubst %.cpp,%.o,$(src)))
 
 all:
 	$(error Requires 'bootstrap' or 'upgrade' target. See README.md for more information)
 
-bootstrap: \
-	clean-bin \
-	bootstrap-boc \
-	build-final-boc \
-	upgrade
+bootstrap:
+	$(info Bootstrapping build system. This may take some time)
+	@$(MAKE) clean-bin
+	@$(MAKE) bootstrap-boc
+	@$(MAKE) build-final-boc
+	@$(MAKE) upgrade
 
 clean-bin:
-	rm -rf bin
+	@rm -rf bin
 
-bootstrap-boc:
-	mkdir -p bin
-	g++ $(BOC_BUILD_CFLAGS) \
-		$(foreach dir,$(BOC_BUILD_SRC_DIRS),$(dir)/*.cpp) \
-		-o bin/boc-build \
-		$(BOC_BUILD_LDFLAGS)
+bin/obj/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@$(CXX) $(CFLAGS) -c $< -o $@
+
+bin/boc-build: $(BOC_BUILD_OBJ_FILES)
+	@$(CXX) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+bootstrap-boc: \
+	bin/boc-build
 
 build-final-boc:
-	cd src/build && ../../bin/boc-build
+	$(info Compiling production build system)
+	@cd src/build && ../../bin/boc-build -j $(THREADS)
 
 upgrade:
-	rm -rf bin
-	cp -r pkg/build-bin bin
+	$(info Upgrading build system)
+	@rm -rf bin
+	@cp -r pkg/build-bin bin
 
 .PHONY: \
 	all \
