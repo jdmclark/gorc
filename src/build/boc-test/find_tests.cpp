@@ -36,11 +36,15 @@ std::set<gorc::path> gorc::find_tests(std::vector<std::string> const &dirnames,
 
     // Working directory is not a test
     for(auto const &test_root : test_roots) {
-        for(auto const &dir : make_range(recursive_directory_iterator(test_root),
-                                         recursive_directory_iterator())) {
-            if(std::regex_match(dir.path().filename().generic_string(), assembled_regex)) {
-                path test = dir.path();
+        for(auto it = recursive_directory_iterator(test_root);
+            it != recursive_directory_iterator();
+            ++it) {
+            if(std::regex_match(it->path().filename().generic_string(), assembled_regex)) {
+                path test = it->path();
                 tests.insert(test.normalize());
+
+                // Do not recurse inside a matching test
+                it.no_push();
             }
         }
     }

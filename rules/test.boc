@@ -10,6 +10,7 @@ var $BUILD_BIN=$(PKG)/build-bin;
 
 var $FAILED_TEST_LOG=$(PROJECT_ROOT)/test-log.txt;
 
+$[TESTSUITE_DIR]=tempdir;
 var $TESTSUITE_DIR=(absolute_path($[TESTSUITE_DIR]));
 
 # Word wrap causes output instability. Disable it.
@@ -27,7 +28,7 @@ var $BUILTIN_REGEX=
     "s?c:/?/c/?Ig"
     "s?c:\\\\?/c/?Ig"
     "s?\\\\?/?g"
-    "s?"(absolute_path($[PWD]))"?$TESTDIR$?g"
+    "s?"(absolute_path(.))"?$TESTDIR$?g"
     "s?"$(PROJECT_ROOT)"?$ROOT$?g"
     "s?\\.EXE??Ig";
 
