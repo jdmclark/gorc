@@ -5,7 +5,12 @@
 
 namespace {
 
-    std::vector<char const *> spinner_states {
+    char const *box_start = "\r[";
+    char const *box_end = "]";
+    char const *fill = "-";
+    char const *empty = " ";
+
+    std::vector<char const *> const spinner_states {
         "-",
         "\\",
         "|",
@@ -24,14 +29,14 @@ gorc::shell_progress::shell_progress(size_t steps, size_t width, std::ostream &s
 
 void gorc::shell_progress::render(bool draw_spinner)
 {
-    stream << "\r[";
+    stream << box_start;
 
     size_t max_num = width - 2;
     size_t num_filled = steps ? ((std::min(current, steps) * max_num) / steps) : 0;
 
     size_t i = 1;
     for(; i < num_filled; ++i) {
-        stream << "-";
+        stream << fill;
     }
 
     if(draw_spinner) {
@@ -39,15 +44,15 @@ void gorc::shell_progress::render(bool draw_spinner)
         stream << spinner_states.at(spindex);
     }
     else {
-        stream << "-";
+        stream << fill;
     }
 
     // Fill rest
     for(; i < max_num; ++i) {
-        stream << " ";
+        stream << empty;
     }
 
-    stream << "]";
+    stream << box_end;
 }
 
 void gorc::shell_progress::advance(size_t steps_to_advance)
