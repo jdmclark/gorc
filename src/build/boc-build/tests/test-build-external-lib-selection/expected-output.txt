@@ -2,7 +2,7 @@ test.boc exists
 ==== stderr ====
 Loading dependency graph from project files
 Dependency graph generated
-Building out-of-date targets
+Building 4 out-of-date targets
 Build succeeded
 Caching dependency graph
 Finished writing cache

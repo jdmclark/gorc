@@ -16,7 +16,7 @@ Caching dependency graph
 Finished writing cache
 ---- first run ----
 Loading dependency graph from cache
-Building out-of-date targets
+Building 14 out-of-date targets
 Build succeeded
 Caching dependency graph
 Finished writing cache
@@ -26,7 +26,7 @@ Caching dependency graph
 Finished writing cache
 ---- second run ----
 Loading dependency graph from cache
-Building out-of-date targets
+Building 5 out-of-date targets
 Build succeeded
 Caching dependency graph
 Finished writing cache
@@ -36,7 +36,7 @@ Caching dependency graph
 Finished writing cache
 ---- third run ----
 Loading dependency graph from cache
-Building out-of-date targets
+Building 15 out-of-date targets
 Build succeeded
 Caching dependency graph
 Finished writing cache

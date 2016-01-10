@@ -57,7 +57,12 @@ int gorc::run_build(service_registry const &services, root_entity *root, bool ne
     dirty_entity_list dirty(closure, edges);
     entity_scheduler scheduler(dirty, edges);
 
-    LOG_INFO("Building out-of-date targets");
+    if(dirty.dirty_entities.empty()) {
+        LOG_INFO("All targets are up-to-date");
+        return EXIT_SUCCESS;
+    }
+
+    LOG_INFO(format("Building %d out-of-date targets") % dirty.dirty_entities.size());
     auto pbar = services.get<progress_factory>().make_progress(dirty.dirty_entities.size());
 
     // TODO: Multithreading

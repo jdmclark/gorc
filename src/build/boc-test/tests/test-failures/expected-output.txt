@@ -12,6 +12,9 @@ FAILED src/ztest-one
 FAILED src/ztest-three
 --------------------
 [ERROR] test.boc:1:1-1:6: command failed with code 1
+
+
+[ERROR] 2 tests failed
 ==== stdout ====
 Passed tests:
     src/ztest-two

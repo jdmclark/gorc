@@ -89,6 +89,9 @@ int gorc::run_tests(std::set<path> const &tests,
             ifs.close();
         }
 
+        std::cerr << std::endl << std::endl;
+        LOG_ERROR(format("%d tests failed") % failed_tests.size());
+
         return EXIT_FAILURE;
     }
     else {
