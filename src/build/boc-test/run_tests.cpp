@@ -7,11 +7,15 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <set>
+#include <thread>
+#include <mutex>
+#include <numeric>
 
 int gorc::run_tests(std::set<path> const &tests,
                     path const &boc_shell,
                     path const &fail_log,
                     service_registry const &services,
+                    size_t threads,
                     bool print_summary)
 {
     boost::filesystem::remove(fail_log);
@@ -21,10 +25,43 @@ int gorc::run_tests(std::set<path> const &tests,
 
     auto progress = services.get<progress_factory>().make_progress(tests.size());
 
+    std::set<path> pending_tests = tests;
     std::set<path> passed_tests;
     std::set<path> failed_tests;
+    std::mutex test_queue_lock;
 
-    for(auto const &test : tests) {
+    auto get_next_test = [&]() -> maybe<path> {
+        std::lock_guard<std::mutex> lg(test_queue_lock);
+        if(pending_tests.empty()) {
+            return nothing;
+        }
+
+        auto it = pending_tests.begin();
+        path rv = *it;
+        pending_tests.erase(it);
+        return rv;
+    };
+
+    auto retire_test = [&](path const &test, int result_code) {
+        std::lock_guard<std::mutex> lg(test_queue_lock);
+        progress->advance();
+
+        if(result_code == 0) {
+            passed_tests.insert(test);
+            boost::filesystem::remove_all(test / "tempdir");
+        }
+        else {
+            failed_tests.insert(test);
+            std::ifstream test_fail_log((test / "tempdir" / "test-log.txt").native());
+
+            fail_log_ofs << std::endl
+                         << "FAILED " << test.generic_string() << std::endl
+                         << "--------------------" << std::endl
+                         << test_fail_log.rdbuf();
+        }
+    };
+
+    auto run_test = [&](path const &test) {
         boost::filesystem::remove_all(test / "tempdir");
 
         boost::filesystem::create_directories(test / "tempdir");
@@ -44,22 +81,28 @@ int gorc::run_tests(std::set<path> const &tests,
                           test);
 
         // TODO: test timeout
-        int result_code = test_proc.join();
-        progress->advance();
+        return test_proc.join();
+    };
 
-        if(result_code == 0) {
-            passed_tests.insert(test);
-            boost::filesystem::remove_all(test / "tempdir");
-        }
-        else {
-            failed_tests.insert(test);
-            std::ifstream test_fail_log((test / "tempdir" / "test-log.txt").native());
+    auto test_thread = [&]() {
+        while(true) {
+            auto next_test = get_next_test();
+            if(!next_test.has_value()) {
+                return;
+            }
 
-            fail_log_ofs << std::endl
-                         << "FAILED " << test.generic_string() << std::endl
-                         << "--------------------" << std::endl
-                         << test_fail_log.rdbuf();
+            int result_code = run_test(next_test.get_value());
+            retire_test(next_test.get_value(), result_code);
         }
+    };
+
+    std::vector<std::thread> thread_pool;
+    for(size_t i = 0; i < std::max(size_t(1), threads); ++i) {
+        thread_pool.emplace_back(test_thread);
+    }
+
+    for(auto &thread : thread_pool) {
+        thread.join();
     }
 
     progress->finished();

@@ -10,6 +10,7 @@ namespace gorc {
                   path const &boc_shell,
                   path const &fail_log,
                   service_registry const &,
+                  size_t threads,
                   bool print_summary);
 
 }

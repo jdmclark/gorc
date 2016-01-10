@@ -26,6 +26,7 @@ namespace gorc {
 
         bool no_progress = false;
         bool print_summary = false;
+        size_t threads = 1;
 
         virtual void create_options(options &opts) override
         {
@@ -35,6 +36,9 @@ namespace gorc {
 
             opts.insert(make_switch_option("no-progress", no_progress));
             opts.insert(make_switch_option("print-summary", print_summary));
+
+            opts.insert(make_value_option("threads", threads));
+            opts.add_alias("threads", "-j");
         }
 
         virtual int main() override
@@ -70,7 +74,12 @@ namespace gorc {
             set_environment_variable("PROJECT_ROOT", project_root_path.native());
             set_environment_variable("BOC_SHELL", shell_path.native());
 
-            return run_tests(tests, shell_path, boc_test_log_filename, services, print_summary);
+            return run_tests(tests,
+                             shell_path,
+                             boc_test_log_filename,
+                             services,
+                             threads,
+                             print_summary);
         }
     };
 
