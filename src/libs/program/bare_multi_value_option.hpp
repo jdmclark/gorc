@@ -27,7 +27,8 @@ namespace gorc {
             return;
         }
 
-        virtual void load_from_arg(std::string const &arg) override
+        virtual void load_from_arg(std::string const &arg,
+                                   abstract_argument_queue &) override
         {
             try {
                 *binding = boost::lexical_cast<ElementT>(arg);

@@ -83,7 +83,7 @@ namespace gorc {
 
                 // Check if it's a bare option
                 if(bare_option && !begins_with(arg, "-")) {
-                    bare_option->load_from_arg(arg);
+                    bare_option->load_from_arg(arg, arg_list);
                     continue;
                 }
 
