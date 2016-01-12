@@ -65,7 +65,7 @@ int64_t gorc::json_input_stream::read_integer()
         }
     }
 
-    auto v = std::stoll(tok.get_value(), 0, 0);
+    auto v = std::stoll(tok.get_value(), nullptr, 0);
 
     return negative ? static_cast<int64_t>(-v) : static_cast<int64_t>(v);
 }
