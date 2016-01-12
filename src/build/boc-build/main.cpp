@@ -15,16 +15,6 @@
 
 using namespace boost::filesystem;
 
-namespace {
-
-    std::unordered_map<std::string, gorc::build_type> build_type_map {
-        { "release", gorc::build_type::release },
-        { "debug", gorc::build_type::debug },
-        { "coverage", gorc::build_type::coverage }
-    };
-
-}
-
 namespace gorc {
 
     class boc_build_program : public program {
@@ -48,12 +38,7 @@ namespace gorc {
                 return build_type::release;
             }
 
-            auto it = build_type_map.find(custom_build_type);
-            if(it == build_type_map.end()) {
-                LOG_FATAL(format("Unknown build type '%s'") % custom_build_type);
-            }
-
-            return it->second;
+            return to_build_type(custom_build_type);
         }
 
         virtual void create_options(options &opts) override

@@ -2,10 +2,13 @@
     "name" : "build-common",
     "dependencies" : [
         "libs/io",
-        "libs/log"
+        "libs/log",
+        "libs/text"
     ],
     "sources" : [
+        "build_type.cpp",
         "change_to_project_root.cpp",
+        "compiler_type.cpp",
         "paths.cpp"
     ]
 }
