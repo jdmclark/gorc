@@ -16,6 +16,9 @@
         "options.cpp",
         "required_option.cpp",
         "program.cpp",
+        "subcommand.cpp",
+        "subcommand_option.cpp",
+        "subcommand_registry.cpp",
         "switch_option.cpp"
     ]
 }

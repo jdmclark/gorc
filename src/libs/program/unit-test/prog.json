@@ -6,6 +6,9 @@
         "libs/test"
     ],
     "sources" : [
-        "options_test.cpp"
+        "bare_options_test.cpp",
+        "option_constraint_test.cpp",
+        "options_test.cpp",
+        "subcommand_test.cpp"
     ]
 }

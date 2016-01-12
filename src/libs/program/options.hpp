@@ -64,42 +64,13 @@ namespace gorc {
             constraints.emplace_back(std::make_unique<ConstraintT>(std::forward<ArgT>(args)...));
         }
 
+        void load_from_arg_queue(abstract_argument_queue &args);
+
         template <typename ArgRangeT>
         void load_from_arg_list(ArgRangeT const &range)
         {
-            // Reset all opts.
-            if(bare_option) {
-                bare_option->reset();
-            }
-
-            for(auto &opt : opts) {
-                opt->reset();
-            }
-
             auto arg_list = make_range_argument_queue(range.begin(), range.end());
-            while(!arg_list.empty()) {
-                auto arg = arg_list.peek();
-                arg_list.pop();
-
-                // Check if it's a bare option
-                if(bare_option && !begins_with(arg, "-")) {
-                    bare_option->load_from_arg(arg, arg_list);
-                    continue;
-                }
-
-                auto it = alias_map.find(arg);
-                if(it == alias_map.end()) {
-                    LOG_FATAL(format("Unrecognized option %s") % arg);
-                }
-                else {
-                    it->second->load_from_arg_list(arg_list);
-                }
-            }
-
-            // Evaluate constraints
-            for(auto const &constraint : constraints) {
-                constraint->check_constraint(*this);
-            }
+            load_from_arg_queue(arg_list);
         }
 
         void add_alias(std::string const &option, std::string const &alias);

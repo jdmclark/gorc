@@ -52,3 +52,39 @@ void gorc::options::insert_bare(std::unique_ptr<abstract_bare_option> &&opt)
 {
     bare_option = std::forward<std::unique_ptr<abstract_bare_option>>(opt);
 }
+
+void gorc::options::load_from_arg_queue(abstract_argument_queue &arg_list)
+{
+    // Reset all opts.
+    if(bare_option) {
+        bare_option->reset();
+    }
+
+    for(auto &opt : opts) {
+        opt->reset();
+    }
+
+    while(!arg_list.empty()) {
+        auto arg = arg_list.peek();
+        arg_list.pop();
+
+        // Check if it's a bare option
+        if(bare_option && !begins_with(arg, "-")) {
+            bare_option->load_from_arg(arg, arg_list);
+            continue;
+        }
+
+        auto it = alias_map.find(arg);
+        if(it == alias_map.end()) {
+            LOG_FATAL(format("Unrecognized option %s") % arg);
+        }
+        else {
+            it->second->load_from_arg_list(arg_list);
+        }
+    }
+
+    // Evaluate constraints
+    for(auto const &constraint : constraints) {
+        constraint->check_constraint(*this);
+    }
+}
