@@ -1,5 +1,4 @@
 #include "global.hpp"
-#include "make_unique.hpp"
 #include <unordered_map>
 #include <mutex>
 #include <iostream>
@@ -14,7 +13,7 @@ namespace {
     global_map& get_global_registry()
     {
         if(!global_registry) {
-            global_registry = gorc::make_unique<global_map>();
+            global_registry = std::make_unique<global_map>();
         }
 
         return *global_registry;

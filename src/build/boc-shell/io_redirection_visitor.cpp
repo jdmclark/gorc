@@ -1,8 +1,9 @@
 #include "io_redirection_visitor.hpp"
 #include "argument_visitor.hpp"
-#include "utility/make_unique.hpp"
 #include "value.hpp"
 #include "log/log.hpp"
+
+#include <memory>
 
 gorc::io_redirection_visitor::io_redirection_visitor(bool input)
     : input(input)
@@ -20,12 +21,12 @@ std::unique_ptr<gorc::pipe> gorc::io_redirection_visitor::visit(pipe_io_redirect
     auto target_file = target_file_vec.front();
 
     if(input) {
-        return make_unique<pipe>(make_input_file_pipe(target_file));
+        return std::make_unique<pipe>(make_input_file_pipe(target_file));
     }
     else if(target.append) {
-        return make_unique<pipe>(make_output_file_append_pipe(target_file));
+        return std::make_unique<pipe>(make_output_file_append_pipe(target_file));
     }
     else {
-        return make_unique<pipe>(make_output_file_pipe(target_file));
+        return std::make_unique<pipe>(make_output_file_pipe(target_file));
     }
 }

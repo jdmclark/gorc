@@ -16,7 +16,6 @@
         "join_test.cpp",
         "lcm_test.cpp",
         "local_test.cpp",
-        "make_unique_test.cpp",
         "maybe_test.cpp",
         "mod_test.cpp",
         "oxford_join_test.cpp",

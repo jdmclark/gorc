@@ -2,9 +2,9 @@
 
 #include "value.hpp"
 #include "type.hpp"
-#include "utility/make_unique.hpp"
 #include "mock_verb.hpp"
 #include "function_verb.hpp"
+#include <memory>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -35,7 +35,7 @@ namespace gorc {
             template <typename VerbT, typename ...ArgT>
             void emplace_verb(ArgT ...args)
             {
-                internal_add_verb(make_unique<VerbT>(std::forward<ArgT>(args)...));
+                internal_add_verb(std::make_unique<VerbT>(std::forward<ArgT>(args)...));
             }
 
             void add_synonym(std::string const &name, std::string const &syn);

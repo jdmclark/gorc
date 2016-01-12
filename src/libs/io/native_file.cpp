@@ -1,6 +1,5 @@
 #include "native_file.hpp"
 #include <system_error>
-#include "utility/make_unique.hpp"
 #include "utility/runtime_assert.hpp"
 #include <errno.h>
 
@@ -95,10 +94,10 @@ bool gorc::native_read_only_file::at_end()
 
 std::unique_ptr<gorc::native_file> gorc::make_native_file(path const &filename)
 {
-    return make_unique<native_file>(filename);
+    return std::make_unique<native_file>(filename);
 }
 
 std::unique_ptr<gorc::native_read_only_file> gorc::make_native_read_only_file(path const &filename)
 {
-    return make_unique<native_read_only_file>(filename);
+    return std::make_unique<native_read_only_file>(filename);
 }

@@ -3,7 +3,6 @@
 #include "log/log.hpp"
 #include "text/json_input_stream.hpp"
 #include "text/json_specification.hpp"
-#include "utility/make_unique.hpp"
 #include "../common/paths.hpp"
 #include <set>
 #include <map>
@@ -149,7 +148,7 @@ gorc::project_file::project_file(path const &project_filename)
         auto prog_path = boc_src_directory / prog / boc_prog_filename;
         project_files.insert(prog_path);
 
-        auto res = programs.emplace(prog, make_unique<program_data>(prog_path));
+        auto res = programs.emplace(prog, std::make_unique<program_data>(prog_path));
 
         if(!res.second) {
             LOG_FATAL(format("program '%s' is included multiple times") % prog.generic_string());
@@ -169,7 +168,7 @@ gorc::project_file::project_file(path const &project_filename)
         auto combined_lib_path = boc_src_directory / libpath / boc_lib_filename;
         project_files.insert(combined_lib_path);
 
-        auto res = libraries.emplace(libpath, make_unique<library_data>(combined_lib_path));
+        auto res = libraries.emplace(libpath, std::make_unique<library_data>(combined_lib_path));
 
         for(auto const &dep : res.first->second->dependencies) {
             auto loaded_it = libraries.find(dep);

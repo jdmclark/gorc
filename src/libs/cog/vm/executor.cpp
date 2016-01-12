@@ -10,14 +10,14 @@ gorc::cog::executor::executor(verb_table &verbs)
 
 gorc::cog::instance& gorc::cog::executor::create_instance(cog::script const &cog)
 {
-    instances.push_back(make_unique<instance>(cog));
+    instances.push_back(std::make_unique<instance>(cog));
     return *instances.back();
 }
 
 gorc::cog::instance& gorc::cog::executor::create_instance(cog::script const &cog,
                                                           std::vector<value> const &values)
 {
-    instances.push_back(make_unique<instance>(cog, values));
+    instances.push_back(std::make_unique<instance>(cog, values));
     return *instances.back();
 }
 

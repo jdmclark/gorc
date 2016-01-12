@@ -1,5 +1,4 @@
 #include "local.hpp"
-#include "make_unique.hpp"
 #include <unordered_map>
 
 namespace {
@@ -22,7 +21,7 @@ std::shared_ptr<gorc::local> gorc::get_or_create_local(
         gorc::abstract_local_factory const &factory)
 {
     if(!local_registry) {
-        local_registry = make_unique<local_map>();
+        local_registry = std::make_unique<local_map>();
     }
 
     auto it = local_registry->find(tid);

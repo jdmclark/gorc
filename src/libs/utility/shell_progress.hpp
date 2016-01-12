@@ -1,6 +1,7 @@
 #pragma once
 
 #include "progress.hpp"
+#include <memory>
 #include <cstddef>
 #include <string>
 #include <iostream>

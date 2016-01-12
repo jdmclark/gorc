@@ -2,7 +2,6 @@
 
 #include "abstract_option.hpp"
 #include "log/log.hpp"
-#include "utility/make_unique.hpp"
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
@@ -61,7 +60,7 @@ namespace gorc {
     std::unique_ptr<abstract_option> make_multi_value_option(std::string const &name,
                                                              OutputItT output_iterator)
     {
-        return make_unique<multi_value_option<ElementT, OutputItT>>(name, output_iterator);
+        return std::make_unique<multi_value_option<ElementT, OutputItT>>(name, output_iterator);
     }
 
 }

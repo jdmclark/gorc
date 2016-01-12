@@ -2,7 +2,6 @@
 #include "ast/factory.hpp"
 #include "cog/grammar/grammar.hpp"
 #include "log/log.hpp"
-#include "utility/make_unique.hpp"
 #include "cog/semantics/analyzer.hpp"
 #include "cog/codegen/codegen.hpp"
 
@@ -25,7 +24,7 @@ std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
                      "could not compile script");
 
     cog::ast::translation_unit *tu = maybe_tu.get_value();
-    auto script = make_unique<cog::script>();
+    auto script = std::make_unique<cog::script>();
 
     if(!handle_parsed_ast(*tu)) {
         return std::move(script);

@@ -22,7 +22,7 @@ begin_suite(ast_factory_test);
 
 test_case(destructors_called)
 {
-    auto fac = gorc::make_unique<gorc::ast_factory>();
+    auto fac = std::make_unique<gorc::ast_factory>();
 
     assert_log_empty();
 

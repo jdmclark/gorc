@@ -10,6 +10,7 @@
 #include "io/path.hpp"
 #include <boost/filesystem.hpp>
 #include <stack>
+#include <memory>
 
 int gorc::program_visitor::visit(pipe_command &cmd)
 {
@@ -22,7 +23,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
     else {
         // Use a normal pipe, but close the output end.
         // This will cause the child process to exit with SIGPIPE instead of halting.
-        stored_redirected_stdin_pipe = make_unique<pipe>();
+        stored_redirected_stdin_pipe = std::make_unique<pipe>();
         stored_redirected_stdin_pipe->close_output();
     }
 
@@ -48,7 +49,7 @@ int gorc::program_visitor::visit(pipe_command &cmd)
 
     std::vector<std::unique_ptr<pipe>> pipes;
     for(size_t i = 1; i < num_subcommands; ++i) {
-        pipes.push_back(make_unique<pipe>());
+        pipes.push_back(std::make_unique<pipe>());
     }
 
     std::vector<maybe<pipe*>> stdin_pipes;
@@ -89,11 +90,11 @@ int gorc::program_visitor::visit(pipe_command &cmd)
             args.push_back(*it);
         }
 
-        processes.push_back(make_unique<process>(prog,
-                                                 args,
-                                                 *stdin_it,
-                                                 *stdout_it,
-                                                 redirected_stderr_pipe));
+        processes.push_back(std::make_unique<process>(prog,
+                                                      args,
+                                                      *stdin_it,
+                                                      *stdout_it,
+                                                      redirected_stderr_pipe));
         ++sub_it;
         ++stdin_it;
         ++stdout_it;

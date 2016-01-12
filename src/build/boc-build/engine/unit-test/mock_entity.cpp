@@ -1,7 +1,6 @@
 #include "mock_entity.hpp"
 #include "../entity_serializer.hpp"
 #include "../entity_deserializer.hpp"
-#include "utility/make_unique.hpp"
 #include "log/log.hpp"
 
 mock_entity::mock_entity(gorc::entity_input_stream &is)
@@ -64,7 +63,7 @@ namespace {
     {
         auto it = rv.find(name);
         if(it == rv.end()) {
-            it = rv.emplace(name, gorc::make_unique<mock_entity>(name)).first;
+            it = rv.emplace(name, std::make_unique<mock_entity>(name)).first;
         }
 
         // Safe: mock graph only contains mock entities.

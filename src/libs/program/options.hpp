@@ -10,7 +10,6 @@
 #include "at_least_one_input.hpp"
 #include "dependent_option.hpp"
 
-#include "utility/make_unique.hpp"
 #include "utility/string_search.hpp"
 #include "log/log.hpp"
 #include <unordered_map>
@@ -54,7 +53,7 @@ namespace gorc {
         template <typename OptionT, typename ...ArgT>
         void emplace(std::string const &name, ArgT &&...args)
         {
-            insert(make_unique<OptionT>(name, std::forward<ArgT>(args)...));
+            insert(std::make_unique<OptionT>(name, std::forward<ArgT>(args)...));
         }
 
         void insert_bare(std::unique_ptr<abstract_bare_option> &&opt);
@@ -62,7 +61,7 @@ namespace gorc {
         template <typename ConstraintT, typename ...ArgT>
         void emplace_constraint(ArgT &&...args)
         {
-            constraints.emplace_back(make_unique<ConstraintT>(std::forward<ArgT>(args)...));
+            constraints.emplace_back(std::make_unique<ConstraintT>(std::forward<ArgT>(args)...));
         }
 
         template <typename ArgRangeT>

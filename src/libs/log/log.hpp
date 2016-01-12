@@ -3,7 +3,6 @@
 #include "log_frontend.hpp"
 #include "log_midend.hpp"
 #include "log_backend.hpp"
-#include "utility/make_unique.hpp"
 #include "utility/flag_set.hpp"
 #include "logged_runtime_error.hpp"
 #include <memory>
@@ -19,7 +18,7 @@ namespace gorc {
     void emplace_log_backend(flag_set<log_level> filter, ArgT&&... arg)
     {
         get_global<log_midend>()->insert_log_backend(filter,
-                                                     make_unique<T>(std::forward<ArgT>(arg)...));
+                                                     std::make_unique<T>(std::forward<ArgT>(arg)...));
     }
 
     void erase_log_backends();

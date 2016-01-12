@@ -11,7 +11,7 @@
 namespace {
 
     std::vector<std::string> common_cflags {
-        "-std=c++11",
+        "-std=c++14",
         "-DPLATFORM_LINUX",
         "-pthread",
         "-Werror",

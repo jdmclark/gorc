@@ -1,7 +1,7 @@
 #include "test/test.hpp"
 #include "utility/variant.hpp"
-#include "utility/make_unique.hpp"
 #include "log/log.hpp"
+#include <memory>
 #include <vector>
 
 using namespace gorc;
@@ -88,7 +88,7 @@ test_case(single_variant_set)
 
 test_case(single_variant_set_uncopyable)
 {
-    variant<std::unique_ptr<int>> v(make_unique<int>(5));
+    variant<std::unique_ptr<int>> v(std::make_unique<int>(5));
     assert_eq(v.accept(int_collector_visitor()), 5);
 }
 
@@ -96,7 +96,7 @@ test_case(variant_assignment)
 {
     variant<int, std::unique_ptr<int>> v(5);
     assert_eq(v.accept(int_collector_visitor()), 5);
-    v = make_unique<int>(583);
+    v = std::make_unique<int>(583);
     assert_eq(v.accept(int_collector_visitor()), 583);
 }
 
@@ -138,7 +138,7 @@ test_case(variant_destructors)
 test_case(immutable_variant_immutable_visitor)
 {
     variant<int, std::unique_ptr<int>> const a(5);
-    variant<int, std::unique_ptr<int>> const b(make_unique<int>(7));
+    variant<int, std::unique_ptr<int>> const b(std::make_unique<int>(7));
 
     assert_eq(a.accept(int_collector_visitor()), 5);
     assert_eq(b.accept(int_collector_visitor()), 7);
@@ -147,7 +147,7 @@ test_case(immutable_variant_immutable_visitor)
 test_case(mutable_variant_immutable_visitor)
 {
     variant<int, std::unique_ptr<int>> a(5);
-    variant<int, std::unique_ptr<int>> b(make_unique<int>(7));
+    variant<int, std::unique_ptr<int>> b(std::make_unique<int>(7));
 
     assert_eq(a.accept(int_collector_visitor()), 5);
     assert_eq(b.accept(int_collector_visitor()), 7);
@@ -162,7 +162,7 @@ test_case(mutable_variant_immutable_visitor)
 test_case(immutable_variant_mutable_visitor)
 {
     variant<int, std::unique_ptr<int>> const a(5);
-    variant<int, std::unique_ptr<int>> const b(make_unique<int>(7));
+    variant<int, std::unique_ptr<int>> const b(std::make_unique<int>(7));
 
     mutable_int_collector_visitor v;
     assert_eq(v.total, 0);
@@ -175,7 +175,7 @@ test_case(immutable_variant_mutable_visitor)
 test_case(mutable_variant_mutable_visitor)
 {
     variant<int, std::unique_ptr<int>> a(5);
-    variant<int, std::unique_ptr<int>> b(make_unique<int>(7));
+    variant<int, std::unique_ptr<int>> b(std::make_unique<int>(7));
 
     mutable_int_collector_visitor v;
     assert_eq(v.total, 0);
@@ -278,8 +278,8 @@ test_case(variant_copy_ctor)
 
 test_case(variant_move_ctor)
 {
-    variant<std::unique_ptr<int>> v(make_unique<int>(58));
-    variant<std::unique_ptr<int>> w(make_unique<int>(274));
+    variant<std::unique_ptr<int>> v(std::make_unique<int>(58));
+    variant<std::unique_ptr<int>> w(std::make_unique<int>(274));
 
     variant<std::unique_ptr<int>> x(std::move(v));
     assert_eq(x.accept(int_collector_visitor()), 58);

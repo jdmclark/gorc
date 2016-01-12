@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "utility/make_unique.hpp"
+#include <memory>
 
 namespace test {
 
@@ -29,7 +29,7 @@ namespace test {
 
         virtual std::unique_ptr<case_object> create_case() override
         {
-            return ::gorc::make_unique<T>();
+            return std::make_unique<T>();
         }
     };
 

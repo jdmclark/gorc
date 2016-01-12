@@ -1,6 +1,5 @@
 #include "pipe.hpp"
 #include "log/log.hpp"
-#include "utility/make_unique.hpp"
 #include <system_error>
 #include <unistd.h>
 #include <stdlib.h>
@@ -99,8 +98,8 @@ gorc::pipe::pipe()
     }
     // LCOV_EXCL_STOP
 
-    input = make_unique<pipe_input_stream>(pipefd[0]);
-    output = make_unique<pipe_output_stream>(pipefd[1]);
+    input = std::make_unique<pipe_input_stream>(pipefd[0]);
+    output = std::make_unique<pipe_output_stream>(pipefd[1]);
 }
 
 gorc::pipe::pipe(std::unique_ptr<pipe_input_stream> &&input,
@@ -157,7 +156,7 @@ gorc::pipe gorc::make_input_file_pipe(path const &p)
         throw std::system_error(errno, std::generic_category());
     }
 
-    return pipe(make_unique<pipe_input_stream>(res),
+    return pipe(std::make_unique<pipe_input_stream>(res),
                 nullptr);
 }
 
@@ -181,7 +180,7 @@ gorc::pipe gorc::make_output_file_pipe(path const &p)
     }
 
     return pipe(nullptr,
-                make_unique<pipe_output_stream>(res));
+                std::make_unique<pipe_output_stream>(res));
 }
 
 gorc::pipe gorc::make_output_file_append_pipe(path const &p)
@@ -204,5 +203,5 @@ gorc::pipe gorc::make_output_file_append_pipe(path const &p)
     }
 
     return pipe(nullptr,
-                make_unique<pipe_output_stream>(res));
+                std::make_unique<pipe_output_stream>(res));
 }

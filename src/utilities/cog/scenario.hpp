@@ -2,6 +2,7 @@
 
 #include "cog/script/value.hpp"
 #include "text/json_input_stream.hpp"
+#include <memory>
 #include <unordered_map>
 #include <string>
 #include <vector>

@@ -2,7 +2,6 @@
 
 #include "abstract_option.hpp"
 #include "log/log.hpp"
-#include "utility/make_unique.hpp"
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
@@ -69,7 +68,7 @@ namespace gorc {
                                                        ValueT &binding,
                                                        DefaultT const &default_value = ValueT())
     {
-        return make_unique<value_option<ValueT, ValueT, DefaultT>>(name, binding, default_value);
+        return std::make_unique<value_option<ValueT, ValueT, DefaultT>>(name, binding, default_value);
     }
 
     template <typename ValueT, typename BindingT, typename DefaultT = BindingT>
@@ -77,7 +76,7 @@ namespace gorc {
                                                        BindingT &binding,
                                                        DefaultT const &default_value = BindingT())
     {
-        return make_unique<value_option<ValueT, BindingT, DefaultT>>(name, binding, default_value);
+        return std::make_unique<value_option<ValueT, BindingT, DefaultT>>(name, binding, default_value);
     }
 
 }

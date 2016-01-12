@@ -1,5 +1,4 @@
 #include "shell_progress.hpp"
-#include "make_unique.hpp"
 #include <numeric>
 #include <vector>
 
@@ -78,5 +77,5 @@ gorc::shell_progress_factory::shell_progress_factory(size_t width,
 
 std::unique_ptr<gorc::progress> gorc::shell_progress_factory::make_progress(size_t steps)
 {
-    return make_unique<shell_progress>(steps, width, stream);
+    return std::make_unique<shell_progress>(steps, width, stream);
 }

@@ -396,14 +396,14 @@ test_case(uncopyable)
 {
     maybe<std::unique_ptr<int>> m;
 
-    m = make_unique<int>(152);
+    m = std::make_unique<int>(152);
 
     assert_eq(*m.get_value(), 152);
 }
 
 test_case(uncopyable_ctor)
 {
-    maybe<std::unique_ptr<int>> m(make_unique<int>(8573));
+    maybe<std::unique_ptr<int>> m(std::make_unique<int>(8573));
     assert_eq(*m.get_value(), 8573);
 }
 

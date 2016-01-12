@@ -41,7 +41,7 @@ namespace gorc {
         void register_entity()
         {
             uint32_t next_id = static_cast<uint32_t>(entity_types.size());
-            entity_types.push_back(make_unique<entity_registry_element_impl<T>>());
+            entity_types.push_back(std::make_unique<entity_registry_element_impl<T>>());
             entity_type_map.emplace(typeid(T), next_id);
             entity_elements_map.emplace(next_id, entity_types.back().get());
         }

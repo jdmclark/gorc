@@ -73,15 +73,15 @@ namespace gorc {
         {
             std::unique_ptr<jk_virtual_file_system> vfs;
             if(jk_game.empty()) {
-                vfs = make_unique<jk_virtual_file_system>(jk_resource);
+                vfs = std::make_unique<jk_virtual_file_system>(jk_resource);
             }
             else {
-                vfs = make_unique<jk_virtual_file_system>(jk_resource, jk_game);
+                vfs = std::make_unique<jk_virtual_file_system>(jk_resource, jk_game);
             }
 
             std::unique_ptr<virtual_container> episode_gob;
             if(!jk_episode.empty()) {
-                episode_gob = make_unique<gob_virtual_container>(jk_episode);
+                episode_gob = std::make_unique<gob_virtual_container>(jk_episode);
                 vfs->set_current_episode(*episode_gob);
             }
 

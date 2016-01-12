@@ -3,8 +3,8 @@
 #include "text/json_output_stream.hpp"
 #include "io/memory_file.hpp"
 #include "io/native_file.hpp"
-#include "utility/make_unique.hpp"
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <cmath>
@@ -894,13 +894,13 @@ test_case(heterogeneous_objects)
                                          [](json_input_stream &jis, std::string const &type)
                                             -> std::unique_ptr<hg_base> {
             if(type == "foo") {
-                return make_unique<hg_foo>(json_deserialization_constructor_tag, jis);
+                return std::make_unique<hg_foo>(json_deserialization_constructor_tag, jis);
             }
             else if(type == "bar") {
-                return make_unique<hg_bar>(json_deserialization_constructor_tag, jis);
+                return std::make_unique<hg_bar>(json_deserialization_constructor_tag, jis);
             }
             else {
-                return make_unique<hg_baz>(json_deserialization_constructor_tag, jis);
+                return std::make_unique<hg_baz>(json_deserialization_constructor_tag, jis);
             }
         });
 
@@ -951,7 +951,7 @@ test_case(heterogeneous_root)
     json_deserialize_heterogeneous(jis,
                                    [&](json_input_stream &jis, std::string const &type) {
             assert_eq(type, "foo");
-            val = make_unique<hg_base>(json_deserialization_constructor_tag, jis);
+            val = std::make_unique<hg_base>(json_deserialization_constructor_tag, jis);
         });
 
     assert_true(val);

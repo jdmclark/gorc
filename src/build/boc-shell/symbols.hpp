@@ -2,7 +2,7 @@
 
 #include "ast.hpp"
 #include "value.hpp"
-#include "utility/make_unique.hpp"
+#include <memory>
 #include <functional>
 #include <vector>
 
@@ -26,7 +26,7 @@ namespace gorc {
                           size_t args,
                           FunctorT fn)
     {
-        register_builtin(name, make_unique<builtin>(args, fn));
+        register_builtin(name, std::make_unique<builtin>(args, fn));
     }
 
     maybe<builtin*> get_builtin(std::string const &name);

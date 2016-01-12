@@ -2,7 +2,7 @@
 
 #include "tokenizer.hpp"
 #include "utility/runtime_assert.hpp"
-#include "utility/make_unique.hpp"
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -42,10 +42,10 @@ namespace gorc {
 
         void grow()
         {
-            token_buffer.push_back(make_unique<token>(tok.get_value(),
-                                                      tok.get_reason(),
-                                                      tok.get_type(),
-                                                      tok.get_location()));
+            token_buffer.push_back(std::make_unique<token>(tok.get_value(),
+                                                           tok.get_reason(),
+                                                           tok.get_type(),
+                                                           tok.get_location()));
             tok.advance();
         }
 

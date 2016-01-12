@@ -106,10 +106,10 @@ namespace gorc {
 
             std::unique_ptr<progress_factory> prog_fac;
             if(no_progress) {
-                prog_fac = make_unique<file_progress_factory>();
+                prog_fac = std::make_unique<file_progress_factory>();
             }
             else {
-                prog_fac = make_unique<shell_progress_factory>();
+                prog_fac = std::make_unique<shell_progress_factory>();
             }
 
             services.add<progress_factory>(*prog_fac);

@@ -241,8 +241,8 @@ test_case(diagnostic_context_location_default_constructor)
 
 test_case(unordered_destruction)
 {
-    auto dcl = gorc::make_unique<gorc::diagnostic_context>("foo");
-    auto dcm = gorc::make_unique<gorc::diagnostic_context>("bar");
+    auto dcl = std::make_unique<gorc::diagnostic_context>("foo");
+    auto dcm = std::make_unique<gorc::diagnostic_context>("bar");
 
     LOG_ERROR("first message");
     dcl.reset();

@@ -1,6 +1,5 @@
 #include "scenario.hpp"
 #include "text/json_specification.hpp"
-#include "utility/make_unique.hpp"
 #include "log/log.hpp"
 #include <list>
 

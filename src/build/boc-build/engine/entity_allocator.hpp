@@ -1,8 +1,8 @@
 #pragma once
 
 #include "base_file_entity.hpp"
-#include "utility/make_unique.hpp"
 #include "log/log.hpp"
+#include <memory>
 #include <type_traits>
 #include <vector>
 #include <map>
@@ -19,7 +19,7 @@ namespace gorc {
         template <typename T, typename ...ArgT>
         T* inner_emplace(ArgT &&...args)
         {
-            auto ptr = make_unique<T>(std::forward<ArgT>(args)...);
+            auto ptr = std::make_unique<T>(std::forward<ArgT>(args)...);
             T *rv = ptr.get();
             entities.push_back(std::move(ptr));
             return rv;

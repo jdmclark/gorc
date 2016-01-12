@@ -1,7 +1,6 @@
 #pragma once
 
 #include "json_input_stream.hpp"
-#include "utility/make_unique.hpp"
 #include "utility/oxford_join.hpp"
 #include "log/log.hpp"
 #include <set>

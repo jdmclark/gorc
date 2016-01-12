@@ -3,7 +3,7 @@
 #include "verb.hpp"
 #include "verb_traits.hpp"
 #include "log/log.hpp"
-#include "utility/make_unique.hpp"
+#include <memory>
 
 namespace gorc {
     namespace cog {
@@ -108,9 +108,9 @@ namespace gorc {
         std::unique_ptr<verb> make_function_verb(std::string const &name,
                                                  FnT functor)
         {
-            return make_unique<function_verb<FnT,
-                                             compute_verb_arity(functor),
-                                             compute_verb_result_type(functor)>>(name, functor);
+            return std::make_unique<function_verb<FnT,
+                                                  compute_verb_arity(functor),
+                                                  compute_verb_result_type(functor)>>(name, functor);
         }
 
         template <typename FnT, size_t arity, value_type result_type>
@@ -140,9 +140,9 @@ namespace gorc {
         std::unique_ptr<verb> make_service_verb(std::string const &name,
                                                 FnT functor)
         {
-            return make_unique<service_verb<FnT,
-                                            compute_verb_arity(functor) - 1,
-                                            compute_verb_result_type(functor)>>(name, functor);
+            return std::make_unique<service_verb<FnT,
+                                                 compute_verb_arity(functor) - 1,
+                                                 compute_verb_result_type(functor)>>(name, functor);
         }
 
     }

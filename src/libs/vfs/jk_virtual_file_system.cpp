@@ -20,7 +20,7 @@ namespace {
         std::unique_ptr<virtual_container> cnt;
 
         try {
-            cnt = make_unique<gob_virtual_container>(filename);
+            cnt = std::make_unique<gob_virtual_container>(filename);
         }
         catch(...) {
             // File is corrupt.

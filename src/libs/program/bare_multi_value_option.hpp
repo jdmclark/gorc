@@ -2,7 +2,7 @@
 
 #include "abstract_bare_option.hpp"
 #include "log/log.hpp"
-#include "utility/make_unique.hpp"
+#include <memory>
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
 
@@ -50,6 +50,6 @@ namespace gorc {
     template <typename ElementT = std::string, typename OutputItT>
     std::unique_ptr<abstract_bare_option> make_bare_multi_value_option(OutputItT output_iterator)
     {
-        return make_unique<bare_multi_value_option<ElementT, OutputItT>>(output_iterator);
+        return std::make_unique<bare_multi_value_option<ElementT, OutputItT>>(output_iterator);
     }
 }

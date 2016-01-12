@@ -1,5 +1,4 @@
 #include "find_tests.hpp"
-#include "utility/make_unique.hpp"
 #include "utility/range.hpp"
 #include "utility/join.hpp"
 #include "log/log.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "node.hpp"
-#include "utility/make_unique.hpp"
+#include <memory>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
@@ -24,7 +24,7 @@ namespace gorc {
             template <typename ...ArgT>
             NodeT* emplace(ArgT &&...args)
             {
-                nodes.emplace_back(make_unique<NodeT>(std::forward<ArgT>(args)...));
+                nodes.emplace_back(std::make_unique<NodeT>(std::forward<ArgT>(args)...));
                 return nodes.back().get();
             }
         };
@@ -37,7 +37,7 @@ namespace gorc {
             auto it = factories.find(typeid(NodeT));
             if(it == factories.end()) {
                 it = factories.emplace(std::type_index(typeid(NodeT)),
-                                       make_unique<factory_factory_impl<NodeT>>()).first;
+                                       std::make_unique<factory_factory_impl<NodeT>>()).first;
             }
 
             return *reinterpret_cast<factory_factory_impl<NodeT>*>(it->second.get());
