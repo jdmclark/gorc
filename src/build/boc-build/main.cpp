@@ -5,10 +5,9 @@
 #include "list_targets.hpp"
 #include "run_build.hpp"
 #include "print_status.hpp"
-#include "utility/shell_progress.hpp"
-#include "utility/file_progress.hpp"
 #include "utility/service_registry.hpp"
 #include "entities/gnu_compiler_properties.hpp"
+#include "build/common/make_progress_factory.hpp"
 #include "build/common/change_to_project_root.hpp"
 #include "build/common/paths.hpp"
 #include <boost/filesystem.hpp>
@@ -23,7 +22,6 @@ namespace gorc {
         bool list_targets_only = false;
         bool print_build_summary = false;
         bool print_status = false;
-        bool no_progress = false;
         size_t threads = 1;
 
         path original_working_directory;
@@ -56,7 +54,6 @@ namespace gorc {
             // Build options
             opts.insert(make_value_option("type", custom_build_type));
             opts.insert(make_switch_option("print-summary", print_build_summary));
-            opts.insert(make_switch_option("no-progress", no_progress));
 
             opts.insert(make_value_option("threads", threads));
             opts.add_alias("threads", "-j");
@@ -89,14 +86,7 @@ namespace gorc {
             gnu_compiler_properties comp_props(comp_config);
             services.add<compiler_properties>(comp_props);
 
-            std::unique_ptr<progress_factory> prog_fac;
-            if(no_progress) {
-                prog_fac = std::make_unique<file_progress_factory>();
-            }
-            else {
-                prog_fac = std::make_unique<shell_progress_factory>();
-            }
-
+            std::unique_ptr<progress_factory> prog_fac = make_boc_progress_factory();
             services.add<progress_factory>(*prog_fac);
 
             // Build is allowed to create new entities to track real (file) dependencies.

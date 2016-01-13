@@ -1,13 +1,12 @@
 #include "program/program.hpp"
 #include "build/common/paths.hpp"
 #include "build/common/change_to_project_root.hpp"
+#include "build/common/make_progress_factory.hpp"
 #include "find_tests.hpp"
 #include "run_tests.hpp"
 #include "system/self.hpp"
 #include "system/env.hpp"
 #include "utility/service_registry.hpp"
-#include "utility/shell_progress.hpp"
-#include "utility/file_progress.hpp"
 #include "log/log.hpp"
 
 namespace gorc {
@@ -20,7 +19,6 @@ namespace gorc {
         path project_root_path;
         path original_working_directory_rel;
 
-        bool no_progress = false;
         bool print_summary = false;
         size_t threads = 1;
 
@@ -30,7 +28,6 @@ namespace gorc {
             opts.insert(make_multi_value_option("add-test-name",
                                                 std::back_inserter(boc_test_directory)));
 
-            opts.insert(make_switch_option("no-progress", no_progress));
             opts.insert(make_switch_option("print-summary", print_summary));
 
             opts.insert(make_value_option("threads", threads));
@@ -46,14 +43,7 @@ namespace gorc {
 
             service_registry services;
 
-            std::unique_ptr<progress_factory> prog_fac;
-            if(no_progress) {
-                prog_fac = std::make_unique<file_progress_factory>();
-            }
-            else {
-                prog_fac = std::make_unique<shell_progress_factory>();
-            }
-
+            std::unique_ptr<progress_factory> prog_fac = make_boc_progress_factory();
             services.add<progress_factory>(*prog_fac);
 
             LOG_INFO("Finding tests");

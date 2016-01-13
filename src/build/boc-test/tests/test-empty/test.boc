@@ -1,7 +1,7 @@
 include ../test.boc;
 
 var $(NOTHING);
-$(BOC_TEST_NO_PROGRESS)=$(NOTHING);
+$[GORC_NO_PROGRESS]=(nil);
 
 call setup_test_project();
 call run_tests();

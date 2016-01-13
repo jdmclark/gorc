@@ -1,14 +1,12 @@
 include ../../test.boc;
 
 var $(BOC_BUILD_OPTS);
-var $(BOC_BUILD_NO_PROGRESS)=--no-progress;
 
 function list_test_project()
 {
     $(BOC_BUILD)
         --list-targets
         $(BOC_BUILD_OPTS)
-        $(BOC_BUILD_NO_PROGRESS)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;
@@ -18,7 +16,6 @@ function build_test_project()
 {
     $(BOC_BUILD)
         $(BOC_BUILD_OPTS)
-        $(BOC_BUILD_NO_PROGRESS)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;
@@ -29,7 +26,6 @@ function test_project_status()
     $(BOC_BUILD)
         --status
         $(BOC_BUILD_OPTS)
-        $(BOC_BUILD_NO_PROGRESS)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;

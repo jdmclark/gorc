@@ -5,6 +5,9 @@ var $(BOC_BUILD)=$(BUILD_BIN)/boc-build;
 var $(BOC_TEST)=$(BUILD_BIN)/boc-test;
 var $(BOC_SHELL)=$(BUILD_BIN)/boc-shell;
 
+# Disable progress bar for most tests
+$[GORC_NO_PROGRESS]=1;
+
 function setup_test_project()
 {
     cp -r project $(TESTSUITE_DIR)/project;

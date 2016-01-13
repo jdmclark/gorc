@@ -9,6 +9,7 @@
         "build_type.cpp",
         "change_to_project_root.cpp",
         "compiler_type.cpp",
+        "make_progress_factory.cpp",
         "paths.cpp"
     ]
 }
