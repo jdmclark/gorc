@@ -1,13 +1,9 @@
 ==== stderr ====
-Loading dependency graph from project files
-Dependency graph generated
 Building 4 out-of-date targets
 src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
  this
  ^
 [ERROR] Build failed
-Caching dependency graph
-Finished writing cache
 ==== stdout ====
 Succeeded:
     src/myprog/main.cpp

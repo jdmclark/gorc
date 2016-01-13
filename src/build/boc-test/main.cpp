@@ -36,7 +36,7 @@ namespace gorc {
 
         virtual int main() override
         {
-            LOG_INFO("Finding project root directory");
+            LOG_DEBUG("Finding project root directory");
             change_to_project_root(original_working_directory,
                                    project_root_path,
                                    original_working_directory_rel);
@@ -46,7 +46,7 @@ namespace gorc {
             std::unique_ptr<progress_factory> prog_fac = make_boc_progress_factory();
             services.add<progress_factory>(*prog_fac);
 
-            LOG_INFO("Finding tests");
+            LOG_DEBUG("Finding tests");
             auto tests = find_tests(boc_test_directory,
                                     original_working_directory_rel);
 

@@ -1,4 +1,3 @@
 ==== stderr ====
-Loading dependency graph from project files
 [ERROR] src/myprog/prog.json:7:9-7:14: unknown external library type 'junk'
 ==== stdout ====

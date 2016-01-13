@@ -2,16 +2,9 @@
 ---- test location ----
 ==== stderr ====
 ---- default location ----
-Loading dependency graph from project files
-Dependency graph generated
 Building 4 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ---- test location ----
-Finding project root directory
-Finding tests
-Current directory is a single test
 Running 1 tests
 **** SUITE PASSED ****
 ==== stdout ====

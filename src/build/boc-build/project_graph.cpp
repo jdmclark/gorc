@@ -22,7 +22,7 @@ gorc::project_graph::project_graph(service_registry const &services,
 {
     if(boost::filesystem::is_regular_file(cache_filename)) {
         // Load from the cache file instead of the project files (fast)
-        LOG_INFO("Loading dependency graph from cache");
+        LOG_DEBUG("Loading dependency graph from cache");
 
         auto nf = make_native_read_only_file(cache_filename);
         entity_deserializer ed(services, reg, ea, *nf);
@@ -40,23 +40,23 @@ gorc::project_graph::project_graph(service_registry const &services,
             return;
         }
 
-        LOG_INFO("Cached dependency graph is out-of-date");
+        LOG_DEBUG("Cached dependency graph is out-of-date");
     }
 
     // Load from the project files (slow)
-    LOG_INFO("Loading dependency graph from project files");
+    LOG_DEBUG("Loading dependency graph from project files");
 
     ea.clear();
 
     project_file pf(project_filename);
     root = create_graph_nodes(pf, services, ea);
 
-    LOG_INFO("Dependency graph generated");
+    LOG_DEBUG("Dependency graph generated");
 }
 
 gorc::project_graph::~project_graph()
 {
-    LOG_INFO("Caching dependency graph");
+    LOG_DEBUG("Caching dependency graph");
 
     std::unique_ptr<output_stream> nf;
     try {
@@ -72,7 +72,7 @@ gorc::project_graph::~project_graph()
     entity_serializer es(reg, *nf);
     es.serialize_root(root);
 
-    LOG_INFO("Finished writing cache");
+    LOG_DEBUG("Finished writing cache");
 }
 
 gorc::root_entity* gorc::project_graph::get_root()

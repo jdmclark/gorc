@@ -1,9 +1,5 @@
 Hello, World!
 ==== stderr ====
-Loading dependency graph from project files
-Dependency graph generated
 Building 4 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ==== stdout ====

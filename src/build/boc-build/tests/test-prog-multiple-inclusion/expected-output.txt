@@ -1,4 +1,3 @@
 ==== stderr ====
-Loading dependency graph from project files
 [ERROR] project.json: program 'myprog' is included multiple times
 ==== stdout ====

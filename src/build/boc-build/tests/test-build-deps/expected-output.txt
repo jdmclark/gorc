@@ -10,40 +10,18 @@ Hello, World!
 ---- all clean ----
 ==== stderr ====
 ---- initial ----
-Loading dependency graph from project files
-Dependency graph generated
-Caching dependency graph
-Finished writing cache
 ---- first run ----
-Loading dependency graph from cache
 Building 14 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ---- touch source file ----
-Loading dependency graph from cache
-Caching dependency graph
-Finished writing cache
 ---- second run ----
-Loading dependency graph from cache
 Building 5 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ---- touch header file ----
-Loading dependency graph from cache
-Caching dependency graph
-Finished writing cache
 ---- third run ----
-Loading dependency graph from cache
 Building 15 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ---- all clean ----
-Loading dependency graph from cache
-Caching dependency graph
-Finished writing cache
 ==== stdout ====
 ---- initial ----
 Out-of-date targets:

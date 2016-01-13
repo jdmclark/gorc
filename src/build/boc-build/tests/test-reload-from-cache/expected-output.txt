@@ -3,21 +3,21 @@
 ---- modified run ----
 ==== stderr ====
 ---- initial run ----
-Loading dependency graph from project files
-Dependency graph generated
-Caching dependency graph
-Finished writing cache
+[DEBUG] Loading dependency graph from project files
+[DEBUG] Dependency graph generated
+[DEBUG] Caching dependency graph
+[DEBUG] Finished writing cache
 ---- clean run ----
-Loading dependency graph from cache
-Caching dependency graph
-Finished writing cache
+[DEBUG] Loading dependency graph from cache
+[DEBUG] Caching dependency graph
+[DEBUG] Finished writing cache
 ---- modified run ----
-Loading dependency graph from cache
-Cached dependency graph is out-of-date
-Loading dependency graph from project files
-Dependency graph generated
-Caching dependency graph
-Finished writing cache
+[DEBUG] Loading dependency graph from cache
+[DEBUG] Cached dependency graph is out-of-date
+[DEBUG] Loading dependency graph from project files
+[DEBUG] Dependency graph generated
+[DEBUG] Caching dependency graph
+[DEBUG] Finished writing cache
 ==== stdout ====
 ---- initial run ----
 ---- clean run ----

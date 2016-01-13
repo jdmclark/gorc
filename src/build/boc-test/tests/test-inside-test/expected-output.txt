@@ -1,7 +1,7 @@
 ==== stderr ====
-Finding project root directory
-Finding tests
-Current directory is a single test
+[DEBUG] Finding project root directory
+[DEBUG] Finding tests
+[DEBUG] Current directory is a single test
 Running 1 tests
 **** SUITE PASSED ****
 ==== stdout ====

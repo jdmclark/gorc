@@ -1,5 +1,7 @@
 include ../test.boc;
 
+$[GORC_DEBUG]=1;
+
 call setup_test_project();
 
 pushd src/subdir/ztest-incl-one;

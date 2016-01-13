@@ -1,8 +1,4 @@
 cache exists
 ==== stderr ====
-Loading dependency graph from project files
-Dependency graph generated
 All targets are up-to-date
-Caching dependency graph
-Finished writing cache
 ==== stdout ====

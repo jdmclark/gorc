@@ -10,9 +10,17 @@ gorc::program::program()
     // Initialize logging
 
     // Logging to standard output shouldn't be too verbose
-    emplace_log_backend<stdio_log_backend>({ log_level::error,
-                                             log_level::warning,
-                                             log_level::info },
+    flag_set<log_level> stdout_diagnostic_level {
+        log_level::error,
+        log_level::warning,
+        log_level::info
+    };
+
+    if(has_environment_variable("GORC_DEBUG")) {
+        stdout_diagnostic_level += log_level::debug;
+    }
+
+    emplace_log_backend<stdio_log_backend>(stdout_diagnostic_level,
                                            (has_environment_variable("GORC_NO_WORD_WRAP") ?
                                             std::numeric_limits<int>::max() : 80));
 

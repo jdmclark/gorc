@@ -6,18 +6,11 @@ Hello, Other World!
 Hello, Other World!
 ==== stderr ====
 ---- first run ----
-Loading dependency graph from project files
-Dependency graph generated
 Building 7 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ---- second run ----
-Loading dependency graph from cache
 Building 4 out-of-date targets
 Build succeeded
-Caching dependency graph
-Finished writing cache
 ==== stdout ====
 ---- first run ----
 Succeeded:

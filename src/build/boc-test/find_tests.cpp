@@ -18,20 +18,20 @@ std::set<gorc::path> gorc::find_tests(std::vector<std::string> const &dirnames,
 
     // Special case: working directory is a test
     if(std::regex_match(original_working_directory.filename().generic_string(), assembled_regex)) {
-        LOG_INFO("Current directory is a single test");
+        LOG_DEBUG("Current directory is a single test");
         tests.insert(original_working_directory);
         return tests;
     }
 
     // Special case: working directory is the root
     if(equivalent(original_working_directory, ".")) {
-        LOG_INFO("Current directory is project root");
+        LOG_DEBUG("Current directory is project root");
         std::copy(boc_test_default_roots.begin(),
                   boc_test_default_roots.end(),
                   std::inserter(test_roots, test_roots.begin()));
     }
     else {
-        LOG_INFO("Current directory is a test subset");
+        LOG_DEBUG("Current directory is a test subset");
         test_roots.insert(original_working_directory);
     }
 

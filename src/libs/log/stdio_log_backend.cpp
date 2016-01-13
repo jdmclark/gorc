@@ -24,6 +24,10 @@ void gorc::stdio_log_backend::write_message(std::string const & /*filename*/,
         tag = "WARNING";
         break;
 
+    case log_level::debug:
+        tag = "DEBUG";
+        break;
+
     default:
         break;
     }

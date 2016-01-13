@@ -1,5 +1,4 @@
 ==== stderr ====
-Loading dependency graph from project files
 [ERROR] cannot generate dependency graph: cycle detected in libraries
         "libs/io" =>
         "libs/program" =>

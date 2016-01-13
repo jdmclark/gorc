@@ -1,5 +1,7 @@
 include ../test.boc;
 
+$[GORC_DEBUG]=1;
+
 $(BOC_BUILD_OPTS) = --do-nothing;
 
 call setup_test_project();
