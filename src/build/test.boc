@@ -1,0 +1,38 @@
+include ../../rules/test.boc;
+
+var $(BOC)=$(BUILD_BIN)/boc;
+var $(BOC_BUILD)=$(BUILD_BIN)/boc-build;
+var $(BOC_TEST)=$(BUILD_BIN)/boc-test;
+var $(BOC_SHELL)=$(BUILD_BIN)/boc-shell;
+
+function setup_test_project()
+{
+    cp -r project $(TESTSUITE_DIR)/project;
+    pushd $(TESTSUITE_DIR)/project;
+}
+
+function teardown_test_project()
+{
+    popd;
+
+    echo "==== stderr ====" >> $(RAW_OUTPUT);
+    cat $(TESTSUITE_DIR)/stderr >> $(RAW_OUTPUT);
+
+    echo "==== stdout ====" >> $(RAW_OUTPUT);
+    cat $(TESTSUITE_DIR)/stdout >> $(RAW_OUTPUT);
+
+    call process_raw_output();
+    call compare_output();
+}
+
+function inner_begin_project_phase(phase)
+{
+    echo $(phase) >>$(TESTSUITE_DIR)/stdout;
+    echo $(phase) >>$(TESTSUITE_DIR)/stderr;
+    echo $(phase) >>$(RAW_OUTPUT);
+}
+
+function begin_project_phase(phase)
+{
+    call inner_begin_project_phase("---- "$(phase)" ----");
+}

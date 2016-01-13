@@ -1,6 +1,5 @@
-include ../../../../rules/test.boc;
+include ../../test.boc;
 
-var $(BOC_SHELL)=$(BUILD_BIN)/boc-shell;
 var $(BOC_SHELL_OPTS);
 
 function run_input_boc_test()
