@@ -5,7 +5,6 @@
         "libs/system",
         "libs/program",
         "libs/text",
-        "libs/ast",
         "libs/log",
         "build/boc-build/engine",
         "build/boc-build/entities",

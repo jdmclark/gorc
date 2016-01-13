@@ -2,7 +2,7 @@ CXX=g++
 THREADS=2
 
 CFLAGS:= \
-	-std=c++11 \
+	-std=c++14 \
 	-DPLATFORM_LINUX \
 	-Isrc \
 	-Isrc/libs \
@@ -21,7 +21,6 @@ BOC_BUILD_SRC_DIRS:= \
 	src/build/boc-build/entities \
 	src/build/boc-build/engine \
 	src/build/common \
-	src/libs/ast \
 	src/libs/io \
 	src/libs/log \
 	src/libs/program \

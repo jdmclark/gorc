@@ -1,0 +1,13 @@
+{
+    "name" : "boc",
+    "type" : "build",
+    "dependencies" : [
+        "libs/system",
+        "libs/program",
+        "libs/text",
+        "build/common"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}

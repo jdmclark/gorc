@@ -1,5 +1,6 @@
 {
     "programs" : [
+        "build/boc",
         "build/boc-build/engine/unit-test",
         "build/boc-build/entities/unit-test",
         "build/boc-build",

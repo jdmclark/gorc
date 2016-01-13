@@ -1,11 +1,10 @@
 #include "program/program.hpp"
-#include "io/path.hpp"
+#include "build/common/paths.hpp"
 #include "build/common/change_to_project_root.hpp"
 #include "find_tests.hpp"
 #include "run_tests.hpp"
 #include "system/self.hpp"
 #include "system/env.hpp"
-#include "build/common/paths.hpp"
 #include "utility/service_registry.hpp"
 #include "utility/shell_progress.hpp"
 #include "utility/file_progress.hpp"
@@ -15,10 +14,7 @@ namespace gorc {
 
     class boc_test_program : public program {
     public:
-        std::vector<std::string> boc_test_directory {
-            "^test-.*",
-            "^unit-test$"
-        };
+        std::vector<std::string> boc_test_directory = boc_test_default_directories;
 
         path original_working_directory;
         path project_root_path;

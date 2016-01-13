@@ -1,4 +1,5 @@
 #include "run_tests.hpp"
+#include "build/common/paths.hpp"
 #include "system/pipe.hpp"
 #include "system/process.hpp"
 #include "utility/progress.hpp"
@@ -48,11 +49,11 @@ int gorc::run_tests(std::set<path> const &tests,
 
         if(result_code == 0) {
             passed_tests.insert(test);
-            boost::filesystem::remove_all(test / "tempdir");
+            boost::filesystem::remove_all(test / boc_test_suite_dir);
         }
         else {
             failed_tests.insert(test);
-            std::ifstream test_fail_log((test / "tempdir" / "test-log.txt").native());
+            std::ifstream test_fail_log((test / boc_test_suite_dir / boc_test_log_filename).native());
 
             fail_log_ofs << std::endl
                          << "FAILED " << test.generic_string() << std::endl
@@ -62,15 +63,15 @@ int gorc::run_tests(std::set<path> const &tests,
     };
 
     auto run_test = [&](path const &test) {
-        boost::filesystem::remove_all(test / "tempdir");
+        boost::filesystem::remove_all(test / boc_test_suite_dir);
 
-        boost::filesystem::create_directories(test / "tempdir");
-        auto p = gorc::make_output_file_pipe(test / "tempdir" / "test-log.txt");
+        boost::filesystem::create_directories(test / boc_test_suite_dir);
+        auto p = gorc::make_output_file_pipe(test / boc_test_suite_dir / boc_test_log_filename);
         p.set_reusable(true);
 
         std::vector<std::string> args {
             "--script",
-            "test.boc"
+            boc_test_shell_filename.native()
         };
 
         process test_proc(boc_shell,

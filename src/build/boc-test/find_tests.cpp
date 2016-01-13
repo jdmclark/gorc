@@ -1,4 +1,5 @@
 #include "find_tests.hpp"
+#include "build/common/paths.hpp"
 #include "utility/range.hpp"
 #include "utility/join.hpp"
 #include "log/log.hpp"
@@ -25,8 +26,9 @@ std::set<gorc::path> gorc::find_tests(std::vector<std::string> const &dirnames,
     // Special case: working directory is the root
     if(equivalent(original_working_directory, ".")) {
         LOG_INFO("Current directory is project root");
-        // TODO: Add more roots here.
-        test_roots.insert("src");
+        std::copy(boc_test_default_roots.begin(),
+                  boc_test_default_roots.end(),
+                  std::inserter(test_roots, test_roots.begin()));
     }
     else {
         LOG_INFO("Current directory is a test subset");

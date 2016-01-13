@@ -1,0 +1,13 @@
+include ../test.boc;
+
+call setup_test_project();
+
+call begin_project_phase("default location");
+call run_boc(nil);
+
+call begin_project_phase("test location");
+pushd src/myprog/tests/test-simple;
+call run_boc(nil);
+popd;
+
+call teardown_test_project();
