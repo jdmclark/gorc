@@ -4,6 +4,7 @@
 #include "system/self.hpp"
 #include "system/process.hpp"
 #include "subcommand_type.hpp"
+#include "build/common/change_to_project_root.hpp"
 #include <boost/filesystem.hpp>
 #include <regex>
 #include <vector>
@@ -83,6 +84,10 @@ namespace gorc {
                 case subcommand_type::test:
                     sub_result = run_test();
                     break;
+
+                case subcommand_type::clean:
+                    sub_result = run_clean();
+                    break;
                 }
 
                 if(sub_result != EXIT_SUCCESS) {
@@ -130,6 +135,22 @@ namespace gorc {
                                /* cwd */ nothing);
 
             return build_proc.join();
+        }
+
+        int run_clean()
+        {
+            auto original_path = boost::filesystem::current_path();
+
+            // Use 'change to project root' to find build temporaries
+            path junk1, junk2, junk3;
+            change_to_project_root(junk1, junk2, junk3);
+
+            boost::filesystem::remove_all("pkg");
+            boost::filesystem::remove_all(".boc-cache");
+
+            boost::filesystem::current_path(original_path);
+
+            return EXIT_SUCCESS;
         }
     };
 

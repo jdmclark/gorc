@@ -6,7 +6,8 @@ namespace gorc {
 
     enum class subcommand_type {
         build,
-        test
+        test,
+        clean
     };
 
     subcommand_type to_subcommand_type(std::string const &);
