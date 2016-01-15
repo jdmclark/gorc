@@ -54,4 +54,10 @@ void gorc::register_builtins()
                 path top_arg = shvalue_to_string(args.at(0));
                 return shvalue_from_string(boost::filesystem::absolute(top_arg).generic_string());
             });
+
+    register_builtin("canonical_path", 1, [](arglist const &args)
+            {
+                path top_arg = shvalue_to_string(args.at(0));
+                return shvalue_from_string(boost::filesystem::canonical(top_arg).generic_string());
+            });
 }

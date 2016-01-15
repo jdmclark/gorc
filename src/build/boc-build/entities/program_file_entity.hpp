@@ -2,8 +2,8 @@
 
 #include "object_file_entity.hpp"
 #include "library_file_entity.hpp"
-#include "program_type.hpp"
-#include "external_lib_type.hpp"
+#include "build/common/program_type.hpp"
+#include "build/common/external_lib_type.hpp"
 #include "generated_file_entity.hpp"
 
 namespace gorc {

@@ -1,6 +1,7 @@
 {
     "name" : "parent-program",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/system",
         "libs/program"

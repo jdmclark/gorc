@@ -1,6 +1,7 @@
 {
     "name" : "utility-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/test",
         "libs/utility"

@@ -1,6 +1,7 @@
 {
     "name" : "boc-build-engine-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "build/boc-build/engine",
         "libs/test"

@@ -1,6 +1,7 @@
 {
     "name" : "program-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/program",
         "libs/test"

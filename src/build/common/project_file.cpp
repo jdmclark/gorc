@@ -3,7 +3,7 @@
 #include "log/log.hpp"
 #include "text/json_input_stream.hpp"
 #include "text/json_specification.hpp"
-#include "../common/paths.hpp"
+#include "paths.hpp"
 #include <set>
 #include <map>
 
@@ -63,7 +63,8 @@ namespace {
                         std::string lib = json_deserialize<std::string>(jis);
                         return to_external_lib_type(lib);
                     });
-                } }
+                } },
+                { "exclude-coverage", make_json_member(&program_data::exclude_test_coverage) }
             },
 
             /* Required */
@@ -86,7 +87,8 @@ namespace {
                         std::string lib = json_deserialize<std::string>(jis);
                         return to_external_lib_type(lib);
                     });
-                } }
+                } },
+                { "exclude-coverage", make_json_member(&library_data::exclude_test_coverage) }
             },
 
             /* Required */

@@ -1,6 +1,7 @@
 {
     "name" : "log-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/log",
         "libs/test"

@@ -8,7 +8,9 @@ namespace {
     std::unordered_map<std::string, gorc::subcommand_type> type_map {
         { "build", gorc::subcommand_type::build },
         { "test", gorc::subcommand_type::test },
-        { "clean", gorc::subcommand_type::clean }
+        { "clean", gorc::subcommand_type::clean },
+        { "coverage-report", gorc::subcommand_type::coverage_report },
+        { "coveralls-coverage-report", gorc::subcommand_type::coveralls_coverage_report }
     };
 
 }

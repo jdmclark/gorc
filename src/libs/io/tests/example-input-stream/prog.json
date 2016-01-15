@@ -1,6 +1,7 @@
 {
     "name" : "example-input-stream",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/io"
     ],

@@ -1,6 +1,7 @@
 {
     "name" : "ast-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/test",
         "libs/ast"

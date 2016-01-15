@@ -1,6 +1,7 @@
 {
     "name" : "example-test-suite",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/test"
     ],

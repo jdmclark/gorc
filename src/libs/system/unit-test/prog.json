@@ -1,6 +1,7 @@
 {
     "name" : "system-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/test",
         "libs/system"

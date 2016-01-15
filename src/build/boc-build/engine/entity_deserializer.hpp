@@ -7,6 +7,7 @@
 #include "log/log.hpp"
 #include "utility/service_registry.hpp"
 #include <unordered_map>
+#include <type_traits>
 
 namespace gorc {
 
@@ -63,6 +64,15 @@ namespace gorc {
                     [](std::unordered_set<EntityT*> &rv, entity_input_stream &is) {
                         rv.insert(is.read_entity_reference<EntityT>());
                     });
+        }
+
+        template <typename EnumRangeT>
+        EnumRangeT read_enum_set()
+        {
+            return read_range<EnumRangeT>([](auto &rv, auto &is) {
+                    rv.insert(static_cast<typename std::decay<decltype(*rv.begin())>::type>(
+                                is.read_uint32()));
+                });
         }
     };
 

@@ -39,10 +39,13 @@ namespace {
         }
     }
 
-    void print_summary(gorc::entity_scheduler const &es)
+    void print_summary(gorc::entity_scheduler const &es, bool failures_only)
     {
-        print_entity_set("Succeeded", es.get_succeeded_entities());
-        print_entity_set("Failed", es.get_failed_entities());
+        if(!failures_only) {
+            print_entity_set("Succeeded", es.get_succeeded_entities());
+            print_entity_set("Failed", es.get_failed_entities());
+        }
+
         print_entity_set("Unsatisfiable", es.get_unsatisfiable_entities());
     }
 
@@ -118,16 +121,21 @@ int gorc::run_build(service_registry const &services,
 
     pbar->finished();
 
+    bool failure_summary = false;
+
     if(scheduler.succeeded()) {
         LOG_INFO("Build succeeded");
     }
     else {
-        needs_summary = true;
+        failure_summary = true;
         LOG_ERROR("Build failed");
     }
 
     if(needs_summary) {
-        print_summary(scheduler);
+        print_summary(scheduler, /* failures only */ false);
+    }
+    else if(failure_summary) {
+        print_summary(scheduler, /* failures only */ true);
     }
 
     return scheduler.succeeded() ? EXIT_SUCCESS : EXIT_FAILURE;

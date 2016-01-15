@@ -42,6 +42,14 @@ namespace gorc {
                     os.write_entity_reference(em);
                 });
         }
+
+        template <typename EnumRangeT>
+        void write_enum_set(EnumRangeT const &els)
+        {
+            write_range(els, [](auto t, auto &os) {
+                    os.write_uint32(static_cast<uint32_t>(t));
+                });
+        }
     };
 
     class entity_serializer : private entity_output_stream {

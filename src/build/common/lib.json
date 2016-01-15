@@ -9,7 +9,10 @@
         "build_type.cpp",
         "change_to_project_root.cpp",
         "compiler_type.cpp",
+        "external_lib_type.cpp",
         "make_progress_factory.cpp",
-        "paths.cpp"
+        "paths.cpp",
+        "program_type.cpp",
+        "project_file.cpp"
     ]
 }

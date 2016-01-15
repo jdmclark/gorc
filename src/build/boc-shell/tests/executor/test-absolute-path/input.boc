@@ -1,1 +1,2 @@
 echo (absolute_path("."));
+echo (canonical_path("."));

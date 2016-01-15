@@ -44,6 +44,7 @@ namespace {
 
     std::vector<std::string> coverage_cflags {
         "-O0",
+        "-g",
         "-fprofile-arcs",
         "-ftest-coverage",
         "-fPIC",
@@ -53,6 +54,10 @@ namespace {
     std::vector<std::string> lib_boost_cflags {
         "-lboost_system",
         "-lboost_filesystem"
+    };
+
+    std::vector<std::string> ld_postflags {
+        "-ldl"
     };
 
     std::vector<std::string> const& get_type_cflags(gorc::build_type t)
@@ -125,8 +130,9 @@ bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *enti
     std::copy(common_cflags.begin(), common_cflags.end(), std::back_inserter(args));
     std::copy(header_search_cflags.begin(), header_search_cflags.end(), std::back_inserter(args));
 
+    // Pass canonical paths to gcc so gcov can find source files
     args.push_back("-c");
-    args.push_back(entity->primary_source_file->file_path().native());
+    args.push_back(canonical(entity->primary_source_file->file_path()).native());
     args.push_back("-o");
     args.push_back(entity->file_path().native());
 
@@ -231,6 +237,9 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
     if(external_libs.find(external_lib_type::boost) != external_libs.end()) {
         std::copy(lib_boost_cflags.begin(), lib_boost_cflags.end(), std::back_inserter(args));
     }
+
+    // Add postflags
+    std::copy(ld_postflags.begin(), ld_postflags.end(), std::back_inserter(args));
 
     process gcc("g++", // TODO: Compiler selection
                 args,

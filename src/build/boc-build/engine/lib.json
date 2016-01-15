@@ -3,7 +3,8 @@
     "dependencies" : [
         "libs/utility",
         "libs/io",
-        "libs/log"
+        "libs/log",
+        "build/common"
     ],
     "sources" : [
         "adjacency_list.cpp",

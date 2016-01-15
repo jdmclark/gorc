@@ -8,7 +8,7 @@ gorc::program_file_entity_internal_properties::program_file_entity_internal_prop
         entity_input_stream &is)
     : program_name(is.read_string())
     , type(static_cast<program_type>(is.read_uint32()))
-    , external_libs(read_ext_lib_set(is))
+    , external_libs(is.read_enum_set<ext_lib_set>())
     , objects(is.read_entity_set<object_file_entity>())
     , libraries(is.read_entity_set<library_file_entity>())
 {
@@ -80,7 +80,7 @@ void gorc::program_file_entity::serialize(entity_output_stream &os)
 {
     os.write_string(program_name);
     os.write_uint32(static_cast<uint32_t>(type));
-    write_ext_lib_set(external_libs, os);
+    os.write_enum_set(external_libs);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
 }

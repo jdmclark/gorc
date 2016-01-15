@@ -4,9 +4,9 @@ this is informational
 [WARNING] warning message
 [ERROR] error message
 ==== log output ====
-src/libs/program/tests/example-program/main.cpp|31|trace> test_program::main
-src/libs/program/tests/example-program/main.cpp|33|debug> handling message options
-src/libs/program/tests/example-program/main.cpp|40|info> this is informational
-src/libs/program/tests/example-program/main.cpp|44|warning> warning message
-src/libs/program/tests/example-program/main.cpp|48|error> error message
-src/libs/program/tests/example-program/main.cpp|68|debug> handling exception options
+$ROOT$/src/libs/program/tests/example-program/main.cpp|31|trace> test_program::main
+$ROOT$/src/libs/program/tests/example-program/main.cpp|33|debug> handling message options
+$ROOT$/src/libs/program/tests/example-program/main.cpp|40|info> this is informational
+$ROOT$/src/libs/program/tests/example-program/main.cpp|44|warning> warning message
+$ROOT$/src/libs/program/tests/example-program/main.cpp|48|error> error message
+$ROOT$/src/libs/program/tests/example-program/main.cpp|68|debug> handling exception options

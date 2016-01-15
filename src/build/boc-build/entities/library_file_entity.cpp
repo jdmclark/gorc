@@ -7,7 +7,7 @@
 gorc::library_file_entity_internal_properties::library_file_entity_internal_properties(
         entity_input_stream &is)
     : library_name(is.read_string())
-    , external_libs(read_ext_lib_set(is))
+    , external_libs(is.read_enum_set<ext_lib_set>())
     , objects(is.read_entity_set<object_file_entity>())
     , libraries(is.read_entity_set<library_file_entity>())
 {
@@ -71,7 +71,7 @@ bool gorc::library_file_entity::update(service_registry const &services)
 void gorc::library_file_entity::serialize(entity_output_stream &os)
 {
     os.write_string(library_name);
-    write_ext_lib_set(external_libs, os);
+    os.write_enum_set(external_libs);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
 }

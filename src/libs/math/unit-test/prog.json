@@ -1,6 +1,7 @@
 {
     "name" : "math-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/math",
         "libs/test"

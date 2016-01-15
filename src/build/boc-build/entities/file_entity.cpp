@@ -28,7 +28,8 @@ std::unordered_set<gorc::entity*> const& gorc::file_entity::dependencies()
 
 bool gorc::file_entity::is_dirty()
 {
-    return previous_timestamp < boost::filesystem::last_write_time(filename);
+    return !boost::filesystem::is_regular_file(filename) ||
+           previous_timestamp < boost::filesystem::last_write_time(filename);
 }
 
 bool gorc::file_entity::update(gorc::service_registry const &)

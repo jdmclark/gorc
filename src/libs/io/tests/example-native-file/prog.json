@@ -1,6 +1,7 @@
 {
     "name" : "example-native-file",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/io"
     ],

@@ -3,7 +3,7 @@
 #include "io/path.hpp"
 #include "utility/service_registry.hpp"
 #include "build/common/build_type.hpp"
-#include "program_type.hpp"
+#include "build/common/program_type.hpp"
 #include <vector>
 #include <string>
 #include <unordered_map>

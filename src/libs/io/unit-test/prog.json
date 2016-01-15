@@ -1,6 +1,7 @@
 {
     "name" : "io-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/io",
         "libs/test"

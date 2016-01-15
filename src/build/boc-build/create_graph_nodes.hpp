@@ -3,7 +3,7 @@
 #include "entities/root_entity.hpp"
 #include "engine/entity_allocator.hpp"
 #include "utility/service_registry.hpp"
-#include "project_file.hpp"
+#include "build/common/project_file.hpp"
 
 namespace gorc {
 

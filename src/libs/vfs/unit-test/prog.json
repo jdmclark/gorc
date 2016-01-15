@@ -1,6 +1,7 @@
 {
     "name" : "vfs-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/vfs",
         "libs/test"

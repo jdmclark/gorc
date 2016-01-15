@@ -1,6 +1,7 @@
 {
     "name" : "test-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/test"
     ],

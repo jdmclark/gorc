@@ -5,6 +5,8 @@
 #include "system/process.hpp"
 #include "subcommand_type.hpp"
 #include "build/common/change_to_project_root.hpp"
+#include "build/common/project_file.hpp"
+#include "utility/strcat.hpp"
 #include <boost/filesystem.hpp>
 #include <regex>
 #include <vector>
@@ -88,6 +90,14 @@ namespace gorc {
                 case subcommand_type::clean:
                     sub_result = run_clean();
                     break;
+
+                case subcommand_type::coverage_report:
+                    sub_result = run_coverage_report();
+                    break;
+
+                case subcommand_type::coveralls_coverage_report:
+                    sub_result = run_coveralls_coverage_report();
+                    break;
                 }
 
                 if(sub_result != EXIT_SUCCESS) {
@@ -137,20 +147,108 @@ namespace gorc {
             return build_proc.join();
         }
 
+        class scoped_project_root {
+        private:
+            path original_path;
+
+        public:
+            scoped_project_root()
+                : original_path(current_path())
+            {
+                path junk1, junk2, junk3;
+                change_to_project_root(junk1, junk2, junk3);
+                return;
+            }
+
+            ~scoped_project_root()
+            {
+                current_path(original_path);
+            }
+        };
+
         int run_clean()
         {
-            auto original_path = boost::filesystem::current_path();
-
             // Use 'change to project root' to find build temporaries
-            path junk1, junk2, junk3;
-            change_to_project_root(junk1, junk2, junk3);
+            scoped_project_root srp;
 
-            boost::filesystem::remove_all("pkg");
-            boost::filesystem::remove_all(".boc-cache");
-
-            boost::filesystem::current_path(original_path);
+            remove_all("pkg");
+            remove_all(".boc-cache");
 
             return EXIT_SUCCESS;
+        }
+
+        std::set<path> get_coverage_exclusions()
+        {
+            std::set<path> rv;
+
+            project_file pf("project.json");
+
+            for(auto const &program : pf.programs) {
+                if(program.second->exclude_test_coverage) {
+                    rv.insert(program.second->source_directory);
+                }
+            }
+
+            for(auto const &library : pf.libraries) {
+                if(library.second->exclude_test_coverage) {
+                    rv.insert(library.second->source_directory);
+                }
+            }
+
+            return rv;
+        }
+
+        int run_coverage_report()
+        {
+            LOG_INFO("Generating coverage report");
+            scoped_project_root srp;
+
+            std::vector<std::string> args {
+                "--root", canonical(current_path()).generic_string(),
+                "--sort-uncovered",
+                "--exclude-unreachable-branches"
+            };
+
+            auto coverage_exclusions = get_coverage_exclusions();
+            for(auto const &excl : coverage_exclusions) {
+                args.push_back("--exclude");
+                args.push_back(excl.generic_string());
+            }
+
+            process report_proc("gcovr",
+                                args,
+                                /* stdin */ nothing,
+                                /* stdout */ nothing,
+                                /* stderr */ nothing,
+                                /* cwd */ nothing);
+
+            return report_proc.join();
+        }
+
+        int run_coveralls_coverage_report()
+        {
+            LOG_INFO("Generating coverage report");
+            scoped_project_root srp;
+
+            std::vector<std::string> args {
+                "--gcov-options", "\\-lp",
+                "--root", canonical(current_path()).generic_string()
+            };
+
+            auto coverage_exclusions = get_coverage_exclusions();
+            for(auto const &excl : coverage_exclusions) {
+                args.push_back("--exclude");
+                args.push_back(excl.generic_string());
+            }
+
+            process report_proc("cpp-coveralls",
+                                args,
+                                /* stdin */ nothing,
+                                /* stdout */ nothing,
+                                /* stderr */ nothing,
+                                /* cwd */ nothing);
+
+            return report_proc.join();
         }
     };
 

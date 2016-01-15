@@ -1,5 +1,5 @@
 #include "project_graph.hpp"
-#include "project_file.hpp"
+#include "build/common/project_file.hpp"
 #include "engine/entity_serializer.hpp"
 #include "engine/entity_deserializer.hpp"
 #include "engine/dirty_list.hpp"

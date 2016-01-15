@@ -1,6 +1,7 @@
 {
     "name" : "script-test",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/test",
         "libs/cog/script"

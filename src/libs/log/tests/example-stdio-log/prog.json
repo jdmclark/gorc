@@ -1,6 +1,7 @@
 {
     "name" : "example-stdio-log",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/log"
     ],

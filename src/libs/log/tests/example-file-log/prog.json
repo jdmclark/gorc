@@ -1,6 +1,7 @@
 {
     "name" : "example-file-log",
     "type" : "test",
+    "exclude-coverage" : true,
     "dependencies" : [
         "libs/log"
     ],
