@@ -8,6 +8,7 @@
         "build/common"
     ],
     "sources" : [
-        "main.cpp"
+        "main.cpp",
+        "subcommand_type.cpp"
     ]
 }

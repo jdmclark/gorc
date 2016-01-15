@@ -3,8 +3,10 @@
 #include "utility/join.hpp"
 #include "system/self.hpp"
 #include "system/process.hpp"
+#include "subcommand_type.hpp"
 #include <boost/filesystem.hpp>
 #include <regex>
+#include <vector>
 
 using namespace boost::filesystem;
 
@@ -12,27 +14,35 @@ namespace gorc {
 
     class boc_frontend_program : public program {
     public:
-        bool no_progress = false;
+        size_t threads = 1;
+        std::vector<std::string> subcommands;
 
-        virtual void create_options(options &opt) override
+        virtual void create_options(options &opts) override
         {
-            opt.insert(make_switch_option("no-progress", no_progress));
+            opts.insert_bare(make_bare_multi_value_option(std::back_inserter(subcommands)));
+
+            opts.insert(make_value_option("threads", threads));
+            opts.add_alias("threads", "-j");
         }
 
         std::vector<std::string> construct_common_args() const
         {
             std::vector<std::string> rv;
 
-            if(no_progress) {
-                rv.push_back("--no-progress");
-            }
+            rv.push_back("-j");
+            rv.push_back(std::to_string(threads));
 
             return rv;
         }
 
         virtual int main() override
         {
-            return run_autodetect();
+            if(subcommands.empty()) {
+                return run_autodetect();
+            }
+            else {
+                return run_sequence();
+            }
         }
 
         int run_autodetect()
@@ -47,6 +57,36 @@ namespace gorc {
             else {
                 return run_build();
             }
+        }
+
+        int run_sequence()
+        {
+            // Preconvert all targets. This will detect problems before running.
+            std::vector<subcommand_type> subs;
+            std::transform(subcommands.begin(),
+                           subcommands.end(),
+                           std::back_inserter(subs),
+                           [](auto const &name) { return to_subcommand_type(name); });
+
+            for(subcommand_type sub : subs) {
+                int sub_result = EXIT_FAILURE;
+
+                switch(sub) {
+                case subcommand_type::build:
+                    sub_result = run_build();
+                    break;
+
+                case subcommand_type::test:
+                    sub_result = run_test();
+                    break;
+                }
+
+                if(sub_result != EXIT_SUCCESS) {
+                    return EXIT_FAILURE;
+                }
+            }
+
+            return EXIT_SUCCESS;
         }
 
         int run_test()
