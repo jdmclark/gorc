@@ -15,6 +15,8 @@ namespace gorc {
     class boc_frontend_program : public program {
     public:
         size_t threads = 1;
+        std::string custom_build_type;
+
         std::vector<std::string> subcommands;
 
         virtual void create_options(options &opts) override
@@ -23,6 +25,8 @@ namespace gorc {
 
             opts.insert(make_value_option("threads", threads));
             opts.add_alias("threads", "-j");
+
+            opts.insert(make_value_option("type", custom_build_type));
         }
 
         std::vector<std::string> construct_common_args() const
@@ -112,6 +116,11 @@ namespace gorc {
                 get_self_executable_path().parent_path() / "boc-build";
 
             auto args = construct_common_args();
+
+            if(!custom_build_type.empty()) {
+                args.push_back("--type");
+                args.push_back(custom_build_type);
+            }
 
             process build_proc(boc_build_path,
                                args,

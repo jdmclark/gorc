@@ -15,5 +15,4 @@ before_script:
 
 script:
   - make bootstrap -j2 THREADS=2
-  - ./bin/boc-build -j 2
-  - ./bin/boc-test -j 2
+  - ./bin/boc build test -j 2
