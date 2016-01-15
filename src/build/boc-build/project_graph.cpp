@@ -46,7 +46,8 @@ gorc::project_graph::project_graph(service_registry const &services,
     // Load from the project files (slow)
     LOG_DEBUG("Loading dependency graph from project files");
 
-    ea.clear();
+    // Don't clear the existing entities.
+    // File entities will be reused for the next build, minimizing out-of-date targets.
 
     project_file pf(project_filename);
     root = create_graph_nodes(pf, services, ea);
