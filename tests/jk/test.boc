@@ -1,0 +1,32 @@
+include ../../rules/test.boc;
+
+# Add all JK utilities to the path
+$[PATH] = $[PATH]:$(BIN);
+
+# Test environment pre-check
+var $(JK_ROOT) = $[JK_ROOT];
+
+if !is_file($(JK_ROOT)/episode/jk1.gob) {
+    echo "[ERROR] Could not find episodes in JK_ROOT";
+    false;
+}
+
+if !is_file($(JK_ROOT)/resource/res2.gob) {
+    echo "[ERROR] Could not find resources in JK_ROOT";
+    false;
+}
+
+# Remove JK directory from all expected output
+$EXTRA_REGEX = $EXTRA_REGEX "s?"$(JK_ROOT)"?$JK$?g";
+
+function jk_file(filename, episode)
+{
+    var $(common_opts) = gob --jk --resource $(JK_ROOT)/resource --extract $(filename);
+
+    if null(episode) {
+        return $(common_opts);
+    }
+    else {
+        return $(common_opts) @ --episode @ $(JK_ROOT)/episode/$(episode);
+    }
+}

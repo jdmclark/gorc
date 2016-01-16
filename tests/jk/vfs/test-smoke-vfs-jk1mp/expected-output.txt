@@ -1,0 +1,7 @@
+jkl/m10.jkl => $JK$/episode/jk1mp.gob
+jkl/m2.jkl => $JK$/episode/jk1mp.gob
+jkl/m4.jkl => $JK$/episode/jk1mp.gob
+jkl/m5.jkl => $JK$/episode/jk1mp.gob
+jkl/m_boss15.jkl => $JK$/episode/jk1mp.gob
+jkl/m_boss17.jkl => $JK$/episode/jk1mp.gob
+jkl/static.jkl => $JK$/resource/res2.gob

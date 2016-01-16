@@ -32,10 +32,12 @@ var $BUILTIN_REGEX=
     "s?"$(PROJECT_ROOT)"?$ROOT$?g"
     "s?\\.EXE??Ig";
 
+var $EXTRA_REGEX;
+
 function process_raw_output()
 {
     cp $(RAW_OUTPUT) $(CURRENT_OUTPUT);
-    for regex in $(BUILTIN_REGEX) {
+    for regex in $(BUILTIN_REGEX) @ $(EXTRA_REGEX) {
         sed -i $(regex) $(CURRENT_OUTPUT);
     }
 }

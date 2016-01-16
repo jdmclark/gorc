@@ -1,0 +1,7 @@
+include ../../test.boc;
+
+gob --jk --resource $(JK_ROOT)/resource --episode $(JK_ROOT)/episode/jk1ctf.gob --list
+    | grep "\\.jkl" | sort >> $(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

@@ -1,0 +1,3 @@
+3do/dflt.3do => $JK$/resource/res2.gob
+mat/dflt.mat => $JK$/resource/res2.gob
+misc/cmp/dflt.cmp => $JK$/resource/res2.gob

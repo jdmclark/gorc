@@ -1,0 +1,6 @@
+include ../../test.boc;
+
+(jk_file(episode.jk, jk1ctf.gob)) | episode 2>>$(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

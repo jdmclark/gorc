@@ -1,0 +1,4 @@
+jkl/c1.jkl => $JK$/episode/jk1ctf.gob
+jkl/c2.jkl => $JK$/episode/jk1ctf.gob
+jkl/c3.jkl => $JK$/episode/jk1ctf.gob
+jkl/static.jkl => $JK$/resource/res2.gob
