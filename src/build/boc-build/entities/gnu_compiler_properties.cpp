@@ -132,7 +132,7 @@ bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *enti
 
     // Pass canonical paths to gcc so gcov can find source files
     args.push_back("-c");
-    args.push_back(canonical(entity->primary_source_file->file_path()).native());
+    args.push_back(entity->primary_source_file->file_path().native());
     args.push_back("-o");
     args.push_back(entity->file_path().native());
 

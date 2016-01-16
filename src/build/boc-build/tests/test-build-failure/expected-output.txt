@@ -1,6 +1,6 @@
 ==== stderr ====
 Building 4 out-of-date targets
-$TESTDIR$/tempdir/project/src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
+src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
  this
  ^
 [ERROR] Build failed
