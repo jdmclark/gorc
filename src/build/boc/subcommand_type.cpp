@@ -1,11 +1,11 @@
 #include "subcommand_type.hpp"
 #include "log/log.hpp"
-#include <unordered_map>
+#include <map>
 #include <sstream>
 
 namespace {
 
-    std::unordered_map<std::string, gorc::subcommand_type> type_map {
+    std::map<std::string, gorc::subcommand_type> type_map {
         { "build", gorc::subcommand_type::build },
         { "test", gorc::subcommand_type::test },
         { "clean", gorc::subcommand_type::clean },
@@ -20,9 +20,9 @@ gorc::subcommand_type gorc::to_subcommand_type(std::string const &st)
     auto it = type_map.find(st);
     if(it == type_map.end()) {
         std::stringstream errmsg;
-        errmsg << "Unknown command '" << st << "'. Valid commands are:" << std::endl;
+        errmsg << "Unknown command '" << st << "'. Valid commands are:";
         for(auto const &t : type_map) {
-            errmsg << "    " << t.first << std::endl;
+            errmsg << std::endl << "- " << t.first;
         }
 
         LOG_FATAL(errmsg.str());
