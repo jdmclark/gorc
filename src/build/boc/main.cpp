@@ -91,6 +91,8 @@ namespace gorc {
                     sub_result = run_clean();
                     break;
 
+// LCOV_EXCL_START
+// Requires specialized configuration. Tested manually.
                 case subcommand_type::coverage_report:
                     sub_result = run_coverage_report();
                     break;
@@ -99,6 +101,7 @@ namespace gorc {
                     sub_result = run_coveralls_coverage_report();
                     break;
                 }
+// LCOV_EXCL_STOP
 
                 if(sub_result != EXIT_SUCCESS) {
                     return EXIT_FAILURE;
@@ -177,6 +180,8 @@ namespace gorc {
             return EXIT_SUCCESS;
         }
 
+// LCOV_EXCL_START
+// Coverage requires a specialized configuration. Tested manually.
         std::set<path> get_coverage_exclusions()
         {
             std::set<path> rv;
@@ -252,6 +257,7 @@ namespace gorc {
 
             return report_proc.join();
         }
+// LCOV_EXCL_STOP
     };
 
 }

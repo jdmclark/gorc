@@ -1,1 +1,1 @@
-echo "begin legal escapes: \" \\ end";
+echo "begin legal escapes: \" \\ \r end";

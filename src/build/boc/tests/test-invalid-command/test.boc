@@ -1,0 +1,7 @@
+include ../test.boc;
+
+call setup_test_project();
+
+call run_boc(not-a-valid-command);
+
+call teardown_test_project();

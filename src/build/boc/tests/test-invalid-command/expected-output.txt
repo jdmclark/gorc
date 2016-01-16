@@ -1,0 +1,8 @@
+==== stderr ====
+[ERROR] Unknown command 'not-a-valid-command'. Valid commands are:
+        - build
+        - clean
+        - coverage-report
+        - coveralls-coverage-report
+        - test
+==== stdout ====

@@ -41,12 +41,14 @@ namespace {
 
     void print_summary(gorc::entity_scheduler const &es, bool failures_only)
     {
-        if(!failures_only) {
-            print_entity_set("Succeeded", es.get_succeeded_entities());
+        if(failures_only) {
             print_entity_set("Failed", es.get_failed_entities());
         }
-
-        print_entity_set("Unsatisfiable", es.get_unsatisfiable_entities());
+        else {
+            print_entity_set("Succeeded", es.get_succeeded_entities());
+            print_entity_set("Failed", es.get_failed_entities());
+            print_entity_set("Unsatisfiable", es.get_unsatisfiable_entities());
+        }
     }
 
 }
@@ -75,6 +77,8 @@ int gorc::run_build(service_registry const &services,
 
     std::mutex scheduler_lock;
 
+    // LCOV_EXCL_START
+    // Unlikely to get consistent coverage results from parallel inner loop
     auto get_next_job = [&]() -> maybe<entity*> {
         while(true) {
             std::unique_lock<std::mutex> ul(scheduler_lock);
@@ -90,6 +94,7 @@ int gorc::run_build(service_registry const &services,
             }
         }
     };
+    // LCOV_EXCL_STOP
 
     auto retire_job = [&](entity *ent, bool successful) {
         std::lock_guard<std::mutex> lg(scheduler_lock);

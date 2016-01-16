@@ -30,13 +30,7 @@ namespace {
         auto str_filename = filename.generic_string();
         diagnostic_context dc(str_filename.c_str());
 
-        std::unique_ptr<input_stream> in_file;
-        try {
-            in_file = make_native_read_only_file(filename);
-        }
-        catch(std::exception const &e) {
-            LOG_FATAL(e.what());
-        }
+        auto in_file = make_native_read_only_file(filename);
 
         json_input_stream jis(*in_file);
         json_deserialize_with_specification(jis, root_project_data_spec, *this);

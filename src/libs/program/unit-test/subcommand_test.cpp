@@ -72,12 +72,14 @@ test_case(simple_bound_subcommand_value)
     assert_log_message(gorc::log_level::error, "Option foo must be specified");
     assert_log_empty();
 
+    assert_true(!opts.has_bare_value());
     assert_true(!value.has_value());
 
     std::vector<std::string> good_opts { "my_other", "--foo", "1", "--bar", "4" };
     opts.load_from_arg_list(good_opts);
     assert_log_empty();
 
+    assert_true(opts.has_bare_value());
     assert_true(value.has_value());
     assert_eq(value.get_value(), 5);
 }
