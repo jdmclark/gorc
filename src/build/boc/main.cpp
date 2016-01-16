@@ -205,6 +205,7 @@ namespace gorc {
 
             std::vector<std::string> args {
                 "--root", canonical(current_path()).generic_string(),
+                "--object-directory", canonical(current_path()).generic_string(),
                 "--sort-uncovered",
                 "--exclude-unreachable-branches"
             };
@@ -232,7 +233,8 @@ namespace gorc {
 
             std::vector<std::string> args {
                 "--gcov-options", "\\-lp",
-                "--root", canonical(current_path()).generic_string()
+                "--root", canonical(current_path()).generic_string(),
+                "--build-root", canonical(current_path()).generic_string()
             };
 
             auto coverage_exclusions = get_coverage_exclusions();
