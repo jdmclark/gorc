@@ -4,36 +4,40 @@
 
 using namespace gorc;
 
-class mock_node : public visitable_ast_node<mock_node> {
-public:
-    mock_node()
-        : visitable_ast_node<mock_node>(diagnostic_context_location())
-    {
-        return;
-    }
-};
+namespace {
 
-class other_mock_node : public visitable_ast_node<other_mock_node> {
-public:
-    other_mock_node()
-        : visitable_ast_node<other_mock_node>(diagnostic_context_location())
-    {
-        return;
-    }
-};
+    class mock_node : public visitable_ast_node<mock_node> {
+    public:
+        mock_node()
+            : visitable_ast_node<mock_node>(diagnostic_context_location())
+        {
+            return;
+        }
+    };
 
-class mock_node_ast_visitor {
-public:
-    void visit(mock_node &) const
-    {
-        LOG_INFO("ast_visited mock_node");
-    }
+    class other_mock_node : public visitable_ast_node<other_mock_node> {
+    public:
+        other_mock_node()
+            : visitable_ast_node<other_mock_node>(diagnostic_context_location())
+        {
+            return;
+        }
+    };
 
-    void visit(other_mock_node &) const
-    {
-        LOG_INFO("ast_visited other_mock_node");
-    }
-};
+    class mock_node_ast_visitor {
+    public:
+        void visit(mock_node &) const
+        {
+            LOG_INFO("ast_visited mock_node");
+        }
+
+        void visit(other_mock_node &) const
+        {
+            LOG_INFO("ast_visited other_mock_node");
+        }
+    };
+
+}
 
 begin_suite(node_test);
 
