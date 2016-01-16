@@ -3,4 +3,4 @@ Running 1 tests
 **** SUITE PASSED ****
 ==== stdout ====
 Passed tests:
-    src/ztest-one
+    src/test-one

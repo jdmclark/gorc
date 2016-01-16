@@ -4,6 +4,6 @@ Running 3 tests
 **** SUITE PASSED ****
 ==== stdout ====
 Passed tests:
-    src/ztest-one
-    src/ztest-three
-    src/ztest-two
+    src/test-one
+    src/test-three
+    src/test-two

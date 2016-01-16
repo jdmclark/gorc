@@ -2,11 +2,11 @@
 Running 3 tests
 [ERROR] Failed tests:
 
-FAILED src/ztest-one
+FAILED src/test-one
 --------------------
 [ERROR] test.boc:1:1-1:6: command failed with code 1
 
-FAILED src/ztest-three
+FAILED src/test-three
 --------------------
 [ERROR] test.boc:1:1-1:6: command failed with code 1
 
@@ -14,7 +14,7 @@ FAILED src/ztest-three
 [ERROR] 2 tests failed
 ==== stdout ====
 Passed tests:
-    src/ztest-two
+    src/test-two
 Failed tests:
-    src/ztest-one
-    src/ztest-three
+    src/test-one
+    src/test-three

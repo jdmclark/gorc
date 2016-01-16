@@ -1,13 +1,11 @@
 include ../../test.boc;
 
 var $(BOC_TEST_OPTS)=--print-summary;
-var $(BOC_TEST_NAMES)=--add-test-name "^ztest-.*";
 
 function run_tests()
 {
     $(BOC_TEST)
         $(BOC_TEST_OPTS)
-        $(BOC_TEST_NAMES)
         >>$(TESTSUITE_DIR)/stdout
         2>>$(TESTSUITE_DIR)/stderr
         || true;

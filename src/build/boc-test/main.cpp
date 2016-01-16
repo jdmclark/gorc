@@ -13,8 +13,6 @@ namespace gorc {
 
     class boc_test_program : public program {
     public:
-        std::vector<std::string> boc_test_directory = boc_test_default_directories;
-
         path original_working_directory;
         path project_root_path;
         path original_working_directory_rel;
@@ -24,10 +22,6 @@ namespace gorc {
 
         virtual void create_options(options &opts) override
         {
-            // Test and debugging options
-            opts.insert(make_multi_value_option("add-test-name",
-                                                std::back_inserter(boc_test_directory)));
-
             opts.insert(make_switch_option("print-summary", print_summary));
 
             opts.insert(make_value_option("threads", threads));
@@ -47,7 +41,7 @@ namespace gorc {
             services.add<progress_factory>(*prog_fac);
 
             LOG_DEBUG("Finding tests");
-            auto tests = find_tests(boc_test_directory,
+            auto tests = find_tests(boc_test_default_directories,
                                     original_working_directory_rel);
 
             // Find boc-shell relative to current executable

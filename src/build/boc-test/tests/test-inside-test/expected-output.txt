@@ -6,4 +6,4 @@ Running 1 tests
 **** SUITE PASSED ****
 ==== stdout ====
 Passed tests:
-    src/subdir/ztest-incl-one
+    src/subdir/test-incl-one
