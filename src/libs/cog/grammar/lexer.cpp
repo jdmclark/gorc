@@ -53,10 +53,10 @@ tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
         return append_directive(tokenizer_state::seen_pipe, current_char);
     }
     else if(current_char == '+') {
-        return append_directive(tokenizer_state::seen_plus, current_char);
+        return append_then_accept(current_char, cog_token_type::punc_plus);
     }
     else if(current_char == '-') {
-        return append_directive(tokenizer_state::seen_minus, current_char);
+        return append_then_accept(current_char, cog_token_type::punc_minus);
     }
     else if(current_char == '.') {
         return append_directive(tokenizer_state::seen_dot, current_char);
@@ -143,32 +143,6 @@ tok_result cog_tokenizer_state_machine::handle_escape_sequence_state(char ch)
     }
 
     return append_directive(tokenizer_state::string, append_char);
-}
-
-tok_result cog_tokenizer_state_machine::handle_seen_plus_state(char ch)
-{
-    if(ch == '0') {
-        return append_directive(tokenizer_state::hex_prefix, ch);
-    }
-    else if(std::isdigit(ch)) {
-        return append_directive(tokenizer_state::digit_sequence, ch);
-    }
-    else {
-        return accept_immediately(cog_token_type::punc_plus);
-    }
-}
-
-tok_result cog_tokenizer_state_machine::handle_seen_minus_state(char ch)
-{
-    if(ch == '0') {
-        return append_directive(tokenizer_state::hex_prefix, ch);
-    }
-    else if(std::isdigit(ch)) {
-        return append_directive(tokenizer_state::digit_sequence, ch);
-    }
-    else {
-        return accept_immediately(cog_token_type::punc_minus);
-    }
 }
 
 tok_result cog_tokenizer_state_machine::handle_seen_dot_state(char ch)
@@ -656,12 +630,6 @@ tok_result cog_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::escape_sequence:
         return handle_escape_sequence_state(ch);
-
-    case tokenizer_state::seen_plus:
-        return handle_seen_plus_state(ch);
-
-    case tokenizer_state::seen_minus:
-        return handle_seen_minus_state(ch);
 
     case tokenizer_state::seen_dot:
         return handle_seen_dot_state(ch);

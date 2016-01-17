@@ -24,12 +24,23 @@ namespace {
     }
 
     template <typename T, typename TokenizerT>
-    T get_number(TokenizerT &t)
+    T get_number(TokenizerT &t, bool check_sign = false)
     {
         bool format_success = false;
         T result = T(0);
+        bool negative = false;
         int64_t int_scratch;
         double dbl_scratch;
+
+        if(check_sign) {
+            if(t.get_type() == cog_token_type::punc_minus) {
+                negative = true;
+                t.advance();
+            }
+            else if(t.get_type() == cog_token_type::punc_plus) {
+                t.advance();
+            }
+        }
 
         std::stringstream ss;
         ss << t.get_value();
@@ -62,7 +73,12 @@ namespace {
             LOG_FATAL(format("expected a numeric value, found '%s'") % t.get_value());
         }
 
-        return result;
+        if(negative) {
+            return -result;
+        }
+        else {
+            return result;
+        }
     }
 
     diagnostic_context_location location_union(diagnostic_context_location const &first,
@@ -366,7 +382,7 @@ namespace {
             auto start_pos = tok.get_location();
             tok.advance();
 
-            float x = get_number<float>(tok);
+            float x = get_number<float>(tok, /* check sign */ true);
             tok.advance();
 
             if(tok.get_type() == cog_token_type::punc_comma) {
@@ -374,7 +390,7 @@ namespace {
                 tok.advance();
             }
 
-            float y = get_number<float>(tok);
+            float y = get_number<float>(tok, /* check sign */ true);
             tok.advance();
 
             if(tok.get_type() == cog_token_type::punc_comma) {
@@ -382,7 +398,7 @@ namespace {
                 tok.advance();
             }
 
-            float z = get_number<float>(tok);
+            float z = get_number<float>(tok, /* check sign */ true);
             tok.advance();
 
             if(tok.get_type() != cog_token_type::punc_apos) {
