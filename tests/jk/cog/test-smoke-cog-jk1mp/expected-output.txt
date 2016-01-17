@@ -1,6 +1,6 @@
-[FAIL] cog/00_1waydoor.cog
-[FAIL] cog/00_aiframemove.cog
-[FAIL] cog/00_aiframepatrol.cog
+[PASS] cog/00_1waydoor.cog
+[PASS] cog/00_aiframemove.cog
+[PASS] cog/00_aiframepatrol.cog
 [PASS] cog/00_ainotbemoved.cog
 [PASS] cog/00_aipatrol.cog
 [PASS] cog/00_aishootbarrel.cog
@@ -14,7 +14,7 @@
 [PASS] cog/00_breakinglamp.cog
 [FAIL] cog/00_breakinglamps.cog
 [FAIL] cog/00_breakinglampx.cog
-[FAIL] cog/00_cameratricks.cog
+[PASS] cog/00_cameratricks.cog
 [PASS] cog/00_conctrail.cog
 [FAIL] cog/00_conveyor.cog
 [PASS] cog/00_damagewall.cog
@@ -52,11 +52,11 @@
 [PASS] cog/00_replaceenemy.cog
 [FAIL] cog/00_sdamage.cog
 [FAIL] cog/00_secretareas.cog
-[FAIL] cog/00_sectordamage.cog
+[PASS] cog/00_sectordamage.cog
 [PASS] cog/00_sectorlight.cog
-[FAIL] cog/00_sectorliteanim.cog
+[PASS] cog/00_sectorliteanim.cog
 [PASS] cog/00_sectorthrust.cog
-[FAIL] cog/00_sendmessage.cog
+[PASS] cog/00_sendmessage.cog
 [PASS] cog/00_simple_elev.cog
 [PASS] cog/00_slashablefaces.cog
 [PASS] cog/00_slashgrate.cog
@@ -218,7 +218,7 @@
 [FAIL] cog/weap_fists.cog
 [FAIL] cog/weap_raildet.cog
 [PASS] cog/weap_repeater.cog
-[FAIL] cog/weap_saber.cog
+[PASS] cog/weap_saber.cog
 [PASS] cog/weap_seqcharge.cog
 [FAIL] cog/weap_strifle.cog
 [FAIL] cog/weap_thermdet.cog

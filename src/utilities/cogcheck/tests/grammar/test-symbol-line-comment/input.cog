@@ -1,0 +1,8 @@
+symbols
+int foo // regression test: next line shouldn't be interpreted as extensions
+int bar
+int baz # another line comment type
+int fnord
+end
+code
+end

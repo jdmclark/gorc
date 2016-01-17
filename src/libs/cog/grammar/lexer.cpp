@@ -73,7 +73,10 @@ tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
 
 tok_result cog_tokenizer_state_machine::handle_skip_line_comment_state(char ch)
 {
-    if(ch == '\0' || ch == '\n') {
+    if(should_return_newlines && ch == '\n') {
+        return append_then_accept(ch, cog_token_type::end_of_line);
+    }
+    else if(ch == '\0' || ch == '\n') {
         return discard_directive(tokenizer_state::initial);
     }
     else {
