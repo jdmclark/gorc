@@ -1,0 +1,27 @@
+include ../test.boc;
+
+function check_all_cogs(episode)
+{
+    (jk_list($episode)) | grep "\\.cog$" | sort | uniq >> $(TESTSUITE_DIR)/cog_files.txt;
+    var $(cog_files) = ${cat $(TESTSUITE_DIR)/cog_files.txt};
+
+    mkdir $(TESTSUITE_DIR)/files;
+    pushd $(TESTSUITE_DIR)/files;
+
+    cat ../cog_files.txt | (jk_extract_list($episode));
+
+    for cog in $(cog_files) {
+        cogcheck $(cog) 2>>$(TESTSUITE_DIR)/cogcheck.log || true;
+        if head($? == 0) {
+            echo "[PASS] "$(cog) >> $(RAW_OUTPUT);
+        }
+        else {
+            echo "[FAIL] "$(cog) >> $(RAW_OUTPUT);
+        }
+    }
+
+    popd;
+
+    call process_raw_output();
+    call compare_output();
+}

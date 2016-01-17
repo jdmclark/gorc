@@ -1,0 +1,3 @@
+include ../test.boc;
+
+call check_all_cogs(jk1mp.gob);
