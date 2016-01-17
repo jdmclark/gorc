@@ -90,6 +90,7 @@ namespace {
     ast_list_node<statement*>* parse_shell_script_file(path const &filename, ast_factory &ast);
     statement* parse_compound_statement(ast_factory &ast, shell_la_tokenizer &tok);
     expression* parse_expression(ast_factory &ast, shell_la_tokenizer &tok);
+    command* parse_or_infix_command(ast_factory &ast, shell_la_tokenizer &tok);
 
     /* Words */
 
@@ -124,6 +125,28 @@ namespace {
                                                             value));
                 words->location = location_union(words->location,
                                                  end_loc);
+            }
+            else if(tok.get_type() == shell_token_type::punc_begin_subshell) {
+                tok.ignore_whitespace = true;
+
+                auto start_loc = tok.get_location();
+                tok.advance();
+
+                command *value = parse_or_infix_command(ast, tok);
+
+                if(tok.get_type() != shell_token_type::punc_end_block) {
+                    diagnostic_context dc(tok.get_location());
+                    LOG_FATAL(format("expected '}', found '%s'") % tok.get_value());
+                }
+
+                auto end_loc = tok.get_location();
+                tok.ignore_whitespace = false;
+                tok.advance();
+
+                words->elements.push_back(
+                        ast.make_var<word, subshell_word>(location_union(start_loc, end_loc),
+                                                          value));
+                words->location = location_union(words->location, end_loc);
             }
             else if(tok.get_type() == shell_token_type::word) {
                 words->elements.push_back(
@@ -178,7 +201,8 @@ namespace {
             if(tok.get_type() != shell_token_type::word &&
                tok.get_type() != shell_token_type::variable_name &&
                tok.get_type() != shell_token_type::environment_variable_name &&
-               tok.get_type() != shell_token_type::punc_begin_expr) {
+               tok.get_type() != shell_token_type::punc_begin_expr &&
+               tok.get_type() != shell_token_type::punc_begin_subshell) {
                 return arguments;
             }
         }

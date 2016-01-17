@@ -1,0 +1,5 @@
+var $values = ${echo "foo\nbar\n\nbaz\nfnord"};
+
+for var in $values {
+    echo "VALUE: "$(var);
+}

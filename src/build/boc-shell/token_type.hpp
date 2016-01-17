@@ -17,6 +17,7 @@ namespace gorc {
         punc_end_block,
         punc_begin_expr,
         punc_end_expr,
+        punc_begin_subshell,
         punc_equal,
         punc_notequal,
         punc_not,

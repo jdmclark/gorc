@@ -62,6 +62,14 @@ gorc::expression_word::expression_word(diagnostic_context_location const &loc,
     return;
 }
 
+gorc::subshell_word::subshell_word(diagnostic_context_location const &loc,
+                                   command *cmd)
+    : visitable_ast_node(loc)
+    , cmd(cmd)
+{
+    return;
+}
+
 gorc::variable_name::variable_name(diagnostic_context_location const &loc,
                                    std::string const &name)
     : visitable_ast_node(loc)

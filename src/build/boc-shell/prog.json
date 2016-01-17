@@ -13,6 +13,7 @@
         "assignment_visitor.cpp",
         "ast.cpp",
         "builtins.cpp",
+        "command_visitor.cpp",
         "expression_visitor.cpp",
         "io_redirection_visitor.cpp",
         "lexer.cpp",

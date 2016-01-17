@@ -1,0 +1,1 @@
+[ERROR] input.boc:2:1-2:1: expected '}', found ''

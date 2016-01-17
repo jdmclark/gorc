@@ -3,6 +3,7 @@
 #include "system/env.hpp"
 #include "expression_visitor.hpp"
 #include "log/log.hpp"
+#include "command_visitor.hpp"
 
 gorc::shvalue gorc::word_visitor::visit(simple_word &w) const
 {
@@ -28,4 +29,19 @@ gorc::shvalue gorc::word_visitor::visit(environment_variable_name &var) const
 gorc::shvalue gorc::word_visitor::visit(expression_word &w) const
 {
     return ast_visit(expression_visitor(), *w.value);
+}
+
+gorc::shvalue gorc::word_visitor::visit(subshell_word &w) const
+{
+    shvalue rv;
+
+    command_visitor cv(&rv);
+    int return_code = ast_visit(cv, *w.cmd);
+    set_variable_value("?", cv.exit_code_sequence);
+
+    if(return_code != 0) {
+        LOG_FATAL(format("command failed with code %d") % return_code);
+    }
+
+    return rv;
 }

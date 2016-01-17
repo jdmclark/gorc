@@ -9,10 +9,6 @@ namespace gorc {
     class program_visitor {
     public:
         maybe<shvalue> return_value;
-        shvalue exit_code_sequence;
-
-        int visit(pipe_command &);
-        int visit(infix_command &);
 
         void visit(command_statement &);
 

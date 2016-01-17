@@ -80,6 +80,7 @@ namespace gorc {
     class expression_word;
     class variable_name;
     class environment_variable_name;
+    class subshell_word;
 
     using lvalue = variant<variable_name*,
                            environment_variable_name*>;
@@ -87,7 +88,8 @@ namespace gorc {
     using word = variant<simple_word*,
                          expression_word*,
                          variable_name*,
-                         environment_variable_name*>;
+                         environment_variable_name*,
+                         subshell_word*>;
 
     class simple_word : public visitable_ast_node<simple_word> {
     public:
@@ -103,6 +105,19 @@ namespace gorc {
 
         expression_word(diagnostic_context_location const &loc,
                         expression *value);
+    };
+
+    class pipe_command;
+    class infix_command;
+    using command = variant<pipe_command*,
+                            infix_command*>;
+
+    class subshell_word : public visitable_ast_node<subshell_word> {
+    public:
+        command *cmd;
+
+        subshell_word(diagnostic_context_location const &loc,
+                      command *cmd);
     };
 
     class variable_name : public visitable_ast_node<variable_name> {
@@ -138,11 +153,6 @@ namespace gorc {
         subcommand(diagnostic_context_location const &loc,
                    ast_list_node<argument*> *arguments);
     };
-
-    class pipe_command;
-    class infix_command;
-    using command = variant<pipe_command*,
-                            infix_command*>;
 
     class pipe_io_redirection : public visitable_ast_node<pipe_io_redirection> {
     public:

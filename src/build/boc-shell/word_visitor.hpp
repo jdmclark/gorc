@@ -11,6 +11,7 @@ namespace gorc {
         shvalue visit(variable_name &) const;
         shvalue visit(environment_variable_name &) const;
         shvalue visit(expression_word &) const;
+        shvalue visit(subshell_word &) const;
     };
 
 }

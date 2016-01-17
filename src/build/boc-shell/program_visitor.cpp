@@ -1,141 +1,21 @@
 #include "program_visitor.hpp"
 #include "log/log.hpp"
 #include "stack.hpp"
-#include "system/pipe.hpp"
-#include "system/process.hpp"
 #include "argument_visitor.hpp"
 #include "expression_visitor.hpp"
 #include "assignment_visitor.hpp"
-#include "io_redirection_visitor.hpp"
+#include "command_visitor.hpp"
 #include "io/path.hpp"
 #include <boost/filesystem.hpp>
 #include <stack>
 #include <memory>
 
-int gorc::program_visitor::visit(pipe_command &cmd)
-{
-    // Open redirection pipes
-    std::unique_ptr<pipe> stored_redirected_stdin_pipe;
-    if(cmd.stdin_source.has_value()) {
-        stored_redirected_stdin_pipe = ast_visit(io_redirection_visitor(/* input */ true),
-                                                 cmd.stdin_source.get_value());
-    }
-    else {
-        // Use a normal pipe, but close the output end.
-        // This will cause the child process to exit with SIGPIPE instead of halting.
-        stored_redirected_stdin_pipe = std::make_unique<pipe>();
-        stored_redirected_stdin_pipe->close_output();
-    }
-
-    std::unique_ptr<pipe> stored_redirected_stdout_pipe;
-    maybe<pipe*> redirected_stdout_pipe;
-    if(cmd.stdout_target.has_value()) {
-        stored_redirected_stdout_pipe = ast_visit(io_redirection_visitor(/* input */ false),
-                                                  cmd.stdout_target.get_value());
-        redirected_stdout_pipe = stored_redirected_stdout_pipe.get();
-    }
-
-    std::unique_ptr<pipe> stored_redirected_stderr_pipe;
-    maybe<pipe*> redirected_stderr_pipe;
-    if(cmd.stderr_target.has_value()) {
-        stored_redirected_stderr_pipe = ast_visit(io_redirection_visitor(/* input */ false),
-                                                  cmd.stderr_target.get_value());
-        stored_redirected_stderr_pipe->set_reusable(true);
-        redirected_stderr_pipe = stored_redirected_stderr_pipe.get();
-    }
-
-    // Open interprocess pipes
-    size_t num_subcommands = cmd.subcommands->elements.size();
-
-    std::vector<std::unique_ptr<pipe>> pipes;
-    for(size_t i = 1; i < num_subcommands; ++i) {
-        pipes.push_back(std::make_unique<pipe>());
-    }
-
-    std::vector<maybe<pipe*>> stdin_pipes;
-    std::vector<maybe<pipe*>> stdout_pipes;
-
-    // First process takes stdin from redirection
-    stdin_pipes.push_back(stored_redirected_stdin_pipe.get());
-
-    for(auto &pipe : pipes) {
-        stdin_pipes.push_back(pipe.get());
-        stdout_pipes.push_back(pipe.get());
-    }
-
-    // Last process sends stdout to console
-    stdout_pipes.push_back(redirected_stdout_pipe);
-
-    auto sub_it = cmd.subcommands->elements.begin();
-    auto stdin_it = stdin_pipes.begin();
-    auto stdout_it = stdout_pipes.begin();
-
-    std::vector<std::unique_ptr<process>> processes;
-
-    while(sub_it != cmd.subcommands->elements.end() &&
-          stdin_it != stdin_pipes.end() &&
-          stdout_it != stdout_pipes.end()) {
-        shvalue argv = ast_visit(argument_visitor(), (*sub_it)->arguments);
-
-        if(argv.empty()) {
-            LOG_FATAL("cannot execute empty command");
-        }
-
-        // First token is the program to execute
-        std::string prog = argv.front();
-        std::vector<std::string> args;
-        for(auto it = argv.begin() + 1;
-            it != argv.end();
-            ++it) {
-            args.push_back(*it);
-        }
-
-        processes.push_back(std::make_unique<process>(prog,
-                                                      args,
-                                                      *stdin_it,
-                                                      *stdout_it,
-                                                      redirected_stderr_pipe));
-        ++sub_it;
-        ++stdin_it;
-        ++stdout_it;
-    }
-
-    int last_exit_code = 0;
-    for(auto &proc : processes) {
-        last_exit_code = proc->join();
-        exit_code_sequence.push_back(std::to_string(last_exit_code));
-    }
-
-    return last_exit_code;
-}
-
-int gorc::program_visitor::visit(infix_command &cmd)
-{
-    int left_return_code = ast_visit(*this, *cmd.left);
-
-    switch(cmd.op) {
-    case command_infix_operator::logical_or:
-        if(left_return_code == 0) {
-            return left_return_code;
-        }
-        break;
-
-    case command_infix_operator::logical_and:
-        if(left_return_code != 0) {
-            return left_return_code;
-        }
-        break;
-    }
-
-    return ast_visit(*this, *cmd.right);
-}
-
 void gorc::program_visitor::visit(command_statement &cmd)
 {
-    exit_code_sequence.clear();
+    command_visitor cv;
 
-    int return_code = ast_visit(*this, *cmd.cmd);
-    set_variable_value("?", exit_code_sequence);
+    int return_code = ast_visit(cv, *cmd.cmd);
+    set_variable_value("?", cv.exit_code_sequence);
 
     if(return_code != 0) {
         LOG_FATAL(format("command failed with code %d") % return_code);

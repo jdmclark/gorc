@@ -1,7 +1,7 @@
 include ../../rules/test.boc;
 
 # Add all JK utilities to the path
-$[PATH] = $[PATH]:$(BIN);
+$[PATH] = $[PATH]:$(BIN):$(BUILD_BIN);
 
 # Test environment pre-check
 var $(JK_ROOT) = $[JK_ROOT];
@@ -19,14 +19,28 @@ if !is_file($(JK_ROOT)/resource/res2.gob) {
 # Remove JK directory from all expected output
 $EXTRA_REGEX = $EXTRA_REGEX "s?"$(JK_ROOT)"?$JK$?g";
 
-function jk_file(filename, episode)
+function jk_vfs(episode, opts)
 {
-    var $(common_opts) = gob --jk --resource $(JK_ROOT)/resource --extract $(filename);
-
-    if null(episode) {
+    var $(common_opts) = gob --jk --resource $(JK_ROOT)/resource $(opts);
+    if null($episode) {
         return $(common_opts);
     }
     else {
         return $(common_opts) @ --episode @ $(JK_ROOT)/episode/$(episode);
     }
+}
+
+function jk_list(episode)
+{
+    return jk_vfs($(episode), --list @ --names-only);
+}
+
+function jk_extract_list(episode)
+{
+    return jk_vfs($(episode), --extract-list);
+}
+
+function jk_file(filename, episode)
+{
+    return jk_vfs($(episode), --extract @ $(filename));
 }

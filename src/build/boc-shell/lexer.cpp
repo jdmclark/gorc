@@ -274,6 +274,9 @@ tok_result shell_tokenizer_state_machine::handle_seen_dollar_state(char ch)
     else if(ch == '[') {
         return skip_directive(tokenizer_state::environment_variable_name);
     }
+    else if(ch == '{') {
+        return append_then_accept(ch, shell_token_type::punc_begin_subshell);
+    }
     else if(!is_bareword_delimiter(ch)) {
         return append_directive(tokenizer_state::bareword_variable_name, ch);
     }
