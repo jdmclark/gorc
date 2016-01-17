@@ -47,10 +47,10 @@
 [PASS] cog/00_playambient2.cog
 [PASS] cog/00_playambient.cog
 [PASS] cog/00_playdialog.cog
-[FAIL] cog/00_playerstarts.cog
+[PASS] cog/00_playerstarts.cog
 [PASS] cog/00_randomambient.cog
 [PASS] cog/00_replaceenemy.cog
-[FAIL] cog/00_sdamage.cog
+[PASS] cog/00_sdamage.cog
 [PASS] cog/00_secretareas.cog
 [PASS] cog/00_sectordamage.cog
 [PASS] cog/00_sectorlight.cog
@@ -212,7 +212,7 @@
 [PASS] cog/09_drainpipes.cog
 [PASS] cog/09_elevdamage.cog
 [PASS] cog/09_endlevel.cog
-[FAIL] cog/09_fuelexplode.cog
+[PASS] cog/09_fuelexplode.cog
 [PASS] cog/09_fueltanks.cog
 [PASS] cog/09_gantrydrainsounds.cog
 [PASS] cog/09_gasdamage.cog

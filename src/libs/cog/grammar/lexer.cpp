@@ -424,9 +424,18 @@ tok_result cog_tokenizer_state_machine::handle_sf_initial_state(char ch)
     }
 }
 
+namespace {
+    bool is_symbol_field_delimiter(char ch)
+    {
+        return ch == '\0' ||
+               ch == ',' ||
+               std::isspace(ch);
+    }
+}
+
 tok_result cog_tokenizer_state_machine::handle_sf_seen_sign_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // Just + or -
         return accept_immediately(cog_token_type::string);
     }
@@ -449,7 +458,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_seen_sign_state(char ch)
 
 tok_result cog_tokenizer_state_machine::handle_sf_hex_prefix_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // Just zero
         return accept_immediately(cog_token_type::integer);
     }
@@ -476,7 +485,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_hex_prefix_state(char ch)
 
 tok_result cog_tokenizer_state_machine::handle_sf_hex_required_digit_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // "0x"
         return accept_immediately(cog_token_type::string);
     }
@@ -490,7 +499,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_hex_required_digit_state(char 
 
 tok_result cog_tokenizer_state_machine::handle_sf_hex_digit_sequence_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         return accept_immediately(cog_token_type::hex_integer);
     }
     else if(std::isxdigit(ch)) {
@@ -503,7 +512,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_hex_digit_sequence_state(char 
 
 tok_result cog_tokenizer_state_machine::handle_sf_digit_sequence_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         return accept_immediately(cog_token_type::integer);
     }
     else if(std::isdigit(ch)) {
@@ -524,7 +533,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_digit_sequence_state(char ch)
 
 tok_result cog_tokenizer_state_machine::handle_sf_decimal_required_digit_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // No digits seen - sign and dot
         return accept_immediately(cog_token_type::string);
     }
@@ -539,7 +548,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_decimal_required_digit_state(c
 
 tok_result cog_tokenizer_state_machine::handle_sf_decimal_digit_sequence_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // At least one digit seen
         return accept_immediately(cog_token_type::real);
     }
@@ -556,7 +565,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_decimal_digit_sequence_state(c
 
 tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sign_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // Not a valid real
         return accept_immediately(cog_token_type::string);
     }
@@ -573,7 +582,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sign_state(ch
 
 tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_required_digit_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         // Not a valid real
         return accept_immediately(cog_token_type::string);
     }
@@ -587,7 +596,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_required_digi
 
 tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sequence_state(char ch)
 {
-    if(ch == '\0' || std::isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         return accept_immediately(cog_token_type::real);
     }
     else if(std::isdigit(ch)) {
@@ -600,7 +609,7 @@ tok_result cog_tokenizer_state_machine::handle_sf_decimal_exponent_sequence_stat
 
 tok_result cog_tokenizer_state_machine::handle_sf_string_fragment_state(char ch)
 {
-    if(ch == '\0' || isspace(ch)) {
+    if(is_symbol_field_delimiter(ch)) {
         return accept_immediately(cog_token_type::string);
     }
     else {
