@@ -1,0 +1,20 @@
+==== default ====
+asset.txt
+empty.gob
+modded.txt
+overridden.txt
+res.gob
+==== mod1 ====
+asset.txt
+empty.gob
+mod.gob
+modded.txt
+overridden.txt
+res.gob
+==== mod2 ====
+asset.txt
+empty.gob
+mod.gob
+modded.txt
+overridden.txt
+res.gob

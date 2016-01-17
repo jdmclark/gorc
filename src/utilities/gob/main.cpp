@@ -18,6 +18,8 @@ namespace gorc {
         std::string jk_episode;
         std::string jk_resource = "resource";
 
+        bool list_names_only = false;
+
         // Sub-commands
         bool do_list = false;
         std::string extract_file;
@@ -45,7 +47,12 @@ namespace gorc {
 
             // Sub-command modes
             opts.insert(make_switch_option("list", do_list));
+            opts.insert(make_switch_option("names-only", list_names_only));
+            opts.emplace_constraint<gorc::dependent_option>("names-only", "list");
+            opts.emplace_constraint<gorc::dependent_option>("names-only", "jk");
+
             opts.insert(make_value_option("extract", extract_file));
+
             opts.emplace_constraint<gorc::mutual_exclusion>(
                     std::vector<std::string> { "list", "extract" },
                     /* min set */ 1,
@@ -110,6 +117,10 @@ namespace gorc {
 
         int jk_vfs_list(jk_virtual_file_system const &vfs)
         {
+            if(list_names_only) {
+                return jk_vfs_list_names_only(vfs);
+            }
+
             auto vfs_map = vfs.list_files();
             size_t num_files = 0;
             for(auto const &f : vfs_map) {
@@ -118,6 +129,16 @@ namespace gorc {
             }
             std::cout << "--------------------" << std::endl;
             std::cout << "Files: " << num_files << std::endl;
+            return EXIT_SUCCESS;
+        }
+
+        int jk_vfs_list_names_only(jk_virtual_file_system const &vfs)
+        {
+            auto vfs_map = vfs.list_files();
+            for(auto const &f : vfs_map) {
+                std::cout << f.first << std::endl;
+            }
+
             return EXIT_SUCCESS;
         }
 
