@@ -19,6 +19,7 @@ namespace gorc {
                 escape_sequence,
                 seen_plus,
                 seen_minus,
+                seen_dot,
                 seen_slash,
                 seen_equal,
                 seen_exclamation_mark,
@@ -119,6 +120,7 @@ namespace gorc {
             tok_result handle_escape_sequence_state(char ch);
             tok_result handle_seen_plus_state(char ch);
             tok_result handle_seen_minus_state(char ch);
+            tok_result handle_seen_dot_state(char ch);
             tok_result handle_seen_slash_state(char ch);
             tok_result handle_seen_equal_state(char ch);
             tok_result handle_seen_exclamation_mark_state(char ch);

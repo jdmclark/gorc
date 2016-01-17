@@ -1,0 +1,2 @@
+[ERROR] input.cog:4:2-4:2: unrecognized punctuator '.'
+[ERROR] input.cog: could not compile script

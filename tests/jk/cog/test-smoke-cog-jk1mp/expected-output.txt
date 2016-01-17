@@ -1,9 +1,9 @@
 [FAIL] cog/00_1waydoor.cog
 [FAIL] cog/00_aiframemove.cog
 [FAIL] cog/00_aiframepatrol.cog
-[FAIL] cog/00_ainotbemoved.cog
+[PASS] cog/00_ainotbemoved.cog
 [PASS] cog/00_aipatrol.cog
-[FAIL] cog/00_aishootbarrel.cog
+[PASS] cog/00_aishootbarrel.cog
 [PASS] cog/00_aisidekick.cog
 [PASS] cog/00_aisleep.cog
 [PASS] cog/00_aiturncoat.cog
@@ -217,7 +217,7 @@
 [FAIL] cog/weap_crossbow.cog
 [FAIL] cog/weap_fists.cog
 [FAIL] cog/weap_raildet.cog
-[FAIL] cog/weap_repeater.cog
+[PASS] cog/weap_repeater.cog
 [FAIL] cog/weap_saber.cog
 [PASS] cog/weap_seqcharge.cog
 [FAIL] cog/weap_strifle.cog

@@ -58,6 +58,9 @@ tok_result cog_tokenizer_state_machine::handle_initial_state(char current_char)
     else if(current_char == '-') {
         return append_directive(tokenizer_state::seen_minus, current_char);
     }
+    else if(current_char == '.') {
+        return append_directive(tokenizer_state::seen_dot, current_char);
+    }
     else if(std::ispunct(current_char)) {
         return handle_single_punctuator_state(current_char);
     }
@@ -162,6 +165,16 @@ tok_result cog_tokenizer_state_machine::handle_seen_minus_state(char ch)
     }
     else {
         return accept_immediately(cog_token_type::punc_minus);
+    }
+}
+
+tok_result cog_tokenizer_state_machine::handle_seen_dot_state(char ch)
+{
+    if(std::isdigit(ch)) {
+        return append_directive(tokenizer_state::decimal_digit_sequence, ch);
+    }
+    else {
+        return reject_immediately("unrecognized punctuator '.'");
     }
 }
 
@@ -646,6 +659,9 @@ tok_result cog_tokenizer_state_machine::handle(char ch)
 
     case tokenizer_state::seen_minus:
         return handle_seen_minus_state(ch);
+
+    case tokenizer_state::seen_dot:
+        return handle_seen_dot_state(ch);
 
     case tokenizer_state::seen_slash:
         return handle_seen_slash_state(ch);
