@@ -1,20 +1,26 @@
 ==== default ====
 asset.txt
+dir/test.txt
 empty.gob
 modded.txt
 overridden.txt
 res.gob
+structured.gob
 ==== mod1 ====
 asset.txt
+dir/test.txt
 empty.gob
 mod.gob
 modded.txt
 overridden.txt
 res.gob
+structured.gob
 ==== mod2 ====
 asset.txt
+dir/test.txt
 empty.gob
 mod.gob
 modded.txt
 overridden.txt
 res.gob
+structured.gob

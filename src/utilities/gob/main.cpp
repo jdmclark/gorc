@@ -2,9 +2,12 @@
 #include "vfs/gob_virtual_container.hpp"
 #include "vfs/jk_virtual_file_system.hpp"
 #include "io/std_output_stream.hpp"
+#include "io/native_file.hpp"
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <iomanip>
 #include <map>
+#include <set>
 
 namespace gorc {
 
@@ -22,6 +25,7 @@ namespace gorc {
 
         // Sub-commands
         bool do_list = false;
+        bool extract_list = false;
         std::string extract_file;
 
     public:
@@ -53,8 +57,11 @@ namespace gorc {
 
             opts.insert(make_value_option("extract", extract_file));
 
+            opts.insert(make_switch_option("extract-list", extract_list));
+            opts.emplace_constraint<gorc::dependent_option>("extract-list", "jk");
+
             opts.emplace_constraint<gorc::mutual_exclusion>(
-                    std::vector<std::string> { "list", "extract" },
+                    std::vector<std::string> { "list", "extract", "extract-list" },
                     /* min set */ 1,
                     /* max set */ 1);
         }
@@ -96,6 +103,9 @@ namespace gorc {
             if(!extract_file.empty()) {
                 return jk_vfs_extract_file(*vfs);
             }
+            else if(extract_list) {
+                return jk_vfs_extract_list(*vfs);
+            }
             else {
                 // Default: list files
                 return jk_vfs_list(*vfs);
@@ -113,6 +123,16 @@ namespace gorc {
                 // Default: list files
                 return single_archive_list(gob);
             }
+        }
+
+        std::set<path> get_extract_list()
+        {
+            std::set<path> rv;
+            for(std::string line; std::getline(std::cin, line); ) {
+                rv.insert(line);
+            }
+
+            return rv;
         }
 
         int jk_vfs_list(jk_virtual_file_system const &vfs)
@@ -207,6 +227,22 @@ namespace gorc {
             }
 
             LOG_FATAL(format("file %s not in archive") % extract_file);
+        }
+
+        int jk_vfs_extract_list(virtual_file_system const &vfs)
+        {
+            auto extractions = get_extract_list();
+            for(auto const &extract : extractions) {
+                if(extract.has_parent_path()) {
+                    boost::filesystem::create_directories(extract.parent_path());
+                }
+
+                auto input_file = vfs.open(extract);
+                auto nf = make_native_file(extract);
+                input_file->copy_to(*nf);
+            }
+
+            return EXIT_SUCCESS;
         }
     };
 

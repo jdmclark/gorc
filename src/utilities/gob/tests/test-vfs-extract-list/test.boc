@@ -1,0 +1,18 @@
+include ../test.boc;
+
+var $VFSDIR = (canonical_path(absolute_path(../sample-vfs)));
+var $GOB_BASE = $(GOB) --jk --resource $(VFSDIR)/resource;
+
+mkdir $(TESTSUITE_DIR)/files;
+pushd $(TESTSUITE_DIR)/files;
+
+$(GOB_BASE) --list --names-only |
+    grep ".*\\.txt" |
+    $(GOB_BASE) --extract-list 2>> $(RAW_OUTPUT);
+
+popd;
+
+find $(TESTSUITE_DIR)/files -type f | sort >> $(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

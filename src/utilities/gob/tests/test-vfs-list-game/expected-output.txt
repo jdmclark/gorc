@@ -1,26 +1,32 @@
 ==== default ====
 asset.txt => ../sample-vfs/resource/res.gob
+dir/test.txt => ../sample-vfs/resource/structured.gob
 empty.gob => ../sample-vfs/resource
 modded.txt => ../sample-vfs/resource/res.gob
 overridden.txt => ../sample-vfs/resource
 res.gob => ../sample-vfs/resource
+structured.gob => ../sample-vfs/resource
 --------------------
-Files: 5
+Files: 7
 ==== mod1 ====
 asset.txt => ../sample-vfs/resource/res.gob
+dir/test.txt => ../sample-vfs/resource/structured.gob
 empty.gob => ../sample-vfs/resource
 mod.gob => ../sample-vfs/mod1
 modded.txt => ../sample-vfs/mod1/mod.gob
 overridden.txt => ../sample-vfs/resource
 res.gob => ../sample-vfs/resource
+structured.gob => ../sample-vfs/resource
 --------------------
-Files: 6
+Files: 8
 ==== mod2 ====
 asset.txt => ../sample-vfs/resource/res.gob
+dir/test.txt => ../sample-vfs/resource/structured.gob
 empty.gob => ../sample-vfs/resource
 mod.gob => ../sample-vfs/mod2
 modded.txt => ../sample-vfs/mod2
 overridden.txt => ../sample-vfs/resource
 res.gob => ../sample-vfs/resource
+structured.gob => ../sample-vfs/resource
 --------------------
-Files: 6
+Files: 8

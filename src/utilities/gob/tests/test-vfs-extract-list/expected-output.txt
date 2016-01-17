@@ -1,0 +1,4 @@
+$TESTDIR$/tempdir/files/asset.txt
+$TESTDIR$/tempdir/files/dir/test.txt
+$TESTDIR$/tempdir/files/modded.txt
+$TESTDIR$/tempdir/files/overridden.txt
