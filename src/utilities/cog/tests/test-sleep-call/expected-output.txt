@@ -1,0 +1,21 @@
+enter startup
+T+0.5
+enter baz
+T+1
+enter bar
+T+1.5
+enter foo
+T+2
+exit foo
+return bar
+T+2.5
+exit bar
+return baz
+T+3
+exit baz
+return startup
+T+3.5
+exit startup
+T+4
+T+4.5
+T+5

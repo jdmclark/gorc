@@ -1,0 +1,10 @@
+{
+    instances: [
+        {
+            file: "input.cog"
+        }
+    ],
+
+    timestep: 0.5,
+    timemax: 5.0
+}

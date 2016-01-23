@@ -21,6 +21,8 @@ namespace gorc {
     public:
         std::vector<cog_scenario_instance> cog_files;
         std::unordered_map<std::string, cog::value> resources;
+        double time_step = 1.0;
+        double max_time = 0.0;
 
         cog_scenario(json_deserialization_constructor, json_input_stream &);
     };

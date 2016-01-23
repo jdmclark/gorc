@@ -1,10 +1,11 @@
 #include "virtual_machine.hpp"
 #include "opcode.hpp"
 #include "continuation.hpp"
+#include "suspend_exception.hpp"
 
-void gorc::cog::virtual_machine::execute(verb_table &verbs,
-                                         service_registry &services,
-                                         continuation &cc)
+void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
+                                                  service_registry &services,
+                                                  continuation &cc)
 {
     if(cc.call_stack.empty()) {
         // Cannot execute in empty continuation
@@ -111,12 +112,20 @@ void gorc::cog::virtual_machine::execute(verb_table &verbs,
 
         case opcode::call: {
                 int vid = read<int>(sr);
+
+                // Store current offset in current continuation
+                cc.call_stack.top().program_counter = sr.position();
+
                 verbs.get_verb(verb_id(vid)).invoke(cc.data_stack, services);
             }
             break;
 
         case opcode::callv: {
                 int vid = read<int>(sr);
+
+                // Store current offset in current continuation
+                cc.call_stack.top().program_counter = sr.position();
+
                 cog::value rv = verbs.get_verb(verb_id(vid)).invoke(cc.data_stack, services);
                 cc.data_stack.push(rv);
             }
@@ -293,5 +302,18 @@ void gorc::cog::virtual_machine::execute(verb_table &verbs,
             }
             break;
         }
+    }
+}
+
+void gorc::cog::virtual_machine::execute(verb_table &verbs,
+                                         service_registry &services,
+                                         continuation &cc)
+{
+    try {
+        internal_execute(verbs, services, cc);
+    }
+    catch(suspend_exception const &)
+    {
+        // Consume suspension
     }
 }

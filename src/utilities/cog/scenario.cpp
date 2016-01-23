@@ -123,7 +123,9 @@ namespace {
                                 scn.resources.emplace(name, read_cog_value(f));
                             });
                     }
-                }
+                },
+                { "timestep", make_json_member(&cog_scenario::time_step) },
+                { "timemax", make_json_member(&cog_scenario::max_time) }
             }
         );
 

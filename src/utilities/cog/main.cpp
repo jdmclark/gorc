@@ -94,15 +94,26 @@ namespace gorc {
                 }
             }
 
-
             // Execute startup messages:
             executor.send_to_all(cog::message_type::startup);
+
+            double current_time = 0.0;
+            while(current_time < scenario.max_time) {
+                current_time += scenario.time_step;
+                std::cout << "T+" << current_time << std::endl;
+
+                executor.update(scenario.time_step);
+            }
 
             return EXIT_SUCCESS;
         }
 
         void populate_verb_table()
         {
+            verbs.add_verb("print", [](char const *s) {
+                    std::cout << s << std::endl;
+                });
+
             verbs.add_verb("printint", [](int v) {
                     std::cout << v << std::endl;
                 });

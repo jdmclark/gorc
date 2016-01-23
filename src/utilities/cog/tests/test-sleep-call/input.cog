@@ -1,0 +1,37 @@
+symbols
+message startup
+end
+code
+
+foo:
+    print("enter foo");
+    sleep(0.5);
+    print("exit foo");
+    return;
+
+bar:
+    print("enter bar");
+    sleep(0.5);
+    call foo;
+    print("return bar");
+    sleep(0.5);
+    print("exit bar");
+    return;
+
+baz:
+    print("enter baz");
+    sleep(0.5);
+    call bar;
+    print("return baz");
+    sleep(0.5);
+    print("exit baz");
+    return;
+
+startup:
+    print("enter startup");
+    sleep(0.5);
+    call baz;
+    print("return startup");
+    sleep(0.5);
+    print("exit startup");
+end

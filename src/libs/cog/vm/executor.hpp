@@ -28,7 +28,11 @@ namespace gorc {
             instance& create_instance(cog::script const &);
             instance& create_instance(cog::script const &, std::vector<value> const &);
 
+            void add_sleep_record(std::unique_ptr<sleep_record> &&);
+
             void send_to_all(message_type);
+
+            void update(double dt);
         };
 
     }

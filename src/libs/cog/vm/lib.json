@@ -13,6 +13,7 @@
         "heap.cpp",
         "instance.cpp",
         "sleep_record.cpp",
+        "suspend_exception.cpp",
         "virtual_machine.cpp"
     ]
 }
