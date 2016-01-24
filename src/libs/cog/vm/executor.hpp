@@ -7,6 +7,7 @@
 #include "cog/script/id.hpp"
 #include "cog/script/verb_table.hpp"
 #include "utility/service_registry.hpp"
+#include "call_stack_frame.hpp"
 #include <vector>
 #include <memory>
 
@@ -30,7 +31,22 @@ namespace gorc {
 
             void add_sleep_record(std::unique_ptr<sleep_record> &&);
 
-            void send_to_all(message_type);
+            maybe<call_stack_frame> create_message_frame(cog_id instance,
+                                                         message_type msg,
+                                                         value sender,
+                                                         value source,
+                                                         value param0,
+                                                         value param1,
+                                                         value param2,
+                                                         value param3);
+
+            void send_to_all(message_type msg,
+                             value sender,
+                             value source,
+                             value param0,
+                             value param1,
+                             value param2,
+                             value param3);
 
             void update(double dt);
         };

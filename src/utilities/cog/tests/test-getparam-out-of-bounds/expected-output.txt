@@ -1,0 +1,4 @@
+[ERROR] ../default.scn: getparam number -1 is out of bounds
+-1
+[ERROR] ../default.scn: getparam number 4 is out of bounds
+-1

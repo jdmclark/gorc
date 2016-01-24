@@ -15,6 +15,8 @@ namespace gorc {
 
             continuation() = default;
             continuation(call_stack_frame &&frame);
+
+            call_stack_frame& frame();
         };
 
     }

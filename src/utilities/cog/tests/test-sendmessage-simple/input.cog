@@ -1,0 +1,9 @@
+symbols
+cog other
+message startup
+end
+code
+startup:
+    printint(sendmessage(other, user0));
+    return;
+end

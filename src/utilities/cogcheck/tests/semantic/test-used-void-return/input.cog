@@ -1,0 +1,9 @@
+symbols
+int x
+message startup
+end
+code
+startup:
+x = sleep(5);
+
+end

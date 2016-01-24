@@ -1,4 +1,5 @@
 #include "executor.hpp"
+#include "log/log.hpp"
 
 gorc::cog::executor::executor(verb_table &verbs)
     : verbs(verbs)
@@ -26,7 +27,51 @@ void gorc::cog::executor::add_sleep_record(std::unique_ptr<sleep_record> &&sr)
     sleep_records.push_back(std::forward<std::unique_ptr<sleep_record>>(sr));
 }
 
-void gorc::cog::executor::send_to_all(message_type t)
+gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_frame(
+        cog_id target,
+        message_type msg,
+        value sender,
+        value source,
+        value param0,
+        value param1,
+        value param2,
+        value param3)
+{
+    int inst_index = static_cast<int>(target);
+    if(inst_index < 0 || static_cast<size_t>(inst_index) >= instances.size()) {
+        LOG_ERROR(format("could not send message %s to cog %d: cog id is out of bounds") %
+                  as_string(msg) %
+                  inst_index);
+        return nothing;
+    }
+
+    auto &inst = instances.at(inst_index);
+    auto addr = inst->cog.exports.get_offset(msg);
+    if(!addr.has_value()) {
+        LOG_WARNING(format("sent message %s to cog %d, but the message is not exported") %
+                    as_string(msg) %
+                    inst_index);
+        return nothing;
+    }
+
+    return call_stack_frame(inst->cog,
+                            inst->memory,
+                            addr.get_value(),
+                            sender,
+                            source,
+                            param0,
+                            param1,
+                            param2,
+                            param3);
+}
+
+void gorc::cog::executor::send_to_all(message_type t,
+                                      value sender,
+                                      value source,
+                                      value param0,
+                                      value param1,
+                                      value param2,
+                                      value param3)
 {
     for(auto &inst : instances) {
         auto addr = inst->cog.exports.get_offset(t);
@@ -34,8 +79,15 @@ void gorc::cog::executor::send_to_all(message_type t)
             continue;
         }
 
-        continuation cc(call_stack_frame(inst->cog, inst->memory, addr.get_value()));
-
+        continuation cc(call_stack_frame(inst->cog,
+                                         inst->memory,
+                                         addr.get_value(),
+                                         sender,
+                                         source,
+                                         param0,
+                                         param1,
+                                         param2,
+                                         param3));
         vm.execute(verbs, services, cc);
     }
 }

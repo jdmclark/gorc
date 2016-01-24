@@ -1,0 +1,11 @@
+symbols
+message user0
+end
+code
+user0:
+    printint(getparam(0));
+    printint(getparam(1));
+    printint(getparam(2));
+    printint(getparam(3));
+    returnex(7);
+end

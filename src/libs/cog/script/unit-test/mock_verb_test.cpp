@@ -12,7 +12,7 @@ test_case(invoke_mock)
 
     stack stk;
     service_registry sr;
-    assert_throws_logged(v.invoke(stk, sr));
+    assert_throws_logged(v.invoke(stk, sr, true));
 
     assert_log_message(log_level::error, "invoked mock verb 'myverb'");
     assert_log_empty();

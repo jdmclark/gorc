@@ -12,6 +12,7 @@
         "executor.cpp",
         "heap.cpp",
         "instance.cpp",
+        "restart_exception.cpp",
         "sleep_record.cpp",
         "suspend_exception.cpp",
         "virtual_machine.cpp"

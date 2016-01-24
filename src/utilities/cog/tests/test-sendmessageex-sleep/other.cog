@@ -1,0 +1,13 @@
+symbols
+message user0
+end
+code
+user0:
+    sleep(0.5);
+    printint(getparam(0));
+    printint(getparam(1));
+    printint(getparam(2));
+    printint(getparam(3));
+    sleep(0.5);
+    returnex(7);
+end

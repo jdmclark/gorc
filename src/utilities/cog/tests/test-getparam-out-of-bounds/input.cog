@@ -1,0 +1,8 @@
+symbols
+message startup
+end
+code
+startup:
+    printint(getparam(-1));
+    printint(getparam(4));
+end

@@ -16,6 +16,7 @@ namespace gorc {
                                  FnT const &fn,
                                  stack &s,
                                  service_registry &sr,
+                                 bool ev,
                                  ArgT ...args)
                 {
                     if(s.empty()) {
@@ -26,7 +27,7 @@ namespace gorc {
                     s.pop();
                     return apply_verb_arguments<remaining - 1,
                                                 result_t,
-                                                pass_svc>()(name, fn, s, sr, v, args...);
+                                                pass_svc>()(name, fn, s, sr, ev, v, args...);
                 }
             };
 
@@ -35,6 +36,7 @@ namespace gorc {
                 template <typename FnT, typename ...ArgT>
                 auto operator()(FnT const &fn,
                                 service_registry &,
+                                bool /* expects value */,
                                 ArgT ...args) -> decltype(fn(args...))
                 {
                     return fn(args...);
@@ -46,9 +48,10 @@ namespace gorc {
                 template <typename FnT, typename ...ArgT>
                 auto operator()(FnT const &fn,
                                 service_registry &sr,
-                                ArgT ...args) -> decltype(fn(sr, args...))
+                                bool expects_value,
+                                ArgT ...args) -> decltype(fn(expects_value, sr, args...))
                 {
-                    return fn(sr, args...);
+                    return fn(expects_value, sr, args...);
                 }
             };
 
@@ -59,9 +62,10 @@ namespace gorc {
                                  FnT const &fn,
                                  stack &,
                                  service_registry &sr,
+                                 bool ev,
                                  ArgT ...args)
                 {
-                    return maybe_apply_service_arguments<pass_svc>()(fn, sr, args...);
+                    return maybe_apply_service_arguments<pass_svc>()(fn, sr, ev, args...);
                 }
             };
 
@@ -72,9 +76,10 @@ namespace gorc {
                                  FnT const &fn,
                                  stack &,
                                  service_registry &sr,
+                                 bool ev,
                                  ArgT ...args)
                 {
-                    maybe_apply_service_arguments<pass_svc>()(fn, sr, args...);
+                    maybe_apply_service_arguments<pass_svc>()(fn, sr, ev, args...);
                     return value();
                 }
             };
@@ -96,11 +101,11 @@ namespace gorc {
                 return;
             }
 
-            virtual value invoke(stack &s, service_registry &sr) const override
+            virtual value invoke(stack &s, service_registry &sr, bool expects_value) const override
             {
                 return detail::apply_verb_arguments<arity,
                                                     result_type,
-                                                    false>()(name, functor, s, sr);
+                                                    false>()(name, functor, s, sr, expects_value);
             }
         };
 
@@ -128,11 +133,11 @@ namespace gorc {
                 return;
             }
 
-            virtual value invoke(stack &s, service_registry &sr) const override
+            virtual value invoke(stack &s, service_registry &sr, bool expects_value) const override
             {
                 return detail::apply_verb_arguments<arity,
                                                     result_type,
-                                                    true>()(name, functor, s, sr);
+                                                    true>()(name, functor, s, sr, expects_value);
             }
         };
 
@@ -141,7 +146,7 @@ namespace gorc {
                                                 FnT functor)
         {
             return std::make_unique<service_verb<FnT,
-                                                 compute_verb_arity(functor) - 1,
+                                                 compute_verb_arity(functor) - 2,
                                                  compute_verb_result_type(functor)>>(name, functor);
         }
 

@@ -41,7 +41,7 @@ test_case(verb_lookup)
     assert_log_empty();
 
     stack s;
-    verb.invoke(s, sr);
+    verb.invoke(s, sr, true);
 
     assert_log_message(log_level::info, "called myverb");
 

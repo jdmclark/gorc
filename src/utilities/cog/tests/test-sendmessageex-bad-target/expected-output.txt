@@ -1,0 +1,2 @@
+[ERROR] scenario.scn: could not send message user0 to cog 1: cog id is out of bounds
+-1

@@ -95,7 +95,13 @@ namespace gorc {
             }
 
             // Execute startup messages:
-            executor.send_to_all(cog::message_type::startup);
+            executor.send_to_all(cog::message_type::startup,
+                                 /* sender: nothing */ 0,
+                                 /* source: nothing */ 0,
+                                 /* param0 */ cog::value(),
+                                 /* param1 */ cog::value(),
+                                 /* param2 */ cog::value(),
+                                 /* param3 */ cog::value());
 
             double current_time = 0.0;
             while(current_time < scenario.max_time) {
@@ -128,7 +134,7 @@ namespace gorc {
                     return;
                 }
 
-                virtual cog::value invoke(cog::stack &stk, service_registry &) const override
+                virtual cog::value invoke(cog::stack &stk, service_registry &, bool) const override
                 {
                     std::cout << cog::as_string(stk.top()) << std::endl;
                     stk.pop();

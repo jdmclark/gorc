@@ -237,7 +237,7 @@ namespace gorc {
         template <typename FnT, typename InsertIt>
         void compute_service_verb_argument_types(FnT const &fn, InsertIt it)
         {
-            detail::extract_verb_argument_types<1, compute_verb_arity(fn)>()(fn, it);
+            detail::extract_verb_argument_types<2, compute_verb_arity(fn)>()(fn, it);
         }
 
         template <typename FnT>

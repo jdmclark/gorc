@@ -19,7 +19,7 @@ test_case(function_verb_no_args)
     // Test call
     cog::stack stk;
     service_registry sr;
-    auto rv = vn->invoke(stk, sr);
+    auto rv = vn->invoke(stk, sr, true);
 
     sector_id rvid = rv;
     assert_eq(rvid, sector_id(5));
@@ -44,7 +44,7 @@ test_case(function_verb_arg_order)
     stk.push(10);
     stk.push(3);
 
-    auto rv = vn->invoke(stk, sr);
+    auto rv = vn->invoke(stk, sr, true);
     assert_eq(rv.get_type(), value_type::nothing);
 
     assert_log_message(log_level::info, "5 10 3");
@@ -69,7 +69,7 @@ test_case(function_verb_underflow)
     stk.push(5);
     stk.push(10);
 
-    assert_throws_logged(vn->invoke(stk, sr));
+    assert_throws_logged(vn->invoke(stk, sr, true));
 
     assert_log_message(log_level::error, "stack underflow in verb 'myverb'");
     assert_log_empty();
@@ -82,7 +82,11 @@ test_case(service_verb_passes_service)
     std::string msg = "Hello, World!";
     sr.add(msg);
 
-    auto vn = make_service_verb("myverb", [](service_registry &sr, int a, int b, int c) -> int {
+    auto vn = make_service_verb("myverb", [](bool,
+                                             service_registry &sr,
+                                             int a,
+                                             int b,
+                                             int c) -> int {
             LOG_INFO(format("%s %d %d %d") % sr.get<std::string>() % a % b % c);
             return 12;
         });
@@ -91,7 +95,7 @@ test_case(service_verb_passes_service)
     stk.push(10);
     stk.push(3);
 
-    assert_eq(static_cast<int>(vn->invoke(stk, sr)), 12);
+    assert_eq(static_cast<int>(vn->invoke(stk, sr, true)), 12);
 
     assert_log_message(log_level::info, "Hello, World! 5 10 3");
     assert_log_empty();

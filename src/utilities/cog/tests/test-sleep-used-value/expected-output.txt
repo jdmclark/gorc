@@ -1,0 +1,4 @@
+[WARNING] input.cog:8:23-8:32: cannot convert argument from void to float
+T+0.5
+0
+T+1

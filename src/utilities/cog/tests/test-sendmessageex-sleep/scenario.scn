@@ -1,0 +1,16 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                cog 1
+            ]
+        },
+        {
+            file: "other.cog"
+        }
+    ],
+
+    timestep: 0.5,
+    timemax: 1
+}

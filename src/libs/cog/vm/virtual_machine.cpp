@@ -1,25 +1,24 @@
 #include "virtual_machine.hpp"
 #include "opcode.hpp"
 #include "continuation.hpp"
+#include "restart_exception.hpp"
 #include "suspend_exception.hpp"
 
-void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
-                                                  service_registry &services,
-                                                  continuation &cc)
+gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
+                                                              service_registry &services,
+                                                              continuation &cc)
 {
     if(cc.call_stack.empty()) {
         // Cannot execute in empty continuation
-        return;
+        return value();
     }
 
     // Add current continuation to services.
     // System verbs must modify the current continuation.
     services.add_or_replace(cc);
 
-    call_stack_frame *frame = &cc.call_stack.top();
-
-    memory_file::reader sr(frame->cog.program);
-    sr.set_position(frame->program_counter);
+    memory_file::reader sr(cc.frame().cog.program);
+    sr.set_position(cc.frame().program_counter);
 
     while(true) {
         opcode op = read<opcode>(sr);
@@ -38,7 +37,7 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
 
         case opcode::load: {
                 size_t addr = read<size_t>(sr);
-                cc.data_stack.push(frame->memory[addr]);
+                cc.data_stack.push(cc.frame().memory[addr]);
             }
             break;
 
@@ -47,13 +46,13 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                 int idx = static_cast<int>(cc.data_stack.top());
                 cc.data_stack.pop();
 
-                cc.data_stack.push(frame->memory[addr + idx]);
+                cc.data_stack.push(cc.frame().memory[addr + idx]);
             }
             break;
 
         case opcode::stor: {
                 size_t addr = read<size_t>(sr);
-                frame->memory[addr] = cc.data_stack.top();
+                cc.frame().memory[addr] = cc.data_stack.top();
                 cc.data_stack.pop();
             }
             break;
@@ -63,7 +62,7 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                 int idx = static_cast<int>(cc.data_stack.top());
                 cc.data_stack.pop();
 
-                frame->memory[addr + idx] = cc.data_stack.top();
+                cc.frame().memory[addr + idx] = cc.data_stack.top();
                 cc.data_stack.pop();
             }
             break;
@@ -81,7 +80,15 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                 cc.call_stack.top().program_counter = sr.position();
 
                 // Create new stack frame
-                cc.call_stack.push(call_stack_frame(frame->cog, frame->memory, addr));
+                cc.call_stack.push(call_stack_frame(cc.frame().cog,
+                                                    cc.frame().memory,
+                                                    addr,
+                                                    cc.frame().sender,
+                                                    cc.frame().source,
+                                                    cc.frame().param0,
+                                                    cc.frame().param1,
+                                                    cc.frame().param2,
+                                                    cc.frame().param3));
 
                 // Jump
                 sr.set_position(addr);
@@ -116,7 +123,9 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                 // Store current offset in current continuation
                 cc.call_stack.top().program_counter = sr.position();
 
-                verbs.get_verb(verb_id(vid)).invoke(cc.data_stack, services);
+                verbs.get_verb(verb_id(vid)).invoke(cc.data_stack,
+                                                    services,
+                                                    /* expects value */ false);
             }
             break;
 
@@ -126,21 +135,35 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                 // Store current offset in current continuation
                 cc.call_stack.top().program_counter = sr.position();
 
-                cog::value rv = verbs.get_verb(verb_id(vid)).invoke(cc.data_stack, services);
+                cog::value rv = verbs.get_verb(verb_id(vid)).invoke(cc.data_stack,
+                                                                    services,
+                                                                    /* expects value */ true);
                 cc.data_stack.push(rv);
             }
             break;
 
         case opcode::ret: {
-                // Retire top stack frame. TODO: ReturnEx value.
+                // Retire top stack frame.
+                value return_register = cc.frame().return_register;
+                bool save_return_register = cc.frame().save_return_register;
+                bool push_return_register = cc.frame().push_return_register;
+
                 cc.call_stack.pop();
 
                 if(cc.call_stack.empty()) {
-                    return;
+                    return return_register;
                 }
 
                 sr = memory_file::reader(cc.call_stack.top().cog.program);
                 sr.set_position(cc.call_stack.top().program_counter);
+
+                if(save_return_register) {
+                    cc.frame().return_register = return_register;
+                }
+
+                if(push_return_register) {
+                    cc.data_stack.push(return_register);
+                }
             }
             break;
 
@@ -305,15 +328,29 @@ void gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
     }
 }
 
-void gorc::cog::virtual_machine::execute(verb_table &verbs,
-                                         service_registry &services,
-                                         continuation &cc)
+gorc::cog::value gorc::cog::virtual_machine::execute(verb_table &verbs,
+                                                     service_registry &services,
+                                                     continuation &cc)
 {
-    try {
-        internal_execute(verbs, services, cc);
+    while(true) {
+        try {
+            return internal_execute(verbs, services, cc);
+        }
+        catch(restart_exception const &) {
+            // Some engine component has changed the current continuation and
+            // is requesting immediate out-of-band execution restart.
+            continue;
+        }
+        catch(suspend_exception const &) {
+            // Some engine component has requested immediate out-of-band execution
+            // suspension. The current context is stored in the continuation.
+            break;
+        }
+
+        break;
     }
-    catch(suspend_exception const &)
-    {
-        // Consume suspension
-    }
+
+    // Execution has halted out-of-band. Use whatever value is in the current
+    // return register.
+    return cc.frame().return_register;
 }

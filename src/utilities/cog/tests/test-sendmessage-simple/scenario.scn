@@ -1,0 +1,13 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                cog 1
+            ]
+        },
+        {
+            file: "other.cog"
+        }
+    ]
+}

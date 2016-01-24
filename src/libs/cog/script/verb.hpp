@@ -20,7 +20,9 @@ namespace gorc {
                  std::vector<value_type> &&argument_types);
             virtual ~verb();
 
-            virtual value invoke(stack &, service_registry &) const = 0;
+            virtual value invoke(stack &,
+                                 service_registry &,
+                                 bool expects_value) const = 0;
         };
 
     }

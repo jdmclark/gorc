@@ -1,0 +1,9 @@
+symbols
+message startup
+end
+code
+
+startup:
+    // This should print 0
+    printint(bitclear(sleep(0.5), -1));
+end

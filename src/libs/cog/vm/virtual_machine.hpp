@@ -8,10 +8,10 @@ namespace gorc {
 
         class virtual_machine {
         private:
-            void internal_execute(verb_table &, service_registry &, continuation &cc);
+            value internal_execute(verb_table &, service_registry &, continuation &cc);
 
         public:
-            void execute(verb_table &, service_registry &, continuation &cc);
+            value execute(verb_table &, service_registry &, continuation &cc);
         };
 
     }
