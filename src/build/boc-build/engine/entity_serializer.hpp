@@ -25,6 +25,7 @@ namespace gorc {
         void write_string(std::string const &);
         void write_path(path const &);
         void write_uint32(uint32_t value);
+        void write_bool(bool b);
 
         template <typename RangeT, typename TransformFnT>
         void write_range(RangeT const &rng, TransformFnT trns_fn)

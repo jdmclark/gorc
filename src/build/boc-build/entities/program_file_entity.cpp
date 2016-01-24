@@ -11,6 +11,7 @@ gorc::program_file_entity_internal_properties::program_file_entity_internal_prop
     , external_libs(is.read_enum_set<ext_lib_set>())
     , objects(is.read_entity_set<object_file_entity>())
     , libraries(is.read_entity_set<library_file_entity>())
+    , last_update_failed_value(is.read_bool())
 {
     std::copy(objects.begin(), objects.end(), std::inserter(dependencies_value,
                                                             dependencies_value.begin()));
@@ -46,6 +47,7 @@ gorc::program_file_entity::program_file_entity(entity_input_stream &is)
     , generated_file_entity(is.services.get<compiler_properties>()
                                        .make_program_filename(program_name, type))
 {
+    last_update_failed = last_update_failed_value;
     return;
 }
 
@@ -73,7 +75,9 @@ std::unordered_set<gorc::entity*> const& gorc::program_file_entity::dependencies
 
 bool gorc::program_file_entity::update(service_registry const &services)
 {
-    return services.get<compiler_properties>().link_program(this);
+    bool rv = services.get<compiler_properties>().link_program(this);
+    last_update_failed = !rv;
+    return rv;
 }
 
 void gorc::program_file_entity::serialize(entity_output_stream &os)
@@ -83,6 +87,7 @@ void gorc::program_file_entity::serialize(entity_output_stream &os)
     os.write_enum_set(external_libs);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
+    os.write_bool(last_update_failed);
 }
 
 std::type_index gorc::program_file_entity::get_type_index() const

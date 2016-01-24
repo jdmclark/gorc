@@ -42,6 +42,11 @@ void gorc::entity_output_stream::write_uint32(uint32_t value)
     write<uint32_t>(os, value);
 }
 
+void gorc::entity_output_stream::write_bool(bool b)
+{
+    write<uint32_t>(os, b ? 1 : 0);
+}
+
 gorc::entity_serializer::entity_serializer(entity_registry const &reg,
                                            output_stream &os)
     : entity_output_stream(reg, os)

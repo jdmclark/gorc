@@ -1,0 +1,30 @@
+---- first run ----
+Hello, World!
+---- second run ----
+Hello, World!
+---- third run ----
+Hello, World!
+==== stderr ====
+---- first run ----
+Building 4 out-of-date targets
+Build succeeded
+---- second run ----
+Building 4 out-of-date targets
+src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
+ this is not a valid c++ program
+ ^
+[ERROR] Build failed
+---- third run ----
+Building 3 out-of-date targets
+src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
+ this is not a valid c++ program
+ ^
+[ERROR] Build failed
+==== stdout ====
+---- first run ----
+---- second run ----
+Failed:
+    pkg/obj/src/myprog/main.o
+---- third run ----
+Failed:
+    pkg/obj/src/myprog/main.o

@@ -8,6 +8,7 @@ gorc::object_file_entity::object_file_entity(entity_input_stream &is)
     : object_file_entity(is.read_entity_reference<source_file_entity>(),
                          is.services)
 {
+    last_update_failed = is.read_bool();
     return;
 }
 
@@ -29,12 +30,15 @@ bool gorc::object_file_entity::update(service_registry const &services)
 {
     auto &comp_props = services.get<compiler_properties>();
 
-    return comp_props.compile_object_file(this);
+    bool rv = comp_props.compile_object_file(this);
+    last_update_failed = !rv;
+    return rv;
 }
 
 void gorc::object_file_entity::serialize(entity_output_stream &os)
 {
     os.write_entity_reference(primary_source_file);
+    os.write_bool(last_update_failed);
 }
 
 std::type_index gorc::object_file_entity::get_type_index() const

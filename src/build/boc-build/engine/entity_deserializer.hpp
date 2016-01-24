@@ -43,6 +43,7 @@ namespace gorc {
         std::string read_string();
         path read_path();
         uint32_t read_uint32();
+        bool read_bool();
 
         template <typename ResultT, typename InsertFnT>
         ResultT read_range(InsertFnT ins_fn)

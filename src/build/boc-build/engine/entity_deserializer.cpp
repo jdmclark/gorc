@@ -42,6 +42,11 @@ uint32_t gorc::entity_input_stream::read_uint32()
     return read<uint32_t>(is);
 }
 
+bool gorc::entity_input_stream::read_bool()
+{
+    return read_uint32();
+}
+
 gorc::entity_deserializer::entity_deserializer(service_registry const &services,
                                                entity_registry const &reg,
                                                entity_allocator &alloc,

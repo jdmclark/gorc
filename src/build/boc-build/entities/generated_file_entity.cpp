@@ -20,5 +20,6 @@ gorc::path const& gorc::generated_file_entity::file_path()
 
 bool gorc::generated_file_entity::is_dirty()
 {
-    return !boost::filesystem::is_regular_file(filename);
+    return last_update_failed ||
+           !boost::filesystem::is_regular_file(filename);
 }

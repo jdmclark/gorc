@@ -15,6 +15,7 @@ namespace gorc {
         ext_lib_set external_libs;
         std::unordered_set<object_file_entity*> objects;
         std::unordered_set<library_file_entity*> libraries;
+        bool last_update_failed_value = false;
 
         std::unordered_set<entity*> dependencies_value;
 

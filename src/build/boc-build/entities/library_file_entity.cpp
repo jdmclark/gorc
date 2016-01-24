@@ -10,6 +10,7 @@ gorc::library_file_entity_internal_properties::library_file_entity_internal_prop
     , external_libs(is.read_enum_set<ext_lib_set>())
     , objects(is.read_entity_set<object_file_entity>())
     , libraries(is.read_entity_set<library_file_entity>())
+    , last_update_failed_value(is.read_bool())
 {
     std::copy(objects.begin(), objects.end(), std::inserter(dependencies_value,
                                                             dependencies_value.begin()));
@@ -43,6 +44,7 @@ gorc::library_file_entity::library_file_entity(entity_input_stream &is)
     , generated_file_entity(is.services.get<compiler_properties>()
                                        .make_library_filename(library_name))
 {
+    last_update_failed = last_update_failed_value;
     return;
 }
 
@@ -65,7 +67,9 @@ std::unordered_set<gorc::entity*> const& gorc::library_file_entity::dependencies
 
 bool gorc::library_file_entity::update(service_registry const &services)
 {
-    return services.get<compiler_properties>().archive_static_library(this);
+    bool rv = services.get<compiler_properties>().archive_static_library(this);
+    last_update_failed = !rv;
+    return rv;
 }
 
 void gorc::library_file_entity::serialize(entity_output_stream &os)
@@ -74,6 +78,7 @@ void gorc::library_file_entity::serialize(entity_output_stream &os)
     os.write_enum_set(external_libs);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
+    os.write_bool(last_update_failed);
 }
 
 gorc::ext_lib_set const& gorc::library_file_entity::get_external_libraries() const

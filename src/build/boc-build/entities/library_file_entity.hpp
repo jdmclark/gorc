@@ -15,6 +15,7 @@ namespace gorc {
         std::unordered_set<object_file_entity*> objects;
         std::unordered_set<library_file_entity*> libraries;
         std::unordered_set<entity*> dependencies_value;
+        bool last_update_failed_value = false;
 
         library_file_entity_internal_properties(entity_input_stream &);
         library_file_entity_internal_properties(std::string const &library_name,

@@ -9,6 +9,7 @@ namespace gorc {
     protected:
         std::string const entity_name;
         path const filename;
+        bool last_update_failed = false;
 
     public:
         generated_file_entity(path const &filename);
