@@ -92,7 +92,7 @@ void gorc::cog::executor::send_to_all(message_type t,
     }
 }
 
-void gorc::cog::executor::update(double dt)
+void gorc::cog::executor::update(time_delta dt)
 {
     // Decrement times first.
     // Continuations may insert new sleep records later.
@@ -101,7 +101,7 @@ void gorc::cog::executor::update(double dt)
     }
 
     for(auto it = sleep_records.begin(); it != sleep_records.end(); ) {
-        if((*it)->expiration_time <= 0.0) {
+        if((*it)->expiration_time <= 0.0s) {
             auto sr = std::move(*it);
             std::swap(*it, sleep_records.back());
             sleep_records.pop_back();

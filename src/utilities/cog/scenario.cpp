@@ -124,8 +124,16 @@ namespace {
                             });
                     }
                 },
-                { "timestep", make_json_member(&cog_scenario::time_step) },
-                { "timemax", make_json_member(&cog_scenario::max_time) }
+                { "timestep", [](json_input_stream &f, cog_scenario &scn) {
+                        double t = json_deserialize<double>(f);
+                        scn.time_step = time_delta(t);
+                    }
+                },
+                { "timemax", [](json_input_stream &f, cog_scenario &scn) {
+                        double t = json_deserialize<double>(f);
+                        scn.max_time = time_delta(t);
+                    }
+                }
             }
         );
 

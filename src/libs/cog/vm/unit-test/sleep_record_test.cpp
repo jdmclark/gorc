@@ -8,7 +8,7 @@ begin_suite(sleep_record_test);
 
 test_case(constructor)
 {
-    sleep_record sr(continuation(), 0.0);
+    sleep_record sr(continuation(), 0.0s);
 }
 
 end_suite(sleep_record_test);

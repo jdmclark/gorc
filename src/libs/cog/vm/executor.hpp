@@ -48,7 +48,7 @@ namespace gorc {
                              value param2,
                              value param3);
 
-            void update(double dt);
+            void update(time_delta dt);
         };
 
     }

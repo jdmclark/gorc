@@ -2,6 +2,7 @@
 
 #include "cog/script/value.hpp"
 #include "text/json_input_stream.hpp"
+#include "utility/time.hpp"
 #include <memory>
 #include <unordered_map>
 #include <string>
@@ -21,8 +22,8 @@ namespace gorc {
     public:
         std::vector<cog_scenario_instance> cog_files;
         std::unordered_map<std::string, cog::value> resources;
-        double time_step = 1.0;
-        double max_time = 0.0;
+        time_delta time_step = 1.0s;
+        time_delta max_time = 0.0s;
 
         cog_scenario(json_deserialization_constructor, json_input_stream &);
     };

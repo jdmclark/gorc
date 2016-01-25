@@ -11,6 +11,7 @@
         "strcat.cpp",
         "string_search.cpp",
         "string_view.cpp",
+        "time.cpp",
         "wrapped.cpp"
     ]
 }

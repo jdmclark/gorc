@@ -75,7 +75,8 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
                 cc.data_stack.push(value());
             }
 
-            exec.add_sleep_record(std::make_unique<sleep_record>(continuation(cc), time));
+            exec.add_sleep_record(std::make_unique<sleep_record>(continuation(cc),
+                                                                 time_delta(time)));
             throw suspend_exception();
         });
 

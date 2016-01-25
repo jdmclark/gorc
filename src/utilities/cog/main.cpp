@@ -103,10 +103,10 @@ namespace gorc {
                                  /* param2 */ cog::value(),
                                  /* param3 */ cog::value());
 
-            double current_time = 0.0;
+            time_delta current_time = 0.0s;
             while(current_time < scenario.max_time) {
                 current_time += scenario.time_step;
-                std::cout << "T+" << current_time << std::endl;
+                std::cout << "T+" << current_time.count() << std::endl;
 
                 executor.update(scenario.time_step);
             }
