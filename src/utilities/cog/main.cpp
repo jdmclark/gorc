@@ -4,6 +4,7 @@
 #include "cog/vm/executor.hpp"
 #include "cog/vm/default_verbs.hpp"
 #include "utility/zip.hpp"
+#include "utility/time.hpp"
 #include "scenario.hpp"
 #include <vector>
 #include <unordered_map>
