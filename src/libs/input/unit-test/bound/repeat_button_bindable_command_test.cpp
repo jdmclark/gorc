@@ -7,8 +7,8 @@ class repeat_button_bindable_command_test_fixture : public test::fixture {
 public:
     int press_count = 0;
     repeat_button_bindable_command bc =
-        repeat_button_bindable_command(1.0,
-                                       0.5,
+        repeat_button_bindable_command(1.0s,
+                                       0.5s,
                                        [&](time_delta) { ++press_count; });
 };
 

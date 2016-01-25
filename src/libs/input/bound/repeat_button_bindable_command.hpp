@@ -11,13 +11,13 @@ namespace gorc {
         bool prev_state = false;
         bool curr_state = false;
 
-        double repeat_delay;
-        double repeat_time;
-        double current_time = 0.0;
+        time_delta repeat_delay;
+        time_delta repeat_time;
+        time_delta current_time = 0.0s;
 
     public:
-        repeat_button_bindable_command(double repeat_delay,
-                                       double repeat_time,
+        repeat_button_bindable_command(time_delta repeat_delay,
+                                       time_delta repeat_time,
                                        std::function<void(time_delta)> &&on_press);
 
         virtual void set_pressed() override;
