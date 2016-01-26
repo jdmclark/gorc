@@ -1,0 +1,11 @@
+{
+    "name" : "content",
+    "dependencies" : [
+        "libs/utility",
+        "libs/log",
+        "libs/io"
+    ],
+    "sources" : [
+        "fourcc.cpp"
+    ]
+}

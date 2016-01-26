@@ -1,0 +1,12 @@
+{
+    "name" : "content-test",
+    "type" : "test",
+    "exclude-coverage" : true,
+    "dependencies" : [
+        "libs/content",
+        "libs/test"
+    ],
+    "sources" : [
+        "fourcc_test.cpp"
+    ]
+}
