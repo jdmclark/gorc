@@ -1,6 +1,7 @@
 {
     "name" : "utility",
     "sources" : [
+        "event_bus.cpp",
         "file_progress.cpp",
         "global.cpp",
         "local.cpp",

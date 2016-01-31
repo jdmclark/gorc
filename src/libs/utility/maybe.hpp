@@ -114,6 +114,13 @@ namespace gorc {
             return;
         }
 
+        maybe(T &&value)
+            : present(false)
+        {
+            set_data(std::forward<T>(value));
+            return;
+        }
+
         maybe(maybe<T> const &value)
             : present(false)
         {
@@ -122,11 +129,12 @@ namespace gorc {
             }
         }
 
-        maybe(T &&value)
+        maybe(maybe<T> &&value)
             : present(false)
         {
-            set_data(std::forward<T>(value));
-            return;
+            if(value.has_value()) {
+                set_data(std::move(value.get_value()));
+            }
         }
 
         maybe(nothing_type)
@@ -159,7 +167,7 @@ namespace gorc {
         maybe<T>& operator=(maybe<T> &&value)
         {
             if(value.has_value()) {
-                set_data(std::forward<T>(value.get_value()));
+                set_data(std::move(value.get_value()));
             }
             else {
                 clear_data_if_present();
