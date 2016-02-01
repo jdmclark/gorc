@@ -32,7 +32,7 @@ void gorc::shell_progress::render(bool draw_spinner)
     stream << line_start;
 
     if(draw_spinner) {
-        size_t spindex = (current % spinner_states.size());
+        size_t spindex = (advance_calls % spinner_states.size());
         stream << spinner_states.at(spindex);
     }
     else {
@@ -59,6 +59,7 @@ void gorc::shell_progress::advance(size_t steps_to_advance)
 {
     current += steps_to_advance;
     render(true);
+    ++advance_calls;
 }
 
 void gorc::shell_progress::finished()

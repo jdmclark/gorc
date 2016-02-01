@@ -107,7 +107,7 @@ test_case(incomplete)
     ss.clear();
     prog.advance(3);
 
-    expected = "\r◒ ▪▪▪▪▪▫▫▫▫";
+    expected = "\r◓ ▪▪▪▪▪▫▫▫▫";
     assert_eq(expected, ss.str());
 
     ss.str(std::string());

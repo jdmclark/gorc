@@ -5,4 +5,8 @@ $[GORC_NO_PROGRESS]=(nil);
 
 call setup_test_project();
 call run_tests();
+
+# Wipe out stderr record:
+echo "[empty]" > $(TESTSUITE_DIR)/stderr;
+
 call teardown_test_project();

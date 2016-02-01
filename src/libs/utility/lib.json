@@ -7,6 +7,7 @@
         "local.cpp",
         "uncopyable.cpp",
         "progress.cpp",
+        "rate_limited_progress.cpp",
         "service_registry.cpp",
         "shell_progress.cpp",
         "strcat.cpp",

@@ -14,6 +14,7 @@ namespace gorc {
         size_t steps;
         size_t width;
         size_t current = 0;
+        size_t advance_calls = 0;
 
         void render(bool draw_spinner);
 

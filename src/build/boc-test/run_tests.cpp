@@ -2,6 +2,7 @@
 #include "build/common/paths.hpp"
 #include "system/pipe.hpp"
 #include "system/process.hpp"
+#include "utility/rate_limited_progress.hpp"
 #include "utility/progress.hpp"
 #include "log/log.hpp"
 #include <fstream>
@@ -24,7 +25,8 @@ int gorc::run_tests(std::set<path> const &tests,
 
     LOG_INFO(format("Running %d tests") % tests.size());
 
-    auto progress = services.get<progress_factory>().make_progress(tests.size());
+    auto bare_progress = services.get<progress_factory>().make_progress(tests.size());
+    rate_limited_progress progress(*bare_progress);
 
     std::set<path> pending_tests = tests;
     std::set<path> passed_tests;
@@ -45,7 +47,7 @@ int gorc::run_tests(std::set<path> const &tests,
 
     auto retire_test = [&](path const &test, int result_code) {
         std::lock_guard<std::mutex> lg(test_queue_lock);
-        progress->advance();
+        progress.advance();
 
         if(result_code == 0) {
             passed_tests.insert(test);
@@ -106,7 +108,7 @@ int gorc::run_tests(std::set<path> const &tests,
         thread.join();
     }
 
-    progress->finished();
+    progress.finished();
     fail_log_ofs.close();
 
     if(print_summary) {

@@ -22,6 +22,7 @@
         "mod_test.cpp",
         "oxford_join_test.cpp",
         "range_test.cpp",
+        "rate_limited_progress_test.cpp",
         "runtime_assert_test.cpp",
         "scoped_assignment_test.cpp",
         "service_registry_test.cpp",

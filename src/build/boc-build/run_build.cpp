@@ -8,6 +8,7 @@
 #include "entities/root_entity.hpp"
 
 #include "utility/progress.hpp"
+#include "utility/rate_limited_progress.hpp"
 #include "log/log.hpp"
 
 #include <set>
@@ -73,7 +74,8 @@ int gorc::run_build(service_registry const &services,
     }
 
     LOG_INFO(format("Building %d out-of-date targets") % dirty.dirty_entities.size());
-    auto pbar = services.get<progress_factory>().make_progress(dirty.dirty_entities.size());
+    auto bare_pbar = services.get<progress_factory>().make_progress(dirty.dirty_entities.size());
+    rate_limited_progress pbar(*bare_pbar);
 
     std::mutex scheduler_lock;
 
@@ -99,7 +101,7 @@ int gorc::run_build(service_registry const &services,
     auto retire_job = [&](entity *ent, bool successful) {
         std::lock_guard<std::mutex> lg(scheduler_lock);
         scheduler.retire(ent, successful);
-        pbar->advance();
+        pbar.advance();
     };
 
     auto build_thread = [&]() {
@@ -124,7 +126,7 @@ int gorc::run_build(service_registry const &services,
         thread.join();
     }
 
-    pbar->finished();
+    pbar.finished();
 
     bool failure_summary = false;
 
