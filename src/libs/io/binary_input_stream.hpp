@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <string>
 #include "input_stream.hpp"
+#include "utility/constructor_tag.hpp"
 
 namespace gorc {
 
@@ -22,12 +23,6 @@ namespace gorc {
         std::string read_string();
 
     };
-
-    struct binary_deserialization_constructor {
-        binary_deserialization_constructor();
-    };
-
-    binary_deserialization_constructor const binary_deserialization_constructor_tag;
 
     template <typename T>
     typename std::enable_if<std::is_fundamental<T>::value, T>::type
@@ -50,7 +45,7 @@ namespace gorc {
                             !std::is_fundamental<T>::value, T>::type
         binary_deserialize(binary_input_stream &is)
     {
-        return T(binary_deserialization_constructor_tag, is);
+        return T(deserialization_constructor, is);
     }
 
     template <typename BackInsertIt, typename FmtFnT>

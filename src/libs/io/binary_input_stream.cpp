@@ -18,8 +18,3 @@ std::string gorc::binary_input_stream::read_string()
 
     return rv;
 }
-
-gorc::binary_deserialization_constructor::binary_deserialization_constructor()
-{
-    return;
-}

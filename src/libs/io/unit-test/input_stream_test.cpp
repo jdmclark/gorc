@@ -10,7 +10,7 @@ test_case(basic_io)
 {
     memory_file f;
     for(int i = 0; i < 10; ++i) {
-        write(f, i);
+        f.write(&i, sizeof(int));
     }
 
     f.set_position(0);
@@ -18,7 +18,9 @@ test_case(basic_io)
     auto &non_interface_stream = f;
     for(int i = 0; i < 10; ++i) {
         assert_true(!non_interface_stream.at_end());
-        assert_eq(read<int>(non_interface_stream), i);
+        int value;
+        non_interface_stream.read(&value, sizeof(int));
+        assert_eq(value, i);
     }
 
     assert_true(non_interface_stream.at_end());
@@ -28,7 +30,9 @@ test_case(basic_io)
     input_stream& stream = non_interface_stream;
     for(int i = 0; i < 10; ++i) {
         assert_true(!stream.at_end());
-        assert_eq(read<int>(stream), i);
+        int value;
+        stream.read(&value, sizeof(int));
+        assert_eq(value, i);
     }
 
     assert_true(stream.at_end());
@@ -38,7 +42,7 @@ test_case(copy_to)
 {
     memory_file f;
     for(int i = 0; i < 10; ++i) {
-        write(f, i);
+        f.write(&i, sizeof(int));
     }
 
     memory_file::reader f_reader(f);
@@ -47,7 +51,9 @@ test_case(copy_to)
     f_reader.copy_to(g);
 
     for(int i = 0; i < 10; ++i) {
-        assert_eq(read<int>(g), i);
+        int value;
+        g.read(&value, sizeof(int));
+        assert_eq(value, i);
     }
 }
 

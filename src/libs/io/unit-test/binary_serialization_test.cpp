@@ -92,7 +92,7 @@ test_case(simple_object)
             return;
         }
 
-        serializable_object(binary_deserialization_constructor, binary_input_stream &is)
+        serializable_object(deserialization_constructor_tag, binary_input_stream &is)
             : value(binary_deserialize<int>(is))
         {
             return;

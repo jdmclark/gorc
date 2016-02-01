@@ -12,12 +12,14 @@ test_case(basic_io)
 
     auto &non_interface_stream = f;
     for(int i = 0; i < 10; ++i) {
-        write(non_interface_stream, i);
+        non_interface_stream.write(&i, sizeof(int));
     }
 
     f.set_position(0);
     for(int i = 0; i < 10; ++i) {
-        assert_eq(read<int>(f), i);
+        int value;
+        f.read(&value, sizeof(int));
+        assert_eq(value, i);
     }
 
     assert_true(f.at_end());
@@ -28,12 +30,14 @@ test_case(basic_io)
 
     output_stream& stream = non_interface_stream2;
     for(int i = 0; i < 10; ++i) {
-        write(stream, i);
+        stream.write(&i, sizeof(int));
     }
 
     g.set_position(0);
     for(int i = 0; i < 10; ++i) {
-        assert_eq(read<int>(g), i);
+        int value;
+        g.read(&value, sizeof(int));
+        assert_eq(value, i);
     }
 
     assert_true(g.at_end());
