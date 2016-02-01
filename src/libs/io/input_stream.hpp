@@ -17,19 +17,4 @@ namespace gorc {
 
         void copy_to(output_stream &);
     };
-
-    template <typename T, typename StreamT>
-    void read(StreamT &f, T &out)
-    {
-        static_assert(std::is_pod<T>::value, "cannot read non-POD type");
-        f.read(&out, sizeof(T));
-    }
-
-    template <typename T, typename StreamT>
-    T read(StreamT &f)
-    {
-        T rv;
-        read(f, rv);
-        return rv;
-    }
 }

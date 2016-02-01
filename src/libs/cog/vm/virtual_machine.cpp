@@ -24,7 +24,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
     binary_input_stream bsr(sr);
 
     while(true) {
-        opcode op = read<opcode>(sr);
+        opcode op = binary_deserialize<opcode>(bsr);
         switch(op) {
         case opcode::push: {
                 cog::value v(deserialization_constructor, bsr);

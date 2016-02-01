@@ -2,7 +2,7 @@
 
 #include "entity_registry.hpp"
 #include "entity_allocator.hpp"
-#include "io/input_stream.hpp"
+#include "io/binary_input_stream.hpp"
 #include "io/path.hpp"
 #include "log/log.hpp"
 #include "utility/service_registry.hpp"
@@ -15,7 +15,7 @@ namespace gorc {
 
     class entity_input_stream {
     protected:
-        input_stream &is;
+        binary_input_stream is;
         std::unordered_map<uint32_t, entity*> entity_id_map;
 
     public:

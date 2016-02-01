@@ -39,7 +39,7 @@ gorc::path gorc::entity_input_stream::read_path()
 
 uint32_t gorc::entity_input_stream::read_uint32()
 {
-    return read<uint32_t>(is);
+    return binary_deserialize<uint32_t>(is);
 }
 
 bool gorc::entity_input_stream::read_bool()

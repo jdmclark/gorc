@@ -181,10 +181,13 @@ test_case(read_out_of_bounds)
     }
 
     f.set_position(0);
-    assert_eq(read<uint32_t>(f), 0xFFFFFFFFU);
+
+    uint32_t value;
+    f.read(&value, sizeof(value));
+    assert_eq(value, 0xFFFFFFFFU);
 
     try {
-        read<uint32_t>(f);
+        f.read(&value, sizeof(value));
     }
     catch(std::runtime_error const &e) {
         assert_eq(std::string(e.what()),
