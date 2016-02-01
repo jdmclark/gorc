@@ -7,6 +7,8 @@
         "boost"
     ],
     "sources" : [
+        "binary_input_stream.cpp",
+        "binary_output_stream.cpp",
         "file.cpp",
         "input_stream.cpp",
         "memory_file.cpp",

@@ -4,9 +4,11 @@
     "exclude-coverage" : true,
     "dependencies" : [
         "libs/io",
+        "libs/math",
         "libs/test"
     ],
     "sources" : [
+        "binary_serialization_test.cpp",
         "input_stream_test.cpp",
         "memory_file_test.cpp",
         "output_stream_test.cpp"
