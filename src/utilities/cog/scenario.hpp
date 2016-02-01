@@ -15,7 +15,7 @@ namespace gorc {
         std::string cog_filename;
         std::vector<cog::value> init;
 
-        cog_scenario_instance(json_deserialization_constructor, json_input_stream &);
+        cog_scenario_instance(deserialization_constructor_tag, json_input_stream &);
     };
 
     class cog_scenario {
@@ -25,7 +25,7 @@ namespace gorc {
         time_delta time_step = 1.0s;
         time_delta max_time = 0.0s;
 
-        cog_scenario(json_deserialization_constructor, json_input_stream &);
+        cog_scenario(deserialization_constructor_tag, json_input_stream &);
     };
 
 }

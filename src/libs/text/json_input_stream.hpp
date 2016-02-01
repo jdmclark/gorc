@@ -11,6 +11,7 @@
 #include "io/file.hpp"
 #include "log/log.hpp"
 #include "json_tokenizer.hpp"
+#include "utility/constructor_tag.hpp"
 
 namespace gorc {
 
@@ -89,12 +90,6 @@ namespace gorc {
         diagnostic_context_location get_diagnostic_context() const;
     };
 
-    struct json_deserialization_constructor {
-        json_deserialization_constructor();
-    };
-
-    json_deserialization_constructor const json_deserialization_constructor_tag;
-
     template <typename T>
     typename std::enable_if<std::is_fundamental<T>::value, T>::type
         json_deserialize(json_input_stream &f)
@@ -124,7 +119,7 @@ namespace gorc {
                             !std::is_same<std::string, T>::value, T>::type
         json_deserialize(json_input_stream &f)
     {
-        T obj(json_deserialization_constructor_tag, f);
+        T obj(deserialization_constructor, f);
         return obj;
     }
 

@@ -113,7 +113,7 @@ namespace {
             {
                 { "instances", [](json_input_stream &f, cog_scenario &scn) {
                         json_deserialize_array(f, [&](json_input_stream &f) {
-                            scn.cog_files.emplace_back(json_deserialization_constructor_tag, f);
+                            scn.cog_files.emplace_back(deserialization_constructor, f);
                         });
                     }
                 },
@@ -139,13 +139,13 @@ namespace {
 
 }
 
-cog_scenario_instance::cog_scenario_instance(json_deserialization_constructor,
+cog_scenario_instance::cog_scenario_instance(deserialization_constructor_tag,
                                              json_input_stream &f)
 {
     json_deserialize_with_specification(f, cog_scenario_instance_spec, *this);
 }
 
-cog_scenario::cog_scenario(json_deserialization_constructor,
+cog_scenario::cog_scenario(deserialization_constructor_tag,
                            json_input_stream &f)
 {
     json_deserialize_with_specification(f, cog_scenario_spec, *this);

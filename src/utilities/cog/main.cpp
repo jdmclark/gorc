@@ -60,7 +60,7 @@ namespace gorc {
             diagnostic_context dc(scenario_file.c_str());
             auto f = make_native_read_only_file(scenario_file);
             json_input_stream jis(*f);
-            cog_scenario scenario(json_deserialization_constructor_tag, jis);
+            cog_scenario scenario(deserialization_constructor, jis);
 
             // Construct instances:
             cog::executor executor(verbs);

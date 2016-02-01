@@ -2,11 +2,6 @@
 #include "log/log.hpp"
 #include <sstream>
 
-gorc::json_deserialization_constructor::json_deserialization_constructor()
-{
-    return;
-}
-
 gorc::json_input_stream::json_input_stream(input_stream &f)
     : tok(f)
 {

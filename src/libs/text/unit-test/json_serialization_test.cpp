@@ -22,7 +22,7 @@ public:
         return;
     }
 
-    inner_json_serializable_object(json_deserialization_constructor,
+    inner_json_serializable_object(deserialization_constructor_tag,
                                    json_input_stream &f)
     {
         json_deserialize_members(f, [this](json_input_stream &f, std::string const &mem_name)
@@ -56,7 +56,7 @@ public:
     }
 
     template <typename SerializeT>
-    json_serializable_object(json_deserialization_constructor, SerializeT &f)
+    json_serializable_object(deserialization_constructor_tag, SerializeT &f)
         : iobj(0, 0)
     {
         json_deserialize_members(f, [this](json_input_stream &f, std::string const &mem_name)
@@ -199,7 +199,7 @@ test_case(object_root)
     f.set_position(0);
     auto jis = json_input_stream(f);
 
-    inner_json_serializable_object d_ijso(json_deserialization_constructor_tag, jis);
+    inner_json_serializable_object d_ijso(deserialization_constructor, jis);
     assert_eq(d_ijso.foo, 5);
     assert_eq(d_ijso.bar, -2);
 }
@@ -258,7 +258,7 @@ test_case(nested_objects)
     f.set_position(0);
     auto jis = json_input_stream(f);
 
-    json_serializable_object d_jso(json_deserialization_constructor_tag, jis);
+    json_serializable_object d_jso(deserialization_constructor, jis);
 
     assert_eq(d_jso.i, 5);
     assert_eq(d_jso.j, 4);
@@ -826,7 +826,7 @@ test_case(heterogeneous_objects)
     public:
         int em = 0;
 
-        hg_base(json_deserialization_constructor, json_input_stream &jis)
+        hg_base(deserialization_constructor_tag, json_input_stream &jis)
         {
             json_deserialize_members(jis, [&](json_input_stream &jis, std::string const &member)
                 {
@@ -894,13 +894,13 @@ test_case(heterogeneous_objects)
                                          [](json_input_stream &jis, std::string const &type)
                                             -> std::unique_ptr<hg_base> {
             if(type == "foo") {
-                return std::make_unique<hg_foo>(json_deserialization_constructor_tag, jis);
+                return std::make_unique<hg_foo>(deserialization_constructor, jis);
             }
             else if(type == "bar") {
-                return std::make_unique<hg_bar>(json_deserialization_constructor_tag, jis);
+                return std::make_unique<hg_bar>(deserialization_constructor, jis);
             }
             else {
-                return std::make_unique<hg_baz>(json_deserialization_constructor_tag, jis);
+                return std::make_unique<hg_baz>(deserialization_constructor, jis);
             }
         });
 
@@ -923,7 +923,7 @@ test_case(heterogeneous_root)
     public:
         int em = 0;
 
-        hg_base(json_deserialization_constructor, json_input_stream &jis)
+        hg_base(deserialization_constructor_tag, json_input_stream &jis)
         {
             json_deserialize_members(jis, [&](json_input_stream &jis, std::string const &member) {
                     if(member == "em") {
@@ -951,7 +951,7 @@ test_case(heterogeneous_root)
     json_deserialize_heterogeneous(jis,
                                    [&](json_input_stream &jis, std::string const &type) {
             assert_eq(type, "foo");
-            val = std::make_unique<hg_base>(json_deserialization_constructor_tag, jis);
+            val = std::make_unique<hg_base>(deserialization_constructor, jis);
         });
 
     assert_true(val);
