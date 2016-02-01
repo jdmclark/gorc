@@ -12,3 +12,8 @@ void gorc::binary_output_stream::write_string(std::string const &str)
     write_value<size_t>(amt);
     stream.write(str.data(), amt);
 }
+
+size_t gorc::binary_output_stream::write_some(void const *src, size_t size)
+{
+    return stream.write_some(src, size);
+}

@@ -8,15 +8,15 @@ namespace {
     constexpr float default_float = 0.0f;
 }
 
-gorc::cog::value::value(deserialization_constructor_tag, input_stream &f)
+gorc::cog::value::value(deserialization_constructor_tag, binary_input_stream &f)
 {
-    type_flag = read<value_type>(f);
+    type_flag = binary_deserialize<value_type>(f);
     f.read(&data, sizeof(data));
 }
 
-void gorc::cog::value::serialize(output_stream &f) const
+void gorc::cog::value::binary_serialize_object(binary_output_stream &f) const
 {
-    write(f, type_flag);
+    binary_serialize(f, type_flag);
     f.write(&data, sizeof(data));
 }
 

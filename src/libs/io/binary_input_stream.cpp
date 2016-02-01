@@ -6,6 +6,16 @@ gorc::binary_input_stream::binary_input_stream(input_stream &stream)
     return;
 }
 
+size_t gorc::binary_input_stream::read_some(void *dest, size_t size)
+{
+    return stream.read_some(dest, size);
+}
+
+bool gorc::binary_input_stream::at_end()
+{
+    return stream.at_end();
+}
+
 std::string gorc::binary_input_stream::read_string()
 {
     size_t amt;

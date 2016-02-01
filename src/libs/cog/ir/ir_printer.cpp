@@ -5,6 +5,7 @@
 gorc::cog::ir_printer::ir_printer(file &program_text,
                                   message_table &exports)
     : program_text(program_text)
+    , program_stream(program_text)
     , exports(exports)
 {
     return;
@@ -26,7 +27,7 @@ void gorc::cog::ir_printer::finalize()
         size_t target = label_offsets[label_id];
 
         program_text.set_position(call_site);
-        write(program_text, target);
+        binary_serialize(program_stream, target);
     }
 
     // Add exported label offsets to export table
@@ -82,53 +83,53 @@ void gorc::cog::ir_printer::label(label_id lid)
 void gorc::cog::ir_printer::push(value v)
 {
     ends_with_ret = false;
-    write(program_text, opcode::push);
-    v.serialize(program_text);
+    binary_serialize(program_stream, opcode::push);
+    binary_serialize(program_stream, v);
 }
 
 void gorc::cog::ir_printer::dup()
 {
     ends_with_ret = false;
-    write(program_text, opcode::dup);
+    binary_serialize(program_stream, opcode::dup);
 }
 
 void gorc::cog::ir_printer::load(size_t addr)
 {
     ends_with_ret = false;
-    write(program_text, opcode::load);
-    write(program_text, addr);
+    binary_serialize(program_stream, opcode::load);
+    binary_serialize(program_stream, addr);
 }
 
 void gorc::cog::ir_printer::loadi(size_t addr)
 {
     ends_with_ret = false;
-    write(program_text, opcode::loadi);
-    write(program_text, addr);
+    binary_serialize(program_stream, opcode::loadi);
+    binary_serialize(program_stream, addr);
 }
 
 void gorc::cog::ir_printer::stor(size_t addr)
 {
     ends_with_ret = false;
-    write(program_text, opcode::stor);
-    write(program_text, addr);
+    binary_serialize(program_stream, opcode::stor);
+    binary_serialize(program_stream, addr);
 }
 
 void gorc::cog::ir_printer::stori(size_t addr)
 {
     ends_with_ret = false;
-    write(program_text, opcode::stori);
-    write(program_text, addr);
+    binary_serialize(program_stream, opcode::stori);
+    binary_serialize(program_stream, addr);
 }
 
 void gorc::cog::ir_printer::write_branch_instruction(opcode op, label_id lid)
 {
-    write(program_text, op);
+    binary_serialize(program_stream, op);
 
     // Store current location in backpatch map
     backpatch_map.emplace(static_cast<int>(lid), program_text.position());
 
     // Write placeholder
-    write(program_text, size_t(0));
+    binary_serialize(program_stream, size_t(0));
 }
 
 void gorc::cog::ir_printer::jmp(label_id lid)
@@ -158,127 +159,127 @@ void gorc::cog::ir_printer::bf(label_id lid)
 void gorc::cog::ir_printer::ret()
 {
     ends_with_ret = true;
-    write(program_text, opcode::ret);
+    binary_serialize(program_stream, opcode::ret);
 }
 
 void gorc::cog::ir_printer::call(verb_id id)
 {
     ends_with_ret = false;
-    write(program_text, opcode::call);
-    write(program_text, static_cast<int>(id));
+    binary_serialize(program_stream, opcode::call);
+    binary_serialize(program_stream, static_cast<int>(id));
 }
 
 void gorc::cog::ir_printer::callv(verb_id id)
 {
     ends_with_ret = false;
-    write(program_text, opcode::callv);
-    write(program_text, static_cast<int>(id));
+    binary_serialize(program_stream, opcode::callv);
+    binary_serialize(program_stream, static_cast<int>(id));
 }
 
 void gorc::cog::ir_printer::neg()
 {
     ends_with_ret = false;
-    write(program_text, opcode::neg);
+    binary_serialize(program_stream, opcode::neg);
 }
 
 void gorc::cog::ir_printer::lnot()
 {
     ends_with_ret = false;
-    write(program_text, opcode::lnot);
+    binary_serialize(program_stream, opcode::lnot);
 }
 
 void gorc::cog::ir_printer::add()
 {
     ends_with_ret = false;
-    write(program_text, opcode::add);
+    binary_serialize(program_stream, opcode::add);
 }
 
 void gorc::cog::ir_printer::sub()
 {
     ends_with_ret = false;
-    write(program_text, opcode::sub);
+    binary_serialize(program_stream, opcode::sub);
 }
 
 void gorc::cog::ir_printer::mul()
 {
     ends_with_ret = false;
-    write(program_text, opcode::mul);
+    binary_serialize(program_stream, opcode::mul);
 }
 
 void gorc::cog::ir_printer::div()
 {
     ends_with_ret = false;
-    write(program_text, opcode::div);
+    binary_serialize(program_stream, opcode::div);
 }
 
 void gorc::cog::ir_printer::mod()
 {
     ends_with_ret = false;
-    write(program_text, opcode::mod);
+    binary_serialize(program_stream, opcode::mod);
 }
 
 void gorc::cog::ir_printer::bor()
 {
     ends_with_ret = false;
-    write(program_text, opcode::bor);
+    binary_serialize(program_stream, opcode::bor);
 }
 
 void gorc::cog::ir_printer::band()
 {
     ends_with_ret = false;
-    write(program_text, opcode::band);
+    binary_serialize(program_stream, opcode::band);
 }
 
 void gorc::cog::ir_printer::bxor()
 {
     ends_with_ret = false;
-    write(program_text, opcode::bxor);
+    binary_serialize(program_stream, opcode::bxor);
 }
 
 void gorc::cog::ir_printer::lor()
 {
     ends_with_ret = false;
-    write(program_text, opcode::lor);
+    binary_serialize(program_stream, opcode::lor);
 }
 
 void gorc::cog::ir_printer::land()
 {
     ends_with_ret = false;
-    write(program_text, opcode::land);
+    binary_serialize(program_stream, opcode::land);
 }
 
 void gorc::cog::ir_printer::eq()
 {
     ends_with_ret = false;
-    write(program_text, opcode::eq);
+    binary_serialize(program_stream, opcode::eq);
 }
 
 void gorc::cog::ir_printer::ne()
 {
     ends_with_ret = false;
-    write(program_text, opcode::ne);
+    binary_serialize(program_stream, opcode::ne);
 }
 
 void gorc::cog::ir_printer::gt()
 {
     ends_with_ret = false;
-    write(program_text, opcode::gt);
+    binary_serialize(program_stream, opcode::gt);
 }
 
 void gorc::cog::ir_printer::ge()
 {
     ends_with_ret = false;
-    write(program_text, opcode::ge);
+    binary_serialize(program_stream, opcode::ge);
 }
 
 void gorc::cog::ir_printer::lt()
 {
     ends_with_ret = false;
-    write(program_text, opcode::lt);
+    binary_serialize(program_stream, opcode::lt);
 }
 
 void gorc::cog::ir_printer::le()
 {
     ends_with_ret = false;
-    write(program_text, opcode::le);
+    binary_serialize(program_stream, opcode::le);
 }

@@ -3,6 +3,7 @@
 #include "continuation.hpp"
 #include "restart_exception.hpp"
 #include "suspend_exception.hpp"
+#include "io/binary_input_stream.hpp"
 
 gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                                                               service_registry &services,
@@ -20,11 +21,13 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
     memory_file::reader sr(cc.frame().cog.program);
     sr.set_position(cc.frame().program_counter);
 
+    binary_input_stream bsr(sr);
+
     while(true) {
         opcode op = read<opcode>(sr);
         switch(op) {
         case opcode::push: {
-                cog::value v(deserialization_constructor, sr);
+                cog::value v(deserialization_constructor, bsr);
                 cc.data_stack.push(v);
             }
             break;
@@ -36,13 +39,13 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::load: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 cc.data_stack.push(cc.frame().memory[addr]);
             }
             break;
 
         case opcode::loadi: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 int idx = static_cast<int>(cc.data_stack.top());
                 cc.data_stack.pop();
 
@@ -51,14 +54,14 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::stor: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 cc.frame().memory[addr] = cc.data_stack.top();
                 cc.data_stack.pop();
             }
             break;
 
         case opcode::stori: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 int idx = static_cast<int>(cc.data_stack.top());
                 cc.data_stack.pop();
 
@@ -68,13 +71,13 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::jmp: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 sr.set_position(addr);
             }
             break;
 
         case opcode::jal: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
 
                 // Store current offset in current continuation
                 cc.call_stack.top().program_counter = sr.position();
@@ -96,7 +99,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::bt: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 cog::value v(cc.data_stack.top());
                 cc.data_stack.pop();
 
@@ -107,7 +110,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::bf: {
-                size_t addr = read<size_t>(sr);
+                size_t addr = binary_deserialize<size_t>(bsr);
                 cog::value v(cc.data_stack.top());
                 cc.data_stack.pop();
 
@@ -118,7 +121,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::call: {
-                int vid = read<int>(sr);
+                int vid = binary_deserialize<int>(bsr);
 
                 // Store current offset in current continuation
                 cc.call_stack.top().program_counter = sr.position();
@@ -130,7 +133,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::callv: {
-                int vid = read<int>(sr);
+                int vid = binary_deserialize<int>(bsr);
 
                 // Store current offset in current continuation
                 cc.call_stack.top().program_counter = sr.position();

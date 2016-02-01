@@ -1,5 +1,6 @@
 #include "disassembler.hpp"
 #include "cog/vm/opcode.hpp"
+#include "io/binary_input_stream.hpp"
 #include <map>
 #include <sstream>
 #include <iostream>
@@ -26,13 +27,14 @@ void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
         return addr;
     };
 
-    memory_file::reader r(s.program);
+    memory_file::reader mfr(s.program);
+    binary_input_stream r(mfr);
     while(!r.at_end()) {
-        size_t line_addr = r.position();
+        size_t line_addr = mfr.position();
         maybe<size_t> printed_address = nothing;
         std::stringstream line;
 
-        auto op = read<cog::opcode>(r);
+        auto op = binary_deserialize<cog::opcode>(r);
         switch(op) {
         case cog::opcode::push:
             line << "push ";
@@ -43,43 +45,43 @@ void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
             break;
         case cog::opcode::load:
             line << "load ";
-            line << read<size_t>(r);
+            line << binary_deserialize<size_t>(r);
             break;
         case cog::opcode::loadi:
             line << "loadi ";
-            line << read<size_t>(r);
+            line << binary_deserialize<size_t>(r);
             break;
         case cog::opcode::stor:
             line << "stor ";
-            line << read<size_t>(r);
+            line << binary_deserialize<size_t>(r);
             break;
         case cog::opcode::stori:
             line << "stori ";
-            line << read<size_t>(r);
+            line << binary_deserialize<size_t>(r);
             break;
         case cog::opcode::jmp:
             line << "jmp ";
-            printed_address = lazy_add_default_addr(read<size_t>(r));
+            printed_address = lazy_add_default_addr(binary_deserialize<size_t>(r));
             break;
         case cog::opcode::jal:
             line << "jal ";
-            printed_address = lazy_add_default_addr(read<size_t>(r));
+            printed_address = lazy_add_default_addr(binary_deserialize<size_t>(r));
             break;
         case cog::opcode::bt:
             line << "bt ";
-            printed_address = lazy_add_default_addr(read<size_t>(r));
+            printed_address = lazy_add_default_addr(binary_deserialize<size_t>(r));
             break;
         case cog::opcode::bf:
             line << "bf ";
-            printed_address = lazy_add_default_addr(read<size_t>(r));
+            printed_address = lazy_add_default_addr(binary_deserialize<size_t>(r));
             break;
         case cog::opcode::call:
             line << "call ";
-            line << verbs.get_verb(cog::verb_id(read<int>(r))).name;
+            line << verbs.get_verb(cog::verb_id(binary_deserialize<int>(r))).name;
             break;
         case cog::opcode::callv:
             line << "callv ";
-            line << verbs.get_verb(cog::verb_id(read<int>(r))).name;
+            line << verbs.get_verb(cog::verb_id(binary_deserialize<int>(r))).name;
             break;
         case cog::opcode::ret:
             line << "ret";

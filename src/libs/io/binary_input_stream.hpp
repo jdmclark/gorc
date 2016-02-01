@@ -4,10 +4,11 @@
 #include <string>
 #include "input_stream.hpp"
 #include "utility/constructor_tag.hpp"
+#include "utility/make_fake.hpp"
 
 namespace gorc {
 
-    class binary_input_stream {
+    class binary_input_stream : public input_stream {
     private:
         input_stream &stream;
 
@@ -22,6 +23,8 @@ namespace gorc {
 
         std::string read_string();
 
+        virtual size_t read_some(void *dest, size_t size) override;
+        virtual bool at_end() override;
     };
 
     template <typename T>
@@ -41,9 +44,15 @@ namespace gorc {
     }
 
     template <typename T>
-    typename std::enable_if<!std::is_same<std::string, T>::value &&
-                            !std::is_fundamental<T>::value, T>::type
+    typename std::enable_if<std::is_enum<T>::value, T>::type
         binary_deserialize(binary_input_stream &is)
+    {
+        return static_cast<T>(binary_deserialize<typename std::underlying_type<T>::type>(is));
+    }
+
+    template <typename T>
+    auto binary_deserialize(binary_input_stream &is)
+        -> decltype(T(deserialization_constructor, is))
     {
         return T(deserialization_constructor, is);
     }

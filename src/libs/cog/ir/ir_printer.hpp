@@ -3,6 +3,7 @@
 #include "cog/script/value.hpp"
 #include "cog/script/message_table.hpp"
 #include "io/file.hpp"
+#include "io/binary_output_stream.hpp"
 #include "label_id.hpp"
 #include "utility/enum_hash.hpp"
 #include "cog/vm/opcode.hpp"
@@ -15,6 +16,8 @@ namespace gorc {
         class ir_printer {
         private:
             file &program_text;
+            binary_output_stream program_stream;
+
             message_table &exports;
 
             int next_label_id = 0;
