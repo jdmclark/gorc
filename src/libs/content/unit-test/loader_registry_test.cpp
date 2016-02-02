@@ -17,7 +17,7 @@ namespace {
 
         virtual std::unique_ptr<asset> deserialize(input_stream&,
                                                    content_manager&,
-                                                   service_registry&) const override
+                                                   service_registry const&) const override
         {
             return nullptr;
         }
