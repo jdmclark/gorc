@@ -7,6 +7,7 @@
         "libs/test"
     ],
     "sources" : [
-        "fourcc_test.cpp"
+        "fourcc_test.cpp",
+        "loader_registry_test.cpp"
     ]
 }

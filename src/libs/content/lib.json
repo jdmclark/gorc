@@ -3,9 +3,13 @@
     "dependencies" : [
         "libs/utility",
         "libs/log",
-        "libs/io"
+        "libs/io",
+        "libs/vfs"
     ],
     "sources" : [
-        "fourcc.cpp"
+        "asset.cpp",
+        "fourcc.cpp",
+        "loader.cpp",
+        "loader_registry.cpp"
     ]
 }

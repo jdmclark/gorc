@@ -7,6 +7,9 @@ begin_suite(fourcc_test);
 
 test_case(simple)
 {
+    fourcc epsilon("");
+    assert_eq(static_cast<uint32_t>(epsilon), 0UL);
+
     fourcc a("a");
     assert_eq(static_cast<uint32_t>(a), 0x61000000UL);
 
@@ -45,6 +48,21 @@ test_case(inequality)
     assert_ne(abcd, abce);
     assert_true(abcd != abce);
     assert_true(!(abcd == abce));
+}
+
+test_case(to_string)
+{
+    fourcc epsilon("");
+    fourcc a("a");
+    fourcc ab("ab");
+    fourcc abc("abc");
+    fourcc abcd("abcd");
+
+    assert_eq(to_string(epsilon), std::string());
+    assert_eq(to_string(a), std::string("a"));
+    assert_eq(to_string(ab), std::string("ab"));
+    assert_eq(to_string(abc), std::string("abc"));
+    assert_eq(to_string(abcd), std::string("abcd"));
 }
 
 end_suite(fourcc_test);

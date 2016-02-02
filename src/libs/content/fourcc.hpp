@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <string>
 
 namespace gorc {
 
@@ -17,6 +18,8 @@ namespace gorc {
 
         explicit operator uint32_t() const;
     };
+
+    std::string to_string(fourcc);
 
 }
 
