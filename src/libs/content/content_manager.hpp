@@ -9,6 +9,8 @@
 #include "fourcc.hpp"
 #include "utility/service_registry.hpp"
 #include "asset_ref.hpp"
+#include "io/binary_output_stream.hpp"
+#include "io/binary_input_stream.hpp"
 
 namespace gorc {
 
