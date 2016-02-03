@@ -4,6 +4,7 @@
 #include <string>
 #include "output_stream.hpp"
 #include "utility/make_fake.hpp"
+#include "utility/service_registry.hpp"
 
 namespace gorc {
 
@@ -12,7 +13,10 @@ namespace gorc {
         output_stream &stream;
 
     public:
+        service_registry const &services;
+
         explicit binary_output_stream(output_stream &stream);
+        binary_output_stream(output_stream &stream, service_registry const &services);
 
         template <typename T>
         typename std::enable_if<std::is_fundamental<T>::value, void>::type write_value(T &out)

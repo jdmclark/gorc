@@ -12,6 +12,7 @@
 #include "log/log.hpp"
 #include "json_tokenizer.hpp"
 #include "utility/constructor_tag.hpp"
+#include "utility/service_registry.hpp"
 
 namespace gorc {
 
@@ -84,7 +85,10 @@ namespace gorc {
         }
 
     public:
-        explicit json_input_stream(input_stream& f);
+        service_registry const &services;
+
+        explicit json_input_stream(input_stream &f);
+        json_input_stream(input_stream &f, service_registry const &services);
         virtual ~json_input_stream();
 
         diagnostic_context_location get_diagnostic_context() const;

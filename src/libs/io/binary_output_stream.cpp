@@ -1,7 +1,20 @@
 #include "binary_output_stream.hpp"
 
+namespace {
+    gorc::service_registry default_services;
+}
+
 gorc::binary_output_stream::binary_output_stream(output_stream &stream)
     : stream(stream)
+    , services(default_services)
+{
+    return;
+}
+
+gorc::binary_output_stream::binary_output_stream(output_stream &stream,
+                                                 service_registry const &services)
+    : stream(stream)
+    , services(services)
 {
     return;
 }

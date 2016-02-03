@@ -95,6 +95,28 @@ public:
 
 begin_suite(json_serialization_test);
 
+test_case(output_stream_services)
+{
+    int value = 5;
+    service_registry services;
+    services.add<int>(value);
+
+    memory_file mf;
+    auto f = json_output_stream(mf, services);
+    assert_eq(f.services.get<int>(), 5);
+}
+
+test_case(input_stream_services)
+{
+    int value = 5;
+    service_registry services;
+    services.add<int>(value);
+
+    memory_file mf;
+    auto f = json_input_stream(mf, services);
+    assert_eq(f.services.get<int>(), 5);
+}
+
 test_case(invalid_root_serialization)
 {
     memory_file mf;

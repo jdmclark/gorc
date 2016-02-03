@@ -9,8 +9,22 @@ gorc::json_output_stream::state::state(state_mode mode)
     return;
 }
 
+namespace {
+    gorc::service_registry default_services;
+}
+
 gorc::json_output_stream::json_output_stream(output_stream &f)
     : f(f)
+    , services(default_services)
+{
+    states.emplace(state_mode::root);
+    return;
+}
+
+gorc::json_output_stream::json_output_stream(output_stream &f,
+                                             service_registry const &services)
+    : f(f)
+    , services(services)
 {
     states.emplace(state_mode::root);
     return;

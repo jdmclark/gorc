@@ -8,6 +8,7 @@
 #include "io/input_stream.hpp"
 #include "io/output_stream.hpp"
 #include "io/file.hpp"
+#include "utility/service_registry.hpp"
 
 namespace gorc {
 
@@ -225,7 +226,10 @@ namespace gorc {
         }
 
     public:
+        service_registry const &services;
+
         explicit json_output_stream(output_stream &f);
+        json_output_stream(output_stream &f, service_registry const &services);
     };
 
     template <typename T>

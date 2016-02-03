@@ -5,6 +5,7 @@
 #include "input_stream.hpp"
 #include "utility/constructor_tag.hpp"
 #include "utility/make_fake.hpp"
+#include "utility/service_registry.hpp"
 
 namespace gorc {
 
@@ -13,7 +14,10 @@ namespace gorc {
         input_stream &stream;
 
     public:
+        service_registry const &services;
+
         explicit binary_input_stream(input_stream &stream);
+        binary_input_stream(input_stream &stream, service_registry const &services);
 
         template <typename T>
         typename std::enable_if<std::is_fundamental<T>::value, void>::type read_value(T &out)

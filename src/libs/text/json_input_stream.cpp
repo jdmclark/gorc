@@ -2,8 +2,21 @@
 #include "log/log.hpp"
 #include <sstream>
 
+namespace {
+    gorc::service_registry default_services;
+}
+
 gorc::json_input_stream::json_input_stream(input_stream &f)
     : tok(f)
+    , services(default_services)
+{
+    return;
+}
+
+gorc::json_input_stream::json_input_stream(input_stream &f,
+                                           service_registry const &services)
+    : tok(f)
+    , services(services)
 {
     return;
 }
