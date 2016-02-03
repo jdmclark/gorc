@@ -40,7 +40,7 @@ namespace gorc {
             service_registry services;
 
             loader_registry loaders;
-            loaders.emplace_loader<cog::script_loader>("COG"_4CC);
+            loaders.emplace_loader<cog::script_loader>();
             services.add(loaders);
 
             cog::compiler compiler(verbs, constants);

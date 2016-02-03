@@ -7,6 +7,8 @@ namespace {
 
     class mock_loader : public loader {
     public:
+        static fourcc const type;
+
         int value;
 
         mock_loader(int value)
@@ -23,6 +25,8 @@ namespace {
         }
     };
 
+    fourcc const mock_loader::type = "MOCK"_4CC;
+
 }
 
 begin_suite(loader_registry_test);
@@ -30,7 +34,7 @@ begin_suite(loader_registry_test);
 test_case(simple_emplace_get)
 {
     loader_registry lr;
-    lr.emplace_loader<mock_loader>("MOCK"_4CC, 58);
+    lr.emplace_loader<mock_loader>(58);
 
     auto const &ldr = lr.get_loader("MOCK"_4CC);
     assert_eq(dynamic_cast<mock_loader const&>(ldr).value, 58);

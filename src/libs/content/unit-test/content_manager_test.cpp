@@ -60,6 +60,8 @@ namespace {
 
     class mock_loader : public loader {
     public:
+        static fourcc const type;
+
         virtual std::unique_ptr<asset> deserialize(input_stream &is,
                                                    content_manager &,
                                                    service_registry const &) const override
@@ -71,6 +73,8 @@ namespace {
         }
     };
 
+    fourcc const mock_loader::type = "MOCK"_4CC;
+
 }
 
 class content_manager_test_fixture : public test::fixture {
@@ -81,7 +85,7 @@ public:
 
     content_manager_test_fixture()
     {
-        loaders.emplace_loader<mock_loader>("MOCK"_4CC);
+        loaders.emplace_loader<mock_loader>();
         services.add(loaders);
         services.add<virtual_file_system>(vfs);
     }

@@ -13,9 +13,9 @@ namespace gorc {
 
     public:
         template <typename T, typename ...ArgT>
-        void emplace_loader(fourcc f, ArgT &&...arg)
+        void emplace_loader(ArgT &&...arg)
         {
-            loaders.emplace(f, std::make_unique<T>(std::forward<ArgT>(arg)...));
+            loaders.emplace(T::type, std::make_unique<T>(std::forward<ArgT>(arg)...));
         }
 
         loader const& get_loader(fourcc f);
