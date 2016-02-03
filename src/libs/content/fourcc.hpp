@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <string>
 #include <stdexcept>
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
 
 namespace gorc {
 
@@ -12,7 +14,7 @@ namespace gorc {
         uint32_t data;
 
     public:
-        constexpr fourcc(char const *f)
+        explicit constexpr fourcc(char const *f)
             : data(0)
         {
             size_t i = 0;
@@ -29,6 +31,10 @@ namespace gorc {
                 data <<= 8;
             }
         }
+
+        fourcc(deserialization_constructor_tag, binary_input_stream &);
+
+        void binary_serialize_object(binary_output_stream &) const;
 
         bool operator==(fourcc const &f) const;
         bool operator!=(fourcc const &f) const;

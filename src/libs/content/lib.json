@@ -8,6 +8,7 @@
     ],
     "sources" : [
         "asset.cpp",
+        "asset_ref.cpp",
         "content_manager.cpp",
         "fourcc.cpp",
         "loader.cpp",

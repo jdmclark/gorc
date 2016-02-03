@@ -1,6 +1,17 @@
 #include "fourcc.hpp"
 #include <stdexcept>
 
+gorc::fourcc::fourcc(deserialization_constructor_tag, binary_input_stream &bis)
+    : data(binary_deserialize<uint32_t>(bis))
+{
+    return;
+}
+
+void gorc::fourcc::binary_serialize_object(binary_output_stream &bos) const
+{
+    binary_serialize(bos, data);
+}
+
 bool gorc::fourcc::operator==(fourcc const &f) const
 {
     return data == f.data;

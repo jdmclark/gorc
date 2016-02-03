@@ -81,7 +81,7 @@ public:
 
     content_manager_test_fixture()
     {
-        loaders.emplace_loader<mock_loader>("MOCK");
+        loaders.emplace_loader<mock_loader>("MOCK"_4CC);
         services.add(loaders);
         services.add<virtual_file_system>(vfs);
     }
@@ -126,6 +126,55 @@ test_case(name_instance_reuse)
 
     assert_eq(&(*foo_ref), &(*foo2_ref));
     assert_eq(&(*bar_ref), &(*bar2_ref));
+}
+
+test_case(freeze_thaw_content_references)
+{
+    memory_file mf;
+
+    {
+        // Prime content manager
+        content_manager content(services);
+        auto bar_ref = content.load<mock_asset>("bar");
+        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_empty();
+        auto fnord_ref = content.load<mock_asset>("fnord");
+        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_empty();
+        auto foo_ref = content.load<mock_asset>("foo");
+        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_empty();
+
+        binary_output_stream bos(mf);
+        binary_serialize(bos, content);
+        binary_serialize(bos, foo_ref);
+        binary_serialize(bos, bar_ref);
+        binary_serialize(bos, fnord_ref);
+    }
+
+    {
+        binary_input_stream bis(mf, services);
+        auto content = binary_deserialize<content_manager>(bis);
+        assert_log_empty();
+
+        // Content manager must be added to the service registry from this point
+        services.add(content);
+
+        auto foo_ref = binary_deserialize<asset_ref<mock_asset>>(bis);
+        assert_eq(foo_ref->value, 5);
+        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_empty();
+
+        auto bar_ref = binary_deserialize<asset_ref<mock_asset>>(bis);
+        assert_eq(bar_ref->value, 10);
+        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_empty();
+
+        auto fnord_ref = binary_deserialize<asset_ref<mock_asset>>(bis);
+        assert_eq(fnord_ref->value, 58);
+        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_empty();
+    }
 }
 
 end_suite(content_manager_test);

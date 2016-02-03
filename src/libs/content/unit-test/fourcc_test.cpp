@@ -1,5 +1,8 @@
 #include "test/test.hpp"
 #include "content/fourcc.hpp"
+#include "io/memory_file.hpp"
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
 
 using namespace gorc;
 
@@ -63,6 +66,32 @@ test_case(to_string)
     assert_eq(to_string(ab), std::string("ab"));
     assert_eq(to_string(abc), std::string("abc"));
     assert_eq(to_string(abcd), std::string("abcd"));
+}
+
+test_case(fourcc_serialize)
+{
+    memory_file mf;
+    binary_output_stream bos(mf);
+
+    fourcc fcc = "abcd"_4CC;
+    binary_serialize(bos, fcc);
+
+    uint32_t read_value;
+    mf.read(&read_value, sizeof(uint32_t));
+
+    assert_eq(read_value, 0x61626364UL);
+}
+
+test_case(fourcc_deserialize)
+{
+    memory_file mf;
+    uint32_t written_value = 0x61626364UL;
+    mf.write(&written_value, sizeof(uint32_t));
+
+    binary_input_stream bis(mf);
+    fourcc fcc = binary_deserialize<fourcc>(bis);
+
+    assert_eq(static_cast<uint32_t>(fcc), 0x61626364UL);
 }
 
 end_suite(fourcc_test);
