@@ -4,7 +4,9 @@
         "libs/program",
         "libs/cog/compiler",
         "libs/cog/vm",
-        "libs/text"
+        "libs/text",
+        "libs/vfs",
+        "libs/content"
     ],
     "sources" : [
         "main.cpp",

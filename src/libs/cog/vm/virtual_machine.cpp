@@ -18,7 +18,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
     // System verbs must modify the current continuation.
     services.add_or_replace(cc);
 
-    memory_file::reader sr(cc.frame().cog.program);
+    memory_file::reader sr(cc.frame().cog->program);
     sr.set_position(cc.frame().program_counter);
 
     binary_input_stream bsr(sr);
@@ -157,7 +157,7 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
                     return return_register;
                 }
 
-                sr = memory_file::reader(cc.call_stack.top().cog.program);
+                sr = memory_file::reader(cc.call_stack.top().cog->program);
                 sr.set_position(cc.call_stack.top().program_counter);
 
                 if(save_return_register) {

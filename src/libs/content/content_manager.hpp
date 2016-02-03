@@ -9,6 +9,7 @@
 #include "fourcc.hpp"
 #include "utility/service_registry.hpp"
 #include "asset_ref.hpp"
+#include "log/diagnostic_context.hpp"
 #include "io/binary_output_stream.hpp"
 #include "io/binary_input_stream.hpp"
 
@@ -44,6 +45,7 @@ namespace gorc {
         template <typename T>
         asset_ref<T> load(std::string const &name)
         {
+            diagnostic_context dc(name.c_str());
             size_t ref_id = load_internal(T::type, name);
             auto const &record = assets[ref_id];
             return asset_ref<T>(dynamic_cast<T const &>(*record.content), ref_id);

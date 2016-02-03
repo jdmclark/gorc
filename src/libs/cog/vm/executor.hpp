@@ -8,6 +8,7 @@
 #include "cog/script/verb_table.hpp"
 #include "utility/service_registry.hpp"
 #include "call_stack_frame.hpp"
+#include "content/asset_ref.hpp"
 #include <vector>
 #include <memory>
 
@@ -26,8 +27,8 @@ namespace gorc {
         public:
             executor(verb_table &verbs);
 
-            instance& create_instance(cog::script const &);
-            instance& create_instance(cog::script const &, std::vector<value> const &);
+            instance& create_instance(asset_ref<cog::script>);
+            instance& create_instance(asset_ref<cog::script>, std::vector<value> const &);
 
             void add_sleep_record(std::unique_ptr<sleep_record> &&);
 

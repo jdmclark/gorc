@@ -4,7 +4,8 @@
         "libs/utility",
         "libs/math",
         "libs/log",
-        "libs/io"
+        "libs/io",
+        "libs/content"
     ],
     "sources" : [
         "constant_table.cpp",

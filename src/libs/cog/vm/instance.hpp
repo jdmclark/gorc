@@ -1,5 +1,6 @@
 #pragma once
 
+#include "content/asset_ref.hpp"
 #include "cog/script/script.hpp"
 #include "heap.hpp"
 #include <vector>
@@ -9,11 +10,11 @@ namespace gorc {
 
         class instance {
         public:
-            script const &cog;
+            asset_ref<script> cog;
             heap memory;
 
-            instance(script const &);
-            instance(script const &, std::vector<value> const &);
+            instance(asset_ref<script>);
+            instance(asset_ref<script>, std::vector<value> const &);
         };
 
     }

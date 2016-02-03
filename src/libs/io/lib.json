@@ -1,7 +1,8 @@
 {
     "name" : "io",
     "dependencies" : [
-        "libs/utility"
+        "libs/utility",
+        "libs/log"
     ],
     "libraries" : [
         "boost"

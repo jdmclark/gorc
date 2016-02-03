@@ -9,13 +9,13 @@ gorc::cog::executor::executor(verb_table &verbs)
     return;
 }
 
-gorc::cog::instance& gorc::cog::executor::create_instance(cog::script const &cog)
+gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script> cog)
 {
     instances.push_back(std::make_unique<instance>(cog));
     return *instances.back();
 }
 
-gorc::cog::instance& gorc::cog::executor::create_instance(cog::script const &cog,
+gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script> cog,
                                                           std::vector<value> const &values)
 {
     instances.push_back(std::make_unique<instance>(cog, values));
@@ -46,7 +46,7 @@ gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_fra
     }
 
     auto &inst = instances.at(inst_index);
-    auto addr = inst->cog.exports.get_offset(msg);
+    auto addr = inst->cog->exports.get_offset(msg);
     if(!addr.has_value()) {
         LOG_WARNING(format("sent message %s to cog %d, but the message is not exported") %
                     as_string(msg) %
@@ -74,7 +74,7 @@ void gorc::cog::executor::send_to_all(message_type t,
                                       value param3)
 {
     for(auto &inst : instances) {
-        auto addr = inst->cog.exports.get_offset(t);
+        auto addr = inst->cog->exports.get_offset(t);
         if(!addr.has_value()) {
             continue;
         }

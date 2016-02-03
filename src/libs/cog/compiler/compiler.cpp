@@ -27,7 +27,7 @@ std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
     auto script = std::make_unique<cog::script>();
 
     if(!handle_parsed_ast(*tu)) {
-        return std::move(script);
+        return script;
     }
 
     cog::perform_semantic_analysis(*script,
@@ -41,7 +41,7 @@ std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
                      "could not compile script");
 
     if(!handle_analyzed_ast(*tu, *script)) {
-        return std::move(script);
+        return script;
     }
 
     cog::perform_code_generation(*script,
@@ -55,7 +55,7 @@ std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
 
     handle_generated_code(*script);
 
-    return std::move(script);
+    return script;
 }
 
 bool gorc::cog::compiler::handle_parsed_ast(ast::translation_unit &)

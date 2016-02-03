@@ -1,6 +1,7 @@
 #include "content_manager.hpp"
 #include "loader_registry.hpp"
 #include "vfs/virtual_file_system.hpp"
+#include "log/log.hpp"
 #include <algorithm>
 
 namespace {
@@ -56,6 +57,7 @@ void gorc::content_manager::finalize_internal(size_t id)
 {
     auto &element = assets.at(id);
     if(!element.content) {
+        diagnostic_context dc(element.name.c_str());
         auto const &loader = services.get<loader_registry>().get_loader(element.type);
         auto file = services.get<virtual_file_system>().open(element.name);
         element.content = loader.deserialize(*file, *this, services);

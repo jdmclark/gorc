@@ -4,12 +4,15 @@
 #include "string_table.hpp"
 #include "message_table.hpp"
 #include "io/memory_file.hpp"
+#include "content/asset.hpp"
 
 namespace gorc {
     namespace cog {
 
-        class script {
+        class script : public asset {
         public:
+            static fourcc const type;
+
             symbol_table symbols;
             string_table strings;
             message_table exports;

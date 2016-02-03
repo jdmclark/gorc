@@ -1,11 +1,15 @@
 #include "program/program.hpp"
 #include "cog/compiler/compiler.hpp"
+#include "cog/compiler/script_loader.hpp"
 #include "io/native_file.hpp"
 #include "cog/vm/executor.hpp"
 #include "cog/vm/default_verbs.hpp"
 #include "utility/zip.hpp"
 #include "utility/time.hpp"
 #include "scenario.hpp"
+#include "vfs/native_file_system.hpp"
+#include "content/content_manager.hpp"
+#include "content/loader_registry.hpp"
 #include <vector>
 #include <unordered_map>
 #include <iostream>
@@ -16,7 +20,6 @@ namespace gorc {
     private:
         std::string scenario_file;
         cog::verb_table verbs;
-        std::unordered_map<std::string, std::unique_ptr<cog::script>> scripts;
 
     public:
         virtual void create_options(options &opts) override
@@ -24,26 +27,6 @@ namespace gorc {
             opts.insert(make_value_option("scenario", scenario_file));
 
             opts.emplace_constraint<required_option>("scenario");
-        }
-
-        cog::script& get_script(std::string const &filename,
-                                cog::compiler &compiler) {
-            auto it = scripts.find(filename);
-            if(it != scripts.end()) {
-                return *it->second;
-            }
-
-            diagnostic_context dc(filename.c_str());
-            try {
-                auto f = make_native_read_only_file(filename);
-                return *scripts.emplace(filename, compiler.compile(*f)).first->second;
-            }
-            catch(logged_runtime_error const &) {
-                throw;
-            }
-            catch(std::exception const &e) {
-                LOG_FATAL(e.what());
-            }
         }
 
         virtual int main() override
@@ -54,7 +37,20 @@ namespace gorc {
             cog::constant_table constants;
             cog::default_populate_constant_table(constants);
 
+            service_registry services;
+
+            loader_registry loaders;
+            loaders.emplace_loader<cog::script_loader>("COG"_4CC);
+            services.add(loaders);
+
             cog::compiler compiler(verbs, constants);
+            services.add(compiler);
+
+            native_file_system vfs;
+            services.add<virtual_file_system>(vfs);
+
+            content_manager content(services);
+            services.add(content);
 
             // Load scenario file
             diagnostic_context dc(scenario_file.c_str());
@@ -65,7 +61,7 @@ namespace gorc {
             // Construct instances:
             cog::executor executor(verbs);
             for(auto const &file : scenario.cog_files) {
-                auto const &script = get_script(file.cog_filename, compiler);
+                auto script = content.load<cog::script>(file.cog_filename);
                 cog::instance *instance;
                 if(file.init.empty()) {
                     instance = &executor.create_instance(script);
@@ -75,7 +71,7 @@ namespace gorc {
                 }
 
                 // Fake loading phase: loop over resource symbols and rebind
-                for(auto const &sym : script.symbols) {
+                for(auto const &sym : script->symbols) {
                     if(is_resource_id_type(sym.type)) {
                         auto &cel = instance->memory[sym.sequence_number];
 

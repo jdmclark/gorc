@@ -8,6 +8,7 @@
         "libs/cog/semantics"
     ],
     "sources" : [
-        "compiler.cpp"
+        "compiler.cpp",
+        "script_loader.cpp"
     ]
 }

@@ -94,13 +94,13 @@ test_case(simple_load)
     content_manager content(services);
 
     auto foo_ref = content.load<mock_asset>("foo");
-    assert_log_message(log_level::info, "called mock_loader");
+    assert_log_message(log_level::info, "foo: called mock_loader");
     assert_log_empty();
 
     assert_eq(foo_ref->value, 5);
 
     auto bar_ref = content.load<mock_asset>("bar");
-    assert_log_message(log_level::info, "called mock_loader");
+    assert_log_message(log_level::info, "bar: called mock_loader");
     assert_log_empty();
 
     assert_eq(bar_ref->value, 10);
@@ -111,11 +111,11 @@ test_case(name_instance_reuse)
     content_manager content(services);
 
     auto foo_ref = content.load<mock_asset>("foo");
-    assert_log_message(log_level::info, "called mock_loader");
+    assert_log_message(log_level::info, "foo: called mock_loader");
     assert_log_empty();
 
     auto bar_ref = content.load<mock_asset>("bar");
-    assert_log_message(log_level::info, "called mock_loader");
+    assert_log_message(log_level::info, "bar: called mock_loader");
     assert_log_empty();
 
     auto foo2_ref = content.load<mock_asset>("foo");
@@ -136,13 +136,13 @@ test_case(freeze_thaw_content_references)
         // Prime content manager
         content_manager content(services);
         auto bar_ref = content.load<mock_asset>("bar");
-        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_message(log_level::info, "bar: called mock_loader");
         assert_log_empty();
         auto fnord_ref = content.load<mock_asset>("fnord");
-        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_message(log_level::info, "fnord: called mock_loader");
         assert_log_empty();
         auto foo_ref = content.load<mock_asset>("foo");
-        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_message(log_level::info, "foo: called mock_loader");
         assert_log_empty();
 
         binary_output_stream bos(mf);
@@ -162,17 +162,17 @@ test_case(freeze_thaw_content_references)
 
         auto foo_ref = binary_deserialize<asset_ref<mock_asset>>(bis);
         assert_eq(foo_ref->value, 5);
-        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_message(log_level::info, "foo: called mock_loader");
         assert_log_empty();
 
         auto bar_ref = binary_deserialize<asset_ref<mock_asset>>(bis);
         assert_eq(bar_ref->value, 10);
-        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_message(log_level::info, "bar: called mock_loader");
         assert_log_empty();
 
         auto fnord_ref = binary_deserialize<asset_ref<mock_asset>>(bis);
         assert_eq(fnord_ref->value, 58);
-        assert_log_message(log_level::info, "called mock_loader");
+        assert_log_message(log_level::info, "fnord: called mock_loader");
         assert_log_empty();
     }
 }
