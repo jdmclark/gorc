@@ -22,18 +22,14 @@ test_case(register_reregister)
     gorc::service_registry sr;
     sr.add(msg);
 
-    assert_throws(sr.add(msg),
-                  std::runtime_error,
-                  "service_registry::add same service multiple times");
+    assert_throws_type(sr.add(msg), std::runtime_error);
 }
 
 test_case(register_get_unregistered)
 {
     gorc::service_registry sr;
 
-    assert_throws(sr.get<std::string>(),
-                  std::runtime_error,
-                  "service_registry::get service not registered");
+    assert_throws_type(sr.get<std::string>(), std::runtime_error);
 }
 
 test_case(add_or_replace)

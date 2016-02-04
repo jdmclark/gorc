@@ -29,3 +29,16 @@ gorc::cog::instance::instance(asset_ref<script> cog,
         }
     }
 }
+
+gorc::cog::instance::instance(deserialization_constructor_tag, binary_input_stream &bis)
+    : cog(binary_deserialize<asset_ref<script>>(bis))
+    , memory(deserialization_constructor, bis)
+{
+    return;
+}
+
+void gorc::cog::instance::binary_serialize_object(binary_output_stream &bos) const
+{
+    binary_serialize(bos, cog);
+    binary_serialize(bos, memory);
+}

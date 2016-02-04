@@ -6,6 +6,7 @@
 #include "utility/constructor_tag.hpp"
 #include "utility/make_fake.hpp"
 #include "utility/service_registry.hpp"
+#include "utility/time.hpp"
 
 namespace gorc {
 
@@ -45,6 +46,13 @@ namespace gorc {
         binary_deserialize(binary_input_stream &is)
     {
         return is.read_string();
+    }
+
+    template <typename T>
+    typename std::enable_if<std::is_same<time_delta, T>::value, T>::type
+        binary_deserialize(binary_input_stream &is)
+    {
+        return time_delta(binary_deserialize<double>(is));
     }
 
     template <typename T>

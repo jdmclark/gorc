@@ -9,6 +9,8 @@
 #include "utility/service_registry.hpp"
 #include "call_stack_frame.hpp"
 #include "content/asset_ref.hpp"
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
 #include <vector>
 #include <memory>
 
@@ -25,10 +27,15 @@ namespace gorc {
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
 
         public:
-            executor(verb_table &verbs);
+            explicit executor(verb_table &verbs);
+            executor(deserialization_constructor_tag, binary_input_stream &);
+
+            void binary_serialize_object(binary_output_stream &) const;
 
             instance& create_instance(asset_ref<cog::script>);
             instance& create_instance(asset_ref<cog::script>, std::vector<value> const &);
+
+            instance& get_instance(size_t instance_id);
 
             void add_sleep_record(std::unique_ptr<sleep_record> &&);
 

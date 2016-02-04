@@ -139,4 +139,18 @@ test_case(simple_object)
     assert_eq(my_object.value, other_object.value);
 }
 
+test_case(time_round_trip)
+{
+    memory_file mf;
+
+    time_delta orig(1.54);
+    binary_output_stream bos(mf);
+    binary_serialize<time_delta>(bos, orig);
+
+    binary_input_stream bis(mf);
+    time_delta td = binary_deserialize<time_delta>(bis);
+
+    assert_eq(orig, td);
+}
+
 end_suite(binary_serialization_test);

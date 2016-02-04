@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 #include <type_traits>
+#include "strcat.hpp"
 
 namespace gorc {
 
@@ -22,7 +23,9 @@ namespace gorc {
             std::type_index tid = typeid(BaseServiceT);
             bool rv = services.emplace(tid, reinterpret_cast<void*>(&svc)).second;
             if(!rv) {
-                throw std::runtime_error("service_registry::add same service multiple times");
+                throw std::runtime_error(strcat("service_registry::add service ",
+                                                typeid(ServiceT).name(),
+                                                " multiple times"));
             }
         }
 
@@ -41,7 +44,9 @@ namespace gorc {
             std::type_index tid = typeid(BaseServiceT);
             auto it = services.find(tid);
             if(it == services.end()) {
-                throw std::runtime_error("service_registry::get service not registered");
+                throw std::runtime_error(strcat("service_registry::get service ",
+                                                typeid(ServiceT).name(),
+                                                " not registered"));
             }
 
             return *reinterpret_cast<ServiceT*>(it->second);

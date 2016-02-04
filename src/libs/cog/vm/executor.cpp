@@ -9,6 +9,32 @@ gorc::cog::executor::executor(verb_table &verbs)
     return;
 }
 
+gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stream &bis)
+    : verbs(bis.services.get<verb_table>())
+{
+    services.add(*this);
+    services.add(vm);
+
+    binary_deserialize_range(bis, std::back_inserter(instances), [](auto &bis) {
+            return std::make_unique<instance>(deserialization_constructor, bis);
+        });
+
+    binary_deserialize_range(bis, std::back_inserter(sleep_records), [](auto &bis) {
+            return std::make_unique<sleep_record>(deserialization_constructor, bis);
+        });
+}
+
+void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) const
+{
+    binary_serialize_range(bos, instances, [](auto &bos, auto const &em) {
+            binary_serialize(bos, *em);
+        });
+
+    binary_serialize_range(bos, sleep_records, [](auto &bos, auto const &em) {
+            binary_serialize(bos, *em);
+        });
+}
+
 gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script> cog)
 {
     instances.push_back(std::make_unique<instance>(cog));
@@ -20,6 +46,14 @@ gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script>
 {
     instances.push_back(std::make_unique<instance>(cog, values));
     return *instances.back();
+}
+
+gorc::cog::instance& gorc::cog::executor::get_instance(size_t instance_id)
+{
+    LOG_FATAL_ASSERT((instance_id < instances.size()),
+                     format("cog instance %d out of bounds") % instance_id);
+
+    return *instances[instance_id];
 }
 
 void gorc::cog::executor::add_sleep_record(std::unique_ptr<sleep_record> &&sr)
@@ -54,8 +88,7 @@ gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_fra
         return nothing;
     }
 
-    return call_stack_frame(inst->cog,
-                            inst->memory,
+    return call_stack_frame(static_cast<int>(target),
                             addr.get_value(),
                             sender,
                             source,
@@ -73,14 +106,15 @@ void gorc::cog::executor::send_to_all(message_type t,
                                       value param2,
                                       value param3)
 {
-    for(auto &inst : instances) {
+    for(size_t i = 0; i < instances.size(); ++i) {
+        auto &inst = instances[i];
+
         auto addr = inst->cog->exports.get_offset(t);
         if(!addr.has_value()) {
             continue;
         }
 
-        continuation cc(call_stack_frame(inst->cog,
-                                         inst->memory,
+        continuation cc(call_stack_frame(i,
                                          addr.get_value(),
                                          sender,
                                          source,
@@ -88,7 +122,7 @@ void gorc::cog::executor::send_to_all(message_type t,
                                          param1,
                                          param2,
                                          param3));
-        vm.execute(verbs, services, cc);
+        vm.execute(verbs, *this, services, cc);
     }
 }
 
@@ -106,7 +140,7 @@ void gorc::cog::executor::update(time_delta dt)
             std::swap(*it, sleep_records.back());
             sleep_records.pop_back();
 
-            vm.execute(verbs, services, sr->cc);
+            vm.execute(verbs, *this, services, sr->cc);
         }
         else {
             ++it;

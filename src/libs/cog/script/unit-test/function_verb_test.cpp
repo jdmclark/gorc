@@ -40,9 +40,9 @@ test_case(function_verb_arg_order)
     service_registry sr;
 
     // Push arguments left to right
-    stk.push(5);
-    stk.push(10);
-    stk.push(3);
+    stk.push_back(5);
+    stk.push_back(10);
+    stk.push_back(3);
 
     auto rv = vn->invoke(stk, sr, true);
     assert_eq(rv.get_type(), value_type::nothing);
@@ -66,8 +66,8 @@ test_case(function_verb_underflow)
     service_registry sr;
 
     // Push arguments left to right
-    stk.push(5);
-    stk.push(10);
+    stk.push_back(5);
+    stk.push_back(10);
 
     assert_throws_logged(vn->invoke(stk, sr, true));
 
@@ -91,9 +91,9 @@ test_case(service_verb_passes_service)
             return 12;
         });
 
-    stk.push(5);
-    stk.push(10);
-    stk.push(3);
+    stk.push_back(5);
+    stk.push_back(10);
+    stk.push_back(3);
 
     assert_eq(static_cast<int>(vn->invoke(stk, sr, true)), 12);
 

@@ -1,7 +1,6 @@
 #include "call_stack_frame.hpp"
 
-gorc::cog::call_stack_frame::call_stack_frame(asset_ref<script> cog,
-                                              heap &memory,
+gorc::cog::call_stack_frame::call_stack_frame(size_t instance_id,
                                               size_t program_counter,
                                               value sender,
                                               value source,
@@ -9,8 +8,7 @@ gorc::cog::call_stack_frame::call_stack_frame(asset_ref<script> cog,
                                               value param1,
                                               value param2,
                                               value param3)
-    : cog(cog)
-    , memory(memory)
+    : instance_id(instance_id)
     , program_counter(program_counter)
     , sender(sender)
     , source(source)
@@ -20,4 +18,36 @@ gorc::cog::call_stack_frame::call_stack_frame(asset_ref<script> cog,
     , param3(param3)
 {
     return;
+}
+
+gorc::cog::call_stack_frame::call_stack_frame(deserialization_constructor_tag,
+                                              binary_input_stream &bis)
+    : instance_id(binary_deserialize<size_t>(bis))
+    , program_counter(binary_deserialize<size_t>(bis))
+    , sender(binary_deserialize<value>(bis))
+    , source(binary_deserialize<value>(bis))
+    , param0(binary_deserialize<value>(bis))
+    , param1(binary_deserialize<value>(bis))
+    , param2(binary_deserialize<value>(bis))
+    , param3(binary_deserialize<value>(bis))
+    , return_register(binary_deserialize<value>(bis))
+    , save_return_register(binary_deserialize<bool>(bis))
+    , push_return_register(binary_deserialize<bool>(bis))
+{
+    return;
+}
+
+void gorc::cog::call_stack_frame::binary_serialize_object(binary_output_stream &bos) const
+{
+    binary_serialize(bos, instance_id);
+    binary_serialize(bos, program_counter);
+    binary_serialize(bos, sender);
+    binary_serialize(bos, source);
+    binary_serialize(bos, param0);
+    binary_serialize(bos, param1);
+    binary_serialize(bos, param2);
+    binary_serialize(bos, param3);
+    binary_serialize(bos, return_register);
+    binary_serialize(bos, save_return_register);
+    binary_serialize(bos, push_return_register);
 }

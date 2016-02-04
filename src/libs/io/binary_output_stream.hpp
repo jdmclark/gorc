@@ -5,6 +5,7 @@
 #include "output_stream.hpp"
 #include "utility/make_fake.hpp"
 #include "utility/service_registry.hpp"
+#include "utility/time.hpp"
 
 namespace gorc {
 
@@ -55,6 +56,13 @@ namespace gorc {
         binary_serialize(binary_output_stream &os, T const &value)
     {
         binary_serialize(os, static_cast<typename std::underlying_type<T>::type>(value));
+    }
+
+    template <typename T>
+    typename std::enable_if<std::is_same<time_delta, T>::value, void>::type
+        binary_serialize(binary_output_stream &os, T const &value)
+    {
+        binary_serialize<double>(os, value.count());
     }
 
     template <typename RangeT, typename FmtFnT>

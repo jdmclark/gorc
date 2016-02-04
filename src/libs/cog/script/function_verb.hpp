@@ -23,8 +23,8 @@ namespace gorc {
                         LOG_FATAL(format("stack underflow in verb '%s'") % name);
                     }
 
-                    auto v = s.top();
-                    s.pop();
+                    auto v = s.back();
+                    s.pop_back();
                     return apply_verb_arguments<remaining - 1,
                                                 result_t,
                                                 pass_svc>()(name, fn, s, sr, ev, v, args...);

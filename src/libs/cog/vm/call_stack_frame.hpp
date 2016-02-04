@@ -3,6 +3,8 @@
 #include "cog/script/script.hpp"
 #include "heap.hpp"
 #include "content/asset_ref.hpp"
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
 #include <cstddef>
 
 namespace gorc {
@@ -10,8 +12,7 @@ namespace gorc {
 
         class call_stack_frame {
         public:
-            asset_ref<script> cog;
-            heap &memory;
+            size_t instance_id;
             size_t program_counter;
             value sender;
             value source;
@@ -28,8 +29,7 @@ namespace gorc {
             // Push return register after frame is popped.
             bool push_return_register = false;
 
-            call_stack_frame(asset_ref<script> cog,
-                             heap &memory,
+            call_stack_frame(size_t instance_id,
                              size_t program_counter,
                              value sender,
                              value source,
@@ -37,6 +37,9 @@ namespace gorc {
                              value param1,
                              value param2,
                              value param3);
+
+            call_stack_frame(deserialization_constructor_tag, binary_input_stream &);
+            void binary_serialize_object(binary_output_stream &) const;
         };
 
     }

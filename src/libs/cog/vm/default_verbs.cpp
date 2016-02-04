@@ -20,8 +20,8 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
         virtual cog::value invoke(cog::stack &stk, service_registry &sr, bool) const override
         {
             auto &cc = sr.get<continuation>();
-            cc.frame().return_register = stk.top();
-            stk.pop();
+            cc.frame().return_register = stk.back();
+            stk.pop_back();
 
             return value();
         }
@@ -42,8 +42,8 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
         virtual cog::value invoke(cog::stack &stk, service_registry &sr, bool) const override
         {
             auto &cc = sr.get<continuation>();
-            int param_num = stk.top();
-            stk.pop();
+            int param_num = stk.back();
+            stk.pop_back();
 
             switch(param_num) {
             case 0:
@@ -72,7 +72,7 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
             if(expects_value) {
                 // The void return value from this verb is used.
                 // Poorly written script, but the missing value will cause problems.
-                cc.data_stack.push(value());
+                cc.data_stack.push_back(value());
             }
 
             exec.add_sleep_record(std::make_unique<sleep_record>(continuation(cc),
@@ -97,24 +97,24 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
 
         virtual cog::value invoke(cog::stack &stk, service_registry &sr, bool ev) const override
         {
-            value param3 = stk.top();
-            stk.pop();
+            value param3 = stk.back();
+            stk.pop_back();
 
-            value param2 = stk.top();
-            stk.pop();
+            value param2 = stk.back();
+            stk.pop_back();
 
-            value param1 = stk.top();
-            stk.pop();
+            value param1 = stk.back();
+            stk.pop_back();
 
-            value param0 = stk.top();
-            stk.pop();
+            value param0 = stk.back();
+            stk.pop_back();
 
-            message_id mid = stk.top();
+            message_id mid = stk.back();
             message_type msg = static_cast<message_type>(static_cast<int>(mid));
-            stk.pop();
+            stk.pop_back();
 
-            cog_id cog = stk.top();
-            stk.pop();
+            cog_id cog = stk.back();
+            stk.pop_back();
 
             auto &cc = sr.get<continuation>();
             auto &exec = sr.get<executor>();
@@ -136,7 +136,7 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
             real_frame.save_return_register = false;
             real_frame.push_return_register = ev;
 
-            cc.call_stack.push(real_frame);
+            cc.call_stack.push_back(real_frame);
 
             throw restart_exception();
         }
@@ -157,12 +157,12 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
 
         virtual cog::value invoke(cog::stack &stk, service_registry &sr, bool ev) const override
         {
-            message_id mid = stk.top();
+            message_id mid = stk.back();
             message_type msg = static_cast<message_type>(static_cast<int>(mid));
-            stk.pop();
+            stk.pop_back();
 
-            cog_id cog = stk.top();
-            stk.pop();
+            cog_id cog = stk.back();
+            stk.pop_back();
 
             auto &cc = sr.get<continuation>();
             auto &exec = sr.get<executor>();
@@ -184,7 +184,7 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
             real_frame.save_return_register = false;
             real_frame.push_return_register = ev;
 
-            cc.call_stack.push(real_frame);
+            cc.call_stack.push_back(real_frame);
 
             throw restart_exception();
         }

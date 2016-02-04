@@ -1,6 +1,8 @@
 #pragma once
 
 #include "cog/script/value.hpp"
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
 #include <vector>
 
 namespace gorc {
@@ -12,7 +14,10 @@ namespace gorc {
 
         public:
             heap() = default;
-            heap(size_t initial_size);
+            explicit heap(size_t initial_size);
+            heap(deserialization_constructor_tag, binary_input_stream &);
+
+            void binary_serialize_object(binary_output_stream &) const;
 
             value& operator[](size_t index);
             value operator[](size_t index) const;

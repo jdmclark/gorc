@@ -6,12 +6,14 @@
 namespace gorc {
     namespace cog {
 
+        class executor;
+
         class virtual_machine {
         private:
-            value internal_execute(verb_table &, service_registry &, continuation &cc);
+            value internal_execute(verb_table &, executor &, service_registry &, continuation &cc);
 
         public:
-            value execute(verb_table &, service_registry &, continuation &cc);
+            value execute(verb_table &, executor &, service_registry &, continuation &cc);
         };
 
     }
