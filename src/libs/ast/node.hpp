@@ -27,16 +27,16 @@ namespace gorc {
 
         template <typename VisitorT>
         auto accept(VisitorT &v)
-            -> decltype(v.visit(*static_cast<SelfT*>(this)))
+            -> decltype(v.visit(*reinterpret_cast<SelfT*>(this)))
         {
-            return v.visit(*static_cast<SelfT*>(this));
+            return v.visit(*reinterpret_cast<SelfT*>(this));
         }
 
         template <typename VisitorT>
         auto accept(VisitorT const &v)
-            -> decltype(v.visit(*static_cast<SelfT*>(this)))
+            -> decltype(v.visit(*reinterpret_cast<SelfT*>(this)))
         {
-            return v.visit(*static_cast<SelfT*>(this));
+            return v.visit(*reinterpret_cast<SelfT*>(this));
         }
     };
 
