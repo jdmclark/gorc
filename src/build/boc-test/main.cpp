@@ -28,7 +28,7 @@ namespace gorc {
             opts.add_alias("threads", "-j");
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             LOG_DEBUG("Finding project root directory");
             change_to_project_root(original_working_directory,

@@ -42,7 +42,7 @@ namespace gorc {
             return rv;
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             if(subcommands.empty()) {
                 return run_autodetect();

@@ -14,7 +14,7 @@ namespace gorc {
 
     public:
         void add_subcommand(std::string const &name, subcommand &sub);
-        int run(std::string const &name, abstract_argument_queue &);
+        int start(std::string const &name, abstract_argument_queue &);
     };
 
 }

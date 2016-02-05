@@ -16,7 +16,7 @@ void gorc::subcommand_option::reset()
 void gorc::subcommand_option::load_from_arg(std::string const &arg,
                                             abstract_argument_queue &args)
 {
-    binding = reg.run(arg, args);
+    binding = reg.start(arg, args);
 }
 
 bool gorc::subcommand_option::has_value() const

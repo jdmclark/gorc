@@ -11,11 +11,11 @@ namespace gorc {
 
     protected:
         virtual void create_options(options &) = 0;
-        virtual int main() = 0;
+        virtual int run() = 0;
 
     public:
         program();
-        int run(range<char**> const &);
+        int start(range<char**> const &);
     };
 
 }
@@ -23,5 +23,5 @@ namespace gorc {
 #define MAKE_MAIN(ProgramT)                                                             \
 int main(int argc, char **argv) {                                                       \
     ProgramT program;                                                                   \
-    return program.run(gorc::make_range(argv + 1, argv + argc));                        \
+    return program.start(gorc::make_range(argv + 1, argv + argc));                      \
 }

@@ -26,7 +26,7 @@ public:
         opts.insert(make_switch_option("long-message", long_message));
     }
 
-    virtual int main() override
+    virtual int run() override
     {
         LOG_TRACE("test_program::main");
 

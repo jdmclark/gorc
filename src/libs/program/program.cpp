@@ -39,13 +39,13 @@ gorc::program::program()
         });
 }
 
-int gorc::program::run(range<char**> const &args)
+int gorc::program::start(range<char**> const &args)
 {
     try {
         create_options(opts);
         opts.load_from_arg_list(args);
 
-        return main();
+        return run();
     }
     catch(logged_runtime_error const &) {
         // Error message was logged at a lower level.

@@ -11,12 +11,12 @@ namespace gorc {
 
     protected:
         virtual void create_options(options &) = 0;
-        virtual int main() = 0;
+        virtual int run() = 0;
 
     public:
         virtual ~subcommand();
 
-        int run(abstract_argument_queue &);
+        int start(abstract_argument_queue &);
     };
 
 }

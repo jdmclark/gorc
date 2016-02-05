@@ -116,7 +116,7 @@ namespace gorc {
             opts.emplace_constraint<dependent_option>("load-from-save", "save-file");
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             cog::constant_table constants;
             cog::default_populate_constant_table(constants);

@@ -14,7 +14,7 @@ public:
         opts.insert(gorc::make_switch_option("failmsg", failmsg));
     }
 
-    virtual int main() override
+    virtual int run() override
     {
         gorc::std_input_stream std_input_stream;
 

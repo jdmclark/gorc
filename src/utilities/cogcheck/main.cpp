@@ -26,7 +26,7 @@ namespace gorc {
             return;
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             mock_populate_verb_table();
 

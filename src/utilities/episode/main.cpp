@@ -23,7 +23,7 @@ namespace gorc {
             }
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             diagnostic_context dc("stdin");
             std_input_stream ss;

@@ -21,7 +21,7 @@ namespace gorc {
             return;
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             register_builtins();
 

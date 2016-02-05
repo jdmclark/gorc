@@ -58,7 +58,7 @@ test_case(simple_bound_subcommand_value)
             opts.emplace_constraint<gorc::required_option>("foo");
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             return foo_value + bar_value;
         }

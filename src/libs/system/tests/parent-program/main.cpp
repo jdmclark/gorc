@@ -21,7 +21,7 @@ public:
         opts.emplace_constraint<gorc::required_option>("run");
     }
 
-    virtual int main() override
+    virtual int run() override
     {
         gorc::std_input_stream std_input_stream;
         gorc::std_output_stream std_output_stream;

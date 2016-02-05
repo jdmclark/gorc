@@ -61,7 +61,7 @@ namespace gorc {
             return;
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             change_to_project_root(original_working_directory,
                                    project_root_path,

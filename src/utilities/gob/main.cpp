@@ -66,7 +66,7 @@ namespace gorc {
                     /* max set */ 1);
         }
 
-        virtual int main() override
+        virtual int run() override
         {
             if(jk_mode) {
                 // Handle JK VFS mode
