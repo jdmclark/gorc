@@ -13,7 +13,8 @@ using namespace gorc;
 
 struct inner_json_serializable_object {
 public:
-    int foo, bar;
+    int foo = 91;
+    int bar = 27;
 
     inner_json_serializable_object(int foo, int bar)
         : foo(foo)
@@ -45,7 +46,9 @@ public:
 
 struct json_serializable_object {
 public:
-    int i, j, k;
+    int i = 38;
+    int j = 3854;
+    int k = 93;
     std::vector<int> ems;
     inner_json_serializable_object iobj;
 

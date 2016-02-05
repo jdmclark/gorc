@@ -135,7 +135,7 @@ test_case(serialize_non_dep_reference)
     class non_dep_entity : public gorc::entity {
     private:
         std::string const name_value;
-        entity *non_dep_ent;
+        entity *non_dep_ent = nullptr;
         std::unordered_set<entity*> empty_deps;
 
     public:

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstring>
 
-int main(int, char**)
+int main(int, char**) noexcept
 {
     gorc::std_output_stream os;
 

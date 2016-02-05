@@ -3,7 +3,7 @@
 
 using namespace gorc;
 
-int main(int, char **)
+int main(int, char **) noexcept
 {
     emplace_log_backend<stdio_log_backend>(
             flag_set<log_level> { log_level::error,

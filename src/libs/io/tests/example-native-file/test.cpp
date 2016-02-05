@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cstring>
 
-int main(int, char**)
+int main(int, char**) noexcept
 {
     std::cout << "==== Simple create/read ====" << std::endl;
     try {

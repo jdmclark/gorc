@@ -32,7 +32,8 @@ size_t gorc::native_file::write_some(void const *src, size_t size)
 
 void gorc::native_file::set_position(size_t offset)
 {
-    fseek(file_handle, static_cast<long>(offset), SEEK_SET);
+    auto res = fseek(file_handle, static_cast<long>(offset), SEEK_SET);
+    runtime_assert(res == 0, "native_file::set_position invalid offset");
 }
 
 size_t gorc::native_file::position()
@@ -70,7 +71,8 @@ void gorc::native_read_only_file::seek(ssize_t offset)
 
 void gorc::native_read_only_file::set_position(size_t offset)
 {
-    fseek(file_handle, static_cast<long>(offset), SEEK_SET);
+    auto res = fseek(file_handle, static_cast<long>(offset), SEEK_SET);
+    runtime_assert(res == 0, "native_file::set_position invalid offset");
 }
 
 size_t gorc::native_read_only_file::position()
@@ -81,9 +83,11 @@ size_t gorc::native_read_only_file::position()
 size_t gorc::native_read_only_file::size()
 {
     auto current_pointer = ftell(file_handle);
-    fseek(file_handle, 0, SEEK_END);
+    auto res = fseek(file_handle, 0, SEEK_END);
+    runtime_assert(res == 0, "native_read_only_file::size failed to seek to end");
     auto fsz = ftell(file_handle);
-    fseek(file_handle, current_pointer, SEEK_SET);
+    res = fseek(file_handle, current_pointer, SEEK_SET);
+    runtime_assert(res == 0, "native_read_only_file::size failed to restore offset");
     return static_cast<size_t>(fsz);
 }
 
