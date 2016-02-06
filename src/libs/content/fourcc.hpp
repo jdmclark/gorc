@@ -20,7 +20,7 @@ namespace gorc {
             size_t i = 0;
             for(; f[i]; ++i) {
                 data <<= 8;
-                data |= f[i];
+                data |= static_cast<uint32_t>(f[i]);
             }
 
             if(i > 4) {

@@ -11,9 +11,7 @@ namespace gorc {
     class project_graph {
     private:
         root_entity *root = nullptr;
-        service_registry const &services;
         entity_registry const &reg;
-        entity_allocator &ea;
         path cache_filename;
 
     public:

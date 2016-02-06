@@ -157,4 +157,5 @@ namespace std {
     template <size_t n, typename F, typename Tag>
     class tuple_size<::gorc::abstract_vector<n, F, Tag>>
         : public std::integral_constant<std::size_t, n> { };
+
 }

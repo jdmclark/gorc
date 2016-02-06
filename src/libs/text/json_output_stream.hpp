@@ -58,7 +58,7 @@ namespace gorc {
             char const *end = str;
             while(*end) ++end;
 
-            f.write(str, end - str);
+            f.write(str, static_cast<size_t>(end - str));
         }
 
         void print_json_escaped_string(char const *str);

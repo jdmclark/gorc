@@ -43,5 +43,5 @@ gorc::cog::verb_id gorc::cog::verb_table::get_verb_id(std::string const &name) c
 
 gorc::cog::verb const& gorc::cog::verb_table::get_verb(verb_id id) const
 {
-    return *verbs[static_cast<int>(id)];
+    return *verbs[static_cast<size_t>(static_cast<int>(id))];
 }

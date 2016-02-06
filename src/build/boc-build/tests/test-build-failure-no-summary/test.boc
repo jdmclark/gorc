@@ -2,4 +2,7 @@ include ../test.boc;
 
 call setup_test_project();
 call build_test_project();
+
+echo "intentionally empty" > $(TESTSUITE_DIR)/stderr;
+
 call teardown_test_project();

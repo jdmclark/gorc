@@ -4,8 +4,6 @@ gorc::gob_file::gob_file(path const &container_filename,
                          size_t chunk_offset,
                          size_t chunk_length)
     : file(container_filename)
-    , chunk_offset(chunk_offset)
-    , chunk_length(chunk_length)
     , chunk_end(chunk_offset + chunk_length)
 {
     file.set_position(chunk_offset);

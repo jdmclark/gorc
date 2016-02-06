@@ -6,10 +6,10 @@ namespace gorc {
 
     class stdio_log_backend : public log_backend {
     private:
-        int wrap_width = 80;
+        size_t wrap_width = 80;
 
     public:
-        stdio_log_backend(int wrap_width = 80);
+        stdio_log_backend(size_t wrap_width = 80);
 
         virtual void write_message(std::string const &filename,
                                    int line_number,

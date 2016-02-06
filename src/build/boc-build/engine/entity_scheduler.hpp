@@ -8,7 +8,6 @@ namespace gorc {
 
     class entity_scheduler {
     private:
-        dirty_entity_list const &dirty_list;
         entity_adjacency_list const &edges;
 
         std::unordered_map<entity*, size_t> dirty_dependency_count;

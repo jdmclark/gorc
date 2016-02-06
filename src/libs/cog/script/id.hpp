@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
 
 #define MAKE_ID(x) \
     class x##_tag { }; \
@@ -34,6 +36,17 @@ namespace gorc {
                 : value(value)
             {
                 return;
+            }
+
+            id(deserialization_constructor_tag, binary_input_stream &bis)
+                : value(binary_deserialize<int32_t>(bis))
+            {
+                return;
+            }
+
+            void binary_serialize_object(binary_output_stream &bos) const
+            {
+                binary_serialize<int32_t>(bos, value);
             }
 
             explicit operator int32_t() const

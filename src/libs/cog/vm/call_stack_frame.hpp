@@ -12,7 +12,7 @@ namespace gorc {
 
         class call_stack_frame {
         public:
-            size_t instance_id;
+            cog_id instance_id;
             size_t program_counter;
             value sender;
             value source;
@@ -29,7 +29,7 @@ namespace gorc {
             // Push return register after frame is popped.
             bool push_return_register = false;
 
-            call_stack_frame(size_t instance_id,
+            call_stack_frame(cog_id instance_id,
                              size_t program_counter,
                              value sender,
                              value source,

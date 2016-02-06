@@ -1065,7 +1065,7 @@ namespace {
         tok.advance();
 
         if(tok.get_type() != cog_token_type::punc_assign) {
-            diagnostic_context_location dc(tok.get_location());
+            diagnostic_context dc(tok.get_location());
             LOG_FATAL(format("expected '=', found '%s'") % tok.get_value());
         }
 

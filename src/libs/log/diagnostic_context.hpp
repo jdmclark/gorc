@@ -5,7 +5,7 @@
 
 namespace gorc {
 
-    class diagnostic_context {
+    class [[gnu::unused]] diagnostic_context {
     private:
         size_t diagnostic_context_handle = 0;
 

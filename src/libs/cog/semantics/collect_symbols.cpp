@@ -68,7 +68,7 @@ void gorc::cog::collect_symbols_visitor::visit(ast::symbol &symbol)
         break;
 
     default:
-        default_mask = 0xFFFFFFFF;
+        default_mask = ~0;
         break;
     }
 

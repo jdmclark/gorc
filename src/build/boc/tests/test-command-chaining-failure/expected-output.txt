@@ -1,9 +1,5 @@
 ==== stderr ====
-Building 4 out-of-date targets
-src/myprog/main.cpp:1:1: error: expected unqualified-id before ‘this’
- this is not a valid c++ source file
- ^
-[ERROR] Build failed
+intentionally empty
 ==== stdout ====
 Failed:
     pkg/obj/src/myprog/main.o

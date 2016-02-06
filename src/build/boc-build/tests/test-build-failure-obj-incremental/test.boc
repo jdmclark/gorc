@@ -19,4 +19,6 @@ call begin_project_phase("third run");
 call build_test_project();
 ./pkg/bin/myprog >> $(RAW_OUTPUT);
 
+echo "intentionally empty" > $(TESTSUITE_DIR)/stderr;
+
 call teardown_test_project();

@@ -48,12 +48,14 @@ gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script>
     return *instances.back();
 }
 
-gorc::cog::instance& gorc::cog::executor::get_instance(size_t instance_id)
+gorc::cog::instance& gorc::cog::executor::get_instance(cog_id instance_id)
 {
-    LOG_FATAL_ASSERT((instance_id < instances.size()),
-                     format("cog instance %d out of bounds") % instance_id);
+    auto real_index = static_cast<int>(instance_id);
 
-    return *instances[instance_id];
+    LOG_FATAL_ASSERT(real_index >= 0 && real_index < static_cast<int>(instances.size()),
+                     format("cog instance %d out of bounds") % real_index);
+
+    return *instances[static_cast<size_t>(real_index)];
 }
 
 void gorc::cog::executor::add_sleep_record(std::unique_ptr<sleep_record> &&sr)
@@ -79,7 +81,7 @@ gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_fra
         return nothing;
     }
 
-    auto &inst = instances.at(inst_index);
+    auto &inst = instances.at(static_cast<size_t>(inst_index));
     auto addr = inst->cog->exports.get_offset(msg);
     if(!addr.has_value()) {
         LOG_WARNING(format("sent message %s to cog %d, but the message is not exported") %
@@ -88,7 +90,7 @@ gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_fra
         return nothing;
     }
 
-    return call_stack_frame(static_cast<int>(target),
+    return call_stack_frame(target,
                             addr.get_value(),
                             sender,
                             source,
@@ -114,7 +116,7 @@ void gorc::cog::executor::send_to_all(message_type t,
             continue;
         }
 
-        continuation cc(call_stack_frame(i,
+        continuation cc(call_stack_frame(cog_id(static_cast<int>(i)),
                                          addr.get_value(),
                                          sender,
                                          source,

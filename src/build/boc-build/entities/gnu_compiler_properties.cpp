@@ -5,6 +5,7 @@
 #include "library_file_entity.hpp"
 #include "program_file_entity.hpp"
 #include "utility/range.hpp"
+#include "system/env.hpp"
 #include <unordered_set>
 #include <boost/filesystem.hpp>
 
@@ -18,19 +19,15 @@ namespace {
         "-Wall",
         "-Wextra",
         "-Wpedantic",
-        "-Wdouble-promotion",
         "-Wno-switch-enum",
+        "-Wno-mismatched-tags",
         "-Wuninitialized",
-        "-Wstrict-aliasing=3",
         "-Wstrict-overflow=1",
         "-Wfloat-equal",
         "-Wcast-qual",
         "-Wcast-align",
         "-Wconversion",
-        "-Wzero-as-null-pointer-constant",
-        "-Wlogical-op",
-        "-Wdisabled-optimization",
-        "-Wl,--no-as-needed"
+        "-Wdisabled-optimization"
     };
 
     std::vector<std::string> release_cflags {
@@ -56,6 +53,10 @@ namespace {
         "-lboost_filesystem"
     };
 
+    std::vector<std::string> ld_preflags {
+        "-Wl,--no-as-needed"
+    };
+
     std::vector<std::string> ld_postflags {
         "-ldl"
     };
@@ -72,6 +73,17 @@ namespace {
 
         case gorc::build_type::coverage:
             return coverage_cflags;
+        }
+    }
+
+    std::string get_compiler_command()
+    {
+        auto cxx = gorc::get_environment_variable("CXX");
+        if(cxx.has_value()) {
+            return cxx.get_value();
+        }
+        else {
+            return "g++";
         }
     }
 }
@@ -136,7 +148,7 @@ bool gorc::gnu_compiler_properties::compile_object_file(object_file_entity *enti
     args.push_back("-o");
     args.push_back(entity->file_path().native());
 
-    process gcc("g++", // TODO: Compiler selection
+    process gcc(get_compiler_command(),
                 args,
                 /* input */ nothing,
                 /* output */ nothing,
@@ -211,6 +223,7 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
     std::copy(type_cflags.begin(), type_cflags.end(), std::back_inserter(args));
     std::copy(common_cflags.begin(), common_cflags.end(), std::back_inserter(args));
     std::copy(header_search_cflags.begin(), header_search_cflags.end(), std::back_inserter(args));
+    std::copy(ld_preflags.begin(), ld_preflags.end(), std::back_inserter(args));
 
     // Target name
     args.push_back("-o");
@@ -241,7 +254,7 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
     // Add postflags
     std::copy(ld_postflags.begin(), ld_postflags.end(), std::back_inserter(args));
 
-    process gcc("g++", // TODO: Compiler selection
+    process gcc(get_compiler_command(),
                 args,
                 /* input */ nothing,
                 /* output */ nothing,

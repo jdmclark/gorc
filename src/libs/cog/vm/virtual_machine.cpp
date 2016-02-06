@@ -49,11 +49,11 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::loadi: {
-                size_t addr = binary_deserialize<size_t>(bsr);
+                int addr = static_cast<int>(binary_deserialize<size_t>(bsr));
                 int idx = static_cast<int>(cc.data_stack.back());
                 cc.data_stack.pop_back();
 
-                cc.data_stack.push_back(current_instance->memory[addr + idx]);
+                cc.data_stack.push_back(current_instance->memory[static_cast<size_t>(addr + idx)]);
             }
             break;
 
@@ -65,11 +65,11 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
             break;
 
         case opcode::stori: {
-                size_t addr = binary_deserialize<size_t>(bsr);
+                int addr = static_cast<int>(binary_deserialize<size_t>(bsr));
                 int idx = static_cast<int>(cc.data_stack.back());
                 cc.data_stack.pop_back();
 
-                current_instance->memory[addr + idx] = cc.data_stack.back();
+                current_instance->memory[static_cast<size_t>(addr + idx)] = cc.data_stack.back();
                 cc.data_stack.pop_back();
             }
             break;

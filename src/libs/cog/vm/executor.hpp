@@ -35,7 +35,7 @@ namespace gorc {
             instance& create_instance(asset_ref<cog::script>);
             instance& create_instance(asset_ref<cog::script>, std::vector<value> const &);
 
-            instance& get_instance(size_t instance_id);
+            instance& get_instance(cog_id instance_id);
 
             void add_sleep_record(std::unique_ptr<sleep_record> &&);
 

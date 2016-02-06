@@ -5,4 +5,6 @@ call setup_test_project();
 var $boc_args = clean build test;
 call run_boc($boc_args);
 
+echo "intentionally empty" > $(TESTSUITE_DIR)/stderr;
+
 call teardown_test_project();

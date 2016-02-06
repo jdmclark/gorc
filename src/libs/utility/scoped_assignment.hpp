@@ -5,7 +5,7 @@
 namespace gorc {
 
     template <typename VarT>
-    class scoped_assignment {
+    class [[gnu::unused]] scoped_assignment {
     private:
         maybe<VarT*> var;
         VarT original_value;

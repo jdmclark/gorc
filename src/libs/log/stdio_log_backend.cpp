@@ -2,7 +2,7 @@
 #include "utility/wrapped.hpp"
 #include <iostream>
 
-gorc::stdio_log_backend::stdio_log_backend(int wrap_width)
+gorc::stdio_log_backend::stdio_log_backend(size_t wrap_width)
     : wrap_width(wrap_width)
 {
     return;

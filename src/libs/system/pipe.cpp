@@ -40,7 +40,7 @@ size_t gorc::pipe_input_stream::read_some(void *dest, size_t size)
     }
 
     if(rv >= 0) {
-        return rv;
+        return static_cast<size_t>(rv);
     }
     else {
         // LCOV_EXCL_START
@@ -80,7 +80,7 @@ size_t gorc::pipe_output_stream::write_some(void const *src, size_t size)
     while(rv < 0 && errno == EINTR);
 
     if(rv >= 0) {
-        return rv;
+        return static_cast<size_t>(rv);
     }
     else {
         throw std::system_error(errno, std::generic_category());

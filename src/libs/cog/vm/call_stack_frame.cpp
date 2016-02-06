@@ -1,6 +1,6 @@
 #include "call_stack_frame.hpp"
 
-gorc::cog::call_stack_frame::call_stack_frame(size_t instance_id,
+gorc::cog::call_stack_frame::call_stack_frame(cog_id instance_id,
                                               size_t program_counter,
                                               value sender,
                                               value source,
@@ -22,7 +22,7 @@ gorc::cog::call_stack_frame::call_stack_frame(size_t instance_id,
 
 gorc::cog::call_stack_frame::call_stack_frame(deserialization_constructor_tag,
                                               binary_input_stream &bis)
-    : instance_id(binary_deserialize<size_t>(bis))
+    : instance_id(deserialization_constructor, bis)
     , program_counter(binary_deserialize<size_t>(bis))
     , sender(binary_deserialize<value>(bis))
     , source(binary_deserialize<value>(bis))

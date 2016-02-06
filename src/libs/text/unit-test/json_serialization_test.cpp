@@ -196,7 +196,7 @@ test_case(double_array_root)
                            8964.0f,
                            84e25f,
                            28e-45f,
-                           0.0574,
+                           0.0574f,
                            -85.372f,
                            -37.555e28f,
                            -22.9e-14f };
@@ -494,11 +494,11 @@ test_case(strip_trailing_zeroes)
     double d = 1.00000000000000001f;
 
     char buffer[128];
-    size_t out_sz = snprintf(buffer, 128, "%#.16g", d);
+    int out_sz = snprintf(buffer, 128, "%#.16g", d);
 
     std::string strbuf(buffer);
 
-    assert_eq(out_sz, 17UL);
+    assert_eq(out_sz, 17);
     assert_eq(strbuf, "1.000000000000000");
 
     memory_file f;

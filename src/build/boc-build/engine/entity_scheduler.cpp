@@ -3,8 +3,7 @@
 
 gorc::entity_scheduler::entity_scheduler(dirty_entity_list const &dirty_list,
                                          entity_adjacency_list const &edges)
-    : dirty_list(dirty_list)
-    , edges(edges)
+    : edges(edges)
 {
     dirty_dependency_count = dirty_list.dirty_dependency_count;
 
