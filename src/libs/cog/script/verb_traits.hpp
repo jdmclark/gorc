@@ -77,25 +77,26 @@ namespace gorc {
             };
 
             template <typename FnT, typename ...ArgT>
-            constexpr auto compute_verb_arity(FnT const &fn, int)
-                -> typename std::enable_if<std::is_same<decltype(fn(ArgT()...)),
-                                                        decltype(fn(ArgT()...))>::value,
-                                           size_t>::type
+            constexpr typename std::enable_if<
+                std::is_same<typename std::result_of<FnT(ArgT...)>::type,
+                             typename std::result_of<FnT(ArgT...)>::type>::value,
+                size_t>::type
+                compute_verb_arity(int)
             {
                 return sizeof...(ArgT);
             }
 
             template <typename FnT, typename ...ArgT>
-            constexpr size_t compute_verb_arity(FnT const &fn, ...)
+            constexpr auto compute_verb_arity(...)
             {
-                return compute_verb_arity<FnT, ArgT..., detail::anything>(fn, 0);
+                return compute_verb_arity<FnT, ArgT..., detail::anything>(0);
             }
         }
 
         template <typename FnT>
-        constexpr size_t compute_verb_arity(FnT const &fn)
+        constexpr size_t compute_verb_arity()
         {
-            return detail::compute_verb_arity(fn, 0);
+            return detail::compute_verb_arity<FnT>(0);
         }
 
         namespace detail {
@@ -115,7 +116,7 @@ namespace gorc {
         constexpr value_type compute_verb_result_type(FnT const &fn)
         {
             return get_value_type<decltype(
-                    detail::compute_verb_result_type<compute_verb_arity(fn)>()(fn))>::value;
+                    detail::compute_verb_result_type<compute_verb_arity<FnT>()>()(fn))>::value;
         }
 
         namespace detail {
@@ -194,8 +195,8 @@ namespace gorc {
         template <size_t n, typename FnT>
         constexpr value_type compute_verb_argument_type(FnT const &fn)
         {
-            static_assert(n < compute_verb_arity(fn), "argument index out of bounds");
-            return detail::compute_verb_argument_type<n, compute_verb_arity(fn)>(fn);
+            static_assert(n < compute_verb_arity<FnT>(), "argument index out of bounds");
+            return detail::compute_verb_argument_type<n, compute_verb_arity<FnT>()>(fn);
         }
 
         namespace detail {
@@ -223,7 +224,7 @@ namespace gorc {
         template <typename FnT, typename InsertIt>
         void compute_verb_argument_types(FnT const &fn, InsertIt it)
         {
-            detail::extract_verb_argument_types<0, compute_verb_arity(fn)>()(fn, it);
+            detail::extract_verb_argument_types<0, compute_verb_arity<FnT>()>()(fn, it);
         }
 
         template <typename FnT>
@@ -237,7 +238,7 @@ namespace gorc {
         template <typename FnT, typename InsertIt>
         void compute_service_verb_argument_types(FnT const &fn, InsertIt it)
         {
-            detail::extract_verb_argument_types<2, compute_verb_arity(fn)>()(fn, it);
+            detail::extract_verb_argument_types<2, compute_verb_arity<FnT>()>()(fn, it);
         }
 
         template <typename FnT>

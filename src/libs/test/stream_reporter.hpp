@@ -12,11 +12,11 @@ namespace test {
     class stream_reporter : public reporter {
         std::ostream &stream;
 
-        std::unordered_map<std::string, unsigned int> suite_successes;
-        std::unordered_map<std::string, unsigned int> suite_failures;
+        std::unordered_map<std::string, int> suite_successes;
+        std::unordered_map<std::string, int> suite_failures;
 
-        unsigned int package_successes;
-        unsigned int package_failures;
+        int package_successes;
+        int package_failures;
 
     private:
         void add_success(std::string const &suite_name);

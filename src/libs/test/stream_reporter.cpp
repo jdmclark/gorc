@@ -44,7 +44,7 @@ void test::stream_reporter::suite_begin(std::string const &)
 
 void test::stream_reporter::suite_end(std::string const &suite_name)
 {
-    unsigned int s_failure_ct = suite_failures[suite_name];
+    int s_failure_ct = suite_failures[suite_name];
 
     if(s_failure_ct > 0) {
         stream << strings::make_suite_failed_cases_string(suite_name, s_failure_ct) << std::endl;

@@ -10,13 +10,13 @@ begin_suite(verb_traits_test);
 test_case(verb_arity_zero)
 {
     auto fn = [] { };
-    assert_eq(compute_verb_arity(fn), size_t(0));
+    assert_eq(compute_verb_arity<decltype(fn)>(), size_t(0));
 }
 
 test_case(verb_arity_one)
 {
     auto fn = [] (int) { };
-    assert_eq(compute_verb_arity(fn), size_t(1));
+    assert_eq(compute_verb_arity<decltype(fn)>(), size_t(1));
 }
 
 test_case(void_result)
@@ -60,7 +60,7 @@ test_case(service_verb_arity)
 {
     auto fn = [](service_registry&, int, int, int) { return; };
 
-    assert_eq(compute_verb_arity(fn), size_t(4));
+    assert_eq(compute_verb_arity<decltype(fn)>(), size_t(4));
 }
 
 end_suite(verb_traits_test);

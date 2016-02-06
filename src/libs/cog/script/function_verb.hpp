@@ -114,7 +114,7 @@ namespace gorc {
                                                  FnT functor)
         {
             return std::make_unique<function_verb<FnT,
-                                                  compute_verb_arity(functor),
+                                                  compute_verb_arity<FnT>(),
                                                   compute_verb_result_type(functor)>>(name, functor);
         }
 
@@ -146,7 +146,7 @@ namespace gorc {
                                                 FnT functor)
         {
             return std::make_unique<service_verb<FnT,
-                                                 compute_verb_arity(functor) - 2,
+                                                 compute_verb_arity<FnT>() - 2,
                                                  compute_verb_result_type(functor)>>(name, functor);
         }
 
