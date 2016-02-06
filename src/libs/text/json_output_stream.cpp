@@ -92,7 +92,7 @@ void gorc::json_output_stream::print_double(double value)
 {
     constexpr size_t bufsz = 128;
     char buffer[bufsz];
-    size_t out_sz = snprintf(buffer, bufsz, "%#.16g", value) - 1;
+    size_t out_sz = static_cast<size_t>(snprintf(buffer, bufsz, "%#.16g", value) - 1);
 
     // Work back out_sz until first non-zero, then step forward.
     while(buffer[out_sz] == '0') {
