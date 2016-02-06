@@ -2,6 +2,7 @@
 #include "log/stdio_log_backend.hpp"
 #include "log/file_log_backend.hpp"
 #include "system/env.hpp"
+#include "utility/strcat.hpp"
 
 #include <limits>
 
@@ -53,7 +54,7 @@ int gorc::program::start(range<char**> const &args)
         return EXIT_FAILURE;
     }
     catch(std::exception const &e) {
-        LOG_ERROR(format("Exception thrown: %s") % e.what());
+        LOG_ERROR(strcat("Exception thrown: ", e.what()));
         return EXIT_FAILURE;
     }
     catch(...) {
