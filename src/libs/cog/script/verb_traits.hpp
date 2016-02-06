@@ -1,7 +1,7 @@
 #pragma once
 
 #include "value.hpp"
-#include "utility/make_fake.hpp"
+#include <utility>
 #include <type_traits>
 #include <vector>
 
@@ -144,7 +144,7 @@ namespace gorc {
             template <typename InsertT, typename ...ArgT>
             struct apply_post_verb_argument_type<0, InsertT, ArgT...> {
                 template <typename FnT>
-                static auto get(FnT const &fn) -> decltype(fn(make_fake<ArgT>()...));
+                static auto get(FnT const &fn) -> decltype(fn(std::declval<ArgT>()...));
             };
 
             template <size_t n, size_t arity, typename InsertT>

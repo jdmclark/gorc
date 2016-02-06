@@ -3,7 +3,6 @@
 #include <type_traits>
 #include <string>
 #include "output_stream.hpp"
-#include "utility/make_fake.hpp"
 #include "utility/service_registry.hpp"
 #include "utility/time.hpp"
 
