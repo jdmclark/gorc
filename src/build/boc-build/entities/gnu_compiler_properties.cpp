@@ -78,13 +78,7 @@ namespace {
 
     std::string get_compiler_command()
     {
-        auto cxx = gorc::get_environment_variable("CXX");
-        if(cxx.has_value()) {
-            return cxx.get_value();
-        }
-        else {
-            return "g++";
-        }
+        return maybe_value(gorc::get_environment_variable("CXX"), "g++");
     }
 }
 

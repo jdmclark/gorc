@@ -151,7 +151,7 @@ namespace gorc {
     template <typename ...EmT>
     class variant {
     private:
-        typename std::aligned_storage<lcm(sizeof(EmT)...), lcm(alignof(EmT)...)>::type data;
+        typename std::aligned_union<0, EmT...>::type data;
         std::type_index tag;
 
         template <typename T, typename DecayT = typename std::decay<T>::type>

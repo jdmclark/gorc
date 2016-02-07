@@ -287,4 +287,16 @@ namespace gorc {
             return else_fn();
         }
     }
+
+    template <typename MaybeT, typename DefaultT>
+    auto maybe_value(maybe<MaybeT> const &v, DefaultT const &w)
+        -> typename std::common_type<decltype(v.get_value()), decltype(w)>::type
+    {
+        if(v.has_value()) {
+            return v.get_value();
+        }
+
+        return w;
+    }
+
 }

@@ -419,4 +419,13 @@ test_case(maybe_str)
     assert_eq(maybe_some_string.get_value(), std::string("some_string"));
 }
 
+test_case(maybe_value)
+{
+    maybe<int> m = 5;
+    maybe<int> n = nothing;
+
+    assert_eq(maybe_value(m, 12), 5);
+    assert_eq(maybe_value(n, 12), 12);
+}
+
 end_suite(maybe_test);
