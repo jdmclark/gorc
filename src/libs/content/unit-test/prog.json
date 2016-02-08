@@ -9,6 +9,7 @@
     "sources" : [
         "content_manager_test.cpp",
         "fourcc_test.cpp",
+        "id_test.cpp",
         "loader_registry_test.cpp"
     ]
 }

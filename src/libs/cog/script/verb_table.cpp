@@ -27,7 +27,7 @@ void gorc::cog::verb_table::add_deprecation(std::string const &name)
     std::get<1>(it->second) = true;
 }
 
-gorc::cog::verb_id gorc::cog::verb_table::get_verb_id(std::string const &name) const
+gorc::verb_id gorc::cog::verb_table::get_verb_id(std::string const &name) const
 {
     auto it = verb_index.find(name);
     if(it == verb_index.end()) {

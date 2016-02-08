@@ -37,13 +37,13 @@ void gorc::content_manager::asset_data::binary_serialize_object(binary_output_st
     binary_serialize(bos, name);
 }
 
-size_t gorc::content_manager::load_internal(fourcc type, std::string const &name)
+gorc::asset_id gorc::content_manager::load_internal(fourcc type, std::string const &name)
 {
     std::string real_name = canonical_content_name(name);
 
     auto loaded_it = asset_map.find(real_name);
     if(loaded_it == asset_map.end()) {
-        size_t new_element = assets.size();
+        asset_id new_element(assets.size());
         assets.emplace_back(type, real_name);
         loaded_it = asset_map.emplace(real_name, new_element).first;
     }
@@ -53,9 +53,9 @@ size_t gorc::content_manager::load_internal(fourcc type, std::string const &name
     return loaded_it->second;
 }
 
-void gorc::content_manager::finalize_internal(size_t id)
+void gorc::content_manager::finalize_internal(asset_id id)
 {
-    auto &element = assets.at(id);
+    auto &element = at_id(assets, id);
     if(!element.content) {
         diagnostic_context dc(element.name.c_str());
         auto const &loader = services.get<loader_registry>().get_loader(element.type);
@@ -64,10 +64,10 @@ void gorc::content_manager::finalize_internal(size_t id)
     }
 }
 
-gorc::asset const& gorc::content_manager::load_from_id(size_t id)
+gorc::asset const& gorc::content_manager::load_from_id(asset_id id)
 {
     finalize_internal(id);
-    return *assets.at(id).content;
+    return *at_id(assets, id).content;
 }
 
 gorc::content_manager::content_manager(service_registry const &services)

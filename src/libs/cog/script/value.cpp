@@ -170,7 +170,7 @@ gorc::cog::value& gorc::cog::value::operator=(x##_id id) \
     return *this; \
 } \
 \
-gorc::cog::value::operator gorc::cog::x##_id() const \
+gorc::cog::value::operator gorc::x##_id() const \
 { \
     if(type_flag == value_type::x) { \
         return x##_id(data.integer); \

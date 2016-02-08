@@ -53,34 +53,34 @@ namespace {
                         return cog::value(v);
                     }
                     else if(type == "sector") {
-                        return cog::value(cog::sector_id(json_deserialize<int>(f)));
+                        return cog::value(sector_id(json_deserialize<int>(f)));
                     }
                     else if(type == "surface") {
-                        return cog::value(cog::surface_id(json_deserialize<int>(f)));
+                        return cog::value(surface_id(json_deserialize<int>(f)));
                     }
                     else if(type == "thing") {
-                        return cog::value(cog::thing_id(json_deserialize<int>(f)));
+                        return cog::value(thing_id(json_deserialize<int>(f)));
                     }
                     else if(type == "ai") {
-                        return cog::value(cog::ai_id(json_deserialize<int>(f)));
+                        return cog::value(ai_id(json_deserialize<int>(f)));
                     }
                     else if(type == "cog") {
-                        return cog::value(cog::cog_id(json_deserialize<int>(f)));
+                        return cog::value(cog_id(json_deserialize<int>(f)));
                     }
                     else if(type == "keyframe") {
-                        return cog::value(cog::keyframe_id(json_deserialize<int>(f)));
+                        return cog::value(keyframe_id(json_deserialize<int>(f)));
                     }
                     else if(type == "material") {
-                        return cog::value(cog::material_id(json_deserialize<int>(f)));
+                        return cog::value(material_id(json_deserialize<int>(f)));
                     }
                     else if(type == "model") {
-                        return cog::value(cog::model_id(json_deserialize<int>(f)));
+                        return cog::value(model_id(json_deserialize<int>(f)));
                     }
                     else if(type == "sound") {
-                        return cog::value(cog::sound_id(json_deserialize<int>(f)));
+                        return cog::value(sound_id(json_deserialize<int>(f)));
                     }
                     else if(type == "template") {
-                        return cog::value(cog::thing_template_id(json_deserialize<int>(f)));
+                        return cog::value(thing_template_id(json_deserialize<int>(f)));
                     }
                     else if(type == "string") {
                         string_constant_cache.push_back(json_deserialize<std::string>(f));

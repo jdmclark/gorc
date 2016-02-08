@@ -4,7 +4,7 @@
 #include "sleep_record.hpp"
 #include "cog/script/message_type.hpp"
 #include "virtual_machine.hpp"
-#include "cog/script/id.hpp"
+#include "content/id.hpp"
 #include "cog/script/verb_table.hpp"
 #include "utility/service_registry.hpp"
 #include "call_stack_frame.hpp"

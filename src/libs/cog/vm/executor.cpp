@@ -50,12 +50,7 @@ gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script>
 
 gorc::cog::instance& gorc::cog::executor::get_instance(cog_id instance_id)
 {
-    auto real_index = static_cast<int>(instance_id);
-
-    LOG_FATAL_ASSERT(real_index >= 0 && real_index < static_cast<int>(instances.size()),
-                     format("cog instance %d out of bounds") % real_index);
-
-    return *instances[static_cast<size_t>(real_index)];
+    return *at_id(instances, instance_id);
 }
 
 void gorc::cog::executor::add_sleep_record(std::unique_ptr<sleep_record> &&sr)

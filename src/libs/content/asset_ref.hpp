@@ -1,22 +1,25 @@
 #pragma once
 
 #include <cstddef>
+#include "id.hpp"
 #include "io/binary_input_stream.hpp"
 #include "io/binary_output_stream.hpp"
 
 namespace gorc {
 
+    MAKE_ID_TYPE(asset);
+
     class asset;
-    asset const& get_asset_from_id(service_registry const &, size_t id);
+    asset const& get_asset_from_id(service_registry const &, asset_id id);
 
     template <typename T>
     class asset_ref {
     private:
         T const *data;
-        size_t id;
+        asset_id id;
 
     public:
-        asset_ref(T const &data, size_t id)
+        asset_ref(T const &data, asset_id id)
             : data(&data)
             , id(id)
         {
@@ -25,7 +28,7 @@ namespace gorc {
 
         asset_ref(deserialization_constructor_tag, binary_input_stream &bis)
             : data(nullptr)
-            , id(binary_deserialize<size_t>(bis))
+            , id(binary_deserialize<asset_id>(bis))
         {
             // Initialize data pointer
             data = &dynamic_cast<T const &>(get_asset_from_id(bis.services, id));

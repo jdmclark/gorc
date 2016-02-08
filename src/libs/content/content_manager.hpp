@@ -31,10 +31,10 @@ namespace gorc {
 
         service_registry const &services;
         std::vector<asset_data> assets;
-        std::unordered_map<std::string, size_t> asset_map;
+        std::unordered_map<std::string, asset_id> asset_map;
 
-        size_t load_internal(fourcc type, std::string const &name);
-        void finalize_internal(size_t id);
+        asset_id load_internal(fourcc type, std::string const &name);
+        void finalize_internal(asset_id id);
 
     public:
         explicit content_manager(service_registry const &services);
@@ -46,12 +46,12 @@ namespace gorc {
         asset_ref<T> load(std::string const &name)
         {
             diagnostic_context dc(name.c_str());
-            size_t ref_id = load_internal(T::type, name);
-            auto const &record = assets[ref_id];
+            asset_id ref_id = load_internal(T::type, name);
+            auto const &record = at_id(assets, ref_id);
             return asset_ref<T>(dynamic_cast<T const &>(*record.content), ref_id);
         }
 
-        asset const& load_from_id(size_t id);
+        asset const& load_from_id(asset_id id);
     };
 
 }

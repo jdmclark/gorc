@@ -1,7 +1,7 @@
 #pragma once
 
 #include "type.hpp"
-#include "id.hpp"
+#include "content/id.hpp"
 #include "utility/constructor_tag.hpp"
 #include "math/vector.hpp"
 #include "io/binary_input_stream.hpp"
