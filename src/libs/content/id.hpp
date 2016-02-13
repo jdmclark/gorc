@@ -138,3 +138,12 @@ namespace gorc {
     MAKE_ID_TYPE(verb);
     MAKE_ID_TYPE(message);
 }
+
+namespace std {
+
+    template <typename TagT>
+    struct underlying_type<::gorc::id<TagT>> {
+        using type = int32_t;
+    };
+
+}

@@ -46,10 +46,12 @@ namespace gorc {
             return *reinterpret_cast<EmT*>(storage);
         }
 
-        void erase(EmT &em)
+        void erase(EmT const &em_ref)
         {
-            em.~EmT();
-            free_list.push_back(reinterpret_cast<EmStorageT*>(&em));
+            // pool is the assumed owner of the element.
+            EmT *em = const_cast<EmT*>(&em_ref);
+            em->~EmT();
+            free_list.push_back(reinterpret_cast<EmStorageT*>(em));
         }
     };
 
