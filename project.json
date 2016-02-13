@@ -12,6 +12,7 @@
         "libs/cog/script/unit-test",
         "libs/cog/vm/unit-test",
         "libs/content/unit-test",
+        "libs/ecs/unit-test",
         "libs/input/unit-test",
         "libs/io/tests/example-binary-stream",
         "libs/io/tests/example-input-stream",

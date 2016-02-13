@@ -1,0 +1,12 @@
+{
+    "name" : "ecs-test",
+    "type" : "test",
+    "exclude-coverage" : true,
+    "dependencies" : [
+        "libs/test",
+        "libs/utility"
+    ],
+    "sources" : [
+        "pool_test.cpp"
+    ]
+}
