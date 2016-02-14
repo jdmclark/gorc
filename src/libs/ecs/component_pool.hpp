@@ -2,13 +2,14 @@
 
 #include "pool.hpp"
 #include "utility/range.hpp"
+#include "abstract_component_pool.hpp"
 #include <unordered_map>
 #include <utility>
 
 namespace gorc {
 
     template <typename IdT, typename CompT, size_t page_size = 128>
-    class component_pool {
+    class component_pool : public abstract_component_pool<IdT> {
     private:
         using IdValueT = typename std::underlying_type<IdT>::type;
         using PoolT = pool<CompT, page_size>;
