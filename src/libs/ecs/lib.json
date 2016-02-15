@@ -4,5 +4,6 @@
         "libs/content"
     ],
     "sources" : [
+        "aspect.cpp"
     ]
 }

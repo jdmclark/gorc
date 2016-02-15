@@ -37,6 +37,13 @@ namespace gorc {
         }
 
         template <typename CompT>
+        auto range()
+        {
+            auto &pool = get_or_create_pool<CompT>();
+            return make_range(pool.begin(), pool.end());
+        }
+
+        template <typename CompT>
         auto equal_range(IdT entity)
         {
             return get_or_create_pool<CompT>().equal_range(entity);
@@ -54,6 +61,13 @@ namespace gorc {
         {
             using CompT = typename std::decay<decltype(*first->second)>::type;
             return get_or_create_pool<CompT>().erase(first, last);
+        }
+
+        void erase_equal_range(IdT entity)
+        {
+            for(auto &pool : pools) {
+                pool.second->erase_equal_range(entity);
+            }
         }
     };
 

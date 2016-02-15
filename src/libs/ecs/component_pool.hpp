@@ -22,6 +22,16 @@ namespace gorc {
         using iterator = typename IndexT::iterator;
         using const_iterator = typename IndexT::const_iterator;
 
+        auto begin()
+        {
+            return index.begin();
+        }
+
+        auto end()
+        {
+            return index.end();
+        }
+
         template <typename ...ArgT>
         CompT& emplace(IdT parent, ArgT &&...args)
         {
@@ -65,6 +75,11 @@ namespace gorc {
         {
             auto key = static_cast<IdValueT>(id);
             return make_range(index.equal_range(key));
+        }
+
+        virtual void erase_equal_range(IdT id) override
+        {
+            erase(equal_range(id));
         }
     };
 

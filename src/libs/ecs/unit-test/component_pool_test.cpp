@@ -115,4 +115,17 @@ test_case(erase_const_range)
     assert_true(p.equal_range(thing_id(3)).empty());
 }
 
+test_case(erase_equal_range)
+{
+    component_pool<thing_id, mock_component> p;
+
+    for(int i = 0; i < 10; ++i) {
+        p.emplace(thing_id(3), i);
+    }
+
+    assert_true(!p.equal_range(thing_id(3)).empty());
+    p.erase_equal_range(thing_id(3));
+    assert_true(p.equal_range(thing_id(3)).empty());
+}
+
 end_suite(component_pool_test);

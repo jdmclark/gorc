@@ -11,6 +11,8 @@ namespace gorc {
         {
             return;
         }
+
+        virtual void erase_equal_range(IdT entity) = 0;
     };
 
 }

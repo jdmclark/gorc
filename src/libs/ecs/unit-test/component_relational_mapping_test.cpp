@@ -17,6 +17,17 @@ namespace {
         }
     };
 
+    class mock_other_component {
+    public:
+        int value;
+
+        mock_other_component(int value)
+            : value(value)
+        {
+            return;
+        }
+    };
+
     template <typename RangeT>
     std::set<int> mock_comp_to_range(RangeT const &rng)
     {
@@ -42,6 +53,28 @@ test_case(emplace_find)
 
     assert_range_eq(mock_comp_to_range(crm.equal_range<mock_component>(thing_id(2))),
                     std::set<int>({ 5, 12 }));
+}
+
+test_case(all_range)
+{
+    component_relational_mapping<thing_id> crm;
+
+    crm.emplace<mock_component>(thing_id(2), 5);
+    crm.emplace<mock_component>(thing_id(3), 12);
+    crm.emplace<mock_component>(thing_id(2), 2);
+
+    std::set<std::tuple<int, int>> values;
+    for(auto const &em : crm.range<mock_component>()) {
+        values.emplace(em.first, em.second->value);
+    }
+
+    std::set<std::tuple<int, int>> expected {
+            std::make_tuple(2, 5),
+            std::make_tuple(3, 12),
+            std::make_tuple(2, 2)
+        };
+
+    assert_range_eq(values, expected);
 }
 
 test_case(erase_one)
@@ -78,6 +111,24 @@ test_case(erase_all)
     crm.erase(rng.begin(), rng.end());
 
     assert_true(crm.equal_range<mock_component>(thing_id(1)).empty());
+}
+
+test_case(erase_equal_range)
+{
+    component_relational_mapping<thing_id> crm;
+
+    for(int i = 0; i < 10; ++i) {
+        crm.emplace<mock_component>(thing_id(1), i);
+        crm.emplace<mock_other_component>(thing_id(1), i);
+    }
+
+    assert_true(!crm.equal_range<mock_component>(thing_id(1)).empty());
+    assert_true(!crm.equal_range<mock_other_component>(thing_id(1)).empty());
+
+    crm.erase_equal_range(thing_id(1));
+
+    assert_true(crm.equal_range<mock_component>(thing_id(1)).empty());
+    assert_true(crm.equal_range<mock_other_component>(thing_id(1)).empty());
 }
 
 end_suite(component_relational_mapping_test);
