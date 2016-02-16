@@ -1,0 +1,10 @@
+{
+    "name" : "cmp",
+    "dependencies" : [
+        "libs/program",
+        "libs/jkcontent"
+    ],
+    "sources" : [
+        "main.cpp"
+    ]
+}
