@@ -19,6 +19,7 @@
         "libs/io/tests/example-native-file",
         "libs/io/tests/example-output-stream",
         "libs/io/unit-test",
+        "libs/jkcontent/unit-test",
         "libs/log/tests/example-file-log",
         "libs/log/tests/example-stdio-log",
         "libs/log/unit-test",

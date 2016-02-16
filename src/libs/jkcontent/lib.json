@@ -1,0 +1,9 @@
+{
+    "name" : "content",
+    "dependencies" : [
+        "libs/content",
+        "libs/cog/compiler"
+    ],
+    "sources" : [
+    ]
+}
