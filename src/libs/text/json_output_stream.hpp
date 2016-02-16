@@ -24,8 +24,8 @@ namespace gorc {
         friend void json_serialize_null(json_output_stream&);
         template <typename EmFmtFn>
         friend void json_serialize_member(json_output_stream&, char const*, EmFmtFn);
-        template <typename ObjT>
-        friend void json_serialize_object(json_output_stream&, ObjT const&);
+        template <typename EmFmtFn>
+        friend void json_serialize_members(json_output_stream&, EmFmtFn);
 
     private:
         enum class state_mode {
@@ -244,6 +244,13 @@ namespace gorc {
         f.print_value(v);
     }
 
+    template <typename T>
+    auto json_serialize(json_output_stream &f, T const &value)
+        -> typename std::conditional<true, void, decltype(value.json_serialize_object(f))>::type
+    {
+        value.json_serialize_object(f);
+    }
+
     inline void json_serialize_null(json_output_stream &f)
     {
         f.print_null();
@@ -273,12 +280,12 @@ namespace gorc {
         f.end_array();
     }
 
-    template <typename ObjT>
-    void json_serialize_object(json_output_stream &f, ObjT const &obj)
+    template <typename EmFmtFn>
+    void json_serialize_members(json_output_stream &f, EmFmtFn efn)
     {
         f.begin_object();
 
-        obj.json_serialize_object(f);
+        efn();
 
         f.end_object();
     }

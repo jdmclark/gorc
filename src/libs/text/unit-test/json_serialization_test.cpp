@@ -39,8 +39,10 @@ public:
 
     void json_serialize_object(json_output_stream& f) const
     {
-        json_serialize_member(f, "foo", [&]{ gorc::json_serialize(f, foo); });
-        json_serialize_member(f, "bar", [&]{ gorc::json_serialize(f, bar); });
+        json_serialize_members(f, [&] {
+            json_serialize_member(f, "foo", [&]{ gorc::json_serialize(f, foo); });
+            json_serialize_member(f, "bar", [&]{ gorc::json_serialize(f, bar); });
+        });
     }
 };
 
@@ -85,14 +87,16 @@ public:
     template <typename SerializeT>
     void json_serialize_object(SerializeT &f) const
     {
-        json_serialize_member(f, "i", [&]{ gorc::json_serialize(f, i); });
+        gorc::json_serialize_members(f, [&]{
+            json_serialize_member(f, "i", [&]{ gorc::json_serialize(f, i); });
 
-        // Serialize last two out of order, deliberately.
-        json_serialize_member(f, "k", [&]{ gorc::json_serialize(f, k); });
-        json_serialize_member(f, "j", [&]{ gorc::json_serialize(f, j); });
+            // Serialize last two out of order, deliberately.
+            json_serialize_member(f, "k", [&]{ gorc::json_serialize(f, k); });
+            json_serialize_member(f, "j", [&]{ gorc::json_serialize(f, j); });
 
-        json_serialize_member(f, "ems", [&]{ gorc::json_serialize_array(f, ems); });
-        json_serialize_member(f, "iobj", [&]{ gorc::json_serialize_object(f, iobj); });
+            json_serialize_member(f, "ems", [&]{ gorc::json_serialize_array(f, ems); });
+            json_serialize_member(f, "iobj", [&]{ gorc::json_serialize(f, iobj); });
+        });
     }
 };
 
@@ -219,7 +223,7 @@ test_case(object_root)
     auto jos = json_output_stream(f);
 
     inner_json_serializable_object ijso(5, -2);
-    json_serialize_object(jos, ijso);
+    json_serialize(jos, ijso);
 
     f.set_position(0);
     auto jis = json_input_stream(f);
@@ -278,7 +282,7 @@ test_case(nested_objects)
     jso.ems.push_back(2);
     jso.ems.push_back(6847);
 
-    json_serialize_object(jos, jso);
+    json_serialize(jos, jso);
 
     f.set_position(0);
     auto jis = json_input_stream(f);
@@ -319,8 +323,10 @@ test_case(serialize_null)
     public:
         void json_serialize_object(json_output_stream &f) const
         {
-            json_serialize_member(f, "some null member", [&f]() {
-                json_serialize_null(f);
+            json_serialize_members(f, [&]{
+                json_serialize_member(f, "some null member", [&f]() {
+                    json_serialize_null(f);
+                });
             });
         }
     } nc;
@@ -328,7 +334,7 @@ test_case(serialize_null)
     memory_file f;
     auto jos = json_output_stream(f);
 
-    json_serialize_object(jos, nc);
+    json_serialize(jos, nc);
 
     std::string expected_doc =
             "{\n"
@@ -802,12 +808,14 @@ test_case(serialize_object_member_without_label)
     class bad_json_object {
     public:
         void json_serialize_object(json_output_stream &js) const {
-            json_serialize_null(js);
+            json_serialize_members(js, [&] {
+                json_serialize_null(js);
+            });
         }
     } bjso;
 
     try {
-        json_serialize_object(jos, bjso);
+        json_serialize(jos, bjso);
     }
     catch(std::logic_error const &e) {
         // Success
