@@ -2,8 +2,11 @@
     "name" : "content",
     "dependencies" : [
         "libs/content",
-        "libs/cog/compiler"
+        "libs/cog/compiler",
+        "libs/math"
     ],
     "sources" : [
+        "colormap.cpp",
+        "colormap_loader.cpp"
     ]
 }

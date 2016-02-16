@@ -16,4 +16,19 @@ namespace gorc {
         return color(r, g, b, a);
     }
 
+    constexpr color_rgb make_color(float r, float g, float b)
+    {
+        return color_rgb(r, g, b);
+    }
+
+    constexpr color_rgba8 make_color_rgba8(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+    {
+        return color_rgba8(r, g, b, a);
+    }
+
+    constexpr color_rgb8 make_color_rgb8(uint8_t r, uint8_t g, uint8_t b)
+    {
+        return color_rgb8(r, g, b);
+    }
+
 }

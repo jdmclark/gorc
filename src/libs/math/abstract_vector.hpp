@@ -8,6 +8,11 @@
 #include "almost_equal.hpp"
 #include "utility/constructor_tag.hpp"
 
+#include "text/json_input_stream.hpp"
+#include "text/json_output_stream.hpp"
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
+
 namespace gorc {
 
     template <size_t n, typename F, typename Tag>
@@ -22,6 +27,30 @@ namespace gorc {
 
         explicit abstract_vector(uninit_constructor_tag)
         {
+        }
+
+        abstract_vector(deserialization_constructor_tag, binary_input_stream &bis)
+        {
+            for(auto &em : data) {
+                em = binary_deserialize<F>(bis);
+            }
+        }
+
+        void binary_serialize_object(binary_output_stream &bos) const
+        {
+            for(auto const &em : data) {
+                binary_serialize(bos, em);
+            }
+        }
+
+        abstract_vector(deserialization_constructor_tag, json_input_stream &jis)
+        {
+            json_deserialize_array(jis, data.begin(), data.end());
+        }
+
+        void json_serialize_object(json_output_stream &jos) const
+        {
+            json_serialize_array(jos, data);
         }
 
         template <typename ...ArgT, class = typename std::enable_if<sizeof...(ArgT) == n>::type>
