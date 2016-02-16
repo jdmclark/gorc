@@ -15,4 +15,15 @@ namespace gorc {
         return make_abstract_vector<size_vector_tag>(v...);
     }
 
+    template <size_t n, typename F>
+    F volume(size<n, F> const &sz)
+    {
+        F vol = F(1);
+        for(auto const &dim : sz) {
+            vol *= dim;
+        }
+
+        return vol;
+    }
+
 }

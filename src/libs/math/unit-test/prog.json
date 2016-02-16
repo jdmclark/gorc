@@ -8,7 +8,9 @@
     ],
     "sources" : [
         "almost_equal_test.cpp",
+        "grid_test.cpp",
         "point_test.cpp",
+        "size_test.cpp",
         "vector_test.cpp"
     ]
 }
