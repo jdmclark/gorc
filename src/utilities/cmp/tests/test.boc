@@ -1,3 +1,0 @@
-include ../../../../rules/test.boc;
-
-var $CMP=$(BIN)/cmp;

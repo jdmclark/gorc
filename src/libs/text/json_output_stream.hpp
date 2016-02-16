@@ -112,6 +112,11 @@ namespace gorc {
             // Called immediately after printing some element.
             states.top().awaiting_content = false;
             states.top().needs_comma = true;
+
+            if(states.top().mode == state_mode::root) {
+                // Print newline after the root node
+                print_raw_string("\n");
+            }
         }
 
         inline void assert_element_label_printed()

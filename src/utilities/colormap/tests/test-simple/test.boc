@@ -1,0 +1,6 @@
+include ../test.boc;
+
+cat script.txt | $(BINCAT) | $(CMP) >> $(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

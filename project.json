@@ -36,9 +36,9 @@
         "libs/vfs/unit-test",
 
         "utilities/bincat",
-        "utilities/cmp",
         "utilities/cogcheck",
         "utilities/cog",
+        "utilities/colormap",
         "utilities/episode",
         "utilities/gob"
     ]

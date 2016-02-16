@@ -49,6 +49,7 @@ namespace gorc {
 
         color_rgb tint;
 
+        // These values are always 0
         std::array<uint32_t, 10> unknown;
 
         std::unique_ptr<colormap_palette> palette;

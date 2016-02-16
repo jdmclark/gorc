@@ -1,0 +1,1 @@
+[ERROR] <stdin>: colormap has unknown version 31

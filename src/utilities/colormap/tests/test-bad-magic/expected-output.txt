@@ -1,0 +1,1 @@
+[ERROR] <stdin>: file is not a valid colormap

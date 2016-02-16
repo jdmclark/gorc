@@ -1,5 +1,5 @@
 {
-    "name" : "cmp",
+    "name" : "colormap",
     "dependencies" : [
         "libs/program",
         "libs/jkcontent"

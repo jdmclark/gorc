@@ -255,7 +255,7 @@ test_case(escape_strings)
             "  \"st\\\"ring\\\\ requiring es\\\\cap\\\"ing\",\n"
             "  \"new\\nline\",\n"
             "  \"ta\\tb\"\n"
-            "]";
+            "]\n";
 
     // Pull the contents of the memory file
     f.set_position(0);
@@ -339,7 +339,7 @@ test_case(serialize_null)
     std::string expected_doc =
             "{\n"
             "  \"some null member\" : null\n"
-            "}";
+            "}\n";
 
     // Pull the contents of the memory file
     f.set_position(0);
@@ -516,7 +516,7 @@ test_case(strip_trailing_zeroes)
     std::string expected_doc =
             "[\n"
             "  1.0\n"
-            "]";
+            "]\n";
 
     // Pull the contents of the memory file
     f.set_position(0);

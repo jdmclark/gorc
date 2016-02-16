@@ -1,0 +1,4 @@
+include ../../../../rules/test.boc;
+
+var $BINCAT=$(TEST_BIN)/bincat;
+var $CMP=$(BIN)/colormap;

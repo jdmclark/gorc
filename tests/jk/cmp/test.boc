@@ -1,0 +1,28 @@
+include ../test.boc;
+
+function check_all_cmps(episode)
+{
+    (jk_list($episode)) | grep "\\.cmp$" | sort | uniq >> $(TESTSUITE_DIR)/cmp_files.txt;
+    var $(cmp_files) = ${cat $(TESTSUITE_DIR)/cmp_files.txt};
+
+    mkdir $(TESTSUITE_DIR)/files;
+    pushd $(TESTSUITE_DIR)/files;
+    $[GORC_LOG] = $(TESTSUITE_DIR)/cmplog.txt;
+
+    cat ../cmp_files.txt | (jk_extract_list($episode));
+
+    for cmp in $(cmp_files) {
+        cat $(cmp) | colormap >$(cmp)dump.json || true;
+        if head(tail($?)) == 0 {
+            echo "[PASS] "$(cmp) >> $(RAW_OUTPUT);
+        }
+        else {
+            echo "[FAIL] "$(cmp) >> $(RAW_OUTPUT);
+        }
+    }
+
+    popd;
+
+    call process_raw_output();
+    call compare_output();
+}
