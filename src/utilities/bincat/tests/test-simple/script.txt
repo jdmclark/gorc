@@ -1,0 +1,7 @@
+# Writes a simple string to standard output
+raw Hello, $
+
+#Some other comment
+
+raw World!
+$

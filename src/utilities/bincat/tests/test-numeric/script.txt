@@ -1,0 +1,29 @@
+raw uint8: $
+uint8 65
+raw 
+$
+
+raw uint8h: $
+uint8h 5A
+raw 
+$
+
+raw uint16: $
+uint16 16706
+raw 
+$
+
+raw uint16h: $
+uint16h 595A
+raw 
+$
+
+raw uint32: $
+uint32 1094861636
+raw 
+$
+
+raw uint32h: $
+uint32h 5758595A
+raw 
+$

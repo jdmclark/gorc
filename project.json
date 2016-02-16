@@ -35,6 +35,7 @@
         "libs/utility/unit-test",
         "libs/vfs/unit-test",
 
+        "utilities/bincat",
         "utilities/cmp",
         "utilities/cogcheck",
         "utilities/cog",

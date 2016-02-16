@@ -1,0 +1,6 @@
+uint8: A
+uint8h: Z
+uint16: BA
+uint16h: ZY
+uint32: DCBA
+uint32h: ZYXW
