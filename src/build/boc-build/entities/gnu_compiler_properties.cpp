@@ -53,6 +53,16 @@ namespace {
         "-lboost_filesystem"
     };
 
+    std::vector<std::string> lib_sfml_cflags {
+        "-lGLEW",
+        "-lGL",
+        "-lGLU",
+        "-lsfml-audio",
+        "-lsfml-graphics",
+        "-lsfml-window",
+        "-lsfml-system"
+    };
+
     std::vector<std::string> ld_preflags {
         "-Wl,--no-as-needed"
     };
@@ -243,6 +253,10 @@ bool gorc::gnu_compiler_properties::link_program(program_file_entity *prog)
     // Add external lib arguments in correct order
     if(external_libs.find(external_lib_type::boost) != external_libs.end()) {
         std::copy(lib_boost_cflags.begin(), lib_boost_cflags.end(), std::back_inserter(args));
+    }
+
+    if(external_libs.find(external_lib_type::sfml) != external_libs.end()) {
+        std::copy(lib_sfml_cflags.begin(), lib_sfml_cflags.end(), std::back_inserter(args));
     }
 
     // Add postflags

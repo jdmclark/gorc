@@ -7,7 +7,8 @@
 namespace gorc {
 
     enum class external_lib_type {
-        boost
+        boost,
+        sfml
     };
 
     external_lib_type to_external_lib_type(std::string const &);

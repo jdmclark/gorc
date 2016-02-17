@@ -2,6 +2,7 @@
 
 #include "math/color.hpp"
 #include "math/grid.hpp"
+#include "io/path.hpp"
 
 namespace gorc {
 
@@ -10,5 +11,7 @@ namespace gorc {
     static_assert(alignof(color_rgba8) == 1, "pixel vector must be unaligned");
 
     using image = grid<color_rgba8>;
+
+    void save_image_to_file(image const &img, path const &);
 
 }

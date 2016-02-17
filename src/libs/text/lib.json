@@ -5,6 +5,7 @@
         "libs/io"
     ],
     "sources" : [
+        "extract_path.cpp",
         "generic_tokenizer.cpp",
         "token_helpers.cpp",
         "tokenizer.cpp",

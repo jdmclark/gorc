@@ -1,4 +1,4 @@
 include ../test.boc;
 
 # Don't compare output. Input is known good, simply pass or fail.
-cat input.cmp | $(CMP);
+cat input.cmp | $(CMP) --extract-to $(TESTSUITE_DIR)/input;

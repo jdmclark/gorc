@@ -12,7 +12,7 @@ function check_all_cmps(episode)
     cat ../cmp_files.txt | (jk_extract_list($episode));
 
     for cmp in $(cmp_files) {
-        cat $(cmp) | colormap >$(cmp)dump.json || true;
+        cat $(cmp) | colormap --extract-to $(cmp) || true;
         if head(tail($?)) == 0 {
             echo "[PASS] "$(cmp) >> $(RAW_OUTPUT);
         }

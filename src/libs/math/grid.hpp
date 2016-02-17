@@ -8,8 +8,10 @@ namespace gorc {
 
     template <typename T>
     class grid {
+    public:
+        gorc::size<2, size_t> const size;
+
     private:
-        gorc::size<2, size_t> size;
         std::vector<T> elements;
 
         inline size_t get_element_index(size_t x, size_t y) const

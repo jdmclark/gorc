@@ -45,7 +45,7 @@ bootstrap:
 	@$(MAKE) upgrade
 
 clean-bin:
-	@rm -rf bin
+	@rm -rf bin .boc-cache
 
 bin/obj/%.o: %.cpp
 	@mkdir -p $(dir $@)

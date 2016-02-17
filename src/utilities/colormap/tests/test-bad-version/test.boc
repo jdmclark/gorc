@@ -1,6 +1,6 @@
 include ../test.boc;
 
-cat script.txt | $(BINCAT) | $(CMP) 2>> $(RAW_OUTPUT) || true;
+cat script.txt | $(BINCAT) | $(CMP) --extract-to $(TESTSUITE_DIR)/out 2>> $(RAW_OUTPUT) || true;
 
 call process_raw_output();
 call compare_output();

@@ -11,7 +11,11 @@
         "asset_ref.cpp",
         "content_manager.cpp",
         "fourcc.cpp",
+        "image.cpp",
         "loader.cpp",
         "loader_registry.cpp"
+    ],
+    "libraries" : [
+        "sfml"
     ]
 }

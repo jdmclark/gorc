@@ -5,7 +5,8 @@
 namespace {
 
     std::unordered_map<std::string, gorc::external_lib_type> lib_type_str_map {
-        { "boost", gorc::external_lib_type::boost }
+        { "boost", gorc::external_lib_type::boost },
+        { "sfml", gorc::external_lib_type::sfml }
     };
 
 }

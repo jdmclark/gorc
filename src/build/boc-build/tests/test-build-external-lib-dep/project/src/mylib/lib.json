@@ -4,6 +4,7 @@
         "does_test_boc_exist.cpp"
     ],
     "libraries" : [
-        "boost"
+        "boost",
+        "sfml"
     ]
 }
