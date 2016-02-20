@@ -1,0 +1,9 @@
+include ../test.boc;
+
+cat script.txt | $(BINCAT) | $(MAT) --extract-to $(TESTSUITE_DIR)/out 2>> $(RAW_OUTPUT);
+
+echo "---- json data ----" >> $(RAW_OUTPUT);
+cat $(TESTSUITE_DIR)/out.json | grep "\\.png" >> $(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

@@ -40,6 +40,7 @@
         "utilities/cog",
         "utilities/colormap",
         "utilities/episode",
-        "utilities/gob"
+        "utilities/gob",
+        "utilities/material"
     ]
 }

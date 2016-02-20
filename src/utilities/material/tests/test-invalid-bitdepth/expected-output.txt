@@ -1,0 +1,1 @@
+[ERROR] <stdin>: bitdepth 7 is not supported

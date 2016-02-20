@@ -7,6 +7,7 @@
     ],
     "sources" : [
         "colormap.cpp",
-        "colormap_loader.cpp"
+        "colormap_loader.cpp",
+        "material.cpp"
     ]
 }

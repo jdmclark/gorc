@@ -1,0 +1,6 @@
+include ../test.boc;
+
+cat script.txt | $(BINCAT) | $(MAT) --extract-to $(TESTSUITE_DIR)/out 2>> $(RAW_OUTPUT) || true;
+
+call process_raw_output();
+call compare_output();

@@ -1,0 +1,45 @@
+raw MAT $
+uint32h 32
+
+uint32 0 # Color type
+uint32 3 # Cells
+uint32 0 # No textures
+
+uint32 0 # Not transparent
+uint32 8 # Bitdepth
+
+uint32 0 # Unknown (16-bit data)
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+
+# Cel records
+
+uint32 0 # Color type
+uint32 182
+uint32 0 # Unknown
+uint32 0
+uint32 0
+uint32 0
+
+uint32 0 # Color type
+uint32 32
+uint32 0 # Unknown
+uint32 0
+uint32 0
+uint32 0
+
+uint32 0 # Color type
+uint32 86
+uint32 0 # Unknown
+uint32 0
+uint32 0
+uint32 0

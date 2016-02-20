@@ -1,0 +1,3 @@
+---- json data ----
+        "$TESTDIR$/tempdir/out-0-0.png",
+        "$TESTDIR$/tempdir/out-0-1.png"

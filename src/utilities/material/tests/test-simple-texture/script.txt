@@ -1,0 +1,71 @@
+raw MAT $
+uint32h 32
+
+uint32 2 # Texture type
+uint32 1 # Cells
+uint32 1 # Textures
+
+uint32 0 # Not transparent
+uint32 8 # Bitdepth
+
+uint32 0 # Unknown (16-bit data)
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+uint32 0
+
+# Cel records
+
+uint32 8 # Texture type
+uint32 0
+uint32 0 # Unknown
+uint32 0
+uint32 0
+uint32 0
+uint32 0 # Unknown
+uint32 0
+uint32 0
+uint32 0 # Texture index
+
+# Texture records
+
+uint32 4 # Width
+uint32 4 # Height
+uint32 0 # Unknown
+uint32 0 # Unknown
+uint32 0 # Unknown
+uint32 2 # Num mipmaps
+
+# Texture data
+uint8 255
+uint8 255
+uint8 255
+uint8 255
+
+uint8 255
+uint8 255
+uint8 255
+uint8 255
+
+uint8 255
+uint8 255
+uint8 255
+uint8 255
+
+uint8 255
+uint8 255
+uint8 255
+uint8 255
+
+# Second mipmap data
+uint8 64
+uint8 64
+uint8 64
+uint8 64

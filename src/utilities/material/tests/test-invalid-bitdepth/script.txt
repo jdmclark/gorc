@@ -1,0 +1,10 @@
+raw MAT $
+uint32h 32
+
+uint32 0 # Type
+uint32 0 # Cells
+uint32 0 # Textures
+
+uint32 0 # Transparency
+
+uint32 7 # Bitdepth
