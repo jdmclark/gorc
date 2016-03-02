@@ -16,7 +16,7 @@ namespace gorc {
     public:
         uint32_t type;
         uint32_t color_index;
-        std::array<uint32_t, 4> unknown_color;
+        std::array<float, 4> unknown_color;
         std::array<uint32_t, 3> unknown_texture;
         uint32_t texture_index;
 

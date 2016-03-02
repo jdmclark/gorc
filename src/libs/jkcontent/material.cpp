@@ -18,7 +18,7 @@ gorc::material_cel_record::material_cel_record(deserialization_constructor_tag,
 
     color_index = binary_deserialize<uint32_t>(bis);
     for(auto &em : unknown_color) {
-        em = binary_deserialize<uint32_t>(bis);
+        em = binary_deserialize<float>(bis);
     }
 
     if(type == 8) {
