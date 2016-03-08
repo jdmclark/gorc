@@ -17,6 +17,13 @@ namespace {
             return;
         }
 
+        virtual std::vector<path> const& get_prefixes() const override
+        {
+            static std::vector<path> rv;
+
+            return rv;
+        }
+
         virtual std::unique_ptr<asset> deserialize(input_stream&,
                                                    content_manager&,
                                                    service_registry const&) const override

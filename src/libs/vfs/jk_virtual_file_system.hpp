@@ -32,6 +32,8 @@ namespace gorc {
         void set_current_episode(virtual_container const &episode_ctr);
 
         virtual std::unique_ptr<input_stream> open(path const &filename) const override;
+        virtual std::tuple<path, std::unique_ptr<input_stream>>
+            find(path const &filename, std::vector<path> const &prefixes) const override;
 
         std::map<std::string, std::string> list_files() const;
     };

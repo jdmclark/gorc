@@ -10,6 +10,8 @@ namespace gorc {
         public:
             static fourcc const type;
 
+            virtual std::vector<path> const& get_prefixes() const override;
+
             virtual std::unique_ptr<asset> deserialize(input_stream &is,
                                                        content_manager &,
                                                        service_registry const &) const override;

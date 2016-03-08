@@ -59,8 +59,8 @@ void gorc::content_manager::finalize_internal(asset_id id)
     if(!element.content) {
         diagnostic_context dc(element.name.c_str());
         auto const &loader = services.get<loader_registry>().get_loader(element.type);
-        auto file = services.get<virtual_file_system>().open(element.name);
-        element.content = loader.deserialize(*file, *this, services);
+        auto file = services.get<virtual_file_system>().find(element.name, loader.get_prefixes());
+        element.content = loader.deserialize(*std::get<1>(file), *this, services);
     }
 }
 

@@ -41,6 +41,12 @@ namespace {
                 return std::make_unique<memory_file::reader>(default_mf);
             }
         }
+
+        virtual std::tuple<path, std::unique_ptr<input_stream>>
+            find(path const &p, std::vector<path> const &) const override
+        {
+            return std::make_tuple(p, open(p));
+        }
     };
 
     class mock_asset : public asset {
@@ -61,6 +67,12 @@ namespace {
     class mock_loader : public loader {
     public:
         static fourcc const type;
+
+        virtual std::vector<path> const& get_prefixes() const override
+        {
+            static std::vector<path> rv = { "" };
+            return rv;
+        }
 
         virtual std::unique_ptr<asset> deserialize(input_stream &is,
                                                    content_manager &,

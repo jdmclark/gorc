@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "io/path.hpp"
 #include "asset.hpp"
 
 namespace gorc {
@@ -16,6 +17,8 @@ namespace gorc {
         virtual std::unique_ptr<asset> deserialize(input_stream &,
                                                    content_manager &,
                                                    service_registry const &) const = 0;
+
+        virtual std::vector<path> const& get_prefixes() const = 0;
     };
 
 }

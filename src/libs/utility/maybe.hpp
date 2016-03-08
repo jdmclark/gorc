@@ -253,6 +253,17 @@ namespace gorc {
         return decltype(fn(v.get_value()))();
     }
 
+    template <typename ValueT, typename IfFnT>
+    auto maybe_if(ValueT const &v, IfFnT fn)
+        -> decltype(fn(v.get_value()))
+    {
+        if(v.has_value()) {
+            return fn(v.get_value());
+        }
+
+        return decltype(fn(v.get_value()))();
+    }
+
     template <typename ValueT, typename IfFnT, typename DefaultT>
     auto maybe_if(ValueT &v, DefaultT const &dflt, IfFnT fn)
         -> typename std::common_type<decltype(fn(v.get_value())), DefaultT>::type

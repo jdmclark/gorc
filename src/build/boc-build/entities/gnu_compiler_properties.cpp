@@ -27,7 +27,8 @@ namespace {
         "-Wcast-qual",
         "-Wcast-align",
         "-Wconversion",
-        "-Wdisabled-optimization"
+        "-Wdisabled-optimization",
+        "-Wno-maybe-uninitialized"
     };
 
     std::vector<std::string> release_cflags {

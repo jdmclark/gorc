@@ -91,8 +91,9 @@ test_case(const_dispatch_with_mutable_handlers_fatal)
 
     assert_throws(bus.fire_event(mock_event(12)),
                   std::runtime_error,
-                  "fatal: dispatched constant event when "
-                  "non-constant handlers are registered");
+                  strcat("fatal: dispatched constant event when "
+                         "non-constant handlers are registered: ",
+                         typeid(mock_event).name()));
 }
 
 

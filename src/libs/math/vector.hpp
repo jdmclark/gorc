@@ -15,16 +15,20 @@ namespace gorc {
         return make_abstract_vector<direction_vector_tag>(v...);
     }
 
+    template <size_t n, typename F>
+    constexpr auto make_fill_vector(F c)
+    {
+        return make_fill_abstract_vector<n, F, direction_vector_tag>(c);
+    }
+
     template <size_t n, typename F = float>
     constexpr auto make_zero_vector()
     {
         return make_fill_abstract_vector<n, F, direction_vector_tag>(F(0));
     }
 
-    template <size_t n, typename F>
-    constexpr F dot(vector<n, F> const &v, vector<n, F> const &w)
-    {
-        return std::inner_product(v.begin(), v.end(), w.begin(), F(0));
-    }
+    // Operators
+    direction_vector_tag operator+(direction_vector_tag, direction_vector_tag);
+    direction_vector_tag operator-(direction_vector_tag, direction_vector_tag);
 
 }

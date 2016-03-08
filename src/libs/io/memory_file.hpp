@@ -63,8 +63,10 @@ namespace gorc {
         void set_position(size_t offset);
         size_t position();
 
-        size_t size();
+        size_t size() const;
         bool at_end();
+
+        char const* data() const;
 
         void copy_to(output_stream&) const;
 

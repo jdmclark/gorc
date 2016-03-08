@@ -7,6 +7,8 @@
         "build/boc-shell",
         "build/boc-test",
 
+        "client",
+
         "libs/ast/unit-test",
         "libs/cog/ir/unit-test",
         "libs/cog/script/unit-test",
@@ -20,6 +22,7 @@
         "libs/io/tests/example-output-stream",
         "libs/io/unit-test",
         "libs/jkcontent/unit-test",
+        "libs/libold/unit-test",
         "libs/log/tests/example-file-log",
         "libs/log/tests/example-stdio-log",
         "libs/log/unit-test",

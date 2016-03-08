@@ -99,41 +99,51 @@ void gorc::jk_virtual_file_system::set_current_episode(virtual_container const &
     }
 }
 
-std::unique_ptr<gorc::input_stream> gorc::jk_virtual_file_system::open(path const &p) const
+std::tuple<gorc::path, std::unique_ptr<gorc::input_stream>>
+    gorc::jk_virtual_file_system::find(path const &original_p,
+                                       std::vector<path> const &prefixes) const
 {
-    std::string generic_p = p.generic_string();
-    std::transform(generic_p.begin(), generic_p.end(), generic_p.begin(), tolower);
-    path normalized_p(generic_p);
+    for(auto const &prefix : prefixes) {
+        path p = prefix / original_p;
+        std::string generic_p = p.generic_string();
+        std::transform(generic_p.begin(), generic_p.end(), generic_p.begin(), tolower);
+        path normalized_p(generic_p);
 
-    // Try from the current episode:
-    auto ep_fn_it = episode_file_map.find(generic_p);
-    if(ep_fn_it != episode_file_map.end()) {
-        return ep_fn_it->second->open();
-    }
+        // Try from the current episode:
+        auto ep_fn_it = episode_file_map.find(generic_p);
+        if(ep_fn_it != episode_file_map.end()) {
+            return std::make_tuple(p, ep_fn_it->second->open());
+        }
 
-    // Try from the current mod:
-    if(game_path.has_value()) {
-        auto game_file = find_in_gobs(normalized_p,
-                                      game_path.get_value(),
-                                      generic_p,
-                                      game_file_map);
-        if(game_file) {
-            return game_file;
+        // Try from the current mod:
+        if(game_path.has_value()) {
+            auto game_file = find_in_gobs(normalized_p,
+                                          game_path.get_value(),
+                                          generic_p,
+                                          game_file_map);
+            if(game_file) {
+                return std::make_tuple(p, std::move(game_file));
+            }
+        }
+
+        // Try from resources
+        auto res_file = find_in_gobs(normalized_p,
+                                     resource_path,
+                                     generic_p,
+                                     resource_file_map);
+        if(res_file) {
+            return std::make_tuple(p, std::move(res_file));
         }
     }
 
-    // Try from resources
-    auto res_file = find_in_gobs(normalized_p,
-                                 resource_path,
-                                 generic_p,
-                                 resource_file_map);
-    if(res_file) {
-        return res_file;
-    }
-
     // Not found
-    diagnostic_context dc(p.c_str());
+    diagnostic_context dc(original_p.c_str());
     LOG_FATAL("file not found");
+}
+
+std::unique_ptr<gorc::input_stream> gorc::jk_virtual_file_system::open(path const &p) const
+{
+    return std::get<1>(find(p, { path() }));
 }
 
 namespace {

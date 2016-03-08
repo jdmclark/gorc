@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include "maybe.hpp"
 #include "scoped_assignment.hpp"
+#include "strcat.hpp"
 
 namespace gorc {
 
@@ -115,8 +116,9 @@ namespace gorc {
             void dispatch_event(T const &event)
             {
                 if(!handlers.empty()) {
-                    throw std::runtime_error("fatal: dispatched constant event when "
-                                             "non-constant handlers are registered");
+                    throw std::runtime_error(strcat("fatal: dispatched constant event when "
+                                                    "non-constant handlers are registered: ",
+                                                    typeid(T).name()));
                 }
 
                 auto caller_inside_guard = make_scoped_assignment(caller_inside, true);

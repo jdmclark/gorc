@@ -6,3 +6,5 @@ test-log.txt
 *.pyc
 pkg/
 .boc-cache
+game/episode
+game/resource

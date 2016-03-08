@@ -56,6 +56,11 @@ bool gorc::memory_file::reader::at_end()
     return offset >= mf->buffer.size();
 }
 
+char const* gorc::memory_file::data() const
+{
+    return buffer.data();
+}
+
 gorc::memory_file::reader& gorc::memory_file::reader::operator=(reader const &r)
 {
     mf = r.mf;
@@ -141,9 +146,9 @@ size_t gorc::memory_file::position()
     return reader_instance.position();
 }
 
-size_t gorc::memory_file::size()
+size_t gorc::memory_file::size() const
 {
-    return reader_instance.size();
+    return buffer.size();
 }
 
 bool gorc::memory_file::at_end()

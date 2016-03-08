@@ -7,6 +7,7 @@
 
 #include "almost_equal.hpp"
 #include "utility/constructor_tag.hpp"
+#include "utility/apply.hpp"
 
 #include "text/json_input_stream.hpp"
 #include "text/json_output_stream.hpp"
@@ -86,6 +87,51 @@ namespace gorc {
             std::transform(begin(), end(), rv.begin(), [](F em) { return static_cast<G>(em); });
             return rv;
         }
+
+        template <typename TagG,
+                  typename = std::enable_if<std::is_same<decltype(Tag() + TagG()), Tag>::value>>
+        abstract_vector& operator+=(abstract_vector<n, F, TagG> const &w)
+        {
+            auto out_it = begin();
+            auto jt = w.begin();
+            for( ; out_it != end() && jt != w.end(); ++out_it, ++jt) {
+                *out_it += *jt;
+            }
+
+            return *this;
+        }
+
+        template <typename TagG,
+                  typename = std::enable_if<std::is_same<decltype(Tag() - TagG()), Tag>::value>>
+        abstract_vector& operator-=(abstract_vector<n, F, TagG> const &w)
+        {
+            auto out_it = begin();
+            auto jt = w.begin();
+            for( ; out_it != end() && jt != w.end(); ++out_it, ++jt) {
+                *out_it -= *jt;
+            }
+
+            return *this;
+        }
+
+        abstract_vector& operator*=(F c)
+        {
+            for(auto &em : data) {
+                em *= c;
+            }
+
+            return *this;
+        }
+
+        abstract_vector& operator/=(F c)
+        {
+            for(auto &em : data) {
+                em /= c;
+            }
+
+            return *this;
+        }
+
     };
 
     template <typename Tag, typename F, typename ...G>
@@ -99,6 +145,22 @@ namespace gorc {
     {
         auto rv = abstract_vector<n, F, Tag>(uninit_constructor);
         std::fill(rv.begin(), rv.end(), c);
+        return rv;
+    }
+
+    template <size_t n, typename F, typename Tag, size_t m>
+    constexpr abstract_vector<n, F, Tag> extend_vector(abstract_vector<m, F, Tag> const &v, F c)
+    {
+        auto rv = abstract_vector<n, F, Tag>(uninit_constructor);
+        auto out_it = rv.begin();
+        for(auto it = v.begin(); it != v.end() && out_it != rv.end(); ++it, ++out_it) {
+            *out_it = *it;
+        }
+
+        for( ; out_it != rv.end(); ++out_it) {
+            *out_it = c;
+        }
+
         return rv;
     }
 
@@ -140,7 +202,7 @@ namespace gorc {
     bool operator!=(abstract_vector<n, F, Tag> const &v,
                     abstract_vector<n, F, Tag> const &w)
     {
-        return std::equal(v.begin(), v.end(), w.begin(), std::not_equal_to<decltype(v)>());
+        return std::equal(v.begin(), v.end(), w.begin(), std::not_equal_to<F>());
     }
 
     template <size_t n, typename F, typename TagF, typename TagG>
@@ -162,6 +224,14 @@ namespace gorc {
     }
 
     template <size_t n, typename F, typename Tag>
+    auto operator*(F c, abstract_vector<n, F, Tag> const &v)
+    {
+        abstract_vector<n, F, Tag> rv(uninit_constructor);
+        std::transform(v.begin(), v.end(), rv.begin(), [c](F x) { return c * x; });
+        return rv;
+    }
+
+    template <size_t n, typename F, typename Tag>
     auto operator*(abstract_vector<n, F, Tag> const &v, F c)
     {
         abstract_vector<n, F, Tag> rv(uninit_constructor);
@@ -174,6 +244,60 @@ namespace gorc {
     {
         abstract_vector<n, F, Tag> rv(uninit_constructor);
         std::transform(v.begin(), v.end(), rv.begin(), [c](F x) { return x / c; });
+        return rv;
+    }
+
+    template <size_t n, typename F, typename Tag>
+    auto operator-(abstract_vector<n, F, Tag> const &v)
+    {
+        abstract_vector<n, F, Tag> rv(uninit_constructor);
+        std::transform(v.begin(), v.end(), rv.begin(), std::negate<F>());
+        return rv;
+    }
+
+    template <size_t n, typename F, typename Tag>
+    auto length_squared(abstract_vector<n, F, Tag> const &v)
+    {
+        F c = F(0);
+        for(auto const &em : v) {
+            c += (em * em);
+        }
+
+        return c;
+    }
+
+    template <size_t n, typename F, typename Tag>
+    auto length(abstract_vector<n, F, Tag> const &v)
+    {
+        return static_cast<F>(std::sqrt(length_squared(v)));
+    }
+
+    template <size_t n, typename F, typename Tag>
+    auto dot(abstract_vector<n, F, Tag> const &v, abstract_vector<n, F, Tag> const &w)
+    {
+        F c = F(0);
+        auto it = v.begin();
+        auto jt = w.begin();
+        for( ; it != v.end() && jt != w.end(); ++it, ++jt) {
+            c += (*it * *jt);
+        }
+
+        return c;
+    }
+
+    template <size_t n, typename F, typename Tag>
+    auto normalize(abstract_vector<n, F, Tag> const &v)
+    {
+        return v / length(v);
+    }
+
+    template <typename F, typename Tag>
+    auto cross(abstract_vector<3, F, Tag> const &v, abstract_vector<3, F, Tag> const &w)
+    {
+        auto rv = abstract_vector<3, F, Tag>(uninit_constructor);
+        get<0>(rv) = get<1>(v) * get<2>(w) - get<2>(v) * get<1>(w);
+        get<1>(rv) = get<2>(v) * get<0>(w) - get<0>(v) * get<2>(w);
+        get<2>(rv) = get<0>(v) * get<1>(w) - get<1>(v) * get<0>(w);
         return rv;
     }
 
