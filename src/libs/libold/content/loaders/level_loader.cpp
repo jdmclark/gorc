@@ -12,6 +12,8 @@
 #include <tuple>
 #include <vector>
 
+gorc::fourcc const gorc::content::loaders::level_loader::type = "JKL"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::level_loader::asset_root_path = { "jkl" };
 
 namespace gorc {

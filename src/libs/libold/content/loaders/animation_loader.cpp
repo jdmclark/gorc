@@ -9,6 +9,8 @@
 #include <tuple>
 #include <vector>
 
+gorc::fourcc const gorc::content::loaders::animation_loader::type = "KEY"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::animation_loader::asset_root_path = { "3do/key" };
 
 namespace gorc {

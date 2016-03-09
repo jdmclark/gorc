@@ -4,7 +4,8 @@
 
 gorc::content::content_manager::content_manager(service_registry const &services)
     : services(services)
-    , fs(services.get<virtual_file_system>()) {
+    , fs(services.get<virtual_file_system>())
+    , loaders(services.get<loader_registry>()) {
     return;
 }
 

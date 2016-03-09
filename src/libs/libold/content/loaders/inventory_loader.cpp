@@ -2,6 +2,8 @@
 #include "libold/content/assets/inventory.hpp"
 #include <boost/format.hpp>
 
+gorc::fourcc const gorc::content::loaders::inventory_loader::type = "IBIN"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::inventory_loader::asset_root_path = { "misc" };
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::inventory_loader::parse(text::tokenizer& t,

@@ -10,6 +10,8 @@
 #include <vector>
 #include "libold/content/constants.hpp"
 
+gorc::fourcc const gorc::content::loaders::model_loader::type = "3DO"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::model_loader::asset_root_path = { "3do" };
 
 namespace gorc {

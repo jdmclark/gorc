@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <boost/format.hpp>
 
+gorc::fourcc const gorc::content::loaders::soundclass_loader::type = "SND"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::soundclass_loader::asset_root_path = { "misc/snd" };
 
 namespace gorc {

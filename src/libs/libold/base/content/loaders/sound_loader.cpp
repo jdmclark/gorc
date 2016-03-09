@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdint>
 
+gorc::fourcc const gorc::content::loaders::sound_loader::type = "WAV"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::sound_loader::asset_root_path = { "sound", "voice" };
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::sound_loader::deserialize(

@@ -2,6 +2,8 @@
 #include "libold/cog/compiler.hpp"
 #include "libold/content/assets/script.hpp"
 
+gorc::fourcc const gorc::content::loaders::script_loader::type = "COG"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::script_loader::asset_root_path = { "cog" };
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::script_loader::deserialize(

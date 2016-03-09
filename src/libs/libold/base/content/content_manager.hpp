@@ -8,6 +8,7 @@
 #include "content/asset.hpp"
 #include "vfs/virtual_file_system.hpp"
 #include "utility/service_registry.hpp"
+#include "loader_registry.hpp"
 
 namespace gorc {
 namespace content {
@@ -18,6 +19,7 @@ private:
     std::unordered_map<std::string, int> asset_map;
     service_registry const &services;
     const virtual_file_system& fs;
+    loader_registry const &loaders;
 
     std::tuple<int, asset*> internal_load(const boost::filesystem::path& name, const std::vector<boost::filesystem::path>& basepaths, loader& loader);
 

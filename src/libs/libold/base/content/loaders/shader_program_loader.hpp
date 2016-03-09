@@ -23,11 +23,15 @@ public:
 
 class vertex_program_loader : public shader_program_loader {
 public:
+    static fourcc const type;
+
     vertex_program_loader();
 };
 
 class fragment_program_loader : public shader_program_loader {
 public:
+    static fourcc const type;
+
     fragment_program_loader();
 };
 

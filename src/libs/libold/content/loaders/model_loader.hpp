@@ -9,6 +9,8 @@ namespace loaders {
 
 class model_loader : public text_loader {
 public:
+    static fourcc const type;
+
     static const std::vector<boost::filesystem::path> asset_root_path;
 
     virtual std::unique_ptr<asset> parse(text::tokenizer& t, content_manager& manager, service_registry const &) const override;

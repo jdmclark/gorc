@@ -7,6 +7,8 @@
 #include <array>
 #include <boost/format.hpp>
 
+gorc::fourcc const gorc::content::loaders::material_loader::type = "MAT"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::material_loader::asset_root_path = { "mat", "3do/mat" };
 
 namespace gorc {

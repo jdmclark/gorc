@@ -1,6 +1,7 @@
 #pragma once
 
 #include "io/input_stream.hpp"
+#include "content/fourcc.hpp"
 #include "content/asset.hpp"
 #include <memory>
 #include <boost/filesystem/path.hpp>

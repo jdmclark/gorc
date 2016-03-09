@@ -4,6 +4,8 @@
 #include "libold/content/assets/colormap.hpp"
 #include "io/binary_input_stream.hpp"
 
+gorc::fourcc const gorc::content::loaders::colormap_loader::type = "CMP"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp" };
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::colormap_loader::deserialize(

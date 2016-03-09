@@ -10,6 +10,9 @@ using gorc::content::loaders::shader_program_loader;
 using gorc::content::loaders::vertex_program_loader;
 using gorc::content::loaders::fragment_program_loader;
 
+gorc::fourcc const vertex_program_loader::type = "VERT"_4CC;
+gorc::fourcc const fragment_program_loader::type = "FRAG"_4CC;
+
 const std::vector<boost::filesystem::path> shader_program_loader::asset_root_path = { "misc/glsl" };
 
 std::unique_ptr<gorc::asset> shader_program_loader::deserialize(

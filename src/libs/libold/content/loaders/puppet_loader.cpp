@@ -9,6 +9,8 @@
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+gorc::fourcc const gorc::content::loaders::puppet_loader::type = "PUP"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::puppet_loader::asset_root_path = { "misc/pup" };
 
 namespace gorc {

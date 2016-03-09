@@ -3,6 +3,8 @@
 #include "libold/base/content/content_manager.hpp"
 #include <boost/format.hpp>
 
+gorc::fourcc const gorc::content::loaders::sprite_loader::type = "SPR"_4CC;
+
 const std::vector<boost::filesystem::path> gorc::content::loaders::sprite_loader::asset_root_path = { "misc/spr" };
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::sprite_loader::parse(text::tokenizer& t,
