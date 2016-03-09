@@ -1,5 +1,4 @@
 #include "component_system.hpp"
-#include "fourcc.hpp"
 
 gorc::utility::component_system::component_system(event_bus &bus)
     : bus(bus)

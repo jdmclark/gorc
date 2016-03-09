@@ -13,7 +13,6 @@
         "base/utility/presenter.cpp",
         "base/utility/time_span.cpp",
         "base/utility/entity_id.cpp",
-        "base/utility/fourcc.cpp",
         "base/utility/game_loop.cpp",
         "base/utility/timestamp.cpp",
         "base/utility/randomizer.cpp",

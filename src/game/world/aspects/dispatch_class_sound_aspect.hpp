@@ -5,8 +5,8 @@
 #include "game/world/components/thing.hpp"
 #include "game/world/components/class_sounds.hpp"
 #include "libold/content/flags/key_marker_type.hpp"
-#include "libold/base/utility/enum_hasher.hpp"
 #include "libold/base/utility/randomizer.hpp"
+#include "utility/enum_hash.hpp"
 
 namespace gorc {
 namespace game {
@@ -17,7 +17,7 @@ class dispatch_class_sound_aspect : public inner_join_aspect<components::class_s
 public:
     using standing_material_map = std::unordered_map<flags::standing_material_type,
                                                      flags::sound_subclass_type,
-                                                     enum_hasher<flags::standing_material_type>>;
+                                                     enum_hash<flags::standing_material_type>>;
 private:
     level_presenter &presenter;
     randomizer rand;

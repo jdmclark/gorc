@@ -6,7 +6,6 @@
 #include "game/world/events/landed.hpp"
 #include "game/world/events/killed.hpp"
 #include "game/world/events/thing_created.hpp"
-#include "libold/base/utility/enum_hasher.hpp"
 #include "game/world/sounds/sound_presenter.hpp"
 
 #include <unordered_map>
