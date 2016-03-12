@@ -10,11 +10,11 @@ class shader_loader : public json_loader {
 public:
     static fourcc const type;
 
-    static const std::vector<boost::filesystem::path> asset_root_path;
-
     virtual std::unique_ptr<asset> parse(json_input_stream &file,
                                          content_manager &manager,
                                          service_registry const &) const override;
+
+    virtual std::vector<path> const& get_prefixes() const override;
 };
 
 }

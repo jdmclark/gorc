@@ -33,7 +33,14 @@ gorc::content::loaders::sfont_loader::sfont_loader(const assets::bitmap& bitmap,
     return;
 }
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::sfont_loader::asset_root_path = { "ui/sft" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "ui/sft" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::sfont_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::sfont_loader::deserialize(
         input_stream& file, content_manager& manager, service_registry const &services) const {

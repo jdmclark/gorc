@@ -4,7 +4,14 @@
 
 gorc::fourcc const gorc::content::loaders::inventory_loader::type = "IBIN"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::inventory_loader::asset_root_path = { "misc" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::inventory_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::inventory_loader::parse(text::tokenizer& t,
         content::content_manager& manager, service_registry const &) const {

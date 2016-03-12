@@ -5,7 +5,14 @@
 
 gorc::fourcc const gorc::content::loaders::sprite_loader::type = "SPR"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::sprite_loader::asset_root_path = { "misc/spr" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc/spr" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::sprite_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::sprite_loader::parse(text::tokenizer& t,
         content::content_manager& manager, service_registry const &) const {

@@ -6,7 +6,14 @@
 
 gorc::fourcc const gorc::content::loaders::colormap_loader::type = "CMP"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::colormap_loader::asset_root_path = { "misc/cmp" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc/cmp" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::colormap_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::colormap_loader::deserialize(
         input_stream &file,

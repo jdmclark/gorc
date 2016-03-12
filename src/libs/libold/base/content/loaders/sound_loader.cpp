@@ -6,7 +6,14 @@
 
 gorc::fourcc const gorc::content::loaders::sound_loader::type = "WAV"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::sound_loader::asset_root_path = { "sound", "voice" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "sound", "voice" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::sound_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::sound_loader::deserialize(
         input_stream &file,

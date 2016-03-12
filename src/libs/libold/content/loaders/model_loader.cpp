@@ -12,7 +12,14 @@
 
 gorc::fourcc const gorc::content::loaders::model_loader::type = "3DO"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::model_loader::asset_root_path = { "3do" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "3do" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::model_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 namespace gorc {
 namespace content {

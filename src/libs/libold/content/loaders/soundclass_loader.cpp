@@ -10,7 +10,14 @@
 
 gorc::fourcc const gorc::content::loaders::soundclass_loader::type = "SND"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::soundclass_loader::asset_root_path = { "misc/snd" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc/snd" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::soundclass_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 namespace gorc {
 namespace content {

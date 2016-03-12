@@ -19,8 +19,6 @@ private:
     bool disable_transparency;
 
 public:
-    static const std::vector<boost::filesystem::path> asset_root_path;
-
     sfont_loader(const assets::colormap& colormap,
                  bool disable_transparency = false);
     sfont_loader(const assets::bitmap& bitmap,
@@ -28,6 +26,8 @@ public:
 
     virtual std::unique_ptr<asset> deserialize(
             input_stream& file, content_manager& manager, service_registry const &) const override;
+
+    virtual std::vector<path> const& get_prefixes() const override;
 };
 
 }

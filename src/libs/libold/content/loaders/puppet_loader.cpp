@@ -11,7 +11,14 @@
 
 gorc::fourcc const gorc::content::loaders::puppet_loader::type = "PUP"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::puppet_loader::asset_root_path = { "misc/pup" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc/pup" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::puppet_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 namespace gorc {
 namespace content {

@@ -13,7 +13,14 @@ using gorc::content::loaders::fragment_program_loader;
 gorc::fourcc const vertex_program_loader::type = "VERT"_4CC;
 gorc::fourcc const fragment_program_loader::type = "FRAG"_4CC;
 
-const std::vector<boost::filesystem::path> shader_program_loader::asset_root_path = { "misc/glsl" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc/glsl" };
+}
+
+std::vector<gorc::path> const& shader_program_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> shader_program_loader::deserialize(
         input_stream &file,

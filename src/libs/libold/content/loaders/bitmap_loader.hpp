@@ -20,12 +20,12 @@ private:
     bool disable_transparency;
 
 public:
-    static const std::vector<boost::filesystem::path> asset_root_path;
-
     bitmap_loader(const assets::colormap& colormap, bool disable_transparency = false);
     bitmap_loader(const assets::bitmap& bitmap, bool disable_transparency = false);
 
     virtual std::unique_ptr<asset> deserialize(input_stream &file, content_manager &, service_registry const &) const override;
+
+    virtual std::vector<path> const& get_prefixes() const override;
 };
 
 }

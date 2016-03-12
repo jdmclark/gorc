@@ -4,7 +4,14 @@
 
 gorc::fourcc const gorc::content::loaders::script_loader::type = "COG"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::script_loader::asset_root_path = { "cog" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "cog" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::script_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::script_loader::deserialize(
         input_stream& file, content_manager&, service_registry const &services) const {

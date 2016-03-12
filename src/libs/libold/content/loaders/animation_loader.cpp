@@ -11,7 +11,14 @@
 
 gorc::fourcc const gorc::content::loaders::animation_loader::type = "KEY"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::animation_loader::asset_root_path = { "3do/key" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "3do/key" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::animation_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 namespace gorc {
 namespace content {

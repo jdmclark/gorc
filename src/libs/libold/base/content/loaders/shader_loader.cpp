@@ -11,7 +11,14 @@ using namespace gorc::content::loaders;
 
 gorc::fourcc const gorc::content::loaders::shader_loader::type = "GLSL"_4CC;
 
-const std::vector<boost::filesystem::path> shader_loader::asset_root_path = { "misc/glsl" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "misc/glsl" };
+}
+
+std::vector<gorc::path> const& shader_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 std::unique_ptr<gorc::asset> shader_loader::parse(json_input_stream &jis,
                                                   content_manager &content,

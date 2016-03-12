@@ -3,6 +3,7 @@
 #include "io/input_stream.hpp"
 #include "content/fourcc.hpp"
 #include "content/asset.hpp"
+#include "io/path.hpp"
 #include <memory>
 #include <boost/filesystem/path.hpp>
 
@@ -18,6 +19,8 @@ public:
     virtual std::unique_ptr<asset> deserialize(input_stream &,
                                                content_manager &,
                                                service_registry const &) const = 0;
+
+    virtual std::vector<path> const& get_prefixes() const = 0;
 };
 
 }

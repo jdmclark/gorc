@@ -9,7 +9,14 @@
 
 gorc::fourcc const gorc::content::loaders::material_loader::type = "MAT"_4CC;
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::material_loader::asset_root_path = { "mat", "3do/mat" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "mat", "3do/mat" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::material_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 namespace gorc {
 namespace content {

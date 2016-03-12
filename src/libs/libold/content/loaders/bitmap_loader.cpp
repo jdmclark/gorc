@@ -6,7 +6,14 @@
 #include <array>
 #include <boost/format.hpp>
 
-const std::vector<boost::filesystem::path> gorc::content::loaders::bitmap_loader::asset_root_path = { "ui/bm" };
+namespace {
+    const std::vector<gorc::path> asset_root_path = { "ui/bm" };
+}
+
+std::vector<gorc::path> const& gorc::content::loaders::bitmap_loader::get_prefixes() const
+{
+    return asset_root_path;
+}
 
 namespace gorc {
 namespace content {

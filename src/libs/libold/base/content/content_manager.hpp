@@ -34,7 +34,7 @@ public:
 
         // Load asset from scratch.
         typename T::loader loader;
-        return *reinterpret_cast<T*>(std::get<1>(internal_load(name, loader.asset_root_path, loader)));
+        return *reinterpret_cast<T*>(std::get<1>(internal_load(name, loader.get_prefixes(), loader)));
     }
 
     template <typename T> int load_id(const boost::filesystem::path& name) {
@@ -45,7 +45,7 @@ public:
 
         // Load asset from scratch.
         typename T::loader loader;
-        return std::get<0>(internal_load(name, loader.asset_root_path, loader));
+        return std::get<0>(internal_load(name, loader.get_prefixes(), loader));
     }
 
     template <typename T> const T& get_asset(int asset_id) {
