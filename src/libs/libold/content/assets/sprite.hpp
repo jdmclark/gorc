@@ -15,10 +15,10 @@ namespace assets {
 
 class sprite : public asset {
 public:
-    using loader = loaders::sprite_loader;
+    static fourcc const type;
 
     const material* mat;
-    int type;
+    int sprite_type;
     float width;
     float height;
     flags::geometry_mode geometry_mode;

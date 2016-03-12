@@ -16,7 +16,7 @@ namespace assets {
 
 class inventory : public asset {
 public:
-    using loader = loaders::inventory_loader;
+    static fourcc const type;
 
     std::unordered_map<std::string, int> bin_map;
     std::map<int, inventory_bin> bins;

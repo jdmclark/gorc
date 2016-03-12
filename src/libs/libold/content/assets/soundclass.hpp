@@ -11,7 +11,7 @@ namespace assets {
 
 class soundclass : public asset {
 public:
-    using loader = loaders::soundclass_loader;
+    static fourcc const type;
 
     std::array<sound_subclass, 128> subclasses;
 

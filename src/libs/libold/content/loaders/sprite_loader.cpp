@@ -19,7 +19,7 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::sprite_loader::parse(text::
     std::unique_ptr<content::assets::sprite> spr(new content::assets::sprite());
 
     spr->mat = &manager.load<assets::material>(t.get_space_delimited_string());
-    spr->type = t.get_number<int>();
+    spr->sprite_type = t.get_number<int>();
     spr->width = t.get_number<float>();
     spr->height = t.get_number<float>();
     spr->geometry_mode = static_cast<flags::geometry_mode>(t.get_number<uint32_t>());

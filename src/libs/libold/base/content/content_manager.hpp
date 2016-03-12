@@ -21,7 +21,7 @@ private:
     const virtual_file_system& fs;
     loader_registry const &loaders;
 
-    std::tuple<int, asset*> internal_load(const boost::filesystem::path& name, const std::vector<boost::filesystem::path>& basepaths, loader& loader);
+    std::tuple<int, asset*> internal_load(const boost::filesystem::path& name, const std::vector<boost::filesystem::path>& basepaths, loader const &loader);
 
 public:
     content_manager(service_registry const &services);
@@ -33,7 +33,7 @@ public:
         }
 
         // Load asset from scratch.
-        typename T::loader loader;
+        auto const &loader = loaders.get_loader(T::type);
         return *reinterpret_cast<T*>(std::get<1>(internal_load(name, loader.get_prefixes(), loader)));
     }
 
@@ -44,7 +44,7 @@ public:
         }
 
         // Load asset from scratch.
-        typename T::loader loader;
+        auto const &loader = loaders.get_loader(T::type);
         return std::get<0>(internal_load(name, loader.get_prefixes(), loader));
     }
 

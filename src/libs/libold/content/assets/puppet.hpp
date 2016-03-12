@@ -14,7 +14,7 @@ namespace assets {
 
 class puppet : public asset {
 public:
-    using loader = loaders::puppet_loader;
+    static fourcc const type;
 
     std::array<puppet_mode, 6> modes;
     std::unordered_map<int, int> joint_map;

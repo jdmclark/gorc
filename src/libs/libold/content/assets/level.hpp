@@ -20,7 +20,7 @@ namespace assets {
 
 class level : public asset {
 public:
-    using loader = loaders::level_loader;
+    static fourcc const type;
 
     level_header header;
     std::vector<std::tuple<material const*, float, float, std::string>> materials;

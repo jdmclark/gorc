@@ -16,7 +16,7 @@ private:
     std::array<vector<3, uint8_t>, 256> extra;
 
 public:
-    using loader = loaders::colormap_loader;
+    static fourcc const type;
 
     vector<3, float> tint_color;
 

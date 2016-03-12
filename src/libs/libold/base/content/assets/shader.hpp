@@ -10,7 +10,7 @@ namespace assets {
 
 class shader : public asset {
 public:
-    using loader = loaders::shader_loader;
+    static fourcc const type;
 
     GLuint program = 0;
 

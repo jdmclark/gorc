@@ -22,12 +22,12 @@ public:
 
 class vertex_program : public shader_program {
 public:
-    using loader = loaders::vertex_program_loader;
+    static fourcc const type;
 };
 
 class fragment_program : public shader_program {
 public:
-    using loader = loaders::fragment_program_loader;
+    static fourcc const type;
 };
 
 }

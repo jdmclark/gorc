@@ -1,5 +1,7 @@
 #include "shader.hpp"
 
+gorc::fourcc const gorc::content::assets::shader::type = "GLSL"_4CC;
+
 gorc::content::assets::shader::shader(GLuint program) : program(program) {
     return;
 }

@@ -10,7 +10,7 @@ namespace assets {
 
 class sound : public asset {
 public:
-    using loader = loaders::sound_loader;
+    static fourcc const type;
 
     sf::SoundBuffer buffer;
 };

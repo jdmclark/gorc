@@ -22,7 +22,7 @@ class level_surface;
 
 class script : public asset {
 public:
-    using loader = loaders::script_loader;
+    static fourcc const type;
 
     cog::script cogscript;
 };

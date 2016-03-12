@@ -18,7 +18,7 @@ namespace gorc {
             loaders.emplace(T::type, std::make_unique<T>(std::forward<ArgT>(arg)...));
         }
 
-        loader const& get_loader(fourcc f);
+        loader const& get_loader(fourcc f) const;
     };
 
 }

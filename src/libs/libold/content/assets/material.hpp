@@ -10,7 +10,7 @@ namespace assets {
 
 class material : public asset {
 public:
-    using loader = loaders::material_loader;
+    static fourcc const type;
 
     box<2, int> size;
     std::vector<material_cel> cels;

@@ -15,7 +15,7 @@ namespace assets {
 
 class model : public asset {
 public:
-    using loader = loaders::model_loader;
+    static fourcc const type;
 
     std::vector<std::string> material_entries;
     std::vector<material const*> materials;

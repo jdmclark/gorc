@@ -14,7 +14,7 @@ namespace assets {
 
 class animation : public asset {
 public:
-    using loader = loaders::animation_loader;
+    static fourcc const type;
 
     flag_set<flags::key_flag> flags;
     unsigned int frame_count;

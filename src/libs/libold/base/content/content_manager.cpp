@@ -10,7 +10,7 @@ gorc::content::content_manager::content_manager(service_registry const &services
 }
 
 std::tuple<int, gorc::asset*> gorc::content::content_manager::internal_load(const boost::filesystem::path& name,
-        const std::vector<boost::filesystem::path>& basepaths, loader& loader) {
+        const std::vector<boost::filesystem::path>& basepaths, loader const &loader) {
     std::string generic_name = name.generic_string();
     diagnostic_context dc(generic_name.c_str());
 
