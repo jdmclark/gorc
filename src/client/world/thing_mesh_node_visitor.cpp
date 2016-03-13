@@ -9,8 +9,8 @@
 
 gorc::client::world::thing_mesh_node_visitor::thing_mesh_node_visitor(const vector<4>& sector_color, level_view& view,
         int weapon_mesh_node, int saber_mesh_node_a, int saber_mesh_node_b,
-        content::assets::model const* weapon_mesh, float saber_length, float saber_base_radius, float saber_tip_radius,
-        content::assets::material const* saber_blade, content::assets::material const* saber_tip)
+        maybe<content::assets::model const*> weapon_mesh, float saber_length, float saber_base_radius, float saber_tip_radius,
+        maybe<content::assets::material const*> saber_blade, maybe<content::assets::material const*> saber_tip)
     : sector_color(sector_color), view(view), weapon_mesh_node(weapon_mesh_node), saber_mesh_node_a(saber_mesh_node_a),
       saber_mesh_node_b(saber_mesh_node_b), weapon_mesh(weapon_mesh), saber_length(saber_length),
       saber_base_radius(saber_base_radius), saber_tip_radius(saber_tip_radius), saber_blade(saber_blade), saber_tip(saber_tip) {
@@ -79,13 +79,13 @@ void gorc::client::world::thing_mesh_node_visitor::visit_mesh(const content::ass
         }
     }
 
-    if(weapon_mesh && node_id == weapon_mesh_node) {
+    if(weapon_mesh.has_value() && node_id == weapon_mesh_node) {
         thing_mesh_node_visitor weapon_mesh_node_visitor(sector_color, view);
-        view.get_presenter().key_presenter->visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh, make_zero_vector<3, float>(),
+        view.get_presenter().key_presenter->visit_mesh_hierarchy(weapon_mesh_node_visitor, *weapon_mesh.get_value(), make_zero_vector<3, float>(),
                 quaternion<float>(), -1);
     }
 
-    if(saber_blade && saber_tip && (node_id == saber_mesh_node_a || node_id == saber_mesh_node_b)) {
-        view.draw_saber(*saber_tip, *saber_blade, saber_length, saber_base_radius, saber_tip_radius);
+    if(saber_blade.has_value() && saber_tip.has_value() && (node_id == saber_mesh_node_a || node_id == saber_mesh_node_b)) {
+        view.draw_saber(*saber_tip.get_value(), *saber_blade.get_value(), saber_length, saber_base_radius, saber_tip_radius);
     }
 }

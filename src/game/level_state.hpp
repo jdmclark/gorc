@@ -17,7 +17,6 @@ class level_presenter;
 class level_state {
 public:
     service_registry services;
-    gorc::loader_registry loaders;
     cog::verbs::verb_table verb_table;
     std::unique_ptr<gorc::game::world::level_presenter> current_level_presenter;
     cog::compiler compiler;

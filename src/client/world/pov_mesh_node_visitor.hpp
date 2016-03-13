@@ -24,13 +24,13 @@ private:
     float saber_length = 0.0f;
     float saber_base_radius = 0.0f;
     float saber_tip_radius = 0.0f;
-    content::assets::material const* saber_blade;
-    content::assets::material const* saber_tip;
+    maybe<content::assets::material const*> saber_blade;
+    maybe<content::assets::material const*> saber_tip;
 
 public:
     pov_mesh_node_visitor(const vector<4>& sector_color, level_view& view, int saber_draw_node = -1,
             float saber_length = 0.0f, float saber_base_radius = 0.0f, float saber_tip_radius = 0.0f,
-            content::assets::material const* saber_blade = nullptr, content::assets::material const* saber_tip = nullptr);
+            maybe<content::assets::material const*> saber_blade = nullptr, maybe<content::assets::material const*> saber_tip = nullptr);
 
     inline void concatenate_matrix(const matrix<4>& mat) {
         view.concatenate_matrix(mat);

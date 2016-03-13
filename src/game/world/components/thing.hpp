@@ -55,20 +55,20 @@ public:
 
     int parent_thing = -1;
 
-    content::assets::model const* weapon_mesh = nullptr;
+    maybe<content::assets::model const*> weapon_mesh;
 
     flag_set<flags::jk_flag> jk_flags;
     flag_set<flags::ai_mode_flag> ai_mode_flags;
 
-    content::assets::material const* saber_side_mat = nullptr;
-    content::assets::material const* saber_tip_mat = nullptr;
+    maybe<content::assets::material const*> saber_side_mat;
+    maybe<content::assets::material const*> saber_tip_mat;
     float saber_base_rad = 0.003f;
     float saber_tip_rad = 0.001f;
     float saber_length = 0.1f;
     float saber_drawn_length = 0.0f;
-    content::assets::thing_template const* saber_wall = nullptr;
-    content::assets::thing_template const* saber_blood = nullptr;
-    content::assets::thing_template const* saber_saber = nullptr;
+    maybe<content::assets::thing_template const*> saber_wall;
+    maybe<content::assets::thing_template const*> saber_blood;
+    maybe<content::assets::thing_template const*> saber_saber;
     bool saber_enabled = false;
     float saber_damage = 0.0f;
     float saber_collide_length = 0.0f;

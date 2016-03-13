@@ -295,16 +295,16 @@ int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
         return -1;
     }
 
-    content::assets::puppet_submode const *submode_ptr = nullptr;
+    maybe<content::assets::puppet_submode const *> submode_ptr;
     for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(thing_id)) {
-        submode_ptr = tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode).get_value();
+        submode_ptr = tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
     }
 
-    if(!submode_ptr) {
+    if(!submode_ptr.has_value()) {
         return -1;
     }
 
-    const auto& submode = *submode_ptr;
+    const auto& submode = *submode_ptr.get_value();
     if(!submode.anim) {
         return -1;
     }

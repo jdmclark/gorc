@@ -9,7 +9,7 @@
 
 gorc::client::world::pov_mesh_node_visitor::pov_mesh_node_visitor(const vector<4>& sector_color, level_view& view,
         int saber_draw_node, float saber_length, float saber_base_radius, float saber_tip_radius,
-        const content::assets::material* saber_blade, const content::assets::material* saber_tip)
+        maybe<const content::assets::material*> saber_blade, maybe<const content::assets::material*> saber_tip)
     : sector_color(sector_color), view(view), saber_draw_node(saber_draw_node), saber_length(saber_length),
       saber_base_radius(saber_base_radius), saber_tip_radius(saber_tip_radius), saber_blade(saber_blade), saber_tip(saber_tip) {
     return;
@@ -77,7 +77,7 @@ void gorc::client::world::pov_mesh_node_visitor::visit_mesh(const content::asset
         }
     }
 
-    if(saber_draw_node == node_id && saber_blade && saber_tip) {
-        view.draw_saber(*saber_tip, *saber_blade, saber_length, saber_base_radius, saber_tip_radius);
+    if(saber_draw_node == node_id && saber_blade.has_value() && saber_tip.has_value()) {
+        view.draw_saber(*saber_tip.get_value(), *saber_blade.get_value(), saber_length, saber_base_radius, saber_tip_radius);
     }
 }
