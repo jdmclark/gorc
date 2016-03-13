@@ -106,6 +106,11 @@ void tokenizer::readNumericLiteral(token& out) {
     readNumericLiteralIntegerPart(out);
 
     if(current == '.' && isdigit(next)) {
+        if(out.value.empty() || !isdigit(out.value.back())) {
+            // Poorly formatted floating point number. Prepend 0.
+            out.value.push_back('0');
+        }
+
         out.value.push_back(current);
         scan();
 
@@ -234,7 +239,10 @@ void tokenizer::get_token(token& out) {
         readNumericLiteral(out);
     }
     else if(ispunct(current)) {
-        if(current == '-' && isdigit(next)) {
+        if(current == '-' && (next == '.' || isdigit(next))) {
+            readNumericLiteral(out);
+        }
+        else if(current == '.' && isdigit(next)) {
             readNumericLiteral(out);
         }
         else {

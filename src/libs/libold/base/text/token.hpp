@@ -4,6 +4,7 @@
 #include <sstream>
 #include "log/diagnostic_context_location.hpp"
 #include "libold/base/text/exception.hpp"
+#include "log/log.hpp"
 
 namespace gorc {
 namespace text {
@@ -43,7 +44,9 @@ public:
         }
 
         if(!formatSuccess) {
-            throw invalid_numeric_conversion_exception();
+            diagnostic_context dc(location);
+            LOG_FATAL(format("invalid numeric conversion: expected number, found '%s'") %
+                      value);
         }
 
         return result;
