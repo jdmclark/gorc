@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <utility>
+#include <cassert>
 
 namespace gorc {
 
@@ -61,14 +62,26 @@ namespace gorc {
             return value != nullptr;
         }
 
+        inline T unsafe_get_value() const
+        {
+            return value;
+        }
+
         inline T get_value() const
+        {
+            assert(has_value());
+            return unsafe_get_value();
+        }
+
+        inline T& unsafe_get_value()
         {
             return value;
         }
 
         inline T& get_value()
         {
-            return value;
+            assert(has_value());
+            return unsafe_get_value();
         }
     };
 
@@ -151,7 +164,7 @@ namespace gorc {
 
         maybe<T>& operator=(T const &value)
         {
-            if(&get_value() != &value) {
+            if(!present || &get_value() != &value) {
                 set_data(value);
             }
 
@@ -225,14 +238,26 @@ namespace gorc {
             return present;
         }
 
-        inline T const& get_value() const
+        inline T const& unsafe_get_value() const
         {
             return *reinterpret_cast<T const *>(&data);
         }
 
-        inline T& get_value()
+        inline T const& get_value() const
+        {
+            assert(has_value());
+            return unsafe_get_value();
+        }
+
+        inline T& unsafe_get_value()
         {
             return *reinterpret_cast<T*>(&data);
+        }
+
+        inline T& get_value()
+        {
+            assert(has_value());
+            return unsafe_get_value();
         }
     };
 
