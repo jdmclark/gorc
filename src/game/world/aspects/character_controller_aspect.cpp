@@ -69,10 +69,17 @@ bool character_controller_aspect::can_stand_on_surface(int surface_id) {
 gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(entity_id thing_id, components::thing& thing,
                 double) {
     // Test for collision between legs and ground using multiple tests
-    auto leg_height = thing.model_3d->insert_offset;
+    vector<3> leg_height, leg_height_norm;
+    maybe_if(thing.model_3d, [&](auto const *model) {
+        leg_height = model->insert_offset;
+        auto len = length(leg_height);
+        if(len > 0.0f) {
+            leg_height_norm = leg_height / len;
+        }
+    });
 
     if(thing.physics_flags & flags::physics_flag::is_crouching) {
-        leg_height = normalize(leg_height) * thing.size;
+        leg_height = leg_height_norm * thing.size;
     }
 
     maybe<physics::contact> contact;
@@ -95,7 +102,10 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
 gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(entity_id thing_id, components::thing& thing,
         double) {
     // Test for collision between legs and ground using multiple tests
-    auto leg_height = thing.model_3d->insert_offset * 1.50f;
+    vector<3> leg_height;
+    maybe_if(thing.model_3d, [&](auto const *model) {
+        leg_height = model->insert_offset * 1.50f;
+    });
 
     maybe<physics::contact> contact;
 
@@ -169,15 +179,23 @@ void character_controller_aspect::update_standing(entity_id thing_id, components
             });
 
             // Accelerate body toward standing position
+            vector<3> insert_offset, insert_offset_norm;
+            maybe_if(thing.model_3d, [&](auto const *model) {
+                insert_offset = model->insert_offset;
+                auto len = length(insert_offset);
+                if(len > 0.0f) {
+                    insert_offset_norm = insert_offset / len;
+                }
+            });
+
             if(thing.physics_flags & flags::physics_flag::is_crouching) {
                 //float dist = dot(hit_normal, thing.position - hit_world);
-                auto io_nrm = normalize(thing.model_3d->insert_offset);
-                auto hover_position = hit_world + io_nrm * (thing.size + 0.01f);
+                auto hover_position = hit_world + insert_offset_norm * (thing.size + 0.01f);
                 new_vel += (hover_position - thing.position) * 20.0f;
             }
             else {
                 //float dist = dot(hit_normal, thing.position - hit_world);
-                auto hover_position = hit_world + thing.model_3d->insert_offset;
+                auto hover_position = hit_world + insert_offset;
                 new_vel += (hover_position - thing.position) * 20.0f;
             }
 

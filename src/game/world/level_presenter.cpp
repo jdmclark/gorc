@@ -695,9 +695,9 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     eventbus->fire_event(events::thing_created(new_thing_id, tpl));
 
     // Create thing components
-    if(new_thing.cog) {
-        script_presenter->create_global_cog_instance(new_thing.cog->cogscript, *place.contentmanager, components.compiler);
-    }
+    maybe_if(new_thing.cog, [&](auto const *cog) {
+        script_presenter->create_global_cog_instance(cog->cogscript, *place.contentmanager, components.compiler);
+    });
 
     return static_cast<int>(new_thing_id);
 }
@@ -789,19 +789,16 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
 
     new_thing.path_moving = false;
 
-    if(new_thing.model_3d) {
-        adjust_thing_pos(new_thing_id, new_thing.position + new_thing.model_3d->insert_offset);
-    }
+    maybe_if(new_thing.model_3d, [&](auto const *model) {
+        this->adjust_thing_pos(new_thing_id, new_thing.position + model->insert_offset);
+    });
 
     // CreateThingAtThing really does copy frames.
     std::transform(referencedThing.frames.begin(), referencedThing.frames.end(), std::back_inserter(new_thing.frames),
             [&new_thing](const std::tuple<vector<3>, vector<3>>& frame) -> std::tuple<vector<3>, vector<3>> {
-        if(new_thing.model_3d) {
-            return std::make_tuple(std::get<0>(frame) + new_thing.model_3d->insert_offset, std::get<1>(frame));
-        }
-        else {
-            return frame;
-        }
+        return maybe_if(new_thing.model_3d, frame, [&](auto const *model) {
+            return std::make_tuple(std::get<0>(frame) + model->insert_offset, std::get<1>(frame));
+        });
     });
 
     return new_thing_id;
@@ -831,9 +828,9 @@ float gorc::game::world::level_presenter::damage_thing(entity_id thing_id,
         else {
             eventbus->fire_event(events::class_sound(thing_id,
                                                      flags::sound_subclass_type::HurtSpecial));
-            if(referencedThing.pup) {
+            maybe_if(referencedThing.pup, [&](auto const *) {
                 key_presenter->play_mode(thing_id, flags::puppet_submode_type::Hit);
-            }
+            });
         }
     }
 

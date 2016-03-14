@@ -76,7 +76,7 @@ public:
 
 private:
     template <typename T> void visit_mesh_node(T& visitor, const content::assets::model& obj, int attached_key_mix, int mesh_id,
-            content::assets::puppet const* puppet_file, float head_pitch) {
+            maybe<content::assets::puppet const*> puppet_file, float head_pitch) {
         if(mesh_id < 0) {
             return;
         }
@@ -97,17 +97,17 @@ private:
         }
 
         // Add head pitch to anim_rotate:
-        if(puppet_file &&
-                (mesh_id == puppet_file->get_joint(flags::puppet_joint_type::head)
-                || mesh_id == puppet_file->get_joint(flags::puppet_joint_type::neck)
-                || mesh_id == puppet_file->get_joint(flags::puppet_joint_type::torso)
-                || mesh_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_aiming_joint)
-                || mesh_id == puppet_file->get_joint(flags::puppet_joint_type::secondary_weapon_aiming_joint)
-                || mesh_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire)
-                || mesh_id == puppet_file->get_joint(flags::puppet_joint_type::secondary_weapon_fire)
-                )) {
-            get<0>(anim_rotate) += head_pitch / 3.0f;
-        }
+        maybe_if(puppet_file, [&](auto const *puppet_file) {
+            if(mesh_id == puppet_file->get_joint(flags::puppet_joint_type::head) ||
+               mesh_id == puppet_file->get_joint(flags::puppet_joint_type::neck) ||
+               mesh_id == puppet_file->get_joint(flags::puppet_joint_type::torso) ||
+               mesh_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_aiming_joint) ||
+               mesh_id == puppet_file->get_joint(flags::puppet_joint_type::secondary_weapon_aiming_joint) ||
+               mesh_id == puppet_file->get_joint(flags::puppet_joint_type::primary_weapon_fire) ||
+               mesh_id == puppet_file->get_joint(flags::puppet_joint_type::secondary_weapon_fire)) {
+                get<0>(anim_rotate) += head_pitch / 3.0f;
+            }
+        });
 
         visitor.concatenate_matrix(make_translation_matrix(anim_translate)
                 * make_rotation_matrix(get<1>(anim_rotate), make_vector(0.0f, 0.0f, 1.0f))
@@ -132,7 +132,7 @@ public:
 
     template <typename T> void visit_mesh_hierarchy(T& visitor, const content::assets::model& obj,
             const vector<3>& base_position, const quaternion<float>& base_orientation, int attached_key_mix,
-            content::assets::puppet const* puppet_file = nullptr, float head_pitch = 0.0f) {
+            maybe<content::assets::puppet const*> puppet_file = nothing, float head_pitch = 0.0f) {
         visitor.push_matrix();
         visitor.concatenate_matrix(make_translation_matrix(base_position)
                 * convert_to_rotation_matrix(base_orientation));

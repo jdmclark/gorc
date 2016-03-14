@@ -30,7 +30,7 @@ private:
 public:
     pov_mesh_node_visitor(const vector<4>& sector_color, level_view& view, int saber_draw_node = -1,
             float saber_length = 0.0f, float saber_base_radius = 0.0f, float saber_tip_radius = 0.0f,
-            maybe<content::assets::material const*> saber_blade = nullptr, maybe<content::assets::material const*> saber_tip = nullptr);
+            maybe<content::assets::material const*> saber_blade = nothing, maybe<content::assets::material const*> saber_tip = nothing);
 
     inline void concatenate_matrix(const matrix<4>& mat) {
         view.concatenate_matrix(mat);

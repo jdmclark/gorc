@@ -87,19 +87,19 @@ void sound_presenter::play_song(int start, int end, int loopto) {
 gorc::entity_id sound_presenter::play_sound_class(entity_id thing_id,
                                                   flags::sound_subclass_type subclass_type) {
     auto& referenced_thing = levelModel->get_thing(thing_id);
-    if(referenced_thing.sound_class) {
-        auto const &subclass = referenced_thing.sound_class->get(subclass_type);
+    return maybe_if(referenced_thing.sound_class, invalid_sound_id, [&](auto const *sound_class) {
+        auto const &subclass = sound_class->get(subclass_type);
         if(subclass.sound >= 0) {
-            return play_sound_thing(subclass.sound,
-                                    thing_id,
-                                    subclass.max_volume,
-                                    subclass.min_radius,
-                                    subclass.max_radius,
-                                    subclass.flags + flags::sound_flag::ThingOriginMovesWithThing);
+            return this->play_sound_thing(subclass.sound,
+                                          thing_id,
+                                          subclass.max_volume,
+                                          subclass.min_radius,
+                                          subclass.max_radius,
+                                          subclass.flags + flags::sound_flag::ThingOriginMovesWithThing);
         }
-    }
 
-    return invalid_sound_id;
+        return invalid_sound_id;
+    });
 }
 
 void sound_presenter::play_foley_loop_class(entity_id thing_id,

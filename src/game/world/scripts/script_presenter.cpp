@@ -328,14 +328,14 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
             }
 
             // Dispatch to class cog
-            if(thing.cog) {
-                auto it = model->global_script_instances.find(&thing.cog->cogscript);
+            maybe_if(thing.cog, [&](auto const *thing_cog) {
+                auto it = model->global_script_instances.find(&thing_cog->cogscript);
                 if(it != model->global_script_instances.end()) {
                     class_cog = it->second;
-                    send_message(it->second, message, -1, SenderRef, SenderType,
+                    this->send_message(it->second, message, -1, SenderRef, SenderType,
                             SourceRef, SourceType, Param0, Param1, Param2, Param3);
                 }
-            }
+            });
 
             if(!(thing.flags & flags::thing_flag::CogLinked)) {
                 return;
@@ -394,12 +394,9 @@ void gorc::game::world::scripts::script_presenter::capture_thing(int thing_id) {
 }
 
 int gorc::game::world::scripts::script_presenter::get_thing_class_cog(int thing_id) {
-    const auto* classcog = levelModel->get_thing(thing_id).cog;
-    if(classcog) {
-        return get_global_cog_instance(&classcog->cogscript);
-    }
-
-    return -1;
+    return maybe_if(levelModel->get_thing(thing_id).cog, -1, [&](auto const *classcog) {
+        return this->get_global_cog_instance(&classcog->cogscript);
+    });
 }
 
 void gorc::game::world::scripts::script_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {

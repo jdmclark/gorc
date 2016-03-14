@@ -16,9 +16,9 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
 
     created_delegate =
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
-        if(e.tpl.pup) {
+        maybe_if(e.tpl.pup, [&](auto const *pup) {
             // New thing has a puppet. Create a puppet animations component.
-            cs.emplace_component<components::puppet_animations>(e.thing, *e.tpl.pup);
+            cs.emplace_component<components::puppet_animations>(e.thing, *pup);
 
             for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
                 // HACK: Initialize actor walk animation
@@ -30,7 +30,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
                     key_state.flags = flag_set<flags::key_flag>();
                 }
             }
-        }
+        });
     });
 
     armed_mode_delegate =

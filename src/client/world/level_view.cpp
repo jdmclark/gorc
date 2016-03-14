@@ -691,27 +691,28 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
     float sector_light = current_sector.ambient_light + current_sector.extra_light;
     auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
-    if(thing.model_3d) {
+    maybe_if(thing.model_3d, [&](auto const *model) {
         int weapon_mesh_node = -1;
         int saber_mesh_node_a = -1;
         int saber_mesh_node_b = -1;
-        if(thing.pup) {
-            weapon_mesh_node = thing.pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
+        maybe_if(thing.pup, [&](auto const *pup) {
+            weapon_mesh_node = pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
             if(thing.jk_flags & flags::jk_flag::has_saber) {
-                saber_mesh_node_a = thing.pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
+                saber_mesh_node_a = pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
                 if(thing.jk_flags & flags::jk_flag::has_two_sabers) {
-                    saber_mesh_node_b = thing.pup->get_joint(flags::puppet_joint_type::secondary_weapon_fire);
+                    saber_mesh_node_b = pup->get_joint(flags::puppet_joint_type::secondary_weapon_fire);
                 }
             }
-        }
+        });
 
         thing_mesh_node_visitor v(lit_sector_color, *this, weapon_mesh_node, saber_mesh_node_a, saber_mesh_node_b,
                 thing.weapon_mesh, thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
                 thing.saber_side_mat, thing.saber_tip_mat);
-        currentPresenter->key_presenter->visit_mesh_hierarchy(v, *thing.model_3d, thing.position, thing.orient, thing.attached_key_mix,
+        currentPresenter->key_presenter->visit_mesh_hierarchy(v, *model, thing.position, thing.orient, thing.attached_key_mix,
                 thing.pup, thing.head_pitch);
-    }
-    else if(thing.spr) {
-        draw_sprite(thing, *thing.spr, sector_light);
-    }
+    });
+
+    maybe_if(thing.spr, [&](auto const *spr) {
+        this->draw_sprite(thing, *spr, sector_light);
+    });
 }

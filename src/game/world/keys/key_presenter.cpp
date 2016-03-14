@@ -291,7 +291,7 @@ int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
 int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
                                                       flags::puppet_submode_type minor_mode) {
     auto& thing = levelModel->get_thing(thing_id);
-    if(!thing.pup) {
+    if(!thing.pup.has_value()) {
         return -1;
     }
 
