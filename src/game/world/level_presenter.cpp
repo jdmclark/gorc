@@ -659,7 +659,9 @@ void gorc::game::world::level_presenter::set_adjoin_flags(int surface, flag_set<
 }
 
 void gorc::game::world::level_presenter::set_face_geo_mode(int surface, flags::geometry_mode geo_mode) {
-    model->surfaces[surface].geometry_mode = geo_mode;
+    if(surface >= 0) {
+        model->surfaces[surface].geometry_mode = geo_mode;
+    }
 }
 
 void gorc::game::world::level_presenter::set_face_type(int surface, flag_set<flags::face_flag> face_flags) {
