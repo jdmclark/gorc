@@ -51,7 +51,7 @@ public:
             return t.second;
         }
 
-        throw std::exception();
+        LOG_FATAL(format("get_thing: thing %d does not exist") % id);
     }
 };
 
