@@ -47,23 +47,27 @@ void sound_presenter::update(const gorc::time& time) {
     model->ambient_music.update(time.elapsed_as_seconds());
 }
 
-void sound_presenter::set_ambient_sound(content::assets::sound const* sound, float volume) {
-    if(&sound->buffer == model->ambient_sound.getBuffer() &&
-       model->ambient_sound.getStatus() != sf::Sound::Stopped) {
-        model->ambient_sound.setVolume(volume * 100.0f);
-    }
-    else if(sound != nullptr) {
-        model->ambient_sound.setBuffer(sound->buffer);
-        model->ambient_sound.setLoop(true);
-        model->ambient_sound.setVolume(volume * 100.0f);
-        model->ambient_sound.setPosition(0,0,0);
-        model->ambient_sound.setRelativeToListener(true);
-        model->ambient_sound.setAttenuation(0.0f);
-        model->ambient_sound.play();
-    }
-    else {
-        model->ambient_sound.stop();
-    }
+void sound_presenter::set_ambient_sound(maybe<content::assets::sound const*> sound, float volume) {
+    maybe_if_else(
+        sound,
+        [&](content::assets::sound const *sound) {
+            if(&sound->buffer == model->ambient_sound.getBuffer() &&
+               model->ambient_sound.getStatus() != sf::Sound::Stopped) {
+                model->ambient_sound.setVolume(volume * 100.0f);
+            }
+            else {
+                model->ambient_sound.setBuffer(sound->buffer);
+                model->ambient_sound.setLoop(true);
+                model->ambient_sound.setVolume(volume * 100.0f);
+                model->ambient_sound.setPosition(0,0,0);
+                model->ambient_sound.setRelativeToListener(true);
+                model->ambient_sound.setAttenuation(0.0f);
+                model->ambient_sound.play();
+            }
+        },
+        [&] {
+            model->ambient_sound.stop();
+        });
 }
 
 // verbs:

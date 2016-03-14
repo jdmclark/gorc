@@ -41,7 +41,7 @@ public:
     void start(level_model& levelModel, sound_model& soundModel);
     void update(const gorc::time& time);
 
-    void set_ambient_sound(content::assets::sound const* sound, float volume);
+    void set_ambient_sound(maybe<content::assets::sound const*> sound, float volume);
     void play_foley_loop_class(entity_id thing, flags::sound_subclass_type subclass);
     void stop_foley_loop(entity_id thing);
 

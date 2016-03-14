@@ -25,7 +25,7 @@ public:
     level_header header;
     std::vector<std::tuple<material const*, float, float, std::string>> materials;
 
-    colormap const* master_colormap = nullptr;
+    maybe<colormap const*> master_colormap;
     std::vector<colormap const*> colormaps;
 
     std::vector<script const*> scripts;

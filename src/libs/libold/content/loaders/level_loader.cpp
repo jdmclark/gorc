@@ -147,7 +147,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, content_m
         tok.assert_punctuator(":");
 
         lev.colormaps.push_back(&manager.load<assets::colormap>(tok.get_space_delimited_string()));
-        if(!lev.master_colormap) {
+        if(!lev.master_colormap.has_value()) {
             lev.master_colormap = lev.colormaps.back();
             services.get<master_colormap>().cmp = lev.master_colormap;
         }

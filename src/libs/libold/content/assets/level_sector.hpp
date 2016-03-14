@@ -23,7 +23,7 @@ public:
     vector<3> tint;
     box<3> bounding_box;
     box<3> collide_box;
-    sound const* ambient_sound = nullptr;
+    maybe<sound const*> ambient_sound;
     float ambient_sound_volume = 0.0f;
     vector<3> center;
     float radius;
