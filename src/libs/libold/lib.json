@@ -111,6 +111,7 @@
         "content/assets/sfont.cpp",
         "content/assets/model.cpp",
         "content/assets/puppet.cpp",
+        "content/assets/puppet_submode.cpp",
         "content/assets/animation.cpp",
         "content/assets/inventory.cpp",
         "content/assets/inventory_bin.cpp",

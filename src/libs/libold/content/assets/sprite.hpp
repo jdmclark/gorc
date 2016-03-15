@@ -17,7 +17,7 @@ class sprite : public asset {
 public:
     static fourcc const type;
 
-    const material* mat;
+    asset_ref<material> mat;
     int sprite_type;
     float width;
     float height;
@@ -26,6 +26,16 @@ public:
     flags::texture_mode texture_mode;
     float extra_light;
     vector<3> offset;
+
+    sprite(asset_ref<material> mat,
+           int sprite_type,
+           float width,
+           float height,
+           flags::geometry_mode geometry_mode,
+           flags::light_mode light_mode,
+           flags::texture_mode texture_mode,
+           float extra_light,
+           vector<3> const &offset);
 };
 
 }

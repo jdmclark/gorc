@@ -119,13 +119,16 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::puppet_loader::parse(text::
                 tok.skip_to_next_line();
             }
             else {
-                auto ins_res = mode->submodes.emplace(it->second, assets::puppet_submode());
-                assets::puppet_submode &submode = ins_res.first->second;
+                auto anim = manager.load<assets::animation>(tok.get_space_delimited_string());
+                auto flags = flag_set<flags::key_flag>(tok.get_number<unsigned int>());
+                auto lo_priority = tok.get_number<unsigned int>();
+                auto hi_priority = tok.get_number<unsigned int>();
 
-                submode.anim = &manager.load<assets::animation>(tok.get_space_delimited_string());
-                submode.flags = flag_set<flags::key_flag>(tok.get_number<unsigned int>());
-                submode.lo_priority = tok.get_number<unsigned int>();
-                submode.hi_priority = tok.get_number<unsigned int>();
+                mode->submodes.emplace(it->second,
+                                       assets::puppet_submode(anim,
+                                                              flags,
+                                                              lo_priority,
+                                                              hi_priority));
             }
         }
     }

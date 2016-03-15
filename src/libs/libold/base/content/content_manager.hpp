@@ -26,15 +26,18 @@ private:
 public:
     content_manager(service_registry const &services);
 
-    template <typename T> const T& load(const boost::filesystem::path& name) {
+    template <typename T> asset_ref<T> load(const boost::filesystem::path& name) {
         auto it = asset_map.find(name.generic_string());
         if(it != asset_map.end()) {
-            return *reinterpret_cast<T*>(assets[it->second].get());
+            return asset_ref<T>(reinterpret_cast<T const &>(*assets[it->second].get()),
+                                asset_id(it->second));
         }
 
         // Load asset from scratch.
         auto const &loader = loaders.get_loader(T::type);
-        return *reinterpret_cast<T*>(std::get<1>(internal_load(name, loader.get_prefixes(), loader)));
+        auto val = internal_load(name, loader.get_prefixes(), loader);
+        return asset_ref<T>(reinterpret_cast<T const &>(*std::get<1>(val)),
+                            asset_id(std::get<0>(val)));
     }
 
     template <typename T> int load_id(const boost::filesystem::path& name) {
@@ -48,8 +51,9 @@ public:
         return std::get<0>(internal_load(name, loader.get_prefixes(), loader));
     }
 
-    template <typename T> const T& get_asset(int asset_id) {
-        return *reinterpret_cast<T*>(assets[asset_id].get());
+    template <typename T> asset_ref<T> get_asset(int id) {
+        return asset_ref<T>(reinterpret_cast<T&>(*assets[id].get()),
+                            asset_id(id));
     }
 };
 
