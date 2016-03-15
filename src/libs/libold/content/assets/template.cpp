@@ -156,7 +156,7 @@ template <typename T> void tpl_asset_loader(maybe<asset_ref<T>>& value, text::to
     }
     else {
         try {
-            value = &manager.load<T>(fn);
+            value = manager.load<T>(fn);
         }
         catch(...) {
             value = nullptr;

@@ -146,7 +146,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, content_m
         tok.get_number<int>();
         tok.assert_punctuator(":");
 
-        lev.colormaps.push_back(&manager.load<assets::colormap>(tok.get_space_delimited_string()));
+        lev.colormaps.push_back(manager.load<assets::colormap>(tok.get_space_delimited_string()));
         if(!lev.master_colormap.has_value()) {
             lev.master_colormap = lev.colormaps.back();
             services.get<master_colormap>().cmp = lev.master_colormap;
@@ -314,7 +314,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, content_manag
                 sec.collide_box = box<3>(make_vector(x0, y0, z0), make_vector(x1, y1, z1));
             }
             else if(boost::iequals(t.value, "sound")) {
-                sec.ambient_sound = &manager.load<assets::sound>(tok.get_space_delimited_string());
+                sec.ambient_sound = manager.load<assets::sound>(tok.get_space_delimited_string());
                 sec.ambient_sound_volume = tok.get_number<float>();
             }
             else if(boost::iequals(t.value, "center")) {
@@ -366,11 +366,15 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
         else {
             tok.assert_punctuator(":");
 
-            assets::script const* script = nullptr;
+            maybe<asset_ref<assets::script>> script;
             try {
-                script = &manager.load<assets::script>(tok.get_space_delimited_string());
+                script = manager.load<assets::script>(tok.get_space_delimited_string());
             }
             catch(...) {
+                script = nothing;
+            }
+
+            if(!script.has_value()) {
                 // Failed to load script. Add empty entry and advance to next entry.
                 lev.cogs.emplace_back(nullptr, std::vector<cog::vm::value>());
                 tok.skip_to_next_line();
@@ -381,7 +385,7 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
 
             tok.set_report_eol(true);
 
-            for(const cog::symbols::symbol& symbol : script->cogscript.symbol_table) {
+            for(const cog::symbols::symbol& symbol : script.get_value()->cogscript.symbol_table) {
                 if(!symbol.local) {
                     switch(symbol.type) {
                     case cog::symbols::symbol_type::ai:
@@ -576,7 +580,7 @@ const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap 
 void PostprocessLevel(assets::level& lev, content_manager& manager, service_registry const &) {
     // Post-process; load materials and scripts.
     for(auto& mat_entry : lev.materials) {
-        std::get<0>(mat_entry) = &manager.load<assets::material>(std::get<3>(mat_entry));
+        std::get<0>(mat_entry) = manager.load<assets::material>(std::get<3>(mat_entry));
     }
 
     // Add adjoined sector reference to adjoins.

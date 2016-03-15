@@ -382,11 +382,11 @@ void gorc::client::world::level_view::draw_pov_model() {
     const auto& cam = currentModel->camera_model.current_computed_state;
 
     if(cam.draw_pov_model) {
-        maybe_if(currentModel->camera_model.pov_model, [&](auto const *pov_model) {
+        maybe_if(currentModel->camera_model.pov_model, [&](auto pov_model) {
             const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
             const auto& current_sector = currentModel->sectors[thing.sector];
             auto sector_color = make_fill_vector<3, float>(1.0f);
-            maybe_if(current_sector.cmp, [&](content::assets::colormap const *cmp) {
+            maybe_if(current_sector.cmp, [&](auto cmp) {
                 sector_color = cmp->tint_color;
             });
 
@@ -439,7 +439,7 @@ void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const 
         glBegin(GL_TRIANGLES);
 
         auto sector_tint = make_zero_vector<3, float>();
-        maybe_if(sector.cmp, [&](content::assets::colormap const *cmp) {
+        maybe_if(sector.cmp, [&](auto cmp) {
             sector_tint = cmp->tint_color;
         });
 
@@ -659,11 +659,11 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
 }
 
 void gorc::client::world::level_view::draw_sprite(const game::world::components::thing& thing, const content::assets::sprite& sprite, float sector_light) {
-    if(sprite.mat) {
+    maybe_if(sprite.mat, [&](auto mat) {
         // TODO: Currently plays animation over duration of timer. Behavior should be verified.
         int current_frame = 0;
         if(thing.timer > 0.0f) {
-            current_frame = static_cast<int>(static_cast<int>(std::floor(static_cast<float>(sprite.mat->cels.size()) * thing.time_alive / thing.timer)) % sprite.mat->cels.size());
+            current_frame = static_cast<int>(static_cast<int>(std::floor(static_cast<float>(mat->cels.size()) * thing.time_alive / thing.timer)) % mat->cels.size());
         }
 
         const auto& cam = currentModel->camera_model.current_computed_state;
@@ -671,9 +671,9 @@ void gorc::client::world::level_view::draw_sprite(const game::world::components:
                 cam.look * get<1>(sprite.offset) +
                 cam.up * get<2>(sprite.offset);
 
-        draw_sprite(thing.position, *sprite.mat, current_frame, sprite.width, sprite.height, sprite.geometry_mode, sprite.light_mode,
+        draw_sprite(thing.position, *mat, current_frame, sprite.width, sprite.height, sprite.geometry_mode, sprite.light_mode,
                 sprite.extra_light, offset, sector_light);
-    }
+    });
 }
 
 void gorc::client::world::level_view::draw_thing(const game::world::components::thing& thing, int thing_id) {
@@ -683,18 +683,18 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
 
     const auto& current_sector = currentModel->sectors[thing.sector];
     auto sector_color = make_fill_vector<3, float>(1.0f);
-    maybe_if(current_sector.cmp, [&](content::assets::colormap const *cmp) {
+    maybe_if(current_sector.cmp, [&](auto cmp) {
         sector_color = cmp->tint_color;
     });
 
     float sector_light = current_sector.ambient_light + current_sector.extra_light;
     auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
 
-    maybe_if(thing.model_3d, [&](auto const *model) {
+    maybe_if(thing.model_3d, [&](auto model) {
         int weapon_mesh_node = -1;
         int saber_mesh_node_a = -1;
         int saber_mesh_node_b = -1;
-        maybe_if(thing.pup, [&](auto const *pup) {
+        maybe_if(thing.pup, [&](auto pup) {
             weapon_mesh_node = pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
             if(thing.jk_flags & flags::jk_flag::has_saber) {
                 saber_mesh_node_a = pup->get_joint(flags::puppet_joint_type::primary_weapon_fire);
@@ -711,7 +711,7 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
                 thing.pup, thing.head_pitch);
     });
 
-    maybe_if(thing.spr, [&](auto const *spr) {
+    maybe_if(thing.spr, [&](auto spr) {
         this->draw_sprite(thing, *spr, sector_light);
     });
 }

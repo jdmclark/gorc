@@ -4,16 +4,10 @@
 #include "current_camera_state.hpp"
 #include "game/flags/camera_state_flag.hpp"
 #include "utility/flag_set.hpp"
+#include "libold/content/assets/model.hpp"
 #include <vector>
 
 namespace gorc {
-
-namespace content {
-namespace assets {
-class model;
-}
-}
-
 namespace game {
 namespace world {
 namespace camera {
@@ -29,7 +23,7 @@ public:
     int current_camera = 0;
     current_camera_state current_computed_state;
 
-    maybe<content::assets::model const*> pov_model;
+    maybe<asset_ref<content::assets::model>> pov_model;
     int pov_key_mix_id = -1;
 
     vector<3> waggle = make_zero_vector<3, float>();

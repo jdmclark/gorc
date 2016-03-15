@@ -19,11 +19,11 @@ public:
     float ambient_light;
     float extra_light;
     int colormap_id;
-    maybe<colormap const*> cmp;
+    maybe<asset_ref<colormap>> cmp;
     vector<3> tint;
     box<3> bounding_box;
     box<3> collide_box;
-    maybe<sound const*> ambient_sound;
+    maybe<asset_ref<sound>> ambient_sound;
     float ambient_sound_volume = 0.0f;
     vector<3> center;
     float radius;

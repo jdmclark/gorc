@@ -8,7 +8,7 @@ namespace content {
 
     class master_colormap {
     public:
-        maybe<assets::colormap const*> cmp;
+        maybe<asset_ref<assets::colormap>> cmp;
     };
 
 }

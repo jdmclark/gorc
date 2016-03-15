@@ -36,7 +36,7 @@ private:
     std::unique_ptr<graphics::default_render_target> default_target;
     std::unique_ptr<graphics::texture_render_target> texture_target;
 
-    const content::assets::shader* screen_shader = nullptr;
+    maybe<asset_ref<content::assets::shader>> screen_shader;
     GLint screen_shader_diffuse_ul = 0;
 
 public:
@@ -64,7 +64,7 @@ public:
         }
 
         screen_shader = &master_content_manager.load<content::assets::shader>("screen.glsl");
-        screen_shader_diffuse_ul = glGetUniformLocation(screen_shader->program, "diffuse");
+        screen_shader_diffuse_ul = glGetUniformLocation(screen_shader.get_value()->program, "diffuse");
 
         texture_target = std::make_unique<graphics::texture_render_target>(get_view_size());
         default_target = std::make_unique<graphics::default_render_target>(get_screen_size());
@@ -108,7 +108,7 @@ private:
         glDisable(GL_ALPHA_TEST);
         glDisable(GL_BLEND);
 
-        glUseProgram(screen_shader->program);
+        glUseProgram(screen_shader.get_value()->program);
         glUniform1i(screen_shader_diffuse_ul, 0);
 
         glActiveTexture(GL_TEXTURE0);

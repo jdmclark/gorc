@@ -47,10 +47,10 @@ void sound_presenter::update(const gorc::time& time) {
     model->ambient_music.update(time.elapsed_as_seconds());
 }
 
-void sound_presenter::set_ambient_sound(maybe<content::assets::sound const*> sound, float volume) {
+void sound_presenter::set_ambient_sound(maybe<asset_ref<content::assets::sound>> sound, float volume) {
     maybe_if_else(
         sound,
-        [&](auto const *sound) {
+        [&](auto sound) {
             if(&sound->buffer == model->ambient_sound.getBuffer() &&
                model->ambient_sound.getStatus() != sf::Sound::Stopped) {
                 model->ambient_sound.setVolume(volume * 100.0f);
@@ -91,7 +91,7 @@ void sound_presenter::play_song(int start, int end, int loopto) {
 gorc::entity_id sound_presenter::play_sound_class(entity_id thing_id,
                                                   flags::sound_subclass_type subclass_type) {
     auto& referenced_thing = levelModel->get_thing(thing_id);
-    return maybe_if(referenced_thing.sound_class, invalid_sound_id, [&](auto const *sound_class) {
+    return maybe_if(referenced_thing.sound_class, invalid_sound_id, [&](auto sound_class) {
         auto const &subclass = sound_class->get(subclass_type);
         if(subclass.sound >= 0) {
             return this->play_sound_thing(subclass.sound,
@@ -133,7 +133,7 @@ gorc::entity_id sound_presenter::play_sound_local(int wav,
     entity_id snd_id = levelModel->ecs.make_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(snd_id);
 
-    snd.internal_sound.setBuffer(buffer.buffer);
+    snd.internal_sound.setBuffer(buffer->buffer);
     snd.internal_sound.setPosition(panning, 0.0f, 0.0f);
     snd.internal_sound.setRelativeToListener(true);
     snd.internal_sound.setVolume(volume * 100.0f);
@@ -176,7 +176,7 @@ gorc::entity_id sound_presenter::play_sound_pos(int wav,
         snd.maximum_attenuation_radius = 25.0f / sound_attenuation_factor;
     }
 
-    snd.internal_sound.setBuffer(buffer.buffer);
+    snd.internal_sound.setBuffer(buffer->buffer);
     snd.internal_sound.setPosition(get<0>(pos), get<2>(pos), -get<1>(pos));
     snd.internal_sound.setRelativeToListener(false);
     snd.internal_sound.setVolume(volume * 100.0f);
@@ -211,7 +211,7 @@ gorc::entity_id sound_presenter::play_sound_thing(int wav,
         // Thing can only play this sound once.
         for(auto &tsnd : levelModel->ecs.find_component<components::thing_sound>(thing_id)) {
             for(auto &snd : levelModel->ecs.find_component<components::sound>(tsnd.second.sound)) {
-                if(snd.second.internal_sound.getBuffer() == &soundfile.buffer) {
+                if(snd.second.internal_sound.getBuffer() == &soundfile->buffer) {
                     return invalid_sound_id;
                 }
             }

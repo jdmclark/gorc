@@ -139,10 +139,10 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
 void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int, int model_id) {
     // TODO: Handle player
     if(model_id >= 0) {
-        model->pov_model = &presenter.contentmanager->get_asset<content::assets::model>(model_id);
+        model->pov_model = presenter.contentmanager->get_asset<content::assets::model>(model_id);
     }
     else {
-        model->pov_model = nullptr;
+        model->pov_model = nothing;
     }
 
     presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);

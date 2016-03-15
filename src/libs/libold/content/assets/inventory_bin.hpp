@@ -23,7 +23,7 @@ public:
     int max_value;
     flag_set<flags::inventory_flag> flags;
 
-    script const* cog = nullptr;
+    maybe<asset_ref<script>> cog;
 
     void parse_args(text::tokenizer& tok, content_manager& manager);
 };

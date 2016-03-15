@@ -26,30 +26,30 @@ std::unique_ptr<gorc::asset> shader_loader::parse(json_input_stream &jis,
 {
     GLint result = GL_FALSE;
 
-    assets::shader_program const *vs = nullptr;
-    assets::shader_program const *ps = nullptr;
+    maybe<asset_ref<assets::vertex_program>> vs;
+    maybe<asset_ref<assets::fragment_program>> ps;
 
     json_deserialize_members(jis, [&](json_input_stream &jis, std::string const &em_name) {
         if(em_name == "vertex_program") {
             auto shader_filename = json_deserialize<std::string>(jis);
-            vs = &content.load<assets::vertex_program>(shader_filename);
+            vs = content.load<assets::vertex_program>(shader_filename);
         }
         else if(em_name == "fragment_program") {
             auto shader_filename = json_deserialize<std::string>(jis);
-            ps = &content.load<assets::fragment_program>(shader_filename);
+            ps = content.load<assets::fragment_program>(shader_filename);
         }
         else {
             LOG_FATAL(format("unknown shader parameter '%s'") % em_name);
         }
     });
 
-    if(!vs || !ps) {
+    if(!vs.has_value() || !ps.has_value()) {
         LOG_FATAL("both 'vertex_program' and 'fragment_program' must be specified");
     }
 
     auto programObject = glCreateProgram();
-    glAttachShader(programObject, vs->program);
-    glAttachShader(programObject, ps->program);
+    glAttachShader(programObject, vs.get_value()->program);
+    glAttachShader(programObject, ps.get_value()->program);
     glLinkProgram(programObject);
 
     glGetProgramiv(programObject, GL_LINK_STATUS, &result);

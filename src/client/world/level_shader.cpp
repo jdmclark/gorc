@@ -21,13 +21,13 @@ void gorc::client::world::level_shader::set_model_matrix(const matrix<4>& matrix
     glUniformMatrix4fv(model_mat_ul, 1, GL_FALSE, make_opengl_matrix(matrix));
 }
 
-gorc::client::world::surface_shader::surface_shader(const content::assets::shader& shader)
-    : level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
-            glGetUniformLocation(shader.program, "view_matrix"),
-            glGetUniformLocation(shader.program, "projection_matrix")),
-      sector_tint_ul(glGetUniformLocation(shader.program, "sector_tint")),
-      diffuse_ul(glGetUniformLocation(shader.program, "diffuse")),
-      light_ul(glGetUniformLocation(shader.program, "light")) {
+gorc::client::world::surface_shader::surface_shader(asset_ref<content::assets::shader> shader)
+    : level_shader(shader->program, glGetUniformLocation(shader->program, "model_matrix"),
+            glGetUniformLocation(shader->program, "view_matrix"),
+            glGetUniformLocation(shader->program, "projection_matrix")),
+      sector_tint_ul(glGetUniformLocation(shader->program, "sector_tint")),
+      diffuse_ul(glGetUniformLocation(shader->program, "diffuse")),
+      light_ul(glGetUniformLocation(shader->program, "light")) {
     return;
 }
 
@@ -47,14 +47,14 @@ void gorc::client::world::surface_shader::activate(const vector<3>& current_sect
     glUniform4fv(sector_tint_ul, 1, tint_color.data());
 }
 
-gorc::client::world::horizon_shader::horizon_shader(const content::assets::shader& shader)
-    : level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
-            glGetUniformLocation(shader.program, "view_matrix"),
-            glGetUniformLocation(shader.program, "projection_matrix")),
-      sector_tint_ul(glGetUniformLocation(shader.program, "sector_tint")),
-      diffuse_ul(glGetUniformLocation(shader.program, "diffuse")),
-      ssz_ul(glGetUniformLocation(shader.program, "screen_size")),
-      offset_ul(glGetUniformLocation(shader.program, "horizon_sky_offset")) {
+gorc::client::world::horizon_shader::horizon_shader(asset_ref<content::assets::shader> shader)
+    : level_shader(shader->program, glGetUniformLocation(shader->program, "model_matrix"),
+            glGetUniformLocation(shader->program, "view_matrix"),
+            glGetUniformLocation(shader->program, "projection_matrix")),
+      sector_tint_ul(glGetUniformLocation(shader->program, "sector_tint")),
+      diffuse_ul(glGetUniformLocation(shader->program, "diffuse")),
+      ssz_ul(glGetUniformLocation(shader->program, "screen_size")),
+      offset_ul(glGetUniformLocation(shader->program, "horizon_sky_offset")) {
     return;
 }
 
@@ -88,13 +88,13 @@ void gorc::client::world::horizon_shader::activate(const vector<3>& current_sect
     glUniform3fv(offset_ul, 1, offset.data());
 }
 
-gorc::client::world::ceiling_shader::ceiling_shader(const content::assets::shader& shader)
-    : level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
-            glGetUniformLocation(shader.program, "view_matrix"),
-            glGetUniformLocation(shader.program, "projection_matrix")),
-      diffuse_ul(glGetUniformLocation(shader.program, "diffuse")),
-      sector_tint_ul(glGetUniformLocation(shader.program, "sector_tint")),
-      offset_ul(glGetUniformLocation(shader.program, "ceiling_sky_offset")) {
+gorc::client::world::ceiling_shader::ceiling_shader(asset_ref<content::assets::shader> shader)
+    : level_shader(shader->program, glGetUniformLocation(shader->program, "model_matrix"),
+            glGetUniformLocation(shader->program, "view_matrix"),
+            glGetUniformLocation(shader->program, "projection_matrix")),
+      diffuse_ul(glGetUniformLocation(shader->program, "diffuse")),
+      sector_tint_ul(glGetUniformLocation(shader->program, "sector_tint")),
+      offset_ul(glGetUniformLocation(shader->program, "ceiling_sky_offset")) {
     return;
 }
 
@@ -114,15 +114,15 @@ void gorc::client::world::ceiling_shader::activate(const vector<3>& current_sect
     glUniform3fv(offset_ul, 1, offset.data());
 }
 
-gorc::client::world::light_shader::light_shader(const content::assets::shader& shader)
-    : level_shader(shader.program, glGetUniformLocation(shader.program, "model_matrix"),
-            glGetUniformLocation(shader.program, "view_matrix"),
-            glGetUniformLocation(shader.program, "projection_matrix")),
-      diffuse_ul(glGetUniformLocation(shader.program, "diffuse")),
-      lightpos_ul(glGetUniformLocation(shader.program, "light_position")),
-      lightrad_ul(glGetUniformLocation(shader.program, "inv_light_radius_squared")),
-      lightint_ul(glGetUniformLocation(shader.program, "light_intensity")),
-      campos_ul(glGetUniformLocation(shader.program, "camera_position")) {
+gorc::client::world::light_shader::light_shader(asset_ref<content::assets::shader> shader)
+    : level_shader(shader->program, glGetUniformLocation(shader->program, "model_matrix"),
+            glGetUniformLocation(shader->program, "view_matrix"),
+            glGetUniformLocation(shader->program, "projection_matrix")),
+      diffuse_ul(glGetUniformLocation(shader->program, "diffuse")),
+      lightpos_ul(glGetUniformLocation(shader->program, "light_position")),
+      lightrad_ul(glGetUniformLocation(shader->program, "inv_light_radius_squared")),
+      lightint_ul(glGetUniformLocation(shader->program, "light_intensity")),
+      campos_ul(glGetUniformLocation(shader->program, "camera_position")) {
     return;
 }
 

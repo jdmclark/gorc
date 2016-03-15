@@ -18,7 +18,7 @@ public:
     static fourcc const type;
 
     std::vector<std::string> material_entries;
-    std::vector<material const*> materials;
+    std::vector<asset_ref<material>> materials;
 
     float radius;
     vector<3> insert_offset;

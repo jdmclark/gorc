@@ -16,18 +16,18 @@ using InventoryBinParameterParser = std::function<void(inventory_bin&, text::tok
 void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content::content_manager& manager) {
     std::string fn = tok.get_space_delimited_string();
     if(boost::iequals(fn, "none")) {
-        tpl.cog = nullptr;
+        tpl.cog = nothing;
     }
     else {
         try {
-            tpl.cog = &manager.load<script>(fn);
+            tpl.cog = manager.load<script>(fn);
         }
         catch(...) {
             diagnostic_context dc(nullptr,
                                   tok.get_internal_token_location().first_line,
                                   tok.get_internal_token_location().first_col);
             LOG_WARNING(format("could not load %d for bin %d") % fn % tpl.bin_id);
-            tpl.cog = nullptr;
+            tpl.cog = nothing;
         }
     }
 }
