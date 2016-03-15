@@ -382,8 +382,7 @@ void gorc::client::world::level_view::draw_pov_model() {
     const auto& cam = currentModel->camera_model.current_computed_state;
 
     if(cam.draw_pov_model) {
-        auto const* pov_model = currentModel->camera_model.pov_model;
-        if(pov_model) {
+        maybe_if(currentModel->camera_model.pov_model, [&](auto const *pov_model) {
             const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
             const auto& current_sector = currentModel->sectors[thing.sector];
             auto sector_color = make_fill_vector<3, float>(1.0f);
@@ -406,7 +405,7 @@ void gorc::client::world::level_view::draw_pov_model() {
             auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
             currentPresenter->key_presenter->visit_mesh_hierarchy(v, *pov_model, thing.position,
                     pov_model_offset, currentModel->camera_model.pov_key_mix_id);
-        }
+        });
     }
 }
 

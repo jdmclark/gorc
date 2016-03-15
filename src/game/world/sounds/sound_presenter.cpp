@@ -50,7 +50,7 @@ void sound_presenter::update(const gorc::time& time) {
 void sound_presenter::set_ambient_sound(maybe<content::assets::sound const*> sound, float volume) {
     maybe_if_else(
         sound,
-        [&](content::assets::sound const *sound) {
+        [&](auto const *sound) {
             if(&sound->buffer == model->ambient_sound.getBuffer() &&
                model->ambient_sound.getStatus() != sf::Sound::Stopped) {
                 model->ambient_sound.setVolume(volume * 100.0f);

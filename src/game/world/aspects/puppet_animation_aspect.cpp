@@ -111,7 +111,7 @@ void puppet_animation_aspect::set_walk_animation(components::thing &thing,
     }
 
     keys::key_state &keyState = presenter.model->key_model.keys[pup.actor_walk_animation];
-    if(!keyState.animation) {
+    if(!keyState.animation.has_value()) {
         return;
     }
 

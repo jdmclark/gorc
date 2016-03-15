@@ -29,7 +29,7 @@ public:
     int current_camera = 0;
     current_camera_state current_computed_state;
 
-    content::assets::model const* pov_model = nullptr;
+    maybe<content::assets::model const*> pov_model;
     int pov_key_mix_id = -1;
 
     vector<3> waggle = make_zero_vector<3, float>();

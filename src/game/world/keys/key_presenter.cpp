@@ -101,9 +101,9 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
         double prev_anim_time = key.animation_time;
         key.animation_time += dt * key.speed;
 
-        if(key.animation) {
+        if(key.animation.has_value()) {
             bool loops = false;
-            const auto& anim = *key.animation;
+            const auto& anim = *key.animation.get_value();
             double prev_logical_frame = anim.framerate * prev_anim_time;
             double logical_frame = anim.framerate * key.animation_time;
             double frame = logical_frame;
@@ -125,7 +125,7 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
 
             key.current_frame = frame;
 
-            DispatchAllMarkers(mix.attached_thing, key.animation->markers, prev_logical_frame, logical_frame, loops, key.animation->frame_count);
+            DispatchAllMarkers(mix.attached_thing, anim.markers, prev_logical_frame, logical_frame, loops, anim.frame_count);
 
             if((key.flags & flags::key_flag::EndSmoothly) && frame >= anim.frame_count) {
                 // End smoothly, continue into next animation.
@@ -239,17 +239,17 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
         mix_level = &mix.body;
     }
 
-    if(!mix_level->animation) {
+    if(!mix_level->animation.has_value()) {
         // Abort if there are no frames to interpolate.
         return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
     }
 
-    auto frame = get_animation_frame(*mix_level->animation, node_id, mix_level->frame);
+    auto frame = get_animation_frame(*mix_level->animation.get_value(), node_id, mix_level->frame);
 
     // Mix in prev frame.
-    if(mix_level->prev_animation) {
+    if(mix_level->prev_animation.has_value()) {
         auto alpha = static_cast<float>(mix_level->prev_frame_blend);
-        auto mix_frame = get_animation_frame(*mix_level->prev_animation, node_id, mix_level->prev_frame);
+        auto mix_frame = get_animation_frame(*mix_level->prev_animation.get_value(), node_id, mix_level->prev_frame);
         auto fr_orient = get<1>(frame);
         auto mx_orient = get<1>(mix_frame);
         auto combined_orient = make_vector(clerp(get<0>(fr_orient), get<0>(mx_orient), alpha),
