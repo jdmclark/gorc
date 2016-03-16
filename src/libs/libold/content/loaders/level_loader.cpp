@@ -124,7 +124,7 @@ void ParseMaterialsSection(assets::level& lev, text::tokenizer& tok, content_man
             float x_scale = tok.get_number<float>();
             float y_scale = tok.get_number<float>();
 
-            lev.materials.emplace_back(nullptr, x_scale, y_scale, t.value);
+            lev.materials.emplace_back(nothing, x_scale, y_scale, t.value);
         }
     }
 
@@ -376,7 +376,7 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
 
             if(!script.has_value()) {
                 // Failed to load script. Add empty entry and advance to next entry.
-                lev.cogs.emplace_back(nullptr, std::vector<cog::vm::value>());
+                lev.cogs.emplace_back(nothing, std::vector<cog::vm::value>());
                 tok.skip_to_next_line();
                 continue;
             }

@@ -79,17 +79,17 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
 
         mix.high.prev_frame_blend -= dt * 2.0;
         if(mix.high.prev_frame_blend <= 0.0) {
-            mix.high.prev_animation = nullptr;
+            mix.high.prev_animation = nothing;
         }
 
         mix.low.prev_frame_blend -= dt * 2.0;
         if(mix.low.prev_frame_blend <= 0.0) {
-            mix.low.prev_animation = nullptr;
+            mix.low.prev_animation = nothing;
         }
 
         mix.body.prev_frame_blend -= dt * 2.0;
         if(mix.body.prev_frame_blend <= 0.0) {
-            mix.body.prev_animation = nullptr;
+            mix.body.prev_animation = nothing;
         }
     }
 
@@ -263,15 +263,15 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
 }
 
 float gorc::game::world::keys::key_presenter::get_key_len(int key_id) {
-    auto& key = contentmanager.get_asset<content::assets::animation>(key_id);
-    return static_cast<float>(key.frame_count) / static_cast<float>(key.framerate);
+    auto key = contentmanager.get_asset<content::assets::animation>(key_id);
+    return static_cast<float>(key->frame_count) / static_cast<float>(key->framerate);
 }
 
 int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
         int priority, flag_set<flags::key_flag> flags) {
     auto& state = model->keys.emplace();
 
-    state.animation = &contentmanager.get_asset<content::assets::animation>(key);
+    state.animation = contentmanager.get_asset<content::assets::animation>(key);
     state.high_priority = state.low_priority = state.body_priority = priority;
     state.animation_time = 0.0;
     state.current_frame = 0.0;
@@ -305,10 +305,6 @@ int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
     }
 
     const auto& submode = *submode_ptr.get_value();
-    if(!submode.anim) {
-        return -1;
-    }
-
     int mix_id = GetThingMixId(thing_id);
     auto& state = model->keys.emplace();
 

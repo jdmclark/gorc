@@ -2,13 +2,13 @@
 
 using namespace gorc::game::world::inventory;
 
-player_inventory_model::player_inventory_model(const content::assets::inventory& BaseInventory)
+player_inventory_model::player_inventory_model(asset_ref<content::assets::inventory> BaseInventory)
     : BaseInventory(BaseInventory) {
     return;
 }
 
 player_bin_model& player_inventory_model::initialize_bin(int bin) {
-    const auto& base_bin = BaseInventory.get_bin(bin);
+    const auto& base_bin = BaseInventory->get_bin(bin);
 
     auto& new_bin = std::get<1>(*std::get<0>(bins.emplace(bin, player_bin_model())));
 
@@ -33,7 +33,7 @@ int player_inventory_model::get_bin_value(int bin) {
 }
 
 void player_inventory_model::set_bin_value(int bin, int value) {
-    const auto& base_bin = BaseInventory.get_bin(bin);
+    const auto& base_bin = BaseInventory->get_bin(bin);
     get_bin(bin).value = std::min(std::max(value, base_bin.min_value), base_bin.max_value);
 }
 
@@ -71,7 +71,7 @@ void player_inventory_model::mod_all_cooldowns(float value) {
     }
 }
 
-inventory_model::inventory_model(const content::assets::inventory& BaseInventory)
+inventory_model::inventory_model(asset_ref<content::assets::inventory> BaseInventory)
     : base_inventory(BaseInventory) {
     return;
 }

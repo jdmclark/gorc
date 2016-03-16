@@ -16,7 +16,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
 
     created_delegate =
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
-        maybe_if(e.tpl.pup, [&](auto const *pup) {
+        maybe_if(e.tpl.pup, [&](auto pup) {
             // New thing has a puppet. Create a puppet animations component.
             cs.emplace_component<components::puppet_animations>(e.thing, *pup);
 

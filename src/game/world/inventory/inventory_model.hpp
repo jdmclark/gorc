@@ -24,7 +24,7 @@ public:
 
 class player_inventory_model {
 private:
-    const content::assets::inventory& BaseInventory;
+    asset_ref<content::assets::inventory> BaseInventory;
     std::unordered_map<int, player_bin_model> bins;
 
     int cur_weapon = -1;
@@ -37,7 +37,7 @@ public:
     bool weap_assigned = false;
     float mount_wait = 0.0f;
 
-    player_inventory_model(const content::assets::inventory& BaseInventory);
+    player_inventory_model(asset_ref<content::assets::inventory> BaseInventory);
 
     player_bin_model& get_bin(int bin);
 
@@ -95,9 +95,9 @@ private:
     std::unordered_map<int, player_inventory_model> player_inventories;
 
 public:
-    const content::assets::inventory& base_inventory;
+    asset_ref<content::assets::inventory> base_inventory;
 
-    inventory_model(const content::assets::inventory& BaseInventory);
+    inventory_model(asset_ref<content::assets::inventory> BaseInventory);
 
     player_inventory_model& get_inventory(int player_id);
     void mod_all_cooldowns(float dt);

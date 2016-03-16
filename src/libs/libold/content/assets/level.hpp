@@ -23,7 +23,7 @@ public:
     static fourcc const type;
 
     level_header header;
-    std::vector<std::tuple<asset_ref<material>, float, float, std::string>> materials;
+    std::vector<std::tuple<maybe<asset_ref<material>>, float, float, std::string>> materials;
 
     maybe<asset_ref<colormap>> master_colormap;
     std::vector<asset_ref<colormap>> colormaps;
@@ -31,7 +31,7 @@ public:
     std::vector<asset_ref<script>> scripts;
 
     std::vector<std::unique_ptr<std::string>> cog_strings;
-    std::vector<std::tuple<asset_ref<script>, std::vector<cog::vm::value>>> cogs;
+    std::vector<std::tuple<maybe<asset_ref<script>>, std::vector<cog::vm::value>>> cogs;
 
     std::vector<vector<3>> vertices;
     std::vector<vector<2>> texture_vertices;

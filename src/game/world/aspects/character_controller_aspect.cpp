@@ -70,7 +70,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
                 double) {
     // Test for collision between legs and ground using multiple tests
     vector<3> leg_height, leg_height_norm;
-    maybe_if(thing.model_3d, [&](auto const *model) {
+    maybe_if(thing.model_3d, [&](auto model) {
         leg_height = model->insert_offset;
         auto len = length(leg_height);
         if(len > 0.0f) {
@@ -103,7 +103,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
         double) {
     // Test for collision between legs and ground using multiple tests
     vector<3> leg_height;
-    maybe_if(thing.model_3d, [&](auto const *model) {
+    maybe_if(thing.model_3d, [&](auto model) {
         leg_height = model->insert_offset * 1.50f;
     });
 
@@ -180,7 +180,7 @@ void character_controller_aspect::update_standing(entity_id thing_id, components
 
             // Accelerate body toward standing position
             vector<3> insert_offset, insert_offset_norm;
-            maybe_if(thing.model_3d, [&](auto const *model) {
+            maybe_if(thing.model_3d, [&](auto model) {
                 insert_offset = model->insert_offset;
                 auto len = length(insert_offset);
                 if(len > 0.0f) {

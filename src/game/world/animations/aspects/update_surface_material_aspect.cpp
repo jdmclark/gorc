@@ -8,13 +8,13 @@ gorc::game::world::animations::aspects::update_surface_material_aspect::update_s
 void gorc::game::world::animations::aspects::update_surface_material_aspect::update(gorc::time t, entity_id, components::surface_material& anim) {
     anim.framerate_accumulator += t.elapsed_as_seconds();
 
-    int surface_material = model.level.surfaces[anim.surface].material;
+    int surface_material = model.level->surfaces[anim.surface].material;
     if(surface_material < 0) {
         // TODO: Surface has no material but has an animation? report error
         return;
     }
 
-    size_t num_cels = std::get<0>(model.level.materials[surface_material])->cels.size();
+    size_t num_cels = std::get<0>(model.level->materials[surface_material]).get_value()->cels.size();
 
     while(anim.framerate_accumulator >= anim.framerate) {
         anim.framerate_accumulator -= anim.framerate;

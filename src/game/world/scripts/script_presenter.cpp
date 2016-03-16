@@ -328,7 +328,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
             }
 
             // Dispatch to class cog
-            maybe_if(thing.cog, [&](auto const *thing_cog) {
+            maybe_if(thing.cog, [&](auto thing_cog) {
                 auto it = model->global_script_instances.find(&thing_cog->cogscript);
                 if(it != model->global_script_instances.end()) {
                     class_cog = it->second;
@@ -394,7 +394,7 @@ void gorc::game::world::scripts::script_presenter::capture_thing(int thing_id) {
 }
 
 int gorc::game::world::scripts::script_presenter::get_thing_class_cog(int thing_id) {
-    return maybe_if(levelModel->get_thing(thing_id).cog, -1, [&](auto const *classcog) {
+    return maybe_if(levelModel->get_thing(thing_id).cog, -1, [&](auto classcog) {
         return this->get_global_cog_instance(&classcog->cogscript);
     });
 }

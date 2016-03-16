@@ -114,20 +114,18 @@ void gorc::game::world::level_presenter::initialize_world() {
     for(const auto& bin_tuple : model->inventory_model.base_inventory) {
         const auto& bin = std::get<1>(bin_tuple);
 
-        if(bin.cog) {
-            script_presenter->create_global_cog_instance(bin.cog->cogscript, *place.contentmanager, components.compiler);
-        }
+        maybe_if(bin.cog, [&](auto cog) {
+            script_presenter->create_global_cog_instance(cog->cogscript, *place.contentmanager, components.compiler);
+        });
     }
 
     // create COG script instances.
     for(unsigned int i = 0; i < model->level.cogs.size(); ++i) {
         const auto& cog = model->level.cogs[i];
-        content::assets::script const* script = std::get<0>(cog);
+        asset_ref<content::assets::script> script = std::get<0>(cog);
         const std::vector<cog::vm::value>& values = std::get<1>(cog);
 
-        if(script) {
-            script_presenter->create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
-        }
+        script_presenter->create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
     }
 }
 

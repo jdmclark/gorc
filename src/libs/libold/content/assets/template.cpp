@@ -152,14 +152,14 @@ void tpl_template_mapper(int& value, int, const std::unordered_map<std::string, 
 template <typename T> void tpl_asset_loader(maybe<asset_ref<T>>& value, text::tokenizer& tok, content::content_manager& manager) {
     std::string fn = tok.get_space_delimited_string();
     if(boost::iequals(fn, "none")) {
-        value = nullptr;
+        value = nothing;
     }
     else {
         try {
             value = manager.load<T>(fn);
         }
         catch(...) {
-            value = nullptr;
+            value = nothing;
         }
     }
 }

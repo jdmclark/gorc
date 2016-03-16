@@ -58,7 +58,7 @@ void gorc::client::world::level_view::do_sector_vis(unsigned int sec_num, const 
     for(int i = 0; i < sector.surface_count; ++i) {
         const auto& surface = currentModel->surfaces[sector.first_surface + i];
 
-        const vector<3>& surf_vx_pos = currentModel->level.vertices[std::get<0>(surface.vertices.front())];
+        const vector<3>& surf_vx_pos = currentModel->level->vertices[std::get<0>(surface.vertices.front())];
 
         if(surface.adjoin < 0 || sector_visited_scratch.count(surface.adjoined_sector) > 0) {
             continue;
@@ -82,7 +82,7 @@ void gorc::client::world::level_view::do_sector_vis(unsigned int sec_num, const 
         bool failed = false;
         bool culled = true;
         for(const auto& vx : surface.vertices) {
-            auto vx_pos = currentModel->level.vertices[std::get<0>(vx)];
+            auto vx_pos = currentModel->level->vertices[std::get<0>(vx)];
 
             if(dot(cam_look, vx_pos - cam_pos) < 0.0f) {
                 // Vertex behind camera.
@@ -154,7 +154,7 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
     for(auto& surf_tuple : translucent_surfaces_scratch) {
         unsigned int surf_id = std::get<1>(surf_tuple);
         const auto& surf = currentModel->surfaces[surf_id];
-        auto vx_pos = currentModel->level.vertices[std::get<0>(surf.vertices.front())];
+        auto vx_pos = currentModel->level->vertices[std::get<0>(surf.vertices.front())];
         std::get<2>(surf_tuple) = dot(surf.normal, cam_pos - vx_pos);
 
         // TODO: Currently uses distance to plane. Compute actual distance to polygon.
@@ -414,8 +414,8 @@ void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const 
     const auto& lev = currentModel->level;
 
     if(surface.material >= 0) {
-        const auto& material_entry = currentModel->level.materials[surface.material];
-        const auto& material = std::get<0>(material_entry);
+        const auto& material_entry = currentModel->level->materials[surface.material];
+        const auto& material = std::get<0>(material_entry).get_value();
 
         vector<2> tex_scale = make_vector(1.0f / static_cast<float>(get_size<0>(material->size)),
                 1.0f / static_cast<float>(get_size<1>(material->size)));

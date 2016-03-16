@@ -20,7 +20,7 @@ namespace world {
 
 class level_model {
 public:
-    const content::assets::level& level;
+    asset_ref<content::assets::level> level;
     content::assets::level_header header;
     std::vector<content::assets::level_adjoin> adjoins;
     std::vector<surface> surfaces;
@@ -44,7 +44,7 @@ public:
     vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
     level_model(event_bus& parent_event_bus, content::content_manager& manager, cog::compiler& Cogcompiler,
-            const content::assets::level& level, const content::assets::inventory& inv);
+            asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);
 
     inline components::thing& get_thing(int id) {
         for(auto& t : ecs.find_component<components::thing>(entity_id(id))) {
