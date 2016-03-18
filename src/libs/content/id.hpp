@@ -66,12 +66,12 @@ namespace gorc {
             return *this;
         }
 
-        bool operator==(id const &o)
+        bool operator==(id const &o) const
         {
             return value == o.value;
         }
 
-        bool operator!=(id const &o)
+        bool operator!=(id const &o) const
         {
             return value != o.value;
         }

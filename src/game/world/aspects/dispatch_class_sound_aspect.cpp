@@ -115,7 +115,7 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
     created_delegate =
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         maybe_if(e.tpl.sound_class, [&](auto tpl_sound_class) {
-            cs.emplace_component<components::class_sounds>(e.thing, *tpl_sound_class);
+            cs.emplace_component<components::class_sounds>(e.thing, tpl_sound_class);
 
             presenter.sound_presenter->play_sound_class(e.thing,
                                                         flags::sound_subclass_type::create);

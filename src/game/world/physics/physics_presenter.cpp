@@ -76,8 +76,8 @@ physics_presenter::physics_node_visitor::physics_node_visitor(physics_presenter&
     return;
 }
 
-void physics_presenter::physics_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int) {
-    const auto& mesh = model.geosets.front().meshes[mesh_id];
+void physics_presenter::physics_node_visitor::visit_mesh(asset_ref<content::assets::model> model, int mesh_id, int) {
+    const auto& mesh = model->geosets.front().meshes[mesh_id];
 
     for(const auto& face : mesh.faces) {
         auto maybe_face_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, mesh, face, current_matrix, sphere.radius);
@@ -224,7 +224,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
                 continue;
             }
 
-            auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, model->level, surface, sphere.radius);
+            auto maybe_surf_nearest_point = physics::bounded_closest_point_on_surface(sphere.position, *model->level, surface, sphere.radius);
             maybe_if(maybe_surf_nearest_point, [&](vector<3> const &surf_nearest_point) {
                 auto surf_nearest_dist = length(sphere.position - surf_nearest_point);
 
@@ -296,7 +296,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
             physics_anim_node_visitor.sphere = sphere;
             physics_anim_node_visitor.visited_thing_id = col_thing_id;
             physics_anim_node_visitor.moving_thing_id = current_thing_id;
-            presenter.key_presenter->visit_mesh_hierarchy(physics_anim_node_visitor, *col_thing.model_3d.get_value(), col_thing.position, col_thing.orient, col_thing.attached_key_mix);
+            presenter.key_presenter->visit_mesh_hierarchy(physics_anim_node_visitor, col_thing.model_3d.get_value(), col_thing.position, col_thing.orient, col_thing.attached_key_mix);
         }
     }
 }
@@ -735,8 +735,8 @@ physics_presenter::segment_query_node_visitor::segment_query_node_visitor(physic
     return;
 }
 
-void physics_presenter::segment_query_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int) {
-    const auto& mesh = model.geosets.front().meshes[mesh_id];
+void physics_presenter::segment_query_node_visitor::visit_mesh(asset_ref<content::assets::model> model, int mesh_id, int) {
+    const auto& mesh = model->geosets.front().meshes[mesh_id];
 
     for(const auto& face : mesh.faces) {
         auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, mesh, face, current_matrix);

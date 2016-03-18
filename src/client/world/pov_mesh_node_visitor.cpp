@@ -9,17 +9,17 @@
 
 gorc::client::world::pov_mesh_node_visitor::pov_mesh_node_visitor(const vector<4>& sector_color, level_view& view,
         int saber_draw_node, float saber_length, float saber_base_radius, float saber_tip_radius,
-        maybe<const content::assets::material*> saber_blade, maybe<const content::assets::material*> saber_tip)
+        maybe<asset_ref<content::assets::material>> saber_blade, maybe<asset_ref<content::assets::material>> saber_tip)
     : sector_color(sector_color), view(view), saber_draw_node(saber_draw_node), saber_length(saber_length),
       saber_base_radius(saber_base_radius), saber_tip_radius(saber_tip_radius), saber_blade(saber_blade), saber_tip(saber_tip) {
     return;
 }
 
-void gorc::client::world::pov_mesh_node_visitor::visit_mesh(const content::assets::model& model, int mesh_id, int node_id) {
-    const content::assets::model_mesh& mesh = model.geosets.front().meshes[mesh_id];
+void gorc::client::world::pov_mesh_node_visitor::visit_mesh(asset_ref<content::assets::model> model, int mesh_id, int node_id) {
+    const content::assets::model_mesh& mesh = model->geosets.front().meshes[mesh_id];
     for(const auto& face : mesh.faces) {
         if(face.material >= 0) {
-            const auto& material = model.materials[face.material];
+            const auto& material = model->materials[face.material];
 
             float alpha = (face.type & flags::face_flag::Translucent) ? 0.5f : 1.0f;
 
@@ -78,6 +78,6 @@ void gorc::client::world::pov_mesh_node_visitor::visit_mesh(const content::asset
     }
 
     if(saber_draw_node == node_id && saber_blade.has_value() && saber_tip.has_value()) {
-        view.draw_saber(*saber_tip.get_value(), *saber_blade.get_value(), saber_length, saber_base_radius, saber_tip_radius);
+        view.draw_saber(saber_tip.get_value(), saber_blade.get_value(), saber_length, saber_base_radius, saber_tip_radius);
     }
 }

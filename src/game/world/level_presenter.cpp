@@ -87,10 +87,10 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
 }
 
 void gorc::game::world::level_presenter::initialize_world() {
-    script_presenter->create_level_dummy_instances(model->level.cogs.size());
+    script_presenter->create_level_dummy_instances(model->level->cogs.size());
 
     // HACK: create thing collision shapes and rigid bodies, enumerate spawn points
-    for(const auto& thing : model->level.things) {
+    for(const auto& thing : model->level->things) {
         if(thing.type == flags::thing_type::Player) {
             // Add player spawn point and create ghost thing to fill ID.
             model->spawn_points.push_back(&thing);
@@ -111,7 +111,7 @@ void gorc::game::world::level_presenter::initialize_world() {
     camera_presenter->set_camera_focus(1, model->local_player_thing_id);
 
     // create bin script instances.
-    for(const auto& bin_tuple : model->inventory_model.base_inventory) {
+    for(const auto& bin_tuple : *model->inventory_model.base_inventory) {
         const auto& bin = std::get<1>(bin_tuple);
 
         maybe_if(bin.cog, [&](auto cog) {
@@ -120,12 +120,13 @@ void gorc::game::world::level_presenter::initialize_world() {
     }
 
     // create COG script instances.
-    for(unsigned int i = 0; i < model->level.cogs.size(); ++i) {
-        const auto& cog = model->level.cogs[i];
-        asset_ref<content::assets::script> script = std::get<0>(cog);
-        const std::vector<cog::vm::value>& values = std::get<1>(cog);
+    for(unsigned int i = 0; i < model->level->cogs.size(); ++i) {
+        const auto& cog = model->level->cogs[i];
+        maybe_if(std::get<0>(cog), [&](auto script) {
+            const std::vector<cog::vm::value>& values = std::get<1>(cog);
 
-        script_presenter->create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
+            script_presenter->create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
+        });
     }
 }
 
@@ -516,15 +517,15 @@ void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
         int wall, int blood, int saber) {
     auto& thing = model->get_thing(thing_id);
 
-    thing.saber_side_mat = &contentmanager->get_asset<content::assets::material>(side_mat);
-    thing.saber_tip_mat = &contentmanager->get_asset<content::assets::material>(tip_mat);
+    thing.saber_side_mat = contentmanager->get_asset<content::assets::material>(side_mat);
+    thing.saber_tip_mat = contentmanager->get_asset<content::assets::material>(tip_mat);
     thing.saber_base_rad = base_rad;
     thing.saber_tip_rad = tip_rad;
     thing.saber_length = length;
 
-    thing.saber_wall = (wall >= 0) ? &model->level.templates[wall] : nullptr;
-    thing.saber_blood = (blood >= 0) ? &model->level.templates[blood] : nullptr;
-    thing.saber_saber = (saber >= 0) ? &model->level.templates[saber] : nullptr;
+    thing.saber_wall = (wall >= 0) ? &model->level->templates[wall] : nullptr;
+    thing.saber_blood = (blood >= 0) ? &model->level->templates[blood] : nullptr;
+    thing.saber_saber = (saber >= 0) ? &model->level->templates[saber] : nullptr;
 }
 
 void gorc::game::world::level_presenter::take_item(entity_id thing_id, entity_id player_id) {
@@ -569,7 +570,7 @@ int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
 
 void gorc::game::world::level_presenter::sector_sound(int sector_id, int sound, float volume) {
     auto& sector = model->sectors[sector_id];
-    sector.ambient_sound = &contentmanager->get_asset<content::assets::sound>(sound);
+    sector.ambient_sound = contentmanager->get_asset<content::assets::sound>(sound);
     sector.ambient_sound_volume = volume;
 }
 
@@ -592,7 +593,7 @@ void gorc::game::world::level_presenter::set_sector_adjoins(int sector_id, bool 
 
 void gorc::game::world::level_presenter::set_sector_colormap(int sector_id, int colormap) {
     auto& sector = model->sectors[sector_id];
-    sector.cmp = &place.contentmanager->get_asset<content::assets::colormap>(colormap);
+    sector.cmp = place.contentmanager->get_asset<content::assets::colormap>(colormap);
 }
 
 void gorc::game::world::level_presenter::set_sector_flags(int sector_id, flag_set<flags::sector_flag> flags) {
@@ -630,11 +631,11 @@ gorc::flags::geometry_mode gorc::game::world::level_presenter::get_face_geo_mode
 
 gorc::vector<3> gorc::game::world::level_presenter::get_surface_center(int surface) {
     auto vec = make_zero_vector<3, float>();
-    for(const auto& vx : model->level.surfaces[surface].vertices) {
-        vec += model->level.vertices[std::get<0>(vx)];
+    for(const auto& vx : model->level->surfaces[surface].vertices) {
+        vec += model->level->vertices[std::get<0>(vx)];
     }
 
-    vec = vec / static_cast<float>(model->level.surfaces[surface].vertices.size());
+    vec = vec / static_cast<float>(model->level->surfaces[surface].vertices.size());
     return vec;
 }
 
@@ -695,7 +696,7 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     eventbus->fire_event(events::thing_created(new_thing_id, tpl));
 
     // Create thing components
-    maybe_if(new_thing.cog, [&](auto const *cog) {
+    maybe_if(new_thing.cog, [&](auto cog) {
         script_presenter->create_global_cog_instance(cog->cogscript, *place.contentmanager, components.compiler);
     });
 
@@ -709,15 +710,15 @@ int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int se
         return -1;
     }
 
-    return create_thing(model->level.templates[tpl_id], sector_num, pos, orientation);
+    return create_thing(model->level->templates[tpl_id], sector_num, pos, orientation);
 }
 
 int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name, unsigned int sector_num,
         const vector<3>& pos, const quaternion<float>& orientation) {
     std::string temp;
     std::transform(tpl_name.begin(), tpl_name.end(), std::back_inserter(temp), tolower);
-    auto it = model->level.template_map.find(temp);
-    if(it != model->level.template_map.end()) {
+    auto it = model->level->template_map.find(temp);
+    if(it != model->level->template_map.end()) {
         return create_thing(it->second, sector_num, pos, orientation);
     }
     else {
@@ -789,14 +790,14 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
 
     new_thing.path_moving = false;
 
-    maybe_if(new_thing.model_3d, [&](auto const *model) {
+    maybe_if(new_thing.model_3d, [&](auto model) {
         this->adjust_thing_pos(new_thing_id, new_thing.position + model->insert_offset);
     });
 
     // CreateThingAtThing really does copy frames.
     std::transform(referencedThing.frames.begin(), referencedThing.frames.end(), std::back_inserter(new_thing.frames),
             [&new_thing](const std::tuple<vector<3>, vector<3>>& frame) -> std::tuple<vector<3>, vector<3>> {
-        return maybe_if(new_thing.model_3d, frame, [&](auto const *model) {
+        return maybe_if(new_thing.model_3d, frame, [&](auto model) {
             return std::make_tuple(std::get<0>(frame) + model->insert_offset, std::get<1>(frame));
         });
     });
@@ -828,7 +829,7 @@ float gorc::game::world::level_presenter::damage_thing(entity_id thing_id,
         else {
             eventbus->fire_event(events::class_sound(thing_id,
                                                      flags::sound_subclass_type::HurtSpecial));
-            maybe_if(referencedThing.pup, [&](auto const *) {
+            maybe_if(referencedThing.pup, [&](auto) {
                 key_presenter->play_mode(thing_id, flags::puppet_submode_type::Hit);
             });
         }
@@ -976,10 +977,10 @@ void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh
     auto& thing = model->get_thing(player);
 
     if(mesh >= 0) {
-        thing.weapon_mesh = &contentmanager->get_asset<content::assets::model>(mesh);
+        thing.weapon_mesh = contentmanager->get_asset<content::assets::model>(mesh);
     }
     else {
-        thing.weapon_mesh = nullptr;
+        thing.weapon_mesh = nothing;
     }
 }
 

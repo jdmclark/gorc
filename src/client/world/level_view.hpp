@@ -90,7 +90,7 @@ private:
     void draw_pov_model();
 
     void draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha);
-    void draw_sprite(const game::world::components::thing& thing, const content::assets::sprite& sprite, float sector_light);
+    void draw_sprite(const game::world::components::thing& thing, asset_ref<content::assets::sprite> sprite, float sector_light);
     void draw_thing(const game::world::components::thing& thing, int thing_id);
 
 public:
@@ -124,10 +124,10 @@ public:
         model_matrix_stack.pop();
     }
 
-    void draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
+    void draw_saber(asset_ref<content::assets::material> saber_tip, asset_ref<content::assets::material> saber_blade,
             float saber_length, float saber_base_radius, float saber_tip_radius);
 
-    void draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
+    void draw_sprite(const vector<3>& pos, asset_ref<content::assets::material> mat, int frame, float width, float height,
             flags::geometry_mode geo, flags::light_mode light, float extra_light, const vector<3>& offset, float sector_light);
 
     virtual void draw(const gorc::time& time, const box<2, int>& view_size, graphics::render_target& target) override;

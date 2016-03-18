@@ -48,6 +48,16 @@ namespace gorc {
         {
             return data;
         }
+
+        inline bool operator==(asset_ref<T> const &ref) const
+        {
+            return id == ref.id;
+        }
+
+        inline bool operator!=(asset_ref<T> const &ref) const
+        {
+            return id != ref.id;
+        }
     };
 
 }

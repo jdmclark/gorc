@@ -403,7 +403,7 @@ void gorc::client::world::level_view::draw_pov_model() {
                     thing.saber_side_mat, thing.saber_tip_mat);
             auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
             auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
-            currentPresenter->key_presenter->visit_mesh_hierarchy(v, *pov_model, thing.position,
+            currentPresenter->key_presenter->visit_mesh_hierarchy(v, pov_model, thing.position,
                     pov_model_offset, currentModel->camera_model.pov_key_mix_id);
         });
     }
@@ -411,7 +411,7 @@ void gorc::client::world::level_view::draw_pov_model() {
 
 void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha) {
     const auto& surface = currentModel->surfaces[surf_num];
-    const auto& lev = currentModel->level;
+    const auto& lev = *currentModel->level;
 
     if(surface.material >= 0) {
         const auto& material_entry = currentModel->level->materials[surface.material];
@@ -479,7 +479,7 @@ void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const 
     }
 }
 
-void gorc::client::world::level_view::draw_saber(const content::assets::material& saber_tip, const content::assets::material& saber_blade,
+void gorc::client::world::level_view::draw_saber(asset_ref<content::assets::material> saber_tip, asset_ref<content::assets::material> saber_blade,
         float saber_length, float saber_base_radius, float saber_tip_radius) {
     float tex_y = static_cast<float>(rand);
 
@@ -514,9 +514,9 @@ void gorc::client::world::level_view::draw_saber(const content::assets::material
     concatenate_matrix(make_rotation_matrix(angle, make_vector(0.0f, 1.0f, 0.0f)));
 
     glActiveTexture(GL_TEXTURE0);
-    graphics::bind_texture(saber_blade.cels[0].diffuse);
+    graphics::bind_texture(saber_blade->cels[0].diffuse);
     glActiveTexture(GL_TEXTURE1);
-    graphics::bind_texture(saber_blade.cels[0].light);
+    graphics::bind_texture(saber_blade->cels[0].light);
 
     vector<3> sprite_middle = make_zero_vector<3, float>();//sprite.Offset;
     vector<3> horiz_off = make_vector(1.0f, 0.0f, 0.0f);
@@ -563,7 +563,7 @@ void gorc::client::world::level_view::draw_saber(const content::assets::material
     pop_matrix();
 }
 
-void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const content::assets::material& mat, int frame, float width, float height,
+void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, asset_ref<content::assets::material> mat, int frame, float width, float height,
         flags::geometry_mode, flags::light_mode light_mode, float extra_light, const vector<3>& spr_offset, float sector_light) {
     // TODO: Deal with geo
     push_matrix();
@@ -587,9 +587,9 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
     int current_frame = frame;
 
     glActiveTexture(GL_TEXTURE0);
-    graphics::bind_texture(mat.cels[current_frame].diffuse);
+    graphics::bind_texture(mat->cels[current_frame].diffuse);
     glActiveTexture(GL_TEXTURE1);
-    graphics::bind_texture(mat.cels[current_frame].light);
+    graphics::bind_texture(mat->cels[current_frame].light);
 
     vector<3> sprite_middle = make_zero_vector<3, float>();//sprite.Offset;
     vector<3> horiz_off = make_vector(1.0f,0.0f,0.0f) * width * 0.5f;
@@ -658,22 +658,20 @@ void gorc::client::world::level_view::draw_sprite(const vector<3>& pos, const co
     update_shader_model_matrix();
 }
 
-void gorc::client::world::level_view::draw_sprite(const game::world::components::thing& thing, const content::assets::sprite& sprite, float sector_light) {
-    maybe_if(sprite.mat, [&](auto mat) {
-        // TODO: Currently plays animation over duration of timer. Behavior should be verified.
-        int current_frame = 0;
-        if(thing.timer > 0.0f) {
-            current_frame = static_cast<int>(static_cast<int>(std::floor(static_cast<float>(mat->cels.size()) * thing.time_alive / thing.timer)) % mat->cels.size());
-        }
+void gorc::client::world::level_view::draw_sprite(const game::world::components::thing& thing, asset_ref<content::assets::sprite> sprite, float sector_light) {
+    // TODO: Currently plays animation over duration of timer. Behavior should be verified.
+    int current_frame = 0;
+    if(thing.timer > 0.0f) {
+        current_frame = static_cast<int>(static_cast<int>(std::floor(static_cast<float>(sprite->mat->cels.size()) * thing.time_alive / thing.timer)) % sprite->mat->cels.size());
+    }
 
-        const auto& cam = currentModel->camera_model.current_computed_state;
-        vector<3> offset = cross(cam.look, cam.up) * get<0>(sprite.offset) +
-                cam.look * get<1>(sprite.offset) +
-                cam.up * get<2>(sprite.offset);
+    const auto& cam = currentModel->camera_model.current_computed_state;
+    vector<3> offset = cross(cam.look, cam.up) * get<0>(sprite->offset) +
+            cam.look * get<1>(sprite->offset) +
+            cam.up * get<2>(sprite->offset);
 
-        draw_sprite(thing.position, *mat, current_frame, sprite.width, sprite.height, sprite.geometry_mode, sprite.light_mode,
-                sprite.extra_light, offset, sector_light);
-    });
+    draw_sprite(thing.position, sprite->mat, current_frame, sprite->width, sprite->height, sprite->geometry_mode, sprite->light_mode,
+            sprite->extra_light, offset, sector_light);
 }
 
 void gorc::client::world::level_view::draw_thing(const game::world::components::thing& thing, int thing_id) {
@@ -707,11 +705,11 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
         thing_mesh_node_visitor v(lit_sector_color, *this, weapon_mesh_node, saber_mesh_node_a, saber_mesh_node_b,
                 thing.weapon_mesh, thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
                 thing.saber_side_mat, thing.saber_tip_mat);
-        currentPresenter->key_presenter->visit_mesh_hierarchy(v, *model, thing.position, thing.orient, thing.attached_key_mix,
+        currentPresenter->key_presenter->visit_mesh_hierarchy(v, model, thing.position, thing.orient, thing.attached_key_mix,
                 thing.pup, thing.head_pitch);
     });
 
     maybe_if(thing.spr, [&](auto spr) {
-        this->draw_sprite(thing, *spr, sector_light);
+        this->draw_sprite(thing, spr, sector_light);
     });
 }

@@ -63,7 +63,7 @@ public:
             LOG_FATAL("could not initialize GLEW");
         }
 
-        screen_shader = &master_content_manager.load<content::assets::shader>("screen.glsl");
+        screen_shader = master_content_manager.load<content::assets::shader>("screen.glsl");
         screen_shader_diffuse_ul = glGetUniformLocation(screen_shader.get_value()->program, "diffuse");
 
         texture_target = std::make_unique<graphics::texture_render_target>(get_view_size());

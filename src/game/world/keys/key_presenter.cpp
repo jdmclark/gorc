@@ -190,14 +190,14 @@ void gorc::game::world::keys::key_presenter::expunge_thing_animations(int thing_
     }
 }
 
-std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_animation_frame(const content::assets::animation& anim,
+std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_animation_frame(asset_ref<content::assets::animation> anim,
         int node_id, double frame) const {
-    if(anim.nodes.size() <= static_cast<size_t>(node_id) || anim.nodes[node_id].frames.empty()) {
+    if(anim->nodes.size() <= static_cast<size_t>(node_id) || anim->nodes[node_id].frames.empty()) {
         // Abort if there are no frames to interpolate.
         return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
     }
 
-    const auto& anim_node = anim.nodes[node_id];
+    const auto& anim_node = anim->nodes[node_id];
 
     int actual_frame = static_cast<int>(std::floor(frame));
 
@@ -244,12 +244,12 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
         return std::make_tuple(make_zero_vector<3, float>(), make_zero_vector<3, float>());
     }
 
-    auto frame = get_animation_frame(*mix_level->animation.get_value(), node_id, mix_level->frame);
+    auto frame = get_animation_frame(mix_level->animation.get_value(), node_id, mix_level->frame);
 
     // Mix in prev frame.
     if(mix_level->prev_animation.has_value()) {
         auto alpha = static_cast<float>(mix_level->prev_frame_blend);
-        auto mix_frame = get_animation_frame(*mix_level->prev_animation.get_value(), node_id, mix_level->prev_frame);
+        auto mix_frame = get_animation_frame(mix_level->prev_animation.get_value(), node_id, mix_level->prev_frame);
         auto fr_orient = get<1>(frame);
         auto mx_orient = get<1>(mix_frame);
         auto combined_orient = make_vector(clerp(get<0>(fr_orient), get<0>(mx_orient), alpha),
@@ -297,7 +297,7 @@ int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
 
     maybe<content::assets::puppet_submode const *> submode_ptr;
     for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(thing_id)) {
-        submode_ptr = tpup.second.puppet.get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
+        submode_ptr = tpup.second.puppet->get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
     }
 
     if(!submode_ptr.has_value()) {

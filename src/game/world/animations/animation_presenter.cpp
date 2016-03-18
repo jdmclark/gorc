@@ -32,13 +32,13 @@ void animation_presenter::start(level_model& levelModel) {
 gorc::entity_id animation_presenter::surface_anim(int surface, float rate, flag_set<flags::anim_flag> flag) {
     entity_id emplaced_anim = levelModel->ecs.make_entity();
 
-    int surface_material = levelModel->level.surfaces[surface].material;
+    int surface_material = levelModel->level->surfaces[surface].material;
     if(surface_material < 0) {
         // TODO: surface has no material but has an animation? report error.
         return emplaced_anim;
     }
 
-    size_t num_cels = std::get<0>(levelModel->level.materials[surface_material])->cels.size();
+    size_t num_cels = std::get<0>(levelModel->level->materials[surface_material]).get_value()->cels.size();
 
     if(flag & flags::anim_flag::skip_first_two_frames) {
         levelModel->surfaces[surface].cel_number = static_cast<int>(2UL % num_cels);
@@ -93,24 +93,24 @@ gorc::entity_id animation_presenter::slide_surface(int surface, const vector<3>&
     // Compute surface slide direction
     auto& surf = levelModel->surfaces[surface];
 
-    auto dnsb0 = levelModel->level.vertices[std::get<0>(surf.vertices[1])] - levelModel->level.vertices[std::get<0>(surf.vertices[0])];
+    auto dnsb0 = levelModel->level->vertices[std::get<0>(surf.vertices[1])] - levelModel->level->vertices[std::get<0>(surf.vertices[0])];
 
     auto sb0 = dnsb0 / length_squared(dnsb0);
     auto sb1 = cross(surf.normal, sb0);
 
     unsigned int noncol_vert;
     for(noncol_vert = 2; noncol_vert < surf.vertices.size(); ++noncol_vert) {
-        auto sb2 = levelModel->level.vertices[std::get<0>(surf.vertices[noncol_vert])] - levelModel->level.vertices[std::get<0>(surf.vertices[0])];
+        auto sb2 = levelModel->level->vertices[std::get<0>(surf.vertices[noncol_vert])] - levelModel->level->vertices[std::get<0>(surf.vertices[0])];
         if(fabsf(dot(sb1, sb2)) > 0.0f) {
             break;
         }
     }
 
-    auto vb0 = levelModel->level.texture_vertices[std::get<1>(surf.vertices[1])] - levelModel->level.texture_vertices[std::get<1>(surf.vertices[0])];
+    auto vb0 = levelModel->level->texture_vertices[std::get<1>(surf.vertices[1])] - levelModel->level->texture_vertices[std::get<1>(surf.vertices[0])];
     auto vb1 = make_vector(get<1>(vb0), -get<0>(vb0));
 
     float sgn = 1.0f;
-    if(dot(vb1, levelModel->level.texture_vertices[std::get<1>(surf.vertices[noncol_vert])] - levelModel->level.texture_vertices[std::get<1>(surf.vertices[0])]) < 0.0f) {
+    if(dot(vb1, levelModel->level->texture_vertices[std::get<1>(surf.vertices[noncol_vert])] - levelModel->level->texture_vertices[std::get<1>(surf.vertices[0])]) < 0.0f) {
         sgn = -1.0f;
     }
 

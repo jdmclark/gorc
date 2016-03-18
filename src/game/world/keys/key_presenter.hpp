@@ -60,7 +60,7 @@ public:
 
     void expunge_thing_animations(int thing_id);
 
-    std::tuple<vector<3>, vector<3>> get_animation_frame(const content::assets::animation& anim, int node_id, double frame) const;
+    std::tuple<vector<3>, vector<3>> get_animation_frame(asset_ref<content::assets::animation> anim, int node_id, double frame) const;
     std::tuple<vector<3>, vector<3>> get_node_frame(int mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
 
     int create_key_mix();
@@ -75,13 +75,13 @@ public:
     static void register_verbs(cog::verbs::verb_table&, level_state&);
 
 private:
-    template <typename T> void visit_mesh_node(T& visitor, const content::assets::model& obj, int attached_key_mix, int mesh_id,
-            maybe<content::assets::puppet const*> puppet_file, float head_pitch) {
+    template <typename T> void visit_mesh_node(T& visitor, asset_ref<content::assets::model> obj, int attached_key_mix, int mesh_id,
+            maybe<asset_ref<content::assets::puppet>> puppet_file, float head_pitch) {
         if(mesh_id < 0) {
             return;
         }
 
-        const content::assets::model_node& node = obj.hierarchy_nodes[mesh_id];
+        const content::assets::model_node& node = obj->hierarchy_nodes[mesh_id];
 
         visitor.push_matrix();
 
@@ -97,7 +97,7 @@ private:
         }
 
         // Add head pitch to anim_rotate:
-        maybe_if(puppet_file, [&](auto const *puppet_file) {
+        maybe_if(puppet_file, [&](auto puppet_file) {
             if(mesh_id == puppet_file->get_joint(flags::puppet_joint_type::head) ||
                mesh_id == puppet_file->get_joint(flags::puppet_joint_type::neck) ||
                mesh_id == puppet_file->get_joint(flags::puppet_joint_type::torso) ||
@@ -130,9 +130,9 @@ private:
 
 public:
 
-    template <typename T> void visit_mesh_hierarchy(T& visitor, const content::assets::model& obj,
+    template <typename T> void visit_mesh_hierarchy(T& visitor, asset_ref<content::assets::model> obj,
             const vector<3>& base_position, const quaternion<float>& base_orientation, int attached_key_mix,
-            maybe<content::assets::puppet const*> puppet_file = nothing, float head_pitch = 0.0f) {
+            maybe<asset_ref<content::assets::puppet>> puppet_file = nothing, float head_pitch = 0.0f) {
         visitor.push_matrix();
         visitor.concatenate_matrix(make_translation_matrix(base_position)
                 * convert_to_rotation_matrix(base_orientation));

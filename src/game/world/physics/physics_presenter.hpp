@@ -92,7 +92,7 @@ private:
             current_matrix = current_matrix * mat;
         }
 
-        void visit_mesh(const content::assets::model& model, int mesh_id, int node_id);
+        void visit_mesh(asset_ref<content::assets::model> model, int mesh_id, int node_id);
 
         bool needs_response;
         int moving_thing_id;
@@ -122,8 +122,7 @@ private:
             current_matrix = current_matrix * mat;
         }
 
-        void visit_mesh(const content::assets::model& model, int mesh_id, int node_id);
-
+        void visit_mesh(asset_ref<content::assets::model> model, int mesh_id, int node_id);
         segment cam_segment;
         vector<3> closest_contact;
         vector<3> closest_contact_normal;
@@ -182,7 +181,7 @@ public:
             for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
                 const auto& surface = model->surfaces[i];
 
-                auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, model->level, surface);
+                auto maybe_nearest_point = physics::segment_surface_intersection_point(cam_segment, *model->level, surface);
                 maybe_if(maybe_nearest_point, [&](vector<3> const &nearest_point) {
                     if(surface_p(i)) {
                         auto dist = length(nearest_point - std::get<0>(cam_segment));
@@ -242,7 +241,7 @@ public:
                 segment_query_anim_node_visitor.cam_segment = cam_segment;
                 segment_query_anim_node_visitor.closest_contact_distance = closest_contact_distance;
                 segment_query_anim_node_visitor.has_closest_contact = false;
-                presenter.key_presenter->visit_mesh_hierarchy(segment_query_anim_node_visitor, *col_thing.model_3d.get_value(), col_thing.position,
+                presenter.key_presenter->visit_mesh_hierarchy(segment_query_anim_node_visitor, col_thing.model_3d.get_value(), col_thing.position,
                         col_thing.orient, col_thing.attached_key_mix);
 
                 if(segment_query_anim_node_visitor.has_closest_contact) {

@@ -63,21 +63,18 @@ int gorc::game::world::inventory::inventory_presenter::get_inv(int player, int b
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_inv_cog(int, int bin) {
-    const content::assets::inventory_bin& inv_bin = model->base_inventory.get_bin(bin);
-    if(inv_bin.cog) {
-        return presenter.script_presenter->get_global_cog_instance(&inv_bin.cog->cogscript);
-    }
-    else {
-        return -1;
-    }
+    const content::assets::inventory_bin& inv_bin = model->base_inventory->get_bin(bin);
+    return maybe_if(inv_bin.cog, -1, [&](auto cog) {
+        return presenter.script_presenter->get_global_cog_instance(&cog->cogscript);
+    });
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_inv_max(int, int bin) {
-    return model->base_inventory.get_bin(bin).max_value;
+    return model->base_inventory->get_bin(bin).max_value;
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_inv_min(int, int bin) {
-    return model->base_inventory.get_bin(bin).min_value;
+    return model->base_inventory->get_bin(bin).min_value;
 }
 
 bool gorc::game::world::inventory::inventory_presenter::is_inv_activated(int player, int bin) {
@@ -132,7 +129,7 @@ int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(int pla
     int best_bin_value = std::numeric_limits<int>::lowest();
 
     for(const auto& bin_pair : model->get_inventory(player)) {
-        auto& base_bin = model->base_inventory.get_bin(std::get<0>(bin_pair));
+        auto& base_bin = model->base_inventory->get_bin(std::get<0>(bin_pair));
         if(base_bin.flags & flags::inventory_flag::weapon) {
             int auto_res = presenter.script_presenter->send_message(get_inv_cog(player, std::get<0>(bin_pair)), cog::message_id::autoselect,
                     -1, static_cast<int>(flags::autoselect_mode::player_mounting), flags::message_type::system,
@@ -229,7 +226,7 @@ void gorc::game::world::inventory::inventory_presenter::set_cur_inv_weapon(int p
 void gorc::game::world::inventory::inventory_presenter::set_cur_weapon(int player, int weap_num) {
     // Convert weapon num into bin num.
     int seen_weap = 0;
-    for(const auto& bin : model->base_inventory) {
+    for(const auto& bin : *model->base_inventory) {
         if(std::get<1>(bin).flags & flags::inventory_flag::weapon) {
             if(seen_weap == weap_num) {
                 set_cur_inv_weapon(player, std::get<0>(bin));

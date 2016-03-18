@@ -12,10 +12,10 @@ class class_sounds {
 public:
     #include "class_sounds.uid"
 
-    content::assets::soundclass const &soundclass;
+    asset_ref<content::assets::soundclass> soundclass;
     flags::standing_material_type standing_material_type;
 
-    class_sounds(content::assets::soundclass const &soundclass,
+    class_sounds(asset_ref<content::assets::soundclass> soundclass,
                  flags::standing_material_type = flags::standing_material_type::none);
 };
 

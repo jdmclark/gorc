@@ -106,8 +106,8 @@ void gorc::game::world::scripts::script_presenter::create_level_cog_instance(int
             // Convert template name to lowercase for matching.
             std::string tpl_name(static_cast<const char*>(*jt));
             std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
-            auto it = levelModel->level.template_map.find(tpl_name);
-            if(it == levelModel->level.template_map.end()) {
+            auto it = levelModel->level->template_map.find(tpl_name);
+            if(it == levelModel->level->template_map.end()) {
                 // TODO: thing_template not found, report error.
                 (*jt) = -1;
             }
@@ -220,8 +220,8 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
             break;
 
         case cog::symbols::symbol_type::thing_template: {
-            auto it = levelModel->level.template_map.find(static_cast<const char*>(*jt));
-            if(it == levelModel->level.template_map.end()) {
+            auto it = levelModel->level->template_map.find(static_cast<const char*>(*jt));
+            if(it == levelModel->level->template_map.end()) {
                 // TODO: thing_template not found, report error.
                 (*jt) = -1;
             }
@@ -350,7 +350,7 @@ void gorc::game::world::scripts::script_presenter::send_message_to_linked(cog::m
         return;
     }
 
-    for(size_t i = 0; i < levelModel->level.cogs.size(); ++i) {
+    for(size_t i = 0; i < levelModel->level->cogs.size(); ++i) {
         if(class_cog == i || capture_cog == i) {
             continue;
         }

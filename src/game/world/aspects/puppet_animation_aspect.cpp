@@ -115,7 +115,7 @@ void puppet_animation_aspect::set_walk_animation(components::thing &thing,
         return;
     }
 
-    auto const &maybe_submode = pup.puppet.get_mode(pup.puppet_mode_type).get_submode(type);
+    auto const &maybe_submode = pup.puppet->get_mode(pup.puppet_mode_type).get_submode(type);
     maybe_if(maybe_submode, [&](content::assets::puppet_submode const *submode) {
         if(keyState.animation != submode->anim) {
             keyState.animation_time = 0.0;
@@ -141,7 +141,7 @@ bool puppet_animation_aspect::is_walk_animation_mode(components::puppet_animatio
                                                      flags::puppet_submode_type type) {
     if(pup.actor_walk_animation >= 0) {
         auto &key_state = presenter.model->key_model.keys[pup.actor_walk_animation];
-        auto const &maybe_submode = pup.puppet.get_mode(pup.puppet_mode_type).get_submode(type);
+        auto const &maybe_submode = pup.puppet->get_mode(pup.puppet_mode_type).get_submode(type);
         maybe_if(maybe_submode, [&](content::assets::puppet_submode const *submode) {
             return key_state.animation == submode->anim;
         });
