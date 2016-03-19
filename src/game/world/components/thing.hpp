@@ -66,9 +66,9 @@ public:
     float saber_tip_rad = 0.001f;
     float saber_length = 0.1f;
     float saber_drawn_length = 0.0f;
-    maybe<asset_ref<content::assets::thing_template>> saber_wall;
-    maybe<asset_ref<content::assets::thing_template>> saber_blood;
-    maybe<asset_ref<content::assets::thing_template>> saber_saber;
+    maybe<content::assets::thing_template const *> saber_wall;
+    maybe<content::assets::thing_template const *> saber_blood;
+    maybe<content::assets::thing_template const *> saber_saber;
     bool saber_enabled = false;
     float saber_damage = 0.0f;
     float saber_collide_length = 0.0f;

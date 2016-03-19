@@ -523,9 +523,9 @@ void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
     thing.saber_tip_rad = tip_rad;
     thing.saber_length = length;
 
-    thing.saber_wall = (wall >= 0) ? &model->level->templates[wall] : nullptr;
-    thing.saber_blood = (blood >= 0) ? &model->level->templates[blood] : nullptr;
-    thing.saber_saber = (saber >= 0) ? &model->level->templates[saber] : nullptr;
+    thing.saber_wall = (wall >= 0) ? make_maybe(&model->level->templates[wall]) : nothing;
+    thing.saber_blood = (blood >= 0) ? make_maybe(&model->level->templates[blood]) : nothing;
+    thing.saber_saber = (saber >= 0) ? make_maybe(&model->level->templates[saber]) : nothing;
 }
 
 void gorc::game::world::level_presenter::take_item(entity_id thing_id, entity_id player_id) {
