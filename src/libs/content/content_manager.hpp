@@ -54,17 +54,16 @@ namespace gorc {
         asset const& load_from_id(asset_id id);
 
         template <typename T>
-        int load_id(std::string const &name)
+        asset_id load_id(std::string const &name)
         {
             diagnostic_context dc(name.c_str());
-            asset_id ref_id = load_internal(T::type, name);
-            return static_cast<int>(ref_id);
+            return load_internal(T::type, name);
         }
 
         template <typename T>
-        asset_ref<T> get_asset(int id)
+        asset_ref<T> get_asset(asset_id id)
         {
-            return asset_ref<T>(dynamic_cast<T const &>(load_from_id(asset_id(id))), asset_id(id));
+            return asset_ref<T>(dynamic_cast<T const &>(load_from_id(id)), id);
         }
     };
 

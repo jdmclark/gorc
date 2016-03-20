@@ -517,8 +517,8 @@ void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
         int wall, int blood, int saber) {
     auto& thing = model->get_thing(thing_id);
 
-    thing.saber_side_mat = contentmanager->get_asset<content::assets::material>(side_mat);
-    thing.saber_tip_mat = contentmanager->get_asset<content::assets::material>(tip_mat);
+    thing.saber_side_mat = contentmanager->get_asset<content::assets::material>(asset_id(side_mat));
+    thing.saber_tip_mat = contentmanager->get_asset<content::assets::material>(asset_id(tip_mat));
     thing.saber_base_rad = base_rad;
     thing.saber_tip_rad = tip_rad;
     thing.saber_length = length;
@@ -570,7 +570,7 @@ int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
 
 void gorc::game::world::level_presenter::sector_sound(int sector_id, int sound, float volume) {
     auto& sector = model->sectors[sector_id];
-    sector.ambient_sound = contentmanager->get_asset<content::assets::sound>(sound);
+    sector.ambient_sound = contentmanager->get_asset<content::assets::sound>(asset_id(sound));
     sector.ambient_sound_volume = volume;
 }
 
@@ -593,7 +593,7 @@ void gorc::game::world::level_presenter::set_sector_adjoins(int sector_id, bool 
 
 void gorc::game::world::level_presenter::set_sector_colormap(int sector_id, int colormap) {
     auto& sector = model->sectors[sector_id];
-    sector.cmp = place.contentmanager->get_asset<content::assets::colormap>(colormap);
+    sector.cmp = place.contentmanager->get_asset<content::assets::colormap>(asset_id(colormap));
 }
 
 void gorc::game::world::level_presenter::set_sector_flags(int sector_id, flag_set<flags::sector_flag> flags) {
@@ -674,7 +674,7 @@ void gorc::game::world::level_presenter::set_surface_flags(int surface, flag_set
 
 // System verbs
 int gorc::game::world::level_presenter::load_sound(const char* fn) {
-    return place.contentmanager->load_id<content::assets::sound>(fn);
+    return static_cast<int>(place.contentmanager->load_id<content::assets::sound>(fn));
 }
 
 // thing action verbs
@@ -977,7 +977,7 @@ void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh
     auto& thing = model->get_thing(player);
 
     if(mesh >= 0) {
-        thing.weapon_mesh = contentmanager->get_asset<content::assets::model>(mesh);
+        thing.weapon_mesh = contentmanager->get_asset<content::assets::model>(asset_id(mesh));
     }
     else {
         thing.weapon_mesh = nothing;

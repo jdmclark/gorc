@@ -182,7 +182,7 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::soundclass_loader::parse(te
             tok.set_report_eol(true);
 
             try {
-                subclass.sound = manager.load_id<assets::sound>(tok.get_space_delimited_string());
+                subclass.sound = static_cast<int>(manager.load_id<assets::sound>(tok.get_space_delimited_string()));
             }
             catch(...) {
                 // sound file not loaded. Set to invalid value.

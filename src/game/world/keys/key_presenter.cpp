@@ -263,7 +263,7 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
 }
 
 float gorc::game::world::keys::key_presenter::get_key_len(int key_id) {
-    auto key = contentmanager.get_asset<content::assets::animation>(key_id);
+    auto key = contentmanager.get_asset<content::assets::animation>(asset_id(key_id));
     return static_cast<float>(key->frame_count) / static_cast<float>(key->framerate);
 }
 
@@ -271,7 +271,7 @@ int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
         int priority, flag_set<flags::key_flag> flags) {
     auto& state = model->keys.emplace();
 
-    state.animation = contentmanager.get_asset<content::assets::animation>(key);
+    state.animation = contentmanager.get_asset<content::assets::animation>(asset_id(key));
     state.high_priority = state.low_priority = state.body_priority = priority;
     state.animation_time = 0.0;
     state.current_frame = 0.0;

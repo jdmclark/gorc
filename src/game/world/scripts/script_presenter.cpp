@@ -185,7 +185,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
         switch(it->type) {
         case cog::symbols::symbol_type::material:
             try {
-                (*jt) = manager.load_id<content::assets::material>(static_cast<const char*>(*jt));
+                (*jt) = static_cast<int>(manager.load_id<content::assets::material>(static_cast<const char*>(*jt)));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -194,7 +194,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
 
         case cog::symbols::symbol_type::model:
             try {
-                (*jt) = manager.load_id<content::assets::model>(static_cast<const char*>(*jt));
+                (*jt) = static_cast<int>(manager.load_id<content::assets::model>(static_cast<const char*>(*jt)));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -203,7 +203,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
 
         case cog::symbols::symbol_type::sound:
             try {
-                (*jt) = manager.load_id<content::assets::sound>(static_cast<const char*>(*jt));
+                (*jt) = static_cast<int>(manager.load_id<content::assets::sound>(static_cast<const char*>(*jt)));
             }
             catch(...) {
                 (*jt) = nullptr;
@@ -212,7 +212,7 @@ void gorc::game::world::scripts::script_presenter::create_global_cog_instance(co
 
         case cog::symbols::symbol_type::keyframe:
             try {
-                (*jt) = manager.load_id<content::assets::animation>(static_cast<const char*>(*jt));
+                (*jt) = static_cast<int>(manager.load_id<content::assets::animation>(static_cast<const char*>(*jt)));
             }
             catch(...) {
                 (*jt) = nullptr;

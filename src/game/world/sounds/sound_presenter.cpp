@@ -128,7 +128,7 @@ gorc::entity_id sound_presenter::play_sound_local(int wav,
         return invalid_sound_id;
     }
 
-    auto const &buffer = contentmanager.get_asset<content::assets::sound>(wav);
+    auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
 
     entity_id snd_id = levelModel->ecs.make_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(snd_id);
@@ -160,7 +160,7 @@ gorc::entity_id sound_presenter::play_sound_pos(int wav,
         return invalid_sound_id;
     }
 
-    auto const &buffer = contentmanager.get_asset<content::assets::sound>(wav);
+    auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
 
     entity_id snd_id = levelModel->ecs.make_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(snd_id);
@@ -205,7 +205,7 @@ gorc::entity_id sound_presenter::play_sound_thing(int wav,
         return invalid_sound_id;
     }
 
-    auto const &soundfile = contentmanager.get_asset<content::assets::sound>(wav);
+    auto const &soundfile = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
 
     if(flags & flags::sound_flag::IgnoreIfSoundclassAlreadyPlaying) {
         // Thing can only play this sound once.
