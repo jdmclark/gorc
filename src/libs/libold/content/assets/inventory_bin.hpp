@@ -9,10 +9,10 @@
 #include <memory>
 
 namespace gorc {
-namespace content {
 
 class content_manager;
 
+namespace content {
 namespace assets {
 
 class inventory_bin {

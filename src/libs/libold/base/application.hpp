@@ -6,7 +6,7 @@
 #include "utility/event_bus.hpp"
 #include "libold/base/utility/time.hpp"
 #include "vfs/virtual_file_system.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include "libold/base/place/place_controller.hpp"
 #include "libold/base/view_stack.hpp"
 #include "libold/base/content/assets/shader.hpp"
@@ -31,7 +31,7 @@ protected:
     service_registry const &services;
 
 private:
-    content::content_manager master_content_manager;
+    content_manager master_content_manager;
     const uint32_t gameplay_timestep_ms;
     std::unique_ptr<graphics::default_render_target> default_target;
     std::unique_ptr<graphics::texture_render_target> texture_target;
@@ -76,7 +76,7 @@ public:
         return;
     }
 
-    virtual void startup(event_bus& eventbus, content::content_manager& content) = 0;
+    virtual void startup(event_bus& eventbus, content_manager& content) = 0;
     virtual void shutdown() = 0;
 
     virtual void update(const gorc::time&, const box<2, int>&) {

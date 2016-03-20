@@ -7,9 +7,8 @@
 #include "libold/base/utility/time.hpp"
 
 namespace gorc {
-namespace content {
+
 class content_manager;
-}
 
 namespace cog {
 class script;
@@ -46,9 +45,9 @@ public:
     void start(level_model& levelModel, script_model& scriptModel);
 
     void create_level_dummy_instances(size_t count);
-    void create_level_cog_instance(int index, const cog::script& script, content::content_manager& manager, cog::compiler& compiler,
+    void create_level_cog_instance(int index, const cog::script& script, content_manager& manager, cog::compiler& compiler,
             const std::vector<cog::vm::value>& values);
-    void create_global_cog_instance(const cog::script& script, content::content_manager& manager, cog::compiler& compiler);
+    void create_global_cog_instance(const cog::script& script, content_manager& manager, cog::compiler& compiler);
 
     int get_global_cog_instance(cog::script const* script) const;
 

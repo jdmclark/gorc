@@ -2,7 +2,7 @@
 #include "inventory_bin.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>
@@ -11,9 +11,9 @@ namespace gorc {
 namespace content {
 namespace assets {
 
-using InventoryBinParameterParser = std::function<void(inventory_bin&, text::tokenizer&, content::content_manager&)>;
+using InventoryBinParameterParser = std::function<void(inventory_bin&, text::tokenizer&, content_manager&)>;
 
-void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content::content_manager& manager) {
+void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content_manager& manager) {
     std::string fn = tok.get_space_delimited_string();
     if(boost::iequals(fn, "none")) {
         tpl.cog = nothing;
@@ -40,7 +40,7 @@ static const std::unordered_map<std::string, InventoryBinParameterParser> Invent
 }
 }
 
-void gorc::content::assets::inventory_bin::parse_args(text::tokenizer& tok, content::content_manager& manager) {
+void gorc::content::assets::inventory_bin::parse_args(text::tokenizer& tok, content_manager& manager) {
     bool oldReportEOL = tok.get_report_eol();
     tok.set_report_eol(true);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/content/loader_registry.hpp"
+#include "content/loader_registry.hpp"
 
 namespace gorc {
 namespace content {

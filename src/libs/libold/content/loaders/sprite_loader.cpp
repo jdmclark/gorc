@@ -1,6 +1,6 @@
 #include "inventory_loader.hpp"
 #include "libold/content/assets/sprite.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include <boost/format.hpp>
 
 gorc::fourcc const gorc::content::loaders::sprite_loader::type = "SPR"_4CC;
@@ -15,7 +15,7 @@ std::vector<gorc::path> const& gorc::content::loaders::sprite_loader::get_prefix
 }
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::sprite_loader::parse(text::tokenizer& t,
-        content::content_manager& manager, service_registry const &) const {
+        content_manager& manager, service_registry const &) const {
 
     auto mat = manager.load<assets::material>(t.get_space_delimited_string());
     auto sprite_type = t.get_number<int>();

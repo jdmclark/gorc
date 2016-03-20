@@ -4,7 +4,7 @@
 #include "libold/cog/verbs/table.hpp"
 #include "libold/cog/compiler.hpp"
 #include "libold/content/master_colormap.hpp"
-#include "libold/base/content/loader_registry.hpp"
+#include "content/loader_registry.hpp"
 #include <memory>
 
 namespace gorc {

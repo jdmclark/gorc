@@ -22,9 +22,7 @@ class verb_table;
 }
 }
 
-namespace content {
 class content_manager;
-}
 
 namespace game {
 
@@ -42,7 +40,7 @@ class key_mix;
 
 class key_presenter {
 private:
-    content::content_manager& contentmanager;
+    content_manager& contentmanager;
     level_model* levelModel;
     key_model* model;
     event_bus* bus;
@@ -53,7 +51,7 @@ private:
     void DispatchMarker(int thing_id, flags::key_marker_type marker);
 
 public:
-    key_presenter(content::content_manager& contentmanager);
+    key_presenter(content_manager& contentmanager);
 
     void start(level_model& levelModel, key_model& model, event_bus& bus);
     void update(const gorc::time& time);

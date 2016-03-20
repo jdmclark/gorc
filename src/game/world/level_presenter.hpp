@@ -51,7 +51,7 @@ private:
     void update_thing_sector(int thing_id, components::thing& thing, const vector<3>& oldThingPosition);
 
 public:
-    std::shared_ptr<content::content_manager> contentmanager;
+    std::shared_ptr<content_manager> contentmanager;
     std::unique_ptr<level_model> model;
 
     std::unique_ptr<physics::physics_presenter> physics_presenter;

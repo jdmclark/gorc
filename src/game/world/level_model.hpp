@@ -43,7 +43,7 @@ public:
     double game_time = 0.0;
     vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
-    level_model(event_bus& parent_event_bus, content::content_manager& manager, cog::compiler& Cogcompiler,
+    level_model(event_bus& parent_event_bus, content_manager& manager, cog::compiler& Cogcompiler,
             asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);
 
     inline components::thing& get_thing(int id) {

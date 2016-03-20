@@ -2,7 +2,7 @@
 #include "template.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include <unordered_map>
 #include <functional>
 #include <type_traits>
@@ -14,11 +14,11 @@ namespace assets {
 class template_parser_args {
 public:
     text::tokenizer& tok;
-    content::content_manager& content;
+    content_manager& content;
     service_registry const &services;
     const std::unordered_map<std::string, int>& templates;
 
-    template_parser_args(text::tokenizer& tok, content::content_manager& content,
+    template_parser_args(text::tokenizer& tok, content_manager& content,
             service_registry const &services,
             const std::unordered_map<std::string, int>& templates) :
                 tok(tok), content(content), services(services),
@@ -149,7 +149,7 @@ void tpl_template_mapper(int& value, int, const std::unordered_map<std::string, 
     }
 }
 
-template <typename T> void tpl_asset_loader(maybe<asset_ref<T>>& value, text::tokenizer& tok, content::content_manager& manager) {
+template <typename T> void tpl_asset_loader(maybe<asset_ref<T>>& value, text::tokenizer& tok, content_manager& manager) {
     std::string fn = tok.get_space_delimited_string();
     if(boost::iequals(fn, "none")) {
         value = nothing;
@@ -246,7 +246,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 }
 }
 
-void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, content::content_manager& manager, service_registry const &services,
+void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, content_manager& manager, service_registry const &services,
         const std::unordered_map<std::string, int>& templates) {
     template_parser_args tp_args(tok, manager, services, templates);
 

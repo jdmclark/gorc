@@ -22,53 +22,63 @@ std::vector<gorc::path> const& shader_program_loader::get_prefixes() const
     return asset_root_path;
 }
 
-std::unique_ptr<gorc::asset> shader_program_loader::deserialize(
-        input_stream &file,
-        content_manager &,
-        service_registry const &) const
-{
-    memory_file shader_program_text;
-    file.copy_to(shader_program_text);
-    char null_delimiter = '\0';
-    shader_program_text.write(&null_delimiter, sizeof(char));
+namespace {
 
-    GLint result = GL_FALSE;
+    template <typename AssetT>
+    std::unique_ptr<gorc::asset> deserialize_shader_program(
+        GLuint program_type,
+        gorc::input_stream &file,
+        gorc::content_manager &,
+        gorc::service_registry const &)
+    {
+        gorc::memory_file shader_program_text;
+        file.copy_to(shader_program_text);
+        char null_delimiter = '\0';
+        shader_program_text.write(&null_delimiter, sizeof(char));
 
-    char const *program_text = shader_program_text.data();
+        GLint result = GL_FALSE;
 
-    auto shaderObject = glCreateShader(program_type);
-    glShaderSource(shaderObject,
-                   /*size*/1,
-                   &program_text,
-                   nullptr);
-    glCompileShader(shaderObject);
+        char const *program_text = shader_program_text.data();
 
-    glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
-    if(result == GL_FALSE) {
-        GLint err_len;
-        glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &err_len);
-        std::vector<char> err_msg(err_len, '\0');
-        glGetShaderInfoLog(shaderObject, err_len, nullptr, err_msg.data());
+        auto shaderObject = glCreateShader(program_type);
+        glShaderSource(shaderObject,
+                       /*size*/1,
+                       &program_text,
+                       nullptr);
+        glCompileShader(shaderObject);
 
-        LOG_FATAL(format("failed to compile shader: %s") % err_msg.data());
+        glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &result);
+        if(result == GL_FALSE) {
+            GLint err_len;
+            glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &err_len);
+            std::vector<char> err_msg(err_len, '\0');
+            glGetShaderInfoLog(shaderObject, err_len, nullptr, err_msg.data());
+
+            LOG_FATAL(gorc::format("failed to compile shader: %s") % err_msg.data());
+        }
+
+        return std::make_unique<AssetT>(shaderObject);
     }
-
-    return std::make_unique<assets::shader_program>(shaderObject);
 }
 
-shader_program_loader::shader_program_loader(GLuint program_type)
-    : program_type(program_type) {
-    return;
-}
-
-vertex_program_loader::vertex_program_loader()
-    : shader_program_loader(GL_VERTEX_SHADER)
+std::unique_ptr<gorc::asset> gorc::content::loaders::vertex_program_loader::deserialize(
+        input_stream &file,
+        content_manager &content,
+        service_registry const &services) const
 {
-    return;
+    return deserialize_shader_program<assets::vertex_program>(GL_VERTEX_SHADER,
+                                                              file,
+                                                              content,
+                                                              services);
 }
 
-fragment_program_loader::fragment_program_loader()
-    : shader_program_loader(GL_FRAGMENT_SHADER)
+std::unique_ptr<gorc::asset> gorc::content::loaders::fragment_program_loader::deserialize(
+        input_stream &file,
+        content_manager &content,
+        service_registry const &services) const
 {
-    return;
+    return deserialize_shader_program<assets::fragment_program>(GL_FRAGMENT_SHADER,
+                                                                file,
+                                                                content,
+                                                                services);
 }

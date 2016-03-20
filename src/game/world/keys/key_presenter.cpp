@@ -3,12 +3,12 @@
 #include "key_presenter.hpp"
 #include "key_model.hpp"
 #include "game/world/level_model.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include "game/world/level_presenter.hpp"
 #include "game/world/events/animation_marker.hpp"
 #include "game/world/components/puppet_animations.hpp"
 
-gorc::game::world::keys::key_presenter::key_presenter(content::content_manager& contentmanager)
+gorc::game::world::keys::key_presenter::key_presenter(content_manager& contentmanager)
     : contentmanager(contentmanager), levelModel(nullptr), model(nullptr) {
     return;
 }

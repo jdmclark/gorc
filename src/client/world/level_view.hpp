@@ -14,9 +14,10 @@
 #include <unordered_set>
 
 namespace gorc {
-namespace content {
+
 class content_manager;
 
+namespace content {
 namespace assets {
 class material;
 class thing_template;
@@ -94,7 +95,7 @@ private:
     void draw_thing(const game::world::components::thing& thing, int thing_id);
 
 public:
-    level_view(content::content_manager& shadercontentmanager);
+    level_view(content_manager& shadercontentmanager);
 
     inline void set_presenter(game::world::level_presenter* presenter) {
         currentPresenter = presenter;

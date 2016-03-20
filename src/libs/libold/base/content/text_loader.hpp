@@ -1,6 +1,6 @@
 #pragma once
 
-#include "loader.hpp"
+#include "content/loader.hpp"
 #include "libold/base/text/tokenizer.hpp"
 
 namespace gorc {

@@ -14,7 +14,7 @@ std::vector<gorc::path> const& gorc::content::loaders::inventory_loader::get_pre
 }
 
 std::unique_ptr<gorc::asset> gorc::content::loaders::inventory_loader::parse(text::tokenizer& t,
-        content::content_manager& manager, service_registry const &) const {
+        content_manager& manager, service_registry const &) const {
     std::unique_ptr<content::assets::inventory> dat(new content::assets::inventory());
 
     text::token tok;

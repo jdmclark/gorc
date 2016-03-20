@@ -1,7 +1,7 @@
 #include "log/log.hpp"
 #include "puppet_loader.hpp"
 #include "libold/content/assets/puppet.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 
 #include <unordered_map>
 #include <string>

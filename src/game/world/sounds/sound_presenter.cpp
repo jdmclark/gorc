@@ -1,7 +1,7 @@
 #include "sound_presenter.hpp"
 #include "game/world/level_model.hpp"
 #include "game/level_state.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include "game/world/level_presenter.hpp"
 #include "sound_model.hpp"
 #include "game/world/sounds/components/sound.hpp"
@@ -18,7 +18,7 @@ using gorc::game::world::sounds::sound_presenter;
 
 constexpr gorc::entity_id invalid_sound_id(-1);
 
-sound_presenter::sound_presenter(content::content_manager& contentmanager)
+sound_presenter::sound_presenter(content_manager& contentmanager)
     : contentmanager(contentmanager)
     , levelModel(nullptr)
     , model(nullptr) {

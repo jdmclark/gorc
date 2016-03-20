@@ -9,10 +9,10 @@
 #include <string>
 
 namespace gorc {
-namespace content {
 
 class content_manager;
 
+namespace content {
 namespace assets {
 
 class colormap;

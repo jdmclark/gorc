@@ -18,9 +18,9 @@ SOURCES:= \
 	content/content_manager.cpp \
 	content/json_loader.cpp \
 	content/loader.cpp \
-	content/loaders/shader_loader.cpp \
-	content/loaders/shader_program_loader.cpp \
-	content/loaders/sound_loader.cpp \
+	libold/base/content/loaders/shader_loader.cpp \
+	libold/base/content/loaders/shader_program_loader.cpp \
+	libold/base/content/loaders/sound_loader.cpp \
 	content/text_loader.cpp \
 	diagnostics/error.cpp \
 	diagnostics/error_level.cpp \

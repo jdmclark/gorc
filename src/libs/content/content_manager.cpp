@@ -55,12 +55,15 @@ gorc::asset_id gorc::content_manager::load_internal(fourcc type, std::string con
 
 void gorc::content_manager::finalize_internal(asset_id id)
 {
-    auto &element = at_id(assets, id);
-    if(!element.content) {
-        diagnostic_context dc(element.name.c_str());
-        auto const &loader = services.get<loader_registry>().get_loader(element.type);
-        auto file = services.get<virtual_file_system>().find(element.name, loader.get_prefixes());
-        element.content = loader.deserialize(*std::get<1>(file), *this, services);
+    // Finalizing this element may trigger load of dependencies. Resizing the assets vector
+    // will invalidate this reference.
+    auto const &unsafe_ref = at_id(assets, id);
+    if(!unsafe_ref.content) {
+        diagnostic_context dc(unsafe_ref.name.c_str());
+        auto const &loader = services.get<loader_registry>().get_loader(unsafe_ref.type);
+        auto file = services.get<virtual_file_system>().find(unsafe_ref.name,
+                                                             loader.get_prefixes());
+        at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, services);
     }
 }
 

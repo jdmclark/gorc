@@ -14,8 +14,8 @@ public:
 
     shader_program(GLuint program);
     shader_program(const shader_program&) = delete;
-    shader_program(shader_program&&);
-    ~shader_program();
+    shader_program(shader_program&&) = delete;
+    virtual ~shader_program();
 
     const shader_program& operator=(const shader_program&) = delete;
 };
@@ -23,11 +23,15 @@ public:
 class vertex_program : public shader_program {
 public:
     static fourcc const type;
+
+    using shader_program::shader_program;
 };
 
 class fragment_program : public shader_program {
 public:
     static fourcc const type;
+
+    using shader_program::shader_program;
 };
 
 }

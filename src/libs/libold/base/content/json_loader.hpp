@@ -1,6 +1,6 @@
 #pragma once
 
-#include "loader.hpp"
+#include "content/loader.hpp"
 #include "text/json_input_stream.hpp"
 
 namespace gorc {

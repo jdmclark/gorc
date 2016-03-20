@@ -1,7 +1,7 @@
 #include "log/log.hpp"
 #include "animation_loader.hpp"
 #include "libold/content/assets/animation.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include <boost/format.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <unordered_map>

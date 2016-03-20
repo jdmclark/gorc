@@ -20,7 +20,7 @@ gorc::client::application::~application() {
     return;
 }
 
-void gorc::client::application::startup(event_bus& eventbus, content::content_manager& content) {
+void gorc::client::application::startup(event_bus& eventbus, content_manager& content) {
     // Register handler to print messages.
     print_delegate = eventbus.add_handler<events::print>([](const events::print& print) {
         LOG_INFO(print.message);
@@ -41,7 +41,7 @@ void gorc::client::application::startup(event_bus& eventbus, content::content_ma
     }
 
     // HACK: Set current level to 01narshadda.jkl.
-    auto contentmanager = std::make_shared<content::content_manager>(components.services);
+    auto contentmanager = std::make_shared<content_manager>(components.services);
     const auto& lev = contentmanager->load<content::assets::level>(input_levelname);
 
     // Start game:

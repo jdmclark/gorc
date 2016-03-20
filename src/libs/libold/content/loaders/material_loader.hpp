@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/content/loader.hpp"
+#include "content/loader.hpp"
 #include "libold/content/assets/colormap.hpp"
 
 namespace gorc {

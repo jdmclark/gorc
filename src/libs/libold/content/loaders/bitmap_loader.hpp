@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/content/loader.hpp"
+#include "content/loader.hpp"
 #include "math/vector.hpp"
 
 namespace gorc {

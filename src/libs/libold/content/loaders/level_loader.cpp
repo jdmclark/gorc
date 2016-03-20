@@ -1,7 +1,7 @@
 #include "log/log.hpp"
 #include "level_loader.hpp"
 #include "libold/content/assets/level.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include "libold/content/constants.hpp"
 #include "libold/content/master_colormap.hpp"
 #include "math/vector.hpp"

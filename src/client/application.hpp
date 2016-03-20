@@ -49,7 +49,7 @@ public:
     application(service_registry const &services);
     ~application();
 
-    virtual void startup(event_bus& eventbus, content::content_manager& content) override;
+    virtual void startup(event_bus& eventbus, content_manager& content) override;
     virtual void shutdown() override;
 
     virtual void update(const gorc::time& time, const box<2, int>& view_size) override;

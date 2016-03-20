@@ -1,7 +1,7 @@
 #include "log/log.hpp"
 #include "soundclass_loader.hpp"
 #include "libold/content/assets/soundclass.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 
 #include <unordered_map>
 #include <string>

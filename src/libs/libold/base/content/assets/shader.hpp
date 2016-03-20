@@ -16,7 +16,7 @@ public:
 
     shader(GLuint program);
     shader(const shader&) = delete;
-    shader(shader&&);
+    shader(shader&&) = delete;
     ~shader();
 
     const shader& operator=(const shader&) = delete;

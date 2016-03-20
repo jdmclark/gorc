@@ -9,9 +9,8 @@
 #include "game/world/components/thing.hpp"
 
 namespace gorc {
-namespace content {
+
 class content_manager;
-}
 
 namespace cog {
 namespace verbs {
@@ -31,12 +30,12 @@ class sound;
 
 class sound_presenter {
 private:
-    content::content_manager& contentmanager;
+    content_manager& contentmanager;
     level_model* levelModel;
     sound_model* model;
 
 public:
-    sound_presenter(content::content_manager&);
+    sound_presenter(content_manager&);
 
     void start(level_model& levelModel, sound_model& soundModel);
     void update(const gorc::time& time);

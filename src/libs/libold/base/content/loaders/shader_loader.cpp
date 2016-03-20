@@ -2,7 +2,7 @@
 #include "shader_loader.hpp"
 #include "libold/base/content/assets/shader.hpp"
 #include "libold/base/content/assets/shader_program.hpp"
-#include "libold/base/content/content_manager.hpp"
+#include "content/content_manager.hpp"
 #include <vector>
 #include <cstdint>
 #include <boost/format.hpp>
