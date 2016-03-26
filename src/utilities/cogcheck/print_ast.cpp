@@ -19,7 +19,7 @@ void gorc::print_ast(cog::ast::translation_unit &tu,
         std::cout << t << "default value: " << as_string(sym.default_value) << std::endl;
         std::cout << t << "local: " << std::boolalpha << sym.local << std::endl;
         std::cout << t << "desc: " << sym.desc << std::endl;
-        std::cout << t << "mask: " << std::hex << sym.mask << std::endl;
+        std::cout << t << "mask: " << std::hex << static_cast<int>(sym.mask) << std::endl;
         std::cout << t << "linkid: " << std::dec << sym.link_id << std::endl;
         std::cout << t << "nolink: " << std::boolalpha << sym.no_link << std::endl;
     }

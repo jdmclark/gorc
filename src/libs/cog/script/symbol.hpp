@@ -2,6 +2,8 @@
 
 #include "type.hpp"
 #include "value.hpp"
+#include "source_type.hpp"
+#include "utility/flag_set.hpp"
 #include <string>
 
 namespace gorc {
@@ -18,7 +20,7 @@ namespace gorc {
 
             bool local;
             std::string desc;
-            int mask;
+            flag_set<source_type> mask;
             int link_id;
             bool no_link;
 
@@ -31,7 +33,7 @@ namespace gorc {
                    value default_value,
                    bool local,
                    std::string const &desc,
-                   int mask,
+                   flag_set<source_type> mask,
                    int linkid,
                    bool nolink);
         };

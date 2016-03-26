@@ -3,6 +3,7 @@
 #include "symbol_field_visitor.hpp"
 #include "symbol_extension_type.hpp"
 #include "symbol_extension_visitor.hpp"
+#include "cog/script/source_type.hpp"
 #include <unordered_set>
 
 gorc::cog::collect_symbols_visitor::collect_symbols_visitor(script &output_script,
@@ -53,22 +54,23 @@ void gorc::cog::collect_symbols_visitor::visit(ast::symbol &symbol)
     symbol_extension_visitor w(type);
     ast_visit(w, symbol.extensions);
 
-    int default_mask = 0;
+    flag_set<source_type> default_mask;
     switch(type) {
     case value_type::sector:
-        default_mask = 0x400;
+        default_mask += source_type::player;
         break;
 
     case value_type::surface:
-        default_mask = 0x400;
+        default_mask += source_type::player;
         break;
 
     case value_type::thing:
-        default_mask = 0x404;
+        default_mask += source_type::player;
+        default_mask += source_type::actor;
         break;
 
     default:
-        default_mask = ~0;
+        default_mask = flag_set<source_type>(~0);
         break;
     }
 
@@ -82,7 +84,7 @@ void gorc::cog::collect_symbols_visitor::visit(ast::symbol &symbol)
                                      default_value,
                                      w.local || default_local,
                                      w.desc,
-                                     maybe_if(w.mask, default_mask, [](int m) { return m; }),
+                                     maybe_if(w.mask, default_mask, [](auto m) { return m; }),
                                      maybe_if(w.linkid, 0, [](int l) { return l; }),
                                      w.nolink);
 

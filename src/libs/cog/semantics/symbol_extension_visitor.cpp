@@ -117,8 +117,8 @@ void gorc::cog::symbol_extension_visitor::visit(ast::valued_extension &ext)
 
             case symbol_extension_type::mask:
                 redefinition(name, mask.has_value());
-                mask = ast_visit(symbol_extension_field_integer_visitor(name),
-                                  *ext.value);
+                mask = flag_set<source_type>(ast_visit(symbol_extension_field_integer_visitor(name),
+                                             *ext.value));
                 break;
 
             case symbol_extension_type::desc:

@@ -56,6 +56,15 @@ namespace gorc {
                              value param2,
                              value param3);
 
+/*            void send_to_linked(message_type msg,
+                                value sender,
+                                value source,
+                                source_type st,
+                                value param0 = value(),
+                                value param1 = value(),
+                                value param2 = value(),
+                                value param3 = value());*/
+
             void update(time_delta dt);
         };
 

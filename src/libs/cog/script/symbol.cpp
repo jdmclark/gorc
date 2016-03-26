@@ -19,7 +19,7 @@ gorc::cog::symbol::symbol(size_t sequence_number,
                           value default_value,
                           bool local,
                           std::string const &desc,
-                          int mask,
+                          flag_set<source_type> mask,
                           int linkid,
                           bool nolink)
     : sequence_number(sequence_number)

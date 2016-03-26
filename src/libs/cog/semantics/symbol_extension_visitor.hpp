@@ -2,6 +2,8 @@
 
 #include "cog/ast/ast.hpp"
 #include "cog/script/value.hpp"
+#include "cog/script/source_type.hpp"
+#include "utility/flag_set.hpp"
 
 namespace gorc {
     namespace cog {
@@ -13,7 +15,7 @@ namespace gorc {
             maybe<int> linkid;
             bool nolink = false;
             std::string desc;
-            maybe<int> mask;
+            maybe<flag_set<source_type>> mask;
 
             symbol_extension_visitor(value_type type);
 
