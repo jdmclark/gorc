@@ -59,7 +59,8 @@ void gorc::content_manager::finalize_internal(asset_id id)
     // will invalidate this reference.
     auto const &unsafe_ref = at_id(assets, id);
     if(!unsafe_ref.content) {
-        diagnostic_context dc(unsafe_ref.name.c_str());
+        std::string safe_name = unsafe_ref.name;
+        diagnostic_context dc(safe_name.c_str());
         auto const &loader = services.get<loader_registry>().get_loader(unsafe_ref.type);
         auto file = services.get<virtual_file_system>().find(unsafe_ref.name,
                                                              loader.get_prefixes());
