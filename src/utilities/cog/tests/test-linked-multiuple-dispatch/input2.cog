@@ -1,0 +1,11 @@
+symbols
+
+sector sec
+
+message entered
+end
+
+code
+entered:
+print("input2 entered");
+end

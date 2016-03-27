@@ -1,0 +1,16 @@
+symbols
+
+sector sec nolink
+
+message startup
+message entered
+end
+
+code
+startup:
+print("startup");
+return;
+
+entered:
+print("should not be printed");
+end

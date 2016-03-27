@@ -1,0 +1,16 @@
+symbols
+
+sector sec mask=0x8
+
+message startup
+message entered
+end
+
+code
+startup:
+print("startup");
+return;
+
+entered:
+print("should not be printed");
+end

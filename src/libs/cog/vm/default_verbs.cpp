@@ -162,7 +162,7 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
         }
     };
 
-    verbs.emplace_verb<getsenderref_verb>("getsourceref");
+    verbs.emplace_verb<getsourceref_verb>("getsourceref");
 
     class getsourcetype_verb : public cog::verb {
     public:
@@ -181,7 +181,7 @@ void gorc::cog::default_populate_verb_table(verb_table &verbs)
         }
     };
 
-    verbs.emplace_verb<getsendertype_verb>("getsourcetype");
+    verbs.emplace_verb<getsourcetype_verb>("getsourcetype");
 
     verbs.add_service_verb("sleep", [](bool expects_value,
                                        service_registry const &sr,

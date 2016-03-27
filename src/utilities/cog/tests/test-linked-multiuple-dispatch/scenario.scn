@@ -1,0 +1,25 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                sector 1
+            ]
+        },
+        {
+            file: "input2.cog",
+            init: [
+                sector 1
+            ]
+        }
+    ],
+
+    events: [
+        send_linked {
+            message: "entered",
+            sender: sector 1,
+            source: thing 2,
+            source_type: "player"
+        }
+    ]
+}

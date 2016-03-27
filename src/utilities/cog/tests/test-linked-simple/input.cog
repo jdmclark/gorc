@@ -1,0 +1,19 @@
+symbols
+
+sector sec
+
+message startup
+message entered
+end
+
+code
+startup:
+print("startup");
+return;
+
+entered:
+print("sender is");
+printvar(getsenderref());
+print("source is");
+printvar(getsourceref());
+end
