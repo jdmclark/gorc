@@ -13,9 +13,25 @@
 #include "io/binary_output_stream.hpp"
 #include <vector>
 #include <memory>
+#include <map>
+#include <tuple>
 
 namespace gorc {
     namespace cog {
+
+        class executor_linkage {
+        public:
+            flag_set<source_type> mask;
+            cog_id instance_id;
+            value sender_link_id;
+
+            executor_linkage(flag_set<source_type> mask,
+                             cog_id instance_id,
+                             value sender_link_id);
+            executor_linkage(deserialization_constructor_tag, binary_input_stream &);
+
+            void binary_serialize_object(binary_output_stream &) const;
+        };
 
         class executor {
         private:
@@ -25,6 +41,9 @@ namespace gorc {
 
             std::vector<std::unique_ptr<instance>> instances;
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
+            std::multimap<value, executor_linkage> linkages;
+
+            void add_linkage(cog_id id, instance const &inst);
 
         public:
             explicit executor(verb_table &verbs);
@@ -42,6 +61,7 @@ namespace gorc {
             maybe<call_stack_frame> create_message_frame(cog_id instance,
                                                          message_type msg,
                                                          value sender,
+                                                         value sender_id,
                                                          value source,
                                                          value param0,
                                                          value param1,
@@ -50,20 +70,21 @@ namespace gorc {
 
             void send_to_all(message_type msg,
                              value sender,
+                             value sender_id,
                              value source,
                              value param0,
                              value param1,
                              value param2,
                              value param3);
 
-/*            void send_to_linked(message_type msg,
+            void send_to_linked(message_type msg,
                                 value sender,
                                 value source,
                                 source_type st,
-                                value param0 = value(),
-                                value param1 = value(),
-                                value param2 = value(),
-                                value param3 = value());*/
+                                value param0,
+                                value param1,
+                                value param2,
+                                value param3);
 
             void update(time_delta dt);
         };

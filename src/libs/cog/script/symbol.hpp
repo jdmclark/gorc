@@ -36,6 +36,8 @@ namespace gorc {
                    flag_set<source_type> mask,
                    int linkid,
                    bool nolink);
+
+            bool has_event_link() const;
         };
 
     }

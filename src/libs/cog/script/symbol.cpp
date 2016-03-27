@@ -34,3 +34,22 @@ gorc::cog::symbol::symbol(size_t sequence_number,
 {
     return;
 }
+
+bool gorc::cog::symbol::has_event_link() const
+{
+    if(no_link) {
+        // No-link symbols never have event link
+        return false;
+    }
+
+    switch(type) {
+    case value_type::cog:
+    case value_type::sector:
+    case value_type::surface:
+    case value_type::thing:
+        return true;
+
+    default:
+        return false;
+    }
+}

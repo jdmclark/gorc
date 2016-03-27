@@ -10,6 +10,7 @@
     ],
     "sources" : [
         "main.cpp",
+        "events.cpp",
         "scenario.cpp"
     ]
 }

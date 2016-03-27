@@ -3,6 +3,7 @@
 gorc::cog::call_stack_frame::call_stack_frame(cog_id instance_id,
                                               size_t program_counter,
                                               value sender,
+                                              value sender_id,
                                               value source,
                                               value param0,
                                               value param1,
@@ -11,6 +12,7 @@ gorc::cog::call_stack_frame::call_stack_frame(cog_id instance_id,
     : instance_id(instance_id)
     , program_counter(program_counter)
     , sender(sender)
+    , sender_id(sender_id)
     , source(source)
     , param0(param0)
     , param1(param1)
@@ -25,6 +27,7 @@ gorc::cog::call_stack_frame::call_stack_frame(deserialization_constructor_tag,
     : instance_id(deserialization_constructor, bis)
     , program_counter(binary_deserialize<size_t>(bis))
     , sender(binary_deserialize<value>(bis))
+    , sender_id(binary_deserialize<value>(bis))
     , source(binary_deserialize<value>(bis))
     , param0(binary_deserialize<value>(bis))
     , param1(binary_deserialize<value>(bis))
@@ -42,6 +45,7 @@ void gorc::cog::call_stack_frame::binary_serialize_object(binary_output_stream &
     binary_serialize(bos, instance_id);
     binary_serialize(bos, program_counter);
     binary_serialize(bos, sender);
+    binary_serialize(bos, sender_id);
     binary_serialize(bos, source);
     binary_serialize(bos, param0);
     binary_serialize(bos, param1);

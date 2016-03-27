@@ -15,6 +15,7 @@ namespace gorc {
             cog_id instance_id;
             size_t program_counter;
             value sender;
+            value sender_id;
             value source;
             value param0;
             value param1;
@@ -32,6 +33,7 @@ namespace gorc {
             call_stack_frame(cog_id instance_id,
                              size_t program_counter,
                              value sender,
+                             value sender_id,
                              value source,
                              value param0,
                              value param1,

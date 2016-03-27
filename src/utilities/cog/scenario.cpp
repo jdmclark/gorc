@@ -108,6 +108,19 @@ namespace {
             { "file" }
         );
 
+    std::unique_ptr<cog_scenario_event> deserialize_event(json_input_stream &f)
+    {
+        return gorc::json_deserialize_heterogeneous(f, [&](json_input_stream &f,
+                                                           std::string const &type) {
+                if(type == "time") {
+                    return std::make_unique<time_step_event>(deserialization_constructor, f);
+                }
+                else {
+                    LOG_FATAL(format("unknown scenario event type '%s'") % type);
+                }
+            });
+    }
+
     json_specification<cog_scenario> cog_scenario_spec(
             /* Members */
             {
@@ -124,14 +137,10 @@ namespace {
                             });
                     }
                 },
-                { "timestep", [](json_input_stream &f, cog_scenario &scn) {
-                        double t = json_deserialize<double>(f);
-                        scn.time_step = time_delta(t);
-                    }
-                },
-                { "timemax", [](json_input_stream &f, cog_scenario &scn) {
-                        double t = json_deserialize<double>(f);
-                        scn.max_time = time_delta(t);
+                { "events", [](json_input_stream &f, cog_scenario &scn) {
+                        json_deserialize_array(f, [&](json_input_stream &f) {
+                            scn.events.push_back(deserialize_event(f));
+                        });
                     }
                 }
             }

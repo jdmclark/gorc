@@ -16,7 +16,7 @@
 
 namespace gorc {
 
-    class cog_program : public program {
+    class cog_program : public program, public cog_scenario_event_visitor {
     private:
         std::string scenario_file;
         cog::verb_table verbs;
@@ -97,6 +97,7 @@ namespace gorc {
             // Execute startup messages:
             executor->send_to_all(cog::message_type::startup,
                                   /* sender: nothing */ 0,
+                                  /* senderid: nothing */ cog::value(),
                                   /* source: nothing */ 0,
                                   /* param0 */ cog::value(),
                                   /* param1 */ cog::value(),
@@ -152,20 +153,24 @@ namespace gorc {
                 instantiate_new(scenario, verbs, services);
             }
 
-            while(current_time < scenario.max_time) {
+            for(auto const &event : scenario.events) {
                 if(save_and_exit_when_possible) {
                     serialize_to_savefile(services);
                     LOG_INFO("Saved state");
                     return EXIT_SUCCESS;
                 }
 
-                current_time += scenario.time_step;
-                std::cout << "T+" << current_time.count() << std::endl;
-
-                executor->update(scenario.time_step);
+                event->accept(*this);
             }
 
             return EXIT_SUCCESS;
+        }
+
+        virtual void visit(time_step_event const &e) override
+        {
+            current_time += e.step;
+            std::cout << "T+" << current_time.count() << std::endl;
+            executor->update(e.step);
         }
 
         void populate_verb_table()

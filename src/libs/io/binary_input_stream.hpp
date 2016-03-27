@@ -6,6 +6,7 @@
 #include "utility/constructor_tag.hpp"
 #include "utility/service_registry.hpp"
 #include "utility/time.hpp"
+#include "utility/flag_set.hpp"
 
 namespace gorc {
 
@@ -59,6 +60,13 @@ namespace gorc {
         binary_deserialize(binary_input_stream &is)
     {
         return static_cast<T>(binary_deserialize<typename std::underlying_type<T>::type>(is));
+    }
+
+    template <typename T>
+    typename std::enable_if<is_flag_set<T>::value, T>::type
+        binary_deserialize(binary_input_stream &is)
+    {
+        return T(binary_deserialize<typename flag_set_underlying_type<T>::type>(is));
     }
 
     template <typename T>

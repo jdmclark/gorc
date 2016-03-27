@@ -5,6 +5,7 @@
 #include "output_stream.hpp"
 #include "utility/service_registry.hpp"
 #include "utility/time.hpp"
+#include "utility/flag_set.hpp"
 
 namespace gorc {
 
@@ -62,6 +63,13 @@ namespace gorc {
         binary_serialize(binary_output_stream &os, T const &value)
     {
         binary_serialize<double>(os, value.count());
+    }
+
+    template <typename U>
+    typename std::enable_if<std::is_enum<U>::value, void>::type
+        binary_serialize(binary_output_stream &os, flag_set<U> const &value)
+    {
+        binary_serialize(os, static_cast<U>(value));
     }
 
     template <typename RangeT, typename FmtFnT>

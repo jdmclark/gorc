@@ -50,6 +50,50 @@ namespace {
         { message_type::splash, "splash" },
         { message_type::trigger, "trigger" }
     };
+
+    std::unordered_map<std::string, message_type> str_map {
+        { "global0", message_type::global0 },
+        { "activate", message_type::activated },
+        { "activated", message_type::activated },
+        { "removed", message_type::removed },
+        { "startup", message_type::startup },
+        { "timer", message_type::timer },
+        { "blocked", message_type::blocked },
+        { "entered", message_type::entered },
+        { "exited", message_type::exited },
+        { "crossed", message_type::sighted },
+        { "damaged", message_type::damaged },
+        { "arrived", message_type::arrived },
+        { "killed", message_type::killed },
+        { "pulse", message_type::pulse },
+        { "touched", message_type::touched },
+        { "created", message_type::created },
+        { "loading", message_type::loading },
+        { "selected", message_type::selected },
+        { "deselected", message_type::deselected },
+        { "autoselect", message_type::autoselect },
+        { "changed", message_type::changed },
+        { "deactivated", message_type::deactivated },
+        { "shutdown", message_type::shutdown },
+        { "respawn", message_type::respawn },
+        { "ai_event", message_type::ai_event },
+        { "skill", message_type::skill },
+        { "taken", message_type::taken },
+        { "user0", message_type::user0 },
+        { "user1", message_type::user1 },
+        { "user2", message_type::user2 },
+        { "user3", message_type::user3 },
+        { "user4", message_type::user4 },
+        { "user5", message_type::user5 },
+        { "user6", message_type::user6 },
+        { "user7", message_type::user7 },
+        { "new_player", message_type::new_player },
+        { "fire", message_type::fire },
+        { "join", message_type::join },
+        { "leave", message_type::leave },
+        { "splash", message_type::splash },
+        { "trigger", message_type::trigger }
+    };
 }
 
 char const* gorc::cog::as_string(message_type mt)
@@ -64,45 +108,7 @@ char const* gorc::cog::as_string(message_type mt)
 
 void gorc::cog::add_messages_to_constant_table(constant_table &table)
 {
-    table.emplace("global0", message_id(static_cast<int>(message_type::global0)));
-    table.emplace("activate", message_id(static_cast<int>(message_type::activated)));
-    table.emplace("activated", message_id(static_cast<int>(message_type::activated)));
-    table.emplace("removed", message_id(static_cast<int>(message_type::removed)));
-    table.emplace("startup", message_id(static_cast<int>(message_type::startup)));
-    table.emplace("timer", message_id(static_cast<int>(message_type::timer)));
-    table.emplace("blocked", message_id(static_cast<int>(message_type::blocked)));
-    table.emplace("entered", message_id(static_cast<int>(message_type::entered)));
-    table.emplace("exited", message_id(static_cast<int>(message_type::exited)));
-    table.emplace("crossed", message_id(static_cast<int>(message_type::sighted)));
-    table.emplace("damaged", message_id(static_cast<int>(message_type::damaged)));
-    table.emplace("arrived", message_id(static_cast<int>(message_type::arrived)));
-    table.emplace("killed", message_id(static_cast<int>(message_type::killed)));
-    table.emplace("pulse", message_id(static_cast<int>(message_type::pulse)));
-    table.emplace("touched", message_id(static_cast<int>(message_type::touched)));
-    table.emplace("created", message_id(static_cast<int>(message_type::created)));
-    table.emplace("loading", message_id(static_cast<int>(message_type::loading)));
-    table.emplace("selected", message_id(static_cast<int>(message_type::selected)));
-    table.emplace("deselected", message_id(static_cast<int>(message_type::deselected)));
-    table.emplace("autoselect", message_id(static_cast<int>(message_type::autoselect)));
-    table.emplace("changed", message_id(static_cast<int>(message_type::changed)));
-    table.emplace("deactivated", message_id(static_cast<int>(message_type::deactivated)));
-    table.emplace("shutdown", message_id(static_cast<int>(message_type::shutdown)));
-    table.emplace("respawn", message_id(static_cast<int>(message_type::respawn)));
-    table.emplace("ai_event", message_id(static_cast<int>(message_type::ai_event)));
-    table.emplace("skill", message_id(static_cast<int>(message_type::skill)));
-    table.emplace("taken", message_id(static_cast<int>(message_type::taken)));
-    table.emplace("user0", message_id(static_cast<int>(message_type::user0)));
-    table.emplace("user1", message_id(static_cast<int>(message_type::user1)));
-    table.emplace("user2", message_id(static_cast<int>(message_type::user2)));
-    table.emplace("user3", message_id(static_cast<int>(message_type::user3)));
-    table.emplace("user4", message_id(static_cast<int>(message_type::user4)));
-    table.emplace("user5", message_id(static_cast<int>(message_type::user5)));
-    table.emplace("user6", message_id(static_cast<int>(message_type::user6)));
-    table.emplace("user7", message_id(static_cast<int>(message_type::user7)));
-    table.emplace("new_player", message_id(static_cast<int>(message_type::new_player)));
-    table.emplace("fire", message_id(static_cast<int>(message_type::fire)));
-    table.emplace("join", message_id(static_cast<int>(message_type::join)));
-    table.emplace("leave", message_id(static_cast<int>(message_type::leave)));
-    table.emplace("splash", message_id(static_cast<int>(message_type::splash)));
-    table.emplace("trigger", message_id(static_cast<int>(message_type::trigger)));
+    for(auto const &em : str_map) {
+        table.emplace(em.first, message_id(static_cast<int>(em.second)));
+    }
 }

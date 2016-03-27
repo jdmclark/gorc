@@ -25,6 +25,11 @@ namespace gorc {
             }
         }
 
+        explicit operator T() const
+        {
+            return T(value);
+        }
+
         explicit operator UT() const
         {
             return value;
@@ -93,6 +98,38 @@ namespace gorc {
         {
             return value != val.value;
         }
+    };
+
+    namespace detail {
+        template <typename U>
+        U fake_flag_set_enum_type(flag_set<U> const &);
+    }
+
+    template <typename T>
+    struct flag_set_enum_type {
+        using type = decltype(detail::fake_flag_set_enum_type(std::declval<T>()));
+    };
+
+    template <typename T>
+    struct flag_set_underlying_type {
+        using type = typename std::underlying_type<typename flag_set_enum_type<T>::type>::type;
+    };
+
+    template <typename T>
+    struct is_flag_set {
+    private:
+        using yes = char[1];
+        using no = char[2];
+
+        template <typename U,
+                  typename = decltype(detail::fake_flag_set_enum_type(std::declval<U>()))>
+        static yes& test(int);
+
+        template <typename U>
+        static no& test(...);
+
+    public:
+        static constexpr bool value = sizeof(test<T>(0)) == sizeof(yes);
     };
 
 }

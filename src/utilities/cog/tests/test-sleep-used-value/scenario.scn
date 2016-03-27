@@ -5,6 +5,8 @@
         }
     ],
 
-    timestep: 0.5,
-    timemax: 1.0
+    events: [
+        time 0.5,
+        time 0.5
+    ]
 }
