@@ -1,5 +1,19 @@
 startup
 sender is
 sector(1)
+senderid is
+int(122)
+sendertype is
+int(5)
 source is
 thing(2)
+sourcetype is
+int(3)
+param0 is
+int(5)
+param1 is
+int(10)
+param2 is
+int(20)
+param3 is
+int(40)

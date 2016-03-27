@@ -2,6 +2,11 @@
 #include "log/log.hpp"
 #include "utility/range.hpp"
 
+bool gorc::cog::executor_linkage_comparator::operator()(value left, value right) const
+{
+    return (left.get_type() < right.get_type()) && (left < right);
+}
+
 gorc::cog::executor_linkage::executor_linkage(flag_set<source_type> mask,
                                               cog_id instance_id,
                                               value sender_link_id)
@@ -76,10 +81,10 @@ void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) con
 void gorc::cog::executor::add_linkage(cog_id id, instance const &inst)
 {
     for(auto const &link : inst.linkages) {
-        linkages.emplace(link.first,
-                         executor_linkage(link.second.mask,
+        linkages.emplace(link.object,
+                         executor_linkage(link.mask,
                                           id,
-                                          link.second.sender_link_id));
+                                          link.sender_link_id));
     }
 }
 

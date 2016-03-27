@@ -13,11 +13,8 @@
             message: "entered",
             sender: sector 1,
             source: thing 2,
-            source_type: "player",
-            param0: int 5,
-            param1: int 10,
-            param2: int 20,
-            param3: int 40
-        }
+            source_type: "player"
+        },
+        time 1
     ]
 }

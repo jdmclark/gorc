@@ -19,6 +19,10 @@
 namespace gorc {
     namespace cog {
 
+        struct executor_linkage_comparator {
+            bool operator()(value left, value right) const;
+        };
+
         class executor_linkage {
         public:
             flag_set<source_type> mask;
@@ -41,7 +45,7 @@ namespace gorc {
 
             std::vector<std::unique_ptr<instance>> instances;
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
-            std::multimap<value, executor_linkage> linkages;
+            std::multimap<value, executor_linkage, executor_linkage_comparator> linkages;
 
             void add_linkage(cog_id id, instance const &inst);
 

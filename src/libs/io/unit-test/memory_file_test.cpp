@@ -303,4 +303,27 @@ test_case(copy)
     assert_true(g.at_end());
 }
 
+test_case(data)
+{
+    memory_file f;
+
+    std::string message = "Hello, World!";
+
+    f.write(message.data(), message.size());
+
+    std::string new_message(f.data(), f.size());
+    assert_eq(new_message, message);
+}
+
+test_case(reader_size)
+{
+    memory_file f;
+
+    std::string message = "Hello, World!";
+    f.write(message.data(), message.size());
+
+    memory_file::reader mr(f);
+    assert_eq(message.size(), mr.size());
+}
+
 end_suite(memory_file_test);

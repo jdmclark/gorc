@@ -1,0 +1,14 @@
+==== run 1 ====
+startup
+sender is
+sector(1)
+source is
+thing(2)
+scenario.scn: Saved state
+==== run 2 ====
+scenario.scn: Loading state
+sender is
+sector(1)
+source is
+thing(2)
+scenario.scn: Saved state

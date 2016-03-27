@@ -5,12 +5,6 @@
             init: [
                 sector 1
             ]
-        },
-        {
-            file: "input2.cog",
-            init: [
-                sector 1
-            ]
         }
     ],
 
@@ -18,8 +12,8 @@
         send_linked {
             message: "entered",
             sender: sector 1,
-            source: thing 2,
-            source_type: "player"
+            source: int 2,
+            source_type: "player",
         }
     ]
 }

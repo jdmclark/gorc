@@ -1,0 +1,6 @@
+{
+    instances: [ ],
+    events: [
+        foobarbaz
+    ]
+}

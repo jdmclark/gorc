@@ -54,9 +54,6 @@ gorc::cog::value gorc::read_cog_value(json_input_stream &f)
         else if(type == "sector") {
             return cog::value(sector_id(json_deserialize<int>(f)));
         }
-        else if(type == "sector") {
-            return cog::value(sector_id(json_deserialize<int>(f)));
-        }
         else if(type == "surface") {
             return cog::value(surface_id(json_deserialize<int>(f)));
         }

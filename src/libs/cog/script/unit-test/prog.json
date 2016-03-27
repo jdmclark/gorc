@@ -11,6 +11,7 @@
         "message_table_test.cpp",
         "message_type_test.cpp",
         "mock_verb_test.cpp",
+        "source_type_test.cpp",
         "string_table_test.cpp",
         "symbol_table_test.cpp",
         "type_test.cpp",

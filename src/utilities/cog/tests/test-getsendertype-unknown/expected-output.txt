@@ -1,0 +1,3 @@
+sourcetype is
+[WARNING] scenario.scn: extracted type number from unmapped type int
+int(1)

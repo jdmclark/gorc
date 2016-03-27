@@ -1,0 +1,12 @@
+symbols
+
+sector sec
+
+message entered
+end
+
+code
+entered:
+print("sourcetype is");
+printvar(getsourcetype());
+end

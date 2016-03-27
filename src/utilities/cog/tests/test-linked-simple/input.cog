@@ -1,6 +1,6 @@
 symbols
 
-sector sec
+sector sec linkid=122
 
 message startup
 message entered
@@ -14,6 +14,20 @@ return;
 entered:
 print("sender is");
 printvar(getsenderref());
+print("senderid is");
+printvar(getsenderid());
+print("sendertype is");
+printvar(getsendertype());
 print("source is");
 printvar(getsourceref());
+print("sourcetype is");
+printvar(getsourcetype());
+print("param0 is");
+printvar(getparam(0));
+print("param1 is");
+printvar(getparam(1));
+print("param2 is");
+printvar(getparam(2));
+print("param3 is");
+printvar(getparam(3));
 end
