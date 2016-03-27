@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace gorc {
     namespace cog {
 
@@ -17,6 +19,8 @@ namespace gorc {
             player = 0x400,
             particle = 0x800
         };
+
+        source_type as_source_type(std::string const &str);
 
     }
 }

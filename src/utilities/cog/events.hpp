@@ -2,16 +2,21 @@
 
 #include "text/json_input_stream.hpp"
 #include "utility/time.hpp"
+#include "cog/script/message_type.hpp"
+#include "cog/script/value.hpp"
+#include "cog/script/source_type.hpp"
 
 namespace gorc {
 
     class time_step_event;
+    class send_linked_event;
 
     class cog_scenario_event_visitor {
     public:
         virtual ~cog_scenario_event_visitor();
 
         virtual void visit(time_step_event const &e) = 0;
+        virtual void visit(send_linked_event const &e) = 0;
     };
 
     class cog_scenario_event {
@@ -26,6 +31,22 @@ namespace gorc {
         time_delta step;
 
         time_step_event(deserialization_constructor_tag, json_input_stream &);
+
+        virtual void accept(cog_scenario_event_visitor &v) const override;
+    };
+
+    class send_linked_event : public cog_scenario_event {
+    public:
+        cog::message_type msg;
+        cog::value sender;
+        cog::value source;
+        cog::source_type st;
+        cog::value param0;
+        cog::value param1;
+        cog::value param2;
+        cog::value param3;
+
+        send_linked_event(deserialization_constructor_tag, json_input_stream &);
 
         virtual void accept(cog_scenario_event_visitor &v) const override;
     };

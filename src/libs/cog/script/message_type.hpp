@@ -51,6 +51,7 @@ namespace gorc {
         };
 
         char const* as_string(message_type);
+        message_type as_message_type(std::string const &);
 
         void add_messages_to_constant_table(constant_table &table);
     }

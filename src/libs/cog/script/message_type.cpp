@@ -106,6 +106,16 @@ char const* gorc::cog::as_string(message_type mt)
     throw std::range_error("not a valid message_type");
 }
 
+message_type gorc::cog::as_message_type(std::string const &str)
+{
+    auto it = str_map.find(str);
+    if(it == str_map.end()) {
+        LOG_FATAL(format("unknown message type \'%s\'") % str);
+    }
+
+    return it->second;
+}
+
 void gorc::cog::add_messages_to_constant_table(constant_table &table)
 {
     for(auto const &em : str_map) {

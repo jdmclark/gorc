@@ -11,6 +11,7 @@
     "sources" : [
         "main.cpp",
         "events.cpp",
+        "read_cog_value.cpp",
         "scenario.cpp"
     ]
 }

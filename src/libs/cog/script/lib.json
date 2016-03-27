@@ -13,6 +13,7 @@
         "message_type.cpp",
         "mock_verb.cpp",
         "script.cpp",
+        "source_type.cpp",
         "string_table.cpp",
         "symbol.cpp",
         "symbol_table.cpp",

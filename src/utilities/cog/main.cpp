@@ -173,6 +173,18 @@ namespace gorc {
             executor->update(e.step);
         }
 
+        virtual void visit(send_linked_event const &e) override
+        {
+            executor->send_to_linked(e.msg,
+                                     e.sender,
+                                     e.source,
+                                     e.st,
+                                     e.param0,
+                                     e.param1,
+                                     e.param2,
+                                     e.param3);
+        }
+
         void populate_verb_table()
         {
             verbs.add_verb("saveandquit", [&]() {
