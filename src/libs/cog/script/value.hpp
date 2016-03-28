@@ -64,6 +64,7 @@ namespace gorc {
             MAKE_ID_MEMBERS(player);
             MAKE_ID_MEMBERS(ai);
             MAKE_ID_MEMBERS(cog);
+            MAKE_ID_MEMBERS(colormap);
             MAKE_ID_MEMBERS(keyframe);
             MAKE_ID_MEMBERS(material);
             MAKE_ID_MEMBERS(model);

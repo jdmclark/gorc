@@ -27,9 +27,21 @@ namespace gorc {
             }
 
             template <typename FnT>
+            void add_safe_verb(std::string const &name, value default_value, FnT functor)
+            {
+                internal_add_verb(make_function_verb(name, functor, true, default_value));
+            }
+
+            template <typename FnT>
             void add_service_verb(std::string const &name, FnT functor)
             {
                 internal_add_verb(make_service_verb(name, functor));
+            }
+
+            template <typename FnT>
+            void add_safe_service_verb(std::string const &name, value default_value, FnT functor)
+            {
+                internal_add_verb(make_service_verb(name, functor, true, default_value));
             }
 
             template <typename VerbT, typename ...ArgT>

@@ -1,0 +1,78 @@
+symbols
+sector sec
+surface surf
+thing th
+int pl
+ai a
+cog c
+int col
+keyframe key
+material mat
+model mod
+sound snd
+template tpl
+message startup
+end
+
+code
+startup:
+print("startup");
+
+print("sector");
+assert_sector(sec);
+assert_sector(5);
+
+print("surface");
+assert_surface(surf);
+assert_surface(5);
+
+print("thing");
+assert_thing(th);
+assert_thing(5);
+
+print("player");
+assert_player(pl);
+assert_player(5);
+
+print("ai");
+assert_ai(a);
+assert_ai(5);
+
+print("cog");
+assert_cog(c);
+assert_cog(5);
+
+print("colormap");
+assert_colormap(col);
+assert_colormap(5);
+
+print("keyframe");
+assert_keyframe(key);
+assert_keyframe(5);
+
+print("material");
+assert_material(mat);
+assert_material(5);
+
+print("model");
+assert_model(mod);
+assert_model(5);
+
+print("sound");
+assert_sound(snd);
+assert_sound(5);
+
+print("template");
+assert_template(tpl);
+assert_template(5);
+
+print("message");
+assert_message(startup);
+assert_message(5);
+
+print("other");
+assert_other(snd);
+assert_other(5);
+
+return;
+end

@@ -66,6 +66,9 @@ gorc::cog::value gorc::read_cog_value(json_input_stream &f)
         else if(type == "cog") {
             return cog::value(cog_id(json_deserialize<int>(f)));
         }
+        else if(type == "colormap") {
+            return cog::value(colormap_id(json_deserialize<int>(f)));
+        }
         else if(type == "keyframe") {
             return cog::value(keyframe_id(json_deserialize<int>(f)));
         }
@@ -74,6 +77,9 @@ gorc::cog::value gorc::read_cog_value(json_input_stream &f)
         }
         else if(type == "model") {
             return cog::value(model_id(json_deserialize<int>(f)));
+        }
+        else if(type == "player") {
+            return cog::value(player_id(json_deserialize<int>(f)));
         }
         else if(type == "sound") {
             return cog::value(sound_id(json_deserialize<int>(f)));

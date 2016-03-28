@@ -84,25 +84,42 @@ namespace gorc {
                 }
             };
 
+            maybe<value> function_verb_type_check(stack const &stk,
+                                                  verb const &v,
+                                                  value default_value);
         }
 
         template <typename FnT, size_t arity, value_type result_type>
         class function_verb : public verb {
         private:
             FnT functor;
+            bool type_safe = false;
+            value default_value;
 
         public:
-            function_verb(std::string const &name, FnT functor)
+            function_verb(std::string const &name,
+                          FnT functor,
+                          bool type_safe = false,
+                          value default_value = value())
                 : verb(name,
                        compute_verb_result_type(functor),
                        compute_verb_argument_types(functor))
                 , functor(functor)
+                , type_safe(type_safe)
+                , default_value(default_value)
             {
                 return;
             }
 
             virtual value invoke(stack &s, service_registry &sr, bool expects_value) const override
             {
+                if(type_safe) {
+                    auto rv = detail::function_verb_type_check(s, *this, default_value);
+                    if(rv.has_value()) {
+                        return rv.get_value();
+                    }
+                }
+
                 return detail::apply_verb_arguments<arity,
                                                     result_type,
                                                     false>()(name, functor, s, sr, expects_value);
@@ -111,30 +128,49 @@ namespace gorc {
 
         template <typename FnT>
         std::unique_ptr<verb> make_function_verb(std::string const &name,
-                                                 FnT functor)
+                                                 FnT functor,
+                                                 bool type_safe = false,
+                                                 value default_value = value())
         {
             return std::make_unique<function_verb<FnT,
                                                   compute_verb_arity<FnT>(),
-                                                  compute_verb_result_type(functor)>>(name, functor);
+                                                  compute_verb_result_type(functor)>>(name,
+                                                                                      functor,
+                                                                                      type_safe,
+                                                                                      default_value);
         }
 
         template <typename FnT, size_t arity, value_type result_type>
         class service_verb : public verb {
         private:
             FnT functor;
+            bool type_safe;
+            value default_value;
 
         public:
-            service_verb(std::string const &name, FnT functor)
+            service_verb(std::string const &name,
+                         FnT functor,
+                         bool type_safe = false,
+                         value default_value = value())
                 : verb(name,
                        compute_verb_result_type(functor),
                        compute_service_verb_argument_types(functor))
                 , functor(functor)
+                , type_safe(type_safe)
+                , default_value(default_value)
             {
                 return;
             }
 
             virtual value invoke(stack &s, service_registry &sr, bool expects_value) const override
             {
+                if(type_safe) {
+                    auto rv = detail::function_verb_type_check(s, *this, default_value);
+                    if(rv.has_value()) {
+                        return rv.get_value();
+                    }
+                }
+
                 return detail::apply_verb_arguments<arity,
                                                     result_type,
                                                     true>()(name, functor, s, sr, expects_value);
@@ -143,11 +179,16 @@ namespace gorc {
 
         template <typename FnT>
         std::unique_ptr<verb> make_service_verb(std::string const &name,
-                                                FnT functor)
+                                                FnT functor,
+                                                bool type_safe = false,
+                                                value default_value = value())
         {
             return std::make_unique<service_verb<FnT,
                                                  compute_verb_arity<FnT>() - 2,
-                                                 compute_verb_result_type(functor)>>(name, functor);
+                                                 compute_verb_result_type(functor)>>(name,
+                                                                                     functor,
+                                                                                     type_safe,
+                                                                                     default_value);
         }
 
     }

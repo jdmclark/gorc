@@ -9,6 +9,7 @@
     ],
     "sources" : [
         "constant_table.cpp",
+        "function_verb.cpp",
         "message_table.cpp",
         "message_type.cpp",
         "mock_verb.cpp",

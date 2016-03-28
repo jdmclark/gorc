@@ -231,6 +231,22 @@ namespace gorc {
                     return flag & setflags;
                 });
 
+            // Test verbs for typesafe casting
+            verbs.add_safe_verb("assert_sector", cog::value(), [](sector_id) { });
+            verbs.add_safe_verb("assert_surface", cog::value(), [](surface_id) { });
+            verbs.add_safe_verb("assert_thing", cog::value(), [](thing_id) { });
+            verbs.add_safe_verb("assert_player", cog::value(), [](player_id) { });
+            verbs.add_safe_verb("assert_ai", cog::value(), [](ai_id) { });
+            verbs.add_safe_verb("assert_cog", cog::value(), [](cog_id) { });
+            verbs.add_safe_verb("assert_colormap", cog::value(), [](colormap_id) { });
+            verbs.add_safe_verb("assert_keyframe", cog::value(), [](keyframe_id) { });
+            verbs.add_safe_verb("assert_material", cog::value(), [](material_id) { });
+            verbs.add_safe_verb("assert_model", cog::value(), [](model_id) { });
+            verbs.add_safe_verb("assert_sound", cog::value(), [](sound_id) { });
+            verbs.add_safe_verb("assert_template", cog::value(), [](thing_template_id) { });
+            verbs.add_safe_verb("assert_message", cog::value(), [](message_id) { });
+            verbs.add_safe_verb("assert_other", cog::value(), [](int) { });
+
             return;
         }
     };

@@ -54,11 +54,13 @@ namespace gorc {
             MAKE_ID_VALUE_TYPE(player);
             MAKE_ID_VALUE_TYPE(ai);
             MAKE_ID_VALUE_TYPE(cog);
+            MAKE_ID_VALUE_TYPE(colormap);
             MAKE_ID_VALUE_TYPE(keyframe);
             MAKE_ID_VALUE_TYPE(material);
             MAKE_ID_VALUE_TYPE(model);
             MAKE_ID_VALUE_TYPE(sound);
             MAKE_ID_VALUE_TYPE(thing_template);
+            MAKE_ID_VALUE_TYPE(message);
 
 #undef MAKE_ID_VALUE_TYPE
         }
@@ -182,11 +184,13 @@ namespace gorc {
             MAKE_VERB_ARGUMENT_ID_TYPE(player)
             MAKE_VERB_ARGUMENT_ID_TYPE(ai)
             MAKE_VERB_ARGUMENT_ID_TYPE(cog)
+            MAKE_VERB_ARGUMENT_ID_TYPE(colormap)
             MAKE_VERB_ARGUMENT_ID_TYPE(keyframe)
             MAKE_VERB_ARGUMENT_ID_TYPE(material)
             MAKE_VERB_ARGUMENT_ID_TYPE(model)
             MAKE_VERB_ARGUMENT_ID_TYPE(sound)
             MAKE_VERB_ARGUMENT_ID_TYPE(thing_template)
+            MAKE_VERB_ARGUMENT_ID_TYPE(message)
 
 #undef MAKE_VERB_ARGUMENT_ID_TYPE
 #undef MAKE_VERB_ARGUMENT_TYPE

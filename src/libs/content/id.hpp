@@ -75,6 +75,11 @@ namespace gorc {
         {
             return value != o.value;
         }
+
+        bool is_valid() const
+        {
+            return value != -1;
+        }
     };
 
     template <typename TagT>
@@ -128,6 +133,7 @@ namespace gorc {
     // Asset IDs
     MAKE_ID_TYPE(ai);
     MAKE_ID_TYPE(cog);
+    MAKE_ID_TYPE(colormap);
     MAKE_ID_TYPE(keyframe);
     MAKE_ID_TYPE(material);
     MAKE_ID_TYPE(model);

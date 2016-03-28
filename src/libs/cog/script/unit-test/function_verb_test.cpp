@@ -101,4 +101,64 @@ test_case(service_verb_passes_service)
     assert_log_empty();
 }
 
+test_case(safe_function_verb)
+{
+    auto fn = [](sector_id)
+    {
+        LOG_INFO("called functor");
+        return 5;
+    };
+
+    auto vn = make_function_verb("myverb", fn, true, 10);
+
+    cog::stack stk;
+    service_registry sr;
+
+    // Push arguments left to right
+    stk.push_back(sector_id(0));
+
+    auto result = vn->invoke(stk, sr, true);
+    assert_eq(result, value(5));
+    assert_log_message(log_level::info, "called functor");
+    assert_log_empty();
+
+    // Again, with an invalid value
+    stk.push_back(0);
+
+    auto result2 = vn->invoke(stk, sr, true);
+    assert_eq(result2, value(10));
+    assert_log_message(log_level::error, "could not convert argument 1 from int to sector");
+    assert_log_empty();
+}
+
+test_case(safe_service_verb)
+{
+    auto fn = [](bool, service_registry &, sector_id)
+    {
+        LOG_INFO("called functor");
+        return 5;
+    };
+
+    auto vn = make_service_verb("myverb", fn, true, 10);
+
+    cog::stack stk;
+    service_registry sr;
+
+    // Push arguments left to right
+    stk.push_back(sector_id(0));
+
+    auto result = vn->invoke(stk, sr, true);
+    assert_eq(result, value(5));
+    assert_log_message(log_level::info, "called functor");
+    assert_log_empty();
+
+    // Again, with an invalid value
+    stk.push_back(0);
+
+    auto result2 = vn->invoke(stk, sr, true);
+    assert_eq(result2, value(10));
+    assert_log_message(log_level::error, "could not convert argument 1 from int to sector");
+    assert_log_empty();
+}
+
 end_suite(function_verb_test);

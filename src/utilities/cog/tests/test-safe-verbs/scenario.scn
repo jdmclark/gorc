@@ -1,0 +1,21 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                sector 1,
+                surface 1,
+                thing 1,
+                player 1,
+                ai 1,
+                cog 1,
+                colormap 1,
+                keyframe 1,
+                material 1,
+                model 1,
+                sound 1,
+                template 1
+            ]
+        }
+    ]
+}

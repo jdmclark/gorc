@@ -1,0 +1,43 @@
+[WARNING] input.cog:23:15-23:15: cannot convert argument from int to sector
+[WARNING] input.cog:27:16-27:16: cannot convert argument from int to surface
+[WARNING] input.cog:31:14-31:14: cannot convert argument from int to thing
+[WARNING] input.cog:34:15-34:16: cannot convert argument from int to player
+[WARNING] input.cog:35:15-35:15: cannot convert argument from int to player
+[WARNING] input.cog:39:11-39:11: cannot convert argument from int to ai
+[WARNING] input.cog:43:12-43:12: cannot convert argument from int to cog
+[WARNING] input.cog:46:17-46:19: cannot convert argument from int to colormap
+[WARNING] input.cog:47:17-47:17: cannot convert argument from int to colormap
+[WARNING] input.cog:51:17-51:17: cannot convert argument from int to keyframe
+[WARNING] input.cog:55:17-55:17: cannot convert argument from int to material
+[WARNING] input.cog:59:14-59:14: cannot convert argument from int to model
+[WARNING] input.cog:63:14-63:14: cannot convert argument from int to sound
+[WARNING] input.cog:67:17-67:17: cannot convert argument from int to template
+[WARNING] input.cog:71:16-71:16: cannot convert argument from int to message
+startup
+sector
+[ERROR] input.cog:23:1-23:16: could not convert argument 1 from int to sector
+surface
+[ERROR] input.cog:27:1-27:17: could not convert argument 1 from int to surface
+thing
+[ERROR] input.cog:31:1-31:15: could not convert argument 1 from int to thing
+player
+[ERROR] input.cog:35:1-35:16: could not convert argument 1 from int to player
+ai
+[ERROR] input.cog:39:1-39:12: could not convert argument 1 from int to ai
+cog
+[ERROR] input.cog:43:1-43:13: could not convert argument 1 from int to cog
+colormap
+[ERROR] input.cog:47:1-47:18: could not convert argument 1 from int to colormap
+keyframe
+[ERROR] input.cog:51:1-51:18: could not convert argument 1 from int to keyframe
+material
+[ERROR] input.cog:55:1-55:18: could not convert argument 1 from int to material
+model
+[ERROR] input.cog:59:1-59:15: could not convert argument 1 from int to model
+sound
+[ERROR] input.cog:63:1-63:15: could not convert argument 1 from int to sound
+template
+[ERROR] input.cog:67:1-67:18: could not convert argument 1 from int to template
+message
+[ERROR] input.cog:71:1-71:17: could not convert argument 1 from int to message
+other
