@@ -127,6 +127,16 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
         case opcode::call: {
                 int vid = binary_deserialize<int>(bsr);
 
+                int first_line = binary_deserialize<int>(bsr);
+                int first_col = binary_deserialize<int>(bsr);
+                int last_line = binary_deserialize<int>(bsr);
+                int last_col = binary_deserialize<int>(bsr);
+                diagnostic_context dc(current_instance->cog->filename.c_str(),
+                                      first_line,
+                                      first_col,
+                                      last_line,
+                                      last_col);
+
                 // Store current offset in current continuation
                 cc.call_stack.back().program_counter = sr.position();
 
@@ -138,6 +148,16 @@ gorc::cog::value gorc::cog::virtual_machine::internal_execute(verb_table &verbs,
 
         case opcode::callv: {
                 int vid = binary_deserialize<int>(bsr);
+
+                int first_line = binary_deserialize<int>(bsr);
+                int first_col = binary_deserialize<int>(bsr);
+                int last_line = binary_deserialize<int>(bsr);
+                int last_col = binary_deserialize<int>(bsr);
+                diagnostic_context dc(current_instance->cog->filename.c_str(),
+                                      first_line,
+                                      first_col,
+                                      last_line,
+                                      last_col);
 
                 // Store current offset in current continuation
                 cc.call_stack.back().program_counter = sr.position();

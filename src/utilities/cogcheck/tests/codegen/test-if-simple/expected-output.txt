@@ -2,8 +2,8 @@ DISASSEMBLY
 
 startup:
     push int(1)
-    bf L32
-    call getsithmode
-L32:
-    call rand
+    bf L48
+    call getsithmode (7:9-7:21)
+L48:
+    call rand (9:5-9:10)
     ret

@@ -57,8 +57,8 @@ namespace gorc {
             void jal(label_id id);
             void bt(label_id id);
             void bf(label_id id);
-            void call(verb_id id);
-            void callv(verb_id id);
+            void call(verb_id id, diagnostic_context_location const &);
+            void callv(verb_id id, diagnostic_context_location const &);
 
             void ret();
 

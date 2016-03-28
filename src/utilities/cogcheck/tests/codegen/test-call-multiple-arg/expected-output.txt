@@ -4,6 +4,6 @@ startup:
     push int(1)
     push int(2)
     push int(3)
-    callv vectorset
+    callv vectorset (7:9-7:26)
     stor 1
     ret

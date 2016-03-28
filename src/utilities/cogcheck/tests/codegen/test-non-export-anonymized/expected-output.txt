@@ -2,16 +2,16 @@ DISASSEMBLY
 
 startup:
     push int(1)
-    call printint
-    jal L42
-    jal L75
+    call printint (6:5-6:15)
+    jal L58
+    jal L107
     ret
-L42:
+L58:
     push int(2)
-    call printint
-    jal L75
+    call printint (12:5-12:15)
+    jal L107
     ret
-L75:
+L107:
     push int(3)
-    call printint
+    call printint (17:5-17:15)
     ret

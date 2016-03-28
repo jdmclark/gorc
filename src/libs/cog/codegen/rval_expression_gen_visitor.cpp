@@ -69,7 +69,7 @@ void rval_expression_gen_visitor::visit(ast::method_call_expression &e)
         ast_visit(*this, *arg);
     }
 
-    ir.callv(verbs.get_verb_id(e.base->value));
+    ir.callv(verbs.get_verb_id(e.base->value), e.location);
 }
 
 void rval_expression_gen_visitor::visit(ast::unary_expression &e)

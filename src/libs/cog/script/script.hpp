@@ -13,6 +13,7 @@ namespace gorc {
         public:
             static fourcc const type;
 
+            std::string filename;
             symbol_table symbols;
             string_table strings;
             message_table exports;

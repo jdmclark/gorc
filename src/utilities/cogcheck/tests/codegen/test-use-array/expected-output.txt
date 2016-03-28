@@ -3,20 +3,20 @@ DISASSEMBLY
 startup:
     push int(0)
     loadi 0
-    call printint
+    call printint (9:5-9:18)
     push int(1)
     loadi 0
-    call printint
+    call printint (10:5-10:18)
     push int(0)
     stor 2
     load 2
     push int(2)
     lt
-    bf L225
-L128:
+    bf L273
+L160:
     load 2
     loadi 0
-    call printint
+    call printint (12:9-12:22)
     load 2
     push int(1)
     add
@@ -24,6 +24,6 @@ L128:
     load 2
     push int(2)
     lt
-    bt L128
-L225:
+    bt L160
+L273:
     ret

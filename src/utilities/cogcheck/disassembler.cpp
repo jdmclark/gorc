@@ -78,10 +78,18 @@ void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
         case cog::opcode::call:
             line << "call ";
             line << verbs.get_verb(verb_id(binary_deserialize<int>(r))).name;
+            line << " (" << binary_deserialize<int>(r);
+            line << ":" << binary_deserialize<int>(r);
+            line << "-" << binary_deserialize<int>(r);
+            line << ":" << binary_deserialize<int>(r) << ")";
             break;
         case cog::opcode::callv:
             line << "callv ";
             line << verbs.get_verb(verb_id(binary_deserialize<int>(r))).name;
+            line << " (" << binary_deserialize<int>(r);
+            line << ":" << binary_deserialize<int>(r);
+            line << "-" << binary_deserialize<int>(r);
+            line << ":" << binary_deserialize<int>(r) << ")";
             break;
         case cog::opcode::ret:
             line << "ret";

@@ -122,7 +122,22 @@ int gorc::log_frontend::diagnostic_file_error_count() const
     return 0;
 }
 
+std::string gorc::log_frontend::diagnostic_file_name() const
+{
+    if(diagnostic_context.empty()) {
+        return "";
+    }
+
+    auto const &context = diagnostic_context.back();
+    return gorc::maybe_value(context.filename, "<BUFFER>");
+}
+
 int gorc::diagnostic_file_error_count()
 {
     return get_local<log_frontend>()->diagnostic_file_error_count();
+}
+
+std::string gorc::diagnostic_file_name()
+{
+    return get_local<log_frontend>()->diagnostic_file_name();
 }

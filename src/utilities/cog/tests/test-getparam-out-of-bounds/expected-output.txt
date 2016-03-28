@@ -1,4 +1,4 @@
-[ERROR] ../default.scn: getparam number -1 is out of bounds
+[ERROR] input.cog:6:14-6:25: getparam number -1 is out of bounds
 -1
-[ERROR] ../default.scn: getparam number 4 is out of bounds
+[ERROR] input.cog:7:14-7:24: getparam number 4 is out of bounds
 -1

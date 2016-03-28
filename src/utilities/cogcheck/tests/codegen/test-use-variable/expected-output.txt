@@ -2,5 +2,5 @@ DISASSEMBLY
 
 startup:
     load 0
-    call printint
+    call printint (7:5-7:15)
     ret

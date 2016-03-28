@@ -1,6 +1,6 @@
 DISASSEMBLY
 
 startup:
-    callv getsithmode
+    callv getsithmode (7:9-7:21)
     stor 0
     ret

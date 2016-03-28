@@ -162,18 +162,26 @@ void gorc::cog::ir_printer::ret()
     binary_serialize(program_stream, opcode::ret);
 }
 
-void gorc::cog::ir_printer::call(verb_id id)
+void gorc::cog::ir_printer::call(verb_id id, diagnostic_context_location const &loc)
 {
     ends_with_ret = false;
     binary_serialize(program_stream, opcode::call);
     binary_serialize(program_stream, static_cast<int>(id));
+    binary_serialize(program_stream, loc.first_line);
+    binary_serialize(program_stream, loc.first_col);
+    binary_serialize(program_stream, loc.last_line);
+    binary_serialize(program_stream, loc.last_col);
 }
 
-void gorc::cog::ir_printer::callv(verb_id id)
+void gorc::cog::ir_printer::callv(verb_id id, diagnostic_context_location const &loc)
 {
     ends_with_ret = false;
     binary_serialize(program_stream, opcode::callv);
     binary_serialize(program_stream, static_cast<int>(id));
+    binary_serialize(program_stream, loc.first_line);
+    binary_serialize(program_stream, loc.first_col);
+    binary_serialize(program_stream, loc.last_line);
+    binary_serialize(program_stream, loc.last_col);
 }
 
 void gorc::cog::ir_printer::neg()

@@ -2,16 +2,16 @@ DISASSEMBLY
 
 startup:
     push int(1)
-    bf L41
-    call getsithmode
-    jmp L87
-L41:
+    bf L57
+    call getsithmode (7:9-7:21)
+    jmp L135
+L57:
     push int(2)
-    bf L82
-    call randvec
-    jmp L87
-L82:
-    call randvec
-L87:
-    call rand
+    bf L114
+    call randvec (10:9-10:17)
+    jmp L135
+L114:
+    call randvec (13:9-13:17)
+L135:
+    call rand (15:5-15:10)
     ret

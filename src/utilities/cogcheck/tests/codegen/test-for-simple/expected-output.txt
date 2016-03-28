@@ -1,15 +1,15 @@
 DISASSEMBLY
 
 startup:
-    call randvec
-    call getcamerastateflags
-    callv getcurrentcamera
-    bf L48
-L24:
-    call getsithmode
-    call cyclecamera
-    callv getcurrentcamera
-    bt L24
-L48:
-    call rand
+    call randvec (6:5-6:13)
+    call getcamerastateflags (7:9-7:29)
+    callv getcurrentcamera (7:32-7:49)
+    bf L144
+L72:
+    call getsithmode (8:9-8:21)
+    call cyclecamera (7:52-7:64)
+    callv getcurrentcamera (7:32-7:49)
+    bt L72
+L144:
+    call rand (10:5-10:10)
     ret

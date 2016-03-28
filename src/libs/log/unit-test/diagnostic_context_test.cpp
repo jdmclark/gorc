@@ -270,4 +270,37 @@ test_case(diagnostic_location_equality)
     assert_true(!(a == diagnostic_context_location(fn, 5, 10, 15, 21)));
 }
 
+test_case(diagnostic_file_name_empty)
+{
+    assert_eq(gorc::diagnostic_file_name(), std::string());
+}
+
+test_case(diagnostic_file_name_null)
+{
+    diagnostic_context dc(nothing);
+    assert_eq(gorc::diagnostic_file_name(), std::string("<BUFFER>"));
+}
+
+test_case(diagnostic_file_name_real)
+{
+    diagnostic_context dc("foobarbaz");
+    assert_eq(gorc::diagnostic_file_name(), std::string("foobarbaz"));
+}
+
+test_case(diagnostic_file_name_nested)
+{
+    diagnostic_context dc("foobarbaz");
+    {
+        diagnostic_context ec("fnord");
+        {
+            diagnostic_context fc(nothing);
+            assert_eq(gorc::diagnostic_file_name(), std::string("fnord"));
+        }
+
+        assert_eq(gorc::diagnostic_file_name(), std::string("fnord"));
+    }
+
+    assert_eq(gorc::diagnostic_file_name(), std::string("foobarbaz"));
+}
+
 end_suite(diagnostic_context_test);

@@ -57,7 +57,9 @@ namespace gorc {
                                std::string const &message);
 
         int diagnostic_file_error_count() const;
+        std::string diagnostic_file_name() const;
     };
 
     int diagnostic_file_error_count();
+    std::string diagnostic_file_name();
 }

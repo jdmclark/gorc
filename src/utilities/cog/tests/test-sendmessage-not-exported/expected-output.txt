@@ -1,3 +1,3 @@
 [WARNING] other.cog:5:1-5:7: dead code
-[WARNING] scenario.scn: sent message user0 to cog 1, but the message is not exported
+[WARNING] input.cog:7:14-7:38: sent message user0 to cog 1, but the message is not exported
 -1

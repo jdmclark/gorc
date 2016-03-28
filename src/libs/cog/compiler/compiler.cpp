@@ -25,6 +25,7 @@ std::unique_ptr<gorc::cog::script> gorc::cog::compiler::compile(input_stream &f)
 
     cog::ast::translation_unit *tu = maybe_tu.get_value();
     auto script = std::make_unique<cog::script>();
+    script->filename = diagnostic_file_name();
 
     if(!handle_parsed_ast(*tu)) {
         return script;
