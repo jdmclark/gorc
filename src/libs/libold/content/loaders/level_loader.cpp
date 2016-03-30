@@ -366,9 +366,9 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
         else {
             tok.assert_punctuator(":");
 
-            maybe<asset_ref<assets::script>> script;
+            maybe<asset_ref<cog::script>> script;
             try {
-                script = manager.load<assets::script>(tok.get_space_delimited_string());
+                script = manager.load<cog::script>(tok.get_space_delimited_string());
             }
             catch(...) {
                 script = nothing;
@@ -376,43 +376,42 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
 
             if(!script.has_value()) {
                 // Failed to load script. Add empty entry and advance to next entry.
-                lev.cogs.emplace_back(nothing, std::vector<cog::vm::value>());
+                lev.cogs.emplace_back(nothing, std::vector<cog::value>());
                 tok.skip_to_next_line();
                 continue;
             }
 
-            std::vector<cog::vm::value> values;
+            std::vector<cog::value> values;
 
             tok.set_report_eol(true);
 
-            for(const cog::symbols::symbol& symbol : script.get_value()->cogscript.symbol_table) {
+            for(auto const &symbol : script.get_value()->symbols) {
                 if(!symbol.local) {
                     switch(symbol.type) {
-                    case cog::symbols::symbol_type::ai:
-                    case cog::symbols::symbol_type::keyframe:
-                    case cog::symbols::symbol_type::material:
-                    case cog::symbols::symbol_type::model:
-                    case cog::symbols::symbol_type::sound:
-                    case cog::symbols::symbol_type::thing_template:
-                    case cog::symbols::symbol_type::string:
+                    case cog::value_type::ai:
+                    case cog::value_type::keyframe:
+                    case cog::value_type::material:
+                    case cog::value_type::model:
+                    case cog::value_type::sound:
+                    case cog::value_type::thing_template:
+                    case cog::value_type::string:
                         lev.cog_strings.emplace_back(new std::string(tok.get_space_delimited_string()));
                         values.push_back(lev.cog_strings.back()->data());
                         break;
 
-                    case cog::symbols::symbol_type::cog:
-                    case cog::symbols::symbol_type::sector:
-                    case cog::symbols::symbol_type::surface:
-                    case cog::symbols::symbol_type::thing:
-                    case cog::symbols::symbol_type::integer:
+                    case cog::value_type::cog:
+                    case cog::value_type::sector:
+                    case cog::value_type::surface:
+                    case cog::value_type::thing:
+                    case cog::value_type::integer:
                         values.push_back(tok.get_number<int>());
                         break;
 
-                    case cog::symbols::symbol_type::flex:
-                    case cog::symbols::symbol_type::floating:
+                    case cog::value_type::floating:
                         values.push_back(tok.get_number<float>());
                         break;
 
-                    case cog::symbols::symbol_type::vector: {
+                    case cog::value_type::vector: {
                         tok.assert_punctuator("(");
                         float x = tok.get_number<float>();
                         tok.assert_punctuator("/");
@@ -424,7 +423,7 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
                     }
                     break;
 
-                    case cog::symbols::symbol_type::message:
+                    case cog::value_type::message:
                         // Ignore
                         break;
 

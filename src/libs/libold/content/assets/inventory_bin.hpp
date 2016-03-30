@@ -4,7 +4,7 @@
 #include "libold/base/text/tokenizer.hpp"
 #include "utility/flag_set.hpp"
 #include "libold/content/flags/inventory_flag.hpp"
-#include "script.hpp"
+#include "cog/script/script.hpp"
 #include <string>
 #include <memory>
 
@@ -23,7 +23,7 @@ public:
     int max_value;
     flag_set<flags::inventory_flag> flags;
 
-    maybe<asset_ref<script>> cog;
+    maybe<asset_ref<cog::script>> cog;
 
     void parse_args(text::tokenizer& tok, content_manager& manager);
 };

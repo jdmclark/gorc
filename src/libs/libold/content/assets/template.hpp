@@ -16,7 +16,7 @@
 #include "model.hpp"
 #include "soundclass.hpp"
 #include "colormap.hpp"
-#include "script.hpp"
+#include "cog/script/script.hpp"
 #include "puppet.hpp"
 #include "sprite.hpp"
 #include <string>
@@ -38,7 +38,7 @@ public:
     flag_set<flags::actor_flag> actor_flags;
     vector<3> ang_vel;
     flag_set<flags::attach_flag> attach_flags;
-    maybe<asset_ref<script>> cog;
+    maybe<asset_ref<cog::script>> cog;
     flags::collide_type collide = flags::collide_type::none;
     int create_thing = 0;
     float damage = 0.0f;

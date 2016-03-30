@@ -8,7 +8,7 @@
 #include "level_adjoin.hpp"
 #include "level_surface.hpp"
 #include "level_sector.hpp"
-#include "script.hpp"
+#include "cog/script/script.hpp"
 #include "material.hpp"
 #include "template.hpp"
 
@@ -28,10 +28,10 @@ public:
     maybe<asset_ref<colormap>> master_colormap;
     std::vector<asset_ref<colormap>> colormaps;
 
-    std::vector<asset_ref<script>> scripts;
+    std::vector<asset_ref<cog::script>> scripts;
 
     std::vector<std::unique_ptr<std::string>> cog_strings;
-    std::vector<std::tuple<maybe<asset_ref<script>>, std::vector<cog::vm::value>>> cogs;
+    std::vector<std::tuple<maybe<asset_ref<cog::script>>, std::vector<cog::value>>> cogs;
 
     std::vector<vector<3>> vertices;
     std::vector<vector<2>> texture_vertices;

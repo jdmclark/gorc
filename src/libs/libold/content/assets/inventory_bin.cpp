@@ -20,7 +20,7 @@ void InventoryBinCogParser(inventory_bin& tpl, text::tokenizer& tok, content_man
     }
     else {
         try {
-            tpl.cog = manager.load<script>(fn);
+            tpl.cog = manager.load<cog::script>(fn);
         }
         catch(...) {
             diagnostic_context dc(nullptr,

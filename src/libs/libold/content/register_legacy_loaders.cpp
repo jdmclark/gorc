@@ -11,9 +11,10 @@
 #include "libold/content/loaders/material_loader.hpp"
 #include "libold/content/loaders/model_loader.hpp"
 #include "libold/content/loaders/puppet_loader.hpp"
-#include "libold/content/loaders/script_loader.hpp"
 #include "libold/content/loaders/soundclass_loader.hpp"
 #include "libold/content/loaders/sprite_loader.hpp"
+
+#include "cog/compiler/script_loader.hpp"
 
 void gorc::content::register_legacy_loaders(loader_registry &loaders)
 {
@@ -29,7 +30,8 @@ void gorc::content::register_legacy_loaders(loader_registry &loaders)
     loaders.emplace_loader<loaders::material_loader>();
     loaders.emplace_loader<loaders::model_loader>();
     loaders.emplace_loader<loaders::puppet_loader>();
-    loaders.emplace_loader<loaders::script_loader>();
     loaders.emplace_loader<loaders::soundclass_loader>();
     loaders.emplace_loader<loaders::sprite_loader>();
+
+    loaders.emplace_loader<cog::script_loader>();
 }
