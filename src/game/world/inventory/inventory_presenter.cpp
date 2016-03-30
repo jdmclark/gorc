@@ -1,10 +1,10 @@
 #include "inventory_presenter.hpp"
 #include "game/world/level_model.hpp"
 #include "inventory_model.hpp"
-#include "libold/cog/verbs/table.hpp"
 #include "game/level_state.hpp"
 #include "game/world/level_presenter.hpp"
-#include "game/world/scripts/script_presenter.hpp"
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 gorc::game::world::inventory::inventory_presenter::inventory_presenter(level_presenter& presenter)
     : presenter(presenter) {
@@ -23,7 +23,7 @@ void gorc::game::world::inventory::inventory_presenter::update(const gorc::time&
     // Update firing messages.
     for(auto& player_inv : *model) {
         for(auto& player_bin : std::get<1>(player_inv)) {
-            auto bin_id = std::get<0>(player_bin);
+            //auto bin_id = std::get<0>(player_bin);
             auto& bin = std::get<1>(player_bin);
 
             bin.refire_time_activated += static_cast<float>(time.elapsed_as_seconds());
@@ -35,9 +35,10 @@ void gorc::game::world::inventory::inventory_presenter::update(const gorc::time&
             if(bin.activated && bin.refiring) {
                 if(bin.refire_time_activated >= bin.refire_rate) {
                     bin.refire_time_activated = 0.0f;
+                    /* TODO
                     presenter.script_presenter->send_message(get_inv_cog(std::get<0>(player_inv), bin_id), cog::message_id::fire,
                             -1, bin.mode, flags::message_type::system,
-                            std::get<0>(player_inv), flags::message_type::thing);
+                            std::get<0>(player_inv), flags::message_type::thing);*/
                 }
             }
         }
@@ -47,9 +48,10 @@ void gorc::game::world::inventory::inventory_presenter::update(const gorc::time&
         if(inv.switching_weapons && inv.mount_wait <= 0.0f) {
             inv.switching_weapons = false;
             // TODO: When weapon is ASSIGNED, pass sender ref of 1.
+            /* TODO
             presenter.script_presenter->send_message(get_inv_cog(std::get<0>(player_inv), inv.next_weapon), cog::message_id::selected,
                     -1, inv.weap_assigned ? 1 : 0, flags::message_type::system,
-                    std::get<0>(player_inv), flags::message_type::thing);
+                    std::get<0>(player_inv), flags::message_type::thing);*/
         }
     }
 }
@@ -62,12 +64,13 @@ int gorc::game::world::inventory::inventory_presenter::get_inv(int player, int b
     return model->get_inventory(player).get_bin_value(bin);
 }
 
+/* TODO
 int gorc::game::world::inventory::inventory_presenter::get_inv_cog(int, int bin) {
     const content::assets::inventory_bin& inv_bin = model->base_inventory->get_bin(bin);
     return maybe_if(inv_bin.cog, -1, [&](auto cog) {
         return presenter.script_presenter->get_global_cog_instance(&cog->cogscript);
     });
-}
+}*/
 
 int gorc::game::world::inventory::inventory_presenter::get_inv_max(int, int bin) {
     return model->base_inventory->get_bin(bin).max_value;
@@ -131,9 +134,11 @@ int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(int pla
     for(const auto& bin_pair : model->get_inventory(player)) {
         auto& base_bin = model->base_inventory->get_bin(std::get<0>(bin_pair));
         if(base_bin.flags & flags::inventory_flag::weapon) {
+            /* TODO
             int auto_res = presenter.script_presenter->send_message(get_inv_cog(player, std::get<0>(bin_pair)), cog::message_id::autoselect,
                     -1, static_cast<int>(flags::autoselect_mode::player_mounting), flags::message_type::system,
-                    player, flags::message_type::thing);
+                    player, flags::message_type::thing);*/
+            int auto_res = 1;
             if(auto_res >= best_bin) {
                 best_bin = auto_res;
                 best_bin_value = std::get<0>(bin_pair);
@@ -190,9 +195,11 @@ void gorc::game::world::inventory::inventory_presenter::select_weapon(int player
     }
 
     //auto cog = get_inv_cog(player, weap_bin);
+    int auto_res = 0;
+    /* TODO
     int auto_res = presenter.script_presenter->send_message(get_inv_cog(player, weap_bin), cog::message_id::autoselect,
             -1, static_cast<int>(flags::autoselect_mode::player_mounting), flags::message_type::system,
-            player, flags::message_type::thing);
+            player, flags::message_type::thing);*/
 
     if(auto_res > -1) {
         // Can mount the weapon
@@ -207,9 +214,10 @@ void gorc::game::world::inventory::inventory_presenter::select_weapon(int player
 
             // Deselect weapon
             if(player_inv.get_cur_weapon() >= 0) {
+                /* TODO
                 presenter.script_presenter->send_message(get_inv_cog(player, player_inv.get_cur_weapon()), cog::message_id::deselected,
                         -1, 0, flags::message_type::system,
-                        player, flags::message_type::thing);
+                        player, flags::message_type::thing);*/
             }
         }
 
@@ -244,30 +252,34 @@ void gorc::game::world::inventory::inventory_presenter::set_mount_wait(int playe
 }
 
 void gorc::game::world::inventory::inventory_presenter::on_item_hotkey_pressed(int player, int bin) {
+    /* TODO
     presenter.script_presenter->send_message(get_inv_cog(player, bin), cog::message_id::activated,
             -1, bin, flags::message_type::system,
-            player, flags::message_type::thing);
+            player, flags::message_type::thing);*/
 }
 
 void gorc::game::world::inventory::inventory_presenter::on_item_hotkey_released(int player, int bin) {
+    /* TODO
     presenter.script_presenter->send_message(get_inv_cog(player, bin), cog::message_id::deactivated,
             -1, bin, flags::message_type::system,
-            player, flags::message_type::thing);
+            player, flags::message_type::thing);*/
 }
 
 void gorc::game::world::inventory::inventory_presenter::on_weapon_fire_pressed(int player, int mode) {
     if(get_cur_weapon(player) >= 0) {
+        /* TODO
         presenter.script_presenter->send_message(get_inv_cog(player, get_cur_weapon(player)), cog::message_id::activated,
                 -1, mode, flags::message_type::system,
-                player, flags::message_type::thing);
+                player, flags::message_type::thing);*/
     }
 }
 
 void gorc::game::world::inventory::inventory_presenter::on_weapon_fire_released(int player, int mode) {
     if(get_cur_weapon(player) >= 0) {
+        /* TODO
         presenter.script_presenter->send_message(get_inv_cog(player, get_cur_weapon(player)), cog::message_id::deactivated,
                 -1, mode, flags::message_type::system,
-                player, flags::message_type::thing);
+                player, flags::message_type::thing);*/
     }
 }
 
@@ -279,7 +291,8 @@ void gorc::game::world::inventory::inventory_presenter::set_goal_flags(int playe
     set_inv(player, 100 + goal, static_cast<int>(flag_set<flags::goal_flag>(get_inv(player, 100 + goal)) + flags));
 }
 
-void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verb_table&, level_state&) {
+    /* TODO
     verbTable.add_verb<void, 3>("changeinv", [&components](int player, int bin, int amount) {
         components.current_level_presenter->inventory_presenter->change_inv(player, bin, amount);
     });
@@ -379,5 +392,5 @@ void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verb
 
     verbTable.add_verb<void, 3>("setgoalflags", [&components](int player, int goal, int flags) {
         components.current_level_presenter->inventory_presenter->set_goal_flags(player, goal, flag_set<flags::goal_flag>(flags));
-    });
+    });*/
 }

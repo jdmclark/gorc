@@ -3,8 +3,6 @@
 #include "game/world/events/animation_marker.hpp"
 #include "game/world/events/touched_surface.hpp"
 #include "game/world/events/touched_thing.hpp"
-#include "libold/cog/flags/message_type.hpp"
-#include "game/world/scripts/script_presenter.hpp"
 #include "libold/base/events/print.hpp"
 
 using namespace gorc::game::world::aspects;
@@ -38,24 +36,26 @@ void thing_controller_aspect::update(gorc::time t,
     }
 }
 
-void thing_controller_aspect::on_touched_surface(entity_id thing,
-                                                 int surface) {
+void thing_controller_aspect::on_touched_surface(entity_id /*thing*/,
+                                                 int /*surface*/) {
     // Dispatch touched message to surface
+    /* TODO
     presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
                                                        surface,
                                                        flags::message_type::surface,
                                                        thing,
-                                                       flags::message_type::thing);
+                                                       flags::message_type::thing);*/
     return;
 }
 
-void thing_controller_aspect::on_touched_thing(entity_id thing,
-                                               entity_id touched_thing) {
+void thing_controller_aspect::on_touched_thing(entity_id /*thing*/,
+                                               entity_id /*touched_thing*/) {
     // Dispatch touched message to thing
+    /* TODO
     presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
                                                        thing,
                                                        flags::message_type::thing,
                                                        touched_thing,
-                                                       flags::message_type::thing);
+                                                       flags::message_type::thing);*/
     return;
 }

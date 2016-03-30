@@ -2,9 +2,17 @@
 #include "log/log.hpp"
 #include "utility/range.hpp"
 
-bool gorc::cog::executor_linkage_comparator::operator()(value left, value right) const
+bool gorc::cog::detail::executor_link_comp::operator()(value left, value right) const
 {
     return (left.get_type() < right.get_type()) && (left < right);
+}
+
+bool gorc::cog::detail::executor_gi_comp::operator()(
+        asset_ref<script> left,
+        asset_ref<script> right) const
+{
+    using UT = std::underlying_type<asset_id>::type;
+    return static_cast<UT>(left.get_id()) < static_cast<UT>(right.get_id());
 }
 
 gorc::cog::executor_linkage::executor_linkage(flag_set<source_type> mask,
@@ -60,6 +68,13 @@ gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stre
             auto st = binary_deserialize<executor_linkage>(bis);
             return std::make_pair(obj, st);
         });
+
+    binary_deserialize_range(bis, std::inserter(global_instance_map, global_instance_map.end()),
+        [](auto &bis) {
+            auto cog_ref = binary_deserialize<asset_ref<script>>(bis);
+            auto inst = binary_deserialize<cog_id>(bis);
+            return std::make_pair(cog_ref, inst);
+        });
 }
 
 void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) const
@@ -73,6 +88,11 @@ void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) con
         });
 
     binary_serialize_range(bos, linkages, [](auto &bos, auto const &em) {
+            binary_serialize(bos, em.first);
+            binary_serialize(bos, em.second);
+        });
+
+    binary_serialize_range(bos, global_instance_map, [](auto &bos, auto const &em) {
             binary_serialize(bos, em.first);
             binary_serialize(bos, em.second);
         });
@@ -102,6 +122,20 @@ gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script>
     cog_id new_cog(static_cast<int>(instances.size()));
     instances.push_back(std::make_unique<instance>(cog, values));
     add_linkage(new_cog, *instances.back());
+    return *instances.back();
+}
+
+gorc::cog::instance& gorc::cog::executor::create_global_instance(asset_ref<cog::script> cog)
+{
+    auto it = global_instance_map.find(cog);
+    if(it != global_instance_map.end()) {
+        return *at_id(instances, it->second);
+    }
+
+    cog_id new_cog(static_cast<int>(instances.size()));
+    instances.push_back(std::make_unique<instance>(cog));
+    add_linkage(new_cog, *instances.back());
+    global_instance_map.emplace(cog, new_cog);
     return *instances.back();
 }
 

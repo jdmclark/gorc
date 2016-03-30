@@ -13,14 +13,10 @@
 #include "math/quaternion.hpp"
 #include "libold/base/utility/time.hpp"
 #include "utility/event_bus.hpp"
+#include "cog/script/verb_table.hpp"
+#include "libold/base/utility/entity_id.hpp"
 
 namespace gorc {
-
-namespace cog {
-namespace verbs {
-class verb_table;
-}
-}
 
 class content_manager;
 
@@ -70,7 +66,7 @@ public:
     void stop_key(int thing_id, int key, float delay);
     void stop_all_mix_keys(int mix);
 
-    static void register_verbs(cog::verbs::verb_table&, level_state&);
+    static void register_verbs(cog::verb_table&, level_state&);
 
 private:
     template <typename T> void visit_mesh_node(T& visitor, asset_ref<content::assets::model> obj, int attached_key_mix, int mesh_id,

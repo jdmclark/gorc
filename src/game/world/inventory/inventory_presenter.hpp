@@ -3,15 +3,10 @@
 #include "libold/base/utility/time.hpp"
 #include "libold/content/flags/autoselect_mode.hpp"
 #include "libold/content/flags/goal_flag.hpp"
+#include "cog/script/verb_table.hpp"
 #include "utility/flag_set.hpp"
 
 namespace gorc {
-namespace cog {
-namespace verbs {
-class verb_table;
-}
-}
-
 namespace game {
 class level_state;
 
@@ -36,7 +31,7 @@ public:
     void update(const gorc::time& time);
 
     void change_inv(int player, int bin, int amount);
-    int get_inv_cog(int player, int bin);
+    //int get_inv_cog(int player, int bin);
     int get_inv(int player, int bin);
     int get_inv_max(int player, int bin);
     int get_inv_min(int player, int bin);
@@ -68,7 +63,7 @@ public:
     void clear_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags);
     void set_goal_flags(int player, int goal, flag_set<flags::goal_flag> flags);
 
-    static void register_verbs(cog::verbs::verb_table& verbTable, level_state&);
+    static void register_verbs(cog::verb_table& verbTable, level_state&);
 };
 
 }

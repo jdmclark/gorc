@@ -6,7 +6,9 @@
         "libs/program",
         "libs/text",
         "libs/vfs",
-        "libs/content"
+        "libs/content",
+        "libs/cog/vm",
+        "libs/cog/compiler"
     ],
     "sources" : [
         "base/utility/timestamp_factory.cpp",

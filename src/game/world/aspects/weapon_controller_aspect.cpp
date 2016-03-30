@@ -1,7 +1,6 @@
 #include "weapon_controller_aspect.hpp"
 #include "game/world/level_model.hpp"
 #include "libold/content/flags/weapon_flag.hpp"
-#include "game/world/scripts/script_presenter.hpp"
 #include "game/world/sounds/sound_presenter.hpp"
 #include "game/world/events/touched_thing.hpp"
 #include "game/world/events/touched_surface.hpp"
@@ -81,10 +80,11 @@ void weapon_controller_aspect::touched_surface(entity_id thing_id, int touched_s
         presenter.create_thing_at_thing(projectile.create_thing, thing_id);
     }
 
+    /* TODO
     presenter.script_presenter->send_message_to_linked(cog::message_id::damaged,
             touched_surface_id, flags::message_type::surface,
             thing_id, flags::message_type::thing,
-            projectile.damage, static_cast<int>(projectile.damage_class));
+            projectile.damage, static_cast<int>(projectile.damage_class));*/
     presenter.destroy_thing(thing_id);
 }
 

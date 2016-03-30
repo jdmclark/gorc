@@ -17,16 +17,9 @@
 #include "game/world/keys/key_presenter.hpp"
 #include "query.hpp"
 #include "shape.hpp"
+#include "cog/script/verb_table.hpp"
 
 namespace gorc {
-
-namespace cog {
-namespace verbs {
-
-class verb_table;
-}
-}
-
 namespace game {
 
 class level_state;
@@ -281,7 +274,7 @@ public:
     bool surface_needs_collision_response(int moving_thing_id, int surface_id);
     bool thing_needs_collision_response(int moving_thing_id, int collision_thing_id);
 
-    static void register_verbs(cog::verbs::verb_table&, level_state&);
+    static void register_verbs(cog::verb_table&, level_state&);
 };
 
 }

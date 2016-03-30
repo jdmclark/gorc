@@ -8,7 +8,6 @@
 #include "game/level_state.hpp"
 #include "game/world/physics/physics_presenter.hpp"
 #include "game/world/animations/animation_presenter.hpp"
-#include "game/world/scripts/script_presenter.hpp"
 #include "game/world/sounds/sound_presenter.hpp"
 #include "game/world/keys/key_presenter.hpp"
 #include "game/world/camera/camera_presenter.hpp"
@@ -40,7 +39,6 @@ gorc::game::world::level_presenter::level_presenter(level_state& components, con
     : components(components), place(place), contentmanager(place.contentmanager) {
     physics_presenter = std::make_unique<physics::physics_presenter>(*this);
     animation_presenter = std::make_unique<animations::animation_presenter>();
-    script_presenter = std::make_unique<scripts::script_presenter>(components);
     sound_presenter = std::make_unique<sounds::sound_presenter>(*place.contentmanager);
     key_presenter = std::make_unique<keys::key_presenter>(*place.contentmanager);
     inventory_presenter = std::make_unique<inventory::inventory_presenter>(*this);
@@ -55,7 +53,7 @@ gorc::game::world::level_presenter::~level_presenter() {
 
 void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     eventbus = &eventBus;
-    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.compiler, place.level,
+    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.verbs, place.level,
             place.contentmanager->load<content::assets::inventory>("items.dat"));
 
     // Create local aspects
@@ -71,7 +69,6 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     key_presenter->start(*model, model->key_model, eventBus);
     camera_presenter->start(*model, model->camera_model);
     animation_presenter->start(*model);
-    script_presenter->start(*model, model->script_model);
     sound_presenter->start(*model, model->sound_model);
     inventory_presenter->start(*model, model->inventory_model);
 
@@ -81,13 +78,37 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     update(gorc::time(timestamp(0), timestamp(0)));
 
     // Send startup and loading messages
-    script_presenter->send_message_to_all(cog::message_id::loading, -1, -1, flags::message_type::nothing);
+    model->script_model.send_to_all(cog::message_type::startup,
+                                    /* sender */ cog::value(),
+                                    /* sender id */ cog::value(),
+                                    /* source */ cog::value());
 
+    model->script_model.send_to_all(cog::message_type::loading,
+                                    /* sender */ cog::value(),
+                                    /* sender id */ cog::value(),
+                                    /* source */ cog::value());
     return;
 }
 
 void gorc::game::world::level_presenter::initialize_world() {
-    script_presenter->create_level_dummy_instances(model->level->cogs.size());
+    // Create COG script instances.
+    for(auto const &cog : model->level->cogs) {
+        maybe_if_else(std::get<0>(cog), [&](auto script) {
+                model->script_model.create_instance(script, std::get<1>(cog));
+            },
+            [&] {
+                model->script_model.create_instance(contentmanager->load<cog::script>("dflt.cog"));
+            });
+    }
+
+    // Create bin script instances.
+    for(const auto& bin_tuple : *model->inventory_model.base_inventory) {
+        const auto& bin = std::get<1>(bin_tuple);
+
+        maybe_if(bin.cog, [&](auto cog) {
+                model->script_model.create_global_instance(cog);
+            });
+    }
 
     // HACK: create thing collision shapes and rigid bodies, enumerate spawn points
     for(const auto& thing : model->level->things) {
@@ -109,25 +130,6 @@ void gorc::game::world::level_presenter::initialize_world() {
     // Set camera focus to current local player thing.
     camera_presenter->set_camera_focus(0, model->local_player_thing_id);
     camera_presenter->set_camera_focus(1, model->local_player_thing_id);
-
-    // create bin script instances.
-    for(const auto& bin_tuple : *model->inventory_model.base_inventory) {
-        const auto& bin = std::get<1>(bin_tuple);
-
-        maybe_if(bin.cog, [&](auto cog) {
-            script_presenter->create_global_cog_instance(cog->cogscript, *place.contentmanager, components.compiler);
-        });
-    }
-
-    // create COG script instances.
-    for(unsigned int i = 0; i < model->level->cogs.size(); ++i) {
-        const auto& cog = model->level->cogs[i];
-        maybe_if(std::get<0>(cog), [&](auto script) {
-            const std::vector<cog::vm::value>& values = std::get<1>(cog);
-
-            script_presenter->create_level_cog_instance(i, script->cogscript, *place.contentmanager, components.compiler, values);
-        });
-    }
 }
 
 void gorc::game::world::level_presenter::update(const gorc::time& time) {
@@ -135,11 +137,11 @@ void gorc::game::world::level_presenter::update(const gorc::time& time) {
 
     physics_presenter->update(time);
     camera_presenter->update(time);
-    script_presenter->update(time);
     sound_presenter->update(time);
     key_presenter->update(time);
     inventory_presenter->update(time);
 
+    model->script_model.update(time_delta(time.elapsed_as_seconds()));
     model->ecs.update(time);
 
     // update dynamic tint, game time.
@@ -158,7 +160,7 @@ void gorc::game::world::level_presenter::update(const gorc::time& time) {
     things_to_destroy.clear();
 }
 
-void gorc::game::world::level_presenter::update_thing_sector(int thing_id, components::thing& thing,
+void gorc::game::world::level_presenter::update_thing_sector(int, components::thing& thing,
         const vector<3>& oldThingPosition) {
     physics::segment segment(oldThingPosition, thing.position);
     physics::segment_adjoin_path(segment, *model, model->sectors[thing.sector], update_path_sector_scratch);
@@ -171,46 +173,54 @@ void gorc::game::world::level_presenter::update_thing_sector(int thing_id, compo
     // Fire messages along path.
     unsigned int first_adjoin = std::get<1>(update_path_sector_scratch.front());
     if(model->surfaces[first_adjoin].flags & flags::surface_flag::CogLinked) {
-        script_presenter->send_message_to_linked(cog::message_id::crossed,
+        // TODO
+        /*script_presenter->send_message_to_linked(cog::message_id::crossed,
                 first_adjoin, flags::message_type::surface,
-                thing_id, flags::message_type::thing);
+                thing_id, flags::message_type::thing);*/
     }
 
     for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
         if(model->sectors[thing.sector].flags & flags::sector_flag::CogLinked) {
+            // TODO
+            /*
             script_presenter->send_message_to_linked(cog::message_id::exited,
                     thing.sector, flags::message_type::sector,
-                    thing_id, flags::message_type::thing);
+                    thing_id, flags::message_type::thing); */
         }
 
         unsigned int sec_id = std::get<0>(update_path_sector_scratch[i]);
         thing.sector = sec_id;
         if(model->sectors[sec_id].flags & flags::sector_flag::CogLinked) {
+            // TODO
+            /*
             script_presenter->send_message_to_linked(cog::message_id::entered,
                     sec_id, flags::message_type::sector,
-                    static_cast<int>(thing_id), flags::message_type::thing);
+                    static_cast<int>(thing_id), flags::message_type::thing);*/
         }
 
         unsigned int surf_id = std::get<1>(update_path_sector_scratch[i]);
         if(model->surfaces[surf_id].flags & flags::surface_flag::CogLinked) {
+            /* TODO
             script_presenter->send_message_to_linked(cog::message_id::crossed,
                     surf_id, flags::message_type::surface,
-                    static_cast<int>(thing_id), flags::message_type::thing);
+                    static_cast<int>(thing_id), flags::message_type::thing); */
         }
     }
 
     if(model->sectors[thing.sector].flags & flags::sector_flag::CogLinked) {
+        /* TODO
         script_presenter->send_message_to_linked(cog::message_id::exited,
                 thing.sector, flags::message_type::sector,
-                thing_id, flags::message_type::thing);
+                thing_id, flags::message_type::thing); */
     }
 
     unsigned int last_sector = std::get<0>(update_path_sector_scratch.back());
     thing.sector = last_sector;
     if(model->sectors[last_sector].flags & flags::sector_flag::CogLinked) {
+        /* TODO
         script_presenter->send_message_to_linked(cog::message_id::entered,
                 last_sector, flags::message_type::sector,
-                static_cast<int>(thing_id), flags::message_type::thing);
+                static_cast<int>(thing_id), flags::message_type::thing); */
     }
 }
 
@@ -267,17 +277,19 @@ void gorc::game::world::level_presenter::activate() {
     maybe_if(activate_contact, [&](physics::contact const &contact) {
         maybe_if(contact.contact_surface_id, [&](int contact_surface_id) {
             LOG_INFO(format("ACTIVATE SURFACE: %d") % contact_surface_id);
+            /* TODO
             script_presenter->send_message_to_linked(cog::message_id::activated,
                     contact_surface_id, flags::message_type::surface,
-                    model->local_player_thing_id, flags::message_type::thing);
+                    model->local_player_thing_id, flags::message_type::thing); */
         });
 
         maybe_if(contact.contact_thing_id, [&](int contact_thing_id) {
             LOG_INFO(format("ACTIVATE THING: %d") % contact_thing_id);
+            /* TODO
             script_presenter->send_message_to_linked(cog::message_id::activated, contact_thing_id, flags::message_type::thing,
                     model->local_player_thing_id, flags::message_type::thing);
             eventbus->fire_event(events::class_sound(entity_id(contact_thing_id),
-                                                     flags::sound_subclass_type::Activate));
+                                                     flags::sound_subclass_type::Activate)); */
         });
     });
 }
@@ -293,9 +305,10 @@ void gorc::game::world::level_presenter::damage() {
             });
 
     maybe_if(activate_contact, [&](physics::contact const &contact) {
-        maybe_if(contact.contact_surface_id, [&](int contact_surface_id) {
+        maybe_if(contact.contact_surface_id, [&](int /*contact_surface_id*/) {
+                /* TODO
             script_presenter->send_message_to_linked(cog::message_id::damaged, contact_surface_id, flags::message_type::surface,
-                    model->local_player_thing_id, flags::message_type::thing, 1000, static_cast<int>(flags::damage_flag::saber));
+                    model->local_player_thing_id, flags::message_type::thing, 1000, static_cast<int>(flags::damage_flag::saber)); */
         });
 
         maybe_if(contact.contact_thing_id, [&](int contact_thing_id) {
@@ -317,7 +330,8 @@ void gorc::game::world::level_presenter::crouch(bool is_crouched) {
 
 void gorc::game::world::level_presenter::thing_sighted(int thing_id) {
     model->get_thing(thing_id).flags += flags::thing_flag::Sighted;
-    script_presenter->send_message_to_linked(cog::message_id::sighted, thing_id, flags::message_type::thing);
+    /* TODO
+    script_presenter->send_message_to_linked(cog::message_id::sighted, thing_id, flags::message_type::thing); */
 }
 
 
@@ -697,7 +711,7 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
 
     // Create thing components
     maybe_if(new_thing.cog, [&](auto cog) {
-        script_presenter->create_global_cog_instance(cog->cogscript, *place.contentmanager, components.compiler);
+        model->script_model.create_global_instance(cog);
     });
 
     return static_cast<int>(new_thing_id);
@@ -807,15 +821,16 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
 
 float gorc::game::world::level_presenter::damage_thing(entity_id thing_id,
                                                        float damage,
-                                                       flag_set<flags::damage_flag> flags,
+                                                       flag_set<flags::damage_flag> /*flags*/,
                                                        entity_id damager_id) {
+    /* TODO
     script_presenter->send_message_to_linked(cog::message_id::damaged,
                                              static_cast<int>(thing_id),
                                              flags::message_type::thing,
                                              damager_id,
                                              flags::message_type::thing,
                                              damage,
-                                             static_cast<int>(flags));
+                                             static_cast<int>(flags)); */
 
     components::thing& referencedThing = model->get_thing(thing_id);
     if(referencedThing.health > 0.0f) {
@@ -996,17 +1011,17 @@ gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode
     return flags::puppet_mode_type::unarmed;
 }
 
-void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+void gorc::game::world::level_presenter::register_verbs(cog::verb_table& verbTable, level_state& components) {
 
     camera::camera_presenter::register_verbs(verbTable, components);
     animations::animation_presenter::register_verbs(verbTable, components);
-    scripts::script_presenter::register_verbs(verbTable, components);
     sounds::sound_presenter::register_verbs(verbTable, components);
     keys::key_presenter::register_verbs(verbTable, components);
     inventory::inventory_presenter::register_verbs(verbTable, components);
     physics::physics_presenter::register_verbs(verbTable, components);
 
     // AI verbs
+    /*
     verbTable.add_verb<void, 2>("aiclearmode", [&components](int thing_id, int flags) {
         components.current_level_presenter->ai_clear_mode(thing_id, flag_set<flags::ai_mode_flag>(flags));
     });
@@ -1153,14 +1168,15 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
     verbTable.add_verb<int, 0>("jkgetlocalplayer", [&components] {
         return components.current_level_presenter->get_local_player_thing();
-    });
+    });*/
 
     // Print verbs:
-    verbTable.add_verb<void, 2>("jkprintunistring", [&components](int /*destination*/, int message_num) {
+    //verbTable.add_verb<void, 2>("jkprintunistring", [&components](int /*destination*/, int message_num) {
         // TODO: Add actual jkPrintUniString once localization is implemented.
-        LOG_INFO(format("COG_%d") % message_num);
-    });
+        //LOG_INFO(format("COG_%d") % message_num);
+    //});
 
+    /*
     verbTable.add_verb<void, 1>("print", [&components](const char* message) {
         // TODO: Add actual print.
         LOG_INFO(message);
@@ -1430,5 +1446,5 @@ void gorc::game::world::level_presenter::register_verbs(cog::verbs::verb_table& 
 
     verbTable.add_verb<int, 1>("getmajormode", [&components](entity_id player) {
         return static_cast<int>(components.current_level_presenter->get_major_mode(player));
-    });
+    });*/
 }

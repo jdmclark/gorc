@@ -7,16 +7,12 @@
 #include "math/vector.hpp"
 #include "libold/base/utility/time.hpp"
 #include "game/world/components/thing.hpp"
+#include "cog/script/verb_table.hpp"
+#include "libold/base/utility/entity_id.hpp"
 
 namespace gorc {
 
 class content_manager;
-
-namespace cog {
-namespace verbs {
-class verb_table;
-}
-}
 
 namespace game {
 class level_state;
@@ -55,7 +51,7 @@ public:
     void set_music_vol(float volume);
     void stop_sound(entity_id channel, float delay);
 
-    static void register_verbs(cog::verbs::verb_table&, level_state&);
+    static void register_verbs(cog::verb_table&, level_state&);
 };
 
 }

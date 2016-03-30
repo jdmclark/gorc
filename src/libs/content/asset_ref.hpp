@@ -58,6 +58,11 @@ namespace gorc {
         {
             return id != ref.id;
         }
+
+        inline asset_id get_id() const
+        {
+            return id;
+        }
     };
 
 }

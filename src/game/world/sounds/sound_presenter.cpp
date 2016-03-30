@@ -261,7 +261,8 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(entity_id channel, f
     }
 }
 
-void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verb_table&, level_state&) {
+    /* TODO
     verbTable.add_verb<void, 3>("changesoundpitch", [&components](entity_id channel, float pitch, float delay) {
         components.current_level_presenter->sound_presenter->change_sound_pitch(channel, pitch, delay);
     });
@@ -296,5 +297,5 @@ void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verbs::verb
 
     verbTable.add_verb<void, 2>("stopsound", [&components](entity_id channel, float delay) {
         components.current_level_presenter->sound_presenter->stop_sound(channel, delay);
-    });
+    });*/
 }

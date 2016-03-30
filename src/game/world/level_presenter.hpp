@@ -13,7 +13,7 @@
 #include "libold/content/flags/ai_mode_flag.hpp"
 
 #include "components/thing.hpp"
-#include "libold/utility/entity_id.hpp"
+#include "libold/base/utility/entity_id.hpp"
 #include "cog/script/verb_table.hpp"
 
 #include <memory>
@@ -32,7 +32,6 @@ namespace camera { class camera_presenter; }
 namespace inventory { class inventory_presenter; }
 namespace keys { class key_presenter; }
 namespace physics { class physics_presenter; }
-namespace scripts { class script_presenter; }
 namespace sounds { class sound_presenter; }
 
 class level_model;
@@ -58,7 +57,6 @@ public:
 
     std::unique_ptr<physics::physics_presenter> physics_presenter;
     std::unique_ptr<animations::animation_presenter> animation_presenter;
-    std::unique_ptr<scripts::script_presenter> script_presenter;
     std::unique_ptr<sounds::sound_presenter> sound_presenter;
     std::unique_ptr<keys::key_presenter> key_presenter;
     std::unique_ptr<inventory::inventory_presenter> inventory_presenter;

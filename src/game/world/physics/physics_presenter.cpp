@@ -1,4 +1,3 @@
-#include "libold/cog/verbs/table.hpp"
 #include "game/level_state.hpp"
 #include "physics_presenter.hpp"
 #include "game/world/level_presenter.hpp"
@@ -6,7 +5,6 @@
 #include "game/constants.hpp"
 #include "utility/range.hpp"
 #include "math/matrix.hpp"
-#include "game/world/scripts/script_presenter.hpp"
 #include "game/world/sounds/sound_presenter.hpp"
 #include "game/world/keys/key_presenter.hpp"
 #include "game/world/events/touched_thing.hpp"
@@ -507,8 +505,9 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
                 presenter.sound_presenter->play_sound_class(entity_id(thing_id), flags::sound_subclass_type::StopMove);
 
                 // Dispatch cog messages and resume cogs which are waiting for stop.
-                presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
-                presenter.script_presenter->resume_wait_for_stop(thing_id);
+                // TODO
+                /*presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
+                presenter.script_presenter->resume_wait_for_stop(thing_id);*/
             }
             else if(thing.current_frame < thing.goal_frame) {
                 thing.next_frame = thing.current_frame + 1;
@@ -546,8 +545,9 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             presenter.sound_presenter->play_sound_class(entity_id(thing_id), flags::sound_subclass_type::StopMove);
 
             // Dispatch cog messages and resume cogs which are waiting for stop.
-            presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
-            presenter.script_presenter->resume_wait_for_stop(thing_id);
+            // TODO
+            /*presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
+            presenter.script_presenter->resume_wait_for_stop(thing_id);*/
         }
         else {
             vector<3> frame_pos, frame_orient;
@@ -701,8 +701,9 @@ void physics_presenter::update(const gorc::time& time) {
     // - Send blocked message to all blocked things; else, update path.
     for(auto& thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.is_blocked && (thing.second.path_moving || thing.second.rotatepivot_moving)) {
-            presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, static_cast<int>(thing.first), flags::message_type::thing,
-                    -1, flags::message_type::nothing);
+            // TODO
+            /*presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, static_cast<int>(thing.first), flags::message_type::thing,
+                    -1, flags::message_type::nothing); */
         }
         else if(thing.second.attach_flags & flags::attach_flag::AttachedToThing) {
             const auto& parent_thing = model->get_thing(thing.second.attached_thing);
@@ -752,5 +753,5 @@ void physics_presenter::segment_query_node_visitor::visit_mesh(asset_ref<content
     }
 }
 
-void physics_presenter::register_verbs(cog::verbs::verb_table&, level_state&) {
+void physics_presenter::register_verbs(cog::verb_table&, level_state&) {
 }

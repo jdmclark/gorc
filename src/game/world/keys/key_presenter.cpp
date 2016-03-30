@@ -1,4 +1,3 @@
-#include "libold/cog/verbs/table.hpp"
 #include "game/level_state.hpp"
 #include "key_presenter.hpp"
 #include "key_model.hpp"
@@ -346,7 +345,8 @@ int gorc::game::world::keys::key_presenter::create_key_mix() {
     return mix.get_id();
 }
 
-void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+void gorc::game::world::keys::key_presenter::register_verbs(cog::verb_table&, level_state&) {
+    /* TODO
     verbTable.add_verb<float, 1>("getkeylen", [&components](int key_id) {
         return components.current_level_presenter->key_presenter->get_key_len(key_id);
     });
@@ -361,5 +361,5 @@ void gorc::game::world::keys::key_presenter::register_verbs(cog::verbs::verb_tab
 
     verbTable.add_verb<void, 3>("stopkey", [&components](int thing, int key, float delay) {
         components.current_level_presenter->key_presenter->stop_key(thing, key, delay);
-    });
+    }); */
 }

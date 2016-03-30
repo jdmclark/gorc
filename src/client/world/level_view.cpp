@@ -6,7 +6,6 @@
 #include "client/application.hpp"
 #include "game/world/level_model.hpp"
 #include "game/world/keys/key_presenter.hpp"
-#include "game/world/scripts/script_presenter.hpp"
 #include "libold/content/assets/model.hpp"
 #include "libold/content/assets/sprite.hpp"
 #include "libold/content/constants.hpp"

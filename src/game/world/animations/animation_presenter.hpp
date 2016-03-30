@@ -5,16 +5,10 @@
 #include "math/vector.hpp"
 #include "libold/base/utility/pool.hpp"
 #include "libold/base/utility/time.hpp"
+#include "cog/script/verb_table.hpp"
+#include "libold/base/utility/entity_id.hpp"
 
 namespace gorc {
-
-namespace cog {
-namespace verbs {
-
-class verb_table;
-}
-}
-
 namespace game {
 
 class level_state;
@@ -46,7 +40,7 @@ public:
 
     entity_id surface_light_anim(int surface_id, float start_light, float end_light, float change_time);
 
-    static void register_verbs(cog::verbs::verb_table&, level_state&);
+    static void register_verbs(cog::verb_table&, level_state&);
 };
 
 }

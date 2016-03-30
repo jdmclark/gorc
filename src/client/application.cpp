@@ -1,7 +1,6 @@
 #include "application.hpp"
 #include "game/world/level_presenter.hpp"
 #include "game/world/level_model.hpp"
-#include "libold/cog/scripts/script_presenter.hpp"
 #include "world/level_view.hpp"
 #include "vfs/gob_virtual_container.hpp"
 #include <boost/algorithm/string/predicate.hpp>
@@ -67,7 +66,7 @@ void gorc::client::application::update(const gorc::time& time, const box<2, int>
 }
 
 void gorc::client::application::register_verbs() {
-    auto& verb_table = components.verb_table;
+    auto& verb_table = components.verbs;
 
     // Register common, general-purpose verbs.
 

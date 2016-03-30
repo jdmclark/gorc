@@ -1,4 +1,3 @@
-#include "libold/cog/verbs/table.hpp"
 #include "game/level_state.hpp"
 #include "camera_presenter.hpp"
 #include "game/world/level_presenter.hpp"
@@ -164,7 +163,8 @@ void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int, int key_i
     presenter.key_presenter->stop_key(-1, key_id, delay);
 }
 
-void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::verb_table& verbTable, level_state& components) {
+void gorc::game::world::camera::camera_presenter::register_verbs(cog::verb_table&, level_state&) {
+    /* TODO
     verbTable.add_verb<void, 0>("cyclecamera", [&components]() {
         components.current_level_presenter->camera_presenter->cycle_camera();
     });
@@ -211,5 +211,5 @@ void gorc::game::world::camera::camera_presenter::register_verbs(cog::verbs::ver
 
     verbTable.add_verb<void, 3>("jkstoppovkey", [&components](int player, int key, float delay) {
         components.current_level_presenter->camera_presenter->jk_stop_pov_key(player, key, delay);
-    });
+    });*/
 }

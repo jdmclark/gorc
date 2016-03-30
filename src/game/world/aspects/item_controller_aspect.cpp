@@ -1,6 +1,5 @@
 #include "item_controller_aspect.hpp"
 #include "game/world/events/taken.hpp"
-#include "game/world/scripts/script_presenter.hpp"
 #include "game/world/level_model.hpp"
 #include "game/world/events/thing_created.hpp"
 
@@ -24,11 +23,12 @@ item_controller_aspect::item_controller_aspect(component_system &cs,
             return;
         }
 
+        /* TODO
         presenter.script_presenter->send_message_to_linked(cog::message_id::taken,
                                                            e.taken_thing,
                                                            flags::message_type::thing,
                                                            e.taker,
-                                                           flags::message_type::thing);
+                                                           flags::message_type::thing);*/
         // TODO: Don't destroy the thing. Flag it for respawn.
         presenter.destroy_thing(e.taken_thing);
     });

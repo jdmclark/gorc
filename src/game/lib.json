@@ -58,8 +58,6 @@
         "world/physics/physics_presenter.cpp",
         "world/physics/query.cpp",
         "world/physics/shape.cpp",
-        "world/scripts/script_model.cpp",
-        "world/scripts/script_presenter.cpp",
         "world/sounds/aspects/sound_aspect.cpp",
         "world/sounds/aspects/thing_sound_aspect.cpp",
         "world/sounds/components/foley.cpp",

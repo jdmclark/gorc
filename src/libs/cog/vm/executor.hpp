@@ -19,9 +19,15 @@
 namespace gorc {
     namespace cog {
 
-        struct executor_linkage_comparator {
-            bool operator()(value left, value right) const;
-        };
+        namespace detail {
+            struct executor_link_comp {
+                bool operator()(value left, value right) const;
+            };
+
+            struct executor_gi_comp {
+                bool operator()(asset_ref<script> left, asset_ref<script> right) const;
+            };
+        }
 
         class executor_linkage {
         public:
@@ -45,7 +51,8 @@ namespace gorc {
 
             std::vector<std::unique_ptr<instance>> instances;
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
-            std::multimap<value, executor_linkage, executor_linkage_comparator> linkages;
+            std::multimap<value, executor_linkage, detail::executor_link_comp> linkages;
+            std::map<asset_ref<script>, cog_id, detail::executor_gi_comp> global_instance_map;
 
             void add_linkage(cog_id id, instance const &inst);
 
@@ -57,6 +64,7 @@ namespace gorc {
 
             instance& create_instance(asset_ref<cog::script>);
             instance& create_instance(asset_ref<cog::script>, std::vector<value> const &);
+            instance& create_global_instance(asset_ref<cog::script>);
 
             instance& get_instance(cog_id instance_id);
 
@@ -76,19 +84,19 @@ namespace gorc {
                              value sender,
                              value sender_id,
                              value source,
-                             value param0,
-                             value param1,
-                             value param2,
-                             value param3);
+                             value param0 = value(),
+                             value param1 = value(),
+                             value param2 = value(),
+                             value param3 = value());
 
             void send_to_linked(message_type msg,
                                 value sender,
                                 value source,
                                 source_type st,
-                                value param0,
-                                value param1,
-                                value param2,
-                                value param3);
+                                value param0 = value(),
+                                value param1 = value(),
+                                value param2 = value(),
+                                value param3 = value());
 
             void update(time_delta dt);
         };

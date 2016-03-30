@@ -2,12 +2,11 @@
 
 #include "math/vector.hpp"
 #include "libold/content/assets/level.hpp"
-#include "libold/cog/instance.hpp"
 #include "libold/base/utility/pool.hpp"
 #include "libold/base/utility/component_system.hpp"
 #include "components/thing.hpp"
 #include "surface.hpp"
-#include "game/world/scripts/script_model.hpp"
+#include "cog/vm/executor.hpp"
 #include "game/world/sounds/sound_model.hpp"
 #include "game/world/keys/key_model.hpp"
 #include "game/world/inventory/inventory_model.hpp"
@@ -28,7 +27,7 @@ public:
 
     component_system ecs;
 
-    scripts::script_model script_model;
+    cog::executor script_model;
     sounds::sound_model sound_model;
     keys::key_model key_model;
     inventory::inventory_model inventory_model;
@@ -43,7 +42,7 @@ public:
     double game_time = 0.0;
     vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
-    level_model(event_bus& parent_event_bus, content_manager& manager, cog::compiler& Cogcompiler,
+    level_model(event_bus& parent_event_bus, content_manager& manager, cog::verb_table &verbs,
             asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);
 
     inline components::thing& get_thing(int id) {
