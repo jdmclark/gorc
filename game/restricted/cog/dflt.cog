@@ -1,0 +1,10 @@
+# Default COG script
+#
+# This script is substituted when another COG could not be loaded due to
+# some error. It is a sink for messages, and may be useful for debugging.
+
+symbols
+end
+
+code
+end
