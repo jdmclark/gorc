@@ -9,7 +9,6 @@
 #include "libold/content/flags/geometry_mode.hpp"
 #include "libold/content/flags/light_mode.hpp"
 #include "level_shader.hpp"
-#include "libold/cog/verbs/table.hpp"
 #include <stack>
 #include <unordered_set>
 

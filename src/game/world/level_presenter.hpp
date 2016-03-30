@@ -13,6 +13,8 @@
 #include "libold/content/flags/ai_mode_flag.hpp"
 
 #include "components/thing.hpp"
+#include "libold/utility/entity_id.hpp"
+#include "cog/script/verb_table.hpp"
 
 #include <memory>
 #include <stack>
@@ -200,7 +202,7 @@ public:
     void set_armed_mode(entity_id player, flags::armed_mode mode);
     flags::puppet_mode_type get_major_mode(entity_id player);
 
-    static void register_verbs(cog::verbs::verb_table&, level_state&);
+    static void register_verbs(cog::verb_table&, level_state&);
 };
 
 }

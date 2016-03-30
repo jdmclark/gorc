@@ -11,8 +11,6 @@
 #include "utility/service_registry.hpp"
 
 #include "libold/base/utility/randomizer.hpp"
-#include "libold/cog/verbs/table.hpp"
-#include "libold/cog/compiler.hpp"
 
 namespace gorc {
 namespace client {

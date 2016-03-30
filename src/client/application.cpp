@@ -71,65 +71,64 @@ void gorc::client::application::register_verbs() {
 
     // Register common, general-purpose verbs.
 
-    verb_table.add_verb<int, 2>("bitclear", [](int flag, int clear_flags) {
+    verb_table.add_verb("bitclear", [](int flag, int clear_flags) {
         return flag & ~clear_flags;
     });
 
-    verb_table.add_verb<int, 2>("bitset", [](int flag, int set_flags) {
+    verb_table.add_verb("bitset", [](int flag, int set_flags) {
         return flag | set_flags;
     });
 
-    verb_table.add_verb<int, 2>("bittest", [](int a, int b) {
+    verb_table.add_verb("bittest", [](int a, int b) {
         return a & b;
     });
 
-    verb_table.add_verb<float, 0>("rand", [this] {
+    verb_table.add_verb("rand", [this] {
         return static_cast<float>(randomizer);
     });
 
-    verb_table.add_verb<vector<3>, 0>("randvec", [this] {
+    verb_table.add_verb("randvec", [this] {
         return make_vector<float>(static_cast<float>(randomizer * 2.0 - 1.0), static_cast<float>(randomizer * 2.0 - 1.0), static_cast<float>(randomizer * 2.0 - 1.0));
     });
 
-    verb_table.add_verb<vector<3>, 2>("vectoradd", [](vector<3> a, vector<3> b) {
+    verb_table.add_verb("vectoradd", [](vector<3> a, vector<3> b) {
         return a + b;
     });
 
-    verb_table.add_verb<vector<3>, 2>("vectorcross", [](vector<3> a, vector<3> b) {
+    verb_table.add_verb("vectorcross", [](vector<3> a, vector<3> b) {
         return cross(a, b);
     });
 
-    verb_table.add_verb<float, 2>("vectordist", [](vector<3> a, vector<3> b) {
+    verb_table.add_verb("vectordist", [](vector<3> a, vector<3> b) {
         return length(a - b);
     });
 
-    verb_table.add_verb<float, 2>("vectordot", [](vector<3> a, vector<3> b) {
+    verb_table.add_verb("vectordot", [](vector<3> a, vector<3> b) {
         return dot(a, b);
     });
 
-    verb_table.add_verb<float, 1>("vectorlen", [](vector<3> a) {
+    verb_table.add_verb("vectorlen", [](vector<3> a) {
         return length(a);
     });
 
-    verb_table.add_verb<vector<3>, 1>("vectornorm", [](vector<3> a) {
+    verb_table.add_verb("vectornorm", [](vector<3> a) {
         return normalize(a);
     });
 
-    verb_table.add_verb<vector<3>, 2>("vectorscale", [](vector<3> a, float c) {
+    verb_table.add_verb("vectorscale", [](vector<3> a, float c) {
         return a * c;
     });
 
-    verb_table.add_verb<vector<3>, 3>("vectorset", make_vector<float, float, float>);
+    verb_table.add_verb("vectorset", make_vector<float, float, float>);
 
-    verb_table.add_verb<vector<3>, 2>("vectorsub", [](vector<3> a, vector<3> b) {
+    verb_table.add_verb("vectorsub", [](vector<3> a, vector<3> b) {
         return a - b;
     });
 
-    verb_table.add_verb<float, 1>("vectorx", [](vector<3> a) { return get<0>(a); });
-    verb_table.add_verb<float, 1>("vectory", [](vector<3> a) { return get<1>(a); });
-    verb_table.add_verb<float, 1>("vectorz", [](vector<3> a) { return get<2>(a); });
+    verb_table.add_verb("vectorx", [](vector<3> a) { return get<0>(a); });
+    verb_table.add_verb("vectory", [](vector<3> a) { return get<1>(a); });
+    verb_table.add_verb("vectorz", [](vector<3> a) { return get<2>(a); });
 
-    cog::scripts::script_presenter::register_verbs(verb_table);
     game::world::level_presenter::register_verbs(verb_table, components);
 }
 
