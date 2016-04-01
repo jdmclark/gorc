@@ -1,0 +1,10 @@
+{
+    instances: [
+        {
+            file: "input.cog"
+        }
+    ],
+    events: [
+        time 0
+    ]
+}

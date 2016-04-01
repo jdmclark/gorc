@@ -108,35 +108,35 @@ void gorc::cog::executor::add_linkage(cog_id id, instance const &inst)
     }
 }
 
-gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script> cog)
+gorc::cog_id gorc::cog::executor::create_instance(asset_ref<cog::script> cog)
 {
     cog_id new_cog(static_cast<int>(instances.size()));
     instances.push_back(std::make_unique<instance>(cog));
     add_linkage(new_cog, *instances.back());
-    return *instances.back();
+    return new_cog;
 }
 
-gorc::cog::instance& gorc::cog::executor::create_instance(asset_ref<cog::script> cog,
-                                                          std::vector<value> const &values)
+gorc::cog_id gorc::cog::executor::create_instance(asset_ref<cog::script> cog,
+                                                  std::vector<value> const &values)
 {
     cog_id new_cog(static_cast<int>(instances.size()));
     instances.push_back(std::make_unique<instance>(cog, values));
     add_linkage(new_cog, *instances.back());
-    return *instances.back();
+    return new_cog;
 }
 
-gorc::cog::instance& gorc::cog::executor::create_global_instance(asset_ref<cog::script> cog)
+gorc::cog_id gorc::cog::executor::create_global_instance(asset_ref<cog::script> cog)
 {
     auto it = global_instance_map.find(cog);
     if(it != global_instance_map.end()) {
-        return *at_id(instances, it->second);
+        return it->second;
     }
 
     cog_id new_cog(static_cast<int>(instances.size()));
     instances.push_back(std::make_unique<instance>(cog));
     add_linkage(new_cog, *instances.back());
     global_instance_map.emplace(cog, new_cog);
-    return *instances.back();
+    return new_cog;
 }
 
 gorc::cog::instance& gorc::cog::executor::get_instance(cog_id instance_id)

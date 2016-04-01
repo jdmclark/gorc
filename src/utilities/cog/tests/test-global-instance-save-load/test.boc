@@ -1,0 +1,17 @@
+include ../test.boc;
+
+echo "==== run 1 ====" >> $(RAW_OUTPUT);
+$(COG) --scenario scenario.scn
+       --save-file $(TESTSUITE_DIR)/save.bin
+       >>$(RAW_OUTPUT)
+       2>>$(RAW_OUTPUT);
+
+echo "==== run 2 ====" >> $(RAW_OUTPUT);
+$(COG) --scenario scenario.scn
+       --save-file $(TESTSUITE_DIR)/save.bin
+       --load-from-save
+       >>$(RAW_OUTPUT)
+       2>>$(RAW_OUTPUT);
+
+call process_raw_output();
+call compare_output();

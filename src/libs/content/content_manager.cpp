@@ -84,10 +84,20 @@ gorc::content_manager::content_manager(deserialization_constructor_tag, binary_i
     : services(bis.services)
 {
     binary_deserialize_range<asset_data>(bis, std::back_inserter(assets));
+    binary_deserialize_range(bis, std::inserter(asset_map, asset_map.end()), [](auto &bis) {
+            auto name = binary_deserialize<std::string>(bis);
+            auto id = binary_deserialize<asset_id>(bis);
+            return std::make_pair(name, id);
+        });
+
     return;
 }
 
 void gorc::content_manager::binary_serialize_object(binary_output_stream &bos) const
 {
     binary_serialize_range(bos, assets);
+    binary_serialize_range(bos, asset_map, [](auto &bos, auto const &em) {
+            binary_serialize(bos, em.first);
+            binary_serialize(bos, em.second);
+        });
 }

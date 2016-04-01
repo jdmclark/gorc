@@ -62,9 +62,9 @@ namespace gorc {
 
             void binary_serialize_object(binary_output_stream &) const;
 
-            instance& create_instance(asset_ref<cog::script>);
-            instance& create_instance(asset_ref<cog::script>, std::vector<value> const &);
-            instance& create_global_instance(asset_ref<cog::script>);
+            cog_id create_instance(asset_ref<cog::script>);
+            cog_id create_instance(asset_ref<cog::script>, std::vector<value> const &);
+            cog_id create_global_instance(asset_ref<cog::script>);
 
             instance& get_instance(cog_id instance_id);
 

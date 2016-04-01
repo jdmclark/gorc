@@ -63,18 +63,20 @@ namespace gorc {
             executor = std::make_unique<cog::executor>(verbs);
             for(auto const &file : scenario.cog_files) {
                 auto script = content->load<cog::script>(file.cog_filename);
-                cog::instance *instance;
+                cog_id instance_id;
                 if(file.init.empty()) {
-                    instance = &executor->create_instance(script);
+                    instance_id = executor->create_instance(script);
                 }
                 else {
-                    instance = &executor->create_instance(script, file.init);
+                    instance_id = executor->create_instance(script, file.init);
                 }
+
+                cog::instance &instance = executor->get_instance(instance_id);
 
                 // Fake loading phase: loop over resource symbols and rebind
                 for(auto const &sym : script->symbols) {
                     if(is_resource_id_type(sym.type)) {
-                        auto &cel = instance->memory[sym.sequence_number];
+                        auto &cel = instance.memory[sym.sequence_number];
 
                         // Skip unless it's a likely filename
                         if(cel.get_type() != cog::value_type::string) {
@@ -229,6 +231,10 @@ namespace gorc {
 
             verbs.add_verb("bittest", [](int flag, int setflags) {
                     return flag & setflags;
+                });
+
+            verbs.add_verb("getglobalcog", [&](char const *cogname) {
+                    return executor->create_global_instance(content->load<cog::script>(cogname));
                 });
 
             // Test verbs for typesafe casting

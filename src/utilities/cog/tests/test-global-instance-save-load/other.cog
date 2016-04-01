@@ -1,0 +1,7 @@
+symbols
+message user0
+end
+code
+user0:
+    returnex(7);
+end
