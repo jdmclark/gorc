@@ -75,6 +75,8 @@ gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stre
             auto inst = binary_deserialize<cog_id>(bis);
             return std::make_pair(cog_ref, inst);
         });
+
+    master_cog = binary_deserialize<cog_id>(bis);
 }
 
 void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) const
@@ -96,6 +98,8 @@ void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) con
             binary_serialize(bos, em.first);
             binary_serialize(bos, em.second);
         });
+
+    binary_serialize(bos, master_cog);
 }
 
 void gorc::cog::executor::add_linkage(cog_id id, instance const &inst)
@@ -251,6 +255,16 @@ void gorc::cog::executor::send_to_linked(message_type t,
                                          param3));
         vm.execute(verbs, *this, services, cc);
     }
+}
+
+void gorc::cog::executor::set_master_cog(cog_id id)
+{
+    master_cog = id;
+}
+
+gorc::cog_id gorc::cog::executor::get_master_cog() const
+{
+    return master_cog;
 }
 
 void gorc::cog::executor::update(time_delta dt)

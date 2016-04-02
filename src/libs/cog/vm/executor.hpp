@@ -54,6 +54,8 @@ namespace gorc {
             std::multimap<value, executor_linkage, detail::executor_link_comp> linkages;
             std::map<asset_ref<script>, cog_id, detail::executor_gi_comp> global_instance_map;
 
+            cog_id master_cog;
+
             void add_linkage(cog_id id, instance const &inst);
 
         public:
@@ -97,6 +99,9 @@ namespace gorc {
                                 value param1 = value(),
                                 value param2 = value(),
                                 value param3 = value());
+
+            void set_master_cog(cog_id);
+            cog_id get_master_cog() const;
 
             void update(time_delta dt);
         };

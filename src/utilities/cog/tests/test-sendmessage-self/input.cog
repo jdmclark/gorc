@@ -1,0 +1,16 @@
+symbols
+cog other
+message startup
+message user0
+end
+code
+startup:
+    print("self");
+    printvar(getselfcog());
+    print("sending message");
+    sendmessage(getselfcog(), user0);
+    return;
+
+user0:
+    print("received message");
+end

@@ -1,0 +1,21 @@
+symbols
+cog other
+message startup
+message user0
+end
+code
+startup:
+    print("default master cog");
+    printvar(getmastercog());
+
+    setmastercog(getselfcog());
+
+    print("after master cog");
+    printvar(getmastercog());
+    print("sending message");
+    sendmessage(getmastercog(), user0);
+    return;
+
+user0:
+    print("received message");
+end

@@ -1,0 +1,6 @@
+default master cog
+cog(-1)
+after master cog
+cog(0)
+sending message
+received message

@@ -324,6 +324,19 @@ namespace {
                 return cc.frame().instance_id;
             });
 
+        verbs.add_service_verb("setmastercog", [](bool,
+                                                  service_registry const &sr,
+                                                  cog_id value) {
+                auto &exec = sr.get<executor>();
+                exec.set_master_cog(value);
+            });
+
+        verbs.add_service_verb("getmastercog", [](bool,
+                                                  service_registry const &sr) {
+                auto &exec = sr.get<executor>();
+                return exec.get_master_cog();
+            });
+
         return;
     }
 
