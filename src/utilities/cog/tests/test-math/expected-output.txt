@@ -1,0 +1,41 @@
+[WARNING] input.cog:19:12-19:15: symbol 'rand' used without being defined
+bit verbs
+3
+2
+5
+
+random verbs
+random within range
+random within range
+random within range
+random within range
+random within range
+random within range
+random within range
+random within range
+random within range
+random within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+randomvec within range
+
+vector verbs
+vector(5, 10, 15)
+float(5)
+float(10)
+float(15)
+vector(3, 5, 7)
+vector(4, 8, 12)
+vector(3, 6, 9)
+float(7)
+float(7)
+vector(0, 1, 0)
+float(10)
+vector(0, 0, 6)

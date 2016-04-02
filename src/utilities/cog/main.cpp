@@ -221,18 +221,6 @@ namespace gorc {
 
             verbs.emplace_verb<printvar_verb>("printvar");
 
-            verbs.add_verb("bitclear", [](int flag, int clearflags) {
-                    return flag & (~clearflags);
-                });
-
-            verbs.add_verb("bitset", [](int flag, int setflags) {
-                    return flag | setflags;
-                });
-
-            verbs.add_verb("bittest", [](int flag, int setflags) {
-                    return flag & setflags;
-                });
-
             verbs.add_verb("getglobalcog", [&](char const *cogname) {
                     return executor->create_global_instance(content->load<cog::script>(cogname));
                 });

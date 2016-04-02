@@ -6,11 +6,14 @@
 #include "sleep_record.hpp"
 #include "utility/enum_hash.hpp"
 #include <unordered_map>
+#include <random>
 
 using namespace gorc;
 using namespace gorc::cog;
 
 namespace {
+
+    std::default_random_engine rng((std::random_device())());
 
     std::unordered_map<gorc::cog::value_type,
                        int,
@@ -317,9 +320,86 @@ namespace {
 
         return;
     }
+
+    void add_math_verbs(verb_table &verbs)
+    {
+        verbs.add_verb("bitclear", [](int flag, int clear_flags) {
+                return flag & ~clear_flags;
+            });
+
+        verbs.add_verb("bitset", [](int flag, int set_flags) {
+                return flag | set_flags;
+            });
+
+        verbs.add_verb("bittest", [](int a, int b) {
+                return a & b;
+            });
+
+        verbs.add_verb("rand", []() {
+                return std::generate_canonical<float, 10>(rng);
+            });
+
+        verbs.add_verb("randvec", []() {
+                auto vec = make_vector(std::generate_canonical<float, 10>(rng),
+                                       std::generate_canonical<float, 10>(rng),
+                                       std::generate_canonical<float, 10>(rng));
+                vec *= 2.0f;
+                vec -= make_vector(1.0f, 1.0f, 1.0f);
+                return vec;
+            });
+
+        verbs.add_verb("vectorx", [](vector<3> a) {
+                return get<0>(a);
+            });
+
+        verbs.add_verb("vectory", [](vector<3> a) {
+                return get<1>(a);
+            });
+
+        verbs.add_verb("vectorz", [](vector<3> a) {
+                return get<2>(a);
+            });
+
+        verbs.add_verb("vectorset", [](float x, float y, float z) {
+                return make_vector(x, y, z);
+            });
+
+        verbs.add_verb("vectoradd", [](vector<3> a, vector<3> b) {
+                return a + b;
+            });
+
+        verbs.add_verb("vectorsub", [](vector<3> a, vector<3> b) {
+                return a - b;
+            });
+
+        verbs.add_verb("vectorscale", [](vector<3> a, float c) {
+                return a * c;
+            });
+
+        verbs.add_verb("vectorlen", [](vector<3> a) {
+                return length(a);
+            });
+
+        verbs.add_verb("vectordist", [](vector<3> a, vector<3> b) {
+                return length(a - b);
+            });
+
+        verbs.add_verb("vectornorm", [](vector<3> a) {
+                return normalize(a);
+            });
+
+        verbs.add_verb("vectordot", [](vector<3> a, vector<3> b) {
+                return dot(a, b);
+            });
+
+        verbs.add_verb("vectorcross", [](vector<3> a, vector<3> b) {
+                return cross(a, b);
+            });
+    }
 }
 
 void gorc::cog::default_populate_verb_table(verb_table &verbs)
 {
     add_system_verbs(verbs);
+    add_math_verbs(verbs);
 }

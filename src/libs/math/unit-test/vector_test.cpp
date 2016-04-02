@@ -84,4 +84,112 @@ test_case(almost_unequal)
     assert_true(!almost_equal(v3, v));
 }
 
+test_case(add_assign)
+{
+    auto v = make_vector(5, 10, 15);
+    auto w = make_vector(1, 2, 3);
+
+    v += w;
+
+    assert_eq(v, make_vector(6, 12, 18));
+}
+
+test_case(minus_assign)
+{
+    auto v = make_vector(5, 10, 15);
+    auto w = make_vector(1, 2, 3);
+
+    v -= w;
+
+    assert_eq(v, make_vector(4, 8, 12));
+}
+
+test_case(scale_assign)
+{
+    auto v = make_vector(1, 2, 3);
+    v *= 2;
+
+    assert_eq(v, make_vector(2, 4, 6));
+}
+
+test_case(div_assign)
+{
+    auto v = make_vector(2, 4, 6);
+    v /= 2;
+
+    assert_eq(v, make_vector(1, 2, 3));
+}
+
+test_case(addition)
+{
+    auto v = make_vector(5, 10, 15);
+    auto w = make_vector(1, 2, 3);
+
+    assert_eq((v + w), make_vector(6, 12, 18));
+}
+
+test_case(subtraction)
+{
+    auto v = make_vector(5, 10, 15);
+    auto w = make_vector(1, 2, 3);
+
+    assert_eq((v - w), make_vector(4, 8, 12));
+}
+
+test_case(prefix_mul)
+{
+    auto v = make_vector(5, 10, 15);
+    assert_eq((2 * v), make_vector(10, 20, 30));
+}
+
+test_case(postfix_mul)
+{
+    auto v = make_vector(5, 10, 15);
+    assert_eq((v * 2), make_vector(10, 20, 30));
+}
+
+test_case(postfix_div)
+{
+    auto v = make_vector(10, 20, 30);
+    assert_eq((v / 2), make_vector(5, 10, 15));
+}
+
+test_case(negate)
+{
+    auto v = make_vector(5, 10, 15);
+    assert_eq((-v), make_vector(-5, -10, -15));
+}
+
+test_case(length_squared)
+{
+    auto v = make_vector(2, 3, 6);
+    assert_eq(length_squared(v), 49);
+}
+
+test_case(length)
+{
+    auto v = make_vector(2, 3, 6);
+    assert_eq(length(v), 7);
+}
+
+test_case(dot)
+{
+    auto v = make_vector(1, 2, 3);
+    auto w = make_vector(3, 5, 7);
+    assert_eq(dot(v, w), 34);
+}
+
+test_case(normalize)
+{
+    auto v = make_vector(0, 3, 0);
+    assert_eq(normalize(v), make_vector(0, 1, 0));
+}
+
+test_case(cross)
+{
+    auto v = make_vector(5, 0, 0);
+    auto w = make_vector(0, 2, 0);
+    assert_eq(cross(v, w), make_vector(0, 0, 10));
+}
+
 end_suite(vector_test);
