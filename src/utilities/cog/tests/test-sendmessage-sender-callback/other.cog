@@ -1,0 +1,13 @@
+symbols
+message user0
+end
+code
+user0:
+    print("inside other");
+    print("senderref:");
+    printint(getsenderref());
+    print("sendertype:");
+    printint(getsendertype());
+
+    sendmessage(getsenderref(), user1);
+end

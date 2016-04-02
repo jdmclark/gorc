@@ -1,0 +1,7 @@
+sending message to other
+inside other
+senderref:
+0
+sendertype:
+9
+received callback

@@ -1,0 +1,16 @@
+symbols
+cog other
+message startup
+message user1
+end
+code
+startup:
+    print("sending message to other");
+    sendmessage(other, user0);
+    return;
+
+user1:
+    print("received callback");
+    return;
+
+end
