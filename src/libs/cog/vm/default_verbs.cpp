@@ -318,6 +318,12 @@ namespace {
 
         verbs.emplace_verb<sendmessage_verb>("sendmessage");
 
+        verbs.add_service_verb("getselfcog", [](bool,
+                                                service_registry const &sr) {
+                auto &cc = sr.get<continuation>();
+                return cc.frame().instance_id;
+            });
+
         return;
     }
 
