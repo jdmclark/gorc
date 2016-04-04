@@ -12,9 +12,9 @@ class voice {
 public:
     #include "voice.uid"
 
-    int sound;
+    thing_id sound;
 
-    voice(int sound);
+    voice(thing_id sound);
 };
 
 }

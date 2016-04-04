@@ -5,12 +5,12 @@ gorc::maybe<gorc::cog::value> gorc::cog::detail::function_verb_type_check(
         verb const &v,
         value default_value)
 {
-    int argn = 1;
-    auto type_it = v.argument_types.begin();
+    int argn = static_cast<int>(v.argument_types.size());
+    auto type_it = v.argument_types.rbegin();
     bool failed_any = false;
     for(auto stack_it = stk.rbegin();
-        type_it != v.argument_types.end() && stack_it != stk.rend();
-        ++type_it, ++stack_it, ++argn) {
+        type_it != v.argument_types.rend() && stack_it != stk.rend();
+        ++type_it, ++stack_it, --argn) {
         bool failed_once = false;
         switch(*type_it) {
         case value_type::sector: {
@@ -97,11 +97,11 @@ gorc::maybe<gorc::cog::value> gorc::cog::detail::function_verb_type_check(
         }
 
         if(failed_once) {
+            failed_any = true;
             LOG_ERROR(format("could not convert argument %d from %s to %s") %
                       argn %
-                      as_string(stack_it->get_type()) %
+                      as_string(*stack_it) %
                       as_string(*type_it));
-            failed_any = true;
         }
     }
 

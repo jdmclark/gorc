@@ -16,8 +16,6 @@
 
 using gorc::game::world::sounds::sound_presenter;
 
-constexpr int invalid_sound_id(-1);
-
 sound_presenter::sound_presenter(content_manager& contentmanager)
     : contentmanager(contentmanager)
     , levelModel(nullptr)
@@ -72,13 +70,13 @@ void sound_presenter::set_ambient_sound(maybe<asset_ref<content::assets::sound>>
 
 // verbs:
 
-void sound_presenter::change_sound_pitch(int channel, float pitch, float delay) {
+void sound_presenter::change_sound_pitch(thing_id channel, float pitch, float delay) {
     for(auto &sound : levelModel->ecs.find_component<components::sound>(entity_id(channel))) {
         sound.second.pitch.set(pitch, delay);
     }
 }
 
-void sound_presenter::change_sound_vol(int channel, float volume, float delay) {
+void sound_presenter::change_sound_vol(thing_id channel, float volume, float delay) {
     for(auto &sound : levelModel->ecs.find_component<components::sound>(entity_id(channel))) {
         sound.second.volume.set(volume, delay);
     }
@@ -88,49 +86,49 @@ void sound_presenter::play_song(int start, int end, int loopto) {
     model->ambient_music.play_song(start, end, loopto);
 }
 
-int sound_presenter::play_sound_class(int thing_id,
-                                                  flags::sound_subclass_type subclass_type) {
-    auto& referenced_thing = levelModel->get_thing(thing_id);
-    return maybe_if(referenced_thing.sound_class, invalid_sound_id, [&](auto sound_class) {
+gorc::thing_id sound_presenter::play_sound_class(thing_id thing,
+                                                 flags::sound_subclass_type subclass_type) {
+    auto& referenced_thing = levelModel->get_thing(static_cast<int>(thing));
+    return maybe_if(referenced_thing.sound_class, thing_id(invalid_id), [&](auto sound_class) {
         auto const &subclass = sound_class->get(subclass_type);
-        if(subclass.sound >= 0) {
+        if(subclass.sound.is_valid()) {
             return this->play_sound_thing(subclass.sound,
-                                          thing_id,
+                                          thing,
                                           subclass.max_volume,
                                           subclass.min_radius,
                                           subclass.max_radius,
                                           subclass.flags + flags::sound_flag::ThingOriginMovesWithThing);
         }
 
-        return invalid_sound_id;
+        return thing_id(invalid_id);
     });
 }
 
-void sound_presenter::play_foley_loop_class(int thing_id,
+void sound_presenter::play_foley_loop_class(thing_id thing,
                                             flags::sound_subclass_type subclass_type) {
-    stop_foley_loop(thing_id);
+    stop_foley_loop(thing);
 
-    auto channel = play_sound_class(thing_id, subclass_type);
-    levelModel->ecs.emplace_component<components::foley>(entity_id(thing_id), channel);
+    auto channel = play_sound_class(thing, subclass_type);
+    levelModel->ecs.emplace_component<components::foley>(thing, channel);
 }
 
-void sound_presenter::stop_foley_loop(int thing_id) {
-    for(auto const &foley : levelModel->ecs.find_component<components::foley>(entity_id(thing_id))) {
+void sound_presenter::stop_foley_loop(thing_id thing) {
+    for(auto const &foley : levelModel->ecs.find_component<components::foley>(thing)) {
         stop_sound(foley.second.sound, 0.0f);
     }
 }
 
-int sound_presenter::play_sound_local(int wav,
-                                                  float volume,
-                                                  float panning,
-                                                  flag_set<flags::sound_flag> flags) {
-    if(wav < 0) {
-        return invalid_sound_id;
+gorc::thing_id sound_presenter::play_sound_local(sound_id wav,
+                                                 float volume,
+                                                 float panning,
+                                                 flag_set<flags::sound_flag> flags) {
+    if(!wav.is_valid()) {
+        return invalid_id;
     }
 
-    auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
+    auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(static_cast<int>(wav)));
 
-    int snd_id = static_cast<int>(levelModel->ecs.make_entity());
+    thing_id snd_id = levelModel->ecs.make_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(entity_id(snd_id));
 
     snd.internal_sound.setBuffer(buffer->buffer);
@@ -150,19 +148,19 @@ int sound_presenter::play_sound_local(int wav,
     return snd_id;
 }
 
-int sound_presenter::play_sound_pos(int wav,
-                                                vector<3> pos,
-                                                float volume,
-                                                float minrad,
-                                                float maxrad,
-                                                flag_set<flags::sound_flag> flags) {
-    if(wav < 0) {
-        return invalid_sound_id;
+gorc::thing_id sound_presenter::play_sound_pos(sound_id wav,
+                                               vector<3> pos,
+                                               float volume,
+                                               float minrad,
+                                               float maxrad,
+                                               flag_set<flags::sound_flag> flags) {
+    if(!wav.is_valid()) {
+        return invalid_id;
     }
 
-    auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
+    auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(static_cast<int>(wav)));
 
-    int snd_id = static_cast<int>(levelModel->ecs.make_entity());
+    thing_id snd_id = levelModel->ecs.make_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(entity_id(snd_id));
 
     snd.minimum_attenuation_radius = std::min(minrad, maxrad);
@@ -195,24 +193,24 @@ int sound_presenter::play_sound_pos(int wav,
     return snd_id;
 }
 
-int sound_presenter::play_sound_thing(int wav,
-                                                  int thing_id,
-                                                  float volume,
-                                                  float minrad,
-                                                  float maxrad,
-                                                  flag_set<flags::sound_flag> flags) {
-    if(wav < 0) {
-        return invalid_sound_id;
+gorc::thing_id sound_presenter::play_sound_thing(sound_id wav,
+                                                 thing_id thing,
+                                                 float volume,
+                                                 float minrad,
+                                                 float maxrad,
+                                                 flag_set<flags::sound_flag> flags) {
+    if(!wav.is_valid()) {
+        return invalid_id;
     }
 
-    auto const &soundfile = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
+    auto const &soundfile = contentmanager.get_asset<content::assets::sound>(asset_id(static_cast<int>(wav)));
 
     if(flags & flags::sound_flag::IgnoreIfSoundclassAlreadyPlaying) {
         // Thing can only play this sound once.
-        for(auto &tsnd : levelModel->ecs.find_component<components::thing_sound>(entity_id(thing_id))) {
+        for(auto &tsnd : levelModel->ecs.find_component<components::thing_sound>(thing)) {
             for(auto &snd : levelModel->ecs.find_component<components::sound>(entity_id(tsnd.second.sound))) {
                 if(snd.second.internal_sound.getBuffer() == &soundfile->buffer) {
-                    return invalid_sound_id;
+                    return invalid_id;
                 }
             }
         }
@@ -220,28 +218,28 @@ int sound_presenter::play_sound_thing(int wav,
 
     if(flags & flags::sound_flag::Voice) {
         // Each thing can only play one voice at a time.
-        for(auto &voc : levelModel->ecs.find_component<components::voice>(entity_id(thing_id))) {
+        for(auto &voc : levelModel->ecs.find_component<components::voice>(thing)) {
             stop_sound(voc.second.sound, 0.0f);
         }
     }
 
-    auto &thing = levelModel->get_thing(thing_id);
+    auto &thing_ref = levelModel->get_thing(static_cast<int>(thing));
 
-    int snd_id = play_sound_pos(wav, thing.position, volume, minrad, maxrad, flags);
-    if(snd_id == invalid_sound_id) {
-        return invalid_sound_id;
+    thing_id snd_id = play_sound_pos(wav, thing_ref.position, volume, minrad, maxrad, flags);
+    if(!snd_id.is_valid()) {
+        return invalid_id;
     }
 
     if(flags & flags::sound_flag::ThingOriginMovesWithThing) {
-        levelModel->ecs.emplace_component<components::thing_sound>(entity_id(thing_id), snd_id);
+        levelModel->ecs.emplace_component<components::thing_sound>(thing, snd_id);
     }
 
     if(flags & flags::sound_flag::StopsWhenThingDestroyed) {
-        levelModel->ecs.emplace_component<components::stop_when_destroyed>(entity_id(thing_id), snd_id);
+        levelModel->ecs.emplace_component<components::stop_when_destroyed>(thing, snd_id);
     }
 
     if(flags & flags::sound_flag::Voice) {
-        levelModel->ecs.emplace_component<components::voice>(entity_id(thing_id), snd_id);
+        levelModel->ecs.emplace_component<components::voice>(thing, snd_id);
     }
 
     return snd_id;
@@ -251,7 +249,7 @@ void gorc::game::world::sounds::sound_presenter::set_music_vol(float volume) {
     model->ambient_music.set_volume(volume);
 }
 
-void gorc::game::world::sounds::sound_presenter::stop_sound(int channel, float delay) {
+void gorc::game::world::sounds::sound_presenter::stop_sound(thing_id channel, float delay) {
     if(delay <= 0.0f) {
         delay = std::numeric_limits<float>::epsilon();
     }
@@ -261,41 +259,40 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(int channel, float d
     }
 }
 
-void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verb_table&, level_state&) {
-    /* TODO
-    verbTable.add_verb<void, 3>("changesoundpitch", [&components](int channel, float pitch, float delay) {
+void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
+    verbs.add_verb("changesoundpitch", [&components](thing_id channel, float pitch, float delay) {
         components.current_level_presenter->sound_presenter->change_sound_pitch(channel, pitch, delay);
     });
 
-    verbTable.add_verb<void, 3>("changesoundvol", [&components](int channel, float volume, float delay) {
+    verbs.add_verb("changesoundvol", [&components](thing_id channel, float volume, float delay) {
         components.current_level_presenter->sound_presenter->change_sound_vol(channel, volume, delay);
     });
 
-    verbTable.add_verb<void, 3>("playsong", [&components](int start, int end, int loopto) {
+    verbs.add_verb("playsong", [&components](int start, int end, int loopto) {
         components.current_level_presenter->sound_presenter->play_song(start, end, loopto);
     });
 
-    verbTable.add_verb<int, 4>("playsoundlocal", [&components](int wav, float volume, float panning, int flags) {
+    verbs.add_verb("playsoundlocal", [&components](sound_id wav, float volume, float panning, int flags) {
         return components.current_level_presenter->sound_presenter->play_sound_local(wav, volume, panning, flag_set<flags::sound_flag>(flags));
     });
 
-    verbTable.add_verb<int, 6>("playsoundpos", [&components](int wav, vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+    verbs.add_verb("playsoundpos", [&components](sound_id wav, vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
         return components.current_level_presenter->sound_presenter->play_sound_pos(wav, pos,
             volume, min_rad / sound_attenuation_factor, max_rad / sound_attenuation_factor,
             flag_set<flags::sound_flag>(flags));
     });
 
-    verbTable.add_verb<int, 6>("playsoundthing", [&components](int wav, int thing, float volume, float min_rad, float max_rad, int flags) {
+    verbs.add_verb("playsoundthing", [&components](sound_id wav, thing_id thing, float volume, float min_rad, float max_rad, int flags) {
         return components.current_level_presenter->sound_presenter->play_sound_thing(wav, thing,
             volume, min_rad / sound_attenuation_factor, max_rad / sound_attenuation_factor,
             flag_set<flags::sound_flag>(flags));
     });
 
-    verbTable.add_verb<void, 1>("setmusicvol", [&components](float vol) {
+    verbs.add_verb("setmusicvol", [&components](float vol) {
         components.current_level_presenter->sound_presenter->set_music_vol(vol);
     });
 
-    verbTable.add_verb<void, 2>("stopsound", [&components](int channel, float delay) {
+    verbs.add_verb("stopsound", [&components](thing_id channel, float delay) {
         components.current_level_presenter->sound_presenter->stop_sound(channel, delay);
-    });*/
+    });
 }

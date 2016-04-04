@@ -70,7 +70,7 @@ dispatch_class_sound_aspect::standing_material_map const character_jump_map {
 };
 
 void dispatch_class_sound_aspect::dispatch_from_map(standing_material_map const &m,
-                                                    int thing,
+                                                    thing_id thing,
                                                     standing_material_type t) {
     auto em = m.find(t);
     if(em != m.end()) {
@@ -78,7 +78,7 @@ void dispatch_class_sound_aspect::dispatch_from_map(standing_material_map const 
     }
 }
 
-void dispatch_class_sound_aspect::handle_animation_marker(int id,
+void dispatch_class_sound_aspect::handle_animation_marker(thing_id id,
                                                           components::class_sounds &csnd,
                                                           flags::key_marker_type type) {
     switch(type) {
@@ -117,7 +117,7 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
         maybe_if(e.tpl.sound_class, [&](auto tpl_sound_class) {
             cs.emplace_component<components::class_sounds>(entity_id(e.thing), tpl_sound_class);
 
-            presenter.sound_presenter->play_sound_class(e.thing,
+            presenter.sound_presenter->play_sound_class(thing_id(e.thing),
                                                         flags::sound_subclass_type::create);
         });
     });
@@ -133,28 +133,28 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
         cs.bus.add_handler<events::class_sound>([&](events::class_sound const &e) {
         auto rng = cs.find_component<components::class_sounds>(entity_id(e.thing));
         for(auto it = rng.begin(); it != rng.end(); ++it) {
-            presenter.sound_presenter->play_sound_class(e.thing, e.type);
+            presenter.sound_presenter->play_sound_class(thing_id(e.thing), e.type);
         }
     });
 
     animation_marker_delegate =
         cs.bus.add_handler<events::animation_marker>([&](events::animation_marker const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(entity_id(e.thing))) {
-            handle_animation_marker(e.thing, csnd.second, e.type);
+            handle_animation_marker(thing_id(e.thing), csnd.second, e.type);
         }
     });
 
     jumped_delegate =
         cs.bus.add_handler<events::jumped>([&](events::jumped const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(entity_id(e.thing))) {
-            dispatch_from_map(character_jump_map, e.thing, csnd.second.standing_material_type);
+            dispatch_from_map(character_jump_map, thing_id(e.thing), csnd.second.standing_material_type);
         }
     });
 
     landed_delegate =
         cs.bus.add_handler<events::landed>([&](events::landed const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(entity_id(e.thing))) {
-            dispatch_from_map(character_land_map, e.thing, csnd.second.standing_material_type);
+            dispatch_from_map(character_land_map, thing_id(e.thing), csnd.second.standing_material_type);
         }
     });
 
@@ -165,10 +165,10 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
             double random_value = static_cast<double>(rand);
 
             if(random_value < 0.5) {
-                presenter.sound_presenter->play_sound_class(e.thing, sound_subclass_type::Death1);
+                presenter.sound_presenter->play_sound_class(thing_id(e.thing), sound_subclass_type::Death1);
             }
             else {
-                presenter.sound_presenter->play_sound_class(e.thing, sound_subclass_type::Death2);
+                presenter.sound_presenter->play_sound_class(thing_id(e.thing), sound_subclass_type::Death2);
             }
         }
     });

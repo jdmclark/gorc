@@ -1,0 +1,18 @@
+symbols
+message startup
+surface convey0 nolink
+surface convey1 nolink
+surface convey2 nolink
+surface convey3 nolink
+surface convey4 nolink
+surface convey5 nolink
+int i local
+end
+code
+
+startup:
+    for(i = 0; i < 6; i = i + 1) {
+        printvar(convey0[i]);
+    }
+
+end

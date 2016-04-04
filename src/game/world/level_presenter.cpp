@@ -444,8 +444,8 @@ void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, 
     set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
 }
 
-void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, float speed) {
-    for(auto &thing : model->ecs.find_component<components::thing>(entity_id(thing_id))) {
+void gorc::game::world::level_presenter::move_to_frame(int tid, int frame, float speed) {
+    for(auto &thing : model->ecs.find_component<components::thing>(thing_id(tid))) {
         auto &referenced_thing = thing.second;
         referenced_thing.goal_frame = frame;
         if(frame > referenced_thing.current_frame) {
@@ -461,8 +461,8 @@ void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, 
         referenced_thing.path_move_speed = speed;
         referenced_thing.path_moving = true;
         referenced_thing.rotatepivot_moving = false;
-        eventbus->fire_event(events::class_sound(thing_id, flags::sound_subclass_type::StartMove));
-        sound_presenter->play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
+        eventbus->fire_event(events::class_sound(tid, flags::sound_subclass_type::StartMove));
+        sound_presenter->play_foley_loop_class(thing_id(tid), flags::sound_subclass_type::Moving);
     }
 }
 
@@ -476,8 +476,8 @@ void gorc::game::world::level_presenter::path_move_resume(int thing_id) {
     referenced_thing.path_moving_paused = false;
 }
 
-void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, float time) {
-    components::thing& referenced_thing = model->get_thing(thing_id);
+void gorc::game::world::level_presenter::rotate_pivot(int tid, int frame, float time) {
+    components::thing& referenced_thing = model->get_thing(tid);
     referenced_thing.path_moving = false;
     referenced_thing.rotatepivot_moving = true;
     referenced_thing.current_frame = 0;
@@ -485,8 +485,8 @@ void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, f
     referenced_thing.path_move_speed = (fabs(time) <= 0.0) ? 1.0f : static_cast<float>(fabs(time));
     referenced_thing.path_move_time = 0.0f;
     referenced_thing.rotatepivot_longway = time < 0.0f;
-    eventbus->fire_event(events::class_sound(thing_id, flags::sound_subclass_type::StartMove));
-    sound_presenter->play_foley_loop_class(thing_id, flags::sound_subclass_type::Moving);
+    eventbus->fire_event(events::class_sound(tid, flags::sound_subclass_type::StartMove));
+    sound_presenter->play_foley_loop_class(thing_id(tid), flags::sound_subclass_type::Moving);
 }
 
 // level verbs
@@ -741,7 +741,7 @@ int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name
     }
 }
 
-int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
+int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, sound_id fire_sound_id, int puppet_submode_id,
         const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
     const auto& parent_thing = model->get_thing(parent_thing_id);
 
@@ -758,7 +758,7 @@ int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int
 
     // TODO: Deal with error vec, autoaim fov.
 
-    if(fire_sound_id >= 0) {
+    if(fire_sound_id.is_valid()) {
         sound_presenter->play_sound_pos(fire_sound_id, created_thing.position, 1.0f, -1.0f, -1.0f, flag_set<flags::sound_flag>());
     }
 

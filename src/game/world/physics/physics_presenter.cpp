@@ -476,7 +476,7 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
     }
 }
 
-void physics_presenter::update_thing_path_moving(int thing_id, components::thing& thing, double dt) {
+void physics_presenter::update_thing_path_moving(int tid, components::thing& thing, double dt) {
     if(thing.move != flags::move_type::Path || thing.is_blocked || thing.path_moving_paused) {
         return;
     }
@@ -493,7 +493,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
         float dist_len = length(targetPosition - currentPosition);
         float alpha = static_cast<float>(rate_factor * dt) * thing.path_move_speed / dist_len;
         if(alpha >= 1.0f || dist_len <= 0.0f) {
-            presenter.adjust_thing_pos(thing_id, targetPosition);
+            presenter.adjust_thing_pos(tid, targetPosition);
             thing.orient = targetOrientation;
 
             // Arrived at next frame. Advance to next.
@@ -501,8 +501,8 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             if(thing.current_frame == thing.goal_frame) {
                 thing.path_moving = false;
                 thing.path_move_speed = 0.0f;
-                presenter.sound_presenter->stop_foley_loop(int(thing_id));
-                presenter.sound_presenter->play_sound_class(int(thing_id), flags::sound_subclass_type::StopMove);
+                presenter.sound_presenter->stop_foley_loop(thing_id(tid));
+                presenter.sound_presenter->play_sound_class(thing_id(tid), flags::sound_subclass_type::StopMove);
 
                 // Dispatch cog messages and resume cogs which are waiting for stop.
                 // TODO
@@ -517,7 +517,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             }
         }
         else {
-            presenter.adjust_thing_pos(thing_id, lerp(thing.position, targetPosition, alpha));
+            presenter.adjust_thing_pos(tid, lerp(thing.position, targetPosition, alpha));
             thing.orient = slerp(thing.orient, targetOrientation, alpha);
         }
     }
@@ -539,10 +539,10 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             auto new_pos = angle.transform(thing.position - frame_pos) + frame_pos;
 
             thing.orient = angle * thing.orient;
-            presenter.adjust_thing_pos(thing_id, new_pos);
+            presenter.adjust_thing_pos(tid, new_pos);
 
-            presenter.sound_presenter->stop_foley_loop(int(thing_id));
-            presenter.sound_presenter->play_sound_class(int(thing_id), flags::sound_subclass_type::StopMove);
+            presenter.sound_presenter->stop_foley_loop(thing_id(tid));
+            presenter.sound_presenter->play_sound_class(thing_id(tid), flags::sound_subclass_type::StopMove);
 
             // Dispatch cog messages and resume cogs which are waiting for stop.
             // TODO
@@ -562,7 +562,7 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             auto new_pos = angle.transform(thing.position - frame_pos) + frame_pos;
 
             thing.orient = angle * thing.orient;
-            presenter.adjust_thing_pos(thing_id, new_pos);
+            presenter.adjust_thing_pos(tid, new_pos);
 
             thing.path_move_time += static_cast<float>(dt);
         }

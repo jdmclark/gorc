@@ -1,0 +1,3 @@
+include ../test.boc;
+
+call run_scenario();

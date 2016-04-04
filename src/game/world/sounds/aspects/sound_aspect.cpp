@@ -17,17 +17,17 @@ gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system 
 
         cs.erase_components(cs.all_components<components::thing_sound>(),
             [&](components::thing_sound const &cmp) {
-                return cmp.sound == static_cast<int>(e.destroyed_entity);
+                return cmp.sound == e.destroyed_entity;
             });
 
         cs.erase_components(cs.all_components<components::voice>(),
             [&](components::voice const &voc) {
-                return voc.sound == static_cast<int>(e.destroyed_entity);
+                return voc.sound == e.destroyed_entity;
             });
 
         cs.erase_components(cs.all_components<components::foley>(),
             [&](components::foley const &fol) {
-                return fol.sound == static_cast<int>(e.destroyed_entity);
+                return fol.sound == e.destroyed_entity;
             });
 
         for(auto &fol : cs.find_component<components::foley>(e.destroyed_entity)) {

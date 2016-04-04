@@ -52,8 +52,8 @@ void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id)
     }
 }
 
-void weapon_controller_aspect::touched_surface(int thing_id, int touched_surface_id) {
-    auto& projectile = presenter.model->get_thing(thing_id);
+void weapon_controller_aspect::touched_surface(int tid, int touched_surface_id) {
+    auto& projectile = presenter.model->get_thing(tid);
     if(projectile.type != flags::thing_type::Weapon) {
         return;
     }
@@ -68,16 +68,16 @@ void weapon_controller_aspect::touched_surface(int thing_id, int touched_surface
             proj_flags -= flags::weapon_flag::does_not_affect_parent;
             projectile.type_flags = static_cast<int>(proj_flags);
             projectile.vel -= 2.0f * dot(projectile.vel, touched_surface.normal) * touched_surface.normal;
-            presenter.sound_presenter->play_sound_class(thing_id, flags::sound_subclass_type::deflected);
+            presenter.sound_presenter->play_sound_class(thing_id(tid), flags::sound_subclass_type::deflected);
         }
         return;
     }
 
     if(proj_flags & flags::weapon_flag::explodes_on_surface) {
-        presenter.create_thing_at_thing(projectile.explode, thing_id);
+        presenter.create_thing_at_thing(projectile.explode, tid);
     }
     else {
-        presenter.create_thing_at_thing(projectile.create_thing, thing_id);
+        presenter.create_thing_at_thing(projectile.create_thing, tid);
     }
 
     /* TODO
@@ -85,7 +85,7 @@ void weapon_controller_aspect::touched_surface(int thing_id, int touched_surface
             touched_surface_id, flags::message_type::surface,
             thing_id, flags::message_type::thing,
             projectile.damage, static_cast<int>(projectile.damage_class));*/
-    presenter.destroy_thing(thing_id);
+    presenter.destroy_thing(tid);
 }
 
 weapon_controller_aspect::weapon_controller_aspect(component_system &cs,

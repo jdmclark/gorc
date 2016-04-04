@@ -400,9 +400,21 @@ void ParseCogsSection(assets::level& lev, text::tokenizer& tok, content_manager&
                         break;
 
                     case cog::value_type::cog:
+                        values.push_back(cog_id(tok.get_number<int>()));
+                        break;
+
                     case cog::value_type::sector:
+                        values.push_back(sector_id(tok.get_number<int>()));
+                        break;
+
                     case cog::value_type::surface:
+                        values.push_back(surface_id(tok.get_number<int>()));
+                        break;
+
                     case cog::value_type::thing:
+                        values.push_back(thing_id(tok.get_number<int>()));
+                        break;
+
                     case cog::value_type::integer:
                         values.push_back(tok.get_number<int>());
                         break;

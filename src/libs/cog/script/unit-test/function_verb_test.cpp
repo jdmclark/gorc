@@ -127,7 +127,7 @@ test_case(safe_function_verb)
 
     auto result2 = vn->invoke(stk, sr, true);
     assert_eq(result2, value(10));
-    assert_log_message(log_level::error, "could not convert argument 1 from int to sector");
+    assert_log_message(log_level::error, "could not convert argument 1 from int(0) to sector");
     assert_log_empty();
 }
 
@@ -157,7 +157,30 @@ test_case(safe_service_verb)
 
     auto result2 = vn->invoke(stk, sr, true);
     assert_eq(result2, value(10));
-    assert_log_message(log_level::error, "could not convert argument 1 from int to sector");
+    assert_log_message(log_level::error, "could not convert argument 1 from int(0) to sector");
+    assert_log_empty();
+}
+
+test_case(safe_verb_order)
+{
+    auto fn = [](surface_id, sector_id, thing_id)
+    {
+        LOG_INFO("called functor");
+        return;
+    };
+
+    auto vn = make_function_verb("myverb", fn, true, 10);
+
+    cog::stack stk;
+    service_registry sr;
+
+    // Push arguments left to right
+    stk.push_back(surface_id(0));
+    stk.push_back(sector_id(5));
+    stk.push_back(thing_id(3));
+
+    vn->invoke(stk, sr, false);
+    assert_log_message(log_level::info, "called functor");
     assert_log_empty();
 }
 

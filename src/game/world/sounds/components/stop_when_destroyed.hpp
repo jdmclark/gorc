@@ -12,9 +12,9 @@ class stop_when_destroyed {
 public:
     #include "stop_when_destroyed.uid"
 
-    int sound;
+    thing_id sound;
 
-    stop_when_destroyed(int sound);
+    stop_when_destroyed(thing_id sound);
 };
 
 }

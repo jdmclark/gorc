@@ -152,7 +152,7 @@ public:
     int create_thing(const std::string& tpl_name, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
     int create_thing(int tpl_id, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
 
-    int fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
+    int fire_projectile(int parent_thing_id, int tpl_id, sound_id fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
             float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovz);
 
     void attach_thing_to_thing(int thing_id, int base_id);
