@@ -696,7 +696,7 @@ int gorc::game::world::level_presenter::load_sound(const char* fn) {
 int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
         const vector<3>& pos, const quaternion<float>& orient) {
     // Initialize thing properties
-    int new_thing_id = model->ecs.make_entity();
+    int new_thing_id = static_cast<int>(model->ecs.make_entity());
     model->ecs.emplace_component<components::thing>(entity_id(new_thing_id), tpl);
 
     auto& new_thing = model->get_thing(static_cast<int>(new_thing_id));

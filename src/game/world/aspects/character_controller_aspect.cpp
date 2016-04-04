@@ -302,15 +302,15 @@ void character_controller_aspect::jump(int thing_id, components::thing& thing) {
 }
 
 void character_controller_aspect::update(gorc::time t,
-                                         entity_id thing_id,
+                                         entity_id id,
                                          components::character&,
                                          components::thing &thing) {
     // Update actor state
     if(static_cast<int>(thing.attach_flags)) {
-        update_standing(thing_id, thing, t.elapsed_as_seconds());
+        update_standing(static_cast<int>(id), thing, t.elapsed_as_seconds());
     }
     else {
-        update_falling(thing_id, thing, t.elapsed_as_seconds());
+        update_falling(static_cast<int>(id), thing, t.elapsed_as_seconds());
     }
 
     // Update lightsaber state

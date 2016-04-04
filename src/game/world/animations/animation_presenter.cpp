@@ -29,7 +29,7 @@ void animation_presenter::start(level_model& levelModel) {
 
 // Anim / Cel verbs
 int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::anim_flag> flag) {
-    int emplaced_anim = levelModel->ecs.make_entity();
+    int emplaced_anim = static_cast<int>(levelModel->ecs.make_entity());
 
     int surface_material = levelModel->level->surfaces[surface].material;
     if(surface_material < 0) {
@@ -58,7 +58,7 @@ int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::a
 int animation_presenter::get_surface_anim(int surface) {
     for(auto& surf_anim : levelModel->ecs.all_components<components::surface_animation>()) {
         if(surf_anim.second.surface == surface) {
-            return surf_anim.first;
+            return static_cast<int>(surf_anim.first);
         }
     }
 
@@ -70,7 +70,7 @@ void animation_presenter::stop_surface_anim(int surface) {
     for(auto it = cmp_range.begin(); it != cmp_range.end();) {
         auto jt = it++;
         if(jt->second.surface == surface) {
-            stop_anim(jt->first);
+            stop_anim(static_cast<int>(jt->first));
         }
     }
 }
@@ -118,7 +118,7 @@ int animation_presenter::slide_surface(int surface, const vector<3>& direction) 
 
     // Create animation
     int surf_id(surface);
-    int emplaced_anim = levelModel->ecs.make_entity();
+    int emplaced_anim = static_cast<int>(levelModel->ecs.make_entity());
 
     levelModel->ecs.emplace_component<components::slide_surface>(entity_id(emplaced_anim), surf_id, direction, sb0, sb1, tb0, tb1);
     levelModel->ecs.emplace_component<components::surface_animation>(entity_id(emplaced_anim), surf_id);
@@ -127,7 +127,7 @@ int animation_presenter::slide_surface(int surface, const vector<3>& direction) 
 }
 
 int animation_presenter::slide_ceiling_sky(float u_speed, float v_speed) {
-    int anim = levelModel->ecs.make_entity();
+    int anim = static_cast<int>(levelModel->ecs.make_entity());
     levelModel->ecs.emplace_component<components::slide_ceiling_sky>(entity_id(anim), make_vector(u_speed, v_speed));
     return anim;
 }
@@ -136,7 +136,7 @@ int animation_presenter::surface_light_anim(int surface, float start_light, floa
     levelModel->surfaces[surface].extra_light = start_light;
 
     int surf_id(surface);
-    int emplaced_anim = levelModel->ecs.make_entity();
+    int emplaced_anim = static_cast<int>(levelModel->ecs.make_entity());
 
     levelModel->ecs.emplace_component<components::surface_light>(entity_id(emplaced_anim), surf_id, start_light, end_light, change_time);
     levelModel->ecs.emplace_component<components::surface_animation>(entity_id(emplaced_anim), surf_id);

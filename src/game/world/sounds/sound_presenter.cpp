@@ -130,7 +130,7 @@ int sound_presenter::play_sound_local(int wav,
 
     auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
 
-    int snd_id = levelModel->ecs.make_entity();
+    int snd_id = static_cast<int>(levelModel->ecs.make_entity());
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(entity_id(snd_id));
 
     snd.internal_sound.setBuffer(buffer->buffer);
@@ -162,7 +162,7 @@ int sound_presenter::play_sound_pos(int wav,
 
     auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(wav));
 
-    int snd_id = levelModel->ecs.make_entity();
+    int snd_id = static_cast<int>(levelModel->ecs.make_entity());
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(entity_id(snd_id));
 
     snd.minimum_attenuation_radius = std::min(minrad, maxrad);
