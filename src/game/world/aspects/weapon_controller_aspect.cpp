@@ -8,7 +8,7 @@
 
 using gorc::game::world::aspects::weapon_controller_aspect;
 
-void weapon_controller_aspect::touched_thing(entity_id thing_id, entity_id touched_thing_id) {
+void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id) {
     auto& projectile = presenter.model->get_thing(thing_id);
     if(projectile.type != flags::thing_type::Weapon) {
         return;
@@ -52,7 +52,7 @@ void weapon_controller_aspect::touched_thing(entity_id thing_id, entity_id touch
     }
 }
 
-void weapon_controller_aspect::touched_surface(entity_id thing_id, int touched_surface_id) {
+void weapon_controller_aspect::touched_surface(int thing_id, int touched_surface_id) {
     auto& projectile = presenter.model->get_thing(thing_id);
     if(projectile.type != flags::thing_type::Weapon) {
         return;
@@ -95,7 +95,7 @@ weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
     created_delegate =
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         if(e.tpl.type == flags::thing_type::Weapon) {
-            cs.emplace_component<components::weapon>(e.thing);
+            cs.emplace_component<components::weapon>(entity_id(e.thing));
         }
     });
 

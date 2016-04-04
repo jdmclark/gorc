@@ -12,7 +12,7 @@ item_controller_aspect::item_controller_aspect(component_system &cs,
     created_delegate =
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         if(e.tpl.type == flags::thing_type::Item) {
-            cs.emplace_component<components::item>(e.thing);
+            cs.emplace_component<components::item>(entity_id(e.thing));
         }
     });
 

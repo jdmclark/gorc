@@ -1,6 +1,6 @@
 #include "killed.hpp"
 
-gorc::game::world::events::killed::killed(entity_id thing, entity_id killer)
+gorc::game::world::events::killed::killed(int thing, int killer)
     : thing(thing), killer(killer) {
     return;
 }

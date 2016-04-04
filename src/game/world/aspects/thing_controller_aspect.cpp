@@ -36,7 +36,7 @@ void thing_controller_aspect::update(gorc::time t,
     }
 }
 
-void thing_controller_aspect::on_touched_surface(entity_id /*thing*/,
+void thing_controller_aspect::on_touched_surface(int /*thing*/,
                                                  int /*surface*/) {
     // Dispatch touched message to surface
     /* TODO
@@ -48,8 +48,8 @@ void thing_controller_aspect::on_touched_surface(entity_id /*thing*/,
     return;
 }
 
-void thing_controller_aspect::on_touched_thing(entity_id /*thing*/,
-                                               entity_id /*touched_thing*/) {
+void thing_controller_aspect::on_touched_thing(int /*thing*/,
+                                               int /*touched_thing*/) {
     // Dispatch touched message to thing
     /* TODO
     presenter.script_presenter->send_message_to_linked(cog::message_id::touched,

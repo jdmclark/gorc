@@ -12,9 +12,9 @@ class thing_sound {
 public:
     #include "thing_sound.uid"
 
-    entity_id sound;
+    int sound;
 
-    thing_sound(entity_id sound);
+    thing_sound(int sound);
 };
 
 }

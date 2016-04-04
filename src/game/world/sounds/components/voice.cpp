@@ -1,6 +1,6 @@
 #include "voice.hpp"
 
-gorc::game::world::sounds::components::voice::voice(entity_id sound)
+gorc::game::world::sounds::components::voice::voice(int sound)
     : sound(sound) {
     return;
 }

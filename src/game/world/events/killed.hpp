@@ -11,10 +11,10 @@ class killed {
 public:
     #include "killed.uid"
 
-    entity_id thing;
-    entity_id killer;
+    int thing;
+    int killer;
 
-    killed(entity_id thing, entity_id killer);
+    killed(int thing, int killer);
 };
 
 }

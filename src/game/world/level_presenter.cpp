@@ -288,7 +288,7 @@ void gorc::game::world::level_presenter::activate() {
             /* TODO
             script_presenter->send_message_to_linked(cog::message_id::activated, contact_thing_id, flags::message_type::thing,
                     model->local_player_thing_id, flags::message_type::thing);
-            eventbus->fire_event(events::class_sound(entity_id(contact_thing_id),
+            eventbus->fire_event(events::class_sound(int(contact_thing_id),
                                                      flags::sound_subclass_type::Activate)); */
         });
     });
@@ -312,8 +312,8 @@ void gorc::game::world::level_presenter::damage() {
         });
 
         maybe_if(contact.contact_thing_id, [&](int contact_thing_id) {
-            damage_thing(entity_id(contact_thing_id), 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
-                    entity_id(model->local_player_thing_id));
+            damage_thing(int(contact_thing_id), 1000.0f, flag_set<flags::damage_flag> { flags::damage_flag::saber, flags::damage_flag::explosion},
+                    int(model->local_player_thing_id));
         });
     });
 }
@@ -434,18 +434,18 @@ bool gorc::game::world::level_presenter::has_los(int look_thing_id, int target_t
 }
 
 // Frame verbs
-int gorc::game::world::level_presenter::get_cur_frame(entity_id thing_id) {
+int gorc::game::world::level_presenter::get_cur_frame(int thing_id) {
     return model->get_thing(thing_id).current_frame;
 }
 
-void gorc::game::world::level_presenter::jump_to_frame(entity_id thing_id, int frame, int sector) {
+void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
     components::thing& referenced_thing = model->get_thing(thing_id);
     auto& referenced_frame = referenced_thing.frames[frame];
     set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
 }
 
-void gorc::game::world::level_presenter::move_to_frame(entity_id thing_id, int frame, float speed) {
-    for(auto &thing : model->ecs.find_component<components::thing>(thing_id)) {
+void gorc::game::world::level_presenter::move_to_frame(int thing_id, int frame, float speed) {
+    for(auto &thing : model->ecs.find_component<components::thing>(entity_id(thing_id))) {
         auto &referenced_thing = thing.second;
         referenced_thing.goal_frame = frame;
         if(frame > referenced_thing.current_frame) {
@@ -466,17 +466,17 @@ void gorc::game::world::level_presenter::move_to_frame(entity_id thing_id, int f
     }
 }
 
-void gorc::game::world::level_presenter::path_move_pause(entity_id thing_id) {
+void gorc::game::world::level_presenter::path_move_pause(int thing_id) {
     auto& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving_paused = true;
 }
 
-void gorc::game::world::level_presenter::path_move_resume(entity_id thing_id) {
+void gorc::game::world::level_presenter::path_move_resume(int thing_id) {
     auto& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving_paused = false;
 }
 
-void gorc::game::world::level_presenter::rotate_pivot(entity_id thing_id, int frame, float time) {
+void gorc::game::world::level_presenter::rotate_pivot(int thing_id, int frame, float time) {
     components::thing& referenced_thing = model->get_thing(thing_id);
     referenced_thing.path_moving = false;
     referenced_thing.rotatepivot_moving = true;
@@ -542,7 +542,7 @@ void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
     thing.saber_saber = (saber >= 0) ? make_maybe(&model->level->templates[saber]) : nothing;
 }
 
-void gorc::game::world::level_presenter::take_item(entity_id thing_id, entity_id player_id) {
+void gorc::game::world::level_presenter::take_item(int thing_id, int player_id) {
     eventbus->fire_event(events::taken(thing_id, player_id));
 }
 
@@ -696,8 +696,8 @@ int gorc::game::world::level_presenter::load_sound(const char* fn) {
 int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
         const vector<3>& pos, const quaternion<float>& orient) {
     // Initialize thing properties
-    entity_id new_thing_id = model->ecs.make_entity();
-    model->ecs.emplace_component<components::thing>(new_thing_id, tpl);
+    int new_thing_id = model->ecs.make_entity();
+    model->ecs.emplace_component<components::thing>(entity_id(new_thing_id), tpl);
 
     auto& new_thing = model->get_thing(static_cast<int>(new_thing_id));
 
@@ -741,7 +741,7 @@ int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name
     }
 }
 
-int gorc::game::world::level_presenter::fire_projectile(entity_id parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
+int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id,
         const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
     const auto& parent_thing = model->get_thing(parent_thing_id);
 
@@ -819,10 +819,10 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
     return new_thing_id;
 }
 
-float gorc::game::world::level_presenter::damage_thing(entity_id thing_id,
+float gorc::game::world::level_presenter::damage_thing(int thing_id,
                                                        float damage,
                                                        flag_set<flags::damage_flag> /*flags*/,
-                                                       entity_id damager_id) {
+                                                       int damager_id) {
     /* TODO
     script_presenter->send_message_to_linked(cog::message_id::damaged,
                                              static_cast<int>(thing_id),
@@ -999,12 +999,12 @@ void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh
     }
 }
 
-void gorc::game::world::level_presenter::set_armed_mode(entity_id player, flags::armed_mode mode) {
+void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed_mode mode) {
     eventbus->fire_event(events::armed_mode_changed(player, mode));
 }
 
-gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(entity_id player) {
-    for(auto const &pup : model->ecs.find_component<components::puppet_animations>(player)) {
+gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(int player) {
+    for(auto const &pup : model->ecs.find_component<components::puppet_animations>(entity_id(player))) {
         return pup.second.puppet_mode_type;
     }
 
@@ -1077,27 +1077,27 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table& verbTab
     });
 
     // Frame verbs
-    verbTable.add_verb<int, 1>("getcurframe", [&components](entity_id thing) {
+    verbTable.add_verb<int, 1>("getcurframe", [&components](int thing) {
         return components.current_level_presenter->get_cur_frame(thing);
     });
 
-    verbTable.add_verb<void, 3>("jumptoframe", [&components](entity_id thing, int frame, int sector) {
+    verbTable.add_verb<void, 3>("jumptoframe", [&components](int thing, int frame, int sector) {
         return components.current_level_presenter->jump_to_frame(thing, frame, sector);
     });
 
-    verbTable.add_verb<void, 3>("movetoframe", [&components](entity_id thing, int frame, float speed) {
+    verbTable.add_verb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
         return components.current_level_presenter->move_to_frame(thing, frame, speed);
     });
 
-    verbTable.add_verb<void, 1>("pathmovepause", [&components](entity_id thing) {
+    verbTable.add_verb<void, 1>("pathmovepause", [&components](int thing) {
         components.current_level_presenter->path_move_pause(thing);
     });
 
-    verbTable.add_verb<void, 1>("pathmoveresume", [&components](entity_id thing) {
+    verbTable.add_verb<void, 1>("pathmoveresume", [&components](int thing) {
         components.current_level_presenter->path_move_resume(thing);
     });
 
-    verbTable.add_verb<void, 3>("rotatepivot", [&components](entity_id thing_id, int frame, float time) {
+    verbTable.add_verb<void, 3>("rotatepivot", [&components](int thing_id, int frame, float time) {
         components.current_level_presenter->rotate_pivot(thing_id, frame, time);
     });
 
@@ -1131,7 +1131,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table& verbTab
                 base_rad, tip_rad, length, wall, blood, saber);
     });
 
-    verbTable.add_verb<void, 2>("takeitem", [&components](entity_id thing_id, entity_id player_id) {
+    verbTable.add_verb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
         components.current_level_presenter->take_item(thing_id, player_id);
     });
 
@@ -1307,13 +1307,13 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table& verbTab
         return components.current_level_presenter->create_thing(tpl_id, sector, pos, make_euler(orient));
     });
 
-    verbTable.add_verb<int, 10>("fireprojectile", [&components](entity_id parent_thing_id, int tpl_id, int snd_id, int submode_id,
+    verbTable.add_verb<int, 10>("fireprojectile", [&components](int parent_thing_id, int tpl_id, int snd_id, int submode_id,
             vector<3> offset_vec, vector<3> error_vec, float extra, int proj_flags, float aa_fovx, float aa_fovz) {
         return components.current_level_presenter->fire_projectile(parent_thing_id, tpl_id, snd_id, submode_id,
                 offset_vec, error_vec, extra, proj_flags, aa_fovx, aa_fovz);
     });
 
-    verbTable.add_verb<float, 4>("damagething", [&components](entity_id thing_id, float damage, int flags, entity_id damager_id) {
+    verbTable.add_verb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
         return components.current_level_presenter->damage_thing(thing_id, damage, flag_set<flags::damage_flag>(flags), damager_id);
     });
 
@@ -1440,11 +1440,11 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table& verbTab
         components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
     });
 
-    verbTable.add_verb<void, 2>("setarmedmode", [&components](entity_id player, int mode) {
+    verbTable.add_verb<void, 2>("setarmedmode", [&components](int player, int mode) {
         components.current_level_presenter->set_armed_mode(player, flags::armed_mode(mode));
     });
 
-    verbTable.add_verb<int, 1>("getmajormode", [&components](entity_id player) {
+    verbTable.add_verb<int, 1>("getmajormode", [&components](int player) {
         return static_cast<int>(components.current_level_presenter->get_major_mode(player));
     });*/
 }

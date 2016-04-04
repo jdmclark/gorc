@@ -12,9 +12,9 @@ class stop_when_destroyed {
 public:
     #include "stop_when_destroyed.uid"
 
-    entity_id sound;
+    int sound;
 
-    stop_when_destroyed(entity_id sound);
+    stop_when_destroyed(int sound);
 };
 
 }

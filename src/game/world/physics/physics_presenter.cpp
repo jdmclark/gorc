@@ -501,8 +501,8 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             if(thing.current_frame == thing.goal_frame) {
                 thing.path_moving = false;
                 thing.path_move_speed = 0.0f;
-                presenter.sound_presenter->stop_foley_loop(entity_id(thing_id));
-                presenter.sound_presenter->play_sound_class(entity_id(thing_id), flags::sound_subclass_type::StopMove);
+                presenter.sound_presenter->stop_foley_loop(int(thing_id));
+                presenter.sound_presenter->play_sound_class(int(thing_id), flags::sound_subclass_type::StopMove);
 
                 // Dispatch cog messages and resume cogs which are waiting for stop.
                 // TODO
@@ -541,8 +541,8 @@ void physics_presenter::update_thing_path_moving(int thing_id, components::thing
             thing.orient = angle * thing.orient;
             presenter.adjust_thing_pos(thing_id, new_pos);
 
-            presenter.sound_presenter->stop_foley_loop(entity_id(thing_id));
-            presenter.sound_presenter->play_sound_class(entity_id(thing_id), flags::sound_subclass_type::StopMove);
+            presenter.sound_presenter->stop_foley_loop(int(thing_id));
+            presenter.sound_presenter->play_sound_class(int(thing_id), flags::sound_subclass_type::StopMove);
 
             // Dispatch cog messages and resume cogs which are waiting for stop.
             // TODO
@@ -716,7 +716,7 @@ void physics_presenter::update(const gorc::time& time) {
     for(const auto& touched_surface_pair : physics_touched_surface_pairs) {
         int thing_id, surf_id;
         std::tie(thing_id, surf_id) = touched_surface_pair;
-        eventbus->fire_event(events::touched_surface(entity_id(thing_id),
+        eventbus->fire_event(events::touched_surface(int(thing_id),
                                                      surf_id));
     }
 
@@ -724,10 +724,10 @@ void physics_presenter::update(const gorc::time& time) {
         int thing_a_id, thing_b_id;
         std::tie(thing_a_id, thing_b_id) = touched_thing_pair;
 
-        eventbus->fire_event(events::touched_thing(entity_id(thing_a_id),
-                                                   entity_id(thing_b_id)));
-        eventbus->fire_event(events::touched_thing(entity_id(thing_b_id),
-                                                   entity_id(thing_a_id)));
+        eventbus->fire_event(events::touched_thing(int(thing_a_id),
+                                                   int(thing_b_id)));
+        eventbus->fire_event(events::touched_thing(int(thing_b_id),
+                                                   int(thing_a_id)));
     }
 }
 

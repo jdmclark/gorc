@@ -12,9 +12,9 @@ class foley {
 public:
     #include "foley.uid"
 
-    entity_id sound;
+    int sound;
 
-    foley(entity_id sound);
+    foley(int sound);
 };
 
 }

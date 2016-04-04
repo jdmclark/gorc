@@ -17,8 +17,8 @@ private:
     maybe<scoped_delegate> touched_surface_delegate;
     maybe<scoped_delegate> created_delegate;
 
-    void touched_thing(entity_id thing_id, entity_id touched_thing_id);
-    void touched_surface(entity_id thing_id, int surface);
+    void touched_thing(int thing_id, int touched_thing_id);
+    void touched_surface(int thing_id, int surface);
 
 public:
     weapon_controller_aspect(component_system&, level_presenter&);

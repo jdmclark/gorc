@@ -1,6 +1,6 @@
 #include "foley.hpp"
 
-gorc::game::world::sounds::components::foley::foley(entity_id sound)
+gorc::game::world::sounds::components::foley::foley(int sound)
     : sound(sound) {
     return;
 }

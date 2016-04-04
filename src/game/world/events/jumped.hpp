@@ -11,9 +11,9 @@ class jumped {
 public:
     #include "jumped.uid"
 
-    entity_id thing;
+    int thing;
 
-    jumped(entity_id thing);
+    jumped(int thing);
 };
 
 }

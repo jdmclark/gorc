@@ -1,6 +1,6 @@
 #include "landed.hpp"
 
-gorc::game::world::events::landed::landed(entity_id thing)
+gorc::game::world::events::landed::landed(int thing)
     : thing(thing) {
     return;
 }

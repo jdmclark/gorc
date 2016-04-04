@@ -44,7 +44,7 @@ void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, co
 }
 
 void gorc::game::world::keys::key_presenter::DispatchMarker(int thing_id, flags::key_marker_type marker) {
-    bus->fire_event(events::animation_marker(entity_id(thing_id), marker));
+    bus->fire_event(events::animation_marker(int(thing_id), marker));
 }
 
 int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {
@@ -287,7 +287,7 @@ int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
     return play_mix_key(GetThingMixId(thing_id), key, priority, flags);
 }
 
-int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
+int gorc::game::world::keys::key_presenter::play_mode(int thing_id,
                                                       flags::puppet_submode_type minor_mode) {
     auto& thing = levelModel->get_thing(thing_id);
     if(!thing.pup.has_value()) {
@@ -295,7 +295,7 @@ int gorc::game::world::keys::key_presenter::play_mode(entity_id thing_id,
     }
 
     maybe<content::assets::puppet_submode const *> submode_ptr;
-    for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(thing_id)) {
+    for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(entity_id(thing_id))) {
         submode_ptr = tpup.second.puppet->get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
     }
 
@@ -355,7 +355,7 @@ void gorc::game::world::keys::key_presenter::register_verbs(cog::verb_table&, le
         return components.current_level_presenter->key_presenter->play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
     });
 
-    verbTable.add_verb<int, 2>("playmode", [&components](entity_id thing_id, int submode) {
+    verbTable.add_verb<int, 2>("playmode", [&components](int thing_id, int submode) {
         return components.current_level_presenter->key_presenter->play_mode(thing_id, static_cast<flags::puppet_submode_type>(submode));
     });
 

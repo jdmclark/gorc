@@ -99,12 +99,12 @@ public:
     bool has_los(int look_thing_id, int target_thing_id);
 
     // Frame verbs
-    int get_cur_frame(entity_id thing_id);
-    void jump_to_frame(entity_id thing_id, int frame, int sector);
-    void move_to_frame(entity_id thing_id, int frame, float speed);
-    void path_move_pause(entity_id thing_id);
-    void path_move_resume(entity_id thing_id);
-    void rotate_pivot(entity_id thing_id, int frame, float time);
+    int get_cur_frame(int thing_id);
+    void jump_to_frame(int thing_id, int frame, int sector);
+    void move_to_frame(int thing_id, int frame, float speed);
+    void path_move_pause(int thing_id);
+    void path_move_resume(int thing_id);
+    void rotate_pivot(int thing_id, int frame, float time);
 
     // Level verbs
     float get_game_time();
@@ -116,7 +116,7 @@ public:
     void jk_enable_saber(int thing_id, float damage, float collide_length, float unknown);
     void jk_set_saber_info(int thing_id, int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
             int wall, int blood, int saber);
-    void take_item(entity_id thing_id, entity_id player_id);
+    void take_item(int thing_id, int player_id);
 
     // Player verbs
     int get_local_player_thing();
@@ -152,12 +152,12 @@ public:
     int create_thing(const std::string& tpl_name, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
     int create_thing(int tpl_id, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
 
-    int fire_projectile(entity_id parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
+    int fire_projectile(int parent_thing_id, int tpl_id, int fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
             float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovz);
 
     void attach_thing_to_thing(int thing_id, int base_id);
     int create_thing_at_thing(int tpl_id, int thing_id);
-    float damage_thing(entity_id thing_id, float damage, flag_set<flags::damage_flag> flags, entity_id damager_id);
+    float damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id);
     void destroy_thing(int thing_id);
     void real_destroy_thing(int thing_id);
     void detach_thing(int thing_id);
@@ -197,8 +197,8 @@ public:
 
     // weapon verbs
     void jk_set_weapon_mesh(int player, int model);
-    void set_armed_mode(entity_id player, flags::armed_mode mode);
-    flags::puppet_mode_type get_major_mode(entity_id player);
+    void set_armed_mode(int player, flags::armed_mode mode);
+    flags::puppet_mode_type get_major_mode(int player);
 
     static void register_verbs(cog::verb_table&, level_state&);
 };

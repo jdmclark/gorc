@@ -65,7 +65,7 @@ bool character_controller_aspect::can_stand_on_surface(int surface_id) {
     return surface.flags & flags::surface_flag::Floor;
 }
 
-gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(entity_id thing_id, components::thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(int thing_id, components::thing& thing,
                 double) {
     // Test for collision between legs and ground using multiple tests
     vector<3> leg_height, leg_height_norm;
@@ -98,7 +98,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     return contact;
 }
 
-gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(entity_id thing_id, components::thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(int thing_id, components::thing& thing,
         double) {
     // Test for collision between legs and ground using multiple tests
     vector<3> leg_height;
@@ -123,7 +123,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     return contact;
 }
 
-void character_controller_aspect::update_falling(entity_id thing_id, components::thing& thing, double dt) {
+void character_controller_aspect::update_falling(int thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_falling_sweep(thing_id, thing, dt);
 
     auto applied_thrust = thing.thrust;
@@ -142,7 +142,7 @@ void character_controller_aspect::update_falling(entity_id thing_id, components:
     });
 }
 
-void character_controller_aspect::update_standing(entity_id thing_id, components::thing& thing, double dt) {
+void character_controller_aspect::update_standing(int thing_id, components::thing& thing, double dt) {
     auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
 
     if(maybe_contact.has_value()) {
@@ -206,7 +206,7 @@ void character_controller_aspect::update_standing(entity_id thing_id, components
     }
 }
 
-void character_controller_aspect::set_is_falling(entity_id thing_id, components::thing& thing) {
+void character_controller_aspect::set_is_falling(int thing_id, components::thing& thing) {
     // Player is falling again.
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
         /* TODO
@@ -226,7 +226,7 @@ void character_controller_aspect::set_is_falling(entity_id thing_id, components:
     cs.bus.fire_event(events::standing_material_changed(thing_id, flags::standing_material_type::none));
 }
 
-bool character_controller_aspect::step_on_surface(entity_id thing_id, components::thing& thing, unsigned int surf_id,
+bool character_controller_aspect::step_on_surface(int thing_id, components::thing& thing, unsigned int surf_id,
                 const physics::contact&) {
     const auto& surface = presenter.model->surfaces[surf_id];
     if(surface.flags & flags::surface_flag::Floor) {
@@ -250,7 +250,7 @@ bool character_controller_aspect::step_on_surface(entity_id thing_id, components
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-bool character_controller_aspect::step_on_thing(entity_id thing_id, components::thing& thing, int land_thing_id,
+bool character_controller_aspect::step_on_thing(int thing_id, components::thing& thing, int land_thing_id,
                 const physics::contact&) {
     const auto& attach_thing = presenter.model->get_thing(land_thing_id);
     if(attach_thing.flags & flags::thing_flag::CanStandOn) {
@@ -275,7 +275,7 @@ bool character_controller_aspect::step_on_thing(entity_id thing_id, components::
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-void character_controller_aspect::land_on_surface(entity_id thing_id,
+void character_controller_aspect::land_on_surface(int thing_id,
                                                   components::thing &thing,
                                                   unsigned int surf_id,
                                                   physics::contact const &rrcb) {
@@ -286,7 +286,7 @@ void character_controller_aspect::land_on_surface(entity_id thing_id,
     cs.bus.fire_event(events::landed(thing_id));
 }
 
-void character_controller_aspect::land_on_thing(entity_id thing_id, components::thing& thing, int land_thing_id,
+void character_controller_aspect::land_on_thing(int thing_id, components::thing& thing, int land_thing_id,
                 const physics::contact& rrcb) {
     if(!step_on_thing(thing_id, thing, land_thing_id, rrcb)) {
         return;
@@ -295,7 +295,7 @@ void character_controller_aspect::land_on_thing(entity_id thing_id, components::
     cs.bus.fire_event(events::landed(thing_id));
 }
 
-void character_controller_aspect::jump(entity_id thing_id, components::thing& thing) {
+void character_controller_aspect::jump(int thing_id, components::thing& thing) {
     cs.bus.fire_event(events::jumped(thing_id));
     set_is_falling(thing_id, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
@@ -340,9 +340,9 @@ void character_controller_aspect::update(gorc::time t,
     }
 }
 
-void character_controller_aspect::on_killed(entity_id,
+void character_controller_aspect::on_killed(int,
                                             components::thing &thing,
-                                            entity_id) {
+                                            int) {
     /* TODO
     presenter.script_presenter->send_message_to_linked(cog::message_id::killed,
                                                        static_cast<int>(thing_id),
@@ -361,20 +361,20 @@ character_controller_aspect::character_controller_aspect(component_system &cs,
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         if(e.tpl.type == flags::thing_type::Actor ||
            e.tpl.type == flags::thing_type::Player ) {
-            cs.emplace_component<components::character>(e.thing);
+            cs.emplace_component<components::character>(entity_id(e.thing));
         }
 
         if(e.tpl.type == flags::thing_type::Player) {
             // TODO: When player gets an aspect, this should be moved there.
-            cs.emplace_component<components::player>(e.thing);
+            cs.emplace_component<components::player>(entity_id(e.thing));
         }
     });
 
     killed_delegate =
         cs.bus.add_handler<events::killed>([&](events::killed const &e) {
-        auto rng = cs.find_component<components::character>(e.thing);
+        auto rng = cs.find_component<components::character>(entity_id(e.thing));
         for(auto it = rng.begin(); it != rng.end(); ++it) {
-            for(auto &thing : cs.find_component<components::thing>(e.thing)) {
+            for(auto &thing : cs.find_component<components::thing>(entity_id(e.thing))) {
                 on_killed(e.thing, thing.second, e.killer);
             }
         }
