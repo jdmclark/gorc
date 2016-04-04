@@ -17,12 +17,12 @@ class surface_material {
 public:
     #include "surface_material.uid"
 
-    int surface;
+    surface_id surface;
     double framerate;
     flag_set<flags::anim_flag> flag;
     double framerate_accumulator = 0.0;
 
-    surface_material(int surface, double framerate, flag_set<flags::anim_flag> flag);
+    surface_material(surface_id surface, double framerate, flag_set<flags::anim_flag> flag);
 };
 
 }

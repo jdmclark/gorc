@@ -26,19 +26,19 @@ private:
 public:
     void start(level_model& levelModel);
 
-    int surface_anim(int surface, float rate, flag_set<flags::anim_flag> flags);
-    int get_surface_anim(int surface);
-    void stop_surface_anim(int surface);
+    thing_id surface_anim(surface_id surface, float rate, flag_set<flags::anim_flag> flags);
+    thing_id get_surface_anim(surface_id surface);
+    void stop_surface_anim(surface_id surface);
 
-    void stop_anim(int anim);
+    void stop_anim(thing_id anim);
 
-    int get_surface_cel(int surface);
-    void set_surface_cel(int surface, int cel);
+    int get_surface_cel(surface_id surface);
+    void set_surface_cel(surface_id surface, int cel);
 
-    int slide_ceiling_sky(float u_speed, float v_speed);
-    int slide_surface(int surface_id, const vector<3>& direction);
+    thing_id slide_ceiling_sky(float u_speed, float v_speed);
+    thing_id slide_surface(surface_id surface_id, const vector<3>& direction);
 
-    int surface_light_anim(int surface_id, float start_light, float end_light, float change_time);
+    thing_id surface_light_anim(surface_id surface_id, float start_light, float end_light, float change_time);
 
     static void register_verbs(cog::verb_table&, level_state&);
 };

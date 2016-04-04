@@ -12,9 +12,9 @@ class stop_animation {
 public:
     #include "stop_animation.uid"
 
-    int animation;
+    thing_id animation;
 
-    stop_animation(int animation);
+    stop_animation(thing_id animation);
 };
 
 }

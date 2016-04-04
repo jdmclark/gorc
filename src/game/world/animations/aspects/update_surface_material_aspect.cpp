@@ -8,7 +8,7 @@ gorc::game::world::animations::aspects::update_surface_material_aspect::update_s
 void gorc::game::world::animations::aspects::update_surface_material_aspect::update(gorc::time t, entity_id, components::surface_material& anim) {
     anim.framerate_accumulator += t.elapsed_as_seconds();
 
-    int surface_material = model.level->surfaces[anim.surface].material;
+    int surface_material = at_id(model.level->surfaces, anim.surface).material;
     if(surface_material < 0) {
         // TODO: Surface has no material but has an animation? report error
         return;
@@ -19,7 +19,7 @@ void gorc::game::world::animations::aspects::update_surface_material_aspect::upd
     while(anim.framerate_accumulator >= anim.framerate) {
         anim.framerate_accumulator -= anim.framerate;
 
-        size_t next_cel = model.surfaces[anim.surface].cel_number + 1;
+        size_t next_cel = at_id(model.surfaces, anim.surface).cel_number + 1;
         if(next_cel >= num_cels) {
             if(anim.flag & flags::anim_flag::skip_first_two_frames) {
                 next_cel = 2UL % num_cels;
@@ -32,6 +32,6 @@ void gorc::game::world::animations::aspects::update_surface_material_aspect::upd
             }
         }
 
-        model.surfaces[anim.surface].cel_number = static_cast<int>(next_cel);
+        at_id(model.surfaces, anim.surface).cel_number = static_cast<int>(next_cel);
     }
 }

@@ -12,9 +12,9 @@ class surface_animation {
 public:
     #include "surface_animation.uid"
 
-    int surface;
+    surface_id surface;
 
-    surface_animation(int surface);
+    surface_animation(surface_id surface);
 };
 
 }

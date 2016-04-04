@@ -14,10 +14,10 @@ class surface_light {
 public:
     #include "surface_light.uid"
 
-    int surface;
+    surface_id surface;
     float start_light, end_light, change_time, anim_time;
 
-    surface_light(int surface, float start_light, float end_light, float change_time);
+    surface_light(surface_id surface, float start_light, float end_light, float change_time);
 };
 
 }

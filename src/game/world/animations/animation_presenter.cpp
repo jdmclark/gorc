@@ -28,10 +28,10 @@ void animation_presenter::start(level_model& levelModel) {
 }
 
 // Anim / Cel verbs
-int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::anim_flag> flag) {
-    int emplaced_anim = static_cast<int>(levelModel->ecs.make_entity());
+gorc::thing_id animation_presenter::surface_anim(surface_id surface, float rate, flag_set<flags::anim_flag> flag) {
+    thing_id emplaced_anim = levelModel->ecs.make_entity();
 
-    int surface_material = levelModel->level->surfaces[surface].material;
+    int surface_material = at_id(levelModel->level->surfaces, surface).material;
     if(surface_material < 0) {
         // TODO: surface has no material but has an animation? report error.
         return emplaced_anim;
@@ -40,13 +40,13 @@ int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::a
     size_t num_cels = std::get<0>(levelModel->level->materials[surface_material]).get_value()->cels.size();
 
     if(flag & flags::anim_flag::skip_first_two_frames) {
-        levelModel->surfaces[surface].cel_number = static_cast<int>(2UL % num_cels);
+        at_id(levelModel->surfaces, surface).cel_number = static_cast<int>(2UL % num_cels);
     }
     else if(flag & flags::anim_flag::skip_first_frame) {
-        levelModel->surfaces[surface].cel_number = static_cast<int>(1UL % num_cels);
+        at_id(levelModel->surfaces, surface).cel_number = static_cast<int>(1UL % num_cels);
     }
     else {
-        levelModel->surfaces[surface].cel_number = 0;
+        at_id(levelModel->surfaces, surface).cel_number = 0;
     }
 
     levelModel->ecs.emplace_component<components::surface_material>(entity_id(emplaced_anim), surface, 1.0 / static_cast<double>(rate), flag);
@@ -55,42 +55,42 @@ int animation_presenter::surface_anim(int surface, float rate, flag_set<flags::a
     return emplaced_anim;
 }
 
-int animation_presenter::get_surface_anim(int surface) {
+gorc::thing_id animation_presenter::get_surface_anim(surface_id surface) {
     for(auto& surf_anim : levelModel->ecs.all_components<components::surface_animation>()) {
         if(surf_anim.second.surface == surface) {
-            return static_cast<int>(surf_anim.first);
+            return surf_anim.first;
         }
     }
 
-    return int(-1);
+    return invalid_id;
 }
 
-void animation_presenter::stop_surface_anim(int surface) {
+void animation_presenter::stop_surface_anim(surface_id surface) {
     auto cmp_range = levelModel->ecs.all_components<components::surface_animation>();
     for(auto it = cmp_range.begin(); it != cmp_range.end();) {
         auto jt = it++;
         if(jt->second.surface == surface) {
-            stop_anim(static_cast<int>(jt->first));
+            stop_anim(jt->first);
         }
     }
 }
 
-void animation_presenter::stop_anim(int anim_id) {
+void animation_presenter::stop_anim(thing_id anim_id) {
     levelModel->ecs.bus.fire_event(events::stop_animation(anim_id));
-    levelModel->ecs.erase_entity(entity_id(anim_id));
+    levelModel->ecs.erase_entity(anim_id);
 }
 
-int animation_presenter::get_surface_cel(int surface) {
-    return levelModel->surfaces[surface].cel_number;
+int animation_presenter::get_surface_cel(surface_id surface) {
+    return at_id(levelModel->surfaces, surface).cel_number;
 }
 
-void animation_presenter::set_surface_cel(int surface, int cel) {
-    levelModel->surfaces[surface].cel_number = cel;
+void animation_presenter::set_surface_cel(surface_id surface, int cel) {
+    at_id(levelModel->surfaces, surface).cel_number = cel;
 }
 
-int animation_presenter::slide_surface(int surface, const vector<3>& direction) {
+gorc::thing_id animation_presenter::slide_surface(surface_id surface, const vector<3>& direction) {
     // Compute surface slide direction
-    auto& surf = levelModel->surfaces[surface];
+    auto &surf = at_id(levelModel->surfaces, surface);
 
     auto dnsb0 = levelModel->level->vertices[std::get<0>(surf.vertices[1])] - levelModel->level->vertices[std::get<0>(surf.vertices[0])];
 
@@ -117,78 +117,75 @@ int animation_presenter::slide_surface(int surface, const vector<3>& direction) 
     auto tb1 = -sgn * vb1;
 
     // Create animation
-    int surf_id(surface);
-    int emplaced_anim = static_cast<int>(levelModel->ecs.make_entity());
+    thing_id emplaced_anim = levelModel->ecs.make_entity();
 
-    levelModel->ecs.emplace_component<components::slide_surface>(entity_id(emplaced_anim), surf_id, direction, sb0, sb1, tb0, tb1);
-    levelModel->ecs.emplace_component<components::surface_animation>(entity_id(emplaced_anim), surf_id);
+    levelModel->ecs.emplace_component<components::slide_surface>(entity_id(emplaced_anim), surface, direction, sb0, sb1, tb0, tb1);
+    levelModel->ecs.emplace_component<components::surface_animation>(entity_id(emplaced_anim), surface);
 
     return emplaced_anim;
 }
 
-int animation_presenter::slide_ceiling_sky(float u_speed, float v_speed) {
-    int anim = static_cast<int>(levelModel->ecs.make_entity());
+gorc::thing_id animation_presenter::slide_ceiling_sky(float u_speed, float v_speed) {
+    thing_id anim = levelModel->ecs.make_entity();
     levelModel->ecs.emplace_component<components::slide_ceiling_sky>(entity_id(anim), make_vector(u_speed, v_speed));
     return anim;
 }
 
-int animation_presenter::surface_light_anim(int surface, float start_light, float end_light, float change_time) {
-    levelModel->surfaces[surface].extra_light = start_light;
+gorc::thing_id animation_presenter::surface_light_anim(surface_id surface, float start_light, float end_light, float change_time) {
+    at_id(levelModel->surfaces, surface).extra_light = start_light;
 
-    int surf_id(surface);
-    int emplaced_anim = static_cast<int>(levelModel->ecs.make_entity());
+    thing_id emplaced_anim = levelModel->ecs.make_entity();
 
-    levelModel->ecs.emplace_component<components::surface_light>(entity_id(emplaced_anim), surf_id, start_light, end_light, change_time);
-    levelModel->ecs.emplace_component<components::surface_animation>(entity_id(emplaced_anim), surf_id);
+    levelModel->ecs.emplace_component<components::surface_light>(entity_id(emplaced_anim), surface, start_light, end_light, change_time);
+    levelModel->ecs.emplace_component<components::surface_animation>(entity_id(emplaced_anim), surface);
 
     return emplaced_anim;
 }
 
-void gorc::game::world::animations::animation_presenter::register_verbs(cog::verb_table&, level_state&) {
-    /* TODO
-    verbTable.add_verb("materialanim", [&components](int, float, int) {
+void gorc::game::world::animations::animation_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
+    verbs.add_verb("materialanim", [&components](int, float, int) {
         // TODO: Implement this verb when setsurfacematerial changes have been made.
         return -1;
     });
 
-    verbTable.add_verb("getsurfaceanim", [&components](int surface) {
-        return static_cast<int>(components.current_level_presenter->animation_presenter->get_surface_anim(surface));
+    verbs.add_safe_verb("getsurfaceanim", thing_id(invalid_id), [&components](surface_id surface) {
+        return components.current_level_presenter->animation_presenter->get_surface_anim(surface);
     });
 
-    verbTable.add_verb("stopsurfaceanim", [&components](int surface) {
+    verbs.add_safe_verb("stopsurfaceanim", cog::value(), [&components](surface_id surface) {
         components.current_level_presenter->animation_presenter->stop_surface_anim(surface);
     });
 
-    verbTable.add_verb("getwallcel", [&components](int surface) {
+    verbs.add_safe_verb("getwallcel", -1, [&components](surface_id surface) {
         return components.current_level_presenter->animation_presenter->get_surface_cel(surface);
     });
 
-    verbTable.add_verb("setwallcel", [&components](int surface, int cel) {
+    verbs.add_safe_verb("setwallcel", cog::value(), [&components](surface_id surface, int cel) {
         components.current_level_presenter->animation_presenter->set_surface_cel(surface, cel);
         return 1;
     });
 
-    verbTable.add_verb("surfaceanim", [&components](int surface, float rate, int flags) {
-        return static_cast<int>(components.current_level_presenter->animation_presenter->surface_anim(surface, rate, flag_set<flags::anim_flag>(flags)));
+    verbs.add_safe_verb("surfaceanim", thing_id(invalid_id), [&components](surface_id surface, float rate, int flags) {
+        return components.current_level_presenter->animation_presenter->surface_anim(surface, rate, flag_set<flags::anim_flag>(flags));
     });
 
-    verbTable.add_verb("slideceilingsky", [&components](float u_speed, float v_speed) {
-        return static_cast<int>(components.current_level_presenter->animation_presenter->slide_ceiling_sky(u_speed, v_speed));
+    verbs.add_verb("slideceilingsky", [&components](float u_speed, float v_speed) {
+        return components.current_level_presenter->animation_presenter->slide_ceiling_sky(u_speed, v_speed);
     });
 
-    verbTable.add_verb("slidesurface", [&components](int surface, vector<3> direction, float speed) {
-        return static_cast<int>(components.current_level_presenter->animation_presenter->slide_surface(surface, normalize(direction) * speed));
+    verbs.add_safe_verb("slidesurface", thing_id(invalid_id), [&components](surface_id surface, vector<3> direction, float speed) {
+        return components.current_level_presenter->animation_presenter->slide_surface(surface, normalize(direction) * speed);
     });
 
-    verbTable.add_verb("slidewall", [&components](int surface, vector<3> direction, float speed) {
-        return static_cast<int>(components.current_level_presenter->animation_presenter->slide_surface(surface, normalize(direction) * speed));
+    verbs.add_safe_verb("slidewall", thing_id(invalid_id), [&components](surface_id surface, vector<3> direction, float speed) {
+        return components.current_level_presenter->animation_presenter->slide_surface(surface, normalize(direction) * speed);
     });
 
-    verbTable.add_verb("stopanim", [&components](int anim) {
+    verbs.add_safe_verb("stopanim", cog::value(), [&components](thing_id anim) {
         components.current_level_presenter->animation_presenter->stop_anim(anim);
     });
 
-    verbTable.add_verb("surfacelightanim", [&components](int surface, float start_light, float end_light, float change_time) {
-        return static_cast<int>(components.current_level_presenter->animation_presenter->surface_light_anim(surface, start_light, end_light, change_time));
-    });*/
+    verbs.add_safe_verb("surfacelightanim", thing_id(invalid_id), [&components](surface_id surface, float start_light, float end_light, float change_time) {
+        return components.current_level_presenter->animation_presenter->surface_light_anim(surface, start_light, end_light, change_time);
+    });
 }
