@@ -192,6 +192,35 @@ gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_fra
                             param3);
 }
 
+gorc::cog::value gorc::cog::executor::send(cog_id instance,
+                                           message_type t,
+                                           value sender,
+                                           value sender_id,
+                                           value source,
+                                           value param0,
+                                           value param1,
+                                           value param2,
+                                           value param3)
+{
+    auto &inst = at_id(instances, instance);
+
+    auto addr = inst->cog->exports.get_offset(t);
+    if(!addr.has_value()) {
+        return value();
+    }
+
+    continuation cc(call_stack_frame(instance,
+                                     addr.get_value(),
+                                     sender,
+                                     sender_id,
+                                     source,
+                                     param0,
+                                     param1,
+                                     param2,
+                                     param3));
+    return vm.execute(verbs, *this, services, cc);
+}
+
 void gorc::cog::executor::send_to_all(message_type t,
                                       value sender,
                                       value sender_id,

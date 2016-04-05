@@ -82,6 +82,16 @@ namespace gorc {
                                                          value param2,
                                                          value param3);
 
+            value send(cog_id instance,
+                       message_type msg,
+                       value sender,
+                       value sender_id,
+                       value source,
+                       value param0 = value(),
+                       value param1 = value(),
+                       value param2 = value(),
+                       value param3 = value());
+
             void send_to_all(message_type msg,
                              value sender,
                              value sender_id,

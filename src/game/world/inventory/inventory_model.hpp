@@ -92,14 +92,14 @@ public:
 
 class inventory_model {
 private:
-    std::unordered_map<int, player_inventory_model> player_inventories;
+    std::unordered_map<thing_id, player_inventory_model> player_inventories;
 
 public:
     asset_ref<content::assets::inventory> base_inventory;
 
     inventory_model(asset_ref<content::assets::inventory> BaseInventory);
 
-    player_inventory_model& get_inventory(int player_id);
+    player_inventory_model& get_inventory(thing_id player_id);
     void mod_all_cooldowns(float dt);
 
     auto begin() -> decltype(player_inventories.begin()) {

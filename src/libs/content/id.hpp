@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include "io/binary_input_stream.hpp"
 #include "io/binary_output_stream.hpp"
 #include "log/log.hpp"
@@ -150,6 +151,19 @@ namespace std {
     template <typename TagT>
     struct underlying_type<::gorc::id<TagT>> {
         using type = int32_t;
+    };
+
+    template <typename TagT>
+    struct hash<::gorc::id<TagT>> {
+    private:
+        using UT = typename underlying_type<::gorc::id<TagT>>::type;
+        std::hash<UT> hasher;
+
+    public:
+        size_t operator()(::gorc::id<TagT> const &id) const
+        {
+            return hasher(static_cast<UT>(id));
+        }
     };
 
 }

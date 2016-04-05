@@ -76,7 +76,7 @@ inventory_model::inventory_model(asset_ref<content::assets::inventory> BaseInven
     return;
 }
 
-player_inventory_model& inventory_model::get_inventory(int player_id) {
+player_inventory_model& inventory_model::get_inventory(thing_id player_id) {
     auto it = player_inventories.find(player_id);
     if(it == player_inventories.end()) {
         return std::get<0>(player_inventories.emplace(player_id, player_inventory_model(base_inventory)))->second;

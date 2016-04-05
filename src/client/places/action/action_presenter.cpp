@@ -76,7 +76,7 @@ void gorc::client::action::action_presenter::handle_keyboard_input(const gorc::t
 }
 
 void gorc::client::action::action_presenter::on_mouse_button_down(const gorc::time&, const vector<2, int>&, sf::Mouse::Button b) {
-    int current_player = app.components.current_level_presenter->get_local_player_thing();
+    thing_id current_player(app.components.current_level_presenter->get_local_player_thing());
 
     if(b == sf::Mouse::Left) {
         app.components.current_level_presenter->inventory_presenter->on_weapon_fire_pressed(current_player, 0);
@@ -87,7 +87,7 @@ void gorc::client::action::action_presenter::on_mouse_button_down(const gorc::ti
 }
 
 void gorc::client::action::action_presenter::on_mouse_button_up(const gorc::time&, const vector<2, int>&, sf::Mouse::Button b) {
-    int current_player = app.components.current_level_presenter->get_local_player_thing();
+    thing_id current_player(app.components.current_level_presenter->get_local_player_thing());
 
     if(b == sf::Mouse::Left) {
         app.components.current_level_presenter->inventory_presenter->on_weapon_fire_released(current_player, 0);
@@ -98,7 +98,7 @@ void gorc::client::action::action_presenter::on_mouse_button_up(const gorc::time
 }
 
 void gorc::client::action::action_presenter::on_keyboard_key_down(const gorc::time&, sf::Keyboard::Key k, bool, bool, bool) {
-    int current_player = app.components.current_level_presenter->get_local_player_thing();
+    thing_id current_player(app.components.current_level_presenter->get_local_player_thing());
 
     switch(k) {
     case sf::Keyboard::Escape:
@@ -189,7 +189,7 @@ void gorc::client::action::action_presenter::on_keyboard_key_down(const gorc::ti
 void gorc::client::action::action_presenter::on_keyboard_key_up(const gorc::time&, sf::Keyboard::Key k, bool, bool, bool) {
     switch(k) {
     case sf::Keyboard::F2:
-        app.components.current_level_presenter->inventory_presenter->on_item_hotkey_released(app.components.current_level_presenter->get_local_player_thing(), 42);
+        app.components.current_level_presenter->inventory_presenter->on_item_hotkey_released(thing_id(app.components.current_level_presenter->get_local_player_thing()), 42);
         break;
 
     case sf::Keyboard::LControl:
