@@ -160,7 +160,7 @@ int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int, int key, i
 
 void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int, int key_id, float delay) {
     // TODO: Handle player
-    presenter.key_presenter->stop_key(-1, key_id, delay);
+    presenter.key_presenter->stop_key(invalid_id, key_id, delay);
 }
 
 void gorc::game::world::camera::camera_presenter::register_verbs(cog::verb_table&, level_state&) {

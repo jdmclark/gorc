@@ -41,10 +41,10 @@ private:
     key_model* model;
     event_bus* bus;
 
-    int GetThingMixId(int thing_id);
-    void DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
+    int GetThingMixId(thing_id);
+    void DispatchAllMarkers(thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
             double begin, double end, bool wraps, double frame_ct);
-    void DispatchMarker(int thing_id, flags::key_marker_type marker);
+    void DispatchMarker(thing_id, flags::key_marker_type marker);
 
 public:
     key_presenter(content_manager& contentmanager);
@@ -52,7 +52,7 @@ public:
     void start(level_model& levelModel, key_model& model, event_bus& bus);
     void update(const gorc::time& time);
 
-    void expunge_thing_animations(int thing_id);
+    void expunge_thing_animations(thing_id);
 
     std::tuple<vector<3>, vector<3>> get_animation_frame(asset_ref<content::assets::animation> anim, int node_id, double frame) const;
     std::tuple<vector<3>, vector<3>> get_node_frame(int mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
@@ -61,9 +61,9 @@ public:
 
     float get_key_len(int key_id);
     int play_mix_key(int mix_id, int key, int priority, flag_set<flags::key_flag> flags);
-    int play_key(int thing_id, int key, int priority, flag_set<flags::key_flag> flags);
-    int play_mode(int thing_id, flags::puppet_submode_type submode);
-    void stop_key(int thing_id, int key, float delay);
+    int play_key(thing_id, int key, int priority, flag_set<flags::key_flag> flags);
+    int play_mode(thing_id, flags::puppet_submode_type submode);
+    void stop_key(thing_id, int key, float delay);
     void stop_all_mix_keys(int mix);
 
     static void register_verbs(cog::verb_table&, level_state&);

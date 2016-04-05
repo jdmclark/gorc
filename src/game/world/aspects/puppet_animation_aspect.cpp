@@ -23,7 +23,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
             for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
                 // HACK: Initialize actor walk animation
                 pup.second.actor_walk_animation =
-                        presenter.key_presenter->play_mode(e.thing,
+                        presenter.key_presenter->play_mode(thing_id(e.thing),
                                                            flags::puppet_submode_type::Stand);
                 if(pup.second.actor_walk_animation >= 0) {
                     auto &key_state = presenter.model->key_model.keys[pup.second.actor_walk_animation];
@@ -82,7 +82,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
         cs.bus.add_handler<events::landed>([&](events::landed const &e) {
         auto rng = cs.find_component<components::puppet_animations>(entity_id(e.thing));
         for(auto it = rng.begin(); it != rng.end(); ++it) {
-            presenter.key_presenter->play_mode(e.thing, flags::puppet_submode_type::Land);
+            presenter.key_presenter->play_mode(thing_id(e.thing), flags::puppet_submode_type::Land);
         }
     });
 
@@ -91,11 +91,11 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
         for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
             // HACK: Stop idle animation
             if(pup.second.actor_walk_animation >= 0) {
-                presenter.key_presenter->stop_key(e.thing, pup.second.actor_walk_animation, 0.0f);
+                presenter.key_presenter->stop_key(thing_id(e.thing), pup.second.actor_walk_animation, 0.0f);
                 pup.second.actor_walk_animation = -1;
             }
 
-            presenter.key_presenter->play_mode(e.thing, flags::puppet_submode_type::Death);
+            presenter.key_presenter->play_mode(thing_id(e.thing), flags::puppet_submode_type::Death);
         }
     });
     return;

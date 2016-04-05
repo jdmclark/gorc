@@ -763,7 +763,7 @@ int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int
     }
 
     if(puppet_submode_id >= 0) {
-        key_presenter->play_mode(parent_thing_id, static_cast<flags::puppet_submode_type>(puppet_submode_id));
+        key_presenter->play_mode(thing_id(parent_thing_id), static_cast<flags::puppet_submode_type>(puppet_submode_id));
     }
 
     return new_thing;
@@ -819,7 +819,7 @@ int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int th
     return new_thing_id;
 }
 
-float gorc::game::world::level_presenter::damage_thing(int thing_id,
+float gorc::game::world::level_presenter::damage_thing(int tid,
                                                        float damage,
                                                        flag_set<flags::damage_flag> /*flags*/,
                                                        int damager_id) {
@@ -832,20 +832,20 @@ float gorc::game::world::level_presenter::damage_thing(int thing_id,
                                              damage,
                                              static_cast<int>(flags)); */
 
-    components::thing& referencedThing = model->get_thing(thing_id);
+    components::thing& referencedThing = model->get_thing(tid);
     if(referencedThing.health > 0.0f) {
         referencedThing.health -= damage;
 
         if(referencedThing.health <= 0.0f &&
            (referencedThing.type == flags::thing_type::Player ||
             referencedThing.type == flags::thing_type::Actor)) {
-            eventbus->fire_event(events::killed(thing_id, damager_id));
+            eventbus->fire_event(events::killed(tid, damager_id));
         }
         else {
-            eventbus->fire_event(events::class_sound(thing_id,
+            eventbus->fire_event(events::class_sound(tid,
                                                      flags::sound_subclass_type::HurtSpecial));
             maybe_if(referencedThing.pup, [&](auto) {
-                key_presenter->play_mode(thing_id, flags::puppet_submode_type::Hit);
+                key_presenter->play_mode(thing_id(tid), flags::puppet_submode_type::Hit);
             });
         }
     }
@@ -859,18 +859,18 @@ void gorc::game::world::level_presenter::destroy_thing(int thing_id) {
     things_to_destroy.insert(thing_id);
 }
 
-void gorc::game::world::level_presenter::real_destroy_thing(int thing_id) {
+void gorc::game::world::level_presenter::real_destroy_thing(int tid) {
     // Reset thing parentage.
     for(auto& thing_pair : model->ecs.all_components<components::thing>()) {
-        if(thing_pair.second.parent_thing == thing_id) {
+        if(thing_pair.second.parent_thing == tid) {
             thing_pair.second.parent_thing = -1;
         }
     }
 
     // Expunge associated resources.
-    key_presenter->expunge_thing_animations(thing_id);
+    key_presenter->expunge_thing_animations(thing_id(tid));
 
-    model->ecs.erase_entity(entity_id(thing_id));
+    model->ecs.erase_entity(entity_id(tid));
 }
 
 void gorc::game::world::level_presenter::detach_thing(int thing_id) {

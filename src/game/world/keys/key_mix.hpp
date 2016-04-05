@@ -1,6 +1,7 @@
 #pragma once
 
 #include "key_mix_level_state.hpp"
+#include "content/id.hpp"
 
 namespace gorc {
 namespace game {
@@ -14,7 +15,7 @@ namespace keys {
 
 class key_mix {
 public:
-    int attached_thing;
+    thing_id attached_thing;
     key_mix_level_state high, low, body;
 };
 

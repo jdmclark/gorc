@@ -18,7 +18,7 @@ void gorc::game::world::keys::key_presenter::start(level_model& levelModel, key_
     this->bus = &bus;
 }
 
-void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
+void gorc::game::world::keys::key_presenter::DispatchAllMarkers(thing_id thing, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
         double begin, double end, bool wraps, double frame_ct) {
     if(wraps) {
         begin = std::fmod(begin, frame_ct);
@@ -29,7 +29,7 @@ void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, co
         for(const auto& marker : markers) {
             double ft = std::get<0>(marker);
             if(ft >= begin || ft < end) {
-                DispatchMarker(thing_id, std::get<1>(marker));
+                DispatchMarker(thing, std::get<1>(marker));
             }
         }
     }
@@ -37,21 +37,21 @@ void gorc::game::world::keys::key_presenter::DispatchAllMarkers(int thing_id, co
         for(const auto& marker : markers) {
             double ft = std::get<0>(marker);
             if(ft >= begin && ft < end) {
-                DispatchMarker(thing_id, std::get<1>(marker));
+                DispatchMarker(thing, std::get<1>(marker));
             }
         }
     }
 }
 
-void gorc::game::world::keys::key_presenter::DispatchMarker(int thing_id, flags::key_marker_type marker) {
-    bus->fire_event(events::animation_marker(int(thing_id), marker));
+void gorc::game::world::keys::key_presenter::DispatchMarker(thing_id thing, flags::key_marker_type marker) {
+    bus->fire_event(events::animation_marker((int)thing, marker));
 }
 
-int gorc::game::world::keys::key_presenter::GetThingMixId(int thing_id) {
-    auto& thing = levelModel->get_thing(thing_id);
+int gorc::game::world::keys::key_presenter::GetThingMixId(thing_id tid) {
+    auto& thing = levelModel->get_thing(static_cast<int>(tid));
     if(thing.attached_key_mix < 0) {
         auto& mix = model->mixes.emplace();
-        mix.attached_thing = thing_id;
+        mix.attached_thing = tid;
         thing.attached_key_mix = mix.get_id();
     }
 
@@ -175,12 +175,12 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
     }
 }
 
-void gorc::game::world::keys::key_presenter::expunge_thing_animations(int thing_id) {
-    auto& thing = levelModel->get_thing(thing_id);
+void gorc::game::world::keys::key_presenter::expunge_thing_animations(thing_id tid) {
+    auto& thing = levelModel->get_thing(static_cast<int>(tid));
     if(thing.attached_key_mix >= 0) {
         for(auto& key : model->keys) {
             if(key.mix_id == thing.attached_key_mix) {
-                stop_key(thing_id, key.get_id(), 0.0f);
+                stop_key(tid, key.get_id(), 0.0f);
             }
         }
 
@@ -282,20 +282,20 @@ int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
     return state.get_id();
 }
 
-int gorc::game::world::keys::key_presenter::play_key(int thing_id, int key,
+int gorc::game::world::keys::key_presenter::play_key(thing_id tid, int key,
         int priority, flag_set<flags::key_flag> flags) {
-    return play_mix_key(GetThingMixId(thing_id), key, priority, flags);
+    return play_mix_key(GetThingMixId(tid), key, priority, flags);
 }
 
-int gorc::game::world::keys::key_presenter::play_mode(int thing_id,
+int gorc::game::world::keys::key_presenter::play_mode(thing_id tid,
                                                       flags::puppet_submode_type minor_mode) {
-    auto& thing = levelModel->get_thing(thing_id);
+    auto& thing = levelModel->get_thing(static_cast<int>(tid));
     if(!thing.pup.has_value()) {
         return -1;
     }
 
     maybe<content::assets::puppet_submode const *> submode_ptr;
-    for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(entity_id(thing_id))) {
+    for(auto const &tpup : levelModel->ecs.find_component<components::puppet_animations>(entity_id(tid))) {
         submode_ptr = tpup.second.puppet->get_mode(tpup.second.puppet_mode_type).get_submode(minor_mode);
     }
 
@@ -304,7 +304,7 @@ int gorc::game::world::keys::key_presenter::play_mode(int thing_id,
     }
 
     const auto& submode = *submode_ptr.get_value();
-    int mix_id = GetThingMixId(thing_id);
+    int mix_id = GetThingMixId(tid);
     auto& state = model->keys.emplace();
 
     state.animation = submode.anim;
@@ -321,7 +321,7 @@ int gorc::game::world::keys::key_presenter::play_mode(int thing_id,
     return state.get_id();
 }
 
-void gorc::game::world::keys::key_presenter::stop_key(int, int key_id, float delay) {
+void gorc::game::world::keys::key_presenter::stop_key(thing_id, int key_id, float delay) {
     if(delay <= 0.0f) {
         // Immediately remove.
         model->keys.erase(key_id);
@@ -335,7 +335,7 @@ void gorc::game::world::keys::key_presenter::stop_key(int, int key_id, float del
 void gorc::game::world::keys::key_presenter::stop_all_mix_keys(int mix) {
     for(auto& key : model->keys) {
         if(key.mix_id == mix) {
-            stop_key(-1, key.get_id(), 0.0f);
+            stop_key(invalid_id, key.get_id(), 0.0f);
         }
     }
 }
@@ -345,21 +345,20 @@ int gorc::game::world::keys::key_presenter::create_key_mix() {
     return mix.get_id();
 }
 
-void gorc::game::world::keys::key_presenter::register_verbs(cog::verb_table&, level_state&) {
-    /* TODO
-    verbTable.add_verb<float, 1>("getkeylen", [&components](int key_id) {
+void gorc::game::world::keys::key_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
+    verbs.add_verb("getkeylen", [&components](int key_id) {
         return components.current_level_presenter->key_presenter->get_key_len(key_id);
     });
 
-    verbTable.add_verb<int, 4>("playkey", [&components](int thing, int key, int priority, int flags) {
+    verbs.add_verb("playkey", [&components](thing_id thing, int key, int priority, int flags) {
         return components.current_level_presenter->key_presenter->play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
     });
 
-    verbTable.add_verb<int, 2>("playmode", [&components](int thing_id, int submode) {
-        return components.current_level_presenter->key_presenter->play_mode(thing_id, static_cast<flags::puppet_submode_type>(submode));
+    verbs.add_verb("playmode", [&components](thing_id tid, int submode) {
+        return components.current_level_presenter->key_presenter->play_mode(tid, static_cast<flags::puppet_submode_type>(submode));
     });
 
-    verbTable.add_verb<void, 3>("stopkey", [&components](int thing, int key, float delay) {
+    verbs.add_verb("stopkey", [&components](thing_id thing, int key, float delay) {
         components.current_level_presenter->key_presenter->stop_key(thing, key, delay);
-    }); */
+    });
 }
