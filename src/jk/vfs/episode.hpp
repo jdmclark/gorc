@@ -3,7 +3,7 @@
 #include "io/input_stream.hpp"
 #include "episode_entry.hpp"
 #include "episode_type.hpp"
-#include "virtual_container.hpp"
+#include "vfs/virtual_container.hpp"
 #include <string>
 #include <unordered_map>
 

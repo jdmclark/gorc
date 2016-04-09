@@ -7,7 +7,6 @@
         "libs/test"
     ],
     "sources" : [
-        "episode_entry_type_test.cpp",
         "native_file_system_test.cpp",
         "virtual_container_iterator_test.cpp"
     ]

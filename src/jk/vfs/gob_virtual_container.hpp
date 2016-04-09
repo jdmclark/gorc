@@ -1,6 +1,6 @@
 #pragma once
 
-#include "virtual_container.hpp"
+#include "vfs/virtual_container.hpp"
 #include "gob_virtual_file.hpp"
 #include <vector>
 

@@ -1,5 +1,5 @@
 #include "program/program.hpp"
-#include "jkcontent/material.hpp"
+#include "jk/content/material.hpp"
 #include "io/binary_input_stream.hpp"
 #include "text/json_output_stream.hpp"
 #include "text/extract_path.hpp"

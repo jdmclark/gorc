@@ -1,6 +1,6 @@
 #include "program/program.hpp"
-#include "vfs/gob_virtual_container.hpp"
-#include "vfs/jk_virtual_file_system.hpp"
+#include "jk/vfs/gob_virtual_container.hpp"
+#include "jk/vfs/jk_virtual_file_system.hpp"
 #include "io/std_output_stream.hpp"
 #include "io/native_file.hpp"
 #include <boost/filesystem.hpp>

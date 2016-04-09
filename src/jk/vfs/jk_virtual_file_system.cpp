@@ -1,6 +1,6 @@
 #include "jk_virtual_file_system.hpp"
 #include "log/log.hpp"
-#include "vfs/gob_virtual_container.hpp"
+#include "gob_virtual_container.hpp"
 #include "io/native_file.hpp"
 #include "utility/range.hpp"
 #include "utility/string_search.hpp"

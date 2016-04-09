@@ -1,5 +1,5 @@
 #include "test/test.hpp"
-#include "vfs/episode_entry_type.hpp"
+#include "jk/vfs/episode_entry_type.hpp"
 
 begin_suite(episode_entry_type_test);
 

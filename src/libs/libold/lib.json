@@ -5,7 +5,7 @@
         "libs/log",
         "libs/program",
         "libs/text",
-        "libs/vfs",
+        "jk/vfs",
         "libs/content",
         "libs/cog/vm",
         "libs/cog/compiler"

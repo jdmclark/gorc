@@ -2,7 +2,7 @@
     "name" : "colormap",
     "dependencies" : [
         "libs/program",
-        "libs/jkcontent"
+        "jk/content"
     ],
     "sources" : [
         "main.cpp"

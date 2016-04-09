@@ -2,7 +2,7 @@
     "name" : "gob",
     "dependencies" : [
         "libs/program",
-        "libs/vfs"
+        "jk/vfs"
     ],
     "sources" : [
         "main.cpp"

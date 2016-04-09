@@ -1,6 +1,6 @@
 #pragma once
 
-#include "virtual_file.hpp"
+#include "vfs/virtual_file.hpp"
 
 namespace gorc {
 

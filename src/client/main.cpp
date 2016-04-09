@@ -2,7 +2,7 @@
 
 #include "application.hpp"
 #include "utility/service_registry.hpp"
-#include "vfs/jk_virtual_file_system.hpp"
+#include "jk/vfs/jk_virtual_file_system.hpp"
 #include "libold/content/register_legacy_loaders.hpp"
 
 int main(int argc, char** argv) {

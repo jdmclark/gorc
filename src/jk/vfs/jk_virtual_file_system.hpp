@@ -1,7 +1,7 @@
 #pragma once
 
-#include "virtual_file_system.hpp"
-#include "virtual_container.hpp"
+#include "vfs/virtual_file_system.hpp"
+#include "vfs/virtual_container.hpp"
 #include "utility/maybe.hpp"
 #include <vector>
 #include <memory>

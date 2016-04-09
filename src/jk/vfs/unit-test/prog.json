@@ -1,0 +1,12 @@
+{
+    "name" : "jk-vfs-test",
+    "type" : "test",
+    "exclude-coverage": true,
+    "dependencies": [
+        "jk/vfs",
+        "libs/test"
+    ],
+    "sources" : [
+        "episode_entry_type_test.cpp"
+    ]
+}

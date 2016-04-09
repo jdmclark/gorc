@@ -6,7 +6,7 @@
 #include "presenter_mapper.hpp"
 #include "clear_screen_view.hpp"
 #include "places/action/action_view.hpp"
-#include "vfs/jk_virtual_file_system.hpp"
+#include "jk/vfs/jk_virtual_file_system.hpp"
 #include "game/level_state.hpp"
 #include "utility/service_registry.hpp"
 

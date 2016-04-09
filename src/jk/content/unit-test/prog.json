@@ -1,9 +1,9 @@
 {
-    "name" : "jkcontent-test",
+    "name" : "jk-content-test",
     "type" : "test",
     "exclude-coverage" : true,
     "dependencies" : [
-        "libs/jkcontent",
+        "jk/content",
         "libs/test"
     ],
     "sources" : [

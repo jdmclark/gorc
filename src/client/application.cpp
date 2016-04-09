@@ -2,7 +2,7 @@
 #include "game/world/level_presenter.hpp"
 #include "game/world/level_model.hpp"
 #include "world/level_view.hpp"
-#include "vfs/gob_virtual_container.hpp"
+#include "jk/vfs/gob_virtual_container.hpp"
 #include <boost/algorithm/string/predicate.hpp>
 #include "libold/base/events/print.hpp"
 
