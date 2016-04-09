@@ -1,0 +1,12 @@
+{
+    "name" : "ir-test",
+    "type" : "test",
+    "exclude-coverage" : true,
+    "dependencies" : [
+        "libs/test",
+        "jk/cog/ir"
+    ],
+    "sources" : [
+        "ir_printer_test.cpp"
+    ]
+}

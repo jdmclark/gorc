@@ -2,9 +2,9 @@
 
 #include "text/json_input_stream.hpp"
 #include "utility/time.hpp"
-#include "cog/script/message_type.hpp"
-#include "cog/script/value.hpp"
-#include "cog/script/source_type.hpp"
+#include "jk/cog/script/message_type.hpp"
+#include "jk/cog/script/value.hpp"
+#include "jk/cog/script/source_type.hpp"
 
 namespace gorc {
 

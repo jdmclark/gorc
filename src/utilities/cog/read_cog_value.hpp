@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cog/script/value.hpp"
+#include "jk/cog/script/value.hpp"
 #include "text/json_input_stream.hpp"
 
 namespace gorc {

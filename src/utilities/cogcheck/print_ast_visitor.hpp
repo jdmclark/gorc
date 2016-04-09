@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cog/ast/ast.hpp"
+#include "jk/cog/ast/ast.hpp"
 
 namespace gorc {
 

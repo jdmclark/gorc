@@ -1,0 +1,14 @@
+{
+    "name" : "compiler",
+    "dependencies" : [
+        "jk/cog/ir",
+        "jk/cog/ast",
+        "jk/cog/grammar",
+        "jk/cog/codegen",
+        "jk/cog/semantics"
+    ],
+    "sources" : [
+        "compiler.cpp",
+        "script_loader.cpp"
+    ]
+}

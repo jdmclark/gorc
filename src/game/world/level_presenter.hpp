@@ -14,7 +14,7 @@
 
 #include "components/thing.hpp"
 #include "libold/base/utility/entity_id.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/script/verb_table.hpp"
 
 #include <memory>
 #include <stack>

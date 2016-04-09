@@ -1,5 +1,5 @@
 #include "disassembler.hpp"
-#include "cog/vm/opcode.hpp"
+#include "jk/cog/vm/opcode.hpp"
 #include "io/binary_input_stream.hpp"
 #include <map>
 #include <sstream>

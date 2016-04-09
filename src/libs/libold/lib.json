@@ -7,8 +7,8 @@
         "libs/text",
         "jk/vfs",
         "libs/content",
-        "libs/cog/vm",
-        "libs/cog/compiler"
+        "jk/cog/vm",
+        "jk/cog/compiler"
     ],
     "sources" : [
         "base/utility/timestamp_factory.cpp",

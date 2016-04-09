@@ -4,7 +4,7 @@
 #include "libold/base/text/tokenizer.hpp"
 #include "utility/flag_set.hpp"
 #include "libold/content/flags/inventory_flag.hpp"
-#include "cog/script/script.hpp"
+#include "jk/cog/script/script.hpp"
 #include <string>
 #include <memory>
 

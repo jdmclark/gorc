@@ -1,0 +1,11 @@
+{
+    "name" : "cog-ast",
+    "dependencies" : [
+        "libs/log",
+        "libs/ast",
+        "jk/cog/script"
+    ],
+    "sources" : [
+        "ast.cpp"
+    ]
+}

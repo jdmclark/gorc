@@ -1,6 +1,6 @@
 #include "level_state.hpp"
 #include "game/world/level_presenter.hpp"
-#include "cog/vm/default_verbs.hpp"
+#include "jk/cog/vm/default_verbs.hpp"
 
 gorc::game::level_state::level_state(service_registry const &parent_services)
     : services(parent_services)

@@ -16,7 +16,7 @@
 #include "model.hpp"
 #include "soundclass.hpp"
 #include "colormap.hpp"
-#include "cog/script/script.hpp"
+#include "jk/cog/script/script.hpp"
 #include "puppet.hpp"
 #include "sprite.hpp"
 #include <string>

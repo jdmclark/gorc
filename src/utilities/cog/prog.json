@@ -2,8 +2,8 @@
     "name" : "cog",
     "dependencies" : [
         "libs/program",
-        "libs/cog/compiler",
-        "libs/cog/vm",
+        "jk/cog/compiler",
+        "jk/cog/vm",
         "libs/text",
         "jk/vfs",
         "libs/content"

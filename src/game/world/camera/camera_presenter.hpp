@@ -5,7 +5,7 @@
 #include "utility/flag_set.hpp"
 #include "libold/content/flags/key_flag.hpp"
 #include "libold/base/utility/time.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/script/verb_table.hpp"
 
 namespace gorc {
 

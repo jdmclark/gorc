@@ -3,7 +3,7 @@
 #include "libold/base/utility/time.hpp"
 #include "libold/content/flags/autoselect_mode.hpp"
 #include "libold/content/flags/goal_flag.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/script/verb_table.hpp"
 #include "utility/flag_set.hpp"
 
 namespace gorc {

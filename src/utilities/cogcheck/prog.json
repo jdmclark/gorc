@@ -2,7 +2,7 @@
     "name" : "cogcheck",
     "dependencies" : [
         "libs/program",
-        "libs/cog/compiler"
+        "jk/cog/compiler"
     ],
     "sources" : [
         "cogcheck_compiler.cpp",

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "utility/service_registry.hpp"
-#include "cog/compiler/compiler.hpp"
-#include "cog/script/constant_table.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/compiler/compiler.hpp"
+#include "jk/cog/script/constant_table.hpp"
+#include "jk/cog/script/verb_table.hpp"
 #include "libold/content/master_colormap.hpp"
 #include "content/loader_registry.hpp"
 #include <memory>

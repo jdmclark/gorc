@@ -5,7 +5,7 @@
 #include "math/vector.hpp"
 #include "libold/base/utility/pool.hpp"
 #include "libold/base/utility/time.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/script/verb_table.hpp"
 #include "libold/base/utility/entity_id.hpp"
 
 namespace gorc {

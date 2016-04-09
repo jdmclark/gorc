@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cog/ast/ast.hpp"
-#include "cog/script/script.hpp"
+#include "jk/cog/ast/ast.hpp"
+#include "jk/cog/script/script.hpp"
 
 namespace gorc {
 

@@ -14,7 +14,7 @@
 #include "libold/content/loaders/soundclass_loader.hpp"
 #include "libold/content/loaders/sprite_loader.hpp"
 
-#include "cog/compiler/script_loader.hpp"
+#include "jk/cog/compiler/script_loader.hpp"
 
 void gorc::content::register_legacy_loaders(loader_registry &loaders)
 {

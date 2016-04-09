@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cog/script/script.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/script/script.hpp"
+#include "jk/cog/script/verb_table.hpp"
 
 namespace gorc {
 

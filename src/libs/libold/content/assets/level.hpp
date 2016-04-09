@@ -8,7 +8,7 @@
 #include "level_adjoin.hpp"
 #include "level_surface.hpp"
 #include "level_sector.hpp"
-#include "cog/script/script.hpp"
+#include "jk/cog/script/script.hpp"
 #include "material.hpp"
 #include "template.hpp"
 

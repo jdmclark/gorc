@@ -1,0 +1,14 @@
+{
+    "name" : "codegen",
+    "dependencies" : [
+        "jk/cog/ir",
+        "jk/cog/ast"
+    ],
+    "sources" : [
+        "codegen.cpp",
+        "lval_expression_gen_visitor.cpp",
+        "nonval_expression_gen_visitor.cpp",
+        "rval_expression_gen_visitor.cpp",
+        "statement_gen_visitor.cpp"
+    ]
+}

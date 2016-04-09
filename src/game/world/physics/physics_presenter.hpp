@@ -17,7 +17,7 @@
 #include "game/world/keys/key_presenter.hpp"
 #include "query.hpp"
 #include "shape.hpp"
-#include "cog/script/verb_table.hpp"
+#include "jk/cog/script/verb_table.hpp"
 
 namespace gorc {
 namespace game {

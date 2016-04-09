@@ -1,0 +1,14 @@
+{
+    "name" : "vm-test",
+    "type" : "test",
+    "exclude-coverage" : true,
+    "dependencies" : [
+        "libs/test",
+        "jk/cog/vm"
+    ],
+    "sources" : [
+        "heap_test.cpp",
+        "sleep_record_test.cpp",
+        "virtual_machine_test.cpp"
+    ]
+}
