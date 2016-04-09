@@ -1,0 +1,24 @@
+symbols
+
+thing elev
+
+message startup
+message arrived
+end
+
+code
+startup:
+print("startup");
+print("thing number");
+printint(elev);
+waitforstop(elev);
+print("after stop");
+return;
+
+arrived:
+print("arrived");
+print("sender");
+printint(getsenderref());
+return;
+
+end

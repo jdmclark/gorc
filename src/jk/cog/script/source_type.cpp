@@ -6,6 +6,7 @@ using gorc::cog::source_type;
 
 namespace {
     std::unordered_map<std::string, source_type> str_map {
+        { "system", source_type::system },
         { "free", source_type::free },
         { "camera", source_type::camera },
         { "actor", source_type::actor },

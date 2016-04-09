@@ -63,6 +63,13 @@ gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stre
             return std::make_unique<sleep_record>(deserialization_constructor, bis);
         });
 
+    binary_deserialize_range(bis, std::inserter(wait_records, wait_records.end()), [](auto &bis) {
+            auto mt = binary_deserialize<message_type>(bis);
+            auto obj = binary_deserialize<value>(bis);
+            auto cont = std::make_unique<continuation>(deserialization_constructor, bis);
+            return std::make_pair(std::make_tuple(mt, obj), std::move(cont));
+        });
+
     binary_deserialize_range(bis, std::inserter(linkages, linkages.end()), [](auto &bis) {
             auto obj = binary_deserialize<value>(bis);
             auto st = binary_deserialize<executor_linkage>(bis);
@@ -87,6 +94,12 @@ void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) con
 
     binary_serialize_range(bos, sleep_records, [](auto &bos, auto const &em) {
             binary_serialize(bos, *em);
+        });
+
+    binary_serialize_range(bos, wait_records, [](auto &bos, auto const &em) {
+            binary_serialize(bos, std::get<0>(em.first));
+            binary_serialize(bos, std::get<1>(em.first));
+            binary_serialize(bos, *em.second);
         });
 
     binary_serialize_range(bos, linkages, [](auto &bos, auto const &em) {
@@ -151,6 +164,14 @@ gorc::cog::instance& gorc::cog::executor::get_instance(cog_id instance_id)
 void gorc::cog::executor::add_sleep_record(std::unique_ptr<sleep_record> &&sr)
 {
     sleep_records.push_back(std::forward<std::unique_ptr<sleep_record>>(sr));
+}
+
+void gorc::cog::executor::add_wait_record(message_type msg,
+                                          value sender,
+                                          std::unique_ptr<continuation> &&cc)
+{
+    wait_records.emplace(std::make_tuple(msg, sender),
+                         std::forward<std::unique_ptr<continuation>>(cc));
 }
 
 gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_frame(
@@ -261,7 +282,8 @@ void gorc::cog::executor::send_to_linked(message_type t,
                                          value param3)
 {
     for(auto const &link : make_range(linkages.equal_range(sender))) {
-        if(!(link.second.mask & st)) {
+        // System source type cannot be masked.
+        if(!(link.second.mask & st) && (st != source_type::system)) {
             // This source type is masked. Don't dispatch message.
             continue;
         }
@@ -283,6 +305,13 @@ void gorc::cog::executor::send_to_linked(message_type t,
                                          param2,
                                          param3));
         vm.execute(verbs, *this, services, cc);
+    }
+
+    auto wait_rng = wait_records.equal_range(std::make_tuple(t, sender));
+    for(auto it = wait_rng.first; it != wait_rng.second;) {
+        auto curr_it = it++;
+        vm.execute(verbs, *this, services, *curr_it->second);
+        wait_records.erase(curr_it);
     }
 }
 

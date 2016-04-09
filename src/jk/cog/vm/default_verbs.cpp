@@ -204,6 +204,24 @@ namespace {
                 throw suspend_exception();
             });
 
+        verbs.add_service_verb("waitforstop", [](bool expects_value,
+                                                 service_registry const &sr,
+                                                 thing_id tid) {
+                auto &cc = sr.get<continuation>();
+                auto &exec = sr.get<executor>();
+
+                if(expects_value) {
+                    // The void return value from this verb is used.
+                    // Poorly written script, but the missing value will cause problems.
+                    cc.data_stack.push_back(value());
+                }
+
+                exec.add_wait_record(message_type::arrived,
+                                     tid,
+                                     std::make_unique<continuation>(cc));
+                throw suspend_exception();
+            });
+
         class sendmessageex_verb : public cog::verb {
         public:
             sendmessageex_verb(std::string const &name)

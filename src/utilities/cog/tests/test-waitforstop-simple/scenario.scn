@@ -1,0 +1,19 @@
+{
+    instances: [
+        {
+            file: "input.cog",
+            init: [
+                thing 1
+            ]
+        }
+    ],
+
+    events: [
+        send_linked {
+            message: "arrived",
+            sender: thing 1,
+            source: void,
+            source_type: "system"
+        }
+    ]
+}

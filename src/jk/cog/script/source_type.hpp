@@ -6,6 +6,7 @@ namespace gorc {
     namespace cog {
 
         enum class source_type {
+            system = 0x0,
             free = 0x1,
             camera = 0x2,
             actor = 0x4,

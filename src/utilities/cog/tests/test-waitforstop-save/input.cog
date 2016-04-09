@@ -1,0 +1,13 @@
+symbols
+thing obj
+message startup
+end
+code
+startup:
+    print("startup");
+    saveandquit();
+    print("waiting for stop");
+    waitforstop(obj);
+    print("done waiting");
+    return;
+end

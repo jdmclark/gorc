@@ -1,0 +1,7 @@
+startup
+thing number
+1
+arrived
+sender
+1
+after stop

@@ -51,6 +51,8 @@ namespace gorc {
 
             std::vector<std::unique_ptr<instance>> instances;
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
+            std::multimap<std::tuple<message_type, value>,
+                          std::unique_ptr<continuation>> wait_records;
             std::multimap<value, executor_linkage, detail::executor_link_comp> linkages;
             std::map<asset_ref<script>, cog_id, detail::executor_gi_comp> global_instance_map;
 
@@ -71,6 +73,7 @@ namespace gorc {
             instance& get_instance(cog_id instance_id);
 
             void add_sleep_record(std::unique_ptr<sleep_record> &&);
+            void add_wait_record(message_type msg, value sender, std::unique_ptr<continuation>&&);
 
             maybe<call_stack_frame> create_message_frame(cog_id instance,
                                                          message_type msg,
