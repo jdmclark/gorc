@@ -505,9 +505,10 @@ void physics_presenter::update_thing_path_moving(int tid, components::thing& thi
                 presenter.sound_presenter->play_sound_class(thing_id(tid), flags::sound_subclass_type::StopMove);
 
                 // Dispatch cog messages and resume cogs which are waiting for stop.
-                // TODO
-                /*presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
-                presenter.script_presenter->resume_wait_for_stop(thing_id);*/
+                model->script_model.send_to_linked(cog::message_type::arrived,
+                                                   /* sender */ thing_id(tid),
+                                                   /* source */ cog::value(),
+                                                   /* source type */ cog::source_type::system);
             }
             else if(thing.current_frame < thing.goal_frame) {
                 thing.next_frame = thing.current_frame + 1;
@@ -545,9 +546,10 @@ void physics_presenter::update_thing_path_moving(int tid, components::thing& thi
             presenter.sound_presenter->play_sound_class(thing_id(tid), flags::sound_subclass_type::StopMove);
 
             // Dispatch cog messages and resume cogs which are waiting for stop.
-            // TODO
-            /*presenter.script_presenter->send_message_to_linked(cog::message_id::arrived, static_cast<int>(thing_id), flags::message_type::thing);
-            presenter.script_presenter->resume_wait_for_stop(thing_id);*/
+            model->script_model.send_to_linked(cog::message_type::arrived,
+                                               /* sender */ thing_id(tid),
+                                               /* source */ cog::value(),
+                                               /* source type */ cog::source_type::system);
         }
         else {
             vector<3> frame_pos, frame_orient;
@@ -701,9 +703,10 @@ void physics_presenter::update(const gorc::time& time) {
     // - Send blocked message to all blocked things; else, update path.
     for(auto& thing : model->ecs.all_components<components::thing>()) {
         if(thing.second.is_blocked && (thing.second.path_moving || thing.second.rotatepivot_moving)) {
-            // TODO
-            /*presenter.script_presenter->send_message_to_linked(cog::message_id::blocked, static_cast<int>(thing.first), flags::message_type::thing,
-                    -1, flags::message_type::nothing); */
+            model->script_model.send_to_linked(cog::message_type::blocked,
+                                               /* sender */ thing.first,
+                                               /* source */ cog::value(),
+                                               /* source type */ cog::source_type::system);
         }
         else if(thing.second.attach_flags & flags::attach_flag::AttachedToThing) {
             const auto& parent_thing = model->get_thing(thing.second.attached_thing);

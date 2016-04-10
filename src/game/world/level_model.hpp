@@ -52,6 +52,8 @@ public:
 
         LOG_FATAL(format("get_thing: thing %d does not exist") % id);
     }
+
+    cog::source_type get_thing_source_type(int id);
 };
 
 }

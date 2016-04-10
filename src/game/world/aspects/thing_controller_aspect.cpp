@@ -4,6 +4,7 @@
 #include "game/world/events/touched_surface.hpp"
 #include "game/world/events/touched_thing.hpp"
 #include "libold/base/events/print.hpp"
+#include "game/world/level_model.hpp"
 
 using namespace gorc::game::world::aspects;
 
@@ -36,26 +37,24 @@ void thing_controller_aspect::update(gorc::time t,
     }
 }
 
-void thing_controller_aspect::on_touched_surface(int /*thing*/,
-                                                 int /*surface*/) {
+void thing_controller_aspect::on_touched_surface(int thing,
+                                                 int surface) {
     // Dispatch touched message to surface
-    /* TODO
-    presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
-                                                       surface,
-                                                       flags::message_type::surface,
-                                                       thing,
-                                                       flags::message_type::thing);*/
+    presenter.model->script_model.send_to_linked(
+            cog::message_type::touched,
+            /* sender */ surface_id(surface),
+            /* source */ thing_id(thing),
+            /* source type */ presenter.model->get_thing_source_type(thing));
     return;
 }
 
-void thing_controller_aspect::on_touched_thing(int /*thing*/,
-                                               int /*touched_thing*/) {
+void thing_controller_aspect::on_touched_thing(int thing,
+                                               int touched_thing) {
     // Dispatch touched message to thing
-    /* TODO
-    presenter.script_presenter->send_message_to_linked(cog::message_id::touched,
-                                                       thing,
-                                                       flags::message_type::thing,
-                                                       touched_thing,
-                                                       flags::message_type::thing);*/
+    presenter.model->script_model.send_to_linked(
+            cog::message_type::touched,
+            /* sender */ thing_id(touched_thing),
+            /* source */ thing_id(thing),
+            /* source type */ presenter.model->get_thing_source_type(thing));
     return;
 }

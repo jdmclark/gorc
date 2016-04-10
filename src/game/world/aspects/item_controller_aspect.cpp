@@ -23,12 +23,12 @@ item_controller_aspect::item_controller_aspect(component_system &cs,
             return;
         }
 
-        /* TODO
-        presenter.script_presenter->send_message_to_linked(cog::message_id::taken,
-                                                           e.taken_thing,
-                                                           flags::message_type::thing,
-                                                           e.taker,
-                                                           flags::message_type::thing);*/
+        presenter.model->script_model.send_to_linked(
+                cog::message_type::taken,
+                /* sender */ thing_id(e.taken_thing),
+                /* source */ thing_id(e.taker),
+                /* source type */ presenter.model->get_thing_source_type(e.taker));
+
         // TODO: Don't destroy the thing. Flag it for respawn.
         presenter.destroy_thing(e.taken_thing);
     });

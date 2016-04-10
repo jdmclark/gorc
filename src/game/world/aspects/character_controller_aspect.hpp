@@ -34,9 +34,9 @@ private:
 
     void update_falling(int thing_id, components::thing& thing, double dt);
     void update_standing(int thing_id, components::thing& thing, double dt);
-    bool step_on_surface(int thing_id, components::thing& thing, unsigned int surf_id, const physics::contact& rrcb);
+    bool step_on_surface(int thing_id, components::thing& thing, int surf_id, const physics::contact& rrcb);
     bool step_on_thing(int thing_id, components::thing& thing, int step_thing_id, const physics::contact& rrcb);
-    void land_on_surface(int thing_id, components::thing& thing, unsigned int surf_id, const physics::contact& rrcb);
+    void land_on_surface(int thing_id, components::thing& thing, int surf_id, const physics::contact& rrcb);
     void land_on_thing(int thing_id, components::thing& thing, int land_thing_id, const physics::contact& rrcb);
     void jump(int thing_id, components::thing& thing);
     void set_is_falling(int thing_id, components::thing& thing);

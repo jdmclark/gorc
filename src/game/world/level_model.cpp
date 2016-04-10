@@ -19,3 +19,45 @@ gorc::game::world::level_model::level_model(event_bus& bus, gorc::content_manage
 
     return;
 }
+
+gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(int id)
+{
+    auto const &thing = get_thing(id);
+    switch(thing.type) {
+    default:
+        return cog::source_type::free;
+
+    case flags::thing_type::Camera:
+        return cog::source_type::camera;
+
+    case flags::thing_type::Actor:
+        return cog::source_type::actor;
+
+    case flags::thing_type::Weapon:
+        return cog::source_type::weapon;
+
+    case flags::thing_type::Debris:
+        return cog::source_type::debris;
+
+    case flags::thing_type::Item:
+        return cog::source_type::item;
+
+    case flags::thing_type::Explosion:
+        return cog::source_type::explosion;
+
+    case flags::thing_type::cog:
+        return cog::source_type::cog;
+
+    case flags::thing_type::ghost:
+        return cog::source_type::ghost;
+
+    case flags::thing_type::Corpse:
+        return cog::source_type::corpse;
+
+    case flags::thing_type::Player:
+        return cog::source_type::player;
+
+    case flags::thing_type::Particle:
+        return cog::source_type::particle;
+    }
+}

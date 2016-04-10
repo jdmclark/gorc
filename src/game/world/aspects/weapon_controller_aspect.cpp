@@ -80,11 +80,13 @@ void weapon_controller_aspect::touched_surface(int tid, int touched_surface_id) 
         presenter.create_thing_at_thing(projectile.create_thing, tid);
     }
 
-    /* TODO
-    presenter.script_presenter->send_message_to_linked(cog::message_id::damaged,
-            touched_surface_id, flags::message_type::surface,
-            thing_id, flags::message_type::thing,
-            projectile.damage, static_cast<int>(projectile.damage_class));*/
+    presenter.model->script_model.send_to_linked(
+            cog::message_type::damaged,
+            /* sender */ surface_id(touched_surface_id),
+            /* source */ thing_id(tid),
+            /* source type */ presenter.model->get_thing_source_type(tid),
+            /* param0 */ projectile.damage,
+            /* param1 */ static_cast<int>(projectile.damage_class));
     presenter.destroy_thing(tid);
 }
 
