@@ -24,6 +24,11 @@ namespace gorc {
                 bool operator()(value left, value right) const;
             };
 
+            struct executor_wait_comp {
+                bool operator()(std::tuple<message_type, value> const&,
+                                std::tuple<message_type, value> const&) const;
+            };
+
             struct executor_gi_comp {
                 bool operator()(asset_ref<script> left, asset_ref<script> right) const;
             };
@@ -52,7 +57,8 @@ namespace gorc {
             std::vector<std::unique_ptr<instance>> instances;
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
             std::multimap<std::tuple<message_type, value>,
-                          std::unique_ptr<continuation>> wait_records;
+                          std::unique_ptr<continuation>,
+                          detail::executor_wait_comp> wait_records;
             std::multimap<value, executor_linkage, detail::executor_link_comp> linkages;
             std::map<asset_ref<script>, cog_id, detail::executor_gi_comp> global_instance_map;
 

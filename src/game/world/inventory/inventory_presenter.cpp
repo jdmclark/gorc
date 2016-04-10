@@ -132,8 +132,8 @@ void gorc::game::world::inventory::inventory_presenter::activate_weapon(thing_id
 
 int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(thing_id player, flags::autoselect_mode) {
     // TODO: Handle autoselect mode
-    int best_bin = -1;
-    int best_bin_value = std::numeric_limits<int>::lowest();
+    int best_bin = std::numeric_limits<int>::lowest();
+    int best_bin_value = -1;
 
     for(const auto& bin_pair : model->get_inventory(player)) {
         auto& base_bin = model->base_inventory->get_bin(std::get<0>(bin_pair));

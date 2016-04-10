@@ -1014,440 +1014,438 @@ gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode
     return flags::puppet_mode_type::unarmed;
 }
 
-void gorc::game::world::level_presenter::register_verbs(cog::verb_table& verbTable, level_state& components) {
+void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
 
-    camera::camera_presenter::register_verbs(verbTable, components);
-    animations::animation_presenter::register_verbs(verbTable, components);
-    sounds::sound_presenter::register_verbs(verbTable, components);
-    keys::key_presenter::register_verbs(verbTable, components);
-    inventory::inventory_presenter::register_verbs(verbTable, components);
-    physics::physics_presenter::register_verbs(verbTable, components);
+    camera::camera_presenter::register_verbs(verbs, components);
+    animations::animation_presenter::register_verbs(verbs, components);
+    sounds::sound_presenter::register_verbs(verbs, components);
+    keys::key_presenter::register_verbs(verbs, components);
+    inventory::inventory_presenter::register_verbs(verbs, components);
+    physics::physics_presenter::register_verbs(verbs, components);
 
     // AI verbs
-    /*
-    verbTable.add_verb<void, 2>("aiclearmode", [&components](int thing_id, int flags) {
+    verbs.add_verb("aiclearmode", [&components](int thing_id, int flags) {
         components.current_level_presenter->ai_clear_mode(thing_id, flag_set<flags::ai_mode_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("aigetmode", [&components](int thing_id) {
+    verbs.add_verb("aigetmode", [&components](int thing_id) {
         return static_cast<int>(components.current_level_presenter->ai_get_mode(thing_id));
     });
 
-    verbTable.add_verb<void, 2>("aisetlookframe", [&components](int thing_id, int frame) {
+    verbs.add_verb("aisetlookframe", [&components](int thing_id, int frame) {
         components.current_level_presenter->ai_set_look_frame(thing_id, frame);
     });
 
-    verbTable.add_verb<void, 2>("aisetlookpos", [&components](int thing_id, vector<3> pos) {
+    verbs.add_verb("aisetlookpos", [&components](int thing_id, vector<3> pos) {
         components.current_level_presenter->ai_set_look_pos(thing_id, pos);
     });
 
-    verbTable.add_verb<void, 2>("aisetmode", [&components](int thing_id, int flags) {
+    verbs.add_verb("aisetmode", [&components](int thing_id, int flags) {
         components.current_level_presenter->ai_set_mode(thing_id, flag_set<flags::ai_mode_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("aisetmoveframe", [&components](int thing_id, int frame) {
+    verbs.add_verb("aisetmoveframe", [&components](int thing_id, int frame) {
         components.current_level_presenter->ai_set_move_frame(thing_id, frame);
     });
 
-    verbTable.add_verb<void, 2>("aisetmovepos", [&components](int thing_id, vector<3> pos) {
+    verbs.add_verb("aisetmovepos", [&components](int thing_id, vector<3> pos) {
         components.current_level_presenter->ai_set_move_pos(thing_id, pos);
     });
 
-    verbTable.add_verb<void, 2>("aisetmovespeed", [&components](int thing_id, float speed) {
+    verbs.add_verb("aisetmovespeed", [&components](int thing_id, float speed) {
         components.current_level_presenter->ai_set_move_speed(thing_id, speed);
     });
 
-    verbTable.add_verb<void, 2>("aisetmovething", [&components](int thing_id, int move_to_thing) {
+    verbs.add_verb("aisetmovething", [&components](int thing_id, int move_to_thing) {
         components.current_level_presenter->ai_set_move_thing(thing_id, move_to_thing);
     });
 
     // Color verbs
-    verbTable.add_verb<void, 4>("adddynamictint", [&components](int player_id, float r, float g, float b) {
+    verbs.add_verb("adddynamictint", [&components](int player_id, float r, float g, float b) {
         components.current_level_presenter->add_dynamic_tint(player_id, make_vector(r, g, b));
     });
 
     // Creature verbs
-    verbTable.add_verb<float, 1>("gethealth", [&components](int thing_id) {
+    verbs.add_verb("gethealth", [&components](int thing_id) {
         return components.current_level_presenter->get_thing_health(thing_id);
     });
 
-    verbTable.add_verb<float, 1>("getthinghealth", [&components](int thing_id) {
+    verbs.add_verb("getthinghealth", [&components](int thing_id) {
         return components.current_level_presenter->get_thing_health(thing_id);
     });
 
-    verbTable.add_verb<bool, 2>("haslos", [&components](int look_thing, int target) {
+    verbs.add_verb("haslos", [&components](int look_thing, int target) {
         return components.current_level_presenter->has_los(look_thing, target);
     });
 
     // Frame verbs
-    verbTable.add_verb<int, 1>("getcurframe", [&components](int thing) {
+    verbs.add_verb("getcurframe", [&components](int thing) {
         return components.current_level_presenter->get_cur_frame(thing);
     });
 
-    verbTable.add_verb<void, 3>("jumptoframe", [&components](int thing, int frame, int sector) {
+    verbs.add_verb("jumptoframe", [&components](int thing, int frame, int sector) {
         return components.current_level_presenter->jump_to_frame(thing, frame, sector);
     });
 
-    verbTable.add_verb<void, 3>("movetoframe", [&components](int thing, int frame, float speed) {
+    verbs.add_verb("movetoframe", [&components](int thing, int frame, float speed) {
         return components.current_level_presenter->move_to_frame(thing, frame, speed);
     });
 
-    verbTable.add_verb<void, 1>("pathmovepause", [&components](int thing) {
+    verbs.add_verb("pathmovepause", [&components](int thing) {
         components.current_level_presenter->path_move_pause(thing);
     });
 
-    verbTable.add_verb<void, 1>("pathmoveresume", [&components](int thing) {
+    verbs.add_verb("pathmoveresume", [&components](int thing) {
         components.current_level_presenter->path_move_resume(thing);
     });
 
-    verbTable.add_verb<void, 3>("rotatepivot", [&components](int thing_id, int frame, float time) {
+    verbs.add_verb("rotatepivot", [&components](int thing_id, int frame, float time) {
         components.current_level_presenter->rotate_pivot(thing_id, frame, time);
     });
 
     // level verbs
-    verbTable.add_verb<float, 0>("getgametime", [&components] {
+    verbs.add_verb("getgametime", [&components] {
         return components.current_level_presenter->get_game_time();
     });
 
-    verbTable.add_verb<float, 0>("getleveltime", [&components] {
+    verbs.add_verb("getleveltime", [&components] {
         return components.current_level_presenter->get_level_time();
     });
 
-    verbTable.add_verb<void, 1>("jkendlevel", [&components] (bool success) {
+    verbs.add_verb("jkendlevel", [&components] (int success) {
         components.current_level_presenter->jk_end_level(success);
     });
 
     // Misc verbs
-    verbTable.add_verb<void, 1>("jkdisablesaber", [&components](int thing_id) {
+    verbs.add_verb("jkdisablesaber", [&components](int thing_id) {
         components.current_level_presenter->jk_disable_saber(thing_id);
     });
 
-    verbTable.add_verb<void, 4>("jkenablesaber", [&components](int thing_id, float damage,
+    verbs.add_verb("jkenablesaber", [&components](int thing_id, float damage,
             float collide_length, float unknown) {
         components.current_level_presenter->jk_enable_saber(thing_id, damage, collide_length, unknown);
     });
 
-    verbTable.add_verb<void, 9>("jksetsaberinfo", [&components](int thing_id,
+    verbs.add_verb("jksetsaberinfo", [&components](int thing_id,
             int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
             int wall, int blood, int saber) {
         components.current_level_presenter->jk_set_saber_info(thing_id, side_mat, tip_mat,
                 base_rad, tip_rad, length, wall, blood, saber);
     });
 
-    verbTable.add_verb<void, 2>("takeitem", [&components](int thing_id, int player_id) {
+    verbs.add_verb("takeitem", [&components](int thing_id, int player_id) {
         components.current_level_presenter->take_item(thing_id, player_id);
     });
 
     // Options verbs
-    verbTable.add_verb<int, 0>("getdifficulty", [] {
+    verbs.add_verb("getdifficulty", [] {
         // TODO: Add actual difficulty setting.
         return static_cast<int>(flags::difficulty_mode::medium);
     });
 
-    verbTable.add_verb<int, 0>("getautoswitch", [] {
+    verbs.add_verb("getautoswitch", [] {
         // TODO: Add actual autoswitch code.
         return 0x3;
     });
 
-    verbTable.add_verb<int, 0>("getautopickup", [] {
+    verbs.add_verb("getautopickup", [] {
         // TODO: Add actual autopickup code.
         return 0xF;
     });
 
-    verbTable.add_verb<int, 0>("jkgetsabercam", [] {
+    verbs.add_verb("jkgetsabercam", [] {
         // TODO: Add actual sabercam code.
         return 1;
     });
 
-    verbTable.add_verb<int, 0>("ismulti", [] {
+    verbs.add_verb("ismulti", [] {
         // TODO: Return actual multiplayer state.
         return 0;
     });
 
     // Player verbs
-    verbTable.add_verb<int, 0>("getlocalplayerthing", [&components] {
+    verbs.add_verb("getlocalplayerthing", [&components] {
         return components.current_level_presenter->get_local_player_thing();
     });
 
-    verbTable.add_verb<int, 0>("jkgetlocalplayer", [&components] {
+    verbs.add_verb("jkgetlocalplayer", [&components] {
         return components.current_level_presenter->get_local_player_thing();
-    });*/
+    });
 
     // Print verbs:
-    //verbTable.add_verb<void, 2>("jkprintunistring", [&components](int /*destination*/, int message_num) {
+    verbs.add_verb("jkprintunistring", [&components](int /*destination*/, int message_num) {
         // TODO: Add actual jkPrintUniString once localization is implemented.
-        //LOG_INFO(format("COG_%d") % message_num);
-    //});
+        LOG_INFO(format("COG_%d") % message_num);
+    });
 
-    /*
-    verbTable.add_verb<void, 1>("print", [&components](const char* message) {
+    verbs.add_verb("print", [&components](const char* message) {
         // TODO: Add actual print.
         LOG_INFO(message);
     });
 
-    verbTable.add_verb<void, 1>("printint", [&components](int value) {
+    verbs.add_verb("printint", [&components](int value) {
         // TODO: Add actual printint.
         LOG_INFO(format("%d") % value);
     });
 
     // sector verbs
-    verbTable.add_verb<void, 2>("clearsectorflags", [&components](int sector_id, int flags) {
+    verbs.add_verb("clearsectorflags", [&components](int sector_id, int flags) {
         components.current_level_presenter->clear_sector_flags(sector_id, flag_set<flags::sector_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("getsectorflags", [&components](int sector_id) {
+    verbs.add_verb("getsectorflags", [&components](int sector_id) {
         return static_cast<int>(components.current_level_presenter->get_sector_flags(sector_id));
     });
 
-    verbTable.add_verb<int, 1>("firstthinginsector", [&components](int sector_id) {
+    verbs.add_verb("firstthinginsector", [&components](int sector_id) {
         return components.current_level_presenter->first_thing_in_sector(sector_id);
     });
 
-    verbTable.add_verb<int, 1>("nextthinginsector", [&components](int thing_id) {
+    verbs.add_verb("nextthinginsector", [&components](int thing_id) {
         return components.current_level_presenter->next_thing_in_sector(thing_id);
     });
 
-    verbTable.add_verb<void, 2>("sectoradjoins", [&components](int sector_id, bool state) {
+    verbs.add_verb("sectoradjoins", [&components](int sector_id, int state) {
         components.current_level_presenter->set_sector_adjoins(sector_id, state);
     });
 
-    verbTable.add_verb<void, 3>("sectorlight", [&components](int sector_id, float light, float delay) {
+    verbs.add_verb("sectorlight", [&components](int sector_id, float light, float delay) {
         components.current_level_presenter->set_sector_light(sector_id, light, delay);
     });
 
-    verbTable.add_verb<void, 3>("sectorsound", [&components](int sector_id, int sound, float volume) {
+    verbs.add_verb("sectorsound", [&components](int sector_id, int sound, float volume) {
         components.current_level_presenter->sector_sound(sector_id, sound, volume);
     });
 
-    verbTable.add_verb<void, 3>("sectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
+    verbs.add_verb("sectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
         components.current_level_presenter->set_sector_thrust(sector_id, normalize(thrust_vec) * thrust_speed);
     });
 
-    verbTable.add_verb<void, 2>("setcolormap", [&components](int sector_id, int colormap) {
+    verbs.add_verb("setcolormap", [&components](int sector_id, int colormap) {
         components.current_level_presenter->set_sector_colormap(sector_id, colormap);
     });
 
-    verbTable.add_verb<void, 2>("setsectoradjoins", [&components](int sector_id, bool state) {
+    verbs.add_verb("setsectoradjoins", [&components](int sector_id, int state) {
         components.current_level_presenter->set_sector_adjoins(sector_id, state);
     });
 
-    verbTable.add_verb<void, 2>("setsectorcolormap", [&components](int sector_id, int colormap) {
+    verbs.add_verb("setsectorcolormap", [&components](int sector_id, int colormap) {
         components.current_level_presenter->set_sector_colormap(sector_id, colormap);
     });
 
-    verbTable.add_verb<void, 2>("setsectorflags", [&components](int sector_id, int flags) {
+    verbs.add_verb("setsectorflags", [&components](int sector_id, int flags) {
         components.current_level_presenter->set_sector_flags(sector_id, flag_set<flags::sector_flag>(flags));
     });
 
-    verbTable.add_verb<void, 3>("setsectorlight", [&components](int sector_id, float light, float delay) {
+    verbs.add_verb("setsectorlight", [&components](int sector_id, float light, float delay) {
         components.current_level_presenter->set_sector_light(sector_id, light, delay);
     });
 
-    verbTable.add_verb<void, 3>("setsectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
+    verbs.add_verb("setsectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
         components.current_level_presenter->set_sector_thrust(sector_id, normalize(thrust_vec) * thrust_speed);
     });
 
-    verbTable.add_verb<void, 2>("setsectortint", [&components](int sector_id, vector<3> tint) {
+    verbs.add_verb("setsectortint", [&components](int sector_id, vector<3> tint) {
         components.current_level_presenter->set_sector_tint(sector_id, tint);
     });
 
     // surface verbs
-    verbTable.add_verb<void, 2>("clearadjoinflags", [&components](int surface, int flags) {
+    verbs.add_verb("clearadjoinflags", [&components](int surface, int flags) {
         components.current_level_presenter->clear_adjoin_flags(surface, flag_set<flags::adjoin_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("getfacegeomode", [&components](int surface) {
+    verbs.add_verb("getfacegeomode", [&components](int surface) {
         return static_cast<int>(components.current_level_presenter->get_face_geo_mode(surface));
     });
 
-    verbTable.add_verb<vector<3>, 1>("getsurfacecenter", [&components](int surface) {
+    verbs.add_verb("getsurfacecenter", [&components](int surface) {
         return components.current_level_presenter->get_surface_center(surface);
     });
 
-    verbTable.add_verb<int, 1>("getsurfacesector", [&components](int surface) {
+    verbs.add_verb("getsurfacesector", [&components](int surface) {
         return components.current_level_presenter->get_surface_sector(surface);
     });
 
-    verbTable.add_verb<void, 2>("setadjoinflags", [&components](int surface, int flags) {
+    verbs.add_verb("setadjoinflags", [&components](int surface, int flags) {
         components.current_level_presenter->set_adjoin_flags(surface, flag_set<flags::adjoin_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("setfacegeomode", [&components](int surface, int mode) {
+    verbs.add_verb("setfacegeomode", [&components](int surface, int mode) {
         components.current_level_presenter->set_face_geo_mode(surface, static_cast<flags::geometry_mode>(mode));
     });
 
-    verbTable.add_verb<void, 2>("setfacetype", [&components](int surface, int flags) {
+    verbs.add_verb("setfacetype", [&components](int surface, int flags) {
         components.current_level_presenter->set_face_type(surface, flag_set<flags::face_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("setsurfaceflags", [&components](int surface, int flags) {
+    verbs.add_verb("setsurfaceflags", [&components](int surface, int flags) {
         components.current_level_presenter->set_surface_flags(surface, flag_set<flags::surface_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("setsurfacemat", [&components](int, int) {
+    verbs.add_verb("setsurfacemat", [&components](int, int) {
         // TODO: Not implemented for now. Architecturally inconvenient.
     });
 
-    verbTable.add_verb<vector<3>, 1>("surfacecenter", [&components](int surface) {
+    verbs.add_verb("surfacecenter", [&components](int surface) {
         return components.current_level_presenter->get_surface_center(surface);
     });
 
     // System verbs
-    verbTable.add_verb<int, 1>("loadsound", [&components](const char* fn) {
+    verbs.add_verb("loadsound", [&components](const char* fn) {
         return components.current_level_presenter->load_sound(fn);
     });
 
     // thing action verbs
-    verbTable.add_verb<void, 2>("attachthingtothing", [&components](int attach_thing, int base_thing) {
+    verbs.add_verb("attachthingtothing", [&components](int attach_thing, int base_thing) {
         components.current_level_presenter->attach_thing_to_thing(attach_thing, base_thing);
     });
 
-    verbTable.add_verb<int, 2>("creatething", [&components](int tpl_id, int thing_pos) {
+    verbs.add_verb("creatething", [&components](int tpl_id, int thing_pos) {
         return components.current_level_presenter->create_thing_at_thing(tpl_id, thing_pos);
     });
 
-    verbTable.add_verb<int, 4>("createthingatpos", [&components](int tpl_id, int sector, vector<3> pos, vector<3> orient) {
+    verbs.add_verb("createthingatpos", [&components](int tpl_id, int sector, vector<3> pos, vector<3> orient) {
         return components.current_level_presenter->create_thing(tpl_id, sector, pos, make_euler(orient));
     });
 
-    verbTable.add_verb<int, 10>("fireprojectile", [&components](int parent_thing_id, int tpl_id, int snd_id, int submode_id,
+    verbs.add_verb("fireprojectile", [&components](int parent_thing_id, int tpl_id, sound_id snd_id, int submode_id,
             vector<3> offset_vec, vector<3> error_vec, float extra, int proj_flags, float aa_fovx, float aa_fovz) {
         return components.current_level_presenter->fire_projectile(parent_thing_id, tpl_id, snd_id, submode_id,
                 offset_vec, error_vec, extra, proj_flags, aa_fovx, aa_fovz);
     });
 
-    verbTable.add_verb<float, 4>("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
+    verbs.add_verb("damagething", [&components](int thing_id, float damage, int flags, int damager_id) {
         return components.current_level_presenter->damage_thing(thing_id, damage, flag_set<flags::damage_flag>(flags), damager_id);
     });
 
-    verbTable.add_verb<void, 1>("destroything", [&components](int thing_id) {
+    verbs.add_verb("destroything", [&components](int thing_id) {
         components.current_level_presenter->destroy_thing(thing_id);
     });
 
-    verbTable.add_verb<void, 1>("detachthing", [&components](int thing_id) {
+    verbs.add_verb("detachthing", [&components](int thing_id) {
         components.current_level_presenter->detach_thing(thing_id);
     });
 
-    verbTable.add_verb<vector<3>, 1>("getthingpos", [&components](int thing_id) {
+    verbs.add_verb("getthingpos", [&components](int thing_id) {
         return components.current_level_presenter->get_thing_pos(thing_id);
     });
 
-    verbTable.add_verb<void, 2>("healthing", [&components](int thing_id, float amount) {
+    verbs.add_verb("healthing", [&components](int thing_id, float amount) {
         components.current_level_presenter->heal_thing(thing_id, amount);
     });
 
-    verbTable.add_verb<bool, 1>("isthingmoving", [&components](int thing_id) {
+    verbs.add_verb("isthingmoving", [&components](int thing_id) {
         return components.current_level_presenter->is_thing_moving(thing_id);
     });
 
-    verbTable.add_verb<bool, 1>("ismoving", [&components](int thing_id) {
+    verbs.add_verb("ismoving", [&components](int thing_id) {
         return components.current_level_presenter->is_thing_moving(thing_id);
     });
 
-    verbTable.add_verb<vector<3>, 1>("getthinglvec", [&components](int thing_id) {
+    verbs.add_verb("getthinglvec", [&components](int thing_id) {
         return components.current_level_presenter->get_thing_lvec(thing_id);
     });
 
     // thing flags verbs
-    verbTable.add_verb<void, 2>("clearactorflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("clearactorflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->clear_actor_flags(thing_id, flag_set<flags::actor_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("getactorflags", [&components](int thing_id) {
+    verbs.add_verb("getactorflags", [&components](int thing_id) {
         return static_cast<int>(components.current_level_presenter->get_actor_flags(thing_id));
     });
 
-    verbTable.add_verb<void, 2>("setactorflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("setactorflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->set_actor_flags(thing_id, flag_set<flags::actor_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("clearthingflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("clearthingflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->clear_thing_flags(thing_id, flag_set<flags::thing_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("getthingflags", [&components](int thing_id) {
+    verbs.add_verb("getthingflags", [&components](int thing_id) {
         return static_cast<int>(components.current_level_presenter->get_thing_flags(thing_id));
     });
 
-    verbTable.add_verb<void, 2>("setthingflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("setthingflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->set_thing_flags(thing_id, flag_set<flags::thing_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("clearthingattachflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("clearthingattachflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->clear_thing_attach_flags(thing_id, flag_set<flags::attach_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("getthingattachflags", [&components](int thing_id) {
+    verbs.add_verb("getthingattachflags", [&components](int thing_id) {
         return static_cast<int>(components.current_level_presenter->get_thing_attach_flags(thing_id));
     });
 
-    verbTable.add_verb<void, 2>("setthingattachflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("setthingattachflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->set_thing_attach_flags(thing_id, flag_set<flags::attach_flag>(flags));
     });
 
-    verbTable.add_verb<void, 2>("jkclearflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("jkclearflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->jk_clear_flags(thing_id, flag_set<flags::jk_flag>(flags));
     });
 
-    verbTable.add_verb<int, 1>("jkgetflags", [&components](int thing_id) {
+    verbs.add_verb("jkgetflags", [&components](int thing_id) {
         return static_cast<int>(components.current_level_presenter->jk_get_flags(thing_id));
     });
 
-    verbTable.add_verb<void, 2>("jksetflags", [&components](int thing_id, int flags) {
+    verbs.add_verb("jksetflags", [&components](int thing_id, int flags) {
         components.current_level_presenter->jk_set_flags(thing_id, flag_set<flags::jk_flag>(flags));
     });
 
     // thing property verbs
-    verbTable.add_verb<int, 1>("getthingparent", [&components](int thing_id) {
+    verbs.add_verb("getthingparent", [&components](int thing_id) {
         return components.current_level_presenter->get_thing_parent(thing_id);
     });
 
-    verbTable.add_verb<int, 1>("getthingsector", [&components](int thing_id) {
+    verbs.add_verb("getthingsector", [&components](int thing_id) {
         return components.current_level_presenter->get_thing_sector(thing_id);
     });
 
-    verbTable.add_verb<int, 1>("getthingtype", [&components](int thing_id) {
+    verbs.add_verb("getthingtype", [&components](int thing_id) {
         return static_cast<int>(components.current_level_presenter->get_thing_type(thing_id));
     });
 
-    verbTable.add_verb<void, 3>("setthinglight", [&components](int thing_id, float light, float fade_time) {
+    verbs.add_verb("setthinglight", [&components](int thing_id, float light, float fade_time) {
         components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
     });
 
-    verbTable.add_verb<void, 3>("thinglight", [&components](int thing_id, float light, float fade_time) {
+    verbs.add_verb("thinglight", [&components](int thing_id, float light, float fade_time) {
         components.current_level_presenter->set_thing_light(thing_id, light, fade_time);
     });
 
     // velocity verbs
-    verbTable.add_verb<void, 1>("stopthing", [&components](int thing_id) {
+    verbs.add_verb("stopthing", [&components](int thing_id) {
         components.current_level_presenter->stop_thing(thing_id);
     });
 
-    verbTable.add_verb<void, 2>("setthingrotvel", [&components](int thing_id, vector<3> vel) {
+    verbs.add_verb("setthingrotvel", [&components](int thing_id, vector<3> vel) {
         // TODO: Proper implementation
         components.current_level_presenter->model->get_thing(thing_id).ang_vel = vel;
     });
 
-    verbTable.add_verb<void, 2>("applyforce", [&components](int thing_id, vector<3> force) {
+    verbs.add_verb("applyforce", [&components](int thing_id, vector<3> force) {
         // TODO: Proper implementation
         components.current_level_presenter->model->get_thing(thing_id).vel += force;
     });
 
-    verbTable.add_verb<vector<3>, 1>("getthingthrust", [&components](int thing_id) {
+    verbs.add_verb("getthingthrust", [&components](int thing_id) {
         // TODO: Proper implementation
         return components.current_level_presenter->model->get_thing(thing_id).thrust;
     });
 
     // weapon verbs
-    verbTable.add_verb<void, 2>("jksetweaponmesh", [&components](int thing_id, int mesh_id) {
+    verbs.add_verb("jksetweaponmesh", [&components](int thing_id, int mesh_id) {
         components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
     });
 
-    verbTable.add_verb<void, 2>("setarmedmode", [&components](int player, int mode) {
+    verbs.add_verb("setarmedmode", [&components](int player, int mode) {
         components.current_level_presenter->set_armed_mode(player, flags::armed_mode(mode));
     });
 
-    verbTable.add_verb<int, 1>("getmajormode", [&components](int player) {
+    verbs.add_verb("getmajormode", [&components](int player) {
         return static_cast<int>(components.current_level_presenter->get_major_mode(player));
-    });*/
+    });
 }

@@ -4,7 +4,15 @@
 
 bool gorc::cog::detail::executor_link_comp::operator()(value left, value right) const
 {
-    return (left.get_type() < right.get_type()) && (left < right);
+    return std::make_tuple(left.get_type(), left) < std::make_tuple(right.get_type(), right);
+}
+
+bool gorc::cog::detail::executor_wait_comp::operator()(
+        std::tuple<message_type, value> const &left,
+        std::tuple<message_type, value> const &right) const
+{
+    return std::make_tuple(std::get<0>(left), std::get<1>(left).get_type(), std::get<1>(left)) <
+           std::make_tuple(std::get<0>(right), std::get<1>(right).get_type(), std::get<1>(right));
 }
 
 bool gorc::cog::detail::executor_gi_comp::operator()(
