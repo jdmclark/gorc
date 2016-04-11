@@ -10,11 +10,14 @@
         "continuation.cpp",
         "default_verbs.cpp",
         "executor.cpp",
+        "executor_linkage.cpp",
         "heap.cpp",
         "instance.cpp",
+        "pulse_record.cpp",
         "restart_exception.cpp",
         "sleep_record.cpp",
         "suspend_exception.cpp",
+        "timer_record.cpp",
         "virtual_machine.cpp"
     ]
 }

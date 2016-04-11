@@ -77,6 +77,26 @@ namespace gorc {
             return value != o.value;
         }
 
+        bool operator<(id const &o) const
+        {
+            return value < o.value;
+        }
+
+        bool operator<=(id const &o) const
+        {
+            return value <= o.value;
+        }
+
+        bool operator>(id const &o) const
+        {
+            return value > o.value;
+        }
+
+        bool operator>=(id const &o) const
+        {
+            return value >= o.value;
+        }
+
         bool is_valid() const
         {
             return value != -1;

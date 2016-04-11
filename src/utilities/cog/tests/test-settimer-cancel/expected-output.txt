@@ -1,0 +1,4 @@
+before settimer
+after settimer
+T+0.5
+T+1

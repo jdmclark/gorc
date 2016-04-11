@@ -1,0 +1,18 @@
+symbols
+message startup
+message timer
+end
+code
+
+startup:
+    print("before settimer");
+    settimer(1);
+    print("after settimer");
+    sleep(0.5);
+    settimer(0);
+    return;
+
+timer:
+    print("should not be printed");
+
+end

@@ -89,4 +89,48 @@ test_case(at_id_too_big) {
     assert_log_empty();
 }
 
+test_case(less) {
+    thing_id a(3);
+    thing_id b(3);
+    thing_id c(2);
+    thing_id d(4);
+
+    assert_true(!(a < b));
+    assert_true(!(a < c));
+    assert_true(a < d);
+}
+
+test_case(lessequal) {
+    thing_id a(3);
+    thing_id b(3);
+    thing_id c(2);
+    thing_id d(4);
+
+    assert_true(a <= b);
+    assert_true(!(a <= c));
+    assert_true(a <= d);
+}
+
+test_case(greater) {
+    thing_id a(3);
+    thing_id b(3);
+    thing_id c(2);
+    thing_id d(4);
+
+    assert_true(!(a > b));
+    assert_true(a > c);
+    assert_true(!(a > d));
+}
+
+test_case(greaterequal) {
+    thing_id a(3);
+    thing_id b(3);
+    thing_id c(2);
+    thing_id d(4);
+
+    assert_true(a >= b);
+    assert_true(a >= c);
+    assert_true(!(a >= d));
+}
+
 end_suite(id_test);

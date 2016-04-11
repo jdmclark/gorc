@@ -4,4 +4,5 @@ thing number
 arrived
 sender
 1
+void()
 after stop

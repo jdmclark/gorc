@@ -1,0 +1,28 @@
+symbols
+message startup
+message timer
+end
+code
+
+startup:
+    print("before settimer");
+    settimer(1);
+    print("after settimer");
+    sleep(0.5);
+    settimer(2);
+    return;
+
+timer:
+    print("timer expired");
+    print("senderref");
+    printvar(getsenderref());
+    print("senderid");
+    printvar(getsenderid());
+    print("sourceref");
+    printvar(getsourceref());
+    print("param0");
+    printvar(getparam(0));
+    print("param1");
+    printvar(getparam(1));
+
+end

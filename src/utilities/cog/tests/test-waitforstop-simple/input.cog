@@ -11,7 +11,7 @@ startup:
 print("startup");
 print("thing number");
 printint(elev);
-waitforstop(elev);
+printvar(waitforstop(elev));
 print("after stop");
 return;
 

@@ -1,0 +1,15 @@
+before settimer
+after settimer
+T+0.5
+T+1
+timer expired
+senderref
+void()
+senderid
+int(212)
+sourceref
+void()
+param0
+int(86)
+param1
+int(3)

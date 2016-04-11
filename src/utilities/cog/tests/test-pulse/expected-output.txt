@@ -1,0 +1,23 @@
+before setpulse
+after setpulse
+T+0.5
+T+1
+pulsed
+0
+T+2
+pulsed
+1
+T+5
+pulsed
+2
+pulsed
+3
+pulsed
+4
+T+8
+pulsed
+5
+pulsed
+6
+killing pulse
+T+13

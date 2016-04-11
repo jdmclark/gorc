@@ -1,0 +1,16 @@
+{
+    instances: [
+        {
+            file: "input.cog"
+        }
+    ],
+
+    events : [
+        time 0.5, # No pulse
+        time 0.5, # Single pulse
+        time 1.0, # Single pulse
+        time 3.0, # Three pulses
+        time 3.0, # Two pulses
+        time 5.0 # No pulses
+    ]
+}

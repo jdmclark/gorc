@@ -1,0 +1,17 @@
+==== run 1 ====
+startup
+scenario.scn: Saved state
+==== run 2 ====
+scenario.scn: Loading state
+T+1
+timer expired
+senderref
+void()
+senderid
+void()
+sourceref
+void()
+param0
+void()
+param1
+void()

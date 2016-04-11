@@ -222,6 +222,107 @@ namespace {
                 throw suspend_exception();
             });
 
+        verbs.add_service_verb("setpulse", [](bool,
+                                              service_registry const &sr,
+                                              float duration) {
+                auto &cc = sr.get<continuation>();
+                auto &exec = sr.get<executor>();
+
+                maybe<time_delta> dt = nothing;
+                if(duration > 0.0f) {
+                    dt = time_delta(duration);
+                }
+
+                exec.set_pulse(cc.frame().instance_id, dt);
+            });
+
+        verbs.add_service_verb("settimer", [](bool,
+                                              service_registry const &sr,
+                                              float duration) {
+                auto &cc = sr.get<continuation>();
+                auto &exec = sr.get<executor>();
+
+                /* Kill any existing timers with the void id */
+                exec.erase_timer_record(cc.frame().instance_id,
+                                        /* id */ value());
+
+                if(duration > 0.0f) {
+                    exec.add_timer_record(cc.frame().instance_id,
+                                          /* id */ value(),
+                                          time_delta(duration),
+                                          /* param0 */ value(),
+                                          /* param1 */ value());
+                }
+            });
+
+        class settimerex_verb : public cog::verb {
+        public:
+            settimerex_verb(std::string const &name)
+                : verb(name,
+                       value_type::nothing,
+                       std::vector<value_type> { value_type::floating,
+                                                 value_type::dynamic,
+                                                 value_type::dynamic,
+                                                 value_type::dynamic })
+            {
+                return;
+            }
+
+            virtual cog::value invoke(cog::stack &stk, service_registry &sr, bool) const override
+            {
+                value param1 = stk.back();
+                stk.pop_back();
+
+                value param0 = stk.back();
+                stk.pop_back();
+
+                value id = stk.back();
+                stk.pop_back();
+
+                float duration = stk.back();
+                stk.pop_back();
+
+                auto &cc = sr.get<continuation>();
+                auto &exec = sr.get<executor>();
+
+                exec.add_timer_record(cc.frame().instance_id,
+                                      id,
+                                      time_delta(duration),
+                                      param0,
+                                      param1);
+
+                return cog::value();
+            }
+        };
+
+        verbs.emplace_verb<settimerex_verb>("settimerex");
+
+        class killtimerex_verb : public cog::verb {
+        public:
+            killtimerex_verb(std::string const &name)
+                : verb(name,
+                       value_type::nothing,
+                       std::vector<value_type> { value_type::dynamic })
+            {
+                return;
+            }
+
+            virtual cog::value invoke(cog::stack &stk, service_registry &sr, bool) const override
+            {
+                value id = stk.back();
+                stk.pop_back();
+
+                auto &cc = sr.get<continuation>();
+                auto &exec = sr.get<executor>();
+
+                exec.erase_timer_record(cc.frame().instance_id, id);
+
+                return cog::value();
+            }
+        };
+
+        verbs.emplace_verb<killtimerex_verb>("killtimerex");
+
         class sendmessageex_verb : public cog::verb {
         public:
             sendmessageex_verb(std::string const &name)

@@ -1,0 +1,12 @@
+{
+    instances: [
+        {
+            file: "input.cog"
+        }
+    ],
+
+    events : [
+        time 0.5, # No timer
+        time 0.5  # Single timer
+    ]
+}

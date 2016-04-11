@@ -1,0 +1,23 @@
+symbols
+message startup
+message pulse
+int i=0
+end
+code
+startup:
+    print("startup");
+    setpulse(1);
+    return;
+
+pulse:
+    print("pulse");
+    printint(i);
+
+    if(i == 3) {
+        saveandquit();
+        sleep(0);
+    }
+
+    i = i + 1;
+    return;
+end

@@ -1,0 +1,12 @@
+symbols
+message startup
+end
+code
+
+startup:
+    print("before settimer");
+    settimer(1);
+    print("after settimer");
+    return;
+
+end

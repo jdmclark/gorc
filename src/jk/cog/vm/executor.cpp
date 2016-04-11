@@ -23,30 +23,12 @@ bool gorc::cog::detail::executor_gi_comp::operator()(
     return static_cast<UT>(left.get_id()) < static_cast<UT>(right.get_id());
 }
 
-gorc::cog::executor_linkage::executor_linkage(flag_set<source_type> mask,
-                                              cog_id instance_id,
-                                              value sender_link_id)
-    : mask(mask)
-    , instance_id(instance_id)
-    , sender_link_id(sender_link_id)
+bool gorc::cog::detail::executor_timer_comp::operator()(
+        std::tuple<cog_id, value> const &left,
+        std::tuple<cog_id, value> const &right) const
 {
-    return;
-}
-
-gorc::cog::executor_linkage::executor_linkage(deserialization_constructor_tag,
-                                              binary_input_stream &is)
-    : mask(binary_deserialize<flag_set<source_type>>(is))
-    , instance_id(binary_deserialize<cog_id>(is))
-    , sender_link_id(binary_deserialize<value>(is))
-{
-    return;
-}
-
-void gorc::cog::executor_linkage::binary_serialize_object(binary_output_stream &os) const
-{
-    binary_serialize(os, mask);
-    binary_serialize(os, instance_id);
-    binary_serialize(os, sender_link_id);
+    return std::make_tuple(std::get<0>(left), std::get<1>(left).get_type(), std::get<1>(left)) <
+           std::make_tuple(std::get<0>(right), std::get<1>(right).get_type(), std::get<1>(right));
 }
 
 gorc::cog::executor::executor(verb_table &verbs)
@@ -76,6 +58,18 @@ gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stre
             auto obj = binary_deserialize<value>(bis);
             auto cont = std::make_unique<continuation>(deserialization_constructor, bis);
             return std::make_pair(std::make_tuple(mt, obj), std::move(cont));
+        });
+
+    binary_deserialize_range(bis, std::inserter(pulse_records, pulse_records.end()), [](auto &is) {
+            auto inst = binary_deserialize<cog_id>(is);
+            return std::make_pair(inst, pulse_record(deserialization_constructor, is));
+        });
+
+    binary_deserialize_range(bis, std::inserter(timer_records, timer_records.end()), [](auto &is) {
+            auto inst = binary_deserialize<cog_id>(is);
+            auto timer_id = binary_deserialize<value>(is);
+            return std::make_pair(std::make_tuple(inst, timer_id),
+                                  timer_record(deserialization_constructor, is));
         });
 
     binary_deserialize_range(bis, std::inserter(linkages, linkages.end()), [](auto &bis) {
@@ -108,6 +102,17 @@ void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) con
             binary_serialize(bos, std::get<0>(em.first));
             binary_serialize(bos, std::get<1>(em.first));
             binary_serialize(bos, *em.second);
+        });
+
+    binary_serialize_range(bos, pulse_records, [](auto &bos, auto const &em) {
+            binary_serialize(bos, em.first);
+            binary_serialize(bos, em.second);
+        });
+
+    binary_serialize_range(bos, timer_records, [](auto &bos, auto const &em) {
+            binary_serialize(bos, std::get<0>(em.first));
+            binary_serialize(bos, std::get<1>(em.first));
+            binary_serialize(bos, em.second);
         });
 
     binary_serialize_range(bos, linkages, [](auto &bos, auto const &em) {
@@ -180,6 +185,31 @@ void gorc::cog::executor::add_wait_record(message_type msg,
 {
     wait_records.emplace(std::make_tuple(msg, sender),
                          std::forward<std::unique_ptr<continuation>>(cc));
+}
+
+void gorc::cog::executor::add_timer_record(cog_id instance_id,
+                                           value timer_id,
+                                           time_delta duration,
+                                           value param0,
+                                           value param1)
+{
+    timer_records.emplace(std::make_tuple(instance_id, timer_id),
+                          timer_record(duration, param0, param1));
+}
+
+void gorc::cog::executor::erase_timer_record(cog_id instance_id,
+                                             value timer_id)
+{
+    timer_records.erase(std::make_tuple(instance_id, timer_id));
+}
+
+void gorc::cog::executor::set_pulse(cog_id instance_id,
+                                    maybe<time_delta> duration)
+{
+    pulse_records.erase(instance_id);
+    maybe_if(duration, [&](time_delta dt) {
+            pulse_records.emplace(instance_id, pulse_record(dt));
+        });
 }
 
 gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_frame(
@@ -336,9 +366,72 @@ gorc::cog_id gorc::cog::executor::get_master_cog() const
 void gorc::cog::executor::update(time_delta dt)
 {
     // Decrement times first.
-    // Continuations may insert new sleep records later.
+    // Continuations may insert new records. The new records shouldn't be decremented this frame.
+    for(auto &timer_record : timer_records) {
+        timer_record.second.remaining -= dt;
+    }
+
+    for(auto &pulse_record : pulse_records) {
+        pulse_record.second.remaining -= dt;
+    }
+
     for(auto &sleep_record : sleep_records) {
         sleep_record->expiration_time -= dt;
+    }
+
+    // Intentionally quadratic. The timer records data structure may be modified by timer event
+    // handlers. Repeatedly searching the map is still more efficient than copying this data.
+    while(true) {
+        bool seen_any = false;
+        for(auto it = timer_records.begin(); it != timer_records.end(); ++it) {
+            if(it->second.remaining <= 0.0s) {
+                cog_id instance = std::get<0>(it->first);
+                value sender_id = std::get<1>(it->first);
+                value param0 = it->second.param0;
+                value param1 = it->second.param1;
+
+                timer_records.erase(it);
+
+                send(instance,
+                     message_type::timer,
+                     /* sender */ value(),
+                     sender_id,
+                     /* source */ value(),
+                     param0,
+                     param1);
+
+                seen_any = true;
+                break;
+            }
+        }
+
+        if(!seen_any) {
+            break;
+        }
+    }
+
+    // Intentionally quadratic. The pulse records data structure may be modified by pulse event
+    // handlers. Repeatedly searching the map is still more efficient than copying this data.
+    while(true) {
+        bool seen_any = false;
+        for(auto it = pulse_records.begin(); it != pulse_records.end(); ++it) {
+            if(it->second.remaining <= 0.0s) {
+                it->second.remaining += it->second.duration;
+
+                send(it->first,
+                     message_type::pulse,
+                     /* sender */ value(),
+                     /* sender id */ value(),
+                     /* source */ value());
+
+                seen_any = true;
+                break;
+            }
+        }
+
+        if(!seen_any) {
+            break;
+        }
     }
 
     for(auto it = sleep_records.begin(); it != sleep_records.end(); ) {
