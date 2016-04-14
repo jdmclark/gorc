@@ -3,10 +3,13 @@
 #include "content/content_manager.hpp"
 #include "game/constants.hpp"
 
-gorc::game::world::level_model::level_model(event_bus& bus, gorc::content_manager&, cog::verb_table &verbs,
+gorc::game::world::level_model::level_model(event_bus& bus, gorc::content_manager& content, service_registry const &svc,
         asset_ref<gorc::content::assets::level> level, asset_ref<content::assets::inventory> inv)
     : level(level), header(level->header), adjoins(level->adjoins), sectors(level->sectors),
-      ecs(bus), script_model(verbs), inventory_model(inv) {
+      ecs(bus), services(&svc), script_model(services), inventory_model(inv),
+      value_mapping(content, script_model, level) {
+
+    services.add<cog::default_value_mapping>(value_mapping);
 
     // Copy surfaces and set up object data.
     std::copy(level->surfaces.begin(), level->surfaces.end(), std::back_inserter(surfaces));

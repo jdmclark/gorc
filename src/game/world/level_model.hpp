@@ -11,6 +11,7 @@
 #include "game/world/keys/key_model.hpp"
 #include "game/world/inventory/inventory_model.hpp"
 #include "game/world/camera/camera_model.hpp"
+#include "value_mapping.hpp"
 #include <vector>
 
 namespace gorc {
@@ -26,12 +27,14 @@ public:
     std::vector<content::assets::level_sector> sectors;
 
     component_system ecs;
+    service_registry services;
 
     cog::executor script_model;
     sounds::sound_model sound_model;
     keys::key_model key_model;
     inventory::inventory_model inventory_model;
     camera::camera_model camera_model;
+    world_value_mapping value_mapping;
 
     int local_player_thing_id;
 
@@ -42,7 +45,7 @@ public:
     double game_time = 0.0;
     vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
 
-    level_model(event_bus& parent_event_bus, content_manager& manager, cog::verb_table &verbs,
+    level_model(event_bus& parent_event_bus, content_manager& manager, service_registry const &,
             asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);
 
     inline components::thing& get_thing(int id) {

@@ -10,5 +10,6 @@ gorc::game::level_state::level_state(service_registry const &parent_services)
 
     services.add<gorc::cog::compiler>(compiler);
     services.add(colormap);
+    services.add(verbs);
     return;
 }

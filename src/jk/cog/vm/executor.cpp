@@ -31,8 +31,9 @@ bool gorc::cog::detail::executor_timer_comp::operator()(
            std::make_tuple(std::get<0>(right), std::get<1>(right).get_type(), std::get<1>(right));
 }
 
-gorc::cog::executor::executor(verb_table &verbs)
-    : verbs(verbs)
+gorc::cog::executor::executor(service_registry const &parent)
+    : verbs(parent.get<verb_table>())
+    , services(&parent)
 {
     services.add(*this);
     services.add(vm);
@@ -41,6 +42,7 @@ gorc::cog::executor::executor(verb_table &verbs)
 
 gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stream &bis)
     : verbs(bis.services.get<verb_table>())
+    , services(&bis.services)
 {
     services.add(*this);
     services.add(vm);
@@ -140,8 +142,10 @@ void gorc::cog::executor::add_linkage(cog_id id, instance const &inst)
 
 gorc::cog_id gorc::cog::executor::create_instance(asset_ref<cog::script> cog)
 {
+    /* Creating this instance may create more instances. Reserve space. */
     cog_id new_cog(static_cast<int>(instances.size()));
-    instances.push_back(std::make_unique<instance>(cog));
+    instances.push_back(nullptr);
+    at_id(instances, new_cog) = std::make_unique<instance>(services, cog);
     add_linkage(new_cog, *instances.back());
     return new_cog;
 }
@@ -149,8 +153,10 @@ gorc::cog_id gorc::cog::executor::create_instance(asset_ref<cog::script> cog)
 gorc::cog_id gorc::cog::executor::create_instance(asset_ref<cog::script> cog,
                                                   std::vector<value> const &values)
 {
+    /* Creating this instance may create more instances. Reserve space. */
     cog_id new_cog(static_cast<int>(instances.size()));
-    instances.push_back(std::make_unique<instance>(cog, values));
+    instances.push_back(nullptr);
+    at_id(instances, new_cog) = std::make_unique<instance>(services, cog, values);
     add_linkage(new_cog, *instances.back());
     return new_cog;
 }
@@ -162,10 +168,13 @@ gorc::cog_id gorc::cog::executor::create_global_instance(asset_ref<cog::script> 
         return it->second;
     }
 
+    /* Creating this instance may create more instances. Reserve space. */
     cog_id new_cog(static_cast<int>(instances.size()));
-    instances.push_back(std::make_unique<instance>(cog));
-    add_linkage(new_cog, *instances.back());
+    instances.push_back(nullptr);
     global_instance_map.emplace(cog, new_cog);
+
+    at_id(instances, new_cog) = std::make_unique<instance>(services, cog);
+    add_linkage(new_cog, *instances.back());
     return new_cog;
 }
 

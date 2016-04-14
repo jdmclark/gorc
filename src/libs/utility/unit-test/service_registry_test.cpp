@@ -51,4 +51,25 @@ test_case(add_or_replace)
     assert_eq(reg_msg2, std::string("foobarbaz"));
 }
 
+test_case(parent)
+{
+    gorc::service_registry parent;
+
+    std::string msg1 = "Hello, World!";
+    parent.add_or_replace(msg1);
+
+    assert_eq(parent.get<std::string>(), std::string("Hello, World!"));
+
+    gorc::service_registry child(&parent);
+
+    assert_eq(child.get<std::string>(), std::string("Hello, World!"));
+
+    std::string msg2 = "Goodbye, Microcosm!";
+    child.add_or_replace(msg2);
+
+    assert_eq(child.get<std::string>(), std::string("Goodbye, Microcosm!"));
+
+    assert_eq(parent.get<std::string>(), std::string("Hello, World!"));
+}
+
 end_suite(service_registry_test);

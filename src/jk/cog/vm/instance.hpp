@@ -32,8 +32,8 @@ namespace gorc {
             heap memory;
             std::vector<instance_linkage> linkages;
 
-            explicit instance(asset_ref<script>);
-            instance(asset_ref<script>, std::vector<value> const &);
+            instance(service_registry const &sr, asset_ref<script>);
+            instance(service_registry const &sr, asset_ref<script>, std::vector<value> const &);
 
             instance(deserialization_constructor_tag, binary_input_stream &);
             void binary_serialize_object(binary_output_stream &) const;

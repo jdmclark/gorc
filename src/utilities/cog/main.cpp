@@ -10,6 +10,7 @@
 #include "vfs/native_file_system.hpp"
 #include "content/content_manager.hpp"
 #include "content/loader_registry.hpp"
+#include "value_mapping.hpp"
 #include <vector>
 #include <unordered_map>
 #include <iostream>
@@ -54,13 +55,12 @@ namespace gorc {
         }
 
         void instantiate_new(cog_scenario &scenario,
-                             cog::verb_table &verbs,
                              service_registry &services)
         {
             content = std::make_unique<content_manager>(services);
             services.add(*content);
 
-            executor = std::make_unique<cog::executor>(verbs);
+            executor = std::make_unique<cog::executor>(services);
             for(auto const &file : scenario.cog_files) {
                 auto script = content->load<cog::script>(file.cog_filename);
                 cog_id instance_id;
@@ -69,28 +69,6 @@ namespace gorc {
                 }
                 else {
                     instance_id = executor->create_instance(script, file.init);
-                }
-
-                cog::instance &instance = executor->get_instance(instance_id);
-
-                // Fake loading phase: loop over resource symbols and rebind
-                for(auto const &sym : script->symbols) {
-                    if(is_resource_id_type(sym.type)) {
-                        auto &cel = instance.memory[sym.sequence_number];
-
-                        // Skip unless it's a likely filename
-                        if(cel.get_type() != cog::value_type::string) {
-                            continue;
-                        }
-
-                        std::string name = static_cast<char const *>(cel);
-                        auto it = scenario.resources.find(name);
-                        if(it == scenario.resources.end()) {
-                            LOG_FATAL(format("no scenario resource named '%s'") % name);
-                        }
-
-                        cel = it->second;
-                    }
                 }
             }
 
@@ -146,13 +124,16 @@ namespace gorc {
             json_input_stream jis(*f);
             cog_scenario scenario(deserialization_constructor, jis);
 
+            cog_scenario_value_mapping val_map(scenario);
+            services.add<cog::default_value_mapping>(val_map);
+
             // Construct instances:
             if(load_from_save) {
                 LOG_INFO("Loading state");
                 instantiate_from_savefile(services);
             }
             else {
-                instantiate_new(scenario, verbs, services);
+                instantiate_new(scenario, services);
             }
 
             for(auto const &event : scenario.events) {

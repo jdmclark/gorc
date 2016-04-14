@@ -1,5 +1,8 @@
 #include "instance.hpp"
+#include "executor.hpp"
+#include "content/content_manager.hpp"
 #include "log/log.hpp"
+#include "default_value_mapping.hpp"
 
 gorc::cog::instance_linkage::instance_linkage(value object,
                                               flag_set<source_type> mask,
@@ -27,30 +30,71 @@ void gorc::cog::instance_linkage::binary_serialize_object(binary_output_stream &
     binary_serialize(os, sender_link_id);
 }
 
-gorc::cog::instance::instance(asset_ref<script> cog)
+namespace {
+    using namespace gorc;
+    using namespace gorc::cog;
+
+    value translate_value(service_registry const &svc,
+                          value_type symbol_type,
+                          value original_value)
+    {
+        // Do not translate non-string default values
+        if(original_value.get_type() != value_type::string ||
+           symbol_type == value_type::string) {
+            return original_value;
+        }
+
+        std::string str_value = static_cast<char const *>(original_value);
+
+        switch(symbol_type) {
+        default:
+            return original_value;
+
+        case value_type::ai:
+        case value_type::cog:
+        case value_type::colormap:
+        case value_type::keyframe:
+        case value_type::material:
+        case value_type::model:
+        case value_type::sound:
+        case value_type::thing_template:
+            return svc.get<default_value_mapping>()(symbol_type, str_value);
+        }
+    }
+}
+
+gorc::cog::instance::instance(service_registry const &svc,
+                              asset_ref<script> cog)
     : cog(cog)
 {
     for(auto const &sym : cog->symbols) {
-        memory[sym.sequence_number] = sym.default_value;
+        memory[sym.sequence_number] = translate_value(svc,
+                                                      sym.type,
+                                                      sym.default_value);
     }
 
     return;
 }
 
-gorc::cog::instance::instance(asset_ref<script> cog,
+gorc::cog::instance::instance(service_registry const &svc,
+                              asset_ref<script> cog,
                               std::vector<value> const &values)
     : cog(cog)
 {
     auto vt = values.begin();
     for(auto const &sym : cog->symbols) {
         if(sym.local) {
-            memory[sym.sequence_number] = sym.default_value;
+            memory[sym.sequence_number] = translate_value(svc,
+                                                          sym.type,
+                                                          sym.default_value);
         }
         else if(vt == values.end()) {
             LOG_FATAL("not enough values to initialize heap");
         }
         else {
-            memory[sym.sequence_number] = *vt;
+            memory[sym.sequence_number] = translate_value(svc,
+                                                          sym.type,
+                                                          *vt);
             ++vt;
         }
 

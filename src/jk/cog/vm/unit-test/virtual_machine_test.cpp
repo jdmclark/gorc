@@ -11,7 +11,9 @@ test_case(empty_continuation)
 {
     verb_table verbs;
     service_registry services;
-    executor exec(verbs);
+    services.add(verbs);
+
+    executor exec(services);
     virtual_machine vm;
 
     continuation empty_continuation;

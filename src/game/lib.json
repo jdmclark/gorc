@@ -68,6 +68,7 @@
         "world/sounds/music.cpp",
         "world/sounds/sound_model.cpp",
         "world/sounds/sound_presenter.cpp",
-        "world/surface.cpp"
+        "world/surface.cpp",
+        "world/value_mapping.cpp"
     ]
 }

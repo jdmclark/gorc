@@ -5,16 +5,18 @@
 #include <memory>
 #include <stdexcept>
 #include <type_traits>
+#include "maybe.hpp"
 #include "strcat.hpp"
 
 namespace gorc {
 
     class service_registry {
     private:
+        maybe<service_registry const*> parent;
         std::unordered_map<std::type_index, void*> services;
 
     public:
-        service_registry();
+        explicit service_registry(maybe<service_registry const*> parent = nothing);
 
         template <typename ServiceT>
         void add(ServiceT &svc)
@@ -43,13 +45,17 @@ namespace gorc {
             using BaseServiceT = typename std::decay<ServiceT>::type;
             std::type_index tid = typeid(BaseServiceT);
             auto it = services.find(tid);
-            if(it == services.end()) {
+            if(it != services.end()) {
+                return *reinterpret_cast<ServiceT*>(it->second);
+            }
+            else if(parent.has_value()) {
+                return parent.get_value()->get<ServiceT>();
+            }
+            else {
                 throw std::runtime_error(strcat("service_registry::get service ",
                                                 typeid(ServiceT).name(),
                                                 " not registered"));
             }
-
-            return *reinterpret_cast<ServiceT*>(it->second);
         }
     };
 

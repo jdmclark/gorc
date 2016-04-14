@@ -67,7 +67,7 @@ namespace gorc {
             void add_linkage(cog_id id, instance const &inst);
 
         public:
-            explicit executor(verb_table &verbs);
+            executor(service_registry const &svc);
             executor(deserialization_constructor_tag, binary_input_stream &);
 
             void binary_serialize_object(binary_output_stream &) const;

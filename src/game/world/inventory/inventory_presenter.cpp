@@ -319,72 +319,73 @@ void gorc::game::world::inventory::inventory_presenter::set_goal_flags(thing_id 
 }
 
 void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
-    verbs.add_verb("changeinv", [&components](thing_id player, int bin, int amount) {
+    verbs.add_safe_verb("changeinv", cog::value(),
+        [&components](thing_id player, int bin, int amount) {
         components.current_level_presenter->inventory_presenter->change_inv(player, bin, amount);
     });
 
-    verbs.add_verb("getinv", [&components](thing_id player, int bin) {
+    verbs.add_safe_verb("getinv", 0, [&components](thing_id player, int bin) {
         return components.current_level_presenter->inventory_presenter->get_inv(player, bin);
     });
 
-    verbs.add_verb("getinvmax", [&components](thing_id player, int bin) {
+    verbs.add_safe_verb("getinvmax", 0, [&components](thing_id player, int bin) {
         return components.current_level_presenter->inventory_presenter->get_inv_max(player, bin);
     });
 
-    verbs.add_verb("getinvmin", [&components](thing_id player, int bin) {
+    verbs.add_safe_verb("getinvmin", 0, [&components](thing_id player, int bin) {
         return components.current_level_presenter->inventory_presenter->get_inv_min(player, bin);
     });
 
-    verbs.add_verb("isinvactivated", [&components](thing_id player, int bin) {
+    verbs.add_safe_verb("isinvactivated", 0, [&components](thing_id player, int bin) {
         return components.current_level_presenter->inventory_presenter->is_inv_activated(player, bin);
     });
 
-    verbs.add_verb("isinvavailable", [&components](thing_id player, int bin) {
+    verbs.add_safe_verb("isinvavailable", 0, [&components](thing_id player, int bin) {
         return components.current_level_presenter->inventory_presenter->is_inv_available(player, bin);
     });
 
-    verbs.add_verb("setbinwait", [&components](thing_id player, int bin, float value) {
+    verbs.add_safe_verb("setbinwait", cog::value(), [&components](thing_id player, int bin, float value) {
         components.current_level_presenter->inventory_presenter->set_bin_wait(player, bin, value);
     });
 
-    verbs.add_verb("setinv", [&components](thing_id player, int bin, int value) {
+    verbs.add_safe_verb("setinv", cog::value(), [&components](thing_id player, int bin, int value) {
         components.current_level_presenter->inventory_presenter->set_inv(player, bin, value);
     });
 
-    verbs.add_verb("setinvactivated", [&components](thing_id player, int bin, int value) {
+    verbs.add_safe_verb("setinvactivated", cog::value(), [&components](thing_id player, int bin, int value) {
         components.current_level_presenter->inventory_presenter->set_inv_activated(player, bin, value);
     });
 
-    verbs.add_verb("setinvavailable", [&components](thing_id player, int bin, int value) {
+    verbs.add_safe_verb("setinvavailable", cog::value(), [&components](thing_id player, int bin, int value) {
         components.current_level_presenter->inventory_presenter->set_inv_available(player, bin, value);
     });
 
     // Weapon verbs
-    verbs.add_verb("assignweapon", [&components](thing_id player, int weap_bin) {
+    verbs.add_safe_verb("assignweapon", cog::value(), [&components](thing_id player, int weap_bin) {
         components.current_level_presenter->inventory_presenter->assign_weapon(player, weap_bin);
     });
 
-    verbs.add_verb("activateweapon", [&components](thing_id player, float firewait, int mode) {
+    verbs.add_safe_verb("activateweapon", cog::value(), [&components](thing_id player, float firewait, int mode) {
         components.current_level_presenter->inventory_presenter->activate_weapon(player, firewait, mode);
     });
 
-    verbs.add_verb("autoselectweapon", [&components](thing_id player, int select_mode) {
+    verbs.add_safe_verb("autoselectweapon", -1, [&components](thing_id player, int select_mode) {
         return components.current_level_presenter->inventory_presenter->autoselect_weapon(player, static_cast<flags::autoselect_mode>(select_mode));
     });
 
-    verbs.add_verb("changefirerate", [&components](thing_id player, float firewait) {
+    verbs.add_safe_verb("changefirerate", cog::value(), [&components](thing_id player, float firewait) {
         components.current_level_presenter->inventory_presenter->change_fire_rate(player, firewait);
     });
 
-    verbs.add_verb("deactivateweapon", [&components](thing_id player, int mode) {
+    verbs.add_safe_verb("deactivateweapon", -1, [&components](thing_id player, int mode) {
         return components.current_level_presenter->inventory_presenter->deactivate_weapon(player, mode);
     });
 
-    verbs.add_verb("getcurinvweapon", [&components](thing_id player) {
+    verbs.add_safe_verb("getcurinvweapon", -1, [&components](thing_id player) {
         return components.current_level_presenter->inventory_presenter->get_cur_weapon(player);
     });
 
-    verbs.add_verb("getcurweapon", [&components](thing_id player) {
+    verbs.add_safe_verb("getcurweapon", -1, [&components](thing_id player) {
         return components.current_level_presenter->inventory_presenter->get_cur_weapon(player);
     });
 
@@ -392,31 +393,31 @@ void gorc::game::world::inventory::inventory_presenter::register_verbs(cog::verb
         return components.current_level_presenter->inventory_presenter->get_cur_weapon_mode();
     });
 
-    verbs.add_verb("selectweapon", [&components](thing_id player, int weap_bin) {
+    verbs.add_safe_verb("selectweapon", cog::value(), [&components](thing_id player, int weap_bin) {
         components.current_level_presenter->inventory_presenter->select_weapon(player, weap_bin);
     });
 
-    verbs.add_verb("setcurinvweapon", [&components](thing_id player, int weap_bin) {
+    verbs.add_safe_verb("setcurinvweapon", cog::value(), [&components](thing_id player, int weap_bin) {
         components.current_level_presenter->inventory_presenter->set_cur_inv_weapon(player, weap_bin);
     });
 
-    verbs.add_verb("setcurweapon", [&components](thing_id player, int weap_num) {
+    verbs.add_safe_verb("setcurweapon", cog::value(), [&components](thing_id player, int weap_num) {
         components.current_level_presenter->inventory_presenter->set_cur_weapon(player, weap_num);
     });
 
-    verbs.add_verb("setfirewait", [&components](thing_id, float) {
+    verbs.add_safe_verb("setfirewait", cog::value(), [&components](thing_id, float) {
         // TODO
     });
 
-    verbs.add_verb("setmountwait", [&components](thing_id player, float delay) {
+    verbs.add_safe_verb("setmountwait", cog::value(), [&components](thing_id player, float delay) {
         components.current_level_presenter->inventory_presenter->set_mount_wait(player, delay);
     });
 
-    verbs.add_verb("cleargoalflags", [&components](thing_id player, int goal, int flags) {
+    verbs.add_safe_verb("cleargoalflags", cog::value(), [&components](thing_id player, int goal, int flags) {
         components.current_level_presenter->inventory_presenter->clear_goal_flags(player, goal, flag_set<flags::goal_flag>(flags));
     });
 
-    verbs.add_verb("setgoalflags", [&components](thing_id player, int goal, int flags) {
+    verbs.add_safe_verb("setgoalflags", cog::value(), [&components](thing_id player, int goal, int flags) {
         components.current_level_presenter->inventory_presenter->set_goal_flags(player, goal, flag_set<flags::goal_flag>(flags));
     });
 }

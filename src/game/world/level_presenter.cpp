@@ -53,7 +53,7 @@ gorc::game::world::level_presenter::~level_presenter() {
 
 void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     eventbus = &eventBus;
-    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.verbs, place.level,
+    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.services, place.level,
             place.contentmanager->load<content::assets::inventory>("items.dat"));
 
     // Create local aspects
