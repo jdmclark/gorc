@@ -39,7 +39,7 @@ class level_model;
 class level_presenter : public gorc::place::presenter {
 private:
     // Scratch space
-    std::vector<std::tuple<int, int>> update_path_sector_scratch;
+    std::vector<std::tuple<sector_id, int>> update_path_sector_scratch;
 
     std::set<int> things_to_destroy;
 
@@ -100,7 +100,7 @@ public:
 
     // Frame verbs
     int get_cur_frame(int thing_id);
-    void jump_to_frame(int thing_id, int frame, int sector);
+    void jump_to_frame(int thing_id, int frame, sector_id sector);
     void move_to_frame(int thing_id, int frame, float speed);
     void path_move_pause(int thing_id);
     void path_move_resume(int thing_id);
@@ -122,23 +122,23 @@ public:
     int get_local_player_thing();
 
     // sector verbs
-    void clear_sector_flags(int sector_id, flag_set<flags::sector_flag> flags);
-    int first_thing_in_sector(int sector_id);
-    flag_set<flags::sector_flag> get_sector_flags(int sector_id);
+    void clear_sector_flags(sector_id, flag_set<flags::sector_flag> flags);
+    int first_thing_in_sector(sector_id);
+    flag_set<flags::sector_flag> get_sector_flags(sector_id);
     int next_thing_in_sector(int thing_id);
-    void sector_sound(int sector_id, int sound, float volume);
-    void set_sector_adjoins(int sector_id, bool state);
-    void set_sector_colormap(int sector_id, int colormap);
-    void set_sector_flags(int sector_id, flag_set<flags::sector_flag> flags);
-    void set_sector_light(int sector_id, float value, float delay);
-    void set_sector_thrust(int sector_id, const vector<3>& thrust);
-    void set_sector_tint(int sector_id, const vector<3>& color);
+    void sector_sound(sector_id, int sound, float volume);
+    void set_sector_adjoins(sector_id, bool state);
+    void set_sector_colormap(sector_id, int colormap);
+    void set_sector_flags(sector_id, flag_set<flags::sector_flag> flags);
+    void set_sector_light(sector_id, float value, float delay);
+    void set_sector_thrust(sector_id, const vector<3>& thrust);
+    void set_sector_tint(sector_id, const vector<3>& color);
 
     // surface verbs
     void clear_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags);
     flags::geometry_mode get_face_geo_mode(int surface);
     vector<3> get_surface_center(int surface);
-    int get_surface_sector(int surface);
+    sector_id get_surface_sector(int surface);
     void set_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags);
     void set_face_geo_mode(int surface, flags::geometry_mode mode);
     void set_face_type(int surface, flag_set<flags::face_flag> flags);
@@ -148,9 +148,9 @@ public:
     int load_sound(const char* sound);
 
     // thing action verbs
-    int create_thing(const content::assets::thing_template& tpl, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
-    int create_thing(const std::string& tpl_name, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
-    int create_thing(int tpl_id, unsigned int sector_num, const vector<3>& pos, const quaternion<float>& orientation);
+    int create_thing(const content::assets::thing_template& tpl, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
+    int create_thing(const std::string& tpl_name, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
+    int create_thing(int tpl_id, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
 
     int fire_projectile(int parent_thing_id, int tpl_id, sound_id fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
             float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovz);
@@ -166,7 +166,7 @@ public:
     bool is_thing_moving(int thing_id);
 
     void adjust_thing_pos(int thing_id, const vector<3>& new_pos);
-    void set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, int new_sector);
+    void set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, sector_id new_sector);
     vector<3> get_thing_lvec(int thing_id);
 
     // thing flag verbs
@@ -188,7 +188,7 @@ public:
 
     // thing property verbs
     int get_thing_parent(int thing_id);
-    int get_thing_sector(int thing_id);
+    sector_id get_thing_sector(int thing_id);
     flags::thing_type get_thing_type(int thing_id);
     void set_thing_light(int thing_id, float light, float fade_time);
 

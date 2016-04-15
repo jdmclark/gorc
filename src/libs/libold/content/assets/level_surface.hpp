@@ -7,6 +7,7 @@
 #include "libold/content/flags/texture_mode.hpp"
 #include "math/vector.hpp"
 #include "utility/flag_set.hpp"
+#include "content/id.hpp"
 #include <memory>
 #include <vector>
 #include <tuple>
@@ -24,7 +25,7 @@ public:
     flags::light_mode light_mode;
     flags::texture_mode texture_mode;
     int adjoin;
-    int adjoined_sector;
+    sector_id adjoined_sector;
     float extra_light;
     std::vector<std::tuple<int, int, float>> vertices;
     vector<3> normal;

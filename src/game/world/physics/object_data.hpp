@@ -1,5 +1,7 @@
 #pragma once
 
+#include "content/id.hpp"
+
 namespace gorc {
 namespace game {
 namespace world {
@@ -17,7 +19,7 @@ public:
 
 class surface_object_data : public object_data {
 public:
-    int sector_id;
+    sector_id sector;
     int surface_id;
 };
 

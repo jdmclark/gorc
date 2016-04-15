@@ -14,7 +14,7 @@ class colormap;
 
 class level_sector {
 public:
-    int number;
+    sector_id number;
     flag_set<flags::sector_flag> flags;
     float ambient_light;
     float extra_light;

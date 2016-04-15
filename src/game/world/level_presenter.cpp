@@ -163,7 +163,7 @@ void gorc::game::world::level_presenter::update(const gorc::time& time) {
 void gorc::game::world::level_presenter::update_thing_sector(int tid, components::thing& thing,
         const vector<3>& oldThingPosition) {
     physics::segment segment(oldThingPosition, thing.position);
-    physics::segment_adjoin_path(segment, *model, model->sectors[thing.sector], update_path_sector_scratch);
+    physics::segment_adjoin_path(segment, *model, at_id(model->sectors, thing.sector), update_path_sector_scratch);
 
     if(std::get<0>(update_path_sector_scratch.back()) == thing.sector) {
         // thing hasn't moved to a different sector.
@@ -182,16 +182,16 @@ void gorc::game::world::level_presenter::update_thing_sector(int tid, components
     }
 
     for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
-        if(model->sectors[thing.sector].flags & flags::sector_flag::CogLinked) {
+        if(at_id(model->sectors, thing.sector).flags & flags::sector_flag::CogLinked) {
             model->script_model.send_to_linked(cog::message_type::exited,
                                                /* sender */ sector_id(thing.sector),
                                                /* source */ thing_id(tid),
                                                tid_source_type);
         }
 
-        int sec_id = std::get<0>(update_path_sector_scratch[i]);
+        sector_id sec_id = std::get<0>(update_path_sector_scratch[i]);
         thing.sector = sec_id;
-        if(model->sectors[sec_id].flags & flags::sector_flag::CogLinked) {
+        if(at_id(model->sectors, sec_id).flags & flags::sector_flag::CogLinked) {
             model->script_model.send_to_linked(cog::message_type::entered,
                                                /* sender */ sector_id(sec_id),
                                                /* source */ thing_id(tid),
@@ -207,16 +207,16 @@ void gorc::game::world::level_presenter::update_thing_sector(int tid, components
         }
     }
 
-    if(model->sectors[thing.sector].flags & flags::sector_flag::CogLinked) {
+    if(at_id(model->sectors, thing.sector).flags & flags::sector_flag::CogLinked) {
         model->script_model.send_to_linked(cog::message_type::exited,
                                            /* sender */ sector_id(thing.sector),
                                            /* source */ thing_id(tid),
                                            tid_source_type);
     }
 
-    int last_sector = std::get<0>(update_path_sector_scratch.back());
+    sector_id last_sector = std::get<0>(update_path_sector_scratch.back());
     thing.sector = last_sector;
-    if(model->sectors[last_sector].flags & flags::sector_flag::CogLinked) {
+    if(at_id(model->sectors, last_sector).flags & flags::sector_flag::CogLinked) {
         model->script_model.send_to_linked(cog::message_type::entered,
                                            /* sender */ sector_id(last_sector),
                                            /* source */ thing_id(tid),
@@ -443,7 +443,7 @@ int gorc::game::world::level_presenter::get_cur_frame(int thing_id) {
     return model->get_thing(thing_id).current_frame;
 }
 
-void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, int sector) {
+void gorc::game::world::level_presenter::jump_to_frame(int thing_id, int frame, sector_id sector) {
     components::thing& referenced_thing = model->get_thing(thing_id);
     auto& referenced_frame = referenced_thing.frames[frame];
     set_thing_pos(thing_id, std::get<0>(referenced_frame), make_euler(std::get<1>(referenced_frame)), sector);
@@ -557,13 +557,13 @@ int gorc::game::world::level_presenter::get_local_player_thing() {
 }
 
 // sector verbs
-void gorc::game::world::level_presenter::clear_sector_flags(int sector_id, flag_set<flags::sector_flag> flags) {
-    model->sectors[sector_id].flags -= flags;
+void gorc::game::world::level_presenter::clear_sector_flags(sector_id sid, flag_set<flags::sector_flag> flags) {
+    at_id(model->sectors, sid).flags -= flags;
 }
 
-int gorc::game::world::level_presenter::first_thing_in_sector(int sector_id) {
+int gorc::game::world::level_presenter::first_thing_in_sector(sector_id sid) {
     for(auto& thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.sector == sector_id) {
+        if(thing.second.sector == sid) {
             return static_cast<int>(thing.first);
         }
     }
@@ -571,15 +571,15 @@ int gorc::game::world::level_presenter::first_thing_in_sector(int sector_id) {
     return -1;
 }
 
-gorc::flag_set<gorc::flags::sector_flag> gorc::game::world::level_presenter::get_sector_flags(int sector_id) {
-    return model->sectors[sector_id].flags;
+gorc::flag_set<gorc::flags::sector_flag> gorc::game::world::level_presenter::get_sector_flags(sector_id sid) {
+    return at_id(model->sectors, sid).flags;
 }
 
 int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
-    int sector_id = model->get_thing(thing_id).sector;
+    sector_id sid = model->get_thing(thing_id).sector;
 
     for(auto& thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.sector == sector_id && static_cast<int>(thing.first) > thing_id) {
+        if(thing.second.sector == sid && static_cast<int>(thing.first) > thing_id) {
             return static_cast<int>(thing.first);
         }
     }
@@ -587,14 +587,14 @@ int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
     return -1;
 }
 
-void gorc::game::world::level_presenter::sector_sound(int sector_id, int sound, float volume) {
-    auto& sector = model->sectors[sector_id];
+void gorc::game::world::level_presenter::sector_sound(sector_id sid, int sound, float volume) {
+    auto& sector = at_id(model->sectors, sid);
     sector.ambient_sound = contentmanager->get_asset<content::assets::sound>(asset_id(sound));
     sector.ambient_sound_volume = volume;
 }
 
-void gorc::game::world::level_presenter::set_sector_adjoins(int sector_id, bool state) {
-    content::assets::level_sector& sector = model->sectors[sector_id];
+void gorc::game::world::level_presenter::set_sector_adjoins(sector_id sid, bool state) {
+    content::assets::level_sector& sector = at_id(model->sectors, sid);
     for(int i = 0; i < sector.surface_count; ++i) {
         content::assets::level_surface& surface = model->surfaces[i + sector.first_surface];
         if(surface.adjoin >= 0) {
@@ -610,28 +610,28 @@ void gorc::game::world::level_presenter::set_sector_adjoins(int sector_id, bool 
     }
 }
 
-void gorc::game::world::level_presenter::set_sector_colormap(int sector_id, int colormap) {
-    auto& sector = model->sectors[sector_id];
+void gorc::game::world::level_presenter::set_sector_colormap(sector_id sid, int colormap) {
+    auto& sector = at_id(model->sectors, sid);
     sector.cmp = place.contentmanager->get_asset<content::assets::colormap>(asset_id(colormap));
 }
 
-void gorc::game::world::level_presenter::set_sector_flags(int sector_id, flag_set<flags::sector_flag> flags) {
-    model->sectors[sector_id].flags += flags;
+void gorc::game::world::level_presenter::set_sector_flags(sector_id sid, flag_set<flags::sector_flag> flags) {
+    at_id(model->sectors, sid).flags += flags;
 }
 
-void gorc::game::world::level_presenter::set_sector_light(int sector_id, float value, float) {
+void gorc::game::world::level_presenter::set_sector_light(sector_id sid, float value, float) {
     // TODO: create animation to implement delay feature.
-    content::assets::level_sector& sector = model->sectors[sector_id];
+    content::assets::level_sector& sector = at_id(model->sectors, sid);
     sector.extra_light = value;
 }
 
-void gorc::game::world::level_presenter::set_sector_thrust(int sector_id, const vector<3>& thrust) {
-    content::assets::level_sector& sector = model->sectors[sector_id];
+void gorc::game::world::level_presenter::set_sector_thrust(sector_id sid, const vector<3>& thrust) {
+    content::assets::level_sector& sector = at_id(model->sectors, sid);
     sector.thrust = thrust * static_cast<float>(rate_factor);
 }
 
-void gorc::game::world::level_presenter::set_sector_tint(int sector_id, const vector<3>& color) {
-    content::assets::level_sector& sector = model->sectors[sector_id];
+void gorc::game::world::level_presenter::set_sector_tint(sector_id sid, const vector<3>& color) {
+    content::assets::level_sector& sector = at_id(model->sectors, sid);
     sector.tint = color;
 }
 
@@ -658,14 +658,14 @@ gorc::vector<3> gorc::game::world::level_presenter::get_surface_center(int surfa
     return vec;
 }
 
-int gorc::game::world::level_presenter::get_surface_sector(int surface) {
+gorc::sector_id gorc::game::world::level_presenter::get_surface_sector(int surface) {
     for(const auto& sec : model->sectors) {
         if(surface >= sec.first_surface && surface < (sec.first_surface + sec.surface_count)) {
             return sec.number;
         }
     }
 
-    return -1;
+    return invalid_id;
 }
 
 void gorc::game::world::level_presenter::set_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags) {
@@ -698,7 +698,7 @@ int gorc::game::world::level_presenter::load_sound(const char* fn) {
 
 // thing action verbs
 
-int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, unsigned int sector_num,
+int gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, sector_id sector_num,
         const vector<3>& pos, const quaternion<float>& orient) {
     // Initialize thing properties
     int new_thing_id = static_cast<int>(model->ecs.make_entity());
@@ -722,7 +722,7 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     return static_cast<int>(new_thing_id);
 }
 
-int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int sector_num,
+int gorc::game::world::level_presenter::create_thing(int tpl_id, sector_id sector_num,
         const vector<3>& pos, const quaternion<float>& orientation) {
     if(tpl_id < 0) {
         // TODO: thing_template not found. report error.
@@ -732,7 +732,7 @@ int gorc::game::world::level_presenter::create_thing(int tpl_id, unsigned int se
     return create_thing(model->level->templates[tpl_id], sector_num, pos, orientation);
 }
 
-int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name, unsigned int sector_num,
+int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name, sector_id sector_num,
         const vector<3>& pos, const quaternion<float>& orientation) {
     std::string temp;
     std::transform(tpl_name.begin(), tpl_name.end(), std::back_inserter(temp), tolower);
@@ -781,7 +781,7 @@ void gorc::game::world::level_presenter::adjust_thing_pos(int thing_id, const ve
     update_thing_sector(thing_id, thing, old_pos);
 }
 
-void gorc::game::world::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, int new_sector) {
+void gorc::game::world::level_presenter::set_thing_pos(int thing_id, const vector<3>& new_pos, const quaternion<float>& new_orient, sector_id new_sector) {
     components::thing& thing = model->get_thing(thing_id);
     thing.position = new_pos;
     thing.orient = new_orient;
@@ -964,7 +964,7 @@ int gorc::game::world::level_presenter::get_thing_parent(int thing_id) {
     return model->get_thing(thing_id).attached_thing;
 }
 
-int gorc::game::world::level_presenter::get_thing_sector(int thing_id) {
+gorc::sector_id gorc::game::world::level_presenter::get_thing_sector(int thing_id) {
     return model->get_thing(thing_id).sector;
 }
 
@@ -1083,7 +1083,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         return components.current_level_presenter->get_cur_frame(thing);
     });
 
-    verbs.add_verb("jumptoframe", [&components](int thing, int frame, int sector) {
+    verbs.add_safe_verb("jumptoframe", cog::value(), [&components](int thing, int frame, sector_id sector) {
         return components.current_level_presenter->jump_to_frame(thing, frame, sector);
     });
 
@@ -1189,64 +1189,64 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
     });
 
     // sector verbs
-    verbs.add_verb("clearsectorflags", [&components](int sector_id, int flags) {
-        components.current_level_presenter->clear_sector_flags(sector_id, flag_set<flags::sector_flag>(flags));
+    verbs.add_safe_verb("clearsectorflags", cog::value(), [&components](sector_id sid, int flags) {
+        components.current_level_presenter->clear_sector_flags(sid, flag_set<flags::sector_flag>(flags));
     });
 
-    verbs.add_verb("getsectorflags", [&components](int sector_id) {
-        return static_cast<int>(components.current_level_presenter->get_sector_flags(sector_id));
+    verbs.add_safe_verb("getsectorflags", 0, [&components](sector_id sid) {
+        return static_cast<int>(components.current_level_presenter->get_sector_flags(sid));
     });
 
-    verbs.add_verb("firstthinginsector", [&components](int sector_id) {
-        return components.current_level_presenter->first_thing_in_sector(sector_id);
+    verbs.add_safe_verb("firstthinginsector", thing_id(invalid_id), [&components](sector_id sid) {
+        return components.current_level_presenter->first_thing_in_sector(sid);
     });
 
     verbs.add_verb("nextthinginsector", [&components](int thing_id) {
         return components.current_level_presenter->next_thing_in_sector(thing_id);
     });
 
-    verbs.add_verb("sectoradjoins", [&components](int sector_id, int state) {
-        components.current_level_presenter->set_sector_adjoins(sector_id, state);
+    verbs.add_safe_verb("sectoradjoins", cog::value(), [&components](sector_id sid, int state) {
+        components.current_level_presenter->set_sector_adjoins(sid, state);
     });
 
-    verbs.add_verb("sectorlight", [&components](int sector_id, float light, float delay) {
-        components.current_level_presenter->set_sector_light(sector_id, light, delay);
+    verbs.add_safe_verb("sectorlight", cog::value(), [&components](sector_id sid, float light, float delay) {
+        components.current_level_presenter->set_sector_light(sid, light, delay);
     });
 
-    verbs.add_verb("sectorsound", [&components](int sector_id, int sound, float volume) {
-        components.current_level_presenter->sector_sound(sector_id, sound, volume);
+    verbs.add_safe_verb("sectorsound", cog::value(), [&components](sector_id sid, int sound, float volume) {
+        components.current_level_presenter->sector_sound(sid, sound, volume);
     });
 
-    verbs.add_verb("sectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
-        components.current_level_presenter->set_sector_thrust(sector_id, normalize(thrust_vec) * thrust_speed);
+    verbs.add_safe_verb("sectorthrust", cog::value(), [&components](sector_id sid, vector<3> thrust_vec, float thrust_speed) {
+        components.current_level_presenter->set_sector_thrust(sid, normalize(thrust_vec) * thrust_speed);
     });
 
-    verbs.add_verb("setcolormap", [&components](int sector_id, int colormap) {
-        components.current_level_presenter->set_sector_colormap(sector_id, colormap);
+    verbs.add_safe_verb("setcolormap", cog::value(), [&components](sector_id sid, int colormap) {
+        components.current_level_presenter->set_sector_colormap(sid, colormap);
     });
 
-    verbs.add_verb("setsectoradjoins", [&components](int sector_id, int state) {
-        components.current_level_presenter->set_sector_adjoins(sector_id, state);
+    verbs.add_safe_verb("setsectoradjoins", cog::value(), [&components](sector_id sid, int state) {
+        components.current_level_presenter->set_sector_adjoins(sid, state);
     });
 
-    verbs.add_verb("setsectorcolormap", [&components](int sector_id, int colormap) {
-        components.current_level_presenter->set_sector_colormap(sector_id, colormap);
+    verbs.add_safe_verb("setsectorcolormap", cog::value(), [&components](sector_id sid, int colormap) {
+        components.current_level_presenter->set_sector_colormap(sid, colormap);
     });
 
-    verbs.add_verb("setsectorflags", [&components](int sector_id, int flags) {
-        components.current_level_presenter->set_sector_flags(sector_id, flag_set<flags::sector_flag>(flags));
+    verbs.add_safe_verb("setsectorflags", cog::value(), [&components](sector_id sid, int flags) {
+        components.current_level_presenter->set_sector_flags(sid, flag_set<flags::sector_flag>(flags));
     });
 
-    verbs.add_verb("setsectorlight", [&components](int sector_id, float light, float delay) {
-        components.current_level_presenter->set_sector_light(sector_id, light, delay);
+    verbs.add_safe_verb("setsectorlight", cog::value(), [&components](sector_id sid, float light, float delay) {
+        components.current_level_presenter->set_sector_light(sid, light, delay);
     });
 
-    verbs.add_verb("setsectorthrust", [&components](int sector_id, vector<3> thrust_vec, float thrust_speed) {
-        components.current_level_presenter->set_sector_thrust(sector_id, normalize(thrust_vec) * thrust_speed);
+    verbs.add_safe_verb("setsectorthrust", cog::value(), [&components](sector_id sid, vector<3> thrust_vec, float thrust_speed) {
+        components.current_level_presenter->set_sector_thrust(sid, normalize(thrust_vec) * thrust_speed);
     });
 
-    verbs.add_verb("setsectortint", [&components](int sector_id, vector<3> tint) {
-        components.current_level_presenter->set_sector_tint(sector_id, tint);
+    verbs.add_safe_verb("setsectortint", cog::value(), [&components](sector_id sid, vector<3> tint) {
+        components.current_level_presenter->set_sector_tint(sid, tint);
     });
 
     // surface verbs
@@ -1304,8 +1304,8 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         return components.current_level_presenter->create_thing_at_thing(tpl_id, thing_pos);
     });
 
-    verbs.add_verb("createthingatpos", [&components](int tpl_id, int sector, vector<3> pos, vector<3> orient) {
-        return components.current_level_presenter->create_thing(tpl_id, sector, pos, make_euler(orient));
+    verbs.add_safe_verb("createthingatpos", thing_id(invalid_id), [&components](int tpl_id, sector_id sid, vector<3> pos, vector<3> orient) {
+        return components.current_level_presenter->create_thing(tpl_id, sid, pos, make_euler(orient));
     });
 
     verbs.add_verb("fireprojectile", [&components](int parent_thing_id, int tpl_id, sound_id snd_id, int submode_id,

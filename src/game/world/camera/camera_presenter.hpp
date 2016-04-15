@@ -32,7 +32,7 @@ private:
     level_model* levelmodel;
     camera_model* model;
 
-    std::vector<std::tuple<int, int>> update_path_sector_scratch;
+    std::vector<std::tuple<sector_id, int>> update_path_sector_scratch;
 
 public:
     camera_presenter(level_presenter& presenter);

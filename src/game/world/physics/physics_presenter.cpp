@@ -116,21 +116,21 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
         physics_thing_open_set.push_back(thing.sector);
 
         while(!physics_thing_open_set.empty()) {
-            int sector_id = physics_thing_open_set.back();
+            sector_id sid = physics_thing_open_set.back();
             physics_thing_open_set.pop_back();
 
-            const auto& sector = model->sectors[sector_id];
+            const auto& sector = at_id(model->sectors, sid);
 
-            if(physics_thing_closed_set.find(sector_id) != physics_thing_closed_set.end()
+            if(physics_thing_closed_set.find(sid) != physics_thing_closed_set.end()
                     || !thing_aabb.overlaps(sector.collide_box)) {
                 // Thing does not influence sector.
                 continue;
             }
 
             // Thing influences sector. Move to closed set.
-            physics_thing_closed_set.emplace(sector_id);
-            physics_broadphase_sector_things.emplace(sector_id, thing_id);
-            physics_broadphase_thing_influence.emplace(thing_id, sector_id);
+            physics_thing_closed_set.emplace(sid);
+            physics_broadphase_sector_things.emplace(sid, thing_id);
+            physics_broadphase_thing_influence.emplace(thing_id, sid);
 
             // Add adjoining sectors to open set.
             for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
@@ -208,12 +208,12 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
     return;
 }
 
-void physics_presenter::physics_find_sector_resting_manifolds(const physics::sphere& sphere, int, const vector<3>&,
+void physics_presenter::physics_find_sector_resting_manifolds(const physics::sphere& sphere, sector_id, const vector<3>&,
         int current_thing_id) {
     // Get list of sectors within thing influence.
     auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
     for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
-        const auto& sector = model->sectors[it->second];
+        const auto& sector = at_id(model->sectors, it->second);
 
         for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
             const auto& surface = model->surfaces[i];

@@ -65,7 +65,7 @@ void gorc::game::world::camera::camera_presenter::update(const gorc::time& time)
 
     // Calculate sector containing camera
     physics::segment_adjoin_path(physics::segment(focus_thing.position, true_desired_position), *levelmodel,
-            levelmodel->sectors[focus_thing.sector], update_path_sector_scratch);
+            at_id(levelmodel->sectors, focus_thing.sector), update_path_sector_scratch);
     cam.containing_sector = std::get<0>(update_path_sector_scratch.back());
     cam.position = true_desired_position;
 

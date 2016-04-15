@@ -49,11 +49,11 @@ void gorc::client::world::level_view::compute_visible_sectors(const box<2, int>&
     do_sector_vis(cam.containing_sector, proj_matrix, view_matrix, viewport, adj_bbox, cam.position, cam.look);
 }
 
-void gorc::client::world::level_view::do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
+void gorc::client::world::level_view::do_sector_vis(sector_id sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
         const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look) {
     sector_visited_scratch.emplace(sec_num);
 
-    const auto& sector = currentModel->sectors[sec_num];
+    const auto& sector = at_id(currentModel->sectors, sec_num);
     for(int i = 0; i < sector.surface_count; ++i) {
         const auto& surface = currentModel->surfaces[sector.first_surface + i];
 
@@ -126,7 +126,7 @@ void gorc::client::world::level_view::do_sector_vis(unsigned int sec_num, const 
 
 void gorc::client::world::level_view::record_visible_special_surfaces() {
     for(auto sec_num : sector_vis_scratch) {
-        const content::assets::level_sector& sector = currentModel->sectors[sec_num];
+        const content::assets::level_sector& sector = at_id(currentModel->sectors, sec_num);
 
         for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
             const auto& surface = currentModel->surfaces[i];
@@ -161,7 +161,7 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 
     // Sort translucent surfaces back to front.
     std::sort(translucent_surfaces_scratch.begin(), translucent_surfaces_scratch.end(),
-            [](const std::tuple<unsigned int, unsigned int, float>& a, const std::tuple<unsigned int, unsigned int, float>& b) {
+            [](const std::tuple<sector_id, unsigned int, float>& a, const std::tuple<sector_id, unsigned int, float>& b) {
         return std::get<2>(a) > std::get<2>(b);
     });
 }
@@ -188,7 +188,7 @@ void gorc::client::world::level_view::record_visible_things() {
 void gorc::client::world::level_view::draw_visible_diffuse_surfaces() {
     glDepthMask(GL_TRUE);
     for(auto sec_num : sector_vis_scratch) {
-        const content::assets::level_sector& sector = currentModel->sectors[sec_num];
+        const content::assets::level_sector& sector = at_id(currentModel->sectors, sec_num);
 
         for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
             const auto& surface = currentModel->surfaces[i];
@@ -214,7 +214,7 @@ void gorc::client::world::level_view::draw_visible_sky_surfaces(const box<2, int
                 currentModel->header.horizon_distance, view_size, currentModel->camera_model.current_computed_state.look);
 
         for(auto surf_tuple : horizon_sky_surfaces_scratch) {
-            draw_surface(std::get<1>(surf_tuple), currentModel->sectors[std::get<0>(surf_tuple)], 1.0f);
+            draw_surface(std::get<1>(surf_tuple), at_id(currentModel->sectors, std::get<0>(surf_tuple)), 1.0f);
         }
     }
 
@@ -223,7 +223,7 @@ void gorc::client::world::level_view::draw_visible_sky_surfaces(const box<2, int
                 currentModel->header.ceiling_sky_offset, currentModel->header.ceiling_sky_z);
 
         for(auto surf_tuple : ceiling_sky_surfaces_scratch) {
-            draw_surface(std::get<1>(surf_tuple), currentModel->sectors[std::get<0>(surf_tuple)], 1.0f);
+            draw_surface(std::get<1>(surf_tuple), at_id(currentModel->sectors, std::get<0>(surf_tuple)), 1.0f);
         }
     }
 }
@@ -241,7 +241,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
         else {
             glDepthMask(GL_FALSE);
             glEnable(GL_CULL_FACE);
-            draw_surface(std::get<1>(*surf_it), currentModel->sectors[std::get<0>(*surf_it)],
+            draw_surface(std::get<1>(*surf_it), at_id(currentModel->sectors, std::get<0>(*surf_it)),
                     (currentModel->surfaces[std::get<1>(*surf_it)].face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
             ++surf_it;
         }
@@ -257,7 +257,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
     glDepthMask(GL_FALSE);
     glEnable(GL_CULL_FACE);
     while(surf_it != translucent_surfaces_scratch.end()) {
-        draw_surface(std::get<1>(*surf_it), currentModel->sectors[std::get<0>(*surf_it)],
+        draw_surface(std::get<1>(*surf_it), at_id(currentModel->sectors, std::get<0>(*surf_it)),
                 (currentModel->surfaces[std::get<1>(*surf_it)].face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
         ++surf_it;
     }
@@ -302,7 +302,7 @@ void gorc::client::world::level_view::draw(const gorc::time&, const box<2, int>&
         record_visible_things();
 
         // Prepare for rendering ordinary surfaces
-        auto sector_tint = currentModel->sectors[cam.containing_sector].tint;
+        auto sector_tint = at_id(currentModel->sectors, cam.containing_sector).tint;
         sector_tint = (sector_tint * length(sector_tint)) + (currentModel->dynamic_tint * (1.0f - length(sector_tint)));
 
         set_current_shader(surfaceShader, sector_tint);
@@ -383,7 +383,7 @@ void gorc::client::world::level_view::draw_pov_model() {
     if(cam.draw_pov_model) {
         maybe_if(currentModel->camera_model.pov_model, [&](auto pov_model) {
             const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
-            const auto& current_sector = currentModel->sectors[thing.sector];
+            const auto& current_sector = at_id(currentModel->sectors, thing.sector);
             auto sector_color = make_fill_vector<3, float>(1.0f);
             maybe_if(current_sector.cmp, [&](auto cmp) {
                 sector_color = cmp->tint_color;
@@ -678,7 +678,7 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
         return;
     }
 
-    const auto& current_sector = currentModel->sectors[thing.sector];
+    const auto& current_sector = at_id(currentModel->sectors, thing.sector);
     auto sector_color = make_fill_vector<3, float>(1.0f);
     maybe_if(current_sector.cmp, [&](auto cmp) {
         sector_color = cmp->tint_color;

@@ -32,7 +32,7 @@ namespace assets {
 class thing_template {
 public:
     // General fields
-    int sector;
+    sector_id sector;
     vector<3> position;
 
     flag_set<flags::actor_flag> actor_flags;

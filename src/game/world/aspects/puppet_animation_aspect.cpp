@@ -38,7 +38,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
         for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
             bool is_underwater = false;
             for(auto &thing : cs.find_component<components::thing>(entity_id(e.thing))) {
-                auto const &cur_sector = presenter.model->sectors[thing.second.sector];
+                auto const &cur_sector = at_id(presenter.model->sectors, thing.second.sector);
                 is_underwater = cur_sector.flags & flags::sector_flag::Underwater;
             }
 

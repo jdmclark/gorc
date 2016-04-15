@@ -271,7 +271,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, content_manag
                 LOG_FATAL("unexpected end of file in sector");
             }
             if(boost::iequals(t.value, "sector")) {
-                sec.number = tok.get_number<int>();
+                sec.number = sector_id(tok.get_number<int>());
             }
             else if(boost::iequals(t.value, "flags")) {
                 sec.flags = flag_set<flags::sector_flag>(tok.get_number<uint32_t>());
@@ -548,7 +548,7 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, content_manage
             float pitch = tok.get_number<float>();
             float yaw = tok.get_number<float>();
             float roll = tok.get_number<float>();
-            int sector = tok.get_number<int>();
+            sector_id sector(tok.get_number<int>());
 
             auto base_it = lev.template_map.find(tpl_name);
             if(base_it == lev.template_map.end()) {

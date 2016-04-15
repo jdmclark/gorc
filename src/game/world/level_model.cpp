@@ -15,7 +15,7 @@ gorc::game::world::level_model::level_model(event_bus& bus, gorc::content_manage
     std::copy(level->surfaces.begin(), level->surfaces.end(), std::back_inserter(surfaces));
     for(auto& sector : sectors) {
         for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
-            surfaces[i].object_data.sector_id = sector.number;
+            surfaces[i].object_data.sector = sector.number;
             surfaces[i].object_data.surface_id = i;
         }
     }

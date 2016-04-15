@@ -72,17 +72,17 @@ private:
 
     game::world::level_presenter* currentPresenter = nullptr;
     game::world::level_model* currentModel = nullptr;
-    std::unordered_set<unsigned int> sector_vis_scratch;
-    std::unordered_set<unsigned int> sector_visited_scratch;
-    std::vector<std::tuple<unsigned int, unsigned int>> horizon_sky_surfaces_scratch;
-    std::vector<std::tuple<unsigned int, unsigned int>> ceiling_sky_surfaces_scratch;
-    std::vector<std::tuple<unsigned int, unsigned int, float>> translucent_surfaces_scratch;
+    std::unordered_set<sector_id> sector_vis_scratch;
+    std::unordered_set<sector_id> sector_visited_scratch;
+    std::vector<std::tuple<sector_id, unsigned int>> horizon_sky_surfaces_scratch;
+    std::vector<std::tuple<sector_id, unsigned int>> ceiling_sky_surfaces_scratch;
+    std::vector<std::tuple<sector_id, unsigned int, float>> translucent_surfaces_scratch;
     std::vector<std::tuple<int, float>> visible_thing_scratch;
 
     void compute_visible_sectors(const box<2, int>& view_size);
     void record_visible_special_surfaces();
     void record_visible_things();
-    void do_sector_vis(unsigned int sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
+    void do_sector_vis(sector_id sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
             const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look);
     void draw_visible_diffuse_surfaces();
     void draw_visible_sky_surfaces(const box<2, int>& screen_size, const vector<3>& sector_tint);

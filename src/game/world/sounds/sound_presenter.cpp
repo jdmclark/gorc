@@ -39,7 +39,7 @@ void sound_presenter::update(const gorc::time& time) {
     sf::Listener::setDirection(get<0>(listener_target), get<2>(listener_target), (1 - get<1>(listener_target)) / 2);
     sf::Listener::setPosition(get<0>(camera_position), get<2>(camera_position), -get<1>(camera_position));
     // TODO: Handle camera orientation (not properly implemented in SFML).
-    const auto& player_sec = levelModel->sectors[cam.containing_sector];
+    const auto& player_sec = at_id(levelModel->sectors, cam.containing_sector);
     set_ambient_sound(player_sec.ambient_sound, player_sec.ambient_sound_volume);
 
     model->ambient_music.update(time.elapsed_as_seconds());
