@@ -39,7 +39,7 @@ class level_model;
 class level_presenter : public gorc::place::presenter {
 private:
     // Scratch space
-    std::vector<std::tuple<sector_id, int>> update_path_sector_scratch;
+    std::vector<std::tuple<sector_id, surface_id>> update_path_sector_scratch;
 
     std::set<thing_id> things_to_destroy;
 

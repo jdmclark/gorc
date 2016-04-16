@@ -16,7 +16,7 @@ bool gorc::game::world::physics::point_inside_sector(const vector<3>& position, 
 }
 
 void gorc::game::world::physics::segment_adjoin_path(const segment& segment, const level_model& level,
-        const content::assets::level_sector& initial_sector, std::vector<std::tuple<sector_id, int>>& path) {
+        const content::assets::level_sector& initial_sector, std::vector<std::tuple<sector_id, surface_id>>& path) {
     path.clear();
 
     auto segment_dir = std::get<1>(segment) - std::get<0>(segment);
@@ -26,7 +26,7 @@ void gorc::game::world::physics::segment_adjoin_path(const segment& segment, con
         const auto& current_sector = at_id(level.sectors, current_sector_id);
 
         if(point_inside_sector(std::get<1>(segment), level, current_sector)) {
-            path.emplace_back(current_sector_id, -1);
+            path.emplace_back(current_sector_id, invalid_id);
             return;
         }
 
@@ -36,7 +36,7 @@ void gorc::game::world::physics::segment_adjoin_path(const segment& segment, con
             if(surf.adjoin >= 0 && dot(surf.normal, segment_dir) <= 0.0f && segment_surface_intersection(segment, *level.level,
                     surf, make_identity_matrix<4, float>())) {
                 // Object passes through this adjoin, to the adjoined sector.
-                path.emplace_back(current_sector_id, surf_id);
+                path.emplace_back(current_sector_id, surface_id(surf_id));
                 current_sector_id = surf.adjoined_sector;
                 has_continued = true;
                 break;
@@ -46,7 +46,7 @@ void gorc::game::world::physics::segment_adjoin_path(const segment& segment, con
         if(!has_continued) {
             // Object has exited current sector. Abort.
             // TODO: Print error, or recover with random walk.
-            path.emplace_back(current_sector_id, -1);
+            path.emplace_back(current_sector_id, invalid_id);
             return;
         }
     }

@@ -175,19 +175,19 @@ void gorc::game::world::level_presenter::update_thing_sector(thing_id tid, compo
     auto tid_source_type = model->get_thing_source_type(tid);
 
     // Fire messages along path.
-    int first_adjoin = std::get<1>(update_path_sector_scratch.front());
-    if(model->surfaces[first_adjoin].flags & flags::surface_flag::CogLinked) {
+    surface_id first_adjoin = std::get<1>(update_path_sector_scratch.front());
+    if(at_id(model->surfaces, first_adjoin).flags & flags::surface_flag::CogLinked) {
         model->script_model.send_to_linked(cog::message_type::crossed,
-                                           /* sender */ surface_id(first_adjoin),
-                                           /* source */ thing_id(tid),
+                                           /* sender */ first_adjoin,
+                                           /* source */ tid,
                                            tid_source_type);
     }
 
     for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
         if(at_id(model->sectors, thing.sector).flags & flags::sector_flag::CogLinked) {
             model->script_model.send_to_linked(cog::message_type::exited,
-                                               /* sender */ sector_id(thing.sector),
-                                               /* source */ thing_id(tid),
+                                               /* sender */ thing.sector,
+                                               /* source */ tid,
                                                tid_source_type);
         }
 
@@ -195,24 +195,24 @@ void gorc::game::world::level_presenter::update_thing_sector(thing_id tid, compo
         thing.sector = sec_id;
         if(at_id(model->sectors, sec_id).flags & flags::sector_flag::CogLinked) {
             model->script_model.send_to_linked(cog::message_type::entered,
-                                               /* sender */ sector_id(sec_id),
-                                               /* source */ thing_id(tid),
+                                               /* sender */ sec_id,
+                                               /* source */ tid,
                                                tid_source_type);
         }
 
-        int surf_id = std::get<1>(update_path_sector_scratch[i]);
-        if(model->surfaces[surf_id].flags & flags::surface_flag::CogLinked) {
+        surface_id surf_id = std::get<1>(update_path_sector_scratch[i]);
+        if(at_id(model->surfaces, surf_id).flags & flags::surface_flag::CogLinked) {
             model->script_model.send_to_linked(cog::message_type::crossed,
-                                               /* sender */ surface_id(surf_id),
-                                               /* source */ thing_id(tid),
+                                               /* sender */ surf_id,
+                                               /* source */ tid,
                                                tid_source_type);
         }
     }
 
     if(at_id(model->sectors, thing.sector).flags & flags::sector_flag::CogLinked) {
         model->script_model.send_to_linked(cog::message_type::exited,
-                                           /* sender */ sector_id(thing.sector),
-                                           /* source */ thing_id(tid),
+                                           /* sender */ thing.sector,
+                                           /* source */ tid,
                                            tid_source_type);
     }
 
@@ -220,8 +220,8 @@ void gorc::game::world::level_presenter::update_thing_sector(thing_id tid, compo
     thing.sector = last_sector;
     if(at_id(model->sectors, last_sector).flags & flags::sector_flag::CogLinked) {
         model->script_model.send_to_linked(cog::message_type::entered,
-                                           /* sender */ sector_id(last_sector),
-                                           /* source */ thing_id(tid),
+                                           /* sender */ last_sector,
+                                           /* source */ tid,
                                            tid_source_type);
     }
 }
