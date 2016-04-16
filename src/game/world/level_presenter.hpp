@@ -135,14 +135,14 @@ public:
     void set_sector_tint(sector_id, const vector<3>& color);
 
     // surface verbs
-    void clear_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags);
-    flags::geometry_mode get_face_geo_mode(int surface);
-    vector<3> get_surface_center(int surface);
-    sector_id get_surface_sector(int surface);
-    void set_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags);
-    void set_face_geo_mode(int surface, flags::geometry_mode mode);
-    void set_face_type(int surface, flag_set<flags::face_flag> flags);
-    void set_surface_flags(int surface, flag_set<flags::surface_flag> flags);
+    void clear_adjoin_flags(surface_id surface, flag_set<flags::adjoin_flag> flags);
+    flags::geometry_mode get_face_geo_mode(surface_id surface);
+    vector<3> get_surface_center(surface_id surface);
+    sector_id get_surface_sector(surface_id surface);
+    void set_adjoin_flags(surface_id surface, flag_set<flags::adjoin_flag> flags);
+    void set_face_geo_mode(surface_id surface, flags::geometry_mode mode);
+    void set_face_type(surface_id surface, flag_set<flags::face_flag> flags);
+    void set_surface_flags(surface_id surface, flag_set<flags::surface_flag> flags);
 
     // System verbs
     int load_sound(const char* sound);

@@ -636,59 +636,50 @@ void gorc::game::world::level_presenter::set_sector_tint(sector_id sid, const ve
 }
 
 // surface verbs
-void gorc::game::world::level_presenter::clear_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags) {
-    content::assets::level_surface& surf = model->surfaces[surface];
+void gorc::game::world::level_presenter::clear_adjoin_flags(surface_id surface, flag_set<flags::adjoin_flag> flags) {
+    content::assets::level_surface& surf = at_id(model->surfaces, surface);
     if(surf.adjoin >= 0) {
         content::assets::level_adjoin& adj = model->adjoins[surf.adjoin];
         adj.flags -= flags;
     }
 }
 
-gorc::flags::geometry_mode gorc::game::world::level_presenter::get_face_geo_mode(int surface) {
-    return model->surfaces[surface].geometry_mode;
+gorc::flags::geometry_mode gorc::game::world::level_presenter::get_face_geo_mode(surface_id surface) {
+    return at_id(model->surfaces, surface).geometry_mode;
 }
 
-gorc::vector<3> gorc::game::world::level_presenter::get_surface_center(int surface) {
+gorc::vector<3> gorc::game::world::level_presenter::get_surface_center(surface_id surface) {
     auto vec = make_zero_vector<3, float>();
-    for(const auto& vx : model->level->surfaces[surface].vertices) {
+    for(const auto& vx : at_id(model->level->surfaces, surface).vertices) {
         vec += model->level->vertices[std::get<0>(vx)];
     }
 
-    vec = vec / static_cast<float>(model->level->surfaces[surface].vertices.size());
+    vec = vec / static_cast<float>(at_id(model->level->surfaces, surface).vertices.size());
     return vec;
 }
 
-gorc::sector_id gorc::game::world::level_presenter::get_surface_sector(int surface) {
-    for(const auto& sec : model->sectors) {
-        if(surface >= sec.first_surface && surface < (sec.first_surface + sec.surface_count)) {
-            return sec.number;
-        }
-    }
-
-    return invalid_id;
+gorc::sector_id gorc::game::world::level_presenter::get_surface_sector(surface_id surface) {
+    return at_id(model->surfaces, surface).get_object_data().sector;
 }
 
-void gorc::game::world::level_presenter::set_adjoin_flags(int surface, flag_set<flags::adjoin_flag> flags) {
-    content::assets::level_surface& surf = model->surfaces[surface];
+void gorc::game::world::level_presenter::set_adjoin_flags(surface_id surface, flag_set<flags::adjoin_flag> flags) {
+    content::assets::level_surface& surf = at_id(model->surfaces, surface);
     if(surf.adjoin >= 0) {
         content::assets::level_adjoin& adj = model->adjoins[surf.adjoin];
         adj.flags += flags;
     }
 }
 
-void gorc::game::world::level_presenter::set_face_geo_mode(int surface, flags::geometry_mode geo_mode) {
-    if(surface >= 0) {
-        model->surfaces[surface].geometry_mode = geo_mode;
-    }
+void gorc::game::world::level_presenter::set_face_geo_mode(surface_id surface, flags::geometry_mode geo_mode) {
+    at_id(model->surfaces, surface).geometry_mode = geo_mode;
 }
 
-void gorc::game::world::level_presenter::set_face_type(int surface, flag_set<flags::face_flag> face_flags) {
-    model->surfaces[surface].face_type_flags += face_flags;
+void gorc::game::world::level_presenter::set_face_type(surface_id surface, flag_set<flags::face_flag> face_flags) {
+    at_id(model->surfaces, surface).face_type_flags += face_flags;
 }
 
-void gorc::game::world::level_presenter::set_surface_flags(int surface, flag_set<flags::surface_flag> flags) {
-    content::assets::level_surface& surf = model->surfaces[surface];
-    surf.flags += flags;
+void gorc::game::world::level_presenter::set_surface_flags(surface_id surface, flag_set<flags::surface_flag> flags) {
+    at_id(model->surfaces, surface).flags += flags;
 }
 
 // System verbs
@@ -1250,35 +1241,35 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
     });
 
     // surface verbs
-    verbs.add_verb("clearadjoinflags", [&components](int surface, int flags) {
+    verbs.add_safe_verb("clearadjoinflags", cog::value(), [&components](surface_id surface, int flags) {
         components.current_level_presenter->clear_adjoin_flags(surface, flag_set<flags::adjoin_flag>(flags));
     });
 
-    verbs.add_verb("getfacegeomode", [&components](int surface) {
+    verbs.add_safe_verb("getfacegeomode", cog::value(), [&components](surface_id surface) {
         return static_cast<int>(components.current_level_presenter->get_face_geo_mode(surface));
     });
 
-    verbs.add_verb("getsurfacecenter", [&components](int surface) {
+    verbs.add_safe_verb("getsurfacecenter", make_zero_vector<3, float>(), [&components](surface_id surface) {
         return components.current_level_presenter->get_surface_center(surface);
     });
 
-    verbs.add_verb("getsurfacesector", [&components](int surface) {
+    verbs.add_safe_verb("getsurfacesector", sector_id(invalid_id), [&components](surface_id surface) {
         return components.current_level_presenter->get_surface_sector(surface);
     });
 
-    verbs.add_verb("setadjoinflags", [&components](int surface, int flags) {
+    verbs.add_safe_verb("setadjoinflags", cog::value(), [&components](surface_id surface, int flags) {
         components.current_level_presenter->set_adjoin_flags(surface, flag_set<flags::adjoin_flag>(flags));
     });
 
-    verbs.add_verb("setfacegeomode", [&components](int surface, int mode) {
+    verbs.add_safe_verb("setfacegeomode", cog::value(), [&components](surface_id surface, int mode) {
         components.current_level_presenter->set_face_geo_mode(surface, static_cast<flags::geometry_mode>(mode));
     });
 
-    verbs.add_verb("setfacetype", [&components](int surface, int flags) {
+    verbs.add_safe_verb("setfacetype", cog::value(), [&components](surface_id surface, int flags) {
         components.current_level_presenter->set_face_type(surface, flag_set<flags::face_flag>(flags));
     });
 
-    verbs.add_verb("setsurfaceflags", [&components](int surface, int flags) {
+    verbs.add_safe_verb("setsurfaceflags", cog::value(), [&components](surface_id surface, int flags) {
         components.current_level_presenter->set_surface_flags(surface, flag_set<flags::surface_flag>(flags));
     });
 
@@ -1286,7 +1277,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         // TODO: Not implemented for now. Architecturally inconvenient.
     });
 
-    verbs.add_verb("surfacecenter", [&components](int surface) {
+    verbs.add_safe_verb("surfacecenter", make_zero_vector<3, float>(), [&components](surface_id surface) {
         return components.current_level_presenter->get_surface_center(surface);
     });
 
