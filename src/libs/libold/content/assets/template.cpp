@@ -16,11 +16,11 @@ public:
     text::tokenizer& tok;
     content_manager& content;
     service_registry const &services;
-    const std::unordered_map<std::string, int>& templates;
+    const std::unordered_map<std::string, thing_template_id>& templates;
 
     template_parser_args(text::tokenizer& tok, content_manager& content,
             service_registry const &services,
-            const std::unordered_map<std::string, int>& templates) :
+            const std::unordered_map<std::string, thing_template_id>& templates) :
                 tok(tok), content(content), services(services),
                 templates(templates) {
         return;
@@ -131,7 +131,7 @@ void tpl_quaternion_mapper(quaternion<float>& value, text::tokenizer& tok) {
     value = make_euler(v);
 }
 
-void tpl_template_mapper(int& value, int, const std::unordered_map<std::string, int>& templates,
+void tpl_template_mapper(maybe<thing_template_id> &value, int, const std::unordered_map<std::string, thing_template_id>& templates,
         text::tokenizer& tok) {
     std::string tpl_name = tok.get_space_delimited_string();
     std::transform(tpl_name.begin(), tpl_name.end(), tpl_name.begin(), tolower);
@@ -142,7 +142,7 @@ void tpl_template_mapper(int& value, int, const std::unordered_map<std::string, 
                               tok.get_internal_token_location().first_line,
                               tok.get_internal_token_location().first_col);
         LOG_WARNING("expected template name");
-        value = 0;
+        value = nothing;
     }
     else {
         value = tpl_it->second;
@@ -247,7 +247,7 @@ static const std::unordered_map<std::string, TemplateParameterParser> TemplatePa
 }
 
 void gorc::content::assets::thing_template::parse_args(text::tokenizer& tok, content_manager& manager, service_registry const &services,
-        const std::unordered_map<std::string, int>& templates) {
+        const std::unordered_map<std::string, thing_template_id>& templates) {
     template_parser_args tp_args(tok, manager, services, templates);
 
     bool oldReportEOL = tok.get_report_eol();

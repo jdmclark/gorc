@@ -29,4 +29,9 @@ public:
 
 }
 }
+
+class content_manager;
+
+asset_ref<content::assets::model> get_asset(content_manager &, model_id);
+
 }

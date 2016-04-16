@@ -465,7 +465,7 @@ void ParseTemplatesSection(assets::level& lev, text::tokenizer& tok, content_man
     tok.assert_identifier("templates");
 
     // Add 'none' template to list with default parameters.
-    lev.template_map.insert(std::make_pair("none", lev.templates.size()));
+    lev.template_map.insert(std::make_pair("none", thing_template_id(lev.templates.size())));
     lev.templates.push_back(assets::thing_template());
 
     size_t num = tok.get_number<size_t>();
@@ -493,7 +493,7 @@ void ParseTemplatesSection(assets::level& lev, text::tokenizer& tok, content_man
                 continue;
             }
 
-            auto succ_pair = lev.template_map.emplace(tpl_name, lev.templates.size());
+            auto succ_pair = lev.template_map.emplace(tpl_name, thing_template_id(lev.templates.size()));
             if(!succ_pair.second) {
                 diagnostic_context dc(nullptr,
                                       tok.get_internal_token_location().first_line,
@@ -501,7 +501,7 @@ void ParseTemplatesSection(assets::level& lev, text::tokenizer& tok, content_man
                 LOG_WARNING(format("template %s redefinition") % tpl_name);
             }
 
-            lev.templates.push_back(lev.templates[base_it->second]);
+            lev.templates.push_back(at_id(lev.templates, base_it->second));
             lev.templates.back().parse_args(tok, manager, services, lev.template_map);
         }
         else {
@@ -560,7 +560,7 @@ void ParseThingsSection(assets::level& lev, text::tokenizer& tok, content_manage
                 continue;
             }
 
-            lev.things.emplace_back(lev.templates[base_it->second]);
+            lev.things.emplace_back(at_id(lev.templates, base_it->second));
             lev.things.back().sector = sector;
             lev.things.back().position = make_vector(x, y, z);
             lev.things.back().orient = make_euler(make_vector(pitch, yaw, roll));

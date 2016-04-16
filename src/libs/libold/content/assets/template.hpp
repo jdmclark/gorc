@@ -40,13 +40,13 @@ public:
     flag_set<flags::attach_flag> attach_flags;
     maybe<asset_ref<cog::script>> cog;
     flags::collide_type collide = flags::collide_type::none;
-    int create_thing = 0;
+    maybe<thing_template_id> create_thing = nothing;
     float damage = 0.0f;
     flag_set<flags::damage_flag> damage_class;
-    int explode = 0;
+    maybe<thing_template_id> explode = nothing;
     vector<3> eye_offset;
     flag_set<flags::thing_flag> flags;
-    int flesh_hit = 0;
+    maybe<thing_template_id> flesh_hit = nothing;
     std::vector<std::tuple<vector<3>, vector<3>>> frames;
     float head_pitch = 0.0f;
     float health = 100.0f;
@@ -82,7 +82,7 @@ public:
     vector<3> vel;
 
     void parse_args(text::tokenizer& tok, content_manager& manager, service_registry const &services,
-            const std::unordered_map<std::string, int>& templates);
+            const std::unordered_map<std::string, thing_template_id>& templates);
 };
 
 }

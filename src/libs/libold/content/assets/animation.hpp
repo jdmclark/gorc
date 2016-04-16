@@ -9,6 +9,9 @@
 #include <vector>
 
 namespace gorc {
+
+class content_manager;
+
 namespace content {
 namespace assets {
 
@@ -26,4 +29,7 @@ public:
 
 }
 }
+
+asset_ref<content::assets::animation> get_asset(content_manager &cm, keyframe_id);
+
 }

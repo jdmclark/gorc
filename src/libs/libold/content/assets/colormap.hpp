@@ -39,4 +39,9 @@ public:
 
 }
 }
+
+class content_manager;
+
+asset_ref<content::assets::colormap> get_asset(content_manager &cm, colormap_id);
+
 }

@@ -30,10 +30,14 @@ void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id)
 
     if(touched_thing.type == flags::thing_type::Actor || touched_thing.type == flags::thing_type::Player) {
         if(proj_flags & flags::weapon_flag::explodes_on_thing) {
-            presenter.create_thing_at_thing(projectile.explode, thing_id);
+            maybe_if(projectile.explode, [&](thing_template_id explode) {
+                    presenter.create_thing_at_thing(explode, thing_id);
+                });
         }
         else {
-            presenter.create_thing_at_thing(projectile.flesh_hit, thing_id);
+            maybe_if(projectile.flesh_hit, [&](thing_template_id flesh_hit) {
+                    presenter.create_thing_at_thing(flesh_hit, thing_id);
+                });
         }
 
         presenter.damage_thing(touched_thing_id, projectile.damage, flag_set<flags::damage_flag>(projectile.damage_class), thing_id);
@@ -41,10 +45,14 @@ void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id)
     }
     else if(touched_thing.type != flags::thing_type::Corpse && touched_thing.type != flags::thing_type::Item) {
         if(proj_flags & flags::weapon_flag::explodes_on_surface) {
-            presenter.create_thing_at_thing(projectile.explode, thing_id);
+            maybe_if(projectile.explode, [&](thing_template_id explode) {
+                    presenter.create_thing_at_thing(explode, thing_id);
+                });
         }
         else {
-            presenter.create_thing_at_thing(projectile.create_thing, thing_id);
+            maybe_if(projectile.create_thing, [&](thing_template_id create_thing) {
+                    presenter.create_thing_at_thing(create_thing, thing_id);
+                });
         }
 
         presenter.damage_thing(touched_thing_id, projectile.damage, flag_set<flags::damage_flag>(projectile.damage_class), thing_id);
@@ -74,10 +82,14 @@ void weapon_controller_aspect::touched_surface(int tid, int touched_surface_id) 
     }
 
     if(proj_flags & flags::weapon_flag::explodes_on_surface) {
-        presenter.create_thing_at_thing(projectile.explode, tid);
+        maybe_if(projectile.explode, [&](thing_template_id explode) {
+                presenter.create_thing_at_thing(explode, tid);
+            });
     }
     else {
-        presenter.create_thing_at_thing(projectile.create_thing, tid);
+        maybe_if(projectile.create_thing, [&](thing_template_id create_thing) {
+                presenter.create_thing_at_thing(create_thing, tid);
+            });
     }
 
     presenter.model->script_model.send_to_linked(

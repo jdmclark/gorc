@@ -35,6 +35,8 @@
 #include "game/world/events/armed_mode_changed.hpp"
 #include "game/world/events/class_sound.hpp"
 
+#include "libold/content/assets/material.hpp"
+
 gorc::game::world::level_presenter::level_presenter(level_state& components, const level_place& place)
     : components(components), place(place), contentmanager(place.contentmanager) {
     physics_presenter = std::make_unique<physics::physics_presenter>(*this);
@@ -532,19 +534,19 @@ void gorc::game::world::level_presenter::jk_enable_saber(int thing_id, float dam
 }
 
 void gorc::game::world::level_presenter::jk_set_saber_info(int thing_id,
-        int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
-        int wall, int blood, int saber) {
+        material_id side_mat, material_id tip_mat, float base_rad, float tip_rad, float length,
+        thing_template_id wall, thing_template_id blood, thing_template_id saber) {
     auto& thing = model->get_thing(thing_id);
 
-    thing.saber_side_mat = contentmanager->get_asset<content::assets::material>(asset_id(side_mat));
-    thing.saber_tip_mat = contentmanager->get_asset<content::assets::material>(asset_id(tip_mat));
+    thing.saber_side_mat = get_asset(*contentmanager, side_mat);
+    thing.saber_tip_mat = get_asset(*contentmanager, tip_mat);
     thing.saber_base_rad = base_rad;
     thing.saber_tip_rad = tip_rad;
     thing.saber_length = length;
 
-    thing.saber_wall = (wall >= 0) ? make_maybe(&model->level->templates[wall]) : nothing;
-    thing.saber_blood = (blood >= 0) ? make_maybe(&model->level->templates[blood]) : nothing;
-    thing.saber_saber = (saber >= 0) ? make_maybe(&model->level->templates[saber]) : nothing;
+    thing.saber_wall = (wall.is_valid()) ? make_maybe(&at_id(model->level->templates, wall)) : nothing;
+    thing.saber_blood = (blood.is_valid()) ? make_maybe(&at_id(model->level->templates, blood)) : nothing;
+    thing.saber_saber = (saber.is_valid()) ? make_maybe(&at_id(model->level->templates, saber)) : nothing;
 }
 
 void gorc::game::world::level_presenter::take_item(int thing_id, int player_id) {
@@ -587,9 +589,9 @@ int gorc::game::world::level_presenter::next_thing_in_sector(int thing_id) {
     return -1;
 }
 
-void gorc::game::world::level_presenter::sector_sound(sector_id sid, int sound, float volume) {
+void gorc::game::world::level_presenter::sector_sound(sector_id sid, sound_id sound, float volume) {
     auto& sector = at_id(model->sectors, sid);
-    sector.ambient_sound = contentmanager->get_asset<content::assets::sound>(asset_id(sound));
+    sector.ambient_sound = get_asset(*contentmanager, sound);
     sector.ambient_sound_volume = volume;
 }
 
@@ -610,9 +612,10 @@ void gorc::game::world::level_presenter::set_sector_adjoins(sector_id sid, bool 
     }
 }
 
-void gorc::game::world::level_presenter::set_sector_colormap(sector_id sid, int colormap) {
-    auto& sector = at_id(model->sectors, sid);
-    sector.cmp = place.contentmanager->get_asset<content::assets::colormap>(asset_id(colormap));
+void gorc::game::world::level_presenter::set_sector_colormap(sector_id sid, colormap_id colormap) {
+    at_id(model->sectors, sid).cmp = colormap.is_valid() ?
+                                     make_maybe(get_asset(*place.contentmanager, colormap)) :
+                                     nothing;
 }
 
 void gorc::game::world::level_presenter::set_sector_flags(sector_id sid, flag_set<flags::sector_flag> flags) {
@@ -683,8 +686,8 @@ void gorc::game::world::level_presenter::set_surface_flags(surface_id surface, f
 }
 
 // System verbs
-int gorc::game::world::level_presenter::load_sound(const char* fn) {
-    return static_cast<int>(place.contentmanager->load_id<content::assets::sound>(fn));
+gorc::sound_id gorc::game::world::level_presenter::load_sound(const char* fn) {
+    return sound_id(static_cast<int>(place.contentmanager->load_id<content::assets::sound>(fn)));
 }
 
 // thing action verbs
@@ -713,14 +716,9 @@ int gorc::game::world::level_presenter::create_thing(const content::assets::thin
     return static_cast<int>(new_thing_id);
 }
 
-int gorc::game::world::level_presenter::create_thing(int tpl_id, sector_id sector_num,
+int gorc::game::world::level_presenter::create_thing(thing_template_id tpl_id, sector_id sector_num,
         const vector<3>& pos, const quaternion<float>& orientation) {
-    if(tpl_id < 0) {
-        // TODO: thing_template not found. report error.
-        return -1;
-    }
-
-    return create_thing(model->level->templates[tpl_id], sector_num, pos, orientation);
+    return create_thing(at_id(model->level->templates, tpl_id), sector_num, pos, orientation);
 }
 
 int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name, sector_id sector_num,
@@ -737,7 +735,7 @@ int gorc::game::world::level_presenter::create_thing(const std::string& tpl_name
     }
 }
 
-int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, int tpl_id, sound_id fire_sound_id, int puppet_submode_id,
+int gorc::game::world::level_presenter::fire_projectile(int parent_thing_id, thing_template_id tpl_id, sound_id fire_sound_id, int puppet_submode_id,
         const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
     const auto& parent_thing = model->get_thing(parent_thing_id);
 
@@ -788,12 +786,7 @@ void gorc::game::world::level_presenter::attach_thing_to_thing(int thing_id, int
     thing.prev_attached_thing_position = base.position;
 }
 
-int gorc::game::world::level_presenter::create_thing_at_thing(int tpl_id, int thing_id) {
-    if(tpl_id < 0) {
-        // TODO: No template. Report error.
-        return -1;
-    }
-
+int gorc::game::world::level_presenter::create_thing_at_thing(thing_template_id tpl_id, int thing_id) {
     components::thing& referencedThing = model->get_thing(thing_id);
     int new_thing_id = create_thing(tpl_id, referencedThing.sector, referencedThing.position, referencedThing.orient);
     components::thing& new_thing = model->get_thing(new_thing_id);
@@ -982,15 +975,10 @@ void gorc::game::world::level_presenter::stop_thing(int thing) {
 
 // weapon verbs
 
-void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, int mesh) {
-    auto& thing = model->get_thing(player);
-
-    if(mesh >= 0) {
-        thing.weapon_mesh = contentmanager->get_asset<content::assets::model>(asset_id(mesh));
-    }
-    else {
-        thing.weapon_mesh = nothing;
-    }
+void gorc::game::world::level_presenter::jk_set_weapon_mesh(int player, model_id mesh) {
+    model->get_thing(player).weapon_mesh = mesh.is_valid() ?
+                                           make_maybe(get_asset(*contentmanager, mesh)) :
+                                           nothing;
 }
 
 void gorc::game::world::level_presenter::set_armed_mode(int player, flags::armed_mode mode) {
@@ -1117,9 +1105,9 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         components.current_level_presenter->jk_enable_saber(thing_id, damage, collide_length, unknown);
     });
 
-    verbs.add_verb("jksetsaberinfo", [&components](int thing_id,
-            int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
-            int wall, int blood, int saber) {
+    verbs.add_safe_verb("jksetsaberinfo", cog::value(), [&components](int thing_id,
+            material_id side_mat, material_id tip_mat, float base_rad, float tip_rad, float length,
+            thing_template_id wall, thing_template_id blood, thing_template_id saber) {
         components.current_level_presenter->jk_set_saber_info(thing_id, side_mat, tip_mat,
                 base_rad, tip_rad, length, wall, blood, saber);
     });
@@ -1204,7 +1192,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         components.current_level_presenter->set_sector_light(sid, light, delay);
     });
 
-    verbs.add_safe_verb("sectorsound", cog::value(), [&components](sector_id sid, int sound, float volume) {
+    verbs.add_safe_verb("sectorsound", cog::value(), [&components](sector_id sid, sound_id sound, float volume) {
         components.current_level_presenter->sector_sound(sid, sound, volume);
     });
 
@@ -1212,7 +1200,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         components.current_level_presenter->set_sector_thrust(sid, normalize(thrust_vec) * thrust_speed);
     });
 
-    verbs.add_safe_verb("setcolormap", cog::value(), [&components](sector_id sid, int colormap) {
+    verbs.add_safe_verb("setcolormap", cog::value(), [&components](sector_id sid, colormap_id colormap) {
         components.current_level_presenter->set_sector_colormap(sid, colormap);
     });
 
@@ -1220,7 +1208,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         components.current_level_presenter->set_sector_adjoins(sid, state);
     });
 
-    verbs.add_safe_verb("setsectorcolormap", cog::value(), [&components](sector_id sid, int colormap) {
+    verbs.add_safe_verb("setsectorcolormap", cog::value(), [&components](sector_id sid, colormap_id colormap) {
         components.current_level_presenter->set_sector_colormap(sid, colormap);
     });
 
@@ -1291,15 +1279,15 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         components.current_level_presenter->attach_thing_to_thing(attach_thing, base_thing);
     });
 
-    verbs.add_verb("creatething", [&components](int tpl_id, int thing_pos) {
+    verbs.add_safe_verb("creatething", thing_id(invalid_id), [&components](thing_template_id tpl_id, int thing_pos) {
         return components.current_level_presenter->create_thing_at_thing(tpl_id, thing_pos);
     });
 
-    verbs.add_safe_verb("createthingatpos", thing_id(invalid_id), [&components](int tpl_id, sector_id sid, vector<3> pos, vector<3> orient) {
+    verbs.add_safe_verb("createthingatpos", thing_id(invalid_id), [&components](thing_template_id tpl_id, sector_id sid, vector<3> pos, vector<3> orient) {
         return components.current_level_presenter->create_thing(tpl_id, sid, pos, make_euler(orient));
     });
 
-    verbs.add_verb("fireprojectile", [&components](int parent_thing_id, int tpl_id, sound_id snd_id, int submode_id,
+    verbs.add_safe_verb("fireprojectile", thing_id(invalid_id), [&components](int parent_thing_id, thing_template_id tpl_id, sound_id snd_id, int submode_id,
             vector<3> offset_vec, vector<3> error_vec, float extra, int proj_flags, float aa_fovx, float aa_fovz) {
         return components.current_level_presenter->fire_projectile(parent_thing_id, tpl_id, snd_id, submode_id,
                 offset_vec, error_vec, extra, proj_flags, aa_fovx, aa_fovz);
@@ -1428,7 +1416,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
     });
 
     // weapon verbs
-    verbs.add_verb("jksetweaponmesh", [&components](int thing_id, int mesh_id) {
+    verbs.add_safe_verb("jksetweaponmesh", cog::value(), [&components](int thing_id, model_id mesh_id) {
         components.current_level_presenter->jk_set_weapon_mesh(thing_id, mesh_id);
     });
 

@@ -114,8 +114,8 @@ public:
     // Misc verbs
     void jk_disable_saber(int thing_id);
     void jk_enable_saber(int thing_id, float damage, float collide_length, float unknown);
-    void jk_set_saber_info(int thing_id, int side_mat, int tip_mat, float base_rad, float tip_rad, float length,
-            int wall, int blood, int saber);
+    void jk_set_saber_info(int thing_id, material_id side_mat, material_id tip_mat, float base_rad, float tip_rad, float length,
+            thing_template_id wall, thing_template_id blood, thing_template_id saber);
     void take_item(int thing_id, int player_id);
 
     // Player verbs
@@ -126,9 +126,9 @@ public:
     int first_thing_in_sector(sector_id);
     flag_set<flags::sector_flag> get_sector_flags(sector_id);
     int next_thing_in_sector(int thing_id);
-    void sector_sound(sector_id, int sound, float volume);
+    void sector_sound(sector_id, sound_id sound, float volume);
     void set_sector_adjoins(sector_id, bool state);
-    void set_sector_colormap(sector_id, int colormap);
+    void set_sector_colormap(sector_id, colormap_id colormap);
     void set_sector_flags(sector_id, flag_set<flags::sector_flag> flags);
     void set_sector_light(sector_id, float value, float delay);
     void set_sector_thrust(sector_id, const vector<3>& thrust);
@@ -145,18 +145,18 @@ public:
     void set_surface_flags(surface_id surface, flag_set<flags::surface_flag> flags);
 
     // System verbs
-    int load_sound(const char* sound);
+    sound_id load_sound(const char* sound);
 
     // thing action verbs
     int create_thing(const content::assets::thing_template& tpl, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
     int create_thing(const std::string& tpl_name, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
-    int create_thing(int tpl_id, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
+    int create_thing(thing_template_id tpl_id, sector_id sector_num, const vector<3>& pos, const quaternion<float>& orientation);
 
-    int fire_projectile(int parent_thing_id, int tpl_id, sound_id fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
+    int fire_projectile(int parent_thing_id, thing_template_id tpl_id, sound_id fire_sound_id, int puppet_submode_id, const vector<3>& offset_vec, const vector<3>& err_vec,
             float extra, int projectile_flags, float autoaim_fovx, float autoaim_fovz);
 
     void attach_thing_to_thing(int thing_id, int base_id);
-    int create_thing_at_thing(int tpl_id, int thing_id);
+    int create_thing_at_thing(thing_template_id tpl_id, int thing_id);
     float damage_thing(int thing_id, float damage, flag_set<flags::damage_flag> flags, int damager_id);
     void destroy_thing(int thing_id);
     void real_destroy_thing(int thing_id);
@@ -196,7 +196,7 @@ public:
     void stop_thing(int thing);
 
     // weapon verbs
-    void jk_set_weapon_mesh(int player, int model);
+    void jk_set_weapon_mesh(int player, model_id model);
     void set_armed_mode(int player, flags::armed_mode mode);
     flags::puppet_mode_type get_major_mode(int player);
 

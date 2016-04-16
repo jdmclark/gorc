@@ -18,4 +18,8 @@ public:
 
 }
 }
+
+class content_manager;
+asset_ref<content::assets::material> get_asset(content_manager &cm, material_id);
+
 }

@@ -40,7 +40,7 @@ public:
     std::vector<level_sector> sectors;
 
     std::vector<thing_template> templates;
-    std::unordered_map<std::string, int> template_map;
+    std::unordered_map<std::string, thing_template_id> template_map;
     std::vector<thing_template> things;
 };
 
