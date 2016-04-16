@@ -342,6 +342,13 @@ void gorc::cog::executor::send_to_linked(message_type t,
             continue;
         }
 
+        diagnostic_context dc(inst->cog->filename.c_str());
+        LOG_DEBUG(format("instance %d received message %s from sender %s due to source %s") %
+                  static_cast<int>(link.second.instance_id) %
+                  as_string(t) %
+                  as_string(sender) %
+                  as_string(source));
+
         continuation cc(call_stack_frame(link.second.instance_id,
                                          addr.get_value(),
                                          sender,

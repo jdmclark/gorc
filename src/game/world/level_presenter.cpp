@@ -94,6 +94,7 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
 
 void gorc::game::world::level_presenter::initialize_world() {
     // Create COG script instances.
+    LOG_DEBUG("creating level cog instances");
     for(auto const &cog : model->level->cogs) {
         maybe_if_else(std::get<0>(cog), [&](auto script) {
                 model->script_model.create_instance(script, std::get<1>(cog));
@@ -104,6 +105,7 @@ void gorc::game::world::level_presenter::initialize_world() {
     }
 
     // Create bin script instances.
+    LOG_DEBUG("creating inventory cog instances");
     for(const auto& bin_tuple : *model->inventory_model.base_inventory) {
         const auto& bin = std::get<1>(bin_tuple);
 
@@ -132,6 +134,37 @@ void gorc::game::world::level_presenter::initialize_world() {
     // Set camera focus to current local player thing.
     camera_presenter->set_camera_focus(0, model->local_player_thing_id);
     camera_presenter->set_camera_focus(1, model->local_player_thing_id);
+
+    // Set coglinked flag on bound objects
+    for(auto const &linkage : model->script_model.get_linkages()) {
+        auto senderref = linkage.first;
+        sector_id sec_id = senderref;
+        surface_id surf_id = senderref;
+        thing_id tid = senderref;
+
+        switch(senderref.get_type()) {
+        case cog::value_type::thing:
+            if(tid.is_valid()) {
+                model->get_thing(tid).flags += flags::thing_flag::CogLinked;
+            }
+            break;
+
+        case cog::value_type::sector:
+            if(sec_id.is_valid()) {
+                at_id(model->sectors, sec_id).flags += flags::sector_flag::CogLinked;
+            }
+            break;
+
+        case cog::value_type::surface:
+            if(surf_id.is_valid()) {
+                at_id(model->surfaces, surf_id).flags += flags::surface_flag::CogLinked;
+            }
+            break;
+
+        default:
+            continue;
+        }
+    }
 }
 
 void gorc::game::world::level_presenter::update(const gorc::time& time) {

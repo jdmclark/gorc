@@ -14,6 +14,7 @@
 #include "content/asset_ref.hpp"
 #include "io/binary_input_stream.hpp"
 #include "io/binary_output_stream.hpp"
+#include "utility/range.hpp"
 #include <vector>
 #include <memory>
 #include <map>
@@ -126,6 +127,11 @@ namespace gorc {
             cog_id get_master_cog() const;
 
             void update(time_delta dt);
+
+            inline auto get_linkages() const
+            {
+                return make_range(linkages);
+            }
         };
 
     }
