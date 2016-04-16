@@ -48,11 +48,11 @@ void gorc::game::world::camera::camera_presenter::update(const gorc::time& time)
     // Cast offset vector into world to detect collisions.
     maybe<physics::contact> contact;
     contact = presenter.physics_presenter->thing_segment_query(selected_camera.focus, true_offset,
-            [&](int thing_id) {
-                auto t = presenter.model->get_thing(thing_id).type;
+            [&](thing_id tid) {
+                auto t = presenter.model->get_thing(tid).type;
                 return t == flags::thing_type::cog;
             },
-            [&](int surf_id) {
+            [&](surface_id surf_id) {
                 return presenter.physics_presenter->surface_needs_collision_response(selected_camera.focus, surf_id);
             },
             contact);
@@ -74,7 +74,7 @@ void gorc::game::world::camera::camera_presenter::update(const gorc::time& time)
     cam.up = focus_thing_orient.transform(make_vector(0.0f, 0.0f, 1.0f));
 
     if(selected_camera.draw_focus) {
-        cam.focus_not_drawn_thing = -1;
+        cam.focus_not_drawn_thing = invalid_id;
     }
     else {
         cam.focus_not_drawn_thing = selected_camera.focus;
@@ -111,11 +111,11 @@ int gorc::game::world::camera::camera_presenter::get_current_camera() {
     return model->current_camera;
 }
 
-int gorc::game::world::camera::camera_presenter::get_primary_focus(int camera_id) {
+gorc::thing_id gorc::game::world::camera::camera_presenter::get_primary_focus(int camera_id) {
     return model->cameras[camera_id].focus;
 }
 
-void gorc::game::world::camera::camera_presenter::set_camera_focus(int camera_id, int focus_object_id) {
+void gorc::game::world::camera::camera_presenter::set_camera_focus(int camera_id, thing_id focus_object_id) {
     model->cameras[camera_id].focus = focus_object_id;
 }
 
@@ -135,10 +135,10 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
     internal_cam.angle_reset_speed = ang_reset_speed;
 }
 
-void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int, int model_id) {
+void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id, model_id mid) {
     // TODO: Handle player
-    if(model_id >= 0) {
-        model->pov_model = presenter.contentmanager->get_asset<content::assets::model>(asset_id(model_id));
+    if(mid.is_valid()) {
+        model->pov_model = get_asset(*presenter.contentmanager, mid);
     }
     else {
         model->pov_model = nothing;
@@ -147,18 +147,18 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(int, int mode
     presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);
 }
 
-void gorc::game::world::camera::camera_presenter::jk_set_waggle(int, const vector<3>& move_vec, float speed) {
+void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id, const vector<3>& move_vec, float speed) {
     // TODO: Handle player
     model->waggle = move_vec;
     model->waggle_speed = speed;
 }
 
-int gorc::game::world::camera::camera_presenter::jk_play_pov_key(int, int key, int priority, flag_set<flags::key_flag> flags) {
+int gorc::game::world::camera::camera_presenter::jk_play_pov_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags) {
     // TODO: Handle player
     return presenter.key_presenter->play_mix_key(model->pov_key_mix_id, key, priority, flags);
 }
 
-void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(int, int key_id, float delay) {
+void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(thing_id, int key_id, float delay) {
     // TODO: Handle player
     presenter.key_presenter->stop_key(invalid_id, key_id, delay);
 }
@@ -180,7 +180,7 @@ void gorc::game::world::camera::camera_presenter::register_verbs(cog::verb_table
         return components.current_level_presenter->camera_presenter->get_primary_focus(camera_id);
     });
 
-    verbs.add_verb("setcamerafocus", [&components](int camera_id, int focus_thing_id) {
+    verbs.add_safe_verb("setcamerafocus", cog::value(), [&components](int camera_id, thing_id focus_thing_id) {
         components.current_level_presenter->camera_presenter->set_camera_focus(camera_id, focus_thing_id);
     });
 
@@ -196,19 +196,19 @@ void gorc::game::world::camera::camera_presenter::register_verbs(cog::verb_table
         components.current_level_presenter->camera_presenter->set_pov_shake(pos_offset, ang_offset, pos_reset_speed, ang_reset_speed);
     });
 
-    verbs.add_verb("jksetpovmodel", [&components](int player, int model_id) {
-        components.current_level_presenter->camera_presenter->jk_set_pov_model(player, model_id);
+    verbs.add_safe_verb("jksetpovmodel", cog::value(), [&components](thing_id player, model_id mid) {
+        components.current_level_presenter->camera_presenter->jk_set_pov_model(player, mid);
     });
 
-    verbs.add_verb("jksetwaggle", [&components](int player, vector<3> move_vec, float speed) {
+    verbs.add_safe_verb("jksetwaggle", cog::value(), [&components](thing_id player, vector<3> move_vec, float speed) {
         components.current_level_presenter->camera_presenter->jk_set_waggle(player, move_vec, speed);
     });
 
-    verbs.add_verb("jkplaypovkey", [&components](int player, int key, int priority, int key_flags) {
+    verbs.add_safe_verb("jkplaypovkey", -1, [&components](thing_id player, keyframe_id key, int priority, int key_flags) {
         return components.current_level_presenter->camera_presenter->jk_play_pov_key(player, key, priority, flag_set<flags::key_flag>(key_flags));
     });
 
-    verbs.add_verb("jkstoppovkey", [&components](int player, int key, float delay) {
+    verbs.add_safe_verb("jkstoppovkey", cog::value(), [&components](thing_id player, int key, float delay) {
         components.current_level_presenter->camera_presenter->jk_stop_pov_key(player, key, delay);
     });
 }

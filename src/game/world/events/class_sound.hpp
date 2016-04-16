@@ -12,10 +12,10 @@ class class_sound {
 public:
     #include "class_sound.uid"
 
-    int thing;
+    thing_id thing;
     flags::sound_subclass_type type;
 
-    class_sound(int thing, flags::sound_subclass_type type);
+    class_sound(thing_id thing, flags::sound_subclass_type type);
 };
 
 }

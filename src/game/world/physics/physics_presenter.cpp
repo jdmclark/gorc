@@ -24,9 +24,9 @@ void physics_presenter::start(level_model& model, event_bus& eb) {
     this->eventbus = &eb;
 }
 
-bool physics_presenter::surface_needs_collision_response(int moving_thing_id, int surface_id) {
+bool physics_presenter::surface_needs_collision_response(thing_id moving_thing_id, surface_id sid) {
     const auto& moving_thing = model->get_thing(moving_thing_id);
-    const auto& surface = model->surfaces[surface_id];
+    const auto& surface = at_id(model->surfaces, sid);
 
     if(surface.adjoin < 0) {
         return true;
@@ -43,7 +43,7 @@ bool physics_presenter::surface_needs_collision_response(int moving_thing_id, in
     return !surface_ethereal;
 }
 
-bool physics_presenter::thing_needs_collision_response(int moving_thing_id, int collision_thing_id) {
+bool physics_presenter::thing_needs_collision_response(thing_id moving_thing_id, thing_id collision_thing_id) {
     const auto& moving_thing = model->get_thing(moving_thing_id);
     const auto& collision_thing = model->get_thing(collision_thing_id);
 
@@ -69,7 +69,7 @@ bool physics_presenter::thing_needs_collision_response(int moving_thing_id, int 
 }
 
 physics_presenter::physics_node_visitor::physics_node_visitor(physics_presenter& presenter, std::vector<physics::contact>& resting_manifolds,
-        std::set<std::tuple<int, int>>& physics_touched_thing_pairs)
+        std::set<std::tuple<thing_id, thing_id>>& physics_touched_thing_pairs)
     : presenter(presenter), resting_manifolds(resting_manifolds), physics_touched_thing_pairs(physics_touched_thing_pairs) {
     return;
 }
@@ -105,7 +105,7 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
     // Calculate influence AABBs and record overlapping sectors.
     for(const auto& thing_pair : model->ecs.all_components<components::thing>()) {
         const auto& thing = thing_pair.second;
-        int thing_id = static_cast<int>(thing_pair.first);
+        thing_id tid = thing_pair.first;
 
         auto thing_off_v = make_vector(1.0f, 1.0f, 1.0f) * (thing.move_size + length(thing.vel) * static_cast<float>(dt));
         auto thing_aabb = make_box(thing.position - thing_off_v, thing.position + thing_off_v);
@@ -129,8 +129,8 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
 
             // Thing influences sector. Move to closed set.
             physics_thing_closed_set.emplace(sid);
-            physics_broadphase_sector_things.emplace(sid, thing_id);
-            physics_broadphase_thing_influence.emplace(thing_id, sid);
+            physics_broadphase_sector_things.emplace(sid, tid);
+            physics_broadphase_thing_influence.emplace(tid, sid);
 
             // Add adjoining sectors to open set.
             for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
@@ -209,7 +209,7 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
 }
 
 void physics_presenter::physics_find_sector_resting_manifolds(const physics::sphere& sphere, sector_id, const vector<3>&,
-        int current_thing_id) {
+        thing_id current_thing_id) {
     // Get list of sectors within thing influence.
     auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
     for(auto it = std::get<0>(thing_influence_range); it != std::get<1>(thing_influence_range); ++it) {
@@ -218,7 +218,7 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
         for(int i = sector.first_surface; i < sector.first_surface + sector.surface_count; ++i) {
             const auto& surface = model->surfaces[i];
 
-            if(!surface_needs_collision_response(current_thing_id, i)) {
+            if(!surface_needs_collision_response(current_thing_id, surface_id(i))) {
                 continue;
             }
 
@@ -229,15 +229,15 @@ void physics_presenter::physics_find_sector_resting_manifolds(const physics::sph
                 if(surf_nearest_dist <= sphere.radius) {
                     physics_thing_resting_manifolds.emplace_back(surf_nearest_point, (sphere.position - surf_nearest_point) / surf_nearest_dist,
                             surface.normal * ((sphere.radius / surf_nearest_dist) - 1.0f));
-                    physics_thing_resting_manifolds.back().contact_surface_id = i;
-                    physics_touched_surface_pairs.emplace(current_thing_id, i);
+                    physics_thing_resting_manifolds.back().contact_surface_id = surface_id(i);
+                    physics_touched_surface_pairs.emplace(current_thing_id, surface_id(i));
                 }
             });
         }
     }
 }
 
-void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>&, int current_thing_id) {
+void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphere& sphere, const vector<3>&, thing_id current_thing_id) {
     // Get list of things within thing influence.
     physics_overlapping_things.clear();
     auto thing_influence_range = physics_broadphase_thing_influence.equal_range(current_thing_id);
@@ -336,14 +336,14 @@ void physics_presenter::compute_thing_attachment_velocity(components::thing &thi
     thing.attached_thing_velocity = make_zero_vector<3, float>();
     if((thing.attach_flags & flags::attach_flag::AttachedToThing) ||
        (thing.attach_flags & flags::attach_flag::AttachedToThingFace)) {
-        const auto& parent_thing = model->get_thing(thing.attached_thing);
+        const auto& parent_thing = model->get_thing(thing.attached_thing.get_value());
         thing.attached_thing_velocity = (parent_thing.position - thing.prev_attached_thing_position) /
                                         static_cast<float>(dt);
         thing.prev_attached_thing_position = parent_thing.position;
     }
 }
 
-void physics_presenter::physics_thing_step(int thing_id, components::thing& thing, double dt) {
+void physics_presenter::physics_thing_step(thing_id tid, components::thing& thing, double dt) {
     // Only perform collision detection for player, actor, and weapon types.
     if(thing.type != flags::thing_type::Actor &&
        thing.type != flags::thing_type::Player &&
@@ -363,8 +363,8 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
     physics_find_sector_resting_manifolds(physics::sphere(thing.position, thing.size),
                                           thing.sector,
                                           thing.vel,
-                                          thing_id);
-    physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, thing_id);
+                                          tid);
+    physics_find_thing_resting_manifolds(physics::sphere(thing.position, thing.size), thing.vel, tid);
 
     vector<3> prev_thing_vel = thing.vel;
 
@@ -443,7 +443,7 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
     else {
         if(!reject_vel) {
             thing.vel = prev_thing_vel;
-            presenter.adjust_thing_pos(thing_id,
+            presenter.adjust_thing_pos(tid,
                                        thing.position + prev_thing_vel * static_cast<float>(dt));
         }
         else {
@@ -468,7 +468,7 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
 
         if(amt_in_man_vel < man_vel_len) {
             // Thing is blocked.
-            maybe_if(manifold.contact_thing_id, [&](int contact_thing_id) {
+            maybe_if(manifold.contact_thing_id, [&](thing_id contact_thing_id) {
                     auto& contact_thing = model->get_thing(contact_thing_id);
                     contact_thing.is_blocked = true;
             });
@@ -476,7 +476,7 @@ void physics_presenter::physics_thing_step(int thing_id, components::thing& thin
     }
 }
 
-void physics_presenter::update_thing_path_moving(int tid, components::thing& thing, double dt) {
+void physics_presenter::update_thing_path_moving(thing_id tid, components::thing& thing, double dt) {
     if(thing.move != flags::move_type::Path || thing.is_blocked || thing.path_moving_paused) {
         return;
     }
@@ -571,8 +571,8 @@ void physics_presenter::update_thing_path_moving(int tid, components::thing& thi
     }
 }
 
-gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(int thing_id, const vector<3>& rel_point) {
-    auto& thing = model->get_thing(thing_id);
+gorc::vector<3> physics_presenter::get_thing_path_moving_point_velocity(thing_id tid, const vector<3>& rel_point) {
+    auto& thing = model->get_thing(tid);
 
     if(thing.move == flags::move_type::Path && thing.path_moving && !thing.is_blocked && !thing.path_moving_paused) {
         auto target_position_tuple = thing.frames[thing.next_frame];
@@ -709,28 +709,28 @@ void physics_presenter::update(const gorc::time& time) {
                                                /* source type */ cog::source_type::system);
         }
         else if(thing.second.attach_flags & flags::attach_flag::AttachedToThing) {
-            const auto& parent_thing = model->get_thing(thing.second.attached_thing);
-            presenter.adjust_thing_pos(static_cast<int>(thing.first), thing.second.position + (parent_thing.position - thing.second.prev_attached_thing_position));
+            const auto& parent_thing = model->get_thing(thing.second.attached_thing.get_value());
+            presenter.adjust_thing_pos(thing.first, thing.second.position + (parent_thing.position - thing.second.prev_attached_thing_position));
             thing.second.prev_attached_thing_position = parent_thing.position;
         }
     }
 
     // Dispatch touched messages
     for(const auto& touched_surface_pair : physics_touched_surface_pairs) {
-        int thing_id, surf_id;
-        std::tie(thing_id, surf_id) = touched_surface_pair;
-        eventbus->fire_event(events::touched_surface(int(thing_id),
-                                                     surf_id));
+        thing_id tid;
+        surface_id sid;
+        std::tie(tid, sid) = touched_surface_pair;
+        eventbus->fire_event(events::touched_surface(tid, sid));
     }
 
     for(const auto& touched_thing_pair : physics_touched_thing_pairs) {
-        int thing_a_id, thing_b_id;
+        thing_id thing_a_id, thing_b_id;
         std::tie(thing_a_id, thing_b_id) = touched_thing_pair;
 
-        eventbus->fire_event(events::touched_thing(int(thing_a_id),
-                                                   int(thing_b_id)));
-        eventbus->fire_event(events::touched_thing(int(thing_b_id),
-                                                   int(thing_a_id)));
+        eventbus->fire_event(events::touched_thing(thing_a_id,
+                                                   thing_b_id));
+        eventbus->fire_event(events::touched_thing(thing_b_id,
+                                                   thing_a_id));
     }
 }
 

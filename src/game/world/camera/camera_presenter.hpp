@@ -43,16 +43,16 @@ public:
     void cycle_camera();
     int get_camera_state_flags();
     int get_current_camera();
-    int get_primary_focus(int camera_id);
-    void set_camera_focus(int camera_id, int focus_object_id);
+    thing_id get_primary_focus(int camera_id);
+    void set_camera_focus(int camera_id, thing_id focus_object_id);
     void set_camera_state_flags(int flags);
     void set_current_camera(int camera_id);
     void set_pov_shake(const vector<3>& pos_offset, const vector<3>& ang_offset, float pos_reset_speed, float ang_reset_speed);
 
-    void jk_set_pov_model(int player, int model);
-    void jk_set_waggle(int player, const vector<3>& move_vec, float speed);
-    int jk_play_pov_key(int player, int key, int priority, flag_set<flags::key_flag> flags);
-    void jk_stop_pov_key(int player, int key_id, float delay);
+    void jk_set_pov_model(thing_id player, model_id model);
+    void jk_set_waggle(thing_id player, const vector<3>& move_vec, float speed);
+    int jk_play_pov_key(thing_id player, keyframe_id key, int priority, flag_set<flags::key_flag> flags);
+    void jk_stop_pov_key(thing_id player, int key_id, float delay);
 
     static void register_verbs(cog::verb_table&, level_state&);
 };

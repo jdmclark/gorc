@@ -20,8 +20,8 @@ public:
 
     void update(gorc::time, entity_id, components::thing&);
 
-    void on_touched_surface(int thing, int touched_surface);
-    void on_touched_thing(int thing, int touched_thing);
+    void on_touched_surface(thing_id thing, surface_id touched_surface);
+    void on_touched_thing(thing_id thing, thing_id touched_thing);
 };
 
 }

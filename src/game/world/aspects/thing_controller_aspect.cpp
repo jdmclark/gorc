@@ -33,28 +33,28 @@ void thing_controller_aspect::update(gorc::time t,
     thing.time_alive += static_cast<float>(t.elapsed_as_seconds());
 
     if(thing.timer > 0.0f && thing.time_alive >= thing.timer) {
-        presenter.destroy_thing(static_cast<int>(thing_id));
+        presenter.destroy_thing(thing_id);
     }
 }
 
-void thing_controller_aspect::on_touched_surface(int thing,
-                                                 int surface) {
+void thing_controller_aspect::on_touched_surface(thing_id thing,
+                                                 surface_id surface) {
     // Dispatch touched message to surface
     presenter.model->script_model.send_to_linked(
             cog::message_type::touched,
-            /* sender */ surface_id(surface),
-            /* source */ thing_id(thing),
+            /* sender */ surface,
+            /* source */ thing,
             /* source type */ presenter.model->get_thing_source_type(thing));
     return;
 }
 
-void thing_controller_aspect::on_touched_thing(int thing,
-                                               int touched_thing) {
+void thing_controller_aspect::on_touched_thing(thing_id thing,
+                                               thing_id touched_thing) {
     // Dispatch touched message to thing
     presenter.model->script_model.send_to_linked(
             cog::message_type::touched,
-            /* sender */ thing_id(touched_thing),
-            /* source */ thing_id(thing),
+            /* sender */ touched_thing,
+            /* source */ thing,
             /* source type */ presenter.model->get_thing_source_type(thing));
     return;
 }

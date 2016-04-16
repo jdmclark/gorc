@@ -11,9 +11,9 @@ class landed {
 public:
     #include "landed.uid"
 
-    int thing;
+    thing_id thing;
 
-    landed(int thing);
+    landed(thing_id thing);
 };
 
 }

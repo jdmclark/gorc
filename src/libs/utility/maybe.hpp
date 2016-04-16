@@ -47,16 +47,6 @@ namespace gorc {
             return *this;
         }
 
-        inline bool operator==(maybe<T> const &o) const
-        {
-            return value == o.value;
-        }
-
-        inline bool operator!=(maybe<T> const &o) const
-        {
-            return value != o.value;
-        }
-
         inline bool has_value() const
         {
             return value != nullptr;
@@ -211,28 +201,6 @@ namespace gorc {
             return *this;
         }
 
-        inline bool operator==(T const &o) const
-        {
-            return present && (get_value() == o);
-        }
-
-        inline bool operator==(maybe<T> const &o) const
-        {
-            return (!present && !o.present) ||
-                   (present && o.present && (get_value() == o.get_value()));
-        }
-
-        inline bool operator!=(T const &o) const
-        {
-            return !present || (get_value() != o);
-        }
-
-        inline bool operator!=(maybe<T> const &o) const
-        {
-            return (present != o.present) ||
-                   (present && (get_value() != o.get_value()));
-        }
-
         inline bool has_value() const
         {
             return present;
@@ -260,6 +228,68 @@ namespace gorc {
             return unsafe_get_value();
         }
     };
+
+    template <typename T>
+    inline bool operator==(nothing_type const &, maybe<T> const &m)
+    {
+        return !m.has_value();
+    }
+
+    template <typename T>
+    inline bool operator!=(nothing_type const &, maybe<T> const &m)
+    {
+        return m.has_value();
+    }
+
+    template <typename T>
+    inline bool operator==(maybe<T> const &m, nothing_type const &)
+    {
+        return !m.has_value();
+    }
+
+    template <typename T>
+    inline bool operator!=(maybe<T> const &m, nothing_type const &)
+    {
+        return m.has_value();
+    }
+
+    template <typename T>
+    inline bool operator==(T const &o, maybe<T> const &m)
+    {
+        return m.has_value() && (o == m.unsafe_get_value());
+    }
+
+    template <typename T>
+    inline bool operator!=(T const &o, maybe<T> const &m)
+    {
+        return !m.has_value() || (o != m.unsafe_get_value());
+    }
+
+    template <typename T>
+    inline bool operator==(maybe<T> const &m, T const &o)
+    {
+        return m.has_value() && (m.unsafe_get_value() == o);
+    }
+
+    template <typename T>
+    inline bool operator!=(maybe<T> const &m, T const &o)
+    {
+        return !m.has_value() || (m.unsafe_get_value() != o);
+    }
+
+    template <typename T>
+    inline bool operator==(maybe<T> const &o, maybe<T> const &m)
+    {
+        return (o.has_value() == m.has_value()) &&
+               (!o.has_value() || (o.unsafe_get_value() == m.unsafe_get_value()));
+    }
+
+    template <typename T>
+    inline bool operator!=(maybe<T> const &o, maybe<T> const &m)
+    {
+        return (o.has_value() != m.has_value()) ||
+               (o.has_value() && (o.unsafe_get_value() != m.unsafe_get_value()));
+    }
 
     template <typename T>
     maybe<T> make_maybe(T const &value)

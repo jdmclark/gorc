@@ -88,7 +88,7 @@ void sound_presenter::play_song(int start, int end, int loopto) {
 
 gorc::thing_id sound_presenter::play_sound_class(thing_id thing,
                                                  flags::sound_subclass_type subclass_type) {
-    auto& referenced_thing = levelModel->get_thing(static_cast<int>(thing));
+    auto& referenced_thing = levelModel->get_thing(thing);
     return maybe_if(referenced_thing.sound_class, thing_id(invalid_id), [&](auto sound_class) {
         auto const &subclass = sound_class->get(subclass_type);
         if(subclass.sound.is_valid()) {
@@ -223,7 +223,7 @@ gorc::thing_id sound_presenter::play_sound_thing(sound_id wav,
         }
     }
 
-    auto &thing_ref = levelModel->get_thing(static_cast<int>(thing));
+    auto &thing_ref = levelModel->get_thing(thing);
 
     thing_id snd_id = play_sound_pos(wav, thing_ref.position, volume, minrad, maxrad, flags);
     if(!snd_id.is_valid()) {

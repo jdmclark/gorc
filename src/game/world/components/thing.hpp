@@ -43,17 +43,17 @@ public:
     vector<3> ai_look_target;
     float ai_move_speed = 1.0;
 
-    int attached_surface = -1;
-    int attached_thing = -1;
+    maybe<surface_id> attached_surface;
+    maybe<thing_id> attached_thing;
     vector<3> prev_attached_thing_position;
     vector<3> attached_thing_velocity;
 
     int attached_key_mix = -1;
 
-    int capture_cog = -1;
+    maybe<cog_id> capture_cog;
     float time_alive = 0.0f;
 
-    int parent_thing = -1;
+    maybe<thing_id> parent_thing;
 
     maybe<asset_ref<content::assets::model>> weapon_mesh;
 

@@ -12,10 +12,10 @@ class thing_created {
 public:
     #include "thing_created.uid"
 
-    int thing;
+    thing_id thing;
     content::assets::thing_template const &tpl;
 
-    thing_created(int thing, content::assets::thing_template const &tpl);
+    thing_created(thing_id thing, content::assets::thing_template const &tpl);
 };
 
 }

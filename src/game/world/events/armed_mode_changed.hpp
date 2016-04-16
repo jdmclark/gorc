@@ -12,10 +12,10 @@ class armed_mode_changed {
 public:
     #include "armed_mode_changed.uid"
 
-    int thing;
+    thing_id thing;
     flags::armed_mode mode;
 
-    armed_mode_changed(int thing, flags::armed_mode mode);
+    armed_mode_changed(thing_id thing, flags::armed_mode mode);
 };
 
 }

@@ -3,6 +3,7 @@
 #include "math/vector.hpp"
 #include "utility/flag_set.hpp"
 #include "game/flags/camera_state_flag.hpp"
+#include "content/id.hpp"
 
 namespace gorc {
 namespace game {
@@ -11,7 +12,7 @@ namespace camera {
 
 class camera_state {
 public:
-    int focus;
+    thing_id focus;
     bool draw_focus;
     bool draw_pov_model;
 

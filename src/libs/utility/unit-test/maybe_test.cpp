@@ -35,11 +35,9 @@ test_case(nullptr_equality)
     maybe<char const *> n;
 
     assert_eq(m, n);
-    assert_eq(m, nullptr);
     assert_eq(m, nothing);
 
     assert_true(!(m != n));
-    assert_true(!(m != nullptr));
     assert_true(!(m != nothing));
 }
 
@@ -50,11 +48,9 @@ test_case(nullptr_inequality)
     maybe<char const *> n;
 
     assert_ne(m, n);
-    assert_ne(m, nullptr);
     assert_ne(m, nothing);
 
     assert_true(!(m == n));
-    assert_true(!(m == nullptr));
     assert_true(!(m == nothing));
 }
 

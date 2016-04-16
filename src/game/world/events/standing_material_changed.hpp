@@ -12,10 +12,10 @@ class standing_material_changed {
 public:
     #include "standing_material_changed.uid"
 
-    int thing;
+    thing_id thing;
     flags::standing_material_type type;
 
-    standing_material_changed(int thing, flags::standing_material_type type);
+    standing_material_changed(thing_id thing, flags::standing_material_type type);
 };
 
 }

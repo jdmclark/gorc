@@ -12,10 +12,10 @@ class animation_marker {
 public:
     #include "animation_marker.uid"
 
-    int thing;
+    thing_id thing;
     flags::key_marker_type type;
 
-    animation_marker(int thing, flags::key_marker_type type);
+    animation_marker(thing_id thing, flags::key_marker_type type);
 };
 
 }

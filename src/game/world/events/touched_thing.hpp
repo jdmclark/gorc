@@ -11,10 +11,10 @@ class touched_thing {
 public:
     #include "touched_thing.uid"
 
-    int toucher;
-    int touched;
+    thing_id toucher;
+    thing_id touched;
 
-    touched_thing(int toucher, int touched);
+    touched_thing(thing_id toucher, thing_id touched);
 };
 
 }

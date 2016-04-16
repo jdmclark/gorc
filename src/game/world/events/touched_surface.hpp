@@ -11,10 +11,10 @@ class touched_surface {
 public:
     #include "touched_surface.uid"
 
-    int toucher;
-    int touched;
+    thing_id toucher;
+    surface_id touched;
 
-    touched_surface(int toucher, int touched);
+    touched_surface(thing_id toucher, surface_id touched);
 };
 
 }

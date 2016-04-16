@@ -1,6 +1,6 @@
 #include "touched_surface.hpp"
 
-gorc::game::world::events::touched_surface::touched_surface(int toucher, int surface)
+gorc::game::world::events::touched_surface::touched_surface(thing_id toucher, surface_id surface)
     : toucher(toucher), touched(surface) {
     return;
 }

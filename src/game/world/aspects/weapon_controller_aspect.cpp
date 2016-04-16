@@ -8,8 +8,8 @@
 
 using gorc::game::world::aspects::weapon_controller_aspect;
 
-void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id) {
-    auto& projectile = presenter.model->get_thing(thing_id);
+void weapon_controller_aspect::touched_thing(thing_id toucher, thing_id touched_thing_id) {
+    auto& projectile = presenter.model->get_thing(toucher);
     if(projectile.type != flags::thing_type::Weapon) {
         return;
     }
@@ -18,7 +18,7 @@ void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id)
 
     auto& touched_thing = presenter.model->get_thing(touched_thing_id);
 
-    if(projectile.parent_thing != -1 && projectile.parent_thing == touched_thing.parent_thing) {
+    if(projectile.parent_thing.has_value() && projectile.parent_thing == touched_thing.parent_thing) {
         // Projectiles fired by same player. Ignore collision.
         return;
     }
@@ -31,36 +31,36 @@ void weapon_controller_aspect::touched_thing(int thing_id, int touched_thing_id)
     if(touched_thing.type == flags::thing_type::Actor || touched_thing.type == flags::thing_type::Player) {
         if(proj_flags & flags::weapon_flag::explodes_on_thing) {
             maybe_if(projectile.explode, [&](thing_template_id explode) {
-                    presenter.create_thing_at_thing(explode, thing_id);
+                    presenter.create_thing_at_thing(explode, toucher);
                 });
         }
         else {
             maybe_if(projectile.flesh_hit, [&](thing_template_id flesh_hit) {
-                    presenter.create_thing_at_thing(flesh_hit, thing_id);
+                    presenter.create_thing_at_thing(flesh_hit, toucher);
                 });
         }
 
-        presenter.damage_thing(touched_thing_id, projectile.damage, flag_set<flags::damage_flag>(projectile.damage_class), thing_id);
-        presenter.destroy_thing(thing_id);
+        presenter.damage_thing(touched_thing_id, projectile.damage, flag_set<flags::damage_flag>(projectile.damage_class), toucher);
+        presenter.destroy_thing(toucher);
     }
     else if(touched_thing.type != flags::thing_type::Corpse && touched_thing.type != flags::thing_type::Item) {
         if(proj_flags & flags::weapon_flag::explodes_on_surface) {
             maybe_if(projectile.explode, [&](thing_template_id explode) {
-                    presenter.create_thing_at_thing(explode, thing_id);
+                    presenter.create_thing_at_thing(explode, toucher);
                 });
         }
         else {
             maybe_if(projectile.create_thing, [&](thing_template_id create_thing) {
-                    presenter.create_thing_at_thing(create_thing, thing_id);
+                    presenter.create_thing_at_thing(create_thing, toucher);
                 });
         }
 
-        presenter.damage_thing(touched_thing_id, projectile.damage, flag_set<flags::damage_flag>(projectile.damage_class), thing_id);
-        presenter.destroy_thing(thing_id);
+        presenter.damage_thing(touched_thing_id, projectile.damage, flag_set<flags::damage_flag>(projectile.damage_class), toucher);
+        presenter.destroy_thing(toucher);
     }
 }
 
-void weapon_controller_aspect::touched_surface(int tid, int touched_surface_id) {
+void weapon_controller_aspect::touched_surface(thing_id tid, surface_id touched_surface_id) {
     auto& projectile = presenter.model->get_thing(tid);
     if(projectile.type != flags::thing_type::Weapon) {
         return;
@@ -68,7 +68,7 @@ void weapon_controller_aspect::touched_surface(int tid, int touched_surface_id) 
 
     flag_set<flags::weapon_flag> proj_flags(projectile.type_flags);
 
-    const auto& touched_surface = presenter.model->surfaces[touched_surface_id];
+    const auto& touched_surface = at_id(presenter.model->surfaces, touched_surface_id);
     if(((touched_surface.flags & flags::surface_flag::MagSealed) && (proj_flags & flags::weapon_flag::ricochets_on_magsealed))
             || (proj_flags & flags::weapon_flag::ricochets_on_surface)) {
         if(dot(projectile.vel, touched_surface.normal) <= 0.0f) {
@@ -94,8 +94,8 @@ void weapon_controller_aspect::touched_surface(int tid, int touched_surface_id) 
 
     presenter.model->script_model.send_to_linked(
             cog::message_type::damaged,
-            /* sender */ surface_id(touched_surface_id),
-            /* source */ thing_id(tid),
+            /* sender */ touched_surface_id,
+            /* source */ tid,
             /* source type */ presenter.model->get_thing_source_type(tid),
             /* param0 */ projectile.damage,
             /* param1 */ static_cast<int>(projectile.damage_class));

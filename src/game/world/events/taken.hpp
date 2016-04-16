@@ -11,10 +11,10 @@ class taken {
 public:
     #include "taken.uid"
 
-    int taken_thing;
-    int taker;
+    thing_id taken_thing;
+    thing_id taker;
 
-    taken(int taken_thing, int taker);
+    taken(thing_id taken_thing, thing_id taker);
 };
 
 }

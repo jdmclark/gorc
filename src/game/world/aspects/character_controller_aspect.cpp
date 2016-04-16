@@ -16,7 +16,7 @@ using gorc::game::world::aspects::character_controller_aspect;
 
 gorc::flags::standing_material_type character_controller_aspect::get_standing_material(components::thing& thing) {
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
-        auto& floor_thing = presenter.model->get_thing(thing.attached_thing);
+        auto& floor_thing = presenter.model->get_thing(thing.attached_thing.get_value());
         if(floor_thing.flags & flags::thing_flag::Metal) {
             return flags::standing_material_type::metal;
         }
@@ -28,7 +28,7 @@ gorc::flags::standing_material_type character_controller_aspect::get_standing_ma
         }
     }
     else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
-        auto& floor_surf = presenter.model->surfaces[thing.attached_surface];
+        auto& floor_surf = at_id(presenter.model->surfaces, thing.attached_surface.get_value());
 
         if(floor_surf.flags & flags::surface_flag::Metal) {
             return flags::standing_material_type::metal;
@@ -54,18 +54,18 @@ gorc::flags::standing_material_type character_controller_aspect::get_standing_ma
     }
 }
 
-bool character_controller_aspect::can_stand_on_thing(int surface_thing_id) {
+bool character_controller_aspect::can_stand_on_thing(thing_id surface_thing_id) {
     auto const &surface_thing = presenter.model->get_thing(surface_thing_id);
     return (surface_thing.collide == flags::collide_type::face) &&
            (surface_thing.flags & flags::thing_flag::CanStandOn);
 }
 
-bool character_controller_aspect::can_stand_on_surface(int surface_id) {
-    auto const &surface = presenter.model->surfaces[surface_id];
+bool character_controller_aspect::can_stand_on_surface(surface_id sid) {
+    auto const &surface = at_id(presenter.model->surfaces, sid);
     return surface.flags & flags::surface_flag::Floor;
 }
 
-gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(int thing_id, components::thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_falling_sweep(thing_id tid, components::thing& thing,
                 double) {
     // Test for collision between legs and ground using multiple tests
     vector<3> leg_height, leg_height_norm;
@@ -83,9 +83,9 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
 
     maybe<physics::contact> contact;
 
-    contact = presenter.physics_presenter->thing_segment_query(thing_id, -leg_height,
-            [&](int t) { return can_stand_on_thing(t); },
-            [&](int s) { return can_stand_on_surface(s); },
+    contact = presenter.physics_presenter->thing_segment_query(tid, -leg_height,
+            [&](thing_id t) { return can_stand_on_thing(t); },
+            [&](surface_id s) { return can_stand_on_surface(s); },
             contact);
 
     // TODO: Revisit character controller falling sweep.
@@ -98,7 +98,7 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     return contact;
 }
 
-gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(int thing_id, components::thing& thing,
+gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::run_walking_sweep(thing_id tid, components::thing& thing,
         double) {
     // Test for collision between legs and ground using multiple tests
     vector<3> leg_height;
@@ -108,9 +108,9 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
 
     maybe<physics::contact> contact;
 
-    contact = presenter.physics_presenter->thing_segment_query(thing_id, -leg_height,
-            [&](int t) { return can_stand_on_thing(t); },
-            [&](int s) { return can_stand_on_surface(s); },
+    contact = presenter.physics_presenter->thing_segment_query(tid, -leg_height,
+            [&](thing_id t) { return can_stand_on_thing(t); },
+            [&](surface_id s) { return can_stand_on_surface(s); },
             contact);
 
     // TODO: Revisit character controller walking sweep.
@@ -123,8 +123,8 @@ gorc::maybe<gorc::game::world::physics::contact> character_controller_aspect::ru
     return contact;
 }
 
-void character_controller_aspect::update_falling(int thing_id, components::thing& thing, double dt) {
-    auto maybe_contact = run_falling_sweep(thing_id, thing, dt);
+void character_controller_aspect::update_falling(thing_id tid, components::thing& thing, double dt) {
+    auto maybe_contact = run_falling_sweep(tid, thing, dt);
 
     auto applied_thrust = thing.thrust;
     get<2>(applied_thrust) = 0.0f;
@@ -132,39 +132,39 @@ void character_controller_aspect::update_falling(int thing_id, components::thing
 
     maybe_if(maybe_contact, [&](physics::contact const &contact) {
         // Check if attached surface/thing has changed.
-        maybe_if(contact.contact_surface_id, [&](int attachment_id) {
-            land_on_surface(thing_id, thing, attachment_id, contact);
+        maybe_if(contact.contact_surface_id, [&](surface_id attachment_id) {
+            land_on_surface(tid, thing, attachment_id, contact);
         });
 
-        maybe_if(contact.contact_thing_id, [&](int attachment_id) {
-            land_on_thing(thing_id, thing, attachment_id, contact);
+        maybe_if(contact.contact_thing_id, [&](thing_id attachment_id) {
+            land_on_thing(tid, thing, attachment_id, contact);
         });
     });
 }
 
-void character_controller_aspect::update_standing(int thing_id, components::thing& thing, double dt) {
-    auto maybe_contact = run_walking_sweep(thing_id, thing, dt);
+void character_controller_aspect::update_standing(thing_id tid, components::thing& thing, double dt) {
+    auto maybe_contact = run_walking_sweep(tid, thing, dt);
 
     if(maybe_contact.has_value()) {
         physics::contact const &contact = maybe_contact.get_value();
 
         // Check if attached surface/thing has changed.
-        maybe_if(contact.contact_surface_id, [&](int attachment_id) {
+        maybe_if(contact.contact_surface_id, [&](surface_id attachment_id) {
             if(!(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) || attachment_id != thing.attached_surface) {
                 // Player has landed on a new surface.
-                step_on_surface(thing_id, thing, attachment_id, contact);
+                step_on_surface(tid, thing, attachment_id, contact);
             }
         });
 
-        maybe_if(contact.contact_thing_id, [&](int attachment_id) {
+        maybe_if(contact.contact_thing_id, [&](thing_id attachment_id) {
             if(!(thing.attach_flags & flags::attach_flag::AttachedToThingFace) || attachment_id != thing.attached_thing) {
                 // Player has landed on a new thing.
-                step_on_thing(thing_id, thing, attachment_id, contact);
+                step_on_thing(tid, thing, attachment_id, contact);
             }
         });
 
         if(get<2>(thing.thrust) > 0.0f) {
-            jump(thing_id, thing);
+            jump(tid, thing);
         }
         else {
             // Accelerate body along surface
@@ -173,8 +173,8 @@ void character_controller_aspect::update_standing(int thing_id, components::thin
             auto player_new_vel = thing.thrust - hit_normal * dot(thing.thrust, hit_normal);
             auto new_vel = player_new_vel;
 
-            maybe_if(contact.contact_surface_id, [&](int attachment_id) {
-                new_vel += presenter.model->surfaces[attachment_id].thrust;
+            maybe_if(contact.contact_surface_id, [&](surface_id attachment_id) {
+                new_vel += at_id(presenter.model->surfaces, attachment_id).thrust;
             });
 
             // Accelerate body toward standing position
@@ -202,25 +202,29 @@ void character_controller_aspect::update_standing(int thing_id, components::thin
         }
     }
     else {
-        set_is_falling(thing_id, thing);
+        set_is_falling(tid, thing);
     }
 }
 
-void character_controller_aspect::set_is_falling(int tid, components::thing& thing) {
+void character_controller_aspect::set_is_falling(thing_id tid, components::thing& thing) {
     // Player is falling again.
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
-        presenter.model->script_model.send_to_linked(
-                cog::message_type::exited,
-                /* sender */ thing_id(thing.attached_thing),
-                /* source */ thing_id(tid),
-                /* source type */ presenter.model->get_thing_source_type(tid));
+        maybe_if(thing.attached_thing, [&](thing_id attached_thing) {
+                presenter.model->script_model.send_to_linked(
+                        cog::message_type::exited,
+                        /* sender */ attached_thing,
+                        /* source */ tid,
+                        /* source type */ presenter.model->get_thing_source_type(tid));
+            });
     }
     else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
-        presenter.model->script_model.send_to_linked(
-                cog::message_type::exited,
-                /* sender */ surface_id(thing.attached_surface),
-                /* source */ thing_id(tid),
-                /* source type */ presenter.model->get_thing_source_type(tid));
+        maybe_if(thing.attached_surface, [&](surface_id attached_surface) {
+                presenter.model->script_model.send_to_linked(
+                        cog::message_type::exited,
+                        /* sender */ attached_surface,
+                        /* source */ tid,
+                        /* source type */ presenter.model->get_thing_source_type(tid));
+            });
     }
 
     thing.attach_flags = flag_set<flags::attach_flag>();
@@ -228,9 +232,9 @@ void character_controller_aspect::set_is_falling(int tid, components::thing& thi
     cs.bus.fire_event(events::standing_material_changed(tid, flags::standing_material_type::none));
 }
 
-bool character_controller_aspect::step_on_surface(int tid, components::thing& thing, int surf_id,
+bool character_controller_aspect::step_on_surface(thing_id tid, components::thing& thing, surface_id surf_id,
                 const physics::contact&) {
-    const auto& surface = presenter.model->surfaces[surf_id];
+    const auto& surface = at_id(presenter.model->surfaces, surf_id);
     if(surface.flags & flags::surface_flag::Floor) {
         thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToWorldSurface };
         thing.attached_surface = surf_id;
@@ -253,7 +257,7 @@ bool character_controller_aspect::step_on_surface(int tid, components::thing& th
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-bool character_controller_aspect::step_on_thing(int tid, components::thing& thing, int land_thing_id,
+bool character_controller_aspect::step_on_thing(thing_id tid, components::thing& thing, thing_id land_thing_id,
                 const physics::contact&) {
     const auto& attach_thing = presenter.model->get_thing(land_thing_id);
     if(attach_thing.flags & flags::thing_flag::CanStandOn) {
@@ -279,29 +283,29 @@ bool character_controller_aspect::step_on_thing(int tid, components::thing& thin
     //presenter.AdjustThingPosition(thing_id, Math::VecBt(rrcb.m_hitPointWorld) + thing.Model3d->InsertOffset);
 }
 
-void character_controller_aspect::land_on_surface(int thing_id,
+void character_controller_aspect::land_on_surface(thing_id tid,
                                                   components::thing &thing,
-                                                  int surf_id,
+                                                  surface_id surf_id,
                                                   physics::contact const &rrcb) {
-    if(!step_on_surface(thing_id, thing, surf_id, rrcb)) {
+    if(!step_on_surface(tid, thing, surf_id, rrcb)) {
         return;
     }
 
-    cs.bus.fire_event(events::landed(thing_id));
+    cs.bus.fire_event(events::landed(tid));
 }
 
-void character_controller_aspect::land_on_thing(int thing_id, components::thing& thing, int land_thing_id,
+void character_controller_aspect::land_on_thing(thing_id tid, components::thing& thing, thing_id land_thing_id,
                 const physics::contact& rrcb) {
-    if(!step_on_thing(thing_id, thing, land_thing_id, rrcb)) {
+    if(!step_on_thing(tid, thing, land_thing_id, rrcb)) {
         return;
     }
 
-    cs.bus.fire_event(events::landed(thing_id));
+    cs.bus.fire_event(events::landed(tid));
 }
 
-void character_controller_aspect::jump(int thing_id, components::thing& thing) {
-    cs.bus.fire_event(events::jumped(thing_id));
-    set_is_falling(thing_id, thing);
+void character_controller_aspect::jump(thing_id tid, components::thing& thing) {
+    cs.bus.fire_event(events::jumped(tid));
+    set_is_falling(tid, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 }
 
@@ -311,10 +315,10 @@ void character_controller_aspect::update(gorc::time t,
                                          components::thing &thing) {
     // Update actor state
     if(static_cast<int>(thing.attach_flags)) {
-        update_standing(static_cast<int>(id), thing, t.elapsed_as_seconds());
+        update_standing(id, thing, t.elapsed_as_seconds());
     }
     else {
-        update_falling(static_cast<int>(id), thing, t.elapsed_as_seconds());
+        update_falling(id, thing, t.elapsed_as_seconds());
     }
 
     // Update lightsaber state
@@ -344,13 +348,13 @@ void character_controller_aspect::update(gorc::time t,
     }
 }
 
-void character_controller_aspect::on_killed(int tid,
+void character_controller_aspect::on_killed(thing_id tid,
                                             components::thing &thing,
-                                            int killer) {
+                                            thing_id killer) {
     presenter.model->script_model.send_to_linked(
             cog::message_type::killed,
-            /* sender */ thing_id(tid),
-            /* source */ thing_id(killer),
+            /* sender */ tid,
+            /* source */ killer,
             /* source type */ presenter.model->get_thing_source_type(killer));
 
     thing.type = flags::thing_type::Corpse;

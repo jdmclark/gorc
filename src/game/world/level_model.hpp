@@ -36,7 +36,7 @@ public:
     camera::camera_model camera_model;
     world_value_mapping value_mapping;
 
-    int local_player_thing_id;
+    thing_id local_player_thing_id;
 
     std::vector<content::assets::thing_template const*> spawn_points;
     size_t current_spawn_point = 0UL;
@@ -48,15 +48,9 @@ public:
     level_model(event_bus& parent_event_bus, content_manager& manager, service_registry const &,
             asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);
 
-    inline components::thing& get_thing(int id) {
-        for(auto& t : ecs.find_component<components::thing>(entity_id(id))) {
-            return t.second;
-        }
+    components::thing& get_thing(thing_id id);
 
-        LOG_FATAL(format("get_thing: thing %d does not exist") % id);
-    }
-
-    cog::source_type get_thing_source_type(int id);
+    cog::source_type get_thing_source_type(thing_id id);
 };
 
 }

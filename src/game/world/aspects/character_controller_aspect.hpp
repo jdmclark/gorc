@@ -26,33 +26,33 @@ private:
 
     flags::standing_material_type get_standing_material(components::thing& thing);
 
-    bool can_stand_on_thing(int surface_thing_id);
-    bool can_stand_on_surface(int surface_id);
+    bool can_stand_on_thing(thing_id surface_thing_id);
+    bool can_stand_on_surface(surface_id);
 
-    maybe<physics::contact> run_falling_sweep(int thing_id, components::thing& thing, double dt);
-    maybe<physics::contact> run_walking_sweep(int thing_id, components::thing& thing, double dt);
+    maybe<physics::contact> run_falling_sweep(thing_id, components::thing& thing, double dt);
+    maybe<physics::contact> run_walking_sweep(thing_id, components::thing& thing, double dt);
 
-    void update_falling(int thing_id, components::thing& thing, double dt);
-    void update_standing(int thing_id, components::thing& thing, double dt);
-    bool step_on_surface(int thing_id, components::thing& thing, int surf_id, const physics::contact& rrcb);
-    bool step_on_thing(int thing_id, components::thing& thing, int step_thing_id, const physics::contact& rrcb);
-    void land_on_surface(int thing_id, components::thing& thing, int surf_id, const physics::contact& rrcb);
-    void land_on_thing(int thing_id, components::thing& thing, int land_thing_id, const physics::contact& rrcb);
-    void jump(int thing_id, components::thing& thing);
-    void set_is_falling(int thing_id, components::thing& thing);
+    void update_falling(thing_id, components::thing& thing, double dt);
+    void update_standing(thing_id, components::thing& thing, double dt);
+    bool step_on_surface(thing_id, components::thing& thing, surface_id surf_id, const physics::contact& rrcb);
+    bool step_on_thing(thing_id, components::thing& thing, thing_id step_thing_id, const physics::contact& rrcb);
+    void land_on_surface(thing_id, components::thing& thing, surface_id surf_id, const physics::contact& rrcb);
+    void land_on_thing(thing_id, components::thing& thing, thing_id land_thing_id, const physics::contact& rrcb);
+    void jump(thing_id, components::thing& thing);
+    void set_is_falling(thing_id, components::thing& thing);
 
-    void play_left_run_footstep(int thing_id);
-    void play_right_run_footstep(int thing_id);
-    void play_left_walk_footstep(int thing_id);
-    void play_right_walk_footstep(int thing_id);
+    void play_left_run_footstep(thing_id);
+    void play_right_run_footstep(thing_id);
+    void play_left_walk_footstep(thing_id);
+    void play_right_walk_footstep(thing_id);
 
-    void on_killed(int thing_id, components::thing &thing, int killer);
+    void on_killed(thing_id, components::thing &thing, thing_id killer);
 
 public:
     character_controller_aspect(component_system&, level_presenter&);
 
-    static void create_controller_data(int thing_id, level_presenter&);
-    static void remove_controller_data(int thing_id, level_presenter&);
+    static void create_controller_data(thing_id, level_presenter&);
+    static void remove_controller_data(thing_id, level_presenter&);
 
     virtual void update(gorc::time, entity_id, components::character&, components::thing&) override;
 };

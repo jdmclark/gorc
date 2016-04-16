@@ -136,13 +136,13 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
             }
 
             if(surface.adjoin < 0 && (surface.flags & flags::surface_flag::HorizonSky)) {
-                horizon_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
+                horizon_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, surface_id(i)));
             }
             else if(surface.adjoin < 0 && (surface.flags & flags::surface_flag::CeilingSky)) {
-                ceiling_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, i));
+                ceiling_sky_surfaces_scratch.push_back(std::make_tuple(sec_num, surface_id(i)));
             }
             else if(surface.adjoin >= 0) {
-                translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, i, 0.0f));
+                translucent_surfaces_scratch.push_back(std::make_tuple(sec_num, surface_id(i), 0.0f));
             }
         }
     }
@@ -151,8 +151,8 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 
     // Compute distances to translucent surfaces
     for(auto& surf_tuple : translucent_surfaces_scratch) {
-        unsigned int surf_id = std::get<1>(surf_tuple);
-        const auto& surf = currentModel->surfaces[surf_id];
+        surface_id surf_id = std::get<1>(surf_tuple);
+        const auto& surf = at_id(currentModel->surfaces, surf_id);
         auto vx_pos = currentModel->level->vertices[std::get<0>(surf.vertices.front())];
         std::get<2>(surf_tuple) = dot(surf.normal, cam_pos - vx_pos);
 
@@ -161,7 +161,7 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 
     // Sort translucent surfaces back to front.
     std::sort(translucent_surfaces_scratch.begin(), translucent_surfaces_scratch.end(),
-            [](const std::tuple<sector_id, unsigned int, float>& a, const std::tuple<sector_id, unsigned int, float>& b) {
+            [](const std::tuple<sector_id, surface_id, float>& a, const std::tuple<sector_id, surface_id, float>& b) {
         return std::get<2>(a) > std::get<2>(b);
     });
 }
@@ -169,18 +169,18 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 void gorc::client::world::level_view::record_visible_things() {
     for(auto& thing_pair : currentModel->ecs.all_components<gorc::game::world::components::thing>()) {
         if(sector_vis_scratch.find(thing_pair.second.sector) != sector_vis_scratch.end()) {
-            visible_thing_scratch.emplace_back(static_cast<int>(thing_pair.first), length(thing_pair.second.position - currentModel->camera_model.current_computed_state.position));
+            visible_thing_scratch.emplace_back(thing_pair.first, length(thing_pair.second.position - currentModel->camera_model.current_computed_state.position));
 
             if(!(thing_pair.second.flags & flags::thing_flag::Sighted)) {
                 // thing has been sighted for first time. Fire sighted event.
-                currentPresenter->thing_sighted(static_cast<int>(thing_pair.first));
+                currentPresenter->thing_sighted(thing_pair.first);
             }
         }
     }
 
     // Sort things from back to front.
     std::sort(visible_thing_scratch.begin(), visible_thing_scratch.end(),
-            [](const std::tuple<int, float>& a, const std::tuple<int, float>& b) {
+            [](const std::tuple<thing_id, float>& a, const std::tuple<thing_id, float>& b) {
         return std::get<1>(a) > std::get<1>(b);
     });
 }
@@ -200,7 +200,7 @@ void gorc::client::world::level_view::draw_visible_diffuse_surfaces() {
                 continue;
             }
 
-            draw_surface(i, sector, 1.0f);
+            draw_surface(surface_id(i), sector, 1.0f);
         }
     }
 }
@@ -242,7 +242,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
             glDepthMask(GL_FALSE);
             glEnable(GL_CULL_FACE);
             draw_surface(std::get<1>(*surf_it), at_id(currentModel->sectors, std::get<0>(*surf_it)),
-                    (currentModel->surfaces[std::get<1>(*surf_it)].face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
+                    (at_id(currentModel->surfaces, std::get<1>(*surf_it)).face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
             ++surf_it;
         }
     }
@@ -258,7 +258,7 @@ void gorc::client::world::level_view::draw_visible_translucent_surfaces_and_thin
     glEnable(GL_CULL_FACE);
     while(surf_it != translucent_surfaces_scratch.end()) {
         draw_surface(std::get<1>(*surf_it), at_id(currentModel->sectors, std::get<0>(*surf_it)),
-                (currentModel->surfaces[std::get<1>(*surf_it)].face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
+                (at_id(currentModel->surfaces, std::get<1>(*surf_it)).face_type_flags & flags::face_flag::Translucent) ? 0.5f : 1.0f);
         ++surf_it;
     }
 }
@@ -408,8 +408,8 @@ void gorc::client::world::level_view::draw_pov_model() {
     }
 }
 
-void gorc::client::world::level_view::draw_surface(unsigned int surf_num, const content::assets::level_sector& sector, float alpha) {
-    const auto& surface = currentModel->surfaces[surf_num];
+void gorc::client::world::level_view::draw_surface(surface_id surf_num, const content::assets::level_sector& sector, float alpha) {
+    const auto& surface = at_id(currentModel->surfaces, surf_num);
     const auto& lev = *currentModel->level;
 
     if(surface.material >= 0) {
@@ -673,8 +673,8 @@ void gorc::client::world::level_view::draw_sprite(const game::world::components:
             sprite->extra_light, offset, sector_light);
 }
 
-void gorc::client::world::level_view::draw_thing(const game::world::components::thing& thing, int thing_id) {
-    if((thing.flags & flags::thing_flag::Invisible) || thing_id == currentModel->camera_model.current_computed_state.focus_not_drawn_thing) {
+void gorc::client::world::level_view::draw_thing(const game::world::components::thing& thing, thing_id tid) {
+    if((thing.flags & flags::thing_flag::Invisible) || tid == currentModel->camera_model.current_computed_state.focus_not_drawn_thing) {
         return;
     }
 

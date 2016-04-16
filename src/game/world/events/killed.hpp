@@ -11,10 +11,10 @@ class killed {
 public:
     #include "killed.uid"
 
-    int thing;
-    int killer;
+    thing_id thing;
+    thing_id killer;
 
-    killed(int thing, int killer);
+    killed(thing_id thing, thing_id killer);
 };
 
 }

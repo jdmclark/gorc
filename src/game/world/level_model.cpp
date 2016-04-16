@@ -23,7 +23,15 @@ gorc::game::world::level_model::level_model(event_bus& bus, gorc::content_manage
     return;
 }
 
-gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(int id)
+gorc::game::world::components::thing& gorc::game::world::level_model::get_thing(thing_id id) {
+    for(auto& t : ecs.find_component<components::thing>(id)) {
+        return t.second;
+    }
+
+    LOG_FATAL(format("get_thing: thing %d does not exist") % static_cast<int>(id));
+}
+
+gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(thing_id id)
 {
     auto const &thing = get_thing(id);
     switch(thing.type) {

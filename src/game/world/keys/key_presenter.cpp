@@ -44,11 +44,11 @@ void gorc::game::world::keys::key_presenter::DispatchAllMarkers(thing_id thing, 
 }
 
 void gorc::game::world::keys::key_presenter::DispatchMarker(thing_id thing, flags::key_marker_type marker) {
-    bus->fire_event(events::animation_marker((int)thing, marker));
+    bus->fire_event(events::animation_marker(thing, marker));
 }
 
 int gorc::game::world::keys::key_presenter::GetThingMixId(thing_id tid) {
-    auto& thing = levelModel->get_thing(static_cast<int>(tid));
+    auto& thing = levelModel->get_thing(tid);
     if(thing.attached_key_mix < 0) {
         auto& mix = model->mixes.emplace();
         mix.attached_thing = tid;
@@ -176,7 +176,7 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
 }
 
 void gorc::game::world::keys::key_presenter::expunge_thing_animations(thing_id tid) {
-    auto& thing = levelModel->get_thing(static_cast<int>(tid));
+    auto& thing = levelModel->get_thing(tid);
     if(thing.attached_key_mix >= 0) {
         for(auto& key : model->keys) {
             if(key.mix_id == thing.attached_key_mix) {
@@ -261,16 +261,16 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
     }
 }
 
-float gorc::game::world::keys::key_presenter::get_key_len(int key_id) {
-    auto key = contentmanager.get_asset<content::assets::animation>(asset_id(key_id));
+float gorc::game::world::keys::key_presenter::get_key_len(keyframe_id key_id) {
+    auto key = get_asset(contentmanager, key_id);
     return static_cast<float>(key->frame_count) / static_cast<float>(key->framerate);
 }
 
-int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
+int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, keyframe_id key,
         int priority, flag_set<flags::key_flag> flags) {
     auto& state = model->keys.emplace();
 
-    state.animation = contentmanager.get_asset<content::assets::animation>(asset_id(key));
+    state.animation = get_asset(contentmanager, key);
     state.high_priority = state.low_priority = state.body_priority = priority;
     state.animation_time = 0.0;
     state.current_frame = 0.0;
@@ -282,14 +282,14 @@ int gorc::game::world::keys::key_presenter::play_mix_key(int mix_id, int key,
     return state.get_id();
 }
 
-int gorc::game::world::keys::key_presenter::play_key(thing_id tid, int key,
+int gorc::game::world::keys::key_presenter::play_key(thing_id tid, keyframe_id key,
         int priority, flag_set<flags::key_flag> flags) {
     return play_mix_key(GetThingMixId(tid), key, priority, flags);
 }
 
 int gorc::game::world::keys::key_presenter::play_mode(thing_id tid,
                                                       flags::puppet_submode_type minor_mode) {
-    auto& thing = levelModel->get_thing(static_cast<int>(tid));
+    auto& thing = levelModel->get_thing(tid);
     if(!thing.pup.has_value()) {
         return -1;
     }
@@ -346,11 +346,11 @@ int gorc::game::world::keys::key_presenter::create_key_mix() {
 }
 
 void gorc::game::world::keys::key_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
-    verbs.add_verb("getkeylen", [&components](int key_id) {
+    verbs.add_safe_verb("getkeylen", 0.0f, [&components](keyframe_id key_id) {
         return components.current_level_presenter->key_presenter->get_key_len(key_id);
     });
 
-    verbs.add_verb("playkey", [&components](thing_id thing, int key, int priority, int flags) {
+    verbs.add_safe_verb("playkey", cog::value(), [&components](thing_id thing, keyframe_id key, int priority, int flags) {
         return components.current_level_presenter->key_presenter->play_key(thing, key, priority, flag_set<flags::key_flag>(flags));
     });
 
