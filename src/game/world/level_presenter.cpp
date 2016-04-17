@@ -770,6 +770,10 @@ gorc::thing_id gorc::game::world::level_presenter::create_thing(const std::strin
 
 gorc::thing_id gorc::game::world::level_presenter::fire_projectile(thing_id parent_thing_id, thing_template_id tpl_id, sound_id fire_sound_id, int puppet_submode_id,
         const vector<3>& offset_vec, const vector<3>& error_vec, float, int, float, float) {
+    if(!parent_thing_id.is_valid() || !tpl_id.is_valid()) {
+        return invalid_id;
+    }
+
     const auto& parent_thing = model->get_thing(parent_thing_id);
 
     const auto& parent_look_orient = parent_thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), parent_thing.head_pitch) * make_euler(error_vec);
@@ -1320,7 +1324,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         return components.current_level_presenter->create_thing(tpl_id, sid, pos, make_euler(orient));
     });
 
-    verbs.add_safe_verb("fireprojectile", thing_id(invalid_id), [&components](thing_id parent_thing_id, thing_template_id tpl_id, sound_id snd_id, int submode_id,
+    verbs.add_verb("fireprojectile", [&components](thing_id parent_thing_id, thing_template_id tpl_id, sound_id snd_id, int submode_id,
             vector<3> offset_vec, vector<3> error_vec, float extra, int proj_flags, float aa_fovx, float aa_fovz) {
         return components.current_level_presenter->fire_projectile(parent_thing_id, tpl_id, snd_id, submode_id,
                 offset_vec, error_vec, extra, proj_flags, aa_fovx, aa_fovz);
