@@ -277,6 +277,14 @@ gorc::cog::value gorc::cog::executor::send(cog_id instance,
         return value();
     }
 
+    diagnostic_context dc(inst->cog->filename.c_str());
+    LOG_DEBUG(format("instance %d received message %s "
+                     "from sender %s due to source %s") %
+              static_cast<int>(instance) %
+              as_string(t) %
+              as_string(sender) %
+              as_string(source));
+
     continuation cc(call_stack_frame(instance,
                                      addr.get_value(),
                                      sender,
@@ -305,6 +313,14 @@ void gorc::cog::executor::send_to_all(message_type t,
         if(!addr.has_value()) {
             continue;
         }
+
+        diagnostic_context dc(inst->cog->filename.c_str());
+        LOG_DEBUG(format("instance %d received broadcast message %s "
+                         "from sender %s due to source %s") %
+                  i %
+                  as_string(t) %
+                  as_string(sender) %
+                  as_string(source));
 
         continuation cc(call_stack_frame(cog_id(static_cast<int>(i)),
                                          addr.get_value(),
@@ -343,7 +359,7 @@ void gorc::cog::executor::send_to_linked(message_type t,
         }
 
         diagnostic_context dc(inst->cog->filename.c_str());
-        LOG_DEBUG(format("instance %d received message %s from sender %s due to source %s") %
+        LOG_DEBUG(format("instance %d received linked message %s from sender %s due to source %s") %
                   static_cast<int>(link.second.instance_id) %
                   as_string(t) %
                   as_string(sender) %
