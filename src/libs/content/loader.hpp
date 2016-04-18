@@ -19,6 +19,7 @@ namespace gorc {
                                                    service_registry const &) const = 0;
 
         virtual std::vector<path> const& get_prefixes() const = 0;
+        virtual maybe<char const *> get_default() const;
     };
 
 }

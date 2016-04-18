@@ -15,6 +15,7 @@ public:
                                                service_registry const &) const override;
 
     virtual std::vector<path> const& get_prefixes() const override;
+    virtual maybe<char const *> get_default() const override;
 };
 
 }

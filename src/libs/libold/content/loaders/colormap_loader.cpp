@@ -59,3 +59,8 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::colormap_loader::deserializ
 
     return std::unique_ptr<asset>(std::move(cmp));
 }
+
+gorc::maybe<char const *> gorc::content::loaders::colormap_loader::get_default() const
+{
+    return "dflt.cmp";
+}

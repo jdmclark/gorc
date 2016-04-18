@@ -286,3 +286,8 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::model_loader::parse(text::t
 
     return std::unique_ptr<asset>(std::move(lev));
 }
+
+gorc::maybe<char const *> gorc::content::loaders::model_loader::get_default() const
+{
+    return "dflt.3do";
+}

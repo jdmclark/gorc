@@ -258,3 +258,8 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::material_loader::deserializ
 
     return std::unique_ptr<asset>(std::move(mat));
 }
+
+gorc::maybe<char const *> gorc::content::loaders::material_loader::get_default() const
+{
+    return "dflt.mat";
+}

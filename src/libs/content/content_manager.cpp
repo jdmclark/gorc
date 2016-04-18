@@ -62,9 +62,24 @@ void gorc::content_manager::finalize_internal(asset_id id)
         std::string safe_name = unsafe_ref.name;
         diagnostic_context dc(safe_name.c_str());
         auto const &loader = services.get<loader_registry>().get_loader(unsafe_ref.type);
-        auto file = services.get<virtual_file_system>().find(unsafe_ref.name,
-                                                             loader.get_prefixes());
-        at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, services);
+
+        try {
+            diagnostic_context dc(safe_name.c_str());
+            auto file = services.get<virtual_file_system>().find(unsafe_ref.name,
+                                                                 loader.get_prefixes());
+            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, services);
+        }
+        catch(...) {
+            auto dflt_name = loader.get_default();
+            if(!dflt_name.has_value()) {
+                throw;
+            }
+
+            diagnostic_context dc(dflt_name.get_value());
+            auto file = services.get<virtual_file_system>().find(dflt_name.get_value(),
+                                                                 loader.get_prefixes());
+            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, services);
+        }
     }
 }
 

@@ -260,11 +260,11 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(thing_id channel, fl
 }
 
 void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verb_table &verbs, level_state &components) {
-    verbs.add_verb("changesoundpitch", [&components](thing_id channel, float pitch, float delay) {
+    verbs.add_safe_verb("changesoundpitch", cog::value(), [&components](thing_id channel, float pitch, float delay) {
         components.current_level_presenter->sound_presenter->change_sound_pitch(channel, pitch, delay);
     });
 
-    verbs.add_verb("changesoundvol", [&components](thing_id channel, float volume, float delay) {
+    verbs.add_safe_verb("changesoundvol", cog::value(), [&components](thing_id channel, float volume, float delay) {
         components.current_level_presenter->sound_presenter->change_sound_vol(channel, volume, delay);
     });
 
@@ -272,17 +272,17 @@ void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verb_table 
         components.current_level_presenter->sound_presenter->play_song(start, end, loopto);
     });
 
-    verbs.add_verb("playsoundlocal", [&components](sound_id wav, float volume, float panning, int flags) {
+    verbs.add_safe_verb("playsoundlocal", thing_id(invalid_id), [&components](sound_id wav, float volume, float panning, int flags) {
         return components.current_level_presenter->sound_presenter->play_sound_local(wav, volume, panning, flag_set<flags::sound_flag>(flags));
     });
 
-    verbs.add_verb("playsoundpos", [&components](sound_id wav, vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
+    verbs.add_safe_verb("playsoundpos", thing_id(invalid_id), [&components](sound_id wav, vector<3> pos, float volume, float min_rad, float max_rad, int flags) {
         return components.current_level_presenter->sound_presenter->play_sound_pos(wav, pos,
             volume, min_rad / sound_attenuation_factor, max_rad / sound_attenuation_factor,
             flag_set<flags::sound_flag>(flags));
     });
 
-    verbs.add_verb("playsoundthing", [&components](sound_id wav, thing_id thing, float volume, float min_rad, float max_rad, int flags) {
+    verbs.add_safe_verb("playsoundthing", thing_id(invalid_id), [&components](sound_id wav, thing_id thing, float volume, float min_rad, float max_rad, int flags) {
         return components.current_level_presenter->sound_presenter->play_sound_thing(wav, thing,
             volume, min_rad / sound_attenuation_factor, max_rad / sound_attenuation_factor,
             flag_set<flags::sound_flag>(flags));
@@ -292,7 +292,7 @@ void gorc::game::world::sounds::sound_presenter::register_verbs(cog::verb_table 
         components.current_level_presenter->sound_presenter->set_music_vol(vol);
     });
 
-    verbs.add_verb("stopsound", [&components](thing_id channel, float delay) {
+    verbs.add_safe_verb("stopsound", thing_id(invalid_id), [&components](thing_id channel, float delay) {
         components.current_level_presenter->sound_presenter->stop_sound(channel, delay);
     });
 }

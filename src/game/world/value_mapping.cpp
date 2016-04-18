@@ -34,28 +34,63 @@ gorc::cog::value gorc::game::world::world_value_mapping::operator()(
         LOG_FATAL(format("world value mapping for type %s is not implemented") %
                   as_string(type));
 
+    case cog::value_type::ai:
+        LOG_ERROR(format("world value mapping for type %s is not implemented") %
+                  as_string(type));
+        return ai_id(invalid_id);
+
     case cog::value_type::cog:
-        return exec.create_global_instance(content.load<cog::script>(value));
+        try {
+            return exec.create_global_instance(content.load<cog::script>(value));
+        }
+        catch(...) {
+            return cog_id(invalid_id);
+        }
 
     case cog::value_type::colormap:
-        return force_cast<colormap_id>(content.load_id<content::assets::colormap>(value));
+        try {
+            return force_cast<colormap_id>(content.load_id<content::assets::colormap>(value));
+        }
+        catch(...) {
+            return colormap_id(invalid_id);
+        }
 
     case cog::value_type::keyframe:
-        return force_cast<keyframe_id>(content.load_id<content::assets::animation>(value));
+        try {
+            return force_cast<keyframe_id>(content.load_id<content::assets::animation>(value));
+        }
+        catch(...) {
+            return keyframe_id(invalid_id);
+        }
 
     case cog::value_type::material:
-        return force_cast<material_id>(content.load_id<content::assets::material>(value));
+        try {
+            return force_cast<material_id>(content.load_id<content::assets::material>(value));
+        }
+        catch(...) {
+            return material_id(invalid_id);
+        }
 
     case cog::value_type::model:
-        return force_cast<model_id>(content.load_id<content::assets::model>(value));
+        try {
+            return force_cast<model_id>(content.load_id<content::assets::model>(value));
+        }
+        catch(...) {
+            return model_id(invalid_id);
+        }
 
     case cog::value_type::sound:
-        return force_cast<sound_id>(content.load_id<content::assets::sound>(value));
+        try {
+            return force_cast<sound_id>(content.load_id<content::assets::sound>(value));
+        }
+        catch(...) {
+            return sound_id(invalid_id);
+        }
 
     case cog::value_type::thing_template: {
             auto it = level->template_map.find(value);
             if(it == level->template_map.end()) {
-                LOG_FATAL(format("referenced undefined template %s") % value);
+                return thing_template_id(invalid_id);
             }
 
             return thing_template_id(it->second);
