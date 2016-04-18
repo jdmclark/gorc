@@ -46,19 +46,11 @@ namespace {
 
         std::string str_value = static_cast<char const *>(original_value);
 
-        switch(symbol_type) {
-        default:
-            return original_value;
-
-        case value_type::ai:
-        case value_type::cog:
-        case value_type::colormap:
-        case value_type::keyframe:
-        case value_type::material:
-        case value_type::model:
-        case value_type::sound:
-        case value_type::thing_template:
+        if(is_resource_id_type(symbol_type)) {
             return svc.get<default_value_mapping>()(symbol_type, str_value);
+        }
+        else {
+            return original_value;
         }
     }
 }

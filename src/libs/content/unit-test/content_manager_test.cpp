@@ -14,6 +14,7 @@ namespace {
     private:
         memory_file foo_mf;
         memory_file bar_mf;
+        memory_file fnord_mf;
         memory_file default_mf;
 
     public:
@@ -26,6 +27,9 @@ namespace {
             bar_mf.write(&value, sizeof(int));
 
             value = 58;
+            fnord_mf.write(&value, sizeof(int));
+
+            value = 23;
             default_mf.write(&value, sizeof(int));
         }
 
@@ -37,9 +41,14 @@ namespace {
             else if(p == "bar") {
                 return std::make_unique<memory_file::reader>(bar_mf);
             }
-            else {
+            else if(p == "fnord") {
+                return std::make_unique<memory_file::reader>(fnord_mf);
+            }
+            else if(p == "dflt") {
                 return std::make_unique<memory_file::reader>(default_mf);
             }
+
+            LOG_FATAL(format("could not open") % p.generic_string());
         }
 
         virtual std::tuple<path, std::unique_ptr<input_stream>>
@@ -72,6 +81,11 @@ namespace {
         {
             static std::vector<path> rv = { "" };
             return rv;
+        }
+
+        virtual maybe<char const*> get_default() const override
+        {
+            return "dflt";
         }
 
         virtual std::unique_ptr<asset> deserialize(input_stream &is,
@@ -120,6 +134,17 @@ test_case(simple_load)
     assert_log_empty();
 
     assert_eq(bar_ref->value, 10);
+}
+
+test_case(default_load)
+{
+    content_manager content(services);
+
+    auto dne_ref = content.load<mock_asset>("dne");
+    assert_log_message(log_level::info, "dflt: called mock_loader");
+    assert_log_empty();
+
+    assert_eq(dne_ref->value, 23);
 }
 
 test_case(name_instance_reuse)
