@@ -92,11 +92,10 @@ void weapon_controller_aspect::touched_surface(thing_id tid, surface_id touched_
             });
     }
 
-    presenter.model->script_model.send_to_linked(
+    presenter.model->send_to_linked(
             cog::message_type::damaged,
             /* sender */ touched_surface_id,
             /* source */ tid,
-            /* source type */ presenter.model->get_thing_source_type(tid),
             /* param0 */ projectile.damage,
             /* param1 */ static_cast<int>(projectile.damage_class));
     presenter.destroy_thing(tid);

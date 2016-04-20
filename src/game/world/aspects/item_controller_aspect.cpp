@@ -23,11 +23,10 @@ item_controller_aspect::item_controller_aspect(component_system &cs,
             return;
         }
 
-        presenter.model->script_model.send_to_linked(
+        presenter.model->send_to_linked(
                 cog::message_type::taken,
                 /* sender */ thing_id(e.taken_thing),
-                /* source */ thing_id(e.taker),
-                /* source type */ presenter.model->get_thing_source_type(e.taker));
+                /* source */ thing_id(e.taker));
 
         // TODO: Don't destroy the thing. Flag it for respawn.
         presenter.destroy_thing(e.taken_thing);

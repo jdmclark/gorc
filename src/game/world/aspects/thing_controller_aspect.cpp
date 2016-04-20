@@ -40,21 +40,19 @@ void thing_controller_aspect::update(gorc::time t,
 void thing_controller_aspect::on_touched_surface(thing_id thing,
                                                  surface_id surface) {
     // Dispatch touched message to surface
-    presenter.model->script_model.send_to_linked(
+    presenter.model->send_to_linked(
             cog::message_type::touched,
             /* sender */ surface,
-            /* source */ thing,
-            /* source type */ presenter.model->get_thing_source_type(thing));
+            /* source */ thing);
     return;
 }
 
 void thing_controller_aspect::on_touched_thing(thing_id thing,
                                                thing_id touched_thing) {
     // Dispatch touched message to thing
-    presenter.model->script_model.send_to_linked(
+    presenter.model->send_to_linked(
             cog::message_type::touched,
             /* sender */ touched_thing,
-            /* source */ thing,
-            /* source type */ presenter.model->get_thing_source_type(thing));
+            /* source */ thing);
     return;
 }

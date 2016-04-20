@@ -210,20 +210,18 @@ void character_controller_aspect::set_is_falling(thing_id tid, components::thing
     // Player is falling again.
     if(thing.attach_flags & flags::attach_flag::AttachedToThingFace) {
         maybe_if(thing.attached_thing, [&](thing_id attached_thing) {
-                presenter.model->script_model.send_to_linked(
+                presenter.model->send_to_linked(
                         cog::message_type::exited,
                         /* sender */ attached_thing,
-                        /* source */ tid,
-                        /* source type */ presenter.model->get_thing_source_type(tid));
+                        /* source */ tid);
             });
     }
     else if(thing.attach_flags & flags::attach_flag::AttachedToWorldSurface) {
         maybe_if(thing.attached_surface, [&](surface_id attached_surface) {
-                presenter.model->script_model.send_to_linked(
+                presenter.model->send_to_linked(
                         cog::message_type::exited,
                         /* sender */ attached_surface,
-                        /* source */ tid,
-                        /* source type */ presenter.model->get_thing_source_type(tid));
+                        /* source */ tid);
             });
     }
 
@@ -239,11 +237,10 @@ bool character_controller_aspect::step_on_surface(thing_id tid, components::thin
         thing.attach_flags = flag_set<flags::attach_flag> { flags::attach_flag::AttachedToWorldSurface };
         thing.attached_surface = surf_id;
 
-        presenter.model->script_model.send_to_linked(
+        presenter.model->send_to_linked(
                 cog::message_type::entered,
                 /* sender */ surface_id(surf_id),
-                /* source */ thing_id(tid),
-                /* source type */ presenter.model->get_thing_source_type(tid));
+                /* source */ thing_id(tid));
 
         cs.bus.fire_event(events::standing_material_changed(tid, get_standing_material(thing)));
         return true;
@@ -265,11 +262,10 @@ bool character_controller_aspect::step_on_thing(thing_id tid, components::thing&
         thing.attached_thing = land_thing_id;
         thing.prev_attached_thing_position = presenter.model->get_thing(land_thing_id).position;
 
-        presenter.model->script_model.send_to_linked(
+        presenter.model->send_to_linked(
                 cog::message_type::entered,
                 /* sender */ thing_id(land_thing_id),
-                /* source */ thing_id(tid),
-                /* source type */ presenter.model->get_thing_source_type(tid));
+                /* source */ thing_id(tid));
 
         cs.bus.fire_event(events::standing_material_changed(tid, get_standing_material(thing)));
         return true;
@@ -351,11 +347,10 @@ void character_controller_aspect::update(gorc::time t,
 void character_controller_aspect::on_killed(thing_id tid,
                                             components::thing &thing,
                                             thing_id killer) {
-    presenter.model->script_model.send_to_linked(
+    presenter.model->send_to_linked(
             cog::message_type::killed,
             /* sender */ tid,
-            /* source */ killer,
-            /* source type */ presenter.model->get_thing_source_type(killer));
+            /* source */ killer);
 
     thing.type = flags::thing_type::Corpse;
 }

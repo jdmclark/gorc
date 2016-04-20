@@ -50,7 +50,17 @@ public:
 
     components::thing& get_thing(thing_id id);
 
-    cog::source_type get_thing_source_type(thing_id id);
+    cog::source_type get_thing_source_type(cog::value id);
+
+    // Level specific send_to_linked wrapper.
+    // Automatically includes correct source type and calls thing class/capture cogs.
+    void send_to_linked(cog::message_type msg,
+                        cog::value sender,
+                        cog::value source,
+                        cog::value param0 = cog::value(),
+                        cog::value param1 = cog::value(),
+                        cog::value param2 = cog::value(),
+                        cog::value param3 = cog::value());
 };
 
 }

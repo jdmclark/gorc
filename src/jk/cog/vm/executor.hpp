@@ -103,7 +103,8 @@ namespace gorc {
                        value param0 = value(),
                        value param1 = value(),
                        value param2 = value(),
-                       value param3 = value());
+                       value param3 = value(),
+                       char const *send_reason = "direct");
 
             void send_to_all(message_type msg,
                              value sender,

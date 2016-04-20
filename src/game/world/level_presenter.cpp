@@ -205,57 +205,49 @@ void gorc::game::world::level_presenter::update_thing_sector(thing_id tid, compo
         return;
     }
 
-    auto tid_source_type = model->get_thing_source_type(tid);
-
     // Fire messages along path.
     surface_id first_adjoin = std::get<1>(update_path_sector_scratch.front());
     if(at_id(model->surfaces, first_adjoin).flags & flags::surface_flag::CogLinked) {
-        model->script_model.send_to_linked(cog::message_type::crossed,
-                                           /* sender */ first_adjoin,
-                                           /* source */ tid,
-                                           tid_source_type);
+        model->send_to_linked(cog::message_type::crossed,
+                              /* sender */ first_adjoin,
+                              /* source */ tid);
     }
 
     for(unsigned int i = 1; i < update_path_sector_scratch.size() - 1; ++i) {
         if(at_id(model->sectors, thing.sector).flags & flags::sector_flag::CogLinked) {
-            model->script_model.send_to_linked(cog::message_type::exited,
-                                               /* sender */ thing.sector,
-                                               /* source */ tid,
-                                               tid_source_type);
+            model->send_to_linked(cog::message_type::exited,
+                                  /* sender */ thing.sector,
+                                  /* source */ tid);
         }
 
         sector_id sec_id = std::get<0>(update_path_sector_scratch[i]);
         thing.sector = sec_id;
         if(at_id(model->sectors, sec_id).flags & flags::sector_flag::CogLinked) {
-            model->script_model.send_to_linked(cog::message_type::entered,
-                                               /* sender */ sec_id,
-                                               /* source */ tid,
-                                               tid_source_type);
+            model->send_to_linked(cog::message_type::entered,
+                                  /* sender */ sec_id,
+                                  /* source */ tid);
         }
 
         surface_id surf_id = std::get<1>(update_path_sector_scratch[i]);
         if(at_id(model->surfaces, surf_id).flags & flags::surface_flag::CogLinked) {
-            model->script_model.send_to_linked(cog::message_type::crossed,
-                                               /* sender */ surf_id,
-                                               /* source */ tid,
-                                               tid_source_type);
+            model->send_to_linked(cog::message_type::crossed,
+                                  /* sender */ surf_id,
+                                  /* source */ tid);
         }
     }
 
     if(at_id(model->sectors, thing.sector).flags & flags::sector_flag::CogLinked) {
-        model->script_model.send_to_linked(cog::message_type::exited,
-                                           /* sender */ thing.sector,
-                                           /* source */ tid,
-                                           tid_source_type);
+        model->send_to_linked(cog::message_type::exited,
+                              /* sender */ thing.sector,
+                              /* source */ tid);
     }
 
     sector_id last_sector = std::get<0>(update_path_sector_scratch.back());
     thing.sector = last_sector;
     if(at_id(model->sectors, last_sector).flags & flags::sector_flag::CogLinked) {
-        model->script_model.send_to_linked(cog::message_type::entered,
-                                           /* sender */ last_sector,
-                                           /* source */ tid,
-                                           tid_source_type);
+        model->send_to_linked(cog::message_type::entered,
+                              /* sender */ last_sector,
+                              /* source */ tid);
     }
 }
 
@@ -312,18 +304,16 @@ void gorc::game::world::level_presenter::activate() {
     maybe_if(activate_contact, [&](physics::contact const &contact) {
         maybe_if(contact.contact_surface_id, [&](surface_id contact_surface_id) {
             LOG_INFO(format("ACTIVATE SURFACE: %d") % static_cast<int>(contact_surface_id));
-            model->script_model.send_to_linked(cog::message_type::activated,
-                                               /* sender */ surface_id(contact_surface_id),
-                                               /* source */ thing_id(model->local_player_thing_id),
-                                               /* source type */ cog::source_type::player);
+            model->send_to_linked(cog::message_type::activated,
+                                  /* sender */ contact_surface_id,
+                                  /* source */ model->local_player_thing_id);
         });
 
         maybe_if(contact.contact_thing_id, [&](thing_id contact_thing_id) {
             LOG_INFO(format("ACTIVATE THING: %d") % static_cast<int>(contact_thing_id));
-            model->script_model.send_to_linked(cog::message_type::activated,
-                                               /* sender */ thing_id(contact_thing_id),
-                                               /* source */ thing_id(model->local_player_thing_id),
-                                               /* source type */ cog::source_type::player);
+            model->send_to_linked(cog::message_type::activated,
+                                  /* sender */ contact_thing_id,
+                                  /* source */ model->local_player_thing_id);
             eventbus->fire_event(events::class_sound(contact_thing_id,
                                                      flags::sound_subclass_type::Activate));
         });
@@ -342,12 +332,11 @@ void gorc::game::world::level_presenter::damage() {
 
     maybe_if(activate_contact, [&](physics::contact const &contact) {
         maybe_if(contact.contact_surface_id, [&](surface_id contact_surface_id) {
-            model->script_model.send_to_linked(cog::message_type::damaged,
-                                               /* sender */ surface_id(contact_surface_id),
-                                               /* source */ thing_id(model->local_player_thing_id),
-                                               cog::source_type::player,
-                                               /* param0 */ 1000,
-                                               /* param1 */ static_cast<int>(flags::damage_flag::saber));
+            model->send_to_linked(cog::message_type::damaged,
+                                  /* sender */ contact_surface_id,
+                                  /* source */ model->local_player_thing_id,
+                                  /* param0 */ 1000,
+                                  /* param1 */ static_cast<int>(flags::damage_flag::saber));
         });
 
         maybe_if(contact.contact_thing_id, [&](thing_id contact_thing_id) {
@@ -369,10 +358,9 @@ void gorc::game::world::level_presenter::crouch(bool is_crouched) {
 
 void gorc::game::world::level_presenter::thing_sighted(thing_id tid) {
     model->get_thing(tid).flags += flags::thing_flag::Sighted;
-    model->script_model.send_to_linked(cog::message_type::sighted,
-                                       /* sender */ thing_id(tid),
-                                       /* source */ cog::value(),
-                                       /* source type */ cog::source_type::system);
+    model->send_to_linked(cog::message_type::sighted,
+                          /* sender */ tid,
+                          /* source */ cog::value());
 }
 
 void gorc::game::world::level_presenter::ai_clear_mode(thing_id tid, flag_set<flags::ai_mode_flag> flags) {
@@ -849,12 +837,11 @@ float gorc::game::world::level_presenter::damage_thing(thing_id tid,
                                                        float damage,
                                                        flag_set<flags::damage_flag> flags,
                                                        thing_id damager_id) {
-    model->script_model.send_to_linked(cog::message_type::damaged,
-                                       /* sender */ tid,
-                                       /* source */ damager_id,
-                                       /* source type */ model->get_thing_source_type(damager_id),
-                                       /* param0 */ damage,
-                                       /* param1 */ static_cast<int>(flags));
+    model->send_to_linked(cog::message_type::damaged,
+                          /* sender */ tid,
+                          /* source */ damager_id,
+                          /* param0 */ damage,
+                          /* param1 */ static_cast<int>(flags));
 
     components::thing& referencedThing = model->get_thing(tid);
     if(referencedThing.health > 0.0f) {

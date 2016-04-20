@@ -268,7 +268,8 @@ gorc::cog::value gorc::cog::executor::send(cog_id instance,
                                            value param0,
                                            value param1,
                                            value param2,
-                                           value param3)
+                                           value param3,
+                                           char const *send_reason)
 {
     auto &inst = at_id(instances, instance);
 
@@ -278,9 +279,10 @@ gorc::cog::value gorc::cog::executor::send(cog_id instance,
     }
 
     diagnostic_context dc(inst->cog->filename.c_str());
-    LOG_DEBUG(format("instance %d received message %s "
+    LOG_DEBUG(format("instance %d received %s message %s "
                      "from sender %s due to source %s") %
               static_cast<int>(instance) %
+              send_reason %
               as_string(t) %
               as_string(sender) %
               as_string(source));
@@ -307,31 +309,16 @@ void gorc::cog::executor::send_to_all(message_type t,
                                       value param3)
 {
     for(size_t i = 0; i < instances.size(); ++i) {
-        auto &inst = instances[i];
-
-        auto addr = inst->cog->exports.get_offset(t);
-        if(!addr.has_value()) {
-            continue;
-        }
-
-        diagnostic_context dc(inst->cog->filename.c_str());
-        LOG_DEBUG(format("instance %d received broadcast message %s "
-                         "from sender %s due to source %s") %
-                  i %
-                  as_string(t) %
-                  as_string(sender) %
-                  as_string(source));
-
-        continuation cc(call_stack_frame(cog_id(static_cast<int>(i)),
-                                         addr.get_value(),
-                                         sender,
-                                         sender_id,
-                                         source,
-                                         param0,
-                                         param1,
-                                         param2,
-                                         param3));
-        vm.execute(verbs, *this, services, cc);
+        send(cog_id(i),
+             t,
+             sender,
+             sender_id,
+             source,
+             param0,
+             param1,
+             param2,
+             param3,
+             "broadcast");
     }
 }
 
@@ -344,6 +331,7 @@ void gorc::cog::executor::send_to_linked(message_type t,
                                          value param2,
                                          value param3)
 {
+    // Dispatch message to all linked level cogs
     for(auto const &link : make_range(linkages.equal_range(sender))) {
         // System source type cannot be masked.
         if(!(link.second.mask & st) && (st != source_type::system)) {
@@ -351,32 +339,21 @@ void gorc::cog::executor::send_to_linked(message_type t,
             continue;
         }
 
-        auto &inst = at_id(instances, link.second.instance_id);
-
-        auto addr = inst->cog->exports.get_offset(t);
-        if(!addr.has_value()) {
-            continue;
-        }
-
-        diagnostic_context dc(inst->cog->filename.c_str());
-        LOG_DEBUG(format("instance %d received linked message %s from sender %s due to source %s") %
-                  static_cast<int>(link.second.instance_id) %
-                  as_string(t) %
-                  as_string(sender) %
-                  as_string(source));
-
-        continuation cc(call_stack_frame(link.second.instance_id,
-                                         addr.get_value(),
-                                         sender,
-                                         link.second.sender_link_id,
-                                         source,
-                                         param0,
-                                         param1,
-                                         param2,
-                                         param3));
-        vm.execute(verbs, *this, services, cc);
+        send(link.second.instance_id,
+             t,
+             sender,
+             link.second.sender_link_id,
+             source,
+             param0,
+             param1,
+             param2,
+             param3,
+             "linked");
     }
 
+    // Some cogs may have blocked on a particular message. For example, the
+    // WaitForStop verb blocks until the correct arrived message is sent.
+    // Resume any continuations matching this message.
     auto wait_rng = wait_records.equal_range(std::make_tuple(t, sender));
     for(auto it = wait_rng.first; it != wait_rng.second;) {
         auto curr_it = it++;

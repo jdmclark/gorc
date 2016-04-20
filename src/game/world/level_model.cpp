@@ -31,9 +31,17 @@ gorc::game::world::components::thing& gorc::game::world::level_model::get_thing(
     LOG_FATAL(format("get_thing: thing %d does not exist") % static_cast<int>(id));
 }
 
-gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(thing_id id)
+gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(cog::value id)
 {
-    auto const &thing = get_thing(id);
+    if(id.get_type() == cog::value_type::cog) {
+        return cog::source_type::cog;
+    }
+    else if(id.get_type() != cog::value_type::thing) {
+        return cog::source_type::system;
+    }
+
+    thing_id tid = id;
+    auto const &thing = get_thing(tid);
     switch(thing.type) {
     default:
         return cog::source_type::free;
@@ -70,5 +78,53 @@ gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(thi
 
     case flags::thing_type::Particle:
         return cog::source_type::particle;
+    }
+}
+
+void gorc::game::world::level_model::send_to_linked(cog::message_type msg,
+                                                    cog::value sender,
+                                                    cog::value source,
+                                                    cog::value param0,
+                                                    cog::value param1,
+                                                    cog::value param2,
+                                                    cog::value param3)
+{
+    script_model.send_to_linked(msg,
+                                sender,
+                                source,
+                                get_thing_source_type(source),
+                                param0,
+                                param1,
+                                param2,
+                                param3);
+
+    thing_id tid = sender;
+    if(tid.is_valid()) {
+        auto const &thing = get_thing(tid);
+        maybe_if(thing.cog, [&](asset_ref<cog::script> class_cog) {
+                script_model.send(script_model.create_global_instance(class_cog),
+                                  msg,
+                                  sender,
+                                  /* sender id */ cog::value(),
+                                  source,
+                                  param0,
+                                  param1,
+                                  param2,
+                                  param3,
+                                  "class");
+            });
+
+        maybe_if(thing.capture_cog, [&](cog_id capture_cog) {
+                script_model.send(capture_cog,
+                                  msg,
+                                  sender,
+                                  /* sender id */ cog::value(),
+                                  source,
+                                  param0,
+                                  param1,
+                                  param2,
+                                  param3,
+                                  "capture");
+            });
     }
 }
