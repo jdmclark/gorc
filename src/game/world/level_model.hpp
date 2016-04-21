@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/vector.hpp"
+#include "math/color.hpp"
 #include "libold/content/assets/level.hpp"
 #include "libold/base/utility/pool.hpp"
 #include "libold/base/utility/component_system.hpp"
@@ -43,7 +44,7 @@ public:
 
     double level_time = 0.0;
     double game_time = 0.0;
-    vector<3> dynamic_tint = make_vector(0.0f, 0.0f, 0.0f);
+    color_rgb dynamic_tint = make_color(0.0f, 0.0f, 0.0f);
 
     level_model(event_bus& parent_event_bus, content_manager& manager, service_registry const &,
             asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);

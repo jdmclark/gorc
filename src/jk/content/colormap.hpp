@@ -12,6 +12,8 @@
 
 namespace gorc {
 
+    class content_manager;
+
     class colormap_palette {
     public:
         std::array<color_rgb8, 256> data;
@@ -53,6 +55,13 @@ namespace gorc {
         colormap(deserialization_constructor_tag, binary_input_stream &);
 
         void json_serialize_object(json_output_stream &) const;
+
+        color_rgb8 get_color(int color_index, int light_level) const;
+
+        color_rgb8 get_color(int color_index) const;
+        color_rgb8 get_light_color(int color_index) const;
     };
+
+    asset_ref<colormap> get_asset(content_manager &cm, colormap_id);
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utility/flag_set.hpp"
+#include "math/vector.hpp"
 #include "libold/content/flags/face_flag.hpp"
 #include "libold/content/flags/geometry_mode.hpp"
 #include "libold/content/flags/light_mode.hpp"

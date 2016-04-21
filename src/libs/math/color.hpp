@@ -16,9 +16,19 @@ namespace gorc {
         return color(r, g, b, a);
     }
 
+    constexpr color make_color(color_rgb col, float a)
+    {
+        return color(get<0>(col), get<1>(col), get<2>(col), a);
+    }
+
     constexpr color_rgb make_color(float r, float g, float b)
     {
         return color_rgb(r, g, b);
+    }
+
+    constexpr color solid(color_rgb col)
+    {
+        return make_color(col, 1.0f);
     }
 
     constexpr color_rgba8 make_color_rgba8(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -40,5 +50,9 @@ namespace gorc {
     {
         return make_color_rgba8(col, 255);
     }
+
+    // Operators
+    color_vector_tag operator+(color_vector_tag, color_vector_tag);
+    color_vector_tag operator-(color_vector_tag, color_vector_tag);
 
 }

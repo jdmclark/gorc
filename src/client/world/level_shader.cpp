@@ -31,7 +31,7 @@ gorc::client::world::surface_shader::surface_shader(asset_ref<content::assets::s
     return;
 }
 
-void gorc::client::world::surface_shader::activate(const vector<3>& current_sector_tint) {
+void gorc::client::world::surface_shader::activate(const color_rgb& current_sector_tint) {
     glUseProgram(program);
 
     // Set texture locations
@@ -58,7 +58,7 @@ gorc::client::world::horizon_shader::horizon_shader(asset_ref<content::assets::s
     return;
 }
 
-void gorc::client::world::horizon_shader::activate(const vector<3>& current_sector_tint, const vector<2>& sky_offset,
+void gorc::client::world::horizon_shader::activate(const color_rgb& current_sector_tint, const vector<2>& sky_offset,
         float horizon_pixels_per_rev, float horizon_distance, const box<2, int>& screen_size, const vector<3>& camera_look) {
     glUseProgram(program);
 
@@ -98,7 +98,7 @@ gorc::client::world::ceiling_shader::ceiling_shader(asset_ref<content::assets::s
     return;
 }
 
-void gorc::client::world::ceiling_shader::activate(const vector<3>& current_sector_tint, const vector<2>& sky_offset, float ceiling_sky_z) {
+void gorc::client::world::ceiling_shader::activate(const color_rgb& current_sector_tint, const vector<2>& sky_offset, float ceiling_sky_z) {
     glUseProgram(program);
 
     std::array<float, 4> tint_color;

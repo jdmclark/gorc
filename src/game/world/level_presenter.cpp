@@ -415,7 +415,7 @@ void gorc::game::world::level_presenter::ai_set_move_thing(thing_id tid, thing_i
 }
 
 // Color verbs
-void gorc::game::world::level_presenter::add_dynamic_tint(thing_id, const vector<3>& tint) {
+void gorc::game::world::level_presenter::add_dynamic_tint(thing_id, const color_rgb& tint) {
     model->dynamic_tint += tint;
 
     // Clamp dynamic tint
@@ -656,7 +656,9 @@ void gorc::game::world::level_presenter::set_sector_thrust(sector_id sid, const 
 
 void gorc::game::world::level_presenter::set_sector_tint(sector_id sid, const vector<3>& color) {
     content::assets::level_sector& sector = at_id(model->sectors, sid);
-    sector.tint = color;
+
+    color_rgb (*color_fn)(float, float, float) = &make_color;
+    sector.tint = apply(color_fn, color);
 }
 
 // surface verbs
@@ -1065,7 +1067,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
 
     // Color verbs
     verbs.add_safe_verb("adddynamictint", cog::value(), [&components](thing_id player_id, float r, float g, float b) {
-        components.current_level_presenter->add_dynamic_tint(player_id, make_vector(r, g, b));
+        components.current_level_presenter->add_dynamic_tint(player_id, make_color(r, g, b));
     });
 
     // Creature verbs

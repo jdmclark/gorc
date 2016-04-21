@@ -1,6 +1,6 @@
 #include "value_mapping.hpp"
 #include "log/log.hpp"
-#include "libold/content/assets/colormap.hpp"
+#include "jk/content/colormap.hpp"
 #include "libold/content/assets/animation.hpp"
 #include "libold/content/assets/material.hpp"
 #include "libold/content/assets/model.hpp"
@@ -49,7 +49,7 @@ gorc::cog::value gorc::game::world::world_value_mapping::operator()(
 
     case cog::value_type::colormap:
         try {
-            return force_cast<colormap_id>(content.load_id<content::assets::colormap>(value));
+            return force_cast<colormap_id>(content.load_id<colormap>(value));
         }
         catch(...) {
             return colormap_id(invalid_id);

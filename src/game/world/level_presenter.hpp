@@ -92,7 +92,7 @@ public:
     void ai_set_move_thing(thing_id, thing_id move_to_thing);
 
     // Color verbs
-    void add_dynamic_tint(thing_id, const vector<3>& tint);
+    void add_dynamic_tint(thing_id, const color_rgb& tint);
 
     // Creature verbs
     float get_thing_health(thing_id);

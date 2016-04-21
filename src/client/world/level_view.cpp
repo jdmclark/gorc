@@ -10,6 +10,7 @@
 #include "libold/content/assets/sprite.hpp"
 #include "libold/content/constants.hpp"
 #include "game/world/components/thing.hpp"
+#include "math/color.hpp"
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -205,7 +206,7 @@ void gorc::client::world::level_view::draw_visible_diffuse_surfaces() {
     }
 }
 
-void gorc::client::world::level_view::draw_visible_sky_surfaces(const box<2, int>& view_size, const vector<3>& sector_tint) {
+void gorc::client::world::level_view::draw_visible_sky_surfaces(const box<2, int>& view_size, const color_rgb& sector_tint) {
     glDepthMask(GL_TRUE);
 
     if(!horizon_sky_surfaces_scratch.empty()) {
@@ -384,13 +385,13 @@ void gorc::client::world::level_view::draw_pov_model() {
         maybe_if(currentModel->camera_model.pov_model, [&](auto pov_model) {
             const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
             const auto& current_sector = at_id(currentModel->sectors, thing.sector);
-            auto sector_color = make_fill_vector<3, float>(1.0f);
+            auto sector_color = make_color(1.0f, 1.0f, 1.0f);
             maybe_if(current_sector.cmp, [&](auto cmp) {
-                sector_color = cmp->tint_color;
+                sector_color = cmp->tint;
             });
 
             float sector_light = current_sector.ambient_light + current_sector.extra_light;
-            auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
+            auto lit_sector_color = solid(sector_color * sector_light);
 
             int saber_mesh_node = -1;
             if(thing.jk_flags & flags::jk_flag::has_saber) {
@@ -437,9 +438,9 @@ void gorc::client::world::level_view::draw_surface(surface_id surf_num, const co
 
         glBegin(GL_TRIANGLES);
 
-        auto sector_tint = make_zero_vector<3, float>();
+        auto sector_tint = make_color(0.0f, 0.0f, 0.0f);
         maybe_if(sector.cmp, [&](auto cmp) {
-            sector_tint = cmp->tint_color;
+            sector_tint = cmp->tint;
         });
 
         vector<3> first_geo = lev.vertices[std::get<0>(surface.vertices[0])];
@@ -679,13 +680,13 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
     }
 
     const auto& current_sector = at_id(currentModel->sectors, thing.sector);
-    auto sector_color = make_fill_vector<3, float>(1.0f);
+    auto sector_color = make_color(1.0f, 1.0f, 1.0f);
     maybe_if(current_sector.cmp, [&](auto cmp) {
-        sector_color = cmp->tint_color;
+        sector_color = cmp->tint;
     });
 
     float sector_light = current_sector.ambient_light + current_sector.extra_light;
-    auto lit_sector_color = extend_vector<4>(sector_color * sector_light, 1.0f);
+    auto lit_sector_color = solid(sector_color * sector_light);
 
     maybe_if(thing.model_3d, [&](auto model) {
         int weapon_mesh_node = -1;

@@ -10,7 +10,6 @@
 #include "libold/base/place/place_controller.hpp"
 #include "libold/base/view_stack.hpp"
 #include "libold/base/content/assets/shader.hpp"
-#include "libold/content/assets/colormap.hpp"
 #include "libold/base/graphics/default_render_target.hpp"
 #include "libold/base/graphics/texture_render_target.hpp"
 

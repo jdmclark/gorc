@@ -137,12 +137,12 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::material_loader::deserializ
             MaterialColorRecordHeader colorRecord;
             bis.read(&colorRecord, sizeof(MaterialColorRecordHeader));
 
-            vector<3, uint8_t> color = make_zero_vector<3, uint8_t>();
-            vector<3, uint8_t> lightcolor = make_zero_vector<3, uint8_t>();
+            color_rgb8 color = make_color_rgb8(0, 0, 0);
+            color_rgb8 lightcolor = make_color_rgb8(0, 0, 0);
 
             if(header.BitDepth == 8) {
-                color = colormap.get_color(static_cast<uint8_t>(colorRecord.ColorNumber));
-                lightcolor = colormap.get_extra(static_cast<uint8_t>(colorRecord.ColorNumber));
+                color = colormap.get_color(colorRecord.ColorNumber);
+                lightcolor = colormap.get_light_color(colorRecord.ColorNumber);
             }
 
             // Use 16x16 as a safe default texture size for color mats.
@@ -232,7 +232,7 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::material_loader::deserializ
                 auto diffuse = LoadMaterialFromMemory(dataheader.SizeX, dataheader.SizeY, col_buffer.data());
 
                 for(auto it = orig_buffer.begin(), jt = col_buffer.begin(); it != orig_buffer.end() && jt != col_buffer.end(); ++it, jt += 4) {
-                    auto color = colormap.get_extra(*it);
+                    auto color = colormap.get_light_color(*it);
                     *(jt + 0) = get<0>(color);
                     *(jt + 1) = get<1>(color);
                     *(jt + 2) = get<2>(color);

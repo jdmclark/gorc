@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include "math/matrix.hpp"
+#include "math/color.hpp"
 #include "math/box.hpp"
 #include "libold/base/content/assets/shader.hpp"
 
@@ -30,7 +31,7 @@ class surface_shader : public level_shader {
 public:
     surface_shader(asset_ref<content::assets::shader> shader);
 
-    void activate(const vector<3>& sector_tint);
+    void activate(const color_rgb& sector_tint);
 };
 
 class horizon_shader : public level_shader {
@@ -38,7 +39,7 @@ class horizon_shader : public level_shader {
 public:
     horizon_shader(asset_ref<content::assets::shader> shader);
 
-    void activate(const vector<3>& sector_tint, const vector<2>& offset, float horizon_pixels_per_rev,
+    void activate(const color_rgb& sector_tint, const vector<2>& offset, float horizon_pixels_per_rev,
             float horizon_distance, const box<2, int>& screen_size, const vector<3>& camera_look);
 };
 
@@ -47,7 +48,7 @@ class ceiling_shader : public level_shader {
 public:
     ceiling_shader(asset_ref<content::assets::shader> shader);
 
-    void activate(const vector<3>& sector_tint, const vector<2>& offset, float ceiling_sky_z);
+    void activate(const color_rgb& sector_tint, const vector<2>& offset, float ceiling_sky_z);
 };
 
 class light_shader : public level_shader {

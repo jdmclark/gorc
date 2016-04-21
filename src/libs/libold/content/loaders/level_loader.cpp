@@ -146,7 +146,7 @@ void ParseGeoresourceSection(assets::level& lev, text::tokenizer& tok, content_m
         tok.get_number<int>();
         tok.assert_punctuator(":");
 
-        lev.colormaps.push_back(manager.load<assets::colormap>(tok.get_space_delimited_string()));
+        lev.colormaps.push_back(manager.load<colormap>(tok.get_space_delimited_string()));
         if(!lev.master_colormap.has_value()) {
             lev.master_colormap = lev.colormaps.back();
             services.get<master_colormap>().cmp = lev.master_colormap;
@@ -291,7 +291,7 @@ void ParseSectorsSection(assets::level& lev, text::tokenizer& tok, content_manag
                 float r = tok.get_number<float>();
                 float g = tok.get_number<float>();
                 float b = tok.get_number<float>();
-                sec.tint = make_vector(r, g, b);
+                sec.tint = make_color(r, g, b);
             }
             else if(boost::iequals(t.value, "boundbox")) {
                 float x0 = tok.get_number<float>();

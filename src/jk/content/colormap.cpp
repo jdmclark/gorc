@@ -4,6 +4,7 @@
 #include "io/path.hpp"
 #include "content/image.hpp"
 #include "text/extract_path.hpp"
+#include "content/content_manager.hpp"
 #include <cstring>
 
 gorc::fourcc const gorc::colormap::type = "CMP"_4CC;
@@ -177,4 +178,24 @@ void gorc::colormap::json_serialize_object(json_output_stream &jos) const
             store_transparency_image(*this, transparency_path);
         }
     });
+}
+
+gorc::color_rgb8 gorc::colormap::get_color(int index, int level) const
+{
+    return palette->data.at(light_levels->data.at(level).at(index));
+}
+
+gorc::color_rgb8 gorc::colormap::get_color(int index) const
+{
+    return get_color(index, 63);
+}
+
+gorc::color_rgb8 gorc::colormap::get_light_color(int index) const
+{
+    return get_color(index, 0);
+}
+
+gorc::asset_ref<gorc::colormap> gorc::get_asset(content_manager &cm, colormap_id id)
+{
+    return cm.get_asset<colormap>(asset_id(static_cast<int>(id)));
 }

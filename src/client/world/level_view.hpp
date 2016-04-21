@@ -85,7 +85,7 @@ private:
     void do_sector_vis(sector_id sec_num, const std::array<double, 16>& proj_mat, const std::array<double, 16>& view_mat,
             const std::array<int, 4>& viewport, const box<2, double>& adj_bbox, const vector<3>& cam_pos, const vector<3>& cam_look);
     void draw_visible_diffuse_surfaces();
-    void draw_visible_sky_surfaces(const box<2, int>& screen_size, const vector<3>& sector_tint);
+    void draw_visible_sky_surfaces(const box<2, int>& screen_size, const color_rgb& sector_tint);
     void draw_visible_translucent_surfaces_and_things();
     void draw_pov_model();
 

@@ -7,7 +7,7 @@
 #include "game/world/level_presenter.hpp"
 #include "game/world/keys/key_presenter.hpp"
 
-gorc::client::world::pov_mesh_node_visitor::pov_mesh_node_visitor(const vector<4>& sector_color, level_view& view,
+gorc::client::world::pov_mesh_node_visitor::pov_mesh_node_visitor(const color& sector_color, level_view& view,
         int saber_draw_node, float saber_length, float saber_base_radius, float saber_tip_radius,
         maybe<asset_ref<content::assets::material>> saber_blade, maybe<asset_ref<content::assets::material>> saber_tip)
     : sector_color(sector_color), view(view), saber_draw_node(saber_draw_node), saber_length(saber_length),

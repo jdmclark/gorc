@@ -15,7 +15,7 @@
 #include "libold/content/flags/damage_flag.hpp"
 #include "model.hpp"
 #include "soundclass.hpp"
-#include "colormap.hpp"
+#include "jk/content/colormap.hpp"
 #include "jk/cog/script/script.hpp"
 #include "puppet.hpp"
 #include "sprite.hpp"

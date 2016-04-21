@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model_face.hpp"
+#include "math/vector.hpp"
 #include <memory>
 #include <vector>
 

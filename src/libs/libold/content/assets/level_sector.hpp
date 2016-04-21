@@ -5,12 +5,11 @@
 #include "libold/base/content/assets/sound.hpp"
 #include "libold/content/flags/sector_flag.hpp"
 #include "utility/maybe.hpp"
+#include "jk/content/colormap.hpp"
 
 namespace gorc {
 namespace content {
 namespace assets {
-
-class colormap;
 
 class level_sector {
 public:
@@ -20,7 +19,7 @@ public:
     float extra_light;
     int colormap_id;
     maybe<asset_ref<colormap>> cmp;
-    vector<3> tint;
+    color_rgb tint;
     box<3> bounding_box;
     box<3> collide_box;
     maybe<asset_ref<sound>> ambient_sound;
