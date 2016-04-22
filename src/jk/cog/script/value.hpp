@@ -4,6 +4,8 @@
 #include "content/id.hpp"
 #include "utility/constructor_tag.hpp"
 #include "math/vector.hpp"
+#include "math/color.hpp"
+#include "math/point.hpp"
 #include "io/binary_input_stream.hpp"
 #include "io/binary_output_stream.hpp"
 #include <string>
@@ -52,6 +54,14 @@ namespace gorc {
             value(vector<3> const &);
             value& operator=(vector<3> const &);
             operator vector<3>() const;
+
+            value(point<3> const &);
+            value& operator=(point<3> const &);
+            operator point<3>() const;
+
+            value(color_rgb const &);
+            value& operator=(color_rgb const &);
+            operator color_rgb() const;
 
 #define MAKE_ID_MEMBERS(x) \
             value(x##_id); \

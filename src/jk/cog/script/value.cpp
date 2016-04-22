@@ -5,6 +5,8 @@ namespace {
     char const *default_string = "";
     constexpr int default_int = -1;
     constexpr gorc::vector<3> default_vector;
+    constexpr gorc::point<3> default_point;
+    constexpr gorc::color_rgb default_color;
     constexpr float default_float = 0.0f;
 }
 
@@ -154,6 +156,54 @@ gorc::cog::value::operator gorc::vector<3>() const
     }
     else {
         return default_vector;
+    }
+}
+
+gorc::cog::value::value(point<3> const &v)
+{
+    *this = v;
+}
+
+gorc::cog::value& gorc::cog::value::operator=(point<3> const &v)
+{
+    type_flag = value_type::vector;
+    data.vector.x = get<0>(v);
+    data.vector.y = get<1>(v);
+    data.vector.z = get<2>(v);
+    return *this;
+}
+
+gorc::cog::value::operator gorc::point<3>() const
+{
+    if(type_flag == value_type::vector) {
+        return make_point(data.vector.x, data.vector.y, data.vector.z);
+    }
+    else {
+        return default_point;
+    }
+}
+
+gorc::cog::value::value(color_rgb const &v)
+{
+    *this = v;
+}
+
+gorc::cog::value& gorc::cog::value::operator=(color_rgb const &v)
+{
+    type_flag = value_type::vector;
+    data.vector.x = get<0>(v);
+    data.vector.y = get<1>(v);
+    data.vector.z = get<2>(v);
+    return *this;
+}
+
+gorc::cog::value::operator gorc::color_rgb() const
+{
+    if(type_flag == value_type::vector) {
+        return make_color(data.vector.x, data.vector.y, data.vector.z);
+    }
+    else {
+        return default_color;
     }
 }
 

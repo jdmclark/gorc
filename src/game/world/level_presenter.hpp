@@ -132,7 +132,7 @@ public:
     void set_sector_flags(sector_id, flag_set<flags::sector_flag> flags);
     void set_sector_light(sector_id, float value, float delay);
     void set_sector_thrust(sector_id, const vector<3>& thrust);
-    void set_sector_tint(sector_id, const vector<3>& color);
+    void set_sector_tint(sector_id, const color_rgb& color);
 
     // surface verbs
     void clear_adjoin_flags(surface_id surface, flag_set<flags::adjoin_flag> flags);

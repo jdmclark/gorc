@@ -654,11 +654,8 @@ void gorc::game::world::level_presenter::set_sector_thrust(sector_id sid, const 
     sector.thrust = thrust * static_cast<float>(rate_factor);
 }
 
-void gorc::game::world::level_presenter::set_sector_tint(sector_id sid, const vector<3>& color) {
-    content::assets::level_sector& sector = at_id(model->sectors, sid);
-
-    color_rgb (*color_fn)(float, float, float) = &make_color;
-    sector.tint = apply(color_fn, color);
+void gorc::game::world::level_presenter::set_sector_tint(sector_id sid, const color_rgb& color) {
+    at_id(model->sectors, sid).tint = color;
 }
 
 // surface verbs
@@ -1250,7 +1247,7 @@ void gorc::game::world::level_presenter::register_verbs(cog::verb_table &verbs, 
         components.current_level_presenter->set_sector_thrust(sid, normalize(thrust_vec) * thrust_speed);
     });
 
-    verbs.add_safe_verb("setsectortint", cog::value(), [&components](sector_id sid, vector<3> tint) {
+    verbs.add_safe_verb("setsectortint", cog::value(), [&components](sector_id sid, color_rgb tint) {
         components.current_level_presenter->set_sector_tint(sid, tint);
     });
 

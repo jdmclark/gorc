@@ -42,6 +42,16 @@ namespace gorc {
                 static constexpr auto value = value_type::vector;
             };
 
+            template <>
+            struct get_value_type<point<3>> {
+                static constexpr auto value = value_type::vector;
+            };
+
+            template <>
+            struct get_value_type<color_rgb> {
+                static constexpr auto value = value_type::vector;
+            };
+
 #define MAKE_ID_VALUE_TYPE(x) \
             template <> \
             struct get_value_type<x##_id> { \
@@ -174,6 +184,8 @@ namespace gorc {
             MAKE_VERB_ARGUMENT_TYPE(float, value_type::floating)
             MAKE_VERB_ARGUMENT_TYPE(char const *, value_type::string)
             MAKE_VERB_ARGUMENT_TYPE(vector<3>, value_type::vector)
+            MAKE_VERB_ARGUMENT_TYPE(point<3>, value_type::vector)
+            MAKE_VERB_ARGUMENT_TYPE(color_rgb, value_type::vector)
 
 #define MAKE_VERB_ARGUMENT_ID_TYPE(x) \
             MAKE_VERB_ARGUMENT_TYPE(x##_id, value_type::x)
