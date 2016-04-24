@@ -5,7 +5,7 @@ gorc::game::world::animations::aspects::update_surface_material_aspect::update_s
     return;
 }
 
-void gorc::game::world::animations::aspects::update_surface_material_aspect::update(gorc::time t, entity_id, components::surface_material& anim) {
+void gorc::game::world::animations::aspects::update_surface_material_aspect::update(gorc::time t, thing_id, components::surface_material& anim) {
     anim.framerate_accumulator += t.elapsed_as_seconds();
 
     int surface_material = at_id(model.level->surfaces, anim.surface).material;

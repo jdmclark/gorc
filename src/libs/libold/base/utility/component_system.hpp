@@ -23,8 +23,8 @@ public:
     public:
         explicit entity_iterator(const pool<entity, 1024>::iterator& it);
 
-        inline entity_id operator*() const {
-            return entity_id(it->get_id());
+        inline thing_id operator*() const {
+            return thing_id(it->get_id());
         }
 
         inline entity_iterator& operator++() {
@@ -54,8 +54,8 @@ public:
     public:
         explicit entity_const_iterator(const pool<entity, 1024>::const_iterator& it);
 
-        inline entity_id operator*() const {
-            return entity_id(it->get_id());
+        inline thing_id operator*() const {
+            return thing_id(it->get_id());
         }
 
         inline entity_const_iterator& operator++() {
@@ -82,14 +82,14 @@ private:
     class pool_container {
     public:
         virtual ~pool_container();
-        virtual void erase_entity(entity_id id) = 0;
+        virtual void erase_entity(thing_id id) = 0;
     };
 
     template <typename CompT> class pool_container_impl : public pool_container {
     public:
         component_pool<CompT> components;
 
-        virtual void erase_entity(entity_id id) override {
+        virtual void erase_entity(thing_id id) override {
             components.erase(components.find(id));
         }
     };
@@ -120,11 +120,11 @@ public:
     void update(gorc::time time);
     void draw(gorc::time time);
 
-    inline entity_id make_entity() {
-        return entity_id(entities.emplace().get_id());
+    inline thing_id make_entity() {
+        return thing_id(entities.emplace().get_id());
     }
 
-    inline void erase_entity(entity_id id) {
+    inline void erase_entity(thing_id id) {
         bus.fire_event(events::destroyed(id));
 
         for(auto &pool : pool_containers) {
@@ -147,11 +147,11 @@ public:
     }
 
     template <typename T, typename... ArgT>
-    inline T& emplace_component(entity_id parent, ArgT&&... args) {
+    inline T& emplace_component(thing_id parent, ArgT&&... args) {
         return get_pool<T>().emplace(parent, std::forward<ArgT>(args)...);
     }
 
-    template <typename T> inline range<typename component_pool<T>::iterator> find_component(entity_id parent) {
+    template <typename T> inline range<typename component_pool<T>::iterator> find_component(thing_id parent) {
         return get_pool<T>().find(parent);
     }
 

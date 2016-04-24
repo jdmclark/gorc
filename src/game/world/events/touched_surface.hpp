@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/entity_id.hpp"
+#include "content/id.hpp"
 
 namespace gorc {
 namespace game {

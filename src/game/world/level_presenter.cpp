@@ -880,7 +880,7 @@ void gorc::game::world::level_presenter::real_destroy_thing(thing_id tid) {
     // Expunge associated resources.
     key_presenter->expunge_thing_animations(thing_id(tid));
 
-    model->ecs.erase_entity(entity_id(tid));
+    model->ecs.erase_entity(tid);
 }
 
 void gorc::game::world::level_presenter::detach_thing(thing_id tid) {
@@ -1009,7 +1009,7 @@ void gorc::game::world::level_presenter::set_armed_mode(thing_id player, flags::
 }
 
 gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(thing_id player) {
-    for(auto const &pup : model->ecs.find_component<components::puppet_animations>(entity_id(player))) {
+    for(auto const &pup : model->ecs.find_component<components::puppet_animations>(player)) {
         return pup.second.puppet_mode_type;
     }
 

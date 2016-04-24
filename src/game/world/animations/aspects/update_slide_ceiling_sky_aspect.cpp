@@ -6,6 +6,6 @@ gorc::game::world::animations::aspects::update_slide_ceiling_sky_aspect::update_
     return;
 }
 
-void gorc::game::world::animations::aspects::update_slide_ceiling_sky_aspect::update(gorc::time t, entity_id, components::slide_ceiling_sky& anim) {
+void gorc::game::world::animations::aspects::update_slide_ceiling_sky_aspect::update(gorc::time t, thing_id, components::slide_ceiling_sky& anim) {
     model.header.ceiling_sky_offset += anim.speed * static_cast<float>(t.elapsed_as_seconds() * rate_factor);
 }

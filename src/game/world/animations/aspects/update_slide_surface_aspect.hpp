@@ -18,7 +18,7 @@ private:
 public:
     update_slide_surface_aspect(component_system& cs, level_model& model);
 
-    virtual void update(gorc::time t, entity_id id, components::slide_surface& anim) override;
+    virtual void update(gorc::time t, thing_id id, components::slide_surface& anim) override;
 };
 
 }

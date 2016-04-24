@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/entity_id.hpp"
+#include "content/id.hpp"
 #include "libold/content/flags/anim_flag.hpp"
 #include "utility/flag_set.hpp"
 

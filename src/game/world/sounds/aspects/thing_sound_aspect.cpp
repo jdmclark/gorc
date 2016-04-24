@@ -7,10 +7,10 @@ gorc::game::world::sounds::aspects::thing_sound_aspect::thing_sound_aspect(compo
 }
 
 void gorc::game::world::sounds::aspects::thing_sound_aspect::update(gorc::time,
-                                                                    entity_id,
+                                                                    thing_id,
                                                                     components::thing_sound &ts,
                                                                     world::components::thing &thing) {
-    for(auto &sound : cs.find_component<components::sound>(entity_id(ts.sound))) {
+    for(auto &sound : cs.find_component<components::sound>(ts.sound)) {
         sound.second.position = thing.position;
         sound.second.internal_sound.setPosition(get<0>(thing.position),
                                                 get<2>(thing.position),

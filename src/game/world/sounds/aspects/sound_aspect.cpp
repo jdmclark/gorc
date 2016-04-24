@@ -31,13 +31,13 @@ gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system 
             });
 
         for(auto &fol : cs.find_component<components::foley>(e.destroyed_entity)) {
-            for(auto &snd : cs.find_component<components::sound>(entity_id(fol.second.sound))) {
+            for(auto &snd : cs.find_component<components::sound>(fol.second.sound)) {
                 snd.second.stop_delay = std::numeric_limits<float>::epsilon();
             }
         }
 
         for(auto &tsnd : cs.find_component<components::stop_when_destroyed>(e.destroyed_entity)) {
-            for(auto &snd : cs.find_component<components::sound>(entity_id(tsnd.second.sound))) {
+            for(auto &snd : cs.find_component<components::sound>(tsnd.second.sound)) {
                 snd.second.stop_delay = std::numeric_limits<float>::epsilon();
             }
         }
@@ -47,7 +47,7 @@ gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system 
 }
 
 void gorc::game::world::sounds::aspects::sound_aspect::update(gorc::time t,
-                                                              entity_id id,
+                                                              thing_id id,
                                                               components::sound &s) {
     if(s.stop_delay > 0.0f) {
         s.stop_delay -= static_cast<float>(t.elapsed_as_seconds());

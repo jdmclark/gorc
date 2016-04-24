@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/entity_id.hpp"
+#include "content/id.hpp"
 #include "libold/content/flags/sound_subclass_type.hpp"
 
 namespace gorc {

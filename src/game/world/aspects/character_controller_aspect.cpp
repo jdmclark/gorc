@@ -306,7 +306,7 @@ void character_controller_aspect::jump(thing_id tid, components::thing& thing) {
 }
 
 void character_controller_aspect::update(gorc::time t,
-                                         entity_id id,
+                                         thing_id id,
                                          components::character&,
                                          components::thing &thing) {
     // Update actor state
@@ -363,20 +363,20 @@ character_controller_aspect::character_controller_aspect(component_system &cs,
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         if(e.tpl.type == flags::thing_type::Actor ||
            e.tpl.type == flags::thing_type::Player ) {
-            cs.emplace_component<components::character>(entity_id(e.thing));
+            cs.emplace_component<components::character>(e.thing);
         }
 
         if(e.tpl.type == flags::thing_type::Player) {
             // TODO: When player gets an aspect, this should be moved there.
-            cs.emplace_component<components::player>(entity_id(e.thing));
+            cs.emplace_component<components::player>(e.thing);
         }
     });
 
     killed_delegate =
         cs.bus.add_handler<events::killed>([&](events::killed const &e) {
-        auto rng = cs.find_component<components::character>(entity_id(e.thing));
+        auto rng = cs.find_component<components::character>(e.thing);
         for(auto it = rng.begin(); it != rng.end(); ++it) {
-            for(auto &thing : cs.find_component<components::thing>(entity_id(e.thing))) {
+            for(auto &thing : cs.find_component<components::thing>(e.thing)) {
                 on_killed(e.thing, thing.second, e.killer);
             }
         }

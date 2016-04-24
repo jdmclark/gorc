@@ -108,7 +108,7 @@ weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
     created_delegate =
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         if(e.tpl.type == flags::thing_type::Weapon) {
-            cs.emplace_component<components::weapon>(entity_id(e.thing));
+            cs.emplace_component<components::weapon>(e.thing);
         }
     });
 
@@ -126,7 +126,7 @@ weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
 }
 
 void weapon_controller_aspect::update(gorc::time t,
-                                      entity_id,
+                                      thing_id,
                                       components::weapon&,
                                       components::thing &thing) {
     flag_set<flags::weapon_flag> weap_flags(thing.type_flags);

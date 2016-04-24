@@ -1,7 +1,7 @@
 #pragma once
 
 #include "aspect.hpp"
-#include "entity_id.hpp"
+#include "content/id.hpp"
 #include "component_system.hpp"
 #include <type_traits>
 
@@ -10,11 +10,11 @@ inline namespace utility {
 
 template <typename HeadCompT, typename... CompT> class inner_join_aspect : public aspect {
 public:
-    virtual void update(gorc::time, entity_id, HeadCompT&, CompT&...) {
+    virtual void update(gorc::time, thing_id, HeadCompT&, CompT&...) {
         return;
     }
 
-    virtual void draw(gorc::time, entity_id, HeadCompT&, CompT&...) {
+    virtual void draw(gorc::time, thing_id, HeadCompT&, CompT&...) {
         return;
     }
 
@@ -33,12 +33,12 @@ private:
     };
 
     template <typename... ArgT>
-    void update_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) == sizeof...(CompT) + 1, entity_id>::type id, ArgT&... args) {
+    void update_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) == sizeof...(CompT) + 1, thing_id>::type id, ArgT&... args) {
         update(time, id, args...);
     }
 
     template <typename... ArgT>
-    void update_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) != sizeof...(CompT) + 1, entity_id>::type id, ArgT&... args) {
+    void update_over_ranges(gorc::time time, typename std::enable_if<sizeof...(ArgT) != sizeof...(CompT) + 1, thing_id>::type id, ArgT&... args) {
         auto rng = cs.find_component<typename nth_param<sizeof...(ArgT), HeadCompT, CompT...>::type>(id);
         for(auto it = rng.begin(); it != rng.end();) {
             auto jt = it;

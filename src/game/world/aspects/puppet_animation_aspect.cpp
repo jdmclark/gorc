@@ -18,9 +18,9 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
         cs.bus.add_handler<events::thing_created>([&](events::thing_created const &e) {
         maybe_if(e.tpl.pup, [&](auto pup) {
             // New thing has a puppet. Create a puppet animations component.
-            cs.emplace_component<components::puppet_animations>(entity_id(e.thing), pup);
+            cs.emplace_component<components::puppet_animations>(e.thing, pup);
 
-            for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
+            for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
                 // HACK: Initialize actor walk animation
                 pup.second.actor_walk_animation =
                         presenter.key_presenter->play_mode(thing_id(e.thing),
@@ -35,9 +35,9 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
 
     armed_mode_delegate =
         cs.bus.add_handler<events::armed_mode_changed>([&](events::armed_mode_changed const &e) {
-        for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
+        for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
             bool is_underwater = false;
-            for(auto &thing : cs.find_component<components::thing>(entity_id(e.thing))) {
+            for(auto &thing : cs.find_component<components::thing>(e.thing)) {
                 auto const &cur_sector = at_id(presenter.model->sectors, thing.second.sector);
                 is_underwater = cur_sector.flags & flags::sector_flag::Underwater;
             }
@@ -66,8 +66,8 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
 
     jumped_delegate =
         cs.bus.add_handler<events::jumped>([&](events::jumped const &e) {
-        for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
-            for(auto &thing : cs.find_component<components::thing>(entity_id(e.thing))) {
+        for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
+            for(auto &thing : cs.find_component<components::thing>(e.thing)) {
                 auto jump_submode = flags::puppet_submode_type::Rising;
                 if(thing.second.physics_flags & flags::physics_flag::is_crouching) {
                     jump_submode = flags::puppet_submode_type::Leap;
@@ -80,7 +80,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
 
     landed_delegate =
         cs.bus.add_handler<events::landed>([&](events::landed const &e) {
-        auto rng = cs.find_component<components::puppet_animations>(entity_id(e.thing));
+        auto rng = cs.find_component<components::puppet_animations>(e.thing);
         for(auto it = rng.begin(); it != rng.end(); ++it) {
             presenter.key_presenter->play_mode(thing_id(e.thing), flags::puppet_submode_type::Land);
         }
@@ -88,7 +88,7 @@ puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
 
     killed_delegate =
         cs.bus.add_handler<events::killed>([&](events::killed const &e) {
-        for(auto &pup : cs.find_component<components::puppet_animations>(entity_id(e.thing))) {
+        for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
             // HACK: Stop idle animation
             if(pup.second.actor_walk_animation >= 0) {
                 presenter.key_presenter->stop_key(thing_id(e.thing), pup.second.actor_walk_animation, 0.0f);
@@ -215,7 +215,7 @@ void puppet_animation_aspect::update_standing_animation(components::thing &thing
 }
 
 void puppet_animation_aspect::update(gorc::time,
-                                     entity_id,
+                                     thing_id,
                                      components::puppet_animations &pup,
                                      components::thing &thing) {
     // Updates the idle animation loop

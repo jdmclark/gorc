@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/entity_id.hpp"
+#include "content/id.hpp"
 #include "libold/content/flags/key_marker_type.hpp"
 
 namespace gorc {

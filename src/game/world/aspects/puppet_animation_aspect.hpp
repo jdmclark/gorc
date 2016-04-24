@@ -34,7 +34,7 @@ private:
 public:
     puppet_animation_aspect(component_system &cs, level_presenter &presenter);
 
-    virtual void update(gorc::time, entity_id, components::puppet_animations&, components::thing&) override;
+    virtual void update(gorc::time, thing_id, components::puppet_animations&, components::thing&) override;
 };
 
 }

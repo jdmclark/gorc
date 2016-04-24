@@ -13,7 +13,7 @@
 #include "libold/content/flags/ai_mode_flag.hpp"
 
 #include "components/thing.hpp"
-#include "libold/base/utility/entity_id.hpp"
+#include "content/id.hpp"
 #include "jk/cog/script/verb_table.hpp"
 
 #include <memory>

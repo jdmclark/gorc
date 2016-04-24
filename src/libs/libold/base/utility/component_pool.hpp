@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entity_id.hpp"
+#include "content/id.hpp"
 #include "pool.hpp"
 #include "utility/range.hpp"
 #include <unordered_map>
@@ -17,9 +17,9 @@ template <typename CompT, size_t CompPoolPageSize = 128> class component_pool {
 private:
     class component_container {
     public:
-        std::pair<const entity_id, CompT> component_pair;
+        std::pair<const thing_id, CompT> component_pair;
 
-        template <typename... Args> component_container(entity_id parent, Args&&... args)
+        template <typename... Args> component_container(thing_id parent, Args&&... args)
             : component_pair(std::piecewise_construct, std::make_tuple(parent), std::forward_as_tuple(args...)) {
             return;
         }
@@ -30,7 +30,7 @@ private:
 
 public:
 
-    template <typename... Args> CompT& emplace(entity_id parent, Args&&... args) {
+    template <typename... Args> CompT& emplace(thing_id parent, Args&&... args) {
         auto& em = components.emplace(parent, std::forward<Args>(args)...);
         index.emplace(static_cast<int>(parent), em.get_id());
         return em.component_pair.second;
@@ -74,11 +74,11 @@ public:
             return rv;
         }
 
-        inline std::pair<const entity_id, CompT>& operator*() const {
+        inline std::pair<const thing_id, CompT>& operator*() const {
             return pool.components[inner_iterator->second].component_pair;
         }
 
-        inline std::pair<const entity_id, CompT>* operator->() const {
+        inline std::pair<const thing_id, CompT>* operator->() const {
             return &pool.components[inner_iterator->second].component_pair;
         }
     };
@@ -121,11 +121,11 @@ public:
             return rv;
         }
 
-        inline const std::pair<const entity_id, CompT>& operator*() const {
+        inline const std::pair<const thing_id, CompT>& operator*() const {
             return pool.components[inner_iterator->second].component_pair;
         }
 
-        inline const std::pair<const entity_id, CompT>* operator->() const {
+        inline const std::pair<const thing_id, CompT>* operator->() const {
             return &pool.components[inner_iterator->second].component_pair;
         }
     };
@@ -146,12 +146,12 @@ public:
         return const_iterator(*this, index.end());
     }
 
-    range<iterator> find(entity_id parent) {
+    range<iterator> find(thing_id parent) {
         auto rng = index.equal_range(static_cast<int>(parent));
         return make_range(iterator(*this, rng.first), iterator(*this, rng.second));
     }
 
-    range<const_iterator> find(entity_id parent) const {
+    range<const_iterator> find(thing_id parent) const {
         auto rng = index.equal_range(static_cast<int>(parent));
         return make_range(const_iterator(*this, rng.first), const_iterator(*this, rng.second));
     }

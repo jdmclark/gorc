@@ -8,7 +8,7 @@
 #include "libold/base/utility/time.hpp"
 #include "game/world/components/thing.hpp"
 #include "jk/cog/script/verb_table.hpp"
-#include "libold/base/utility/entity_id.hpp"
+#include "content/id.hpp"
 
 namespace gorc {
 
