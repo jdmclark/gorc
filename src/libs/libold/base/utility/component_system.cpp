@@ -6,11 +6,11 @@ gorc::utility::component_system::component_system(event_bus &bus)
     return;
 }
 
-gorc::utility::component_system::entity_iterator::entity_iterator(const pool<entity, 1024>::iterator& it) : it(it) {
+gorc::utility::component_system::entity_iterator::entity_iterator(const oldpool<entity, 1024>::iterator& it) : it(it) {
     return;
 }
 
-gorc::utility::component_system::entity_const_iterator::entity_const_iterator(const pool<entity, 1024>::const_iterator& it) : it(it) {
+gorc::utility::component_system::entity_const_iterator::entity_const_iterator(const oldpool<entity, 1024>::const_iterator& it) : it(it) {
     return;
 }
 

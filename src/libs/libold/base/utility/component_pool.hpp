@@ -25,7 +25,7 @@ private:
         }
     };
 
-    pool<component_container, CompPoolPageSize> components;
+    oldpool<component_container, CompPoolPageSize> components;
     std::unordered_multimap<int, int> index;
 
 public:

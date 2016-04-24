@@ -11,8 +11,8 @@ namespace keys {
 
 class key_model {
 public:
-    pool<key_mix> mixes;
-    pool<key_state> keys;
+    oldpool<key_mix> mixes;
+    oldpool<key_state> keys;
     unsigned int key_creation_counter = 0;
 };
 

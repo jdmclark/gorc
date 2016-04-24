@@ -13,15 +13,15 @@ inline namespace utility {
 class component_system {
 private:
     struct entity { };
-    pool<entity, 1024> entities;
+    oldpool<entity, 1024> entities;
 
 public:
     class entity_iterator {
     private:
-        pool<entity, 1024>::iterator it;
+        oldpool<entity, 1024>::iterator it;
 
     public:
-        explicit entity_iterator(const pool<entity, 1024>::iterator& it);
+        explicit entity_iterator(const oldpool<entity, 1024>::iterator& it);
 
         inline thing_id operator*() const {
             return thing_id(it->get_id());
@@ -49,10 +49,10 @@ public:
 
     class entity_const_iterator {
     private:
-        pool<entity, 1024>::const_iterator it;
+        oldpool<entity, 1024>::const_iterator it;
 
     public:
-        explicit entity_const_iterator(const pool<entity, 1024>::const_iterator& it);
+        explicit entity_const_iterator(const oldpool<entity, 1024>::const_iterator& it);
 
         inline thing_id operator*() const {
             return thing_id(it->get_id());

@@ -2,7 +2,6 @@
 
 #include "music.hpp"
 #include "libold/base/content/assets/sound.hpp"
-#include "libold/base/utility/pool.hpp"
 
 namespace gorc {
 namespace game {

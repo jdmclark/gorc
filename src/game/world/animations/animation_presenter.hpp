@@ -3,7 +3,6 @@
 #include "libold/content/flags/anim_flag.hpp"
 #include "utility/flag_set.hpp"
 #include "math/vector.hpp"
-#include "libold/base/utility/pool.hpp"
 #include "libold/base/utility/time.hpp"
 #include "jk/cog/script/verb_table.hpp"
 #include "content/id.hpp"

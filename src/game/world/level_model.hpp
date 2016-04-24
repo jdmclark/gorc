@@ -3,7 +3,6 @@
 #include "math/vector.hpp"
 #include "math/color.hpp"
 #include "libold/content/assets/level.hpp"
-#include "libold/base/utility/pool.hpp"
 #include "libold/base/utility/component_system.hpp"
 #include "components/thing.hpp"
 #include "surface.hpp"
