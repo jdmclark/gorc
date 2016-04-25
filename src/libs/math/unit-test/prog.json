@@ -8,6 +8,7 @@
     ],
     "sources" : [
         "almost_equal_test.cpp",
+        "color_test.cpp",
         "grid_test.cpp",
         "point_test.cpp",
         "size_test.cpp",
