@@ -27,10 +27,10 @@ thing_controller_aspect::thing_controller_aspect(component_system &cs,
     return;
 }
 
-void thing_controller_aspect::update(gorc::time t,
+void thing_controller_aspect::update(time_delta t,
                                      thing_id tid,
                                      components::thing &thing) {
-    thing.time_alive += static_cast<float>(t.elapsed_as_seconds());
+    thing.time_alive += static_cast<float>(t.count());
 
     if(thing.timer > 0.0f && thing.time_alive >= thing.timer) {
         presenter.destroy_thing(tid);

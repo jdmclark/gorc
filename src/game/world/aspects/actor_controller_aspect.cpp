@@ -26,7 +26,7 @@ gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(com
     });
 }
 
-void gorc::game::world::aspects::actor_controller_aspect::update(gorc::time t, thing_id, components::actor&, components::thing& thing) {
+void gorc::game::world::aspects::actor_controller_aspect::update(time_delta t, thing_id, components::actor&, components::thing& thing) {
 
     if(thing.ai_mode_flags & flags::ai_mode_flag::turning_to_face_target) {
         // Get plane angle.
@@ -43,7 +43,7 @@ void gorc::game::world::aspects::actor_controller_aspect::update(gorc::time t, t
             thing.ai_mode_flags -= flags::ai_mode_flag::turning_to_face_target;
         }
         else {
-            thing.orient = slerp(thing.orient, make_rotation<float>(make_vector(0.0f, 0.0f, 1.0f), target_yaw - 90.0f), thing.ai_move_speed * static_cast<float>(t.elapsed_as_seconds()) * 1.0f);
+            thing.orient = slerp(thing.orient, make_rotation<float>(make_vector(0.0f, 0.0f, 1.0f), target_yaw - 90.0f), thing.ai_move_speed * static_cast<float>(t.count()) * 1.0f);
         }
     }
 
@@ -53,7 +53,7 @@ void gorc::game::world::aspects::actor_controller_aspect::update(gorc::time t, t
 
         float vlen = length(v);
         if(vlen > 0.005f) {
-            thing.thrust = (v / vlen) * thing.ai_move_speed * static_cast<float>(t.elapsed_as_seconds()) * 6.0f;
+            thing.thrust = (v / vlen) * thing.ai_move_speed * static_cast<float>(t.count()) * 6.0f;
         }
         else {
             thing.thrust = make_zero_vector<3, float>();

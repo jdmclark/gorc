@@ -1,6 +1,6 @@
 #pragma once
 
-#include "time.hpp"
+#include "utility/time.hpp"
 
 namespace gorc {
 inline namespace utility {
@@ -8,8 +8,8 @@ inline namespace utility {
 class aspect {
 public:
     virtual ~aspect();
-    virtual void update(gorc::time time);
-    virtual void draw(gorc::time time);
+    virtual void update(time_delta time);
+    virtual void draw(time_delta time);
 };
 
 }

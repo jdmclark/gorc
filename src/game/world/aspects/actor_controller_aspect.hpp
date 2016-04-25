@@ -18,7 +18,7 @@ private:
 public:
     explicit actor_controller_aspect(component_system& cs);
 
-    void update(gorc::time, thing_id, components::actor&, components::thing&);
+    void update(time_delta, thing_id, components::actor&, components::thing&);
 };
 
 }

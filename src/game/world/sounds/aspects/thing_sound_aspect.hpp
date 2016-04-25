@@ -14,7 +14,7 @@ class thing_sound_aspect : public inner_join_aspect<components::thing_sound, wor
 public:
     explicit thing_sound_aspect(component_system &cs);
 
-    void update(gorc::time, thing_id, components::thing_sound&, world::components::thing&);
+    void update(time_delta, thing_id, components::thing_sound&, world::components::thing&);
 };
 
 }

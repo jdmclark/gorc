@@ -16,11 +16,11 @@ gorc::game::world::animations::aspects::update_slide_surface_aspect::update_slid
     return;
 }
 
-void gorc::game::world::animations::aspects::update_slide_surface_aspect::update(gorc::time t, thing_id, components::slide_surface& anim) {
+void gorc::game::world::animations::aspects::update_slide_surface_aspect::update(time_delta t, thing_id, components::slide_surface& anim) {
     auto& surf = at_id(model.surfaces, anim.surface);
     surf.thrust = anim.direction * static_cast<float>(rate_factor);
 
     auto plane_dir = anim.tb0 * dot(anim.direction, anim.sb0) + anim.tb1 * dot(anim.direction, anim.sb1);
 
-    surf.texture_offset += plane_dir * static_cast<float>(t.elapsed_as_seconds() * rate_factor);
+    surf.texture_offset += plane_dir * static_cast<float>(t.count() * rate_factor);
 }

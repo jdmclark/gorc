@@ -5,8 +5,8 @@ gorc::game::world::animations::aspects::update_surface_material_aspect::update_s
     return;
 }
 
-void gorc::game::world::animations::aspects::update_surface_material_aspect::update(gorc::time t, thing_id, components::surface_material& anim) {
-    anim.framerate_accumulator += t.elapsed_as_seconds();
+void gorc::game::world::animations::aspects::update_surface_material_aspect::update(time_delta t, thing_id, components::surface_material& anim) {
+    anim.framerate_accumulator += t.count();
 
     int surface_material = at_id(model.level->surfaces, anim.surface).material;
     if(surface_material < 0) {

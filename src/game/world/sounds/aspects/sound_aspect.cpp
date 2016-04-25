@@ -46,11 +46,11 @@ gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system 
     return;
 }
 
-void gorc::game::world::sounds::aspects::sound_aspect::update(gorc::time t,
+void gorc::game::world::sounds::aspects::sound_aspect::update(time_delta t,
                                                               thing_id id,
                                                               components::sound &s) {
     if(s.stop_delay > 0.0f) {
-        s.stop_delay -= static_cast<float>(t.elapsed_as_seconds());
+        s.stop_delay -= static_cast<float>(t.count());
 
         if(s.stop_delay <= 0.0f) {
             s.internal_sound.stop();
@@ -62,8 +62,8 @@ void gorc::game::world::sounds::aspects::sound_aspect::update(gorc::time t,
         return;
     }
 
-    s.volume.update(static_cast<float>(t.elapsed_as_seconds()));
-    s.pitch.update(static_cast<float>(t.elapsed_as_seconds()));
+    s.volume.update(static_cast<float>(t.count()));
+    s.pitch.update(static_cast<float>(t.count()));
 
     if(s.do_distance_attenuation) {
         auto sound_dist = length(model.camera_model.current_computed_state.position - s.position);

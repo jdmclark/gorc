@@ -18,7 +18,7 @@ private:
 public:
     sound_aspect(component_system&, level_model&);
 
-    void update(gorc::time, thing_id, components::sound&);
+    void update(time_delta, thing_id, components::sound&);
 };
 
 }

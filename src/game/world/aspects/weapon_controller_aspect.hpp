@@ -23,7 +23,7 @@ private:
 public:
     weapon_controller_aspect(component_system&, level_presenter&);
 
-    virtual void update(gorc::time, thing_id, components::weapon&, components::thing&) override;
+    virtual void update(time_delta, thing_id, components::weapon&, components::thing&) override;
 };
 
 }

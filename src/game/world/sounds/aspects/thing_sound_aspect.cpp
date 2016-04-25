@@ -6,7 +6,7 @@ gorc::game::world::sounds::aspects::thing_sound_aspect::thing_sound_aspect(compo
     return;
 }
 
-void gorc::game::world::sounds::aspects::thing_sound_aspect::update(gorc::time,
+void gorc::game::world::sounds::aspects::thing_sound_aspect::update(time_delta,
                                                                     thing_id,
                                                                     components::thing_sound &ts,
                                                                     world::components::thing &thing) {

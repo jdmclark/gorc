@@ -214,7 +214,7 @@ void puppet_animation_aspect::update_standing_animation(components::thing &thing
     }
 }
 
-void puppet_animation_aspect::update(gorc::time,
+void puppet_animation_aspect::update(time_delta,
                                      thing_id,
                                      components::puppet_animations &pup,
                                      components::thing &thing) {

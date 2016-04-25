@@ -305,30 +305,30 @@ void character_controller_aspect::jump(thing_id tid, components::thing& thing) {
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 }
 
-void character_controller_aspect::update(gorc::time t,
+void character_controller_aspect::update(time_delta t,
                                          thing_id id,
                                          components::character&,
                                          components::thing &thing) {
     // Update actor state
     if(static_cast<int>(thing.attach_flags)) {
-        update_standing(id, thing, t.elapsed_as_seconds());
+        update_standing(id, thing, t.count());
     }
     else {
-        update_falling(id, thing, t.elapsed_as_seconds());
+        update_falling(id, thing, t.count());
     }
 
     // Update lightsaber state
     if(thing.jk_flags & flags::jk_flag::has_saber) {
         if(thing.jk_flags & flags::jk_flag::saber_igniting) {
             thing.saber_drawn_length += static_cast<float>(fabs(thing.saber_drawn_length - thing.saber_length) *
-            t.elapsed_as_seconds() * 6.0);
+            t.count() * 6.0);
             if(thing.saber_drawn_length >= thing.saber_length) {
                 thing.saber_drawn_length = thing.saber_length;
                 thing.jk_flags -= flags::jk_flag::saber_igniting;
             }
         }
         else if(thing.jk_flags & flags::jk_flag::saber_shrinking) {
-            thing.saber_drawn_length -= thing.saber_drawn_length * static_cast<float>(t.elapsed_as_seconds()) * 6.0f;
+            thing.saber_drawn_length -= thing.saber_drawn_length * static_cast<float>(t.count()) * 6.0f;
             if(thing.saber_drawn_length <= 0.0f) {
                 thing.saber_drawn_length = 0.0f;
                 thing.jk_flags -= flag_set<flags::jk_flag> { flags::jk_flag::saber_shrinking, flags::jk_flag::has_saber };

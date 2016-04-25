@@ -177,7 +177,7 @@ void gorc::game::world::level_presenter::update(const gorc::time& time) {
     inventory_presenter->update(time);
 
     model->script_model.update(time_delta(time.elapsed_as_seconds()));
-    model->ecs.update(time);
+    model->ecs.update(time_delta(time.elapsed_as_seconds()));
 
     // update dynamic tint, game time.
     model->game_time += dt;

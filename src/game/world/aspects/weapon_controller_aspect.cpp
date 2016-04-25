@@ -125,14 +125,14 @@ weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
     return;
 }
 
-void weapon_controller_aspect::update(gorc::time t,
+void weapon_controller_aspect::update(time_delta t,
                                       thing_id,
                                       components::weapon&,
                                       components::thing &thing) {
     flag_set<flags::weapon_flag> weap_flags(thing.type_flags);
 
     if(weap_flags & flags::weapon_flag::uses_damage_decay) {
-        float alpha = static_cast<float>(t.elapsed_as_seconds()) / (thing.time_alive - thing.timer);
+        float alpha = static_cast<float>(t.count()) / (thing.time_alive - thing.timer);
         thing.damage = lerp(thing.damage, thing.min_damage, alpha);
     }
 }

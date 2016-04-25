@@ -18,13 +18,13 @@ gorc::utility::component_system::pool_container::~pool_container() {
     return;
 }
 
-void gorc::utility::component_system::update(gorc::time time) {
+void gorc::utility::component_system::update(time_delta time) {
     for(auto& aspect : aspects) {
         aspect->update(time);
     }
 }
 
-void gorc::utility::component_system::draw(gorc::time time) {
+void gorc::utility::component_system::draw(time_delta time) {
     for(auto& aspect : aspects) {
         aspect->draw(time);
     }

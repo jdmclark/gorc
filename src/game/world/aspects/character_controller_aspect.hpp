@@ -54,7 +54,7 @@ public:
     static void create_controller_data(thing_id, level_presenter&);
     static void remove_controller_data(thing_id, level_presenter&);
 
-    virtual void update(gorc::time, thing_id, components::character&, components::thing&) override;
+    virtual void update(time_delta, thing_id, components::character&, components::thing&) override;
 };
 
 }

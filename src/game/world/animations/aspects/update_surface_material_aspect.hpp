@@ -17,7 +17,7 @@ private:
 public:
     update_surface_material_aspect(component_system& cs, level_model& model);
 
-    virtual void update(gorc::time t, thing_id id, components::surface_material& anim) override;
+    virtual void update(time_delta t, thing_id id, components::surface_material& anim) override;
 };
 
 }

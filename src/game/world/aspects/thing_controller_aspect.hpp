@@ -18,7 +18,7 @@ private:
 public:
     thing_controller_aspect(component_system& cs, level_presenter& presenter);
 
-    void update(gorc::time, thing_id, components::thing&);
+    void update(time_delta, thing_id, components::thing&);
 
     void on_touched_surface(thing_id thing, surface_id touched_surface);
     void on_touched_thing(thing_id thing, thing_id touched_thing);

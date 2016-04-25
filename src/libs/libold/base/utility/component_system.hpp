@@ -117,8 +117,8 @@ public:
 
     explicit component_system(event_bus &bus);
 
-    void update(gorc::time time);
-    void draw(gorc::time time);
+    void update(time_delta time);
+    void draw(time_delta time);
 
     inline thing_id make_entity() {
         return thing_id(entities.emplace().get_id());
