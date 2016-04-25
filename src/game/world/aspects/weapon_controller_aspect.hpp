@@ -21,7 +21,7 @@ private:
     void touched_surface(thing_id toucher, surface_id surface);
 
 public:
-    weapon_controller_aspect(component_system&, level_presenter&);
+    weapon_controller_aspect(entity_component_system&, level_presenter&);
 
     virtual void update(time_delta, thing_id, components::weapon&, components::thing&) override;
 };

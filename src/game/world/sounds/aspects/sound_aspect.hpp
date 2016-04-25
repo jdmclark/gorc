@@ -16,7 +16,7 @@ private:
     maybe<scoped_delegate> destroyed_delegate;
 
 public:
-    sound_aspect(component_system&, level_model&);
+    sound_aspect(entity_component_system&, level_model&);
 
     void update(time_delta, thing_id, components::sound&);
 };

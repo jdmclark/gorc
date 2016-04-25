@@ -34,7 +34,7 @@ private:
     void handle_animation_marker(thing_id, components::class_sounds&, flags::key_marker_type);
 
 public:
-    dispatch_class_sound_aspect(component_system &cs, level_presenter &presenter);
+    dispatch_class_sound_aspect(entity_component_system &cs, level_presenter &presenter);
 };
 
 }

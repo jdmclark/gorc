@@ -16,7 +16,7 @@ private:
     maybe<scoped_delegate> created_delegate;
 
 public:
-    explicit actor_controller_aspect(component_system& cs);
+    explicit actor_controller_aspect(entity_component_system& cs);
 
     void update(time_delta, thing_id, components::actor&, components::thing&);
 };

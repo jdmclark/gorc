@@ -1,7 +1,7 @@
 #include "thing_sound_aspect.hpp"
 #include "game/world/sounds/components/sound.hpp"
 
-gorc::game::world::sounds::aspects::thing_sound_aspect::thing_sound_aspect(component_system &cs)
+gorc::game::world::sounds::aspects::thing_sound_aspect::thing_sound_aspect(entity_component_system &cs)
     : inner_join_aspect(cs) {
     return;
 }

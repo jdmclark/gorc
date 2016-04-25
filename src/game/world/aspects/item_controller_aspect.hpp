@@ -18,7 +18,7 @@ private:
     maybe<scoped_delegate> taken_delegate;
 
 public:
-    item_controller_aspect(component_system&, level_presenter&);
+    item_controller_aspect(entity_component_system&, level_presenter&);
 };
 
 }

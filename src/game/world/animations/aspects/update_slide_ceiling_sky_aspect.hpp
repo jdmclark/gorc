@@ -15,7 +15,7 @@ private:
     level_model& model;
 
 public:
-    update_slide_ceiling_sky_aspect(component_system& cs, level_model& model);
+    update_slide_ceiling_sky_aspect(entity_component_system& cs, level_model& model);
 
     virtual void update(time_delta t, thing_id id, components::slide_ceiling_sky& anim) override;
 };

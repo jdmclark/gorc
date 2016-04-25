@@ -16,7 +16,7 @@ private:
     maybe<scoped_delegate> touched_thing_delegate;
 
 public:
-    thing_controller_aspect(component_system& cs, level_presenter& presenter);
+    thing_controller_aspect(entity_component_system& cs, level_presenter& presenter);
 
     void update(time_delta, thing_id, components::thing&);
 

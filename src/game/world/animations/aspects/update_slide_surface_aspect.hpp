@@ -16,7 +16,7 @@ private:
     maybe<scoped_delegate> stop_animation_delegate;
 
 public:
-    update_slide_surface_aspect(component_system& cs, level_model& model);
+    update_slide_surface_aspect(entity_component_system& cs, level_model& model);
 
     virtual void update(time_delta t, thing_id id, components::slide_surface& anim) override;
 };

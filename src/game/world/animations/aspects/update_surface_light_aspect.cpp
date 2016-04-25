@@ -1,6 +1,6 @@
 #include "update_surface_light_aspect.hpp"
 
-gorc::game::world::animations::aspects::update_surface_light_aspect::update_surface_light_aspect(component_system& cs, level_model& model)
+gorc::game::world::animations::aspects::update_surface_light_aspect::update_surface_light_aspect(entity_component_system& cs, level_model& model)
     : inner_join_aspect(cs), model(model) {
     return;
 }

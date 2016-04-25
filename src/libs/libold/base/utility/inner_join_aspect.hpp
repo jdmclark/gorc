@@ -20,7 +20,7 @@ public:
     }
 
 protected:
-    component_system& cs;
+    entity_component_system& cs;
 
 private:
     template <size_t n, typename HeadT, typename... TailT> struct nth_param {
@@ -52,7 +52,7 @@ private:
 
     template <typename HeadT, typename... TailT> struct register_component_types<HeadT, TailT...> {
     public:
-        register_component_types(component_system& cs) {
+        register_component_types(entity_component_system& cs) {
             cs.register_component_type<HeadT>();
             register_component_types<TailT...> rct(cs);
         }
@@ -60,13 +60,13 @@ private:
 
     template <typename LastT> struct register_component_types<LastT> {
     public:
-        register_component_types(component_system& cs) {
+        register_component_types(entity_component_system& cs) {
             cs.register_component_type<LastT>();
         }
     };
 
 public:
-    inner_join_aspect(component_system& cs) : cs(cs) {
+    inner_join_aspect(entity_component_system& cs) : cs(cs) {
         register_component_types<HeadCompT, CompT...> rct(cs);
 
         return;

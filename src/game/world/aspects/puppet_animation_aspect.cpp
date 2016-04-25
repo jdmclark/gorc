@@ -9,7 +9,7 @@
 
 using gorc::game::world::aspects::puppet_animation_aspect;
 
-puppet_animation_aspect::puppet_animation_aspect(component_system &cs,
+puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
                                                  level_presenter &presenter)
     : inner_join_aspect(cs)
     , presenter(presenter) {

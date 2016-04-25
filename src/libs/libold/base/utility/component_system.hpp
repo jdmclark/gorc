@@ -10,7 +10,7 @@
 namespace gorc {
 inline namespace utility {
 
-class component_system {
+class entity_component_system {
 private:
     struct entity { };
     oldpool<entity, 1024> entities;
@@ -115,7 +115,7 @@ private:
 public:
     event_bus &bus;
 
-    explicit component_system(event_bus &bus);
+    explicit entity_component_system(event_bus &bus);
 
     void update(time_delta time);
     void draw(time_delta time);

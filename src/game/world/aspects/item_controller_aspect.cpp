@@ -5,7 +5,7 @@
 
 using gorc::game::world::aspects::item_controller_aspect;
 
-item_controller_aspect::item_controller_aspect(component_system &cs,
+item_controller_aspect::item_controller_aspect(entity_component_system &cs,
                                                level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 

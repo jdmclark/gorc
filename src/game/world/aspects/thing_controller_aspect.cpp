@@ -8,7 +8,7 @@
 
 using namespace gorc::game::world::aspects;
 
-thing_controller_aspect::thing_controller_aspect(component_system &cs,
+thing_controller_aspect::thing_controller_aspect(entity_component_system &cs,
                                                  level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 

@@ -26,7 +26,7 @@ public:
     std::vector<surface> surfaces;
     std::vector<content::assets::level_sector> sectors;
 
-    component_system ecs;
+    entity_component_system ecs;
     service_registry services;
 
     cog::executor script_model;

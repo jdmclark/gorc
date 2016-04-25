@@ -355,7 +355,7 @@ void character_controller_aspect::on_killed(thing_id tid,
     thing.type = flags::thing_type::Corpse;
 }
 
-character_controller_aspect::character_controller_aspect(component_system &cs,
+character_controller_aspect::character_controller_aspect(entity_component_system &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 

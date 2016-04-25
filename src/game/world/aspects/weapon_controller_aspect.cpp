@@ -101,7 +101,7 @@ void weapon_controller_aspect::touched_surface(thing_id tid, surface_id touched_
     presenter.destroy_thing(tid);
 }
 
-weapon_controller_aspect::weapon_controller_aspect(component_system &cs,
+weapon_controller_aspect::weapon_controller_aspect(entity_component_system &cs,
                                                    level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 

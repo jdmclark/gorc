@@ -4,7 +4,7 @@
 #include "game/world/sounds/components/foley.hpp"
 #include "game/world/sounds/components/stop_when_destroyed.hpp"
 
-gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(component_system &cs,
+gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(entity_component_system &cs,
                                                                level_model &model)
     : inner_join_aspect(cs)
     , model(model) {

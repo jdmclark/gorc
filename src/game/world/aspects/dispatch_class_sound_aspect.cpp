@@ -108,7 +108,7 @@ void dispatch_class_sound_aspect::handle_animation_marker(thing_id id,
     }
 }
 
-dispatch_class_sound_aspect::dispatch_class_sound_aspect(component_system &cs,
+dispatch_class_sound_aspect::dispatch_class_sound_aspect(entity_component_system &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 
