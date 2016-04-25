@@ -4,7 +4,7 @@
 
 namespace gorc {
 
-    class colormap_loader : public loader {
+    class material_loader : public loader {
     public:
         static fourcc const type;
 

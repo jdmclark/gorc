@@ -5,6 +5,7 @@
     ],
     "sources" : [
         "main.cpp",
+        "client_renderer_object_factory.cpp",
         "clear_screen_view.cpp",
         "presenter_mapper.cpp",
         "world/level_shader.cpp",

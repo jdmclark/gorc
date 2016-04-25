@@ -17,6 +17,7 @@ public:
 
     virtual std::unique_ptr<asset> deserialize(input_stream &file,
                                                content_manager &,
+                                               asset_id,
                                                service_registry const &) const override;
 
 };
@@ -27,6 +28,7 @@ public:
 
     virtual std::unique_ptr<asset> deserialize(input_stream &file,
                                                content_manager &,
+                                               asset_id,
                                                service_registry const &) const override;
 
 };

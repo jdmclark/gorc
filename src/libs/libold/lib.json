@@ -55,7 +55,6 @@
         "content/register_legacy_loaders.cpp",
         "content/loaders/animation_loader.cpp",
         "content/loaders/level_loader.cpp",
-        "content/loaders/material_loader.cpp",
         "content/loaders/soundclass_loader.cpp",
         "content/loaders/puppet_loader.cpp",
         "content/loaders/sprite_loader.cpp",
@@ -70,9 +69,7 @@
         "content/assets/template.cpp",
         "content/assets/sprite.cpp",
         "content/assets/level.cpp",
-        "content/assets/soundclass.cpp",
-        "content/assets/material.cpp",
-        "content/assets/material_cel.cpp"
+        "content/assets/soundclass.cpp"
     ],
     "libraries" : [
         "boost",

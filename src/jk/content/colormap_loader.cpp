@@ -5,6 +5,7 @@ gorc::fourcc const gorc::colormap_loader::type = "CMP"_4CC;
 
 std::unique_ptr<gorc::asset> gorc::colormap_loader::deserialize(input_stream &is,
                                                                 content_manager &,
+                                                                asset_id,
                                                                 service_registry const &) const
 {
     binary_input_stream bis(is);

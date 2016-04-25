@@ -2,7 +2,7 @@
 #include "log/log.hpp"
 #include "jk/content/colormap.hpp"
 #include "libold/content/assets/animation.hpp"
-#include "libold/content/assets/material.hpp"
+#include "jk/content/material.hpp"
 #include "libold/content/assets/model.hpp"
 #include "libold/base/content/assets/sound.hpp"
 
@@ -65,7 +65,7 @@ gorc::cog::value gorc::game::world::world_value_mapping::operator()(
 
     case cog::value_type::material:
         try {
-            return force_cast<material_id>(content.load_id<content::assets::material>(value));
+            return force_cast<material_id>(content.load_id<material>(value));
         }
         catch(...) {
             return material_id(invalid_id);

@@ -42,7 +42,7 @@ namespace gorc {
             return elements[get_element_index(x, y)];
         }
 
-        auto data() const
+        T const* data() const
         {
             return elements.data();
         }

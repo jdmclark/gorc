@@ -9,7 +9,7 @@
 #include "level_surface.hpp"
 #include "level_sector.hpp"
 #include "jk/cog/script/script.hpp"
-#include "material.hpp"
+#include "jk/content/material.hpp"
 #include "template.hpp"
 
 #include <unordered_map>

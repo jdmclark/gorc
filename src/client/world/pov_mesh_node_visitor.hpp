@@ -3,14 +3,16 @@
 #include "math/vector.hpp"
 #include "math/color.hpp"
 #include "client/world/level_view.hpp"
+#include "client/client_renderer_object_factory.hpp"
 
 namespace gorc {
+
+class material;
 
 namespace content {
 namespace assets {
 class model;
 class puppet;
-class material;
 }
 }
 
@@ -19,19 +21,20 @@ namespace world {
 
 class pov_mesh_node_visitor {
 private:
+    client_renderer_object_factory &renderer_object_factory;
     color sector_color;
     level_view& view;
     int saber_draw_node = -1;
     float saber_length = 0.0f;
     float saber_base_radius = 0.0f;
     float saber_tip_radius = 0.0f;
-    maybe<asset_ref<content::assets::material>> saber_blade;
-    maybe<asset_ref<content::assets::material>> saber_tip;
+    maybe<asset_ref<material>> saber_blade;
+    maybe<asset_ref<material>> saber_tip;
 
 public:
-    pov_mesh_node_visitor(const color& sector_color, level_view& view, int saber_draw_node = -1,
+    pov_mesh_node_visitor(client_renderer_object_factory &renderer_object_factory, const color& sector_color, level_view& view, int saber_draw_node = -1,
             float saber_length = 0.0f, float saber_base_radius = 0.0f, float saber_tip_radius = 0.0f,
-            maybe<asset_ref<content::assets::material>> saber_blade = nothing, maybe<asset_ref<content::assets::material>> saber_tip = nothing);
+            maybe<asset_ref<material>> saber_blade = nothing, maybe<asset_ref<material>> saber_tip = nothing);
 
     inline void concatenate_matrix(const matrix<4>& mat) {
         view.concatenate_matrix(mat);

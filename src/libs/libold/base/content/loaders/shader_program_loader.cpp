@@ -64,6 +64,7 @@ namespace {
 std::unique_ptr<gorc::asset> gorc::content::loaders::vertex_program_loader::deserialize(
         input_stream &file,
         content_manager &content,
+        asset_id,
         service_registry const &services) const
 {
     return deserialize_shader_program<assets::vertex_program>(GL_VERTEX_SHADER,
@@ -75,6 +76,7 @@ std::unique_ptr<gorc::asset> gorc::content::loaders::vertex_program_loader::dese
 std::unique_ptr<gorc::asset> gorc::content::loaders::fragment_program_loader::deserialize(
         input_stream &file,
         content_manager &content,
+        asset_id,
         service_registry const &services) const
 {
     return deserialize_shader_program<assets::fragment_program>(GL_FRAGMENT_SHADER,

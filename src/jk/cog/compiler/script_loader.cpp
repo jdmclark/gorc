@@ -17,6 +17,7 @@ std::vector<gorc::path> const& gorc::cog::script_loader::get_prefixes() const
 std::unique_ptr<gorc::asset> gorc::cog::script_loader::deserialize(
         input_stream &is,
         content_manager &,
+        asset_id,
         service_registry const &services) const
 {
     auto &compiler = services.get<cog::compiler>();

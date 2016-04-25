@@ -18,6 +18,7 @@ std::vector<gorc::path> const& gorc::content::loaders::sound_loader::get_prefixe
 std::unique_ptr<gorc::asset> gorc::content::loaders::sound_loader::deserialize(
         input_stream &file,
         content_manager &,
+        asset_id,
         service_registry const &) const
 {
     std::unique_ptr<content::assets::sound> wav(new content::assets::sound());

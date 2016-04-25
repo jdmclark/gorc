@@ -9,7 +9,7 @@
 #include "jk/vfs/jk_virtual_file_system.hpp"
 #include "game/level_state.hpp"
 #include "utility/service_registry.hpp"
-
+#include "client_renderer_object_factory.hpp"
 #include "libold/base/utility/randomizer.hpp"
 
 namespace gorc {
@@ -37,6 +37,7 @@ public:
 
     jk_virtual_file_system& virtual_filesystem;
 
+    client_renderer_object_factory renderer_object_factory;
     utility::randomizer randomizer;
 
     std::unique_ptr<world::level_view> level_view;

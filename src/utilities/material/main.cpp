@@ -1,5 +1,5 @@
 #include "program/program.hpp"
-#include "jk/content/material.hpp"
+#include "jk/content/raw_material.hpp"
 #include "io/binary_input_stream.hpp"
 #include "text/json_output_stream.hpp"
 #include "text/extract_path.hpp"
@@ -29,7 +29,7 @@ namespace gorc {
             is.reopen_as_binary();
 
             binary_input_stream bis(is);
-            material mat(deserialization_constructor, bis);
+            raw_material mat(deserialization_constructor, bis);
 
             if(extract_path.empty()) {
                 return EXIT_SUCCESS;

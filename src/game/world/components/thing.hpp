@@ -60,8 +60,8 @@ public:
     flag_set<flags::jk_flag> jk_flags;
     flag_set<flags::ai_mode_flag> ai_mode_flags;
 
-    maybe<asset_ref<content::assets::material>> saber_side_mat;
-    maybe<asset_ref<content::assets::material>> saber_tip_mat;
+    maybe<asset_ref<material>> saber_side_mat;
+    maybe<asset_ref<material>> saber_tip_mat;
     float saber_base_rad = 0.003f;
     float saber_tip_rad = 0.001f;
     float saber_length = 0.1f;

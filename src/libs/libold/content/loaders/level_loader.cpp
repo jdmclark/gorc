@@ -591,7 +591,7 @@ const std::unordered_map<std::string, LevelSectionParser> LevelSectionParserMap 
 void PostprocessLevel(assets::level& lev, content_manager& manager, service_registry const &) {
     // Post-process; load materials and scripts.
     for(auto& mat_entry : lev.materials) {
-        std::get<0>(mat_entry) = manager.load<assets::material>(std::get<3>(mat_entry));
+        std::get<0>(mat_entry) = manager.load<material>(std::get<3>(mat_entry));
     }
 
     // Add adjoined sector reference to adjoins.

@@ -5,7 +5,7 @@
 
 #include "model_geoset.hpp"
 #include "model_node.hpp"
-#include "material.hpp"
+#include "jk/content/material.hpp"
 
 #include <memory>
 

@@ -230,7 +230,7 @@ void ParseHierarchyDefSection(assets::model& model, text::tokenizer& tok, conten
 void PostprocessModel(assets::model& model, content_manager& manager)
 {
     for(const auto& mat_name : model.material_entries) {
-        model.materials.push_back(manager.load<assets::material>(mat_name));
+        model.materials.push_back(manager.load<material>(mat_name));
     }
 
     // Some color faces have invalid texture coordinates.

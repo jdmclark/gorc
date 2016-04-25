@@ -35,7 +35,7 @@
 #include "game/world/events/armed_mode_changed.hpp"
 #include "game/world/events/class_sound.hpp"
 
-#include "libold/content/assets/material.hpp"
+#include "jk/content/material.hpp"
 
 gorc::game::world::level_presenter::level_presenter(level_state& components, const level_place& place)
     : components(components), place(place), contentmanager(place.contentmanager) {

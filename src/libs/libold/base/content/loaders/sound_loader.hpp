@@ -12,6 +12,7 @@ public:
 
     virtual std::unique_ptr<asset> deserialize(input_stream &file,
                                                content_manager &,
+                                               asset_id,
                                                service_registry const &) const override;
 
     virtual std::vector<path> const& get_prefixes() const override;

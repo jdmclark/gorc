@@ -17,7 +17,7 @@ std::vector<gorc::path> const& gorc::content::loaders::sprite_loader::get_prefix
 std::unique_ptr<gorc::asset> gorc::content::loaders::sprite_loader::parse(text::tokenizer& t,
         content_manager& manager, service_registry const &) const {
 
-    auto mat = manager.load<assets::material>(t.get_space_delimited_string());
+    auto mat = manager.load<material>(t.get_space_delimited_string());
     auto sprite_type = t.get_number<int>();
     auto width = t.get_number<float>();
     auto height = t.get_number<float>();

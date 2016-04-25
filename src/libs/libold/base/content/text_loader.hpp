@@ -15,6 +15,7 @@ protected:
 public:
     virtual std::unique_ptr<asset> deserialize(input_stream &,
                                                content_manager &,
+                                               asset_id,
                                                service_registry const &) const override;
 };
 

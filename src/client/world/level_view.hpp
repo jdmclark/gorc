@@ -9,16 +9,17 @@
 #include "libold/content/flags/geometry_mode.hpp"
 #include "libold/content/flags/light_mode.hpp"
 #include "level_shader.hpp"
+#include "client/client_renderer_object_factory.hpp"
 #include <stack>
 #include <unordered_set>
 
 namespace gorc {
 
 class content_manager;
+class material;
 
 namespace content {
 namespace assets {
-class material;
 class thing_template;
 class level_sector;
 class shader;
@@ -50,6 +51,7 @@ namespace world {
 
 class level_view : public view {
 private:
+    client_renderer_object_factory &renderer_object_factory;
     randomizer rand;
     surface_shader surfaceShader;
     horizon_shader horizonShader;
@@ -94,7 +96,8 @@ private:
     void draw_thing(const game::world::components::thing& thing, thing_id);
 
 public:
-    level_view(content_manager& shadercontentmanager);
+    level_view(content_manager& shadercontentmanager,
+               client_renderer_object_factory &renderer_object_factory);
 
     inline void set_presenter(game::world::level_presenter* presenter) {
         currentPresenter = presenter;
@@ -124,10 +127,10 @@ public:
         model_matrix_stack.pop();
     }
 
-    void draw_saber(asset_ref<content::assets::material> saber_tip, asset_ref<content::assets::material> saber_blade,
+    void draw_saber(asset_ref<material> saber_tip, asset_ref<material> saber_blade,
             float saber_length, float saber_base_radius, float saber_tip_radius);
 
-    void draw_sprite(const vector<3>& pos, asset_ref<content::assets::material> mat, int frame, float width, float height,
+    void draw_sprite(const vector<3>& pos, asset_ref<material> mat, int frame, float width, float height,
             flags::geometry_mode geo, flags::light_mode light, float extra_light, const vector<3>& offset, float sector_light);
 
     virtual void draw(const gorc::time& time, const box<2, int>& view_size, graphics::render_target& target) override;

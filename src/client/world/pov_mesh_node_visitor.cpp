@@ -1,16 +1,16 @@
 #include <GL/glew.h>
 #include "pov_mesh_node_visitor.hpp"
-#include "libold/content/assets/material.hpp"
+#include "jk/content/material.hpp"
 #include "libold/content/assets/model.hpp"
 #include "libold/content/assets/puppet.hpp"
 #include "client/world/level_view.hpp"
 #include "game/world/level_presenter.hpp"
 #include "game/world/keys/key_presenter.hpp"
 
-gorc::client::world::pov_mesh_node_visitor::pov_mesh_node_visitor(const color& sector_color, level_view& view,
+gorc::client::world::pov_mesh_node_visitor::pov_mesh_node_visitor(client_renderer_object_factory &renderer_object_factory, const color& sector_color, level_view& view,
         int saber_draw_node, float saber_length, float saber_base_radius, float saber_tip_radius,
-        maybe<asset_ref<content::assets::material>> saber_blade, maybe<asset_ref<content::assets::material>> saber_tip)
-    : sector_color(sector_color), view(view), saber_draw_node(saber_draw_node), saber_length(saber_length),
+        maybe<asset_ref<material>> saber_blade, maybe<asset_ref<material>> saber_tip)
+    : renderer_object_factory(renderer_object_factory), sector_color(sector_color), view(view), saber_draw_node(saber_draw_node), saber_length(saber_length),
       saber_base_radius(saber_base_radius), saber_tip_radius(saber_tip_radius), saber_blade(saber_blade), saber_tip(saber_tip) {
     return;
 }
@@ -23,8 +23,9 @@ void gorc::client::world::pov_mesh_node_visitor::visit_mesh(asset_ref<content::a
 
             float alpha = (face.type & flags::face_flag::Translucent) ? 0.5f : 1.0f;
 
-            vector<2> tex_scale = make_vector(1.0f / static_cast<float>(get_size<0>(material->size)),
-                    1.0f / static_cast<float>(get_size<1>(material->size)));
+            auto const &cel_size = material->cels.at(0);
+            vector<2> tex_scale = make_vector(1.0f / static_cast<float>(get<0>(cel_size)),
+                                              1.0f / static_cast<float>(get<1>(cel_size)));
 
             float light = face.extra_light;
             if(face.light == flags::light_mode::fully_lit || mesh.light == flags::light_mode::fully_lit) {
@@ -37,10 +38,14 @@ void gorc::client::world::pov_mesh_node_visitor::visit_mesh(asset_ref<content::a
             }
             get<3>(extra_lit_color) = alpha;
 
+            material_id mat_id(static_cast<int>(material.get_id()));
+
             glActiveTexture(GL_TEXTURE0);
-            graphics::bind_texture(material->cels[0].diffuse);
+            glBindTexture(GL_TEXTURE_2D,
+                renderer_object_factory.get_material_image(mat_id, 0, 0));
             glActiveTexture(GL_TEXTURE1);
-            graphics::bind_texture(material->cels[0].light);
+            glBindTexture(GL_TEXTURE_2D,
+                renderer_object_factory.get_material_image(mat_id, 0, 1));
 
             glBegin(GL_TRIANGLES);
 

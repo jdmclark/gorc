@@ -14,6 +14,7 @@ namespace gorc {
 
             virtual std::unique_ptr<asset> deserialize(input_stream &is,
                                                        content_manager &,
+                                                       asset_id,
                                                        service_registry const &) const override;
         };
 

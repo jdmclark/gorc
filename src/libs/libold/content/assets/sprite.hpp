@@ -7,7 +7,7 @@
 #include "libold/content/flags/texture_mode.hpp"
 #include "math/vector.hpp"
 
-#include "material.hpp"
+#include "jk/content/material.hpp"
 
 namespace gorc {
 namespace content {

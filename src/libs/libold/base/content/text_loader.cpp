@@ -2,6 +2,7 @@
 
 std::unique_ptr<gorc::asset> gorc::content::text_loader::deserialize(input_stream &file,
                                                                      content_manager &manager,
+                                                                     asset_id,
                                                                      service_registry const &svc) const
 {
     text::tokenizer tok(file);

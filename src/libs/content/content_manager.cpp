@@ -67,18 +67,21 @@ void gorc::content_manager::finalize_internal(asset_id id)
             diagnostic_context dc(safe_name.c_str());
             auto file = services.get<virtual_file_system>().find(unsafe_ref.name,
                                                                  loader.get_prefixes());
-            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, services);
+            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, id, services);
         }
         catch(...) {
             auto dflt_name = loader.get_default();
             if(!dflt_name.has_value()) {
+                LOG_ERROR(format("failed to load asset %s") % safe_name);
                 throw;
             }
+
+            LOG_ERROR(format("failed to load asset %s, using default instead") % safe_name);
 
             diagnostic_context dc(dflt_name.get_value());
             auto file = services.get<virtual_file_system>().find(dflt_name.get_value(),
                                                                  loader.get_prefixes());
-            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, services);
+            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, id, services);
         }
     }
 }
