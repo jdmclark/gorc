@@ -61,7 +61,8 @@ test_case(no_elements)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    entity_component_system<thing_id> ecs;
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     ecs.update(std::chrono::seconds(0));
@@ -73,7 +74,8 @@ test_case(no_matches)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    entity_component_system<thing_id> ecs;
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     auto thing0 = ecs.emplace_entity();
@@ -91,7 +93,8 @@ test_case(find_single)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    entity_component_system<thing_id> ecs;
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     auto thing0 = ecs.emplace_entity();
@@ -116,7 +119,8 @@ test_case(find_repeats)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    entity_component_system<thing_id> ecs;
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     auto thing0 = ecs.emplace_entity();

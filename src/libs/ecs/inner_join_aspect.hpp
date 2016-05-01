@@ -34,7 +34,7 @@ namespace gorc {
                        FnT const &fn,
                        ArgT &...args) const
             {
-                for(auto &comp : ecs.template component_equal_range<HeadCompT>(entity)) {
+                for(auto &comp : ecs.template find_component<HeadCompT>(entity)) {
                     inner_join_aspect_apply_args<IdT, CompT...>()
                         .apply(ecs, dt, entity, fn, args..., *comp.second);
                 }
@@ -57,7 +57,7 @@ namespace gorc {
 
         virtual void update(time_delta dt) override
         {
-            for(auto &comp : ecs.template component_range<HeadCompT>()) {
+            for(auto &comp : ecs.template all_components<HeadCompT>()) {
                 auto fn = [this](time_delta dt, IdT entity, HeadCompT &head_comp, CompT &...comp)
                     {
                         update(dt, entity, head_comp, comp...);

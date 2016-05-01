@@ -3,6 +3,7 @@
 #include "sequential_entity_generator.hpp"
 #include "component_relational_mapping.hpp"
 #include "aspect.hpp"
+#include "utility/event_bus.hpp"
 
 #include <vector>
 #include <memory>
@@ -16,9 +17,15 @@ namespace gorc {
         component_relational_mapping<IdT> components;
         std::vector<std::unique_ptr<aspect>> aspects;
 
-
-
     public:
+        event_bus &bus;
+
+        explicit entity_component_system(event_bus &bus)
+            : bus(bus)
+        {
+            return;
+        }
+
         auto emplace_entity()
         {
             return entities.emplace();
@@ -31,13 +38,13 @@ namespace gorc {
         }
 
         template <typename CompT>
-        auto component_range()
+        auto all_components()
         {
             return components.component_relational_mapping<IdT>::template range<CompT>();
         }
 
         template <typename CompT>
-        auto component_equal_range(IdT entity)
+        auto find_component(IdT entity)
         {
             return components.template equal_range<CompT>(entity);
         }

@@ -47,7 +47,8 @@ begin_suite(entity_component_system_test);
 
 test_case(aspects_updated)
 {
-    entity_component_system<thing_id> ecs;
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
 
     assert_log_empty();
     ecs.emplace_aspect<mock_aspect>(12);
@@ -61,7 +62,8 @@ test_case(aspects_updated)
 
 test_case(range)
 {
-    entity_component_system<thing_id> ecs;
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
 
     auto tid = ecs.emplace_entity();
     auto tid2 = ecs.emplace_entity();
@@ -71,7 +73,7 @@ test_case(range)
     ecs.emplace_component<mock_health_component>(tid2, 3);
 
     std::set<std::tuple<int, int>> values;
-    for(auto const &comp : ecs.component_range<mock_health_component>()) {
+    for(auto const &comp : ecs.all_components<mock_health_component>()) {
         values.emplace(static_cast<int>(comp.first), comp.second->value);
     }
 
