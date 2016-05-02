@@ -28,7 +28,8 @@ gorc::game::world::components::thing& gorc::game::world::level_model::get_thing(
         return *t.second;
     }
 
-    LOG_FATAL(format("get_thing: thing %d does not exist") % static_cast<int>(id));
+    LOG_ERROR(format("get_thing: thing %d does not exist") % static_cast<int>(id));
+    abort();
 }
 
 gorc::cog::source_type gorc::game::world::level_model::get_thing_source_type(cog::value id)

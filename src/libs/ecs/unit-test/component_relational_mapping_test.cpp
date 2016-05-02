@@ -86,7 +86,8 @@ test_case(erase_one)
     }
 
     auto rng = crm.equal_range<mock_component>(thing_id(1));
-    for(auto it = rng.begin(); it != rng.end();) {
+    for(component_pool<thing_id, mock_component>::const_iterator it = rng.begin();
+        it != rng.end();) {
         if(it->second->value % 2) {
             it = crm.erase(it);
         }

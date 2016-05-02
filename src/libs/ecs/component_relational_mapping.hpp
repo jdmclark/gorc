@@ -75,6 +75,13 @@ namespace gorc {
                 pool.second->erase_equal_range(entity);
             }
         }
+
+        void flush_erase_queue()
+        {
+            for(auto &pool : pools) {
+                pool.second->flush_erase_queue();
+            }
+        }
     };
 
 }

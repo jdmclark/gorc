@@ -20,6 +20,11 @@ namespace gorc {
         {
             return;
         }
+
+        virtual void flush_erase_queue() override
+        {
+            return;
+        }
     };
 
 }

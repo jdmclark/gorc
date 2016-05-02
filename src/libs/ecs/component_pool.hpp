@@ -14,13 +14,16 @@ namespace gorc {
         using PoolT = pool<CompT, page_size>;
         using IndexT = std::unordered_multimap<IdT, CompT*>;
 
-        PoolT components;
-        IndexT index;
-
     public:
         using iterator = typename IndexT::iterator;
         using const_iterator = typename IndexT::const_iterator;
 
+    private:
+        PoolT components;
+        IndexT index;
+        std::unordered_map<CompT*, const_iterator> erase_queue;
+
+    public:
         auto begin()
         {
             return index.begin();
@@ -39,29 +42,31 @@ namespace gorc {
             return em;
         }
 
-        auto erase(const_iterator const &it)
+        auto erase(const_iterator it)
         {
-            components.erase(*it->second);
-            return index.erase(it);
+            erase_queue.emplace(it->second, it);
+            return ++it;
         }
 
-        auto erase(const_iterator const &begin, const_iterator const &end)
+        auto erase(const_iterator begin, const_iterator end)
         {
             for(auto it = begin; it != end; ++it) {
-                components.erase(*it->second);
+                erase_queue.emplace(it->second, it);
             }
 
-            return index.erase(begin, end);
+            return end;
         }
 
         auto erase(range<const_iterator> const &rng)
         {
-            return erase(rng.begin(), rng.end());
+            erase(rng.begin(), rng.end());
+            return rng.end();
         }
 
         auto erase(range<iterator> const &rng)
         {
-            return erase(rng.begin(), rng.end());
+            erase(rng.begin(), rng.end());
+            return rng.end();
         }
 
         range<iterator> equal_range(IdT id)
@@ -82,11 +87,10 @@ namespace gorc {
         template <typename PredT>
         void erase_if(PredT pred)
         {
-            for(auto it = index.begin(); it != index.end(); ) {
+            for(const_iterator it = index.begin(); it != index.end(); ) {
                 bool should_delete = pred(it->first, *it->second);
                 if(should_delete) {
-                    components.erase(*it->second);
-                    it = index.erase(it);
+                    it = erase(it);
                 }
                 else {
                     ++it;
@@ -94,6 +98,16 @@ namespace gorc {
             }
 
             return;
+        }
+
+        virtual void flush_erase_queue() override
+        {
+            for(auto const &em : erase_queue) {
+                components.erase(*em.second->second);
+                index.erase(em.second);
+            }
+
+            erase_queue.clear();
         }
     };
 

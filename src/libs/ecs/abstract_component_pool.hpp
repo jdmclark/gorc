@@ -13,6 +13,7 @@ namespace gorc {
         }
 
         virtual void erase_equal_range(IdT entity) = 0;
+        virtual void flush_erase_queue() = 0;
     };
 
 }

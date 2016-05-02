@@ -14,6 +14,8 @@ namespace gorc {
 
         virtual IdT emplace() = 0;
         virtual void erase(IdT entity) = 0;
+
+        virtual void flush_erase_queue() = 0;
     };
 
 }

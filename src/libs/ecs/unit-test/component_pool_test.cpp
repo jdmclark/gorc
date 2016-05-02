@@ -54,7 +54,8 @@ test_case(erase_single)
     assert_range_eq(value1, expected1);
 
     auto rng = p.equal_range(thing_id(3));
-    for(auto it = rng.begin(); it != rng.end(); ) {
+    for(component_pool<thing_id, mock_component>::const_iterator it = rng.begin();
+        it != rng.end(); ) {
         if(it->second->value % 2) {
             it = p.erase(it);
         }

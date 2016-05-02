@@ -5,6 +5,7 @@
 #include "aspect.hpp"
 #include "entity_destroyed.hpp"
 #include "utility/event_bus.hpp"
+#include "log/log.hpp"
 
 #include <vector>
 #include <memory>
@@ -34,6 +35,7 @@ namespace gorc {
 
         void erase_entity(IdT entity)
         {
+            LOG_DEBUG(format("erased entity %d") % static_cast<int>(entity));
             bus.fire_event(entity_destroyed<IdT>(entity));
             components.erase_equal_range(entity);
             entities.erase(entity);
@@ -81,6 +83,8 @@ namespace gorc {
                 aspect->update(dt);
             }
 
+            components.flush_erase_queue();
+            entities.flush_erase_queue();
             return;
         }
     };

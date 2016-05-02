@@ -187,12 +187,6 @@ void gorc::game::world::level_presenter::update(const gorc::time& time) {
     get<0>(model->dynamic_tint) = std::max(get<0>(model->dynamic_tint), 0.0f);
     get<1>(model->dynamic_tint) = std::max(get<1>(model->dynamic_tint), 0.0f);
     get<2>(model->dynamic_tint) = std::max(get<2>(model->dynamic_tint), 0.0f);
-
-    for(auto thing_id : things_to_destroy) {
-        real_destroy_thing(thing_id);
-    }
-
-    things_to_destroy.clear();
 }
 
 void gorc::game::world::level_presenter::update_thing_sector(thing_id tid, components::thing& thing,
@@ -866,20 +860,6 @@ float gorc::game::world::level_presenter::damage_thing(thing_id tid,
 }
 
 void gorc::game::world::level_presenter::destroy_thing(thing_id tid) {
-    things_to_destroy.insert(tid);
-}
-
-void gorc::game::world::level_presenter::real_destroy_thing(thing_id tid) {
-    // Reset thing parentage.
-    for(auto& thing_pair : model->ecs.all_components<components::thing>()) {
-        if(thing_pair.second->parent_thing == tid) {
-            thing_pair.second->parent_thing = invalid_id;
-        }
-    }
-
-    // Expunge associated resources.
-    key_presenter->expunge_thing_animations(thing_id(tid));
-
     model->ecs.erase_entity(tid);
 }
 
