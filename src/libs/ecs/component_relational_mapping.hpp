@@ -63,6 +63,12 @@ namespace gorc {
             return get_or_create_pool<CompT>().erase(first, last);
         }
 
+        template <typename CompT, typename PredT>
+        void erase_if(PredT pred)
+        {
+            get_or_create_pool<CompT>().erase_if(pred);
+        }
+
         void erase_equal_range(IdT entity)
         {
             for(auto &pool : pools) {

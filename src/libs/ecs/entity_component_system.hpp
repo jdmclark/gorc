@@ -31,6 +31,12 @@ namespace gorc {
             return entities.emplace();
         }
 
+        void erase_entity(IdT entity)
+        {
+            components.erase_equal_range(entity);
+            entities.erase(entity);
+        }
+
         template <typename CompT, typename ...ArgT>
         auto& emplace_component(IdT entity, ArgT &&...args)
         {
@@ -47,6 +53,12 @@ namespace gorc {
         auto find_component(IdT entity)
         {
             return components.template equal_range<CompT>(entity);
+        }
+
+        template <typename CompT, typename PredT>
+        void erase_component_if(PredT pred)
+        {
+            components.template erase_if<CompT>(pred);
         }
 
         template <typename T, typename ...ArgT>

@@ -63,15 +63,15 @@ test_case(all_range)
     crm.emplace<mock_component>(thing_id(3), 12);
     crm.emplace<mock_component>(thing_id(2), 2);
 
-    std::set<std::tuple<int, int>> values;
+    std::set<std::tuple<thing_id, int>> values;
     for(auto const &em : crm.range<mock_component>()) {
         values.emplace(em.first, em.second->value);
     }
 
-    std::set<std::tuple<int, int>> expected {
-            std::make_tuple(2, 5),
-            std::make_tuple(3, 12),
-            std::make_tuple(2, 2)
+    std::set<std::tuple<thing_id, int>> expected {
+            std::make_tuple(thing_id(2), 5),
+            std::make_tuple(thing_id(3), 12),
+            std::make_tuple(thing_id(2), 2)
         };
 
     assert_range_eq(values, expected);
