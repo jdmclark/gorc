@@ -3,6 +3,7 @@
 #include "sequential_entity_generator.hpp"
 #include "component_relational_mapping.hpp"
 #include "aspect.hpp"
+#include "entity_destroyed.hpp"
 #include "utility/event_bus.hpp"
 
 #include <vector>
@@ -33,6 +34,7 @@ namespace gorc {
 
         void erase_entity(IdT entity)
         {
+            bus.fire_event(entity_destroyed<IdT>(entity));
             components.erase_equal_range(entity);
             entities.erase(entity);
         }

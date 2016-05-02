@@ -85,4 +85,34 @@ test_case(range)
     assert_range_eq(values, expected);
 }
 
+test_case(destroy_entity)
+{
+    event_bus bus;
+
+    auto delegate = bus.add_handler<entity_destroyed<thing_id>>([&](auto const &e) {
+            LOG_INFO(format("entity %d destroyed") % static_cast<int>(e.entity));
+        });
+
+    entity_component_system<thing_id> ecs(bus);
+
+    auto tid = ecs.emplace_entity();
+    ecs.emplace_component<mock_health_component>(tid, 3);
+
+    assert_log_empty();
+    for(auto const &em : ecs.all_components<mock_health_component>()) {
+        LOG_INFO(format("found component thing %d value %d") %
+                 static_cast<int>(em.first) %
+                 em.second->value);
+    }
+
+    assert_log_message(log_level::info, "found component thing 0 value 3");
+    assert_log_empty();
+
+    ecs.erase_entity(tid);
+    assert_log_message(log_level::info, "entity 0 destroyed");
+    assert_log_empty();
+
+    assert_true(ecs.all_components<mock_health_component>().empty());
+}
+
 end_suite(entity_component_system_test);
