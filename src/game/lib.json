@@ -1,7 +1,8 @@
 {
     "name" : "game",
     "dependencies" : [
-        "libs/libold"
+        "libs/libold",
+        "libs/ecs"
     ],
     "sources" : [
         "level_state.cpp",

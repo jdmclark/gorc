@@ -27,6 +27,11 @@ public:
     float stop_delay = 0.0f;
 
     sound();
+
+    sound(sound const &) = delete;
+    sound(sound &&) = delete;
+    sound& operator=(sound const &) = delete;
+    sound& operator=(sound &&) = delete;
 };
 
 }

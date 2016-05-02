@@ -3,7 +3,7 @@
 #include "math/vector.hpp"
 #include "math/color.hpp"
 #include "libold/content/assets/level.hpp"
-#include "libold/base/utility/component_system.hpp"
+#include "ecs/entity_component_system.hpp"
 #include "components/thing.hpp"
 #include "surface.hpp"
 #include "jk/cog/vm/executor.hpp"
@@ -26,7 +26,7 @@ public:
     std::vector<surface> surfaces;
     std::vector<content::assets::level_sector> sectors;
 
-    entity_component_system ecs;
+    entity_component_system<thing_id> ecs;
     service_registry services;
 
     cog::executor script_model;

@@ -9,7 +9,7 @@
 
 using gorc::game::world::aspects::puppet_animation_aspect;
 
-puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
+puppet_animation_aspect::puppet_animation_aspect(entity_component_system<thing_id> &cs,
                                                  level_presenter &presenter)
     : inner_join_aspect(cs)
     , presenter(presenter) {
@@ -22,11 +22,11 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
 
             for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
                 // HACK: Initialize actor walk animation
-                pup.second.actor_walk_animation =
+                pup.second->actor_walk_animation =
                         presenter.key_presenter->play_mode(thing_id(e.thing),
                                                            flags::puppet_submode_type::Stand);
-                if(pup.second.actor_walk_animation >= 0) {
-                    auto &key_state = presenter.model->key_model.keys[pup.second.actor_walk_animation];
+                if(pup.second->actor_walk_animation >= 0) {
+                    auto &key_state = presenter.model->key_model.keys[pup.second->actor_walk_animation];
                     key_state.flags = flag_set<flags::key_flag>();
                 }
             }
@@ -38,7 +38,7 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
         for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
             bool is_underwater = false;
             for(auto &thing : cs.find_component<components::thing>(e.thing)) {
-                auto const &cur_sector = at_id(presenter.model->sectors, thing.second.sector);
+                auto const &cur_sector = at_id(presenter.model->sectors, thing.second->sector);
                 is_underwater = cur_sector.flags & flags::sector_flag::Underwater;
             }
 
@@ -60,7 +60,7 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
                 break;
             }
 
-            pup.second.puppet_mode_type = maj_mode;
+            pup.second->puppet_mode_type = maj_mode;
         }
     });
 
@@ -69,11 +69,11 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
         for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
             for(auto &thing : cs.find_component<components::thing>(e.thing)) {
                 auto jump_submode = flags::puppet_submode_type::Rising;
-                if(thing.second.physics_flags & flags::physics_flag::is_crouching) {
+                if(thing.second->physics_flags & flags::physics_flag::is_crouching) {
                     jump_submode = flags::puppet_submode_type::Leap;
                 }
 
-                set_walk_animation(thing.second, pup.second, jump_submode, 1.0f);
+                set_walk_animation(*thing.second, *pup.second, jump_submode, 1.0f);
             }
         }
     });
@@ -90,9 +90,9 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system &cs,
         cs.bus.add_handler<events::killed>([&](events::killed const &e) {
         for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
             // HACK: Stop idle animation
-            if(pup.second.actor_walk_animation >= 0) {
-                presenter.key_presenter->stop_key(thing_id(e.thing), pup.second.actor_walk_animation, 0.0f);
-                pup.second.actor_walk_animation = -1;
+            if(pup.second->actor_walk_animation >= 0) {
+                presenter.key_presenter->stop_key(thing_id(e.thing), pup.second->actor_walk_animation, 0.0f);
+                pup.second->actor_walk_animation = -1;
             }
 
             presenter.key_presenter->play_mode(thing_id(e.thing), flags::puppet_submode_type::Death);

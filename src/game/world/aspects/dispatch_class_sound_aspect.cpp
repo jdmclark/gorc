@@ -108,7 +108,7 @@ void dispatch_class_sound_aspect::handle_animation_marker(thing_id id,
     }
 }
 
-dispatch_class_sound_aspect::dispatch_class_sound_aspect(entity_component_system &cs,
+dispatch_class_sound_aspect::dispatch_class_sound_aspect(entity_component_system<thing_id> &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 
@@ -125,7 +125,7 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(entity_component_system
     material_change_delegate =
         cs.bus.add_handler<events::standing_material_changed>([&](events::standing_material_changed const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
-            csnd.second.standing_material_type = e.type;
+            csnd.second->standing_material_type = e.type;
         }
     });
 
@@ -140,21 +140,21 @@ dispatch_class_sound_aspect::dispatch_class_sound_aspect(entity_component_system
     animation_marker_delegate =
         cs.bus.add_handler<events::animation_marker>([&](events::animation_marker const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
-            handle_animation_marker(thing_id(e.thing), csnd.second, e.type);
+            handle_animation_marker(thing_id(e.thing), *csnd.second, e.type);
         }
     });
 
     jumped_delegate =
         cs.bus.add_handler<events::jumped>([&](events::jumped const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
-            dispatch_from_map(character_jump_map, thing_id(e.thing), csnd.second.standing_material_type);
+            dispatch_from_map(character_jump_map, thing_id(e.thing), csnd.second->standing_material_type);
         }
     });
 
     landed_delegate =
         cs.bus.add_handler<events::landed>([&](events::landed const &e) {
         for(auto &csnd : cs.find_component<components::class_sounds>(e.thing)) {
-            dispatch_from_map(character_land_map, thing_id(e.thing), csnd.second.standing_material_type);
+            dispatch_from_map(character_land_map, thing_id(e.thing), csnd.second->standing_material_type);
         }
     });
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/inner_join_aspect.hpp"
+#include "ecs/inner_join_aspect.hpp"
 #include "game/world/level_presenter.hpp"
 #include "game/world/components/thing.hpp"
 #include "game/world/components/puppet_animations.hpp"
@@ -10,7 +10,8 @@ namespace game {
 namespace world {
 namespace aspects {
 
-class puppet_animation_aspect : public inner_join_aspect<components::puppet_animations,
+class puppet_animation_aspect : public inner_join_aspect<thing_id,
+                                                         components::puppet_animations,
                                                          components::thing> {
 private:
     level_presenter &presenter;
@@ -32,7 +33,7 @@ private:
     void update_standing_animation(components::thing&, components::puppet_animations&);
 
 public:
-    puppet_animation_aspect(entity_component_system &cs, level_presenter &presenter);
+    puppet_animation_aspect(entity_component_system<thing_id> &cs, level_presenter &presenter);
 
     virtual void update(time_delta, thing_id, components::puppet_animations&, components::thing&) override;
 };

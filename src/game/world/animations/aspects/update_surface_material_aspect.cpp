@@ -1,6 +1,6 @@
 #include "update_surface_material_aspect.hpp"
 
-gorc::game::world::animations::aspects::update_surface_material_aspect::update_surface_material_aspect(entity_component_system& cs, level_model& model)
+gorc::game::world::animations::aspects::update_surface_material_aspect::update_surface_material_aspect(entity_component_system<thing_id>& cs, level_model& model)
     : inner_join_aspect(cs), model(model) {
     return;
 }

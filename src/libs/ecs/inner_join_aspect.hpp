@@ -45,7 +45,7 @@ namespace gorc {
 
     template <typename IdT, typename HeadCompT, typename ...CompT>
     class inner_join_aspect : public aspect {
-    private:
+    protected:
         entity_component_system<IdT> &ecs;
 
     public:
@@ -68,6 +68,9 @@ namespace gorc {
             }
         }
 
-        virtual void update(time_delta, IdT, HeadCompT&, CompT& ...) = 0;
+        virtual void update(time_delta, IdT, HeadCompT&, CompT& ...)
+        {
+            return;
+        }
     };
 }

@@ -1,7 +1,7 @@
 #include "update_slide_ceiling_sky_aspect.hpp"
 #include "game/constants.hpp"
 
-gorc::game::world::animations::aspects::update_slide_ceiling_sky_aspect::update_slide_ceiling_sky_aspect(entity_component_system& cs, level_model& model)
+gorc::game::world::animations::aspects::update_slide_ceiling_sky_aspect::update_slide_ceiling_sky_aspect(entity_component_system<thing_id>& cs, level_model& model)
     : inner_join_aspect(cs), model(model) {
     return;
 }

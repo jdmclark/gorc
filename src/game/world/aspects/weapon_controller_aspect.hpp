@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/inner_join_aspect.hpp"
+#include "ecs/inner_join_aspect.hpp"
 #include "game/world/level_presenter.hpp"
 #include "game/world/components/thing.hpp"
 #include "game/world/components/weapon.hpp"
@@ -10,7 +10,7 @@ namespace game {
 namespace world {
 namespace aspects {
 
-class weapon_controller_aspect : public inner_join_aspect<components::weapon, components::thing> {
+class weapon_controller_aspect : public inner_join_aspect<thing_id, components::weapon, components::thing> {
 private:
     level_presenter &presenter;
     maybe<scoped_delegate> touched_thing_delegate;
@@ -21,7 +21,7 @@ private:
     void touched_surface(thing_id toucher, surface_id surface);
 
 public:
-    weapon_controller_aspect(entity_component_system&, level_presenter&);
+    weapon_controller_aspect(entity_component_system<thing_id>&, level_presenter&);
 
     virtual void update(time_delta, thing_id, components::weapon&, components::thing&) override;
 };

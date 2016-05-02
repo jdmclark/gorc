@@ -4,41 +4,38 @@
 #include "game/world/sounds/components/foley.hpp"
 #include "game/world/sounds/components/stop_when_destroyed.hpp"
 
-gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(entity_component_system &cs,
+gorc::game::world::sounds::aspects::sound_aspect::sound_aspect(entity_component_system<thing_id> &cs,
                                                                level_model &model)
     : inner_join_aspect(cs)
     , model(model) {
 
     destroyed_delegate =
-        cs.bus.add_handler<events::destroyed>([&](events::destroyed const &e) {
-        for(auto &sound : cs.find_component<components::sound>(e.destroyed_entity)) {
-            sound.second.internal_sound.stop();
+        ecs.bus.add_handler<entity_destroyed<thing_id>>([&](auto const &e) {
+        for(auto &sound : ecs.find_component<components::sound>(e.entity)) {
+            sound.second->internal_sound.stop();
         }
 
-        cs.erase_components(cs.all_components<components::thing_sound>(),
-            [&](components::thing_sound const &cmp) {
-                return cmp.sound == e.destroyed_entity;
+        ecs.erase_component_if<components::thing_sound>([&](thing_id, auto const &cmp) {
+                return cmp.sound == e.entity;
             });
 
-        cs.erase_components(cs.all_components<components::voice>(),
-            [&](components::voice const &voc) {
-                return voc.sound == e.destroyed_entity;
+        ecs.erase_component_if<components::voice>([&](thing_id, auto const &voc) {
+                return voc.sound == e.entity;
             });
 
-        cs.erase_components(cs.all_components<components::foley>(),
-            [&](components::foley const &fol) {
-                return fol.sound == e.destroyed_entity;
+        ecs.erase_component_if<components::foley>([&](thing_id, auto const &fol) {
+                return fol.sound == e.entity;
             });
 
-        for(auto &fol : cs.find_component<components::foley>(e.destroyed_entity)) {
-            for(auto &snd : cs.find_component<components::sound>(fol.second.sound)) {
-                snd.second.stop_delay = std::numeric_limits<float>::epsilon();
+        for(auto &fol : ecs.find_component<components::foley>(e.entity)) {
+            for(auto &snd : ecs.find_component<components::sound>(fol.second->sound)) {
+                snd.second->stop_delay = std::numeric_limits<float>::epsilon();
             }
         }
 
-        for(auto &tsnd : cs.find_component<components::stop_when_destroyed>(e.destroyed_entity)) {
-            for(auto &snd : cs.find_component<components::sound>(tsnd.second.sound)) {
-                snd.second.stop_delay = std::numeric_limits<float>::epsilon();
+        for(auto &tsnd : ecs.find_component<components::stop_when_destroyed>(e.entity)) {
+            for(auto &snd : cs.find_component<components::sound>(tsnd.second->sound)) {
+                snd.second->stop_delay = std::numeric_limits<float>::epsilon();
             }
         }
     });
@@ -58,7 +55,7 @@ void gorc::game::world::sounds::aspects::sound_aspect::update(time_delta t,
     }
 
     if(s.has_played && s.internal_sound.getStatus() == sf::Sound::Stopped) {
-        cs.erase_entity(id);
+        ecs.erase_entity(id);
         return;
     }
 

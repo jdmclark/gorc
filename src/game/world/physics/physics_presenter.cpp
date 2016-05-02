@@ -104,7 +104,7 @@ void physics_presenter::physics_calculate_broadphase(double dt) {
 
     // Calculate influence AABBs and record overlapping sectors.
     for(const auto& thing_pair : model->ecs.all_components<components::thing>()) {
-        const auto& thing = thing_pair.second;
+        const auto& thing = *thing_pair.second;
         thing_id tid = thing_pair.first;
 
         auto thing_off_v = make_vector(1.0f, 1.0f, 1.0f) * (thing.move_size + length(thing.vel) * static_cast<float>(dt));
@@ -627,7 +627,7 @@ void physics_presenter::update(const gorc::time& time) {
 
     // - Clear blocked flag on all path things.
     for(auto& thing : model->ecs.all_components<components::thing>()) {
-        thing.second.is_blocked = false;
+        thing.second->is_blocked = false;
     }
 
     // - Calculate potentially overlapping pairs (broadphase)
@@ -635,10 +635,10 @@ void physics_presenter::update(const gorc::time& time) {
 
     // - Compute current velocity from thrust, etc.
     for(auto &thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.move == flags::move_type::physics) {
-            compute_current_velocity(thing.second, dt);
-            compute_thing_attachment_velocity(thing.second, dt);
-            thing.second.vel += thing.second.attached_thing_velocity;
+        if(thing.second->move == flags::move_type::physics) {
+            compute_current_velocity(*thing.second, dt);
+            compute_thing_attachment_velocity(*thing.second, dt);
+            thing.second->vel += thing.second->attached_thing_velocity;
         }
     }
 
@@ -693,22 +693,22 @@ void physics_presenter::update(const gorc::time& time) {
 
     // - Remove thing attachment velocity.
     for(auto &thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.move == flags::move_type::physics) {
-            thing.second.vel -= thing.second.attached_thing_velocity;
+        if(thing.second->move == flags::move_type::physics) {
+            thing.second->vel -= thing.second->attached_thing_velocity;
         }
     }
 
     // - Send blocked message to all blocked things; else, update path.
     for(auto& thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.is_blocked && (thing.second.path_moving || thing.second.rotatepivot_moving)) {
+        if(thing.second->is_blocked && (thing.second->path_moving || thing.second->rotatepivot_moving)) {
             model->send_to_linked(cog::message_type::blocked,
                                   /* sender */ thing.first,
                                   /* source */ cog::value());
         }
-        else if(thing.second.attach_flags & flags::attach_flag::AttachedToThing) {
-            const auto& parent_thing = model->get_thing(thing.second.attached_thing.get_value());
-            presenter.adjust_thing_pos(thing.first, thing.second.position + (parent_thing.position - thing.second.prev_attached_thing_position));
-            thing.second.prev_attached_thing_position = parent_thing.position;
+        else if(thing.second->attach_flags & flags::attach_flag::AttachedToThing) {
+            const auto& parent_thing = model->get_thing(thing.second->attached_thing.get_value());
+            presenter.adjust_thing_pos(thing.first, thing.second->position + (parent_thing.position - thing.second->prev_attached_thing_position));
+            thing.second->prev_attached_thing_position = parent_thing.position;
         }
     }
 

@@ -19,8 +19,6 @@
         "base/utility/timestamp.cpp",
         "base/utility/randomizer.cpp",
         "base/utility/time.cpp",
-        "base/utility/component_system.cpp",
-        "base/utility/aspect.cpp",
         "base/input/input_adapter.cpp",
         "base/application_presenter.cpp",
         "base/view.cpp",

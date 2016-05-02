@@ -3,7 +3,7 @@
 #include "game/world/events/thing_created.hpp"
 #include "game/world/events/killed.hpp"
 
-gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(entity_component_system& cs)
+gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(entity_component_system<thing_id>& cs)
     : inner_join_aspect(cs) {
 
     created_delegate =
@@ -18,11 +18,11 @@ gorc::game::world::aspects::actor_controller_aspect::actor_controller_aspect(ent
         auto rng = cs.find_component<components::actor>(e.thing);
         for(auto it = rng.begin(); it != rng.end(); ++it) {
             for(auto &thing : cs.find_component<components::thing>(e.thing)) {
-                thing.second.thrust = make_zero_vector<3, float>();
+                thing.second->thrust = make_zero_vector<3, float>();
             }
         }
 
-        cs.erase_components(cs.find_component<components::actor>(e.thing));
+        ecs.erase_components<components::actor>(e.thing);
     });
 }
 

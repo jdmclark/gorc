@@ -474,7 +474,7 @@ void gorc::game::world::level_presenter::jump_to_frame(thing_id tid, int frame, 
 
 void gorc::game::world::level_presenter::move_to_frame(thing_id tid, int frame, float speed) {
     for(auto &thing : model->ecs.find_component<components::thing>(thing_id(tid))) {
-        auto &referenced_thing = thing.second;
+        auto &referenced_thing = *thing.second;
         referenced_thing.goal_frame = frame;
         if(frame > referenced_thing.current_frame) {
             referenced_thing.next_frame = referenced_thing.current_frame + 1;
@@ -586,7 +586,7 @@ void gorc::game::world::level_presenter::clear_sector_flags(sector_id sid, flag_
 
 gorc::thing_id gorc::game::world::level_presenter::first_thing_in_sector(sector_id sid) {
     for(auto& thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.sector == sid) {
+        if(thing.second->sector == sid) {
             return thing.first;
         }
     }
@@ -602,7 +602,7 @@ gorc::thing_id gorc::game::world::level_presenter::next_thing_in_sector(thing_id
     sector_id sid = model->get_thing(tid).sector;
 
     for(auto& thing : model->ecs.all_components<components::thing>()) {
-        if(thing.second.sector == sid && static_cast<int>(thing.first) > static_cast<int>(tid)) {
+        if(thing.second->sector == sid && static_cast<int>(thing.first) > static_cast<int>(tid)) {
             return thing.first;
         }
     }
@@ -715,7 +715,7 @@ gorc::sound_id gorc::game::world::level_presenter::load_sound(const char* fn) {
 gorc::thing_id gorc::game::world::level_presenter::create_thing(const content::assets::thing_template& tpl, sector_id sector_num,
         const vector<3>& pos, const quaternion<float>& orient) {
     // Initialize thing properties
-    thing_id new_thing_id = model->ecs.make_entity();
+    thing_id new_thing_id = model->ecs.emplace_entity();
     model->ecs.emplace_component<components::thing>(new_thing_id, tpl);
 
     auto& new_thing = model->get_thing(new_thing_id);
@@ -872,8 +872,8 @@ void gorc::game::world::level_presenter::destroy_thing(thing_id tid) {
 void gorc::game::world::level_presenter::real_destroy_thing(thing_id tid) {
     // Reset thing parentage.
     for(auto& thing_pair : model->ecs.all_components<components::thing>()) {
-        if(thing_pair.second.parent_thing == tid) {
-            thing_pair.second.parent_thing = invalid_id;
+        if(thing_pair.second->parent_thing == tid) {
+            thing_pair.second->parent_thing = invalid_id;
         }
     }
 
@@ -1010,7 +1010,7 @@ void gorc::game::world::level_presenter::set_armed_mode(thing_id player, flags::
 
 gorc::flags::puppet_mode_type gorc::game::world::level_presenter::get_major_mode(thing_id player) {
     for(auto const &pup : model->ecs.find_component<components::puppet_animations>(player)) {
-        return pup.second.puppet_mode_type;
+        return pup.second->puppet_mode_type;
     }
 
     return flags::puppet_mode_type::unarmed;

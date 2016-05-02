@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/inner_join_aspect.hpp"
+#include "ecs/inner_join_aspect.hpp"
 #include "game/world/level_presenter.hpp"
 #include "game/world/components/thing.hpp"
 #include "game/world/components/class_sounds.hpp"
@@ -13,7 +13,7 @@ namespace game {
 namespace world {
 namespace aspects {
 
-class dispatch_class_sound_aspect : public inner_join_aspect<components::class_sounds, components::thing> {
+class dispatch_class_sound_aspect : public inner_join_aspect<thing_id, components::class_sounds, components::thing> {
 public:
     using standing_material_map = std::unordered_map<flags::standing_material_type,
                                                      flags::sound_subclass_type,
@@ -34,7 +34,7 @@ private:
     void handle_animation_marker(thing_id, components::class_sounds&, flags::key_marker_type);
 
 public:
-    dispatch_class_sound_aspect(entity_component_system &cs, level_presenter &presenter);
+    dispatch_class_sound_aspect(entity_component_system<thing_id> &cs, level_presenter &presenter);
 };
 
 }

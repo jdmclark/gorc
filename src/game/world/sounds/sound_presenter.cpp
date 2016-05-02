@@ -72,13 +72,13 @@ void sound_presenter::set_ambient_sound(maybe<asset_ref<content::assets::sound>>
 
 void sound_presenter::change_sound_pitch(thing_id channel, float pitch, float delay) {
     for(auto &sound : levelModel->ecs.find_component<components::sound>(channel)) {
-        sound.second.pitch.set(pitch, delay);
+        sound.second->pitch.set(pitch, delay);
     }
 }
 
 void sound_presenter::change_sound_vol(thing_id channel, float volume, float delay) {
     for(auto &sound : levelModel->ecs.find_component<components::sound>(channel)) {
-        sound.second.volume.set(volume, delay);
+        sound.second->volume.set(volume, delay);
     }
 }
 
@@ -114,7 +114,7 @@ void sound_presenter::play_foley_loop_class(thing_id thing,
 
 void sound_presenter::stop_foley_loop(thing_id thing) {
     for(auto const &foley : levelModel->ecs.find_component<components::foley>(thing)) {
-        stop_sound(foley.second.sound, 0.0f);
+        stop_sound(foley.second->sound, 0.0f);
     }
 }
 
@@ -128,7 +128,7 @@ gorc::thing_id sound_presenter::play_sound_local(sound_id wav,
 
     auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(static_cast<int>(wav)));
 
-    thing_id snd_id = levelModel->ecs.make_entity();
+    thing_id snd_id = levelModel->ecs.emplace_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(snd_id);
 
     snd.internal_sound.setBuffer(buffer->buffer);
@@ -160,7 +160,7 @@ gorc::thing_id sound_presenter::play_sound_pos(sound_id wav,
 
     auto const &buffer = contentmanager.get_asset<content::assets::sound>(asset_id(static_cast<int>(wav)));
 
-    thing_id snd_id = levelModel->ecs.make_entity();
+    thing_id snd_id = levelModel->ecs.emplace_entity();
     components::sound &snd = levelModel->ecs.emplace_component<components::sound>(snd_id);
 
     snd.minimum_attenuation_radius = std::min(minrad, maxrad);
@@ -208,8 +208,8 @@ gorc::thing_id sound_presenter::play_sound_thing(sound_id wav,
     if(flags & flags::sound_flag::IgnoreIfSoundclassAlreadyPlaying) {
         // Thing can only play this sound once.
         for(auto &tsnd : levelModel->ecs.find_component<components::thing_sound>(thing)) {
-            for(auto &snd : levelModel->ecs.find_component<components::sound>(tsnd.second.sound)) {
-                if(snd.second.internal_sound.getBuffer() == &soundfile->buffer) {
+            for(auto &snd : levelModel->ecs.find_component<components::sound>(tsnd.second->sound)) {
+                if(snd.second->internal_sound.getBuffer() == &soundfile->buffer) {
                     return invalid_id;
                 }
             }
@@ -219,7 +219,7 @@ gorc::thing_id sound_presenter::play_sound_thing(sound_id wav,
     if(flags & flags::sound_flag::Voice) {
         // Each thing can only play one voice at a time.
         for(auto &voc : levelModel->ecs.find_component<components::voice>(thing)) {
-            stop_sound(voc.second.sound, 0.0f);
+            stop_sound(voc.second->sound, 0.0f);
         }
     }
 
@@ -255,7 +255,7 @@ void gorc::game::world::sounds::sound_presenter::stop_sound(thing_id channel, fl
     }
 
     for(auto &snd : levelModel->ecs.find_component<components::sound>(channel)) {
-        snd.second.stop_delay = delay;
+        snd.second->stop_delay = delay;
     }
 }
 

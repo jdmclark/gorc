@@ -171,10 +171,10 @@ void gorc::client::world::level_view::record_visible_special_surfaces() {
 
 void gorc::client::world::level_view::record_visible_things() {
     for(auto& thing_pair : currentModel->ecs.all_components<gorc::game::world::components::thing>()) {
-        if(sector_vis_scratch.find(thing_pair.second.sector) != sector_vis_scratch.end()) {
-            visible_thing_scratch.emplace_back(thing_pair.first, length(thing_pair.second.position - currentModel->camera_model.current_computed_state.position));
+        if(sector_vis_scratch.find(thing_pair.second->sector) != sector_vis_scratch.end()) {
+            visible_thing_scratch.emplace_back(thing_pair.first, length(thing_pair.second->position - currentModel->camera_model.current_computed_state.position));
 
-            if(!(thing_pair.second.flags & flags::thing_flag::Sighted)) {
+            if(!(thing_pair.second->flags & flags::thing_flag::Sighted)) {
                 // thing has been sighted for first time. Fire sighted event.
                 currentPresenter->thing_sighted(thing_pair.first);
             }

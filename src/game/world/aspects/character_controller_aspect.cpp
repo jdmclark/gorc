@@ -227,7 +227,7 @@ void character_controller_aspect::set_is_falling(thing_id tid, components::thing
 
     thing.attach_flags = flag_set<flags::attach_flag>();
 
-    cs.bus.fire_event(events::standing_material_changed(tid, flags::standing_material_type::none));
+    ecs.bus.fire_event(events::standing_material_changed(tid, flags::standing_material_type::none));
 }
 
 bool character_controller_aspect::step_on_surface(thing_id tid, components::thing& thing, surface_id surf_id,
@@ -242,7 +242,7 @@ bool character_controller_aspect::step_on_surface(thing_id tid, components::thin
                 /* sender */ surface_id(surf_id),
                 /* source */ thing_id(tid));
 
-        cs.bus.fire_event(events::standing_material_changed(tid, get_standing_material(thing)));
+        ecs.bus.fire_event(events::standing_material_changed(tid, get_standing_material(thing)));
         return true;
     }
     else {
@@ -267,7 +267,7 @@ bool character_controller_aspect::step_on_thing(thing_id tid, components::thing&
                 /* sender */ thing_id(land_thing_id),
                 /* source */ thing_id(tid));
 
-        cs.bus.fire_event(events::standing_material_changed(tid, get_standing_material(thing)));
+        ecs.bus.fire_event(events::standing_material_changed(tid, get_standing_material(thing)));
         return true;
     }
     else {
@@ -287,7 +287,7 @@ void character_controller_aspect::land_on_surface(thing_id tid,
         return;
     }
 
-    cs.bus.fire_event(events::landed(tid));
+    ecs.bus.fire_event(events::landed(tid));
 }
 
 void character_controller_aspect::land_on_thing(thing_id tid, components::thing& thing, thing_id land_thing_id,
@@ -296,11 +296,11 @@ void character_controller_aspect::land_on_thing(thing_id tid, components::thing&
         return;
     }
 
-    cs.bus.fire_event(events::landed(tid));
+    ecs.bus.fire_event(events::landed(tid));
 }
 
 void character_controller_aspect::jump(thing_id tid, components::thing& thing) {
-    cs.bus.fire_event(events::jumped(tid));
+    ecs.bus.fire_event(events::jumped(tid));
     set_is_falling(tid, thing);
     thing.vel = thing.vel + make_vector(0.0f, 0.0f, get<2>(thing.thrust));
 }
@@ -355,7 +355,7 @@ void character_controller_aspect::on_killed(thing_id tid,
     thing.type = flags::thing_type::Corpse;
 }
 
-character_controller_aspect::character_controller_aspect(entity_component_system &cs,
+character_controller_aspect::character_controller_aspect(entity_component_system<thing_id> &cs,
                                                          level_presenter &presenter)
     : inner_join_aspect(cs), presenter(presenter) {
 
@@ -377,7 +377,7 @@ character_controller_aspect::character_controller_aspect(entity_component_system
         auto rng = cs.find_component<components::character>(e.thing);
         for(auto it = rng.begin(); it != rng.end(); ++it) {
             for(auto &thing : cs.find_component<components::thing>(e.thing)) {
-                on_killed(e.thing, thing.second, e.killer);
+                on_killed(e.thing, *thing.second, e.killer);
             }
         }
     });

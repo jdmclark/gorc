@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/utility/inner_join_aspect.hpp"
+#include "ecs/inner_join_aspect.hpp"
 #include "game/world/components/thing.hpp"
 #include "game/world/level_presenter.hpp"
 
@@ -9,14 +9,14 @@ namespace game {
 namespace world {
 namespace aspects {
 
-class thing_controller_aspect : public inner_join_aspect<components::thing> {
+class thing_controller_aspect : public inner_join_aspect<thing_id, components::thing> {
 private:
     level_presenter& presenter;
     maybe<scoped_delegate> touched_surface_delegate;
     maybe<scoped_delegate> touched_thing_delegate;
 
 public:
-    thing_controller_aspect(entity_component_system& cs, level_presenter& presenter);
+    thing_controller_aspect(entity_component_system<thing_id>& cs, level_presenter& presenter);
 
     void update(time_delta, thing_id, components::thing&);
 

@@ -2,14 +2,14 @@
 #include "game/world/animations/events/stop_animation.hpp"
 #include "game/constants.hpp"
 
-gorc::game::world::animations::aspects::update_slide_surface_aspect::update_slide_surface_aspect(entity_component_system& cs, level_model& model)
+gorc::game::world::animations::aspects::update_slide_surface_aspect::update_slide_surface_aspect(entity_component_system<thing_id>& cs, level_model& model)
     : inner_join_aspect(cs), model(model) {
 
     // Add event handler to reduce thrust to 0 when the animation has stopped
     stop_animation_delegate =
         cs.bus.add_handler<events::stop_animation>([&cs, &model](const events::stop_animation& e) {
         for(auto& anim : cs.find_component<components::slide_surface>(e.animation)) {
-            at_id(model.surfaces, anim.second.surface).thrust = make_zero_vector<3, float>();
+            at_id(model.surfaces, anim.second->surface).thrust = make_zero_vector<3, float>();
         }
     });
 
