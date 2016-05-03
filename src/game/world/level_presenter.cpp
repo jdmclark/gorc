@@ -860,6 +860,7 @@ float gorc::game::world::level_presenter::damage_thing(thing_id tid,
 }
 
 void gorc::game::world::level_presenter::destroy_thing(thing_id tid) {
+    LOG_DEBUG(format("destroying thing %d") % static_cast<int>(tid));
     model->ecs.erase_entity(tid);
 }
 

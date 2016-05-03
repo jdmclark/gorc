@@ -103,6 +103,9 @@ namespace gorc {
         virtual void flush_erase_queue() override
         {
             for(auto const &em : erase_queue) {
+                LOG_DEBUG(format("erasing component %s for entity %d") %
+                          typeid(CompT).name() %
+                          static_cast<int>(em.second->first));
                 components.erase(*em.second->second);
                 index.erase(em.second);
             }

@@ -62,7 +62,8 @@ namespace gorc {
         template <typename CompT>
         void erase_components(IdT entity)
         {
-            components.template erase_equal_range(entity);
+            auto rng = components.template equal_range<CompT>(entity);
+            components.template erase(rng.begin(), rng.end());
         }
 
         template <typename CompT, typename PredT>
