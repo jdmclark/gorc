@@ -96,6 +96,8 @@ test_case(erase_one)
         }
     }
 
+    crm.flush_erase_queue();
+
     assert_range_eq(mock_comp_to_range(crm.equal_range<mock_component>(thing_id(1))),
                     std::set<int>({ 0, 2, 4, 6, 8 }));
 }
@@ -110,6 +112,8 @@ test_case(erase_all)
 
     auto rng = crm.equal_range<mock_component>(thing_id(1));
     crm.erase(rng.begin(), rng.end());
+
+    crm.flush_erase_queue();
 
     assert_true(crm.equal_range<mock_component>(thing_id(1)).empty());
 }
@@ -127,6 +131,7 @@ test_case(erase_equal_range)
     assert_true(!crm.equal_range<mock_other_component>(thing_id(1)).empty());
 
     crm.erase_equal_range(thing_id(1));
+    crm.flush_erase_queue();
 
     assert_true(crm.equal_range<mock_component>(thing_id(1)).empty());
     assert_true(crm.equal_range<mock_other_component>(thing_id(1)).empty());

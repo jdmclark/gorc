@@ -112,6 +112,8 @@ test_case(destroy_entity)
     assert_log_message(log_level::info, "entity 0 destroyed");
     assert_log_empty();
 
+    ecs.update(time_delta());
+
     assert_true(ecs.all_components<mock_health_component>().empty());
 }
 

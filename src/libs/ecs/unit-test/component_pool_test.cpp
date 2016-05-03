@@ -64,6 +64,8 @@ test_case(erase_single)
         }
     }
 
+    p.flush_erase_queue();
+
     std::set<int> value2;
     for(auto const &em : p.equal_range(thing_id(3))) {
         value2.insert(em.second->value);
@@ -90,6 +92,7 @@ test_case(erase_range)
     assert_range_eq(value1, expected1);
 
     p.erase(p.equal_range(thing_id(3)));
+    p.flush_erase_queue();
 
     assert_true(p.equal_range(thing_id(3)).empty());
 }
@@ -112,6 +115,7 @@ test_case(erase_const_range)
     assert_range_eq(value1, expected1);
 
     p.erase(p2.equal_range(thing_id(3)));
+    p.flush_erase_queue();
 
     assert_true(p.equal_range(thing_id(3)).empty());
 }
@@ -126,6 +130,7 @@ test_case(erase_equal_range)
 
     assert_true(!p.equal_range(thing_id(3)).empty());
     p.erase_equal_range(thing_id(3));
+    p.flush_erase_queue();
     assert_true(p.equal_range(thing_id(3)).empty());
 }
 
