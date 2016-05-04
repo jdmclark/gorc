@@ -1,17 +1,16 @@
 #pragma once
 
 #include "libold/content/assets/animation.hpp"
+#include "content/id.hpp"
 
 namespace gorc {
 namespace game {
 namespace world {
 namespace keys {
 
-class key_mix;
-
 class key_state {
 public:
-    int mix_id;
+    thing_id mix_id;
     maybe<asset_ref<content::assets::animation>> animation;
     double animation_time;
     double current_frame;
@@ -21,6 +20,8 @@ public:
     unsigned int creation_timestamp = 0;
 
     int high_priority, low_priority, body_priority;
+
+    key_state();
 };
 
 }

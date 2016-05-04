@@ -15,11 +15,6 @@ namespace sounds {
 class sound;
 }
 
-namespace keys {
-class key_mix;
-class key_state;
-}
-
 namespace components {
 
 class thing : public content::assets::thing_template {
@@ -47,8 +42,6 @@ public:
     maybe<thing_id> attached_thing;
     vector<3> prev_attached_thing_position;
     vector<3> attached_thing_velocity;
-
-    int attached_key_mix = -1;
 
     maybe<cog_id> capture_cog;
     float time_alive = 0.0f;

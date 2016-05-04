@@ -24,7 +24,7 @@ public:
     current_camera_state current_computed_state;
 
     maybe<asset_ref<content::assets::model>> pov_model;
-    int pov_key_mix_id = -1;
+    thing_id pov_key_mix_id;
 
     vector<3> waggle = make_zero_vector<3, float>();
     float waggle_speed = 0.0f;

@@ -68,7 +68,7 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     model->ecs.emplace_aspect<aspects::puppet_animation_aspect>(*this);
 
     physics_presenter->start(*model, eventBus);
-    key_presenter->start(*model, model->key_model, eventBus);
+    key_presenter->start(*model, eventBus);
     camera_presenter->start(*model, model->camera_model);
     animation_presenter->start(*model);
     sound_presenter->start(*model, model->sound_model);

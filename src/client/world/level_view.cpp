@@ -719,7 +719,7 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
         thing_mesh_node_visitor v(renderer_object_factory, lit_sector_color, *this, weapon_mesh_node, saber_mesh_node_a, saber_mesh_node_b,
                 thing.weapon_mesh, thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
                 thing.saber_side_mat, thing.saber_tip_mat);
-        currentPresenter->key_presenter->visit_mesh_hierarchy(v, model, thing.position, thing.orient, thing.attached_key_mix,
+        currentPresenter->key_presenter->visit_mesh_hierarchy(v, model, thing.position, thing.orient, tid,
                 thing.pup, thing.head_pitch);
     });
 

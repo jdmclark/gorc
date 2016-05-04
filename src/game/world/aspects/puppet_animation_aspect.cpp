@@ -1,5 +1,6 @@
 #include "puppet_animation_aspect.hpp"
 #include "game/world/level_model.hpp"
+#include "game/world/keys/components/key_state.hpp"
 #include "game/world/keys/key_presenter.hpp"
 #include "game/world/events/armed_mode_changed.hpp"
 #include "game/world/events/jumped.hpp"
@@ -25,10 +26,11 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system<thing_i
                 pup.second->actor_walk_animation =
                         presenter.key_presenter->play_mode(thing_id(e.thing),
                                                            flags::puppet_submode_type::Stand);
-                if(pup.second->actor_walk_animation >= 0) {
-                    auto &key_state = presenter.model->key_model.keys[pup.second->actor_walk_animation];
-                    key_state.flags = flag_set<flags::key_flag>();
-                }
+                maybe_if(pup.second->actor_walk_animation, [&](auto walk_anim) {
+                    for(auto &key_state : cs.find_component<keys::key_state>(walk_anim)) {
+                        key_state.second->flags = flag_set<flags::key_flag>();
+                    }
+                });
             }
         });
     });
@@ -90,12 +92,12 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system<thing_i
         cs.bus.add_handler<events::killed>([&](events::killed const &e) {
         for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
             // HACK: Stop idle animation
-            if(pup.second->actor_walk_animation >= 0) {
-                presenter.key_presenter->stop_key(thing_id(e.thing), pup.second->actor_walk_animation, 0.0f);
-                pup.second->actor_walk_animation = -1;
-            }
+            maybe_if(pup.second->actor_walk_animation, [&](thing_id anim) {
+                presenter.key_presenter->stop_key(e.thing, anim, 0.0f);
+                pup.second->actor_walk_animation = nothing;
+            });
 
-            presenter.key_presenter->play_mode(thing_id(e.thing), flags::puppet_submode_type::Death);
+            presenter.key_presenter->play_mode(e.thing, flags::puppet_submode_type::Death);
         }
     });
     return;
@@ -105,47 +107,55 @@ void puppet_animation_aspect::set_walk_animation(components::thing &thing,
                                                  components::puppet_animations &pup,
                                                  flags::puppet_submode_type type,
                                                  float speed) {
-    if(thing.type == flags::thing_type::Corpse || pup.actor_walk_animation < 0) {
+    if(thing.type == flags::thing_type::Corpse || !pup.actor_walk_animation.has_value()) {
         // Thing is dead and/or cannot play a walk animation.
         return;
     }
 
-    keys::key_state &keyState = presenter.model->key_model.keys[pup.actor_walk_animation];
-    if(!keyState.animation.has_value()) {
+    keys::key_state *keyState = nullptr;
+    maybe_if(pup.actor_walk_animation, [&](thing_id anim) {
+            for(auto &key_state : ecs.find_component<keys::key_state>(anim)) {
+                keyState = key_state.second;
+            }
+        });
+
+    if(!keyState) {
         return;
     }
 
     auto const &maybe_submode = pup.puppet->get_mode(pup.puppet_mode_type).get_submode(type);
     maybe_if(maybe_submode, [&](content::assets::puppet_submode const *submode) {
-        if(keyState.animation != submode->anim) {
-            keyState.animation_time = 0.0;
+        if(keyState->animation != submode->anim) {
+            keyState->animation_time = 0.0;
         }
 
-        keyState.animation = submode->anim;
-        keyState.high_priority = submode->hi_priority;
-        keyState.low_priority = submode->lo_priority;
-        keyState.flags = flag_set<flags::key_flag>();
-        keyState.speed = speed;
+        keyState->animation = submode->anim;
+        keyState->high_priority = submode->hi_priority;
+        keyState->low_priority = submode->lo_priority;
+        keyState->flags = flag_set<flags::key_flag>();
+        keyState->speed = speed;
     });
 }
 
 void puppet_animation_aspect::set_walk_animation_speed(components::puppet_animations &pup,
                                                        float speed) {
-    if(pup.actor_walk_animation >= 0) {
-        auto &key_state = presenter.model->key_model.keys[pup.actor_walk_animation];
-        key_state.speed = speed;
-    }
+    maybe_if(pup.actor_walk_animation, [&](thing_id anim) {
+        for(auto &key_state : ecs.find_component<keys::key_state>(anim)) {
+            key_state.second->speed = speed;
+        }
+    });
 }
 
 bool puppet_animation_aspect::is_walk_animation_mode(components::puppet_animations &pup,
                                                      flags::puppet_submode_type type) {
-    if(pup.actor_walk_animation >= 0) {
-        auto &key_state = presenter.model->key_model.keys[pup.actor_walk_animation];
-        auto const &maybe_submode = pup.puppet->get_mode(pup.puppet_mode_type).get_submode(type);
-        maybe_if(maybe_submode, [&](content::assets::puppet_submode const *submode) {
-            return key_state.animation == submode->anim;
-        });
-    }
+    maybe_if(pup.actor_walk_animation, [&](thing_id anim) {
+        for(auto &key_state : ecs.find_component<keys::key_state>(anim)) {
+            auto const &maybe_submode = pup.puppet->get_mode(pup.puppet_mode_type).get_submode(type);
+            maybe_if(maybe_submode, [&](content::assets::puppet_submode const *submode) {
+                return key_state.second->animation == submode->anim;
+            });
+        }
+    });
 
     return false;
 }

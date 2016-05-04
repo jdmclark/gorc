@@ -7,6 +7,7 @@
 #include "camera_model.hpp"
 #include "game/world/level_model.hpp"
 #include "game/world/physics/query.hpp"
+#include "game/world/keys/components/key_mix.hpp"
 
 gorc::game::world::camera::camera_presenter::camera_presenter(level_presenter& presenter)
     : presenter(presenter), levelmodel(nullptr), model(nullptr) {
@@ -31,7 +32,8 @@ void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel,
     external_camera.base_offset = make_vector(0.0f, -0.2f, 0.0125f);
 
     // Create POV animation key mix.
-    model.pov_key_mix_id = presenter.key_presenter->create_key_mix();
+    model.pov_key_mix_id = levelmodel.ecs.emplace_entity();
+    levelmodel.ecs.emplace_component<keys::key_mix>(model.pov_key_mix_id);
 }
 
 void gorc::game::world::camera::camera_presenter::update(const gorc::time& time) {
@@ -153,12 +155,12 @@ void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id, const 
     model->waggle_speed = speed;
 }
 
-int gorc::game::world::camera::camera_presenter::jk_play_pov_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags) {
+gorc::thing_id gorc::game::world::camera::camera_presenter::jk_play_pov_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags) {
     // TODO: Handle player
     return presenter.key_presenter->play_mix_key(model->pov_key_mix_id, key, priority, flags);
 }
 
-void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(thing_id, int key_id, float delay) {
+void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(thing_id, thing_id key_id, float delay) {
     // TODO: Handle player
     presenter.key_presenter->stop_key(invalid_id, key_id, delay);
 }
@@ -204,11 +206,11 @@ void gorc::game::world::camera::camera_presenter::register_verbs(cog::verb_table
         components.current_level_presenter->camera_presenter->jk_set_waggle(player, move_vec, speed);
     });
 
-    verbs.add_safe_verb("jkplaypovkey", -1, [&components](thing_id player, keyframe_id key, int priority, int key_flags) {
+    verbs.add_safe_verb("jkplaypovkey", thing_id(invalid_id), [&components](thing_id player, keyframe_id key, int priority, int key_flags) {
         return components.current_level_presenter->camera_presenter->jk_play_pov_key(player, key, priority, flag_set<flags::key_flag>(key_flags));
     });
 
-    verbs.add_safe_verb("jkstoppovkey", cog::value(), [&components](thing_id player, int key, float delay) {
+    verbs.add_safe_verb("jkstoppovkey", cog::value(), [&components](thing_id player, thing_id key, float delay) {
         components.current_level_presenter->camera_presenter->jk_stop_pov_key(player, key, delay);
     });
 }

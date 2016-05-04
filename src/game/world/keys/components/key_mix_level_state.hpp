@@ -17,6 +17,8 @@ public:
     double frame;
     int priority;
     unsigned int key_timestamp;
+
+    key_mix_level_state();
 };
 
 }

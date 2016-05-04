@@ -15,6 +15,7 @@
 #include "utility/event_bus.hpp"
 #include "jk/cog/script/verb_table.hpp"
 #include "content/id.hpp"
+#include "components/key_mix.hpp"
 
 namespace gorc {
 
@@ -30,7 +31,6 @@ class level_model;
 
 namespace keys {
 
-class key_model;
 class key_state;
 class key_mix;
 
@@ -38,10 +38,9 @@ class key_presenter {
 private:
     content_manager& contentmanager;
     level_model* levelModel;
-    key_model* model;
     event_bus* bus;
 
-    int GetThingMixId(thing_id);
+    key_mix& get_thing_mix(thing_id) const;
     void DispatchAllMarkers(thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,
             double begin, double end, bool wraps, double frame_ct);
     void DispatchMarker(thing_id, flags::key_marker_type marker);
@@ -49,27 +48,25 @@ private:
 public:
     key_presenter(content_manager& contentmanager);
 
-    void start(level_model& levelModel, key_model& model, event_bus& bus);
+    void start(level_model& levelModel, event_bus& bus);
     void update(const gorc::time& time);
 
     void expunge_thing_animations(thing_id);
 
     std::tuple<vector<3>, vector<3>> get_animation_frame(asset_ref<content::assets::animation> anim, int node_id, double frame) const;
-    std::tuple<vector<3>, vector<3>> get_node_frame(int mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
-
-    int create_key_mix();
+    std::tuple<vector<3>, vector<3>> get_node_frame(thing_id mix_id, int node_id, flag_set<flags::mesh_node_type> node_type) const;
 
     float get_key_len(keyframe_id key_id);
-    int play_mix_key(int mix_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags);
-    int play_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags);
-    int play_mode(thing_id, flags::puppet_submode_type submode);
-    void stop_key(thing_id, int key, float delay);
-    void stop_all_mix_keys(int mix);
+    thing_id play_mix_key(thing_id mix_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags);
+    thing_id play_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags);
+    thing_id play_mode(thing_id, flags::puppet_submode_type submode);
+    void stop_key(thing_id, thing_id key, float delay);
+    void stop_all_mix_keys(thing_id mix);
 
     static void register_verbs(cog::verb_table&, level_state&);
 
 private:
-    template <typename T> void visit_mesh_node(T& visitor, asset_ref<content::assets::model> obj, int attached_key_mix, int mesh_id,
+    template <typename T> void visit_mesh_node(T& visitor, asset_ref<content::assets::model> obj, thing_id attached_key_mix, int mesh_id,
             maybe<asset_ref<content::assets::puppet>> puppet_file, float head_pitch) {
         if(mesh_id < 0) {
             return;
@@ -82,7 +79,7 @@ private:
         vector<3> anim_translate = make_zero_vector<3, float>();
         vector<3> anim_rotate = make_zero_vector<3, float>();
 
-        if(attached_key_mix >= 0) {
+        if(attached_key_mix.is_valid()) {
             std::tie(anim_translate, anim_rotate) = get_node_frame(attached_key_mix, mesh_id, node.type);
         }
         else {
@@ -125,7 +122,7 @@ private:
 public:
 
     template <typename T> void visit_mesh_hierarchy(T& visitor, asset_ref<content::assets::model> obj,
-            const vector<3>& base_position, const quaternion<float>& base_orientation, int attached_key_mix,
+            const vector<3>& base_position, const quaternion<float>& base_orientation, thing_id attached_key_mix,
             maybe<asset_ref<content::assets::puppet>> puppet_file = nothing, float head_pitch = 0.0f) {
         visitor.push_matrix();
         visitor.concatenate_matrix(make_translation_matrix(base_position)

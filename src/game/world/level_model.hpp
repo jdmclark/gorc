@@ -8,7 +8,6 @@
 #include "surface.hpp"
 #include "jk/cog/vm/executor.hpp"
 #include "game/world/sounds/sound_model.hpp"
-#include "game/world/keys/key_model.hpp"
 #include "game/world/inventory/inventory_model.hpp"
 #include "game/world/camera/camera_model.hpp"
 #include "value_mapping.hpp"
@@ -31,7 +30,6 @@ public:
 
     cog::executor script_model;
     sounds::sound_model sound_model;
-    keys::key_model key_model;
     inventory::inventory_model inventory_model;
     camera::camera_model camera_model;
     world_value_mapping value_mapping;

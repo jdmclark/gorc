@@ -87,7 +87,7 @@ void gorc::client::world::thing_mesh_node_visitor::visit_mesh(asset_ref<content:
     if(weapon_mesh.has_value() && node_id == weapon_mesh_node) {
         thing_mesh_node_visitor weapon_mesh_node_visitor(renderer_object_factory, sector_color, view);
         view.get_presenter().key_presenter->visit_mesh_hierarchy(weapon_mesh_node_visitor, weapon_mesh.get_value(), make_zero_vector<3, float>(),
-                quaternion<float>(), -1);
+                quaternion<float>(), invalid_id);
     }
 
     if(saber_blade.has_value() && saber_tip.has_value() && (node_id == saber_mesh_node_a || node_id == saber_mesh_node_b)) {

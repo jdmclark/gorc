@@ -294,7 +294,7 @@ void physics_presenter::physics_find_thing_resting_manifolds(const physics::sphe
             physics_anim_node_visitor.sphere = sphere;
             physics_anim_node_visitor.visited_thing_id = col_thing_id;
             physics_anim_node_visitor.moving_thing_id = current_thing_id;
-            presenter.key_presenter->visit_mesh_hierarchy(physics_anim_node_visitor, col_thing.model_3d.get_value(), col_thing.position, col_thing.orient, col_thing.attached_key_mix);
+            presenter.key_presenter->visit_mesh_hierarchy(physics_anim_node_visitor, col_thing.model_3d.get_value(), col_thing.position, col_thing.orient, col_thing_id);
         }
     }
 }
