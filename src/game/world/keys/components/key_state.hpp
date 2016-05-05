@@ -11,6 +11,8 @@ namespace keys {
 class key_state {
 public:
     thing_id mix_id;
+    bool is_pov_mix = false;
+
     maybe<asset_ref<content::assets::animation>> animation;
     double animation_time;
     double current_frame;

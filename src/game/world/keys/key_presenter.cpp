@@ -6,6 +6,7 @@
 #include "game/world/events/animation_marker.hpp"
 #include "game/world/components/puppet_animations.hpp"
 #include "components/key_state.hpp"
+#include "components/pov_key_mix.hpp"
 
 gorc::game::world::keys::key_presenter::key_presenter(content_manager& contentmanager)
     : contentmanager(contentmanager), levelModel(nullptr) {
@@ -56,6 +57,146 @@ gorc::game::world::keys::key_mix& gorc::game::world::keys::key_presenter::get_th
     return levelModel->ecs.emplace_component<key_mix>(tid);
 }
 
+gorc::game::world::keys::pov_key_mix& gorc::game::world::keys::key_presenter::get_thing_pov_mix(
+        thing_id tid) const
+{
+    for(auto &mix : levelModel->ecs.find_component<pov_key_mix>(tid)) {
+        return *mix.second;
+    }
+
+    return levelModel->ecs.emplace_component<pov_key_mix>(tid);
+}
+
+gorc::maybe<gorc::game::world::keys::key_mix const *>
+    gorc::game::world::keys::key_presenter::maybe_get_mix(thing_id tid,
+                                                          bool is_pov) const
+{
+    if(is_pov) {
+        for(auto &mix : levelModel->ecs.find_component<pov_key_mix>(tid)) {
+            return mix.second;
+        }
+    }
+    else {
+        for(auto &mix : levelModel->ecs.find_component<key_mix>(tid)) {
+            return mix.second;
+        }
+    }
+
+    return nothing;
+}
+
+void gorc::game::world::keys::key_presenter::update_key_mix(key_mix &mix, double dt)
+{
+    mix.body.priority = mix.high.priority
+                      = mix.low.priority
+                      = std::numeric_limits<int>::lowest();
+
+    mix.high.prev_frame_blend -= dt * 2.0;
+    if(mix.high.prev_frame_blend <= 0.0) {
+        mix.high.prev_animation = nothing;
+    }
+
+    mix.low.prev_frame_blend -= dt * 2.0;
+    if(mix.low.prev_frame_blend <= 0.0) {
+        mix.low.prev_animation = nothing;
+    }
+
+    mix.body.prev_frame_blend -= dt * 2.0;
+    if(mix.body.prev_frame_blend <= 0.0) {
+        mix.body.prev_animation = nothing;
+    }
+}
+
+void gorc::game::world::keys::key_presenter::update_key(thing_id tid,
+                                                        thing_id key_id,
+                                                        key_state &key,
+                                                        key_mix &mix,
+                                                        double dt)
+{
+    // update anim time and compute frame number
+    double prev_anim_time = key.animation_time;
+    key.animation_time += dt * key.speed;
+
+    if(key.animation.has_value()) {
+        bool loops = false;
+        const auto& anim = *key.animation.get_value();
+        double prev_logical_frame = anim.framerate * prev_anim_time;
+        double logical_frame = anim.framerate * key.animation_time;
+        double frame = logical_frame;
+
+        if(key.flags & flags::key_flag::PausesOnFirstFrame) {
+            if(frame > anim.frame_count) {
+                frame = 0.0;
+            }
+        }
+        else if(key.flags & flags::key_flag::PausesOnLastFrame) {
+            if(frame > anim.frame_count) {
+                frame = anim.frame_count;
+            }
+        }
+        else if(static_cast<int>(key.flags) == 0) {
+            loops = true;
+            frame = std::fmod(frame, anim.frame_count);
+        }
+
+        key.current_frame = frame;
+
+        DispatchAllMarkers(tid, anim.markers, prev_logical_frame, logical_frame, loops, anim.frame_count);
+
+        if((key.flags & flags::key_flag::EndSmoothly) && frame >= anim.frame_count) {
+            // End smoothly, continue into next animation.
+            levelModel->ecs.erase_entity(key_id);
+            return;
+        }
+    }
+
+    // Apply mix
+    if(key.high_priority > mix.high.priority ||
+       (key.high_priority == mix.high.priority &&
+        key.creation_timestamp > mix.high.key_timestamp)) {
+        if(mix.high.animation != key.animation) {
+            mix.high.prev_animation = mix.high.animation;
+            mix.high.prev_frame = mix.high.frame;
+            mix.high.prev_frame_blend = 0.5;
+        }
+
+        mix.high.animation = key.animation;
+        mix.high.frame = key.current_frame;
+        mix.high.priority = key.high_priority;
+        mix.high.key_timestamp = key.creation_timestamp;
+    }
+
+    if(key.low_priority > mix.low.priority ||
+       (key.low_priority == mix.low.priority &&
+        key.creation_timestamp > mix.low.key_timestamp)) {
+        if(mix.low.animation != key.animation) {
+            mix.low.prev_animation = mix.low.animation;
+            mix.low.prev_frame = mix.low.frame;
+            mix.low.prev_frame_blend = 0.5;
+        }
+
+        mix.low.animation = key.animation;
+        mix.low.frame = key.current_frame;
+        mix.low.priority = key.low_priority;
+        mix.low.key_timestamp = key.creation_timestamp;
+    }
+
+    if(key.body_priority > mix.body.priority ||
+       (key.body_priority == mix.body.priority &&
+        key.creation_timestamp > mix.body.key_timestamp)) {
+        if(mix.body.animation != key.animation) {
+            mix.body.prev_animation = mix.body.animation;
+            mix.body.prev_frame = mix.body.frame;
+            mix.body.prev_frame_blend = 0.5;
+        }
+
+        mix.body.animation = key.animation;
+        mix.body.frame = key.current_frame;
+        mix.body.priority = key.body_priority;
+        mix.body.key_timestamp = key.creation_timestamp;
+    }
+}
+
 void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
     double dt = time.elapsed_as_seconds();
 
@@ -72,110 +213,23 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
 
     // Reset mix priorities and decrement prev-blend
     for(auto &mix : levelModel->ecs.all_components<key_mix>()) {
-        mix.second->body.priority = mix.second->high.priority
-                                  = mix.second->low.priority
-                                  = std::numeric_limits<int>::lowest();
+        update_key_mix(*mix.second, dt);
+    }
 
-        mix.second->high.prev_frame_blend -= dt * 2.0;
-        if(mix.second->high.prev_frame_blend <= 0.0) {
-            mix.second->high.prev_animation = nothing;
-        }
-
-        mix.second->low.prev_frame_blend -= dt * 2.0;
-        if(mix.second->low.prev_frame_blend <= 0.0) {
-            mix.second->low.prev_animation = nothing;
-        }
-
-        mix.second->body.prev_frame_blend -= dt * 2.0;
-        if(mix.second->body.prev_frame_blend <= 0.0) {
-            mix.second->body.prev_animation = nothing;
-        }
+    for(auto &mix : levelModel->ecs.all_components<pov_key_mix>()) {
+        update_key_mix(*mix.second, dt);
     }
 
     // update animation frames
     for(auto &key : levelModel->ecs.all_components<key_state>()) {
-        for(auto &mix : levelModel->ecs.find_component<key_mix>(key.second->mix_id)) {
-            // update anim time and compute frame number
-            double prev_anim_time = key.second->animation_time;
-            key.second->animation_time += dt * key.second->speed;
-
-            if(key.second->animation.has_value()) {
-                bool loops = false;
-                const auto& anim = *key.second->animation.get_value();
-                double prev_logical_frame = anim.framerate * prev_anim_time;
-                double logical_frame = anim.framerate * key.second->animation_time;
-                double frame = logical_frame;
-
-                if(key.second->flags & flags::key_flag::PausesOnFirstFrame) {
-                    if(frame > anim.frame_count) {
-                        frame = 0.0;
-                    }
-                }
-                else if(key.second->flags & flags::key_flag::PausesOnLastFrame) {
-                    if(frame > anim.frame_count) {
-                        frame = anim.frame_count;
-                    }
-                }
-                else if(static_cast<int>(key.second->flags) == 0) {
-                    loops = true;
-                    frame = std::fmod(frame, anim.frame_count);
-                }
-
-                key.second->current_frame = frame;
-
-                DispatchAllMarkers(mix.first, anim.markers, prev_logical_frame, logical_frame, loops, anim.frame_count);
-
-                if((key.second->flags & flags::key_flag::EndSmoothly) && frame >= anim.frame_count) {
-                    // End smoothly, continue into next animation.
-                    levelModel->ecs.erase_entity(key.first);
-                    continue;
-                }
+        if(key.second->is_pov_mix) {
+            for(auto &mix : levelModel->ecs.find_component<pov_key_mix>(key.second->mix_id)) {
+                update_key(mix.first, key.first, *key.second, *mix.second, dt);
             }
-
-            // Apply mix
-            if(key.second->high_priority > mix.second->high.priority ||
-               (key.second->high_priority == mix.second->high.priority &&
-                key.second->creation_timestamp > mix.second->high.key_timestamp)) {
-                if(mix.second->high.animation != key.second->animation) {
-                    mix.second->high.prev_animation = mix.second->high.animation;
-                    mix.second->high.prev_frame = mix.second->high.frame;
-                    mix.second->high.prev_frame_blend = 0.5;
-                }
-
-                mix.second->high.animation = key.second->animation;
-                mix.second->high.frame = key.second->current_frame;
-                mix.second->high.priority = key.second->high_priority;
-                mix.second->high.key_timestamp = key.second->creation_timestamp;
-            }
-
-            if(key.second->low_priority > mix.second->low.priority ||
-               (key.second->low_priority == mix.second->low.priority &&
-                key.second->creation_timestamp > mix.second->low.key_timestamp)) {
-                if(mix.second->low.animation != key.second->animation) {
-                    mix.second->low.prev_animation = mix.second->low.animation;
-                    mix.second->low.prev_frame = mix.second->low.frame;
-                    mix.second->low.prev_frame_blend = 0.5;
-                }
-
-                mix.second->low.animation = key.second->animation;
-                mix.second->low.frame = key.second->current_frame;
-                mix.second->low.priority = key.second->low_priority;
-                mix.second->low.key_timestamp = key.second->creation_timestamp;
-            }
-
-            if(key.second->body_priority > mix.second->body.priority ||
-               (key.second->body_priority == mix.second->body.priority &&
-                key.second->creation_timestamp > mix.second->body.key_timestamp)) {
-                if(mix.second->body.animation != key.second->animation) {
-                    mix.second->body.prev_animation = mix.second->body.animation;
-                    mix.second->body.prev_frame = mix.second->body.frame;
-                    mix.second->body.prev_frame_blend = 0.5;
-                }
-
-                mix.second->body.animation = key.second->animation;
-                mix.second->body.frame = key.second->current_frame;
-                mix.second->body.priority = key.second->body_priority;
-                mix.second->body.key_timestamp = key.second->creation_timestamp;
+        }
+        else {
+            for(auto &mix : levelModel->ecs.find_component<key_mix>(key.second->mix_id)) {
+                update_key(mix.first, key.first, *key.second, *mix.second, dt);
             }
         }
     }
@@ -222,10 +276,9 @@ std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presen
     return std::make_tuple(position, orientation);
 }
 
-std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_node_frame(thing_id mix_id,
+std::tuple<gorc::vector<3>, gorc::vector<3>> gorc::game::world::keys::key_presenter::get_node_frame(
+        key_mix const &mix,
         int node_id, flag_set<flags::mesh_node_type> node_type) const {
-    auto const &mix = get_thing_mix(mix_id);
-
     // get animation corresponding to node type
     const key_mix_level_state* mix_level;
     if(node_type & flags::mesh_node_type::UpperBody) {
@@ -266,18 +319,24 @@ float gorc::game::world::keys::key_presenter::get_key_len(keyframe_id key_id) {
     return static_cast<float>(key->frame_count) / static_cast<float>(key->framerate);
 }
 
-gorc::thing_id gorc::game::world::keys::key_presenter::play_mix_key(thing_id mix_id, keyframe_id key,
+gorc::thing_id gorc::game::world::keys::key_presenter::play_mix_key(thing_id mix_id, bool is_pov, keyframe_id key,
         int priority, flag_set<flags::key_flag> flags) {
     thing_id new_key_id = levelModel->ecs.emplace_entity();
 
     auto &state = levelModel->ecs.emplace_component<key_state>(new_key_id);
-    get_thing_mix(mix_id);
+    if(is_pov) {
+        get_thing_pov_mix(mix_id);
+    }
+    else {
+        get_thing_mix(mix_id);
+    }
 
     state.animation = get_asset(contentmanager, key);
     state.high_priority = state.low_priority = state.body_priority = priority;
     state.animation_time = 0.0;
     state.current_frame = 0.0;
     state.mix_id = mix_id;
+    state.is_pov_mix = is_pov;
     state.flags = flags;
     state.speed = 1.0;
 
@@ -286,7 +345,7 @@ gorc::thing_id gorc::game::world::keys::key_presenter::play_mix_key(thing_id mix
 
 gorc::thing_id gorc::game::world::keys::key_presenter::play_key(thing_id tid, keyframe_id key,
         int priority, flag_set<flags::key_flag> flags) {
-    return play_mix_key(tid, key, priority, flags);
+    return play_mix_key(tid, false, key, priority, flags);
 }
 
 gorc::thing_id gorc::game::world::keys::key_presenter::play_mode(thing_id tid,
@@ -336,9 +395,9 @@ void gorc::game::world::keys::key_presenter::stop_key(thing_id, thing_id key_id,
     }
 }
 
-void gorc::game::world::keys::key_presenter::stop_all_mix_keys(thing_id mix) {
+void gorc::game::world::keys::key_presenter::stop_all_mix_keys(thing_id mix, bool is_pov) {
     for(auto &key : levelModel->ecs.all_components<key_state>()) {
-        if(key.second->mix_id == mix) {
+        if(key.second->mix_id == mix && key.second->is_pov_mix == is_pov) {
             stop_key(invalid_id, key.first, 0.0f);
         }
     }

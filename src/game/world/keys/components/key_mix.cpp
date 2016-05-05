@@ -4,3 +4,8 @@ gorc::game::world::keys::key_mix::key_mix()
 {
     return;
 }
+
+gorc::game::world::keys::key_mix::~key_mix()
+{
+    return;
+}

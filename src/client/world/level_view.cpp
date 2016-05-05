@@ -405,7 +405,8 @@ void gorc::client::world::level_view::draw_pov_model() {
         auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
         auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
         currentPresenter->key_presenter->visit_mesh_hierarchy(v, pov_model, thing.position,
-                pov_model_offset, currentModel->camera_model.pov_key_mix_id);
+                pov_model_offset, currentPresenter->get_local_player_thing(),
+                /* is pov mesh */ true);
     });
 }
 
@@ -717,7 +718,7 @@ void gorc::client::world::level_view::draw_thing(const game::world::components::
         thing_mesh_node_visitor v(renderer_object_factory, lit_sector_color, *this, weapon_mesh_node, saber_mesh_node_a, saber_mesh_node_b,
                 thing.weapon_mesh, thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
                 thing.saber_side_mat, thing.saber_tip_mat);
-        currentPresenter->key_presenter->visit_mesh_hierarchy(v, model, thing.position, thing.orient, tid,
+        currentPresenter->key_presenter->visit_mesh_hierarchy(v, model, thing.position, thing.orient, tid, /* is pov mesh */ false,
                 thing.pup, thing.head_pitch);
     });
 

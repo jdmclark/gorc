@@ -7,7 +7,7 @@
 #include "camera_model.hpp"
 #include "game/world/level_model.hpp"
 #include "game/world/physics/query.hpp"
-#include "game/world/keys/components/key_mix.hpp"
+#include "game/world/keys/components/pov_key_mix.hpp"
 #include "game/world/components/pov_model.hpp"
 
 gorc::game::world::camera::camera_presenter::camera_presenter(level_presenter& presenter)
@@ -41,10 +41,6 @@ void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel,
     external_camera.draw_focus = true;
     external_camera.draw_pov_model = false;
     external_camera.base_offset = make_vector(0.0f, -0.2f, 0.0125f);
-
-    // Create POV animation key mix.
-    model.pov_key_mix_id = levelmodel.ecs.emplace_entity();
-    levelmodel.ecs.emplace_component<keys::key_mix>(model.pov_key_mix_id);
 }
 
 void gorc::game::world::camera::camera_presenter::update(const gorc::time& time) {
@@ -167,7 +163,7 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id tid,
         pov_model.model = get_asset(*presenter.contentmanager, mid);
     }
 
-    presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);
+    presenter.key_presenter->stop_all_mix_keys(tid, true);
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id tid, const vector<3>& move_vec, float speed) {
@@ -176,13 +172,11 @@ void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id tid, co
     pov_model.waggle_speed = speed;
 }
 
-gorc::thing_id gorc::game::world::camera::camera_presenter::jk_play_pov_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags) {
-    // TODO: Handle player
-    return presenter.key_presenter->play_mix_key(model->pov_key_mix_id, key, priority, flags);
+gorc::thing_id gorc::game::world::camera::camera_presenter::jk_play_pov_key(thing_id tid, keyframe_id key, int priority, flag_set<flags::key_flag> flags) {
+    return presenter.key_presenter->play_mix_key(tid, true, key, priority, flags);
 }
 
 void gorc::game::world::camera::camera_presenter::jk_stop_pov_key(thing_id, thing_id key_id, float delay) {
-    // TODO: Handle player
     presenter.key_presenter->stop_key(invalid_id, key_id, delay);
 }
 

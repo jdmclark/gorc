@@ -51,6 +51,7 @@
         "world/inventory/inventory_model.cpp",
         "world/inventory/inventory_presenter.cpp",
         "world/keys/key_presenter.cpp",
+        "world/keys/components/pov_key_mix.cpp",
         "world/keys/components/key_mix.cpp",
         "world/keys/components/key_mix_level_state.cpp",
         "world/keys/components/key_state.cpp",

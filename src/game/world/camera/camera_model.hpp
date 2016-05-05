@@ -22,8 +22,6 @@ public:
 
     int current_camera = 0;
     current_camera_state current_computed_state;
-
-    thing_id pov_key_mix_id;
 };
 
 }

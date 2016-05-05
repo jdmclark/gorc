@@ -235,7 +235,7 @@ public:
                 segment_query_anim_node_visitor.closest_contact_distance = closest_contact_distance;
                 segment_query_anim_node_visitor.has_closest_contact = false;
                 presenter.key_presenter->visit_mesh_hierarchy(segment_query_anim_node_visitor, col_thing.model_3d.get_value(), col_thing.position,
-                        col_thing.orient, col_thing_id);
+                        col_thing.orient, col_thing_id, /* is pov mix */ false);
 
                 if(segment_query_anim_node_visitor.has_closest_contact) {
                     closest_contact_distance = segment_query_anim_node_visitor.closest_contact_distance;

@@ -13,6 +13,7 @@ public:
     key_mix_level_state high, low, body;
 
     key_mix();
+    virtual ~key_mix();
 };
 
 }
