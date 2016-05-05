@@ -63,10 +63,10 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
     for(auto &key : levelModel->ecs.all_components<key_state>()) {
         if(key.second->expiration_time > 0.0f) {
             key.second->expiration_time -= static_cast<float>(dt);
-        }
 
-        if(key.second->expiration_time <= 0.0f) {
-            levelModel->ecs.erase_entity(key.first);
+            if(key.second->expiration_time <= 0.0f) {
+                levelModel->ecs.erase_entity(key.first);
+            }
         }
     }
 
@@ -179,6 +179,8 @@ void gorc::game::world::keys::key_presenter::update(const gorc::time& time) {
             }
         }
     }
+
+    return;
 }
 
 void gorc::game::world::keys::key_presenter::expunge_thing_animations(thing_id tid) {
