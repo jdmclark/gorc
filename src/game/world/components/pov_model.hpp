@@ -9,9 +9,11 @@ namespace components {
 
 class pov_model {
 public:
-    asset_ref<content::assets::model> model;
+    maybe<asset_ref<content::assets::model>> model = nothing;
 
-    pov_model(asset_ref<content::assets::model> model);
+    vector<3> waggle = make_zero_vector<3, float>();
+    float waggle_speed = 0.0f;
+    float waggle_time = 0.0f;
 };
 
 }

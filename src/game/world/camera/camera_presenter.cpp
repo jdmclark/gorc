@@ -15,6 +15,16 @@ gorc::game::world::camera::camera_presenter::camera_presenter(level_presenter& p
     return;
 }
 
+gorc::game::world::components::pov_model&
+    gorc::game::world::camera::camera_presenter::get_thing_pov_model(thing_id tid)
+{
+    for(auto &comp : levelmodel->ecs.find_component<components::pov_model>(tid)) {
+        return *comp.second;
+    }
+
+    return levelmodel->ecs.emplace_component<components::pov_model>(tid);
+}
+
 void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel, camera_model& model) {
     this->levelmodel = &levelmodel;
     this->model = &model;
@@ -83,23 +93,26 @@ void gorc::game::world::camera::camera_presenter::update(const gorc::time& time)
         cam.focus_not_drawn_thing = selected_camera.focus;
     }
 
-    cam.pov_model = nothing;
+    auto &pov_model = get_thing_pov_model(selected_camera.focus);
+
     if(selected_camera.draw_pov_model) {
-        for(auto const &pov_model :
-                levelmodel->ecs.find_component<components::pov_model>(selected_camera.focus)) {
-            cam.pov_model = pov_model.second->model;
-        }
+        cam.pov_model = pov_model.model;
+    }
+    else {
+        cam.pov_model = nothing;
     }
 
     // Calculate pov model waggle.
     const auto& player_thing = levelmodel->get_thing(presenter.get_local_player_thing());
     auto player_speed = length(make_vector(get<0>(player_thing.vel), get<1>(player_thing.vel))) / player_thing.max_vel;
-    float actual_waggle_speed = player_speed * model->waggle_speed * static_cast<float>(time.elapsed_as_seconds()) * (1.0f / 60.0f);
-    model->waggle_time += actual_waggle_speed;
-    float waggle_up = -cosf(model->waggle_time * 2.0f);
-    float waggle_left = sinf(model->waggle_time);
-    auto new_offset = player_speed * make_vector(waggle_up * get<0>(model->waggle) * (9.0f / 16.0f),
-            waggle_left * get<1>(model->waggle) * (16.0f / 9.0f), waggle_up * get<2>(model->waggle));
+    float actual_waggle_speed = player_speed * pov_model.waggle_speed * static_cast<float>(time.elapsed_as_seconds()) * (1.0f / 60.0f);
+    pov_model.waggle_time += actual_waggle_speed;
+    float waggle_up = -cosf(pov_model.waggle_time * 2.0f);
+    float waggle_left = sinf(pov_model.waggle_time);
+    auto new_offset = player_speed *
+                      make_vector(waggle_up * get<0>(pov_model.waggle) * (9.0f / 16.0f),
+                                  waggle_left * get<1>(pov_model.waggle) * (16.0f / 9.0f),
+                                  waggle_up * get<2>(pov_model.waggle));
     cam.pov_model_offset = lerp(cam.pov_model_offset, new_offset, 0.1f);
 
     for(auto& camera_state : model->cameras) {
@@ -145,27 +158,22 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id tid, model_id mid) {
+    auto &pov_model = get_thing_pov_model(tid);
+
     if(!mid.is_valid()) {
-        levelmodel->ecs.erase_components<components::pov_model>(tid);
-        return;
+        pov_model.model = nothing;
     }
-
-    for(auto &pov_model : levelmodel->ecs.find_component<components::pov_model>(tid)) {
-        pov_model.second->model = get_asset(*presenter.contentmanager, mid);
-        return;
+    else {
+        pov_model.model = get_asset(*presenter.contentmanager, mid);
     }
-
-    levelmodel->ecs.emplace_component<components::pov_model>(
-            tid,
-            get_asset(*presenter.contentmanager, mid));
 
     presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);
 }
 
-void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id, const vector<3>& move_vec, float speed) {
-    // TODO: Handle player
-    model->waggle = move_vec;
-    model->waggle_speed = speed;
+void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id tid, const vector<3>& move_vec, float speed) {
+    auto &pov_model = get_thing_pov_model(tid);
+    pov_model.waggle = move_vec;
+    pov_model.waggle_speed = speed;
 }
 
 gorc::thing_id gorc::game::world::camera::camera_presenter::jk_play_pov_key(thing_id, keyframe_id key, int priority, flag_set<flags::key_flag> flags) {

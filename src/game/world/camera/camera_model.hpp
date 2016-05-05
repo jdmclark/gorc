@@ -24,10 +24,6 @@ public:
     current_camera_state current_computed_state;
 
     thing_id pov_key_mix_id;
-
-    vector<3> waggle = make_zero_vector<3, float>();
-    float waggle_speed = 0.0f;
-    float waggle_time = 0.0;
 };
 
 }

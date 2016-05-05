@@ -6,6 +6,7 @@
 #include "libold/content/flags/key_flag.hpp"
 #include "libold/base/utility/time.hpp"
 #include "jk/cog/script/verb_table.hpp"
+#include "game/world/components/pov_model.hpp"
 
 namespace gorc {
 
@@ -33,6 +34,8 @@ private:
     camera_model* model;
 
     std::vector<std::tuple<sector_id, surface_id>> update_path_sector_scratch;
+
+    components::pov_model& get_thing_pov_model(thing_id);
 
 public:
     camera_presenter(level_presenter& presenter);
