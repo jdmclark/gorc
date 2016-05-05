@@ -33,6 +33,7 @@
         "world/components/class_sounds.cpp",
         "world/components/item.cpp",
         "world/components/player.cpp",
+        "world/components/pov_model.cpp",
         "world/components/puppet_animations.cpp",
         "world/components/thing.cpp",
         "world/components/weapon.cpp",

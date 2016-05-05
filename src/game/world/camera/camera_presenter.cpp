@@ -8,6 +8,7 @@
 #include "game/world/level_model.hpp"
 #include "game/world/physics/query.hpp"
 #include "game/world/keys/components/key_mix.hpp"
+#include "game/world/components/pov_model.hpp"
 
 gorc::game::world::camera::camera_presenter::camera_presenter(level_presenter& presenter)
     : presenter(presenter), levelmodel(nullptr), model(nullptr) {
@@ -82,7 +83,13 @@ void gorc::game::world::camera::camera_presenter::update(const gorc::time& time)
         cam.focus_not_drawn_thing = selected_camera.focus;
     }
 
-    cam.draw_pov_model = selected_camera.draw_pov_model;
+    cam.pov_model = nothing;
+    if(selected_camera.draw_pov_model) {
+        for(auto const &pov_model :
+                levelmodel->ecs.find_component<components::pov_model>(selected_camera.focus)) {
+            cam.pov_model = pov_model.second->model;
+        }
+    }
 
     // Calculate pov model waggle.
     const auto& player_thing = levelmodel->get_thing(presenter.get_local_player_thing());
@@ -137,14 +144,20 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
     internal_cam.angle_reset_speed = ang_reset_speed;
 }
 
-void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id, model_id mid) {
-    // TODO: Handle player
-    if(mid.is_valid()) {
-        model->pov_model = get_asset(*presenter.contentmanager, mid);
+void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id tid, model_id mid) {
+    if(!mid.is_valid()) {
+        levelmodel->ecs.erase_components<components::pov_model>(tid);
+        return;
     }
-    else {
-        model->pov_model = nothing;
+
+    for(auto &pov_model : levelmodel->ecs.find_component<components::pov_model>(tid)) {
+        pov_model.second->model = get_asset(*presenter.contentmanager, mid);
+        return;
     }
+
+    levelmodel->ecs.emplace_component<components::pov_model>(
+            tid,
+            get_asset(*presenter.contentmanager, mid));
 
     presenter.key_presenter->stop_all_mix_keys(model->pov_key_mix_id);
 }

@@ -383,32 +383,30 @@ void gorc::client::world::level_view::draw_pov_model() {
     // Draw POV model.
     const auto& cam = currentModel->camera_model.current_computed_state;
 
-    if(cam.draw_pov_model) {
-        maybe_if(currentModel->camera_model.pov_model, [&](auto pov_model) {
-            const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
-            const auto& current_sector = at_id(currentModel->sectors, thing.sector);
-            auto sector_color = make_color(1.0f, 1.0f, 1.0f);
-            maybe_if(current_sector.cmp, [&](auto cmp) {
-                sector_color = cmp->tint;
-            });
-
-            float sector_light = current_sector.ambient_light + current_sector.extra_light;
-            auto lit_sector_color = solid(sector_color * sector_light);
-
-            int saber_mesh_node = -1;
-            if(thing.jk_flags & flags::jk_flag::has_saber) {
-                saber_mesh_node = 5;
-            }
-
-            pov_mesh_node_visitor v(renderer_object_factory, lit_sector_color, *this, saber_mesh_node,
-                    thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
-                    thing.saber_side_mat, thing.saber_tip_mat);
-            auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
-            auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
-            currentPresenter->key_presenter->visit_mesh_hierarchy(v, pov_model, thing.position,
-                    pov_model_offset, currentModel->camera_model.pov_key_mix_id);
+    maybe_if(cam.pov_model, [&](auto pov_model) {
+        const auto& thing = currentModel->get_thing(currentPresenter->get_local_player_thing());
+        const auto& current_sector = at_id(currentModel->sectors, thing.sector);
+        auto sector_color = make_color(1.0f, 1.0f, 1.0f);
+        maybe_if(current_sector.cmp, [&](auto cmp) {
+            sector_color = cmp->tint;
         });
-    }
+
+        float sector_light = current_sector.ambient_light + current_sector.extra_light;
+        auto lit_sector_color = solid(sector_color * sector_light);
+
+        int saber_mesh_node = -1;
+        if(thing.jk_flags & flags::jk_flag::has_saber) {
+            saber_mesh_node = 5;
+        }
+
+        pov_mesh_node_visitor v(renderer_object_factory, lit_sector_color, *this, saber_mesh_node,
+                thing.saber_drawn_length, thing.saber_base_rad, thing.saber_tip_rad,
+                thing.saber_side_mat, thing.saber_tip_mat);
+        auto pov_orient = thing.orient * make_rotation(make_vector(1.0f, 0.0f, 0.0f), thing.head_pitch);
+        auto pov_model_offset = pov_orient * make_euler(cam.pov_model_offset);
+        currentPresenter->key_presenter->visit_mesh_hierarchy(v, pov_model, thing.position,
+                pov_model_offset, currentModel->camera_model.pov_key_mix_id);
+    });
 }
 
 void gorc::client::world::level_view::draw_surface(surface_id surf_num, const content::assets::level_sector& sector, float alpha) {
