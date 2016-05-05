@@ -20,18 +20,6 @@ puppet_animation_aspect::puppet_animation_aspect(entity_component_system<thing_i
         maybe_if(e.tpl.pup, [&](auto pup) {
             // New thing has a puppet. Create a puppet animations component.
             cs.emplace_component<components::puppet_animations>(e.thing, pup);
-
-            for(auto &pup : cs.find_component<components::puppet_animations>(e.thing)) {
-                // HACK: Initialize actor walk animation
-                pup.second->actor_walk_animation =
-                        presenter.key_presenter->play_mode(thing_id(e.thing),
-                                                           flags::puppet_submode_type::Stand);
-                maybe_if(pup.second->actor_walk_animation, [&](auto walk_anim) {
-                    for(auto &key_state : cs.find_component<keys::key_state>(walk_anim)) {
-                        key_state.second->flags = flag_set<flags::key_flag>();
-                    }
-                });
-            }
         });
     });
 
@@ -225,13 +213,24 @@ void puppet_animation_aspect::update_standing_animation(components::thing &thing
 }
 
 void puppet_animation_aspect::update(time_delta,
-                                     thing_id,
+                                     thing_id tid,
                                      components::puppet_animations &pup,
                                      components::thing &thing) {
     // Updates the idle animation loop
 
     // There are many possible states. This aspect tries to determine how the
     // entity is moving based on its thing properties.
+
+    // Create the walk animation, if one does not already exist
+    if(!pup.actor_walk_animation.has_value()) {
+        pup.actor_walk_animation =
+            presenter.key_presenter->play_mode(tid, flags::puppet_submode_type::Stand);
+        maybe_if(pup.actor_walk_animation, [&](auto walk_anim) {
+            for(auto &key_state : ecs.find_component<keys::key_state>(walk_anim)) {
+                key_state.second->flags = flag_set<flags::key_flag>();
+            }
+        });
+    }
 
     if(static_cast<int>(thing.attach_flags)) {
         // Thing is standing on a hard surface
