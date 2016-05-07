@@ -35,8 +35,6 @@ private:
 
     std::vector<std::tuple<sector_id, surface_id>> update_path_sector_scratch;
 
-    components::pov_model& get_thing_pov_model(thing_id);
-
 public:
     camera_presenter(level_presenter& presenter);
 

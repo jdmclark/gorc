@@ -15,16 +15,6 @@ gorc::game::world::camera::camera_presenter::camera_presenter(level_presenter& p
     return;
 }
 
-gorc::game::world::components::pov_model&
-    gorc::game::world::camera::camera_presenter::get_thing_pov_model(thing_id tid)
-{
-    for(auto &comp : levelmodel->ecs.find_component<components::pov_model>(tid)) {
-        return *comp.second;
-    }
-
-    return levelmodel->ecs.emplace_component<components::pov_model>(tid);
-}
-
 void gorc::game::world::camera::camera_presenter::start(level_model& levelmodel, camera_model& model) {
     this->levelmodel = &levelmodel;
     this->model = &model;
@@ -89,7 +79,8 @@ void gorc::game::world::camera::camera_presenter::update(const gorc::time& time)
         cam.focus_not_drawn_thing = selected_camera.focus;
     }
 
-    auto &pov_model = get_thing_pov_model(selected_camera.focus);
+    auto &pov_model = levelmodel->ecs.get_unique_component<components::pov_model>(
+            selected_camera.focus);
 
     if(selected_camera.draw_pov_model) {
         cam.pov_model = pov_model.model;
@@ -154,7 +145,7 @@ void gorc::game::world::camera::camera_presenter::set_pov_shake(const vector<3>&
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id tid, model_id mid) {
-    auto &pov_model = get_thing_pov_model(tid);
+    auto &pov_model = levelmodel->ecs.get_unique_component<components::pov_model>(tid);
 
     if(!mid.is_valid()) {
         pov_model.model = nothing;
@@ -167,7 +158,7 @@ void gorc::game::world::camera::camera_presenter::jk_set_pov_model(thing_id tid,
 }
 
 void gorc::game::world::camera::camera_presenter::jk_set_waggle(thing_id tid, const vector<3>& move_vec, float speed) {
-    auto &pov_model = get_thing_pov_model(tid);
+    auto &pov_model = levelmodel->ecs.get_unique_component<components::pov_model>(tid);
     pov_model.waggle = move_vec;
     pov_model.waggle_speed = speed;
 }

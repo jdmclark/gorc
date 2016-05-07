@@ -47,26 +47,6 @@ void gorc::game::world::keys::key_presenter::DispatchMarker(thing_id thing, flag
     bus->fire_event(events::animation_marker(thing, marker));
 }
 
-gorc::game::world::keys::key_mix& gorc::game::world::keys::key_presenter::get_thing_mix(
-        thing_id tid) const
-{
-    for(auto &mix : levelModel->ecs.find_component<key_mix>(tid)) {
-        return *mix.second;
-    }
-
-    return levelModel->ecs.emplace_component<key_mix>(tid);
-}
-
-gorc::game::world::keys::pov_key_mix& gorc::game::world::keys::key_presenter::get_thing_pov_mix(
-        thing_id tid) const
-{
-    for(auto &mix : levelModel->ecs.find_component<pov_key_mix>(tid)) {
-        return *mix.second;
-    }
-
-    return levelModel->ecs.emplace_component<pov_key_mix>(tid);
-}
-
 gorc::maybe<gorc::game::world::keys::key_mix const *>
     gorc::game::world::keys::key_presenter::maybe_get_mix(thing_id tid,
                                                           bool is_pov) const
@@ -325,10 +305,10 @@ gorc::thing_id gorc::game::world::keys::key_presenter::play_mix_key(thing_id mix
 
     auto &state = levelModel->ecs.emplace_component<key_state>(new_key_id);
     if(is_pov) {
-        get_thing_pov_mix(mix_id);
+        levelModel->ecs.get_unique_component<pov_key_mix>(mix_id);
     }
     else {
-        get_thing_mix(mix_id);
+        levelModel->ecs.get_unique_component<key_mix>(mix_id);
     }
 
     state.animation = get_asset(contentmanager, key);
@@ -365,7 +345,7 @@ gorc::thing_id gorc::game::world::keys::key_presenter::play_mode(thing_id tid,
     }
 
     const auto& submode = *submode_ptr.get_value();
-    get_thing_mix(tid);
+    levelModel->ecs.get_unique_component<key_mix>(tid);
 
     auto new_key_id = levelModel->ecs.emplace_entity();
     auto &state = levelModel->ecs.emplace_component<key_state>(new_key_id);

@@ -41,9 +41,6 @@ private:
     level_model* levelModel;
     event_bus* bus;
 
-    key_mix& get_thing_mix(thing_id) const;
-    pov_key_mix& get_thing_pov_mix(thing_id) const;
-
     maybe<key_mix const *> maybe_get_mix(thing_id, bool is_pov) const;
 
     void DispatchAllMarkers(thing_id, const std::vector<std::tuple<double, flags::key_marker_type>>& markers,

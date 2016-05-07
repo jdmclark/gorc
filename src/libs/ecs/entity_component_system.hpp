@@ -6,6 +6,7 @@
 #include "entity_destroyed.hpp"
 #include "utility/event_bus.hpp"
 #include "log/log.hpp"
+#include "utility/maybe.hpp"
 
 #include <vector>
 #include <memory>
@@ -57,6 +58,26 @@ namespace gorc {
         auto find_component(IdT entity)
         {
             return components.template equal_range<CompT>(entity);
+        }
+
+        template <typename CompT, typename ...ArgT>
+        auto& get_unique_component(IdT entity, ArgT &&...args)
+        {
+            for(auto &comp : find_component<CompT>(entity)) {
+                return *comp.second;
+            }
+
+            return emplace_component<CompT>(entity, std::forward<ArgT>(args)...);
+        }
+
+        template <typename CompT>
+        maybe<CompT*> maybe_get_unique_component(IdT entity)
+        {
+            for(auto &comp : find_component<CompT>(entity)) {
+                return comp.second;
+            }
+
+            return nothing;
         }
 
         template <typename CompT>
