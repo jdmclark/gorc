@@ -8,7 +8,6 @@
 #include "surface.hpp"
 #include "jk/cog/vm/executor.hpp"
 #include "game/world/sounds/sound_model.hpp"
-#include "game/world/inventory/inventory_model.hpp"
 #include "game/world/camera/camera_model.hpp"
 #include "value_mapping.hpp"
 #include <vector>
@@ -30,7 +29,6 @@ public:
 
     cog::executor script_model;
     sounds::sound_model sound_model;
-    inventory::inventory_model inventory_model;
     camera::camera_model camera_model;
     world_value_mapping value_mapping;
 
@@ -44,7 +42,7 @@ public:
     color_rgb dynamic_tint = make_color(0.0f, 0.0f, 0.0f);
 
     level_model(event_bus& parent_event_bus, content_manager& manager, service_registry const &,
-            asset_ref<content::assets::level> level, asset_ref<content::assets::inventory> inv);
+            asset_ref<content::assets::level> level);
 
     components::thing& get_thing(thing_id id);
 

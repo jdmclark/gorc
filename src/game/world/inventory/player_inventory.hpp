@@ -2,34 +2,21 @@
 
 #include <unordered_map>
 #include "libold/content/assets/inventory.hpp"
+#include "player_bin.hpp"
 
 namespace gorc {
 namespace game {
 namespace world {
 namespace inventory {
 
-class player_bin_model {
-public:
-    bool activated = false;
-    bool available = false;
-    int value = 0;
-    float cooldown = 0.0f;
-
-    bool refiring = false;
-    int mode = 0;
-    float total_time_activated = 0.0f;
-    float refire_time_activated = 0.0f;
-    float refire_rate = 0.0f;
-};
-
-class player_inventory_model {
+class player_inventory {
 private:
     asset_ref<content::assets::inventory> BaseInventory;
-    std::unordered_map<int, player_bin_model> bins;
+    std::unordered_map<int, player_bin> bins;
 
     int cur_weapon = -1;
 
-    player_bin_model& initialize_bin(int bin);
+    player_bin& initialize_bin(int bin);
 
 public:
     bool switching_weapons = false;
@@ -37,9 +24,9 @@ public:
     bool weap_assigned = false;
     float mount_wait = 0.0f;
 
-    player_inventory_model(asset_ref<content::assets::inventory> BaseInventory);
+    player_inventory(asset_ref<content::assets::inventory> BaseInventory);
 
-    player_bin_model& get_bin(int bin);
+    player_bin& get_bin(int bin);
 
     int get_bin_value(int bin);
     void set_bin_value(int bin, int value);
@@ -87,27 +74,6 @@ public:
 
     auto end() -> decltype(bins.end()) {
         return bins.end();
-    }
-};
-
-class inventory_model {
-private:
-    std::unordered_map<thing_id, player_inventory_model> player_inventories;
-
-public:
-    asset_ref<content::assets::inventory> base_inventory;
-
-    inventory_model(asset_ref<content::assets::inventory> BaseInventory);
-
-    player_inventory_model& get_inventory(thing_id player_id);
-    void mod_all_cooldowns(float dt);
-
-    auto begin() -> decltype(player_inventories.begin()) {
-        return player_inventories.begin();
-    }
-
-    auto end() -> decltype(player_inventories.end()) {
-        return player_inventories.end();
     }
 };
 

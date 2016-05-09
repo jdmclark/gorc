@@ -43,7 +43,7 @@ gorc::game::world::level_presenter::level_presenter(level_state& components, con
     animation_presenter = std::make_unique<animations::animation_presenter>();
     sound_presenter = std::make_unique<sounds::sound_presenter>(*place.contentmanager);
     key_presenter = std::make_unique<keys::key_presenter>(*place.contentmanager);
-    inventory_presenter = std::make_unique<inventory::inventory_presenter>(*this);
+    inventory_presenter = std::make_unique<inventory::inventory_presenter>(*this, place.contentmanager->load<content::assets::inventory>("items.dat"));
     camera_presenter = std::make_unique<camera::camera_presenter>(*this);
 
     return;
@@ -55,8 +55,7 @@ gorc::game::world::level_presenter::~level_presenter() {
 
 void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     eventbus = &eventBus;
-    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.services, place.level,
-            place.contentmanager->load<content::assets::inventory>("items.dat"));
+    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.services, place.level);
 
     // Create local aspects
     model->ecs.emplace_aspect<aspects::thing_controller_aspect>(*this);
@@ -72,9 +71,10 @@ void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     camera_presenter->start(*model, model->camera_model);
     animation_presenter->start(*model);
     sound_presenter->start(*model, model->sound_model);
-    inventory_presenter->start(*model, model->inventory_model);
 
     initialize_world();
+
+    inventory_presenter->start(*model);
 
     // Update all components
     update(gorc::time(timestamp(0), timestamp(0)));
@@ -101,16 +101,6 @@ void gorc::game::world::level_presenter::initialize_world() {
             },
             [&] {
                 model->script_model.create_instance(contentmanager->load<cog::script>("dflt.cog"));
-            });
-    }
-
-    // Create bin script instances.
-    LOG_DEBUG("creating inventory cog instances");
-    for(const auto& bin_tuple : *model->inventory_model.base_inventory) {
-        const auto& bin = std::get<1>(bin_tuple);
-
-        maybe_if(bin.cog, [&](auto cog) {
-                model->script_model.create_global_instance(cog);
             });
     }
 

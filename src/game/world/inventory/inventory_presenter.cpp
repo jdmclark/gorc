@@ -1,27 +1,50 @@
 #include "inventory_presenter.hpp"
 #include "game/world/level_model.hpp"
-#include "inventory_model.hpp"
 #include "game/level_state.hpp"
 #include "game/world/level_presenter.hpp"
 #include <limits>
 
-gorc::game::world::inventory::inventory_presenter::inventory_presenter(level_presenter& presenter)
-    : presenter(presenter) {
+gorc::game::world::inventory::inventory_presenter::inventory_presenter(
+        level_presenter& presenter,
+        asset_ref<content::assets::inventory> base_inventory)
+    : presenter(presenter)
+    , base_inventory(base_inventory)
+{
     return;
 }
 
-void gorc::game::world::inventory::inventory_presenter::start(level_model& levelModel, inventory_model& model) {
-    this->model = &model;
+gorc::game::world::inventory::player_inventory&
+    gorc::game::world::inventory::inventory_presenter::get_inventory(thing_id tid)
+{
+    return levelModel->ecs.get_unique_component<player_inventory>(tid, base_inventory);
+}
+
+void gorc::game::world::inventory::inventory_presenter::start(level_model& levelModel)
+{
     this->levelModel = &levelModel;
+
+    // Create bin script instances.
+    LOG_DEBUG("creating inventory cog instances");
+    for(const auto& bin_tuple : *base_inventory) {
+        const auto& bin = std::get<1>(bin_tuple);
+
+        maybe_if(bin.cog, [&](auto cog) {
+                levelModel.script_model.create_global_instance(cog);
+            });
+    }
+
     return;
 }
 
 void gorc::game::world::inventory::inventory_presenter::update(const gorc::time& time) {
-    model->mod_all_cooldowns(-static_cast<float>(time.elapsed_as_seconds()));
+    // Decrease all cooldowns
+    for(auto &player_inv : levelModel->ecs.all_components<player_inventory>()) {
+        player_inv.second->mod_all_cooldowns(-static_cast<float>(time.elapsed_as_seconds()));
+    }
 
     // Update firing messages.
-    for(auto& player_inv : *model) {
-        for(auto& player_bin : std::get<1>(player_inv)) {
+    for(auto &player_inv : levelModel->ecs.all_components<player_inventory>()) {
+        for(auto& player_bin : *player_inv.second) {
             auto bin_id = std::get<0>(player_bin);
             auto& bin = std::get<1>(player_bin);
 
@@ -45,7 +68,7 @@ void gorc::game::world::inventory::inventory_presenter::update(const gorc::time&
             }
         }
 
-        auto& inv = std::get<1>(player_inv);
+        auto& inv = *std::get<1>(player_inv);
         inv.mount_wait -= static_cast<float>(time.elapsed_as_seconds());
         if(inv.switching_weapons && inv.mount_wait <= 0.0f) {
             inv.switching_weapons = false;
@@ -62,56 +85,56 @@ void gorc::game::world::inventory::inventory_presenter::update(const gorc::time&
 }
 
 void gorc::game::world::inventory::inventory_presenter::change_inv(thing_id player, int bin, int amount) {
-    model->get_inventory(player).mod_bin_value(bin, amount);
+    get_inventory(player).mod_bin_value(bin, amount);
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_inv(thing_id player, int bin) {
-    return model->get_inventory(player).get_bin_value(bin);
+    return get_inventory(player).get_bin_value(bin);
 }
 
 gorc::maybe<gorc::cog_id> gorc::game::world::inventory::inventory_presenter::get_inv_cog(thing_id, int bin) {
-    const content::assets::inventory_bin& inv_bin = model->base_inventory->get_bin(bin);
+    const content::assets::inventory_bin& inv_bin = base_inventory->get_bin(bin);
     return maybe_if(inv_bin.cog, maybe<cog_id>(), [&](auto cog) {
         return levelModel->script_model.create_global_instance(cog);
     });
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_inv_max(thing_id, int bin) {
-    return model->base_inventory->get_bin(bin).max_value;
+    return base_inventory->get_bin(bin).max_value;
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_inv_min(thing_id, int bin) {
-    return model->base_inventory->get_bin(bin).min_value;
+    return base_inventory->get_bin(bin).min_value;
 }
 
 bool gorc::game::world::inventory::inventory_presenter::is_inv_activated(thing_id player, int bin) {
-    return model->get_inventory(player).is_bin_activated(bin);
+    return get_inventory(player).is_bin_activated(bin);
 }
 
 bool gorc::game::world::inventory::inventory_presenter::is_inv_available(thing_id player, int bin) {
-    return model->get_inventory(player).is_bin_available(bin);
+    return get_inventory(player).is_bin_available(bin);
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_bin_wait(thing_id player, int bin, float delay) {
-    model->get_inventory(player).set_bin_cooldown(bin, delay);
+    get_inventory(player).set_bin_cooldown(bin, delay);
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_inv(thing_id player, int bin, int value) {
-    model->get_inventory(player).set_bin_value(bin, value);
+    get_inventory(player).set_bin_value(bin, value);
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_inv_activated(thing_id player, int bin, bool value) {
-    model->get_inventory(player).set_bin_activated(bin, value);
+    get_inventory(player).set_bin_activated(bin, value);
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_inv_available(thing_id player, int bin, bool value) {
-    model->get_inventory(player).set_bin_available(bin, value);
+    get_inventory(player).set_bin_available(bin, value);
 }
 
 void gorc::game::world::inventory::inventory_presenter::assign_weapon(thing_id player, int weapon_bin) {
     select_weapon(player, weapon_bin);
 
-    auto& player_inv = model->get_inventory(player);
+    auto& player_inv = get_inventory(player);
     if(player_inv.switching_weapons) {
         player_inv.weap_assigned = true;
     }
@@ -121,7 +144,7 @@ void gorc::game::world::inventory::inventory_presenter::activate_weapon(thing_id
     int cur_weapon = get_cur_weapon(player);
 
     if(cur_weapon >= 0) {
-        auto& bin = model->get_inventory(player).get_bin(cur_weapon);
+        auto& bin = get_inventory(player).get_bin(cur_weapon);
         bin.activated = true;
         bin.refiring = firewait > 0.0f;
         bin.total_time_activated = 0.0f;
@@ -135,8 +158,8 @@ int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(thing_i
     int best_bin = std::numeric_limits<int>::lowest();
     int best_bin_value = -1;
 
-    for(const auto& bin_pair : model->get_inventory(player)) {
-        auto& base_bin = model->base_inventory->get_bin(std::get<0>(bin_pair));
+    for(const auto& bin_pair : get_inventory(player)) {
+        auto& base_bin = base_inventory->get_bin(std::get<0>(bin_pair));
         if(base_bin.flags & flags::inventory_flag::weapon) {
             int senderref = static_cast<int>(flags::autoselect_mode::player_mounting);
             int auto_res = std::numeric_limits<int>::lowest();
@@ -161,7 +184,7 @@ int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(thing_i
 void gorc::game::world::inventory::inventory_presenter::change_fire_rate(thing_id player, float firewait) {
     int cur_weapon = get_cur_weapon(player);
     if(cur_weapon >= 0) {
-        auto& bin = model->get_inventory(player).get_bin(cur_weapon);
+        auto& bin = get_inventory(player).get_bin(cur_weapon);
         bin.refire_rate = firewait;
     }
 }
@@ -171,7 +194,7 @@ float gorc::game::world::inventory::inventory_presenter::deactivate_weapon(thing
     int cur_weapon = get_cur_weapon(player);
 
     if(cur_weapon >= 0) {
-        auto& bin = model->get_inventory(player).get_bin(cur_weapon);
+        auto& bin = get_inventory(player).get_bin(cur_weapon);
         bin.activated = false;
         return bin.total_time_activated;
     }
@@ -180,7 +203,7 @@ float gorc::game::world::inventory::inventory_presenter::deactivate_weapon(thing
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_cur_weapon(thing_id player) {
-    return model->get_inventory(player).get_cur_weapon();
+    return get_inventory(player).get_cur_weapon();
 }
 
 int gorc::game::world::inventory::inventory_presenter::get_cur_weapon_mode() {
@@ -188,7 +211,7 @@ int gorc::game::world::inventory::inventory_presenter::get_cur_weapon_mode() {
     int cur_weapon = get_cur_weapon(player);
 
     if(cur_weapon >= 0) {
-        const auto& weap_bin = model->get_inventory(player).get_bin(cur_weapon);
+        const auto& weap_bin = get_inventory(player).get_bin(cur_weapon);
         if(weap_bin.activated && weap_bin.refiring) {
             return weap_bin.mode;
         }
@@ -215,7 +238,7 @@ void gorc::game::world::inventory::inventory_presenter::select_weapon(thing_id p
 
     if(auto_res > -1) {
         // Can mount the weapon
-        auto& player_inv = model->get_inventory(player);
+        auto& player_inv = get_inventory(player);
 
         // Check to see if already switching away from current weapon.
         if(!player_inv.switching_weapons) {
@@ -243,13 +266,13 @@ void gorc::game::world::inventory::inventory_presenter::select_weapon(thing_id p
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_cur_inv_weapon(thing_id player, int bin_num) {
-    model->get_inventory(player).set_cur_weapon(bin_num);
+    get_inventory(player).set_cur_weapon(bin_num);
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_cur_weapon(thing_id player, int weap_num) {
     // Convert weapon num into bin num.
     int seen_weap = 0;
-    for(const auto& bin : *model->base_inventory) {
+    for(const auto& bin : *base_inventory) {
         if(std::get<1>(bin).flags & flags::inventory_flag::weapon) {
             if(seen_weap == weap_num) {
                 set_cur_inv_weapon(player, std::get<0>(bin));
@@ -263,7 +286,7 @@ void gorc::game::world::inventory::inventory_presenter::set_cur_weapon(thing_id 
 }
 
 void gorc::game::world::inventory::inventory_presenter::set_mount_wait(thing_id player, float delay) {
-    model->get_inventory(player).mount_wait = delay;
+    get_inventory(player).mount_wait = delay;
 }
 
 void gorc::game::world::inventory::inventory_presenter::on_item_hotkey_pressed(thing_id player, int bin) {

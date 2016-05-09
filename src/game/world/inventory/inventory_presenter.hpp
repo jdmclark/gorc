@@ -5,6 +5,8 @@
 #include "libold/content/flags/goal_flag.hpp"
 #include "jk/cog/script/verb_table.hpp"
 #include "utility/flag_set.hpp"
+#include "player_inventory.hpp"
+#include "libold/content/assets/inventory.hpp"
 
 namespace gorc {
 namespace game {
@@ -16,18 +18,20 @@ class level_presenter;
 
 namespace inventory {
 
-class inventory_model;
-
 class inventory_presenter {
 private:
     level_presenter& presenter;
-    inventory_model* model;
+    asset_ref<content::assets::inventory> base_inventory;
+
     level_model* levelModel;
 
-public:
-    inventory_presenter(level_presenter& presenter);
+    player_inventory& get_inventory(thing_id player_id);
 
-    void start(level_model& levelModel, inventory_model& model);
+public:
+    inventory_presenter(level_presenter& presenter,
+                        asset_ref<content::assets::inventory> base_inventory);
+
+    void start(level_model& levelModel);
     void update(const gorc::time& time);
 
     void change_inv(thing_id player, int bin, int amount);
