@@ -53,6 +53,17 @@ namespace {
         }
     };
 
+    class trivial_inner_join_aspect : public inner_join_aspect<thing_id,
+                                                               mock_health_component> {
+    public:
+        trivial_inner_join_aspect(entity_component_system<thing_id> &ecs)
+            : inner_join_aspect(ecs)
+        {
+            return;
+        }
+
+    };
+
 }
 
 begin_suite(inner_join_aspect_test);
@@ -155,6 +166,18 @@ test_case(find_repeats)
         };
 
     assert_range_eq(values, expected);
+}
+
+test_case(has_default_update)
+{
+    event_bus bus;
+    entity_component_system<thing_id> ecs(bus);
+    ecs.emplace_aspect<trivial_inner_join_aspect>();
+
+    auto tid = ecs.emplace_entity();
+    ecs.emplace_component<mock_health_component>(tid, 5);
+
+    ecs.update(std::chrono::seconds(0));
 }
 
 end_suite(inner_join_aspect_test);

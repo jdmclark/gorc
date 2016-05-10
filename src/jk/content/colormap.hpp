@@ -18,6 +18,7 @@ namespace gorc {
     public:
         std::array<color_rgb8, 256> data;
 
+        explicit colormap_palette(uninit_constructor_tag);
         colormap_palette(deserialization_constructor_tag, binary_input_stream &);
     };
 
@@ -25,6 +26,7 @@ namespace gorc {
     public:
         std::array<std::array<uint8_t, 256>, 64> data;
 
+        explicit colormap_light_level(uninit_constructor_tag);
         colormap_light_level(deserialization_constructor_tag, binary_input_stream &);
     };
 
@@ -52,6 +54,7 @@ namespace gorc {
         std::unique_ptr<colormap_light_level> light_levels;
         std::unique_ptr<colormap_transparency_table> transparency_tables;
 
+        explicit colormap(uninit_constructor_tag);
         colormap(deserialization_constructor_tag, binary_input_stream &);
 
         void json_serialize_object(json_output_stream &) const;

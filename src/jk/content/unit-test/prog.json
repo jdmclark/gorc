@@ -7,5 +7,6 @@
         "libs/test"
     ],
     "sources" : [
+        "colormap_test.cpp"
     ]
 }

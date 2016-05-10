@@ -220,4 +220,16 @@ test_case(freeze_thaw_content_references)
     }
 }
 
+test_case(get_asset)
+{
+    content_manager content(services);
+    auto foo_ref = content.load<mock_asset>("foo");
+
+    auto foo_id = foo_ref.get_id();
+
+    auto foo_ref2 = content.get_asset<mock_asset>(foo_id);
+
+    assert_eq(foo_ref, foo_ref2);
+}
+
 end_suite(content_manager_test);

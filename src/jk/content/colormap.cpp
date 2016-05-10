@@ -9,10 +9,20 @@
 
 gorc::fourcc const gorc::colormap::type = "CMP"_4CC;
 
+gorc::colormap_palette::colormap_palette(uninit_constructor_tag)
+{
+    return;
+}
+
 gorc::colormap_palette::colormap_palette(deserialization_constructor_tag,
                                          binary_input_stream &bis)
 {
     bis.read(data.data(), data.size() * sizeof(color_rgb8));
+}
+
+gorc::colormap_light_level::colormap_light_level(uninit_constructor_tag)
+{
+    return;
 }
 
 gorc::colormap_light_level::colormap_light_level(deserialization_constructor_tag,
@@ -29,6 +39,11 @@ gorc::colormap_transparency_table::colormap_transparency_table(deserialization_c
     for(auto &row : data) {
         bis.read(row.data(), row.size() * sizeof(uint8_t));
     }
+}
+
+gorc::colormap::colormap(uninit_constructor_tag)
+{
+    return;
 }
 
 gorc::colormap::colormap(deserialization_constructor_tag, binary_input_stream &bis)

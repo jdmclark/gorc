@@ -169,6 +169,27 @@ test_case(is_same_vector)
                          value(make_vector(1.0f, 2.0f, 3.1f))));
 }
 
+test_case(vector_types)
+{
+    auto v0 = value(make_vector(1.0f, 2.0f, 3.0f));
+    auto v1 = value(make_color(1.0f, 2.0f, 3.0f));
+    auto v2 = value(make_point(1.0f, 2.0f, 3.0f));
+
+    assert_true(is_same(v0, v1));
+    assert_true(is_same(v0, v2));
+
+    auto color0 = static_cast<color_rgb>(v0);
+    auto point0 = static_cast<point<3, float>>(v0);
+
+    assert_true(is_same(value(color0), v0));
+    assert_true(is_same(value(point0), v0));
+
+    auto int0 = value(5);
+
+    assert_true(almost_equal(static_cast<color_rgb>(int0), color_rgb()));
+    assert_true(almost_equal(static_cast<point<3, float>>(int0), point<3, float>()));
+}
+
 #define MAKE_ID_MEMBER_TEST(x) \
 test_case(id_member_##x##_test) \
 { \
