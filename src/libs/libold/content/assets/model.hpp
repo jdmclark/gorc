@@ -30,8 +30,9 @@ public:
 }
 }
 
-class content_manager;
-
-asset_ref<content::assets::model> get_asset(content_manager &, model_id);
+template <>
+struct id_asset_type<model_id> {
+    using type = content::assets::model;
+};
 
 }

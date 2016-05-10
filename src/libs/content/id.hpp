@@ -164,6 +164,11 @@ namespace gorc {
     // Cog subsystem IDs
     MAKE_ID_TYPE(verb);
     MAKE_ID_TYPE(message);
+
+    // Prototype asset type mapping template.
+    // Assets must specialize this template for content_manager::get_asset.
+    template <typename IdT>
+    struct id_asset_type;
 }
 
 namespace std {

@@ -30,6 +30,9 @@ public:
 }
 }
 
-asset_ref<content::assets::animation> get_asset(content_manager &cm, keyframe_id);
+template <>
+struct id_asset_type<keyframe_id> {
+    using type = content::assets::animation;
+};
 
 }

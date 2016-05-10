@@ -21,6 +21,9 @@ public:
 }
 }
 
-asset_ref<content::assets::sound> get_asset(content_manager &cm, sound_id);
+template <>
+struct id_asset_type<sound_id> {
+    using type = content::assets::sound;
+};
 
 }

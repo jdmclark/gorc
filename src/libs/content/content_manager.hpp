@@ -60,11 +60,19 @@ namespace gorc {
             return load_internal(T::type, name);
         }
 
-        template <typename T>
-        asset_ref<T> get_asset(asset_id id)
+        template <typename IdT>
+        asset_ref<typename id_asset_type<IdT>::type> get_asset(IdT id)
         {
-            return asset_ref<T>(dynamic_cast<T const &>(load_from_id(id)), id);
+            using T = typename id_asset_type<IdT>::type;
+            asset_id ut_id(static_cast<int>(id));
+            return asset_ref<T>(dynamic_cast<T const &>(load_from_id(ut_id)), ut_id);
         }
     };
+
+    template <typename IdT>
+    auto get_asset(content_manager &cm, IdT id)
+    {
+        return cm.get_asset(id);
+    }
 
 }

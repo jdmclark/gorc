@@ -100,7 +100,18 @@ namespace {
         }
     };
 
+    MAKE_ID_TYPE(mock_asset);
+
     fourcc const mock_loader::type = "MOCK"_4CC;
+
+}
+
+namespace gorc {
+
+    template <>
+    struct id_asset_type<mock_asset_id> {
+        using type = mock_asset;
+    };
 
 }
 
@@ -225,9 +236,9 @@ test_case(get_asset)
     content_manager content(services);
     auto foo_ref = content.load<mock_asset>("foo");
 
-    auto foo_id = foo_ref.get_id();
+    mock_asset_id mai(static_cast<int>(foo_ref.get_id()));
 
-    auto foo_ref2 = content.get_asset<mock_asset>(foo_id);
+    auto foo_ref2 = get_asset(content, mai);
 
     assert_eq(foo_ref, foo_ref2);
 }

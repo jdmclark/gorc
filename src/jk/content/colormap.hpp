@@ -65,6 +65,9 @@ namespace gorc {
         color_rgb8 get_light_color(int color_index) const;
     };
 
-    asset_ref<colormap> get_asset(content_manager &cm, colormap_id);
+    template <>
+    struct id_asset_type<colormap_id> {
+        using type = colormap;
+    };
 
 }

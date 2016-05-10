@@ -12,7 +12,9 @@ namespace gorc {
         std::vector<size<2, int>> cels;
     };
 
-    class content_manager;
-    asset_ref<material> get_asset(content_manager &cm, material_id);
+    template <>
+    struct id_asset_type<material_id> {
+        using type = material;
+    };
 
 }
