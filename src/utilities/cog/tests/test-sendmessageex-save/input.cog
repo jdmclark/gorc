@@ -5,9 +5,8 @@ end
 code
 startup:
     print("entered startup");
-    saveandquit();
     print("sleeping inside input.cog");
-    sleep(0);
+    sleep(1);
     printint(sendmessageex(other, user0, 3, 5, 7, 11));
     return;
 end

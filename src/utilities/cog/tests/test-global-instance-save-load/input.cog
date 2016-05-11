@@ -6,8 +6,7 @@ startup:
     print("first run");
     printint(getglobalcog("other.cog"));
     printint(sendmessage(getglobalcog("other.cog"), user0));
-    saveandquit();
-    sleep(0);
+    sleep(1);
     print("second run");
     printint(getglobalcog("other.cog"));
     printint(sendmessage(getglobalcog("other.cog"), user0));

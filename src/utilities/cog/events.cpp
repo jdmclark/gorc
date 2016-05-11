@@ -25,6 +25,28 @@ void gorc::time_step_event::accept(cog_scenario_event_visitor &v) const
     v.visit(*this);
 }
 
+gorc::quicksave_event::quicksave_event(deserialization_constructor_tag, json_input_stream &jis)
+    : key(json_deserialize<std::string>(jis))
+{
+    return;
+}
+
+void gorc::quicksave_event::accept(cog_scenario_event_visitor &v) const
+{
+    v.visit(*this);
+}
+
+gorc::quickload_event::quickload_event(deserialization_constructor_tag, json_input_stream &jis)
+    : key(json_deserialize<std::string>(jis))
+{
+    return;
+}
+
+void gorc::quickload_event::accept(cog_scenario_event_visitor &v) const
+{
+    v.visit(*this);
+}
+
 namespace {
 
     json_specification<send_linked_event> send_linked_event_spec(

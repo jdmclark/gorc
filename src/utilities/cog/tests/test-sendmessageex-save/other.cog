@@ -5,9 +5,8 @@ end
 code
 user0:
     print("inside other.cog");
-    saveandquit();
     print("sleeping");
-    sleep(0.5);
+    sleep(1);
     print("printing params");
     printint(getparam(0));
     printint(getparam(1));
@@ -15,9 +14,8 @@ user0:
     printint(getparam(3));
     sum = getparam(0) + getparam(1) + getparam(2) + getparam(3);
     printint(sum);
-    saveandquit();
     print("sleeping after params");
-    sleep(0.5);
+    sleep(1);
     printint(sum);
     print("returning");
     returnex(7);

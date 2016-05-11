@@ -1,9 +1,5 @@
-==== run 1 ====
-startup
 waiting for stop
-scenario.scn: Saved state
-==== run 2 ====
-scenario.scn: Loading state
-T+0.5
+SAVE: save
 done waiting
-T+1
+LOAD: save
+done waiting

@@ -1,7 +1,7 @@
 symbols
 message startup
 message pulse
-int i=0
+int i=1
 end
 code
 startup:
@@ -12,11 +12,6 @@ startup:
 pulse:
     print("pulse");
     printint(i);
-
-    if(i == 3) {
-        saveandquit();
-        sleep(0);
-    }
 
     i = i + 1;
     return;

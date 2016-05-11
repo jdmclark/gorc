@@ -36,6 +36,12 @@ namespace {
                 else if(type == "send_linked") {
                     return std::make_unique<send_linked_event>(deserialization_constructor, f);
                 }
+                else if(type == "quicksave") {
+                    return std::make_unique<quicksave_event>(deserialization_constructor, f);
+                }
+                else if(type == "quickload") {
+                    return std::make_unique<quickload_event>(deserialization_constructor, f);
+                }
                 else {
                     LOG_FATAL(format("unknown scenario event type '%s'") % type);
                 }

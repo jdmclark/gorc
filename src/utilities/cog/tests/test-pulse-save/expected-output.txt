@@ -1,46 +1,35 @@
-==== run 1 ====
 startup
-T+0.5
 T+1
 pulse
-0
-T+1.5
+1
 T+2
 pulse
-1
-T+2.5
+2
 T+3
 pulse
-2
-T+3.5
+3
+SAVE: save3
 T+4
 pulse
-3
-scenario.scn: Saved state
-==== run 2 ====
-scenario.scn: Loading state
-T+4.5
+4
 T+5
 pulse
-4
-T+5.5
+5
 T+6
 pulse
-5
-T+6.5
+6
+SAVE: save6
 T+7
 pulse
-6
-T+7.5
+7
 T+8
 pulse
-7
-T+8.5
-T+9
-pulse
 8
-T+9.5
-T+10
+LOAD: save3
+T+4
 pulse
-9
-T+10.5
+4
+LOAD: save6
+T+7
+pulse
+7

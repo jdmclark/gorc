@@ -6,8 +6,7 @@ code
 startup:
     print("startup");
     settimer(1);
-    saveandquit();
-    sleep(0);
+    sleep(1);
     return;
 
 timer:

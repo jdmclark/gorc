@@ -11,57 +11,29 @@
 #include "content/content_manager.hpp"
 #include "content/loader_registry.hpp"
 #include "value_mapping.hpp"
+#include "io/native_file.hpp"
 #include <vector>
 #include <unordered_map>
 #include <iostream>
 
 namespace gorc {
 
-    class cog_program : public program, public cog_scenario_event_visitor {
-    private:
-        std::string scenario_file;
-        cog::verb_table verbs;
-
-        std::string save_file;
-        bool load_from_save = false;
-
-        bool save_and_exit_when_possible = false;
-
+    class cog_scenario_state {
+    public:
+        service_registry services;
         std::unique_ptr<content_manager> content;
         std::unique_ptr<cog::executor> executor;
         time_delta current_time = 0.0s;
 
-        void serialize_to_savefile(service_registry const &services)
-        {
-            auto out_stream = make_native_file(save_file);
-            binary_output_stream bos(*out_stream, services);
-
-            // Always serialize content manager first
-            binary_serialize(bos, *content);
-            binary_serialize(bos, *executor);
-            binary_serialize(bos, current_time);
-        }
-
-        void instantiate_from_savefile(service_registry &services)
-        {
-            auto in_stream = make_native_read_only_file(save_file);
-            binary_input_stream bis(*in_stream, services);
-
-            content = std::make_unique<content_manager>(deserialization_constructor, bis);
-            services.add(*content);
-
-            executor = std::make_unique<cog::executor>(deserialization_constructor, bis);
-            current_time = binary_deserialize<time_delta>(bis);
-        }
-
-        void instantiate_new(cog_scenario &scenario,
-                             service_registry &services)
+        cog_scenario_state(cog_scenario &scn,
+                           service_registry const &parent_services)
+            : services(&parent_services)
         {
             content = std::make_unique<content_manager>(services);
             services.add(*content);
 
             executor = std::make_unique<cog::executor>(services);
-            for(auto const &file : scenario.cog_files) {
+            for(auto const &file : scn.cog_files) {
                 auto script = content->load<cog::script>(file.cog_filename);
                 cog_id instance_id;
                 if(file.init.empty()) {
@@ -71,38 +43,55 @@ namespace gorc {
                     instance_id = executor->create_instance(script, file.init);
                 }
             }
-
-            current_time = 0.0s;
-
-            // Execute startup messages:
-            executor->send_to_all(cog::message_type::startup,
-                                  /* sender: nothing */ 0,
-                                  /* senderid: nothing */ cog::value(),
-                                  /* source: nothing */ 0,
-                                  /* param0 */ cog::value(),
-                                  /* param1 */ cog::value(),
-                                  /* param2 */ cog::value(),
-                                  /* param3 */ cog::value());
         }
+
+        cog_scenario_state(deserialization_constructor_tag,
+                           input_stream &is,
+                           service_registry const &parent_services)
+            : services(&parent_services)
+        {
+            binary_input_stream bis(is, services);
+
+            content = std::make_unique<content_manager>(deserialization_constructor, bis);
+            services.add(*content);
+
+            executor = std::make_unique<cog::executor>(deserialization_constructor, bis);
+
+            current_time = binary_deserialize<time_delta>(bis);
+        }
+
+        void binary_serialize_object(output_stream &os) const
+        {
+            binary_output_stream bos(os, services);
+
+            binary_serialize(bos, *content);
+            binary_serialize(bos, *executor);
+            binary_serialize(bos, current_time);
+        }
+    };
+
+    class cog_program : public program, public cog_scenario_event_visitor {
+    private:
+        service_registry services;
+
+        std::string scenario_file;
+        cog::verb_table verbs;
+
+        std::unique_ptr<cog_scenario_state> state;
+
+        std::unordered_map<std::string, std::unique_ptr<memory_file>> quicksaves;
 
     public:
         virtual void create_options(options &opts) override
         {
             opts.insert(make_value_option("scenario", scenario_file));
-
-            opts.insert(make_value_option("save-file", save_file));
-            opts.insert(make_switch_option("load-from-save", load_from_save));
-
             opts.emplace_constraint<required_option>("scenario");
-            opts.emplace_constraint<dependent_option>("load-from-save", "save-file");
         }
 
         virtual int run() override
         {
             cog::constant_table constants;
             cog::default_populate_constant_table(constants);
-
-            service_registry services;
 
             cog::default_populate_verb_table(verbs);
             populate_verb_table();
@@ -128,21 +117,19 @@ namespace gorc {
             services.add<cog::default_value_mapping>(val_map);
 
             // Construct instances:
-            if(load_from_save) {
-                LOG_INFO("Loading state");
-                instantiate_from_savefile(services);
-            }
-            else {
-                instantiate_new(scenario, services);
-            }
+            state = std::make_unique<cog_scenario_state>(scenario, services);
+
+            // Execute startup messages:
+            state->executor->send_to_all(cog::message_type::startup,
+                                         /* sender: nothing */ 0,
+                                         /* senderid: nothing */ cog::value(),
+                                         /* source: nothing */ 0,
+                                         /* param0 */ cog::value(),
+                                         /* param1 */ cog::value(),
+                                         /* param2 */ cog::value(),
+                                         /* param3 */ cog::value());
 
             for(auto const &event : scenario.events) {
-                if(save_and_exit_when_possible) {
-                    serialize_to_savefile(services);
-                    LOG_INFO("Saved state");
-                    return EXIT_SUCCESS;
-                }
-
                 event->accept(*this);
             }
 
@@ -151,29 +138,45 @@ namespace gorc {
 
         virtual void visit(time_step_event const &e) override
         {
-            current_time += e.step;
-            std::cout << "T+" << current_time.count() << std::endl;
-            executor->update(e.step);
+            state->current_time += e.step;
+            std::cout << "T+" << state->current_time.count() << std::endl;
+            state->executor->update(e.step);
         }
 
         virtual void visit(send_linked_event const &e) override
         {
-            executor->send_to_linked(e.msg,
-                                     e.sender,
-                                     e.source,
-                                     e.st,
-                                     e.param0,
-                                     e.param1,
-                                     e.param2,
-                                     e.param3);
+            state->executor->send_to_linked(e.msg,
+                                            e.sender,
+                                            e.source,
+                                            e.st,
+                                            e.param0,
+                                            e.param1,
+                                            e.param2,
+                                            e.param3);
+        }
+
+        virtual void visit(quicksave_event const &e) override
+        {
+            auto mf = std::make_unique<memory_file>();
+            state->binary_serialize_object(*mf);
+
+            quicksaves.erase(e.key);
+            quicksaves.emplace(e.key, std::move(mf));
+
+            std::cout << "SAVE: " << e.key << std::endl;
+        }
+
+        virtual void visit(quickload_event const &e) override
+        {
+            memory_file::reader mr(*quicksaves.at(e.key));
+            state = std::make_unique<cog_scenario_state>(deserialization_constructor,
+                                                         mr,
+                                                         services);
+            std::cout << "LOAD: " << e.key << std::endl;
         }
 
         void populate_verb_table()
         {
-            verbs.add_verb("saveandquit", [&]() {
-                    save_and_exit_when_possible = true;
-                });
-
             verbs.add_verb("print", [](char const *s) {
                     std::cout << s << std::endl;
                 });
@@ -203,7 +206,8 @@ namespace gorc {
             verbs.emplace_verb<printvar_verb>("printvar");
 
             verbs.add_verb("getglobalcog", [&](char const *cogname) {
-                    return executor->create_global_instance(content->load<cog::script>(cogname));
+                    return state->executor->create_global_instance(
+                            state->content->load<cog::script>(cogname));
                 });
 
             // Test verbs for typesafe casting

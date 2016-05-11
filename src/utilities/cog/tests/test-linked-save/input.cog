@@ -16,5 +16,4 @@ print("sender is");
 printvar(getsenderref());
 print("source is");
 printvar(getsourceref());
-saveandquit();
 end

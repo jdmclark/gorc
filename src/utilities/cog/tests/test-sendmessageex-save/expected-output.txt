@@ -1,16 +1,13 @@
-==== run 1 ====
 entered startup
 sleeping inside input.cog
-scenario.scn: Saved state
-==== run 2 ====
-scenario.scn: Loading state
-T+0.5
+SAVE: save
+LOAD: save
+T+1
 inside other.cog
 sleeping
-scenario.scn: Saved state
-==== run 3 ====
-scenario.scn: Loading state
-T+1
+SAVE: save
+LOAD: save
+T+2
 printing params
 3
 5
@@ -18,18 +15,9 @@ printing params
 11
 26
 sleeping after params
-scenario.scn: Saved state
-==== run 4 ====
-scenario.scn: Loading state
-T+1.5
+SAVE: save
+LOAD: save
+T+3
 26
 returning
 7
-T+2
-==== run 5 ====
-scenario.scn: Loading state
-T+1.5
-26
-returning
-7
-T+2

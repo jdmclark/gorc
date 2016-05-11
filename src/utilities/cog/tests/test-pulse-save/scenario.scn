@@ -6,18 +6,23 @@
     ],
 
     events: [
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5,
-        time 0.5
+        time 1,
+        time 1,
+        time 1,
+        quicksave save3,
+
+        time 1,
+        time 1,
+        time 1,
+        quicksave save6,
+
+        time 1,
+        time 1,
+
+        quickload save3,
+        time 1,
+
+        quickload save6,
+        time 1
     ]
 }

@@ -1,11 +1,13 @@
-==== run 1 ====
 first run
 1
 7
-scenario.scn: Saved state
-==== run 2 ====
-scenario.scn: Loading state
-T+0
+SAVE: save
+T+1
+second run
+1
+7
+LOAD: save
+T+1
 second run
 1
 7

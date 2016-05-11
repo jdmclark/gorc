@@ -5,6 +5,9 @@
         }
     ],
     events: [
-        time 0
+        quicksave save,
+        time 1,
+        quickload save,
+        time 1
     ]
 }

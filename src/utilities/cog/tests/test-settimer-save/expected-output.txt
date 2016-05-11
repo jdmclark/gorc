@@ -1,8 +1,7 @@
-==== run 1 ====
 startup
-scenario.scn: Saved state
-==== run 2 ====
-scenario.scn: Loading state
+T+0.5
+SAVE: save
+LOAD: save
 T+1
 timer expired
 senderref

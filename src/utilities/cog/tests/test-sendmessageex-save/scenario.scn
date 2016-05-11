@@ -12,7 +12,14 @@
     ],
 
     events: [
-        time 0.5,
-        time 0.5
+        quicksave save,
+        quickload save,
+        time 1,
+        quicksave save,
+        quickload save,
+        time 1,
+        quicksave save,
+        quickload save,
+        time 1
     ]
 }

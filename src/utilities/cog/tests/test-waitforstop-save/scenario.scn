@@ -9,13 +9,19 @@
     ],
 
     events: [
-        time 0.5,
+        quicksave save,
         send_linked {
             message: "arrived",
             sender: thing 1,
             source: void,
             source_type: "system"
         },
-        time 0.5
+        quickload save,
+        send_linked {
+            message: "arrived",
+            sender: thing 1,
+            source: void,
+            source_type: "system"
+        }
     ]
 }
