@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libold/base/content/json_loader.hpp"
+#include "content/json_loader.hpp"
 
 namespace gorc {
 namespace content {

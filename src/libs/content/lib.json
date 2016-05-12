@@ -1,9 +1,10 @@
 {
     "name" : "content",
     "dependencies" : [
-        "libs/utility",
-        "libs/log",
         "libs/io",
+        "libs/log",
+        "libs/text",
+        "libs/utility",
         "libs/vfs"
     ],
     "sources" : [
@@ -12,6 +13,7 @@
         "content_manager.cpp",
         "fourcc.cpp",
         "image.cpp",
+        "json_loader.cpp",
         "loader.cpp",
         "loader_registry.cpp"
     ],
