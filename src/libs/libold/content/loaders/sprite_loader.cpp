@@ -1,4 +1,4 @@
-#include "inventory_loader.hpp"
+#include "sprite_loader.hpp"
 #include "libold/content/assets/sprite.hpp"
 #include "content/content_manager.hpp"
 #include <boost/format.hpp>

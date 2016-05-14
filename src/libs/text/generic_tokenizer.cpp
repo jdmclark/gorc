@@ -8,6 +8,9 @@ tok_result gorc::generic_tokenizer_state_machine::handle_initial_state(char curr
     if(current_char == '\0') {
         return append_then_accept(current_char, token_type::end_of_file);
     }
+    else if(current_char == '\n' && return_newlines) {
+        return skip_then_accept(token_type::end_of_line);
+    }
     else if(std::isspace(current_char)) {
         return discard_directive(tokenizer_state::initial);
     }
@@ -40,7 +43,10 @@ tok_result gorc::generic_tokenizer_state_machine::handle_initial_state(char curr
 
 tok_result gorc::generic_tokenizer_state_machine::handle_skip_line_comment_state(char ch)
 {
-    if(ch == '\0' || ch == '\n') {
+    if(ch == '\n' && return_newlines) {
+        return skip_then_accept(token_type::end_of_line);
+    }
+    else if(ch == '\0' || ch == '\n') {
         return discard_directive(tokenizer_state::initial);
     }
     else {
@@ -349,6 +355,11 @@ void gorc::generic_tokenizer_state_machine::set_string_fragment_state()
     current_state = tokenizer_state::string_fragment;
 }
 
+void gorc::generic_tokenizer_state_machine::set_return_newlines(bool value)
+{
+    return_newlines = value;
+}
+
 gorc::generic_tokenizer::generic_tokenizer(input_stream &input)
     : tokenizer(input)
 {
@@ -361,4 +372,9 @@ void gorc::generic_tokenizer::extract_string_fragment()
     // Append to it until the next whitespace character.
     state_machine.set_string_fragment_state();
     advance_with_current_token();
+}
+
+void gorc::generic_tokenizer::return_newlines(bool value)
+{
+    state_machine.set_return_newlines(value);
 }

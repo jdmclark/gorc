@@ -15,7 +15,8 @@
         "image.cpp",
         "json_loader.cpp",
         "loader.cpp",
-        "loader_registry.cpp"
+        "loader_registry.cpp",
+        "text_loader.cpp"
     ],
     "libraries" : [
         "sfml"

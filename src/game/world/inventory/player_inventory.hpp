@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include "libold/content/assets/inventory.hpp"
+#include "jk/content/inventory.hpp"
 #include "player_bin.hpp"
 
 namespace gorc {
@@ -11,7 +11,7 @@ namespace inventory {
 
 class player_inventory {
 private:
-    asset_ref<content::assets::inventory> BaseInventory;
+    asset_ref<gorc::inventory> BaseInventory;
     std::unordered_map<int, player_bin> bins;
 
     int cur_weapon = -1;
@@ -24,7 +24,7 @@ public:
     bool weap_assigned = false;
     float mount_wait = 0.0f;
 
-    player_inventory(asset_ref<content::assets::inventory> BaseInventory);
+    player_inventory(asset_ref<gorc::inventory> BaseInventory);
 
     player_bin& get_bin(int bin);
 

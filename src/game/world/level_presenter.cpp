@@ -43,7 +43,7 @@ gorc::game::world::level_presenter::level_presenter(level_state& components, con
     animation_presenter = std::make_unique<animations::animation_presenter>();
     sound_presenter = std::make_unique<sounds::sound_presenter>(*place.contentmanager);
     key_presenter = std::make_unique<keys::key_presenter>(*place.contentmanager);
-    inventory_presenter = std::make_unique<inventory::inventory_presenter>(*this, place.contentmanager->load<content::assets::inventory>("items.dat"));
+    inventory_presenter = std::make_unique<inventory::inventory_presenter>(*this, place.contentmanager->load<gorc::inventory>("items.dat"));
     camera_presenter = std::make_unique<camera::camera_presenter>(*this);
 
     return;

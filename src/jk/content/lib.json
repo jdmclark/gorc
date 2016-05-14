@@ -8,6 +8,9 @@
     "sources" : [
         "colormap.cpp",
         "colormap_loader.cpp",
+        "inventory.cpp",
+        "inventory_bin.cpp",
+        "inventory_loader.cpp",
         "material.cpp",
         "material_loader.cpp",
         "raw_material.cpp",

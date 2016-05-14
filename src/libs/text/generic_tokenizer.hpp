@@ -39,6 +39,7 @@ namespace gorc {
         token_type current_type = token_type::error;
         std::string reason;
         std::string append_buffer;
+        bool return_newlines = false;
 
         inline tok_result append_directive(tokenizer_state new_state,
                                            char ch)
@@ -124,12 +125,14 @@ namespace gorc {
 
         token_type get_type() const;
         void set_string_fragment_state();
+        void set_return_newlines(bool);
     };
 
     class generic_tokenizer : public tokenizer<generic_tokenizer_state_machine> {
     public:
         generic_tokenizer(input_stream &);
         void extract_string_fragment();
+        void return_newlines(bool);
     };
 
 }

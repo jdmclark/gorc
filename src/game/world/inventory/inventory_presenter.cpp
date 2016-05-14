@@ -6,7 +6,7 @@
 
 gorc::game::world::inventory::inventory_presenter::inventory_presenter(
         level_presenter& presenter,
-        asset_ref<content::assets::inventory> base_inventory)
+        asset_ref<gorc::inventory> base_inventory)
     : presenter(presenter)
     , base_inventory(base_inventory)
 {
@@ -93,7 +93,7 @@ int gorc::game::world::inventory::inventory_presenter::get_inv(thing_id player, 
 }
 
 gorc::maybe<gorc::cog_id> gorc::game::world::inventory::inventory_presenter::get_inv_cog(thing_id, int bin) {
-    const content::assets::inventory_bin& inv_bin = base_inventory->get_bin(bin);
+    const gorc::inventory_bin& inv_bin = base_inventory->get_bin(bin);
     return maybe_if(inv_bin.cog, maybe<cog_id>(), [&](auto cog) {
         return levelModel->script_model.create_global_instance(cog);
     });
@@ -160,7 +160,7 @@ int gorc::game::world::inventory::inventory_presenter::autoselect_weapon(thing_i
 
     for(const auto& bin_pair : get_inventory(player)) {
         auto& base_bin = base_inventory->get_bin(std::get<0>(bin_pair));
-        if(base_bin.flags & flags::inventory_flag::weapon) {
+        if(base_bin.flags & inventory_flag::weapon) {
             int senderref = static_cast<int>(flags::autoselect_mode::player_mounting);
             int auto_res = std::numeric_limits<int>::lowest();
             maybe_if(get_inv_cog(player, std::get<0>(bin_pair)), [&](auto bin_cog) {
@@ -273,7 +273,7 @@ void gorc::game::world::inventory::inventory_presenter::set_cur_weapon(thing_id 
     // Convert weapon num into bin num.
     int seen_weap = 0;
     for(const auto& bin : *base_inventory) {
-        if(std::get<1>(bin).flags & flags::inventory_flag::weapon) {
+        if(std::get<1>(bin).flags & inventory_flag::weapon) {
             if(seen_weap == weap_num) {
                 set_cur_inv_weapon(player, std::get<0>(bin));
                 return;

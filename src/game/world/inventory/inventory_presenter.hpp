@@ -6,7 +6,7 @@
 #include "jk/cog/script/verb_table.hpp"
 #include "utility/flag_set.hpp"
 #include "player_inventory.hpp"
-#include "libold/content/assets/inventory.hpp"
+#include "jk/content/inventory.hpp"
 
 namespace gorc {
 namespace game {
@@ -21,7 +21,7 @@ namespace inventory {
 class inventory_presenter {
 private:
     level_presenter& presenter;
-    asset_ref<content::assets::inventory> base_inventory;
+    asset_ref<gorc::inventory> base_inventory;
 
     level_model* levelModel;
 
@@ -29,7 +29,7 @@ private:
 
 public:
     inventory_presenter(level_presenter& presenter,
-                        asset_ref<content::assets::inventory> base_inventory);
+                        asset_ref<gorc::inventory> base_inventory);
 
     void start(level_model& levelModel);
     void update(const gorc::time& time);

@@ -5,7 +5,6 @@
 #include "libold/base/content/loaders/sound_loader.hpp"
 
 #include "libold/content/loaders/animation_loader.hpp"
-#include "libold/content/loaders/inventory_loader.hpp"
 #include "libold/content/loaders/level_loader.hpp"
 #include "libold/content/loaders/model_loader.hpp"
 #include "libold/content/loaders/puppet_loader.hpp"
@@ -14,6 +13,7 @@
 
 #include "jk/cog/compiler/script_loader.hpp"
 #include "jk/content/colormap_loader.hpp"
+#include "jk/content/inventory_loader.hpp"
 #include "jk/content/material_loader.hpp"
 
 void gorc::content::register_legacy_loaders(loader_registry &loaders)
@@ -24,7 +24,6 @@ void gorc::content::register_legacy_loaders(loader_registry &loaders)
     loaders.emplace_loader<loaders::sound_loader>();
 
     loaders.emplace_loader<loaders::animation_loader>();
-    loaders.emplace_loader<loaders::inventory_loader>();
     loaders.emplace_loader<loaders::level_loader>();
     loaders.emplace_loader<loaders::model_loader>();
     loaders.emplace_loader<loaders::puppet_loader>();
@@ -33,5 +32,6 @@ void gorc::content::register_legacy_loaders(loader_registry &loaders)
 
     loaders.emplace_loader<cog::script_loader>();
     loaders.emplace_loader<colormap_loader>();
+    loaders.emplace_loader<inventory_loader>();
     loaders.emplace_loader<material_loader>();
 }

@@ -2,7 +2,7 @@
 
 using namespace gorc::game::world::inventory;
 
-player_inventory::player_inventory(asset_ref<content::assets::inventory> BaseInventory)
+player_inventory::player_inventory(asset_ref<gorc::inventory> BaseInventory)
     : BaseInventory(BaseInventory) {
     return;
 }
@@ -14,7 +14,7 @@ player_bin& player_inventory::initialize_bin(int bin) {
 
     new_bin.cooldown = 0.0f;
     new_bin.value = base_bin.min_value;
-    new_bin.available = base_bin.flags & flags::inventory_flag::AvailableByDefault;
+    new_bin.available = base_bin.flags & inventory_flag::available_by_default;
     return new_bin;
 }
 

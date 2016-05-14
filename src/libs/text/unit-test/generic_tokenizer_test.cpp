@@ -350,4 +350,44 @@ test_case(simple_path_with_whitespace_string_fragment)
     tok_assert(string, "/usr/local/bin/bash");
 }
 
+test_case(default_no_return_newlines)
+{
+    set_file("foo\nbar\nbaz");
+    generic_tokenizer tok(mf);
+
+    tok_assert(identifier, "foo");
+    tok_assert(identifier, "bar");
+    tok_assert(identifier, "baz");
+    tok_eof();
+}
+
+test_case(return_newlines)
+{
+    set_file("foo\nbar\nbaz");
+    generic_tokenizer tok(mf);
+
+    tok.return_newlines(true);
+    tok_assert(identifier, "foo");
+
+    tok_assert(end_of_line, "");
+    tok.return_newlines(false);
+
+    tok_assert(identifier, "bar");
+    tok_assert(identifier, "baz");
+
+    tok_eof();
+}
+
+test_case(return_newlines_after_comment)
+{
+    set_file("foo # some comment\nbar");
+    generic_tokenizer tok(mf);
+
+    tok.return_newlines(true);
+    tok_assert(identifier, "foo");
+    tok_assert(end_of_line, "");
+    tok_assert(identifier, "bar");
+    tok_eof();
+}
+
 end_suite(generic_tokenizer_test);
