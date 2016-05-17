@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -9,7 +10,7 @@ namespace components {
 
 class player {
 public:
-    #include "player.uid"
+    uid(1361155893);
 
     player() = default;
 };

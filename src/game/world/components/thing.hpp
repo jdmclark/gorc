@@ -5,6 +5,7 @@
 #include "utility/maybe.hpp"
 #include "libold/content/flags/jk_flag.hpp"
 #include "libold/content/flags/ai_mode_flag.hpp"
+#include "utility/uid.hpp"
 #include <memory>
 
 namespace gorc {
@@ -19,7 +20,7 @@ namespace components {
 
 class thing : public content::assets::thing_template {
 public:
-    #include "thing.uid"
+    uid(1226231207);
 
     physics::thing_object_data object_data;
 

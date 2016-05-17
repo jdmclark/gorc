@@ -10,6 +10,7 @@ namespace {
 
     class mock_health_component {
     public:
+        uid(10);
         int value;
 
         mock_health_component(int value)
@@ -21,6 +22,7 @@ namespace {
 
     class mock_armor_component {
     public:
+        uid(20);
         int value;
 
         mock_armor_component(int value)

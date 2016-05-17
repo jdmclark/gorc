@@ -2,6 +2,7 @@
 
 #include "libold/content/assets/animation.hpp"
 #include "content/id.hpp"
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -10,6 +11,8 @@ namespace keys {
 
 class key_state {
 public:
+    uid(96857468);
+
     thing_id mix_id;
     bool is_pov_mix = false;
 

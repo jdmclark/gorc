@@ -2,6 +2,7 @@
 
 #include "content/id.hpp"
 #include "math/vector.hpp"
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -11,7 +12,7 @@ namespace components {
 
 class slide_surface {
 public:
-    #include "slide_surface.uid"
+    uid(3489289859);
 
     surface_id surface;
     vector<3> direction;

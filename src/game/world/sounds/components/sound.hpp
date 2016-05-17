@@ -4,6 +4,7 @@
 #include "math/vector.hpp"
 #include "libold/base/utility/easing.hpp"
 #include <SFML/Audio.hpp>
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -13,7 +14,7 @@ namespace components {
 
 class sound {
 public:
-    #include "sound.uid"
+    uid(54554757);
 
     sf::Sound internal_sound;
     bool has_played = false;

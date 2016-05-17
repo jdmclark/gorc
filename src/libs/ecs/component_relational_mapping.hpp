@@ -2,28 +2,28 @@
 
 #include "component_pool.hpp"
 #include "utility/maybe.hpp"
+#include "utility/uid.hpp"
 
 #include <type_traits>
-#include <typeindex>
 #include <unordered_map>
 #include <utility>
 
 namespace gorc {
 
-    template <typename IdT, size_t page_size = 128>
+    template <typename IdT>
     class component_relational_mapping {
     private:
         template <typename CompT>
-        using CompPoolT = component_pool<IdT, CompT, page_size>;
+        using CompPoolT = component_pool<IdT, CompT>;
 
-        std::unordered_map<std::type_index, std::unique_ptr<abstract_component_pool<IdT>>> pools;
+        std::unordered_map<uint32_t, std::unique_ptr<abstract_component_pool<IdT>>> pools;
 
         template <typename CompT>
         CompPoolT<CompT>& get_or_create_pool()
         {
-            auto it = pools.find(typeid(CompT));
+            auto it = pools.find(uid_of<CompT>());
             if(it == pools.end()) {
-                it = pools.emplace(typeid(CompT), std::make_unique<CompPoolT<CompT>>()).first;
+                it = pools.emplace(uid_of<CompT>(), std::make_unique<CompPoolT<CompT>>()).first;
             }
 
             return *reinterpret_cast<CompPoolT<CompT>*>(it->second.get());

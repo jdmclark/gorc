@@ -1,6 +1,7 @@
 #pragma once
 
 #include "content/id.hpp"
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -10,7 +11,7 @@ namespace components {
 
 class thing_sound {
 public:
-    #include "thing_sound.uid"
+    uid(1373383292);
 
     thing_id sound;
 

@@ -3,6 +3,7 @@
 #include "content/id.hpp"
 #include "libold/content/flags/anim_flag.hpp"
 #include "utility/flag_set.hpp"
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -15,7 +16,7 @@ namespace components {
 
 class surface_material {
 public:
-    #include "surface_material.uid"
+    uid(3174651231);
 
     surface_id surface;
     double framerate;

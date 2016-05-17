@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "jk/content/inventory.hpp"
 #include "player_bin.hpp"
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -19,6 +20,8 @@ private:
     player_bin& initialize_bin(int bin);
 
 public:
+    uid(58475947);
+
     bool switching_weapons = false;
     int next_weapon;
     bool weap_assigned = false;

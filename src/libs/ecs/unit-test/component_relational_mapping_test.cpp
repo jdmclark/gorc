@@ -8,6 +8,7 @@ namespace {
 
     class mock_component {
     public:
+        uid(10);
         int value;
 
         mock_component(int value)
@@ -19,6 +20,7 @@ namespace {
 
     class mock_other_component {
     public:
+        uid(20);
         int value;
 
         mock_other_component(int value)

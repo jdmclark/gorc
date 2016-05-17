@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/vector.hpp"
+#include "utility/uid.hpp"
 
 namespace gorc {
 namespace game {
@@ -10,7 +11,7 @@ namespace components {
 
 class slide_ceiling_sky {
 public:
-    #include "slide_ceiling_sky.uid"
+    uid(573406198);
 
     vector<2> speed;
 
