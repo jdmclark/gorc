@@ -6,6 +6,7 @@
 #include "jk/cog/script/verb_table.hpp"
 #include "libold/content/master_colormap.hpp"
 #include "content/loader_registry.hpp"
+#include "ecs/component_registry.hpp"
 #include <memory>
 
 namespace gorc {
@@ -18,6 +19,7 @@ class level_presenter;
 class level_state {
 public:
     service_registry services;
+    component_registry<thing_id> components;
     cog::constant_table constants;
     cog::verb_table verbs;
     std::unique_ptr<gorc::game::world::level_presenter> current_level_presenter;

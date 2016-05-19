@@ -1,5 +1,6 @@
 #include "test/test.hpp"
 #include "ecs/component_relational_mapping.hpp"
+#include "ecs/component_registry.hpp"
 #include <set>
 
 using namespace gorc;
@@ -41,13 +42,26 @@ namespace {
         return rv;
     }
 
+    class component_relational_mapping_fixture : public test::fixture {
+    public:
+        component_registry<thing_id> cr;
+
+        component_relational_mapping_fixture()
+        {
+            cr.register_component_type<mock_component>();
+            cr.register_component_type<mock_other_component>();
+        }
+    };
+
 }
 
-begin_suite(component_relational_mapping_test);
+begin_suite_fixture(component_relational_mapping_test,
+                    component_relational_mapping_fixture);
 
 test_case(emplace_find)
 {
     component_relational_mapping<thing_id> crm;
+    cr.register_component_types(crm);
 
     crm.emplace<mock_component>(thing_id(2), 5);
     crm.emplace<mock_component>(thing_id(2), 12);
@@ -60,6 +74,7 @@ test_case(emplace_find)
 test_case(all_range)
 {
     component_relational_mapping<thing_id> crm;
+    cr.register_component_types(crm);
 
     crm.emplace<mock_component>(thing_id(2), 5);
     crm.emplace<mock_component>(thing_id(3), 12);
@@ -82,6 +97,7 @@ test_case(all_range)
 test_case(erase_one)
 {
     component_relational_mapping<thing_id> crm;
+    cr.register_component_types(crm);
 
     for(int i = 0; i < 10; ++i) {
         crm.emplace<mock_component>(thing_id(1), i);
@@ -107,6 +123,7 @@ test_case(erase_one)
 test_case(erase_all)
 {
     component_relational_mapping<thing_id> crm;
+    cr.register_component_types(crm);
 
     for(int i = 0; i < 10; ++i) {
         crm.emplace<mock_component>(thing_id(1), i);
@@ -123,6 +140,7 @@ test_case(erase_all)
 test_case(erase_equal_range)
 {
     component_relational_mapping<thing_id> crm;
+    cr.register_component_types(crm);
 
     for(int i = 0; i < 10; ++i) {
         crm.emplace<mock_component>(thing_id(1), i);
@@ -137,6 +155,31 @@ test_case(erase_equal_range)
 
     assert_true(crm.equal_range<mock_component>(thing_id(1)).empty());
     assert_true(crm.equal_range<mock_other_component>(thing_id(1)).empty());
+}
+
+test_case(register_duplicate)
+{
+    component_relational_mapping<thing_id> crm;
+    crm.register_component_type<mock_component>();
+
+    assert_log_empty();
+
+    assert_throws_logged(crm.register_component_type<mock_component>());
+    assert_log_message(log_level::error,
+                       "component type with uid 10 is already registered");
+    assert_log_empty();
+}
+
+test_case(not_registered)
+{
+    component_relational_mapping<thing_id> crm;
+
+    assert_log_empty();
+
+    assert_throws_logged(crm.range<mock_component>());
+    assert_log_message(log_level::error,
+                       "component type with uid 10 is not registered");
+    assert_log_empty();
 }
 
 end_suite(component_relational_mapping_test);

@@ -24,8 +24,8 @@ public:
     std::vector<surface> surfaces;
     std::vector<content::assets::level_sector> sectors;
 
-    entity_component_system<thing_id> ecs;
     service_registry services;
+    entity_component_system<thing_id> ecs;
 
     cog::executor script_model;
     sounds::sound_model sound_model;
@@ -41,7 +41,7 @@ public:
     double game_time = 0.0;
     color_rgb dynamic_tint = make_color(0.0f, 0.0f, 0.0f);
 
-    level_model(event_bus& parent_event_bus, content_manager& manager, service_registry const &,
+    level_model(content_manager& manager, service_registry const &,
             asset_ref<content::assets::level> level);
 
     components::thing& get_thing(thing_id id);

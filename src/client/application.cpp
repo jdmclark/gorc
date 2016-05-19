@@ -40,6 +40,7 @@ void gorc::client::application::startup(event_bus& eventbus, content_manager& co
     }
 
     // HACK: Set current level to 01narshadda.jkl.
+    components.services.add_or_replace(eventbus);
     components.services.add_or_replace<gorc::renderer_object_factory>(renderer_object_factory);
     auto contentmanager = std::make_shared<content_manager>(components.services);
     const auto& lev = contentmanager->load<content::assets::level>(input_levelname);

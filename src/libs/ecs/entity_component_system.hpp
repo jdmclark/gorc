@@ -2,11 +2,13 @@
 
 #include "sequential_entity_generator.hpp"
 #include "component_relational_mapping.hpp"
+#include "component_registry.hpp"
 #include "aspect.hpp"
 #include "entity_destroyed.hpp"
 #include "utility/event_bus.hpp"
-#include "log/log.hpp"
 #include "utility/maybe.hpp"
+#include "utility/service_registry.hpp"
+#include "log/log.hpp"
 
 #include <vector>
 #include <memory>
@@ -23,9 +25,10 @@ namespace gorc {
     public:
         event_bus &bus;
 
-        explicit entity_component_system(event_bus &bus)
-            : bus(bus)
+        explicit entity_component_system(service_registry const &services)
+            : bus(services.get<event_bus>())
         {
+            services.get<component_registry<IdT>>().register_component_types(components);
             return;
         }
 

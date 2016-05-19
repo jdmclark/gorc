@@ -66,16 +66,32 @@ namespace {
 
     };
 
+    class inner_join_aspect_fixture : public test::fixture {
+    public:
+        event_bus bus;
+        component_registry<thing_id> cr;
+        service_registry services;
+
+        inner_join_aspect_fixture()
+        {
+            cr.register_component_type<mock_health_component>();
+            cr.register_component_type<mock_armor_component>();
+
+            services.add(cr);
+            services.add(bus);
+        }
+    };
+
 }
 
-begin_suite(inner_join_aspect_test);
+begin_suite_fixture(inner_join_aspect_test,
+                    inner_join_aspect_fixture);
 
 test_case(no_elements)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     ecs.update(std::chrono::seconds(0));
@@ -87,8 +103,7 @@ test_case(no_matches)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     auto thing0 = ecs.emplace_entity();
@@ -106,8 +121,7 @@ test_case(find_single)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     auto thing0 = ecs.emplace_entity();
@@ -132,8 +146,7 @@ test_case(find_repeats)
 {
     std::set<std::tuple<int, int, int>> values;
 
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
     ecs.emplace_aspect<mock_inner_join_aspect>(values);
 
     auto thing0 = ecs.emplace_entity();
@@ -172,8 +185,7 @@ test_case(find_repeats)
 
 test_case(has_default_update)
 {
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
     ecs.emplace_aspect<trivial_inner_join_aspect>();
 
     auto tid = ecs.emplace_entity();

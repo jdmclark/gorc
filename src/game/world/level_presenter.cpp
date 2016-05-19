@@ -55,7 +55,7 @@ gorc::game::world::level_presenter::~level_presenter() {
 
 void gorc::game::world::level_presenter::start(event_bus& eventBus) {
     eventbus = &eventBus;
-    model = std::make_unique<level_model>(eventBus, *place.contentmanager, components.services, place.level);
+    model = std::make_unique<level_model>(*place.contentmanager, components.services, place.level);
 
     // Create local aspects
     model->ecs.emplace_aspect<aspects::thing_controller_aspect>(*this);

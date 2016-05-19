@@ -1,4 +1,6 @@
 #include "ecs/entity_component_system.hpp"
+#include "ecs/component_registry.hpp"
+#include "utility/service_registry.hpp"
 #include "test/test.hpp"
 #include <set>
 #include <tuple>
@@ -43,14 +45,30 @@ namespace {
             LOG_INFO("called mock_aspect::update");
         }
     };
+
+    class entity_component_system_fixture : public test::fixture {
+    public:
+        event_bus bus;
+        component_registry<thing_id> cr;
+        service_registry services;
+
+        entity_component_system_fixture()
+        {
+            cr.register_component_type<mock_health_component>();
+            cr.register_component_type<mock_armor_component>();
+            services.add(cr);
+
+            services.add(bus);
+        }
+    };
 }
 
-begin_suite(entity_component_system_test);
+begin_suite_fixture(entity_component_system_test,
+                    entity_component_system_fixture);
 
 test_case(aspects_updated)
 {
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
 
     assert_log_empty();
     ecs.emplace_aspect<mock_aspect>(12);
@@ -64,8 +82,7 @@ test_case(aspects_updated)
 
 test_case(range)
 {
-    event_bus bus;
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
 
     auto tid = ecs.emplace_entity();
     auto tid2 = ecs.emplace_entity();
@@ -89,13 +106,11 @@ test_case(range)
 
 test_case(destroy_entity)
 {
-    event_bus bus;
-
     auto delegate = bus.add_handler<entity_destroyed<thing_id>>([&](auto const &e) {
             LOG_INFO(format("entity %d destroyed") % static_cast<int>(e.entity));
         });
 
-    entity_component_system<thing_id> ecs(bus);
+    entity_component_system<thing_id> ecs(services);
 
     auto tid = ecs.emplace_entity();
     ecs.emplace_component<mock_health_component>(tid, 3);
