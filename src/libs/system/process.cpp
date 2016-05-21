@@ -48,20 +48,20 @@ gorc::process::process(path const &executable,
     // LCOV_EXCL_STOP
 }
 
+// LCOV_EXCL_START
 gorc::process::~process()
 {
     if(pid.has_value()) {
         LOG_ERROR("zombie process not reaped");
         try {
             join();
-// LCOV_EXCL_START
         }
         catch(std::exception const &e) {
             LOG_ERROR(format("error while reaping: %s") % e.what());
         }
-// LCOV_EXCL_STOP
     }
 }
+// LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
 // Inside child process between fork and exec
