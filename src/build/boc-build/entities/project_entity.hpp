@@ -22,6 +22,8 @@ namespace gorc {
         virtual void serialize(entity_output_stream &) override;
 
         virtual std::type_index get_type_index() const override;
+
+        std::unordered_set<program_file_entity*> const& get_programs() const;
     };
 
 }

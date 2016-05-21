@@ -11,6 +11,7 @@ gorc::program_file_entity_internal_properties::program_file_entity_internal_prop
     , external_libs(is.read_enum_set<ext_lib_set>())
     , objects(is.read_entity_set<object_file_entity>())
     , libraries(is.read_entity_set<library_file_entity>())
+    , source_file_path(is.read_path())
     , last_update_failed_value(is.read_bool())
 {
     std::copy(objects.begin(), objects.end(), std::inserter(dependencies_value,
@@ -24,12 +25,14 @@ gorc::program_file_entity_internal_properties::program_file_entity_internal_prop
         program_type type,
         ext_lib_set const &ext_libs,
         std::unordered_set<object_file_entity*> const &objs,
-        std::unordered_set<library_file_entity*> const &libs)
+        std::unordered_set<library_file_entity*> const &libs,
+        path const &source_file_path)
     : program_name(program_name)
     , type(type)
     , external_libs(ext_libs)
     , objects(objs)
     , libraries(libs)
+    , source_file_path(source_file_path)
 {
     std::copy(objects.begin(), objects.end(), std::inserter(dependencies_value,
                                                             dependencies_value.begin()));
@@ -56,12 +59,14 @@ gorc::program_file_entity::program_file_entity(std::string const &program_name,
                                                ext_lib_set const &ext_libs,
                                                std::unordered_set<object_file_entity*> const &objs,
                                                std::unordered_set<library_file_entity*> const &libs,
+                                               path const &source_file_path,
                                                service_registry const &services)
     : program_file_entity_internal_properties(program_name,
                                               type,
                                               ext_libs,
                                               objs,
-                                              libs)
+                                              libs,
+                                              source_file_path)
     , generated_file_entity(services.get<compiler_properties>()
                                     .make_program_filename(program_name, type))
 {
@@ -87,6 +92,7 @@ void gorc::program_file_entity::serialize(entity_output_stream &os)
     os.write_enum_set(external_libs);
     os.write_entity_set(objects);
     os.write_entity_set(libraries);
+    os.write_path(source_file_path);
     os.write_bool(last_update_failed);
 }
 
@@ -110,4 +116,9 @@ std::unordered_set<gorc::library_file_entity*> const&
     gorc::program_file_entity::get_libraries() const
 {
     return libraries;
+}
+
+gorc::path const& gorc::program_file_entity::get_source_file_path() const
+{
+    return source_file_path;
 }

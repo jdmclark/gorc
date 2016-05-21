@@ -48,3 +48,8 @@ std::type_index gorc::project_entity::get_type_index() const
 {
     return typeid(project_entity);
 }
+
+std::unordered_set<gorc::program_file_entity*> const& gorc::project_entity::get_programs() const
+{
+    return programs;
+}

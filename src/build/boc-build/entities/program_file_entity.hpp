@@ -15,6 +15,7 @@ namespace gorc {
         ext_lib_set external_libs;
         std::unordered_set<object_file_entity*> objects;
         std::unordered_set<library_file_entity*> libraries;
+        path source_file_path;
         bool last_update_failed_value = false;
 
         std::unordered_set<entity*> dependencies_value;
@@ -24,7 +25,8 @@ namespace gorc {
                                                 program_type type,
                                                 ext_lib_set const &ext_libs,
                                                 std::unordered_set<object_file_entity*> const &obj,
-                                                std::unordered_set<library_file_entity*> const &lib);
+                                                std::unordered_set<library_file_entity*> const &lib,
+                                                path const &source_file_path);
         virtual ~program_file_entity_internal_properties();
     };
 
@@ -37,6 +39,7 @@ namespace gorc {
                             ext_lib_set const &ext_libs,
                             std::unordered_set<object_file_entity*> const &objs,
                             std::unordered_set<library_file_entity*> const &libs,
+                            path const &source_file_path,
                             service_registry const &);
 
         virtual std::unordered_set<entity*> const& dependencies() override;
@@ -50,5 +53,6 @@ namespace gorc {
         ext_lib_set const& get_external_libraries() const;
         std::unordered_set<object_file_entity*> const& get_objects() const;
         std::unordered_set<library_file_entity*> const& get_libraries() const;
+        path const& get_source_file_path() const;
     };
 }

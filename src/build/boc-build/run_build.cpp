@@ -9,6 +9,7 @@
 
 #include "utility/progress.hpp"
 #include "utility/rate_limited_progress.hpp"
+#include "utility/zip.hpp"
 #include "log/log.hpp"
 
 #include <set>
@@ -57,11 +58,25 @@ namespace {
 int gorc::run_build(service_registry const &services,
                     root_entity *root,
                     size_t threads,
-                    bool needs_summary)
+                    bool needs_summary,
+                    path const & working_dir)
 {
-    // Build everything for now.
-    // TODO: Need to prune this based on original working directory.
-    std::unordered_set<gorc::entity*> initial_set { root->project };
+    std::unordered_set<gorc::entity*> initial_set;
+    if(working_dir == path(".")) {
+        initial_set.emplace(root->project);
+    }
+    else {
+        for(auto const &prog : root->project->get_programs()) {
+            bool matches = true;
+            for(auto const &part_pair : zip(working_dir, prog->get_source_file_path())) {
+                matches = matches && (std::get<0>(part_pair) == std::get<1>(part_pair));
+            }
+
+            if(matches) {
+                initial_set.emplace(prog);
+            }
+        }
+    }
 
     entity_closure closure = compute_target_closure(initial_set);
     entity_adjacency_list edges(closure);

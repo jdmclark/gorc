@@ -144,6 +144,7 @@ root_entity* gorc::create_graph_nodes(project_file const &pf,
                                             prog.second->external_libraries,
                                             program_objects,
                                             program_libraries,
+                                            prog.second->source_directory,
                                             services);
         programs.insert(prog_ent);
     }

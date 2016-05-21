@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utility/service_registry.hpp"
+#include "io/path.hpp"
 
 namespace gorc {
 
@@ -9,6 +10,7 @@ namespace gorc {
     int run_build(service_registry const &,
                   root_entity*,
                   size_t threads,
-                  bool print_summary);
+                  bool print_summary,
+                  path const &working_dir);
 
 }

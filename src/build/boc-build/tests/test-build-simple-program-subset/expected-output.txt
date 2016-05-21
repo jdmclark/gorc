@@ -1,0 +1,12 @@
+---- build part ----
+Hello, World!
+==== stderr ====
+---- build part ----
+Building 3 out-of-date targets
+Build succeeded
+==== stdout ====
+---- build part ----
+Succeeded:
+    pkg/bin/myprog
+    pkg/obj/src/myprog/main.o
+    src/myprog/main.cpp

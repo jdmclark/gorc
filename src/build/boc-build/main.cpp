@@ -113,7 +113,11 @@ namespace gorc {
                 return EXIT_SUCCESS;
             }
             else {
-                return run_build(services, pg.get_root(), threads, print_build_summary);
+                return run_build(services,
+                                 pg.get_root(),
+                                 threads,
+                                 print_build_summary,
+                                 original_working_directory_rel);
             }
         }
     };
