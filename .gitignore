@@ -8,3 +8,4 @@ pkg/
 .boc-cache
 game/episode
 game/resource
+game/restricted/music

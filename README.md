@@ -10,8 +10,6 @@ Gorc is an early-development Dark Forces II game engine recreation. The goal of 
 
 * Standard C++11 compiler (Clang 3.3, GCC 4.8)
 * GNU Make
-* Flex 2.5
-* Bison 2.5
 * SFML 2.1
 * [Boost](http://boost.org)
 * [Gcovr 3.2](http://gcovr.com)
@@ -58,3 +56,24 @@ report generation. Use the following command to quickly generate a complete cove
 The Gorc project has adopted a 100% line coverage policy to encourage the development of highly
 testable code. The test coverage report must show 100% line coverage before any code changes will
 be accepted.
+
+#### Running
+
+Before running Gorc, you must copy your Dark Forces II original `episode` and `resource`
+directories into the `game` directory in the root of this repository. Gorc will not work without
+these directories. This step only needs to be done once.
+
+After the files have been copied, you can run the Gorc client from the command line. Gorc does not
+currently allow you to play through the levels normally. You must specify an episode GOB and a level
+filename manually.
+
+For example, to play the first level you would run:
+
+  pkg/bin/client --episode game/episode/jk1.gob --level 01narshadda.jkl
+
+Other episodes and levels can be played by using appropriate `--episode` and `--level` options.
+
+If you do not know the level filenames inside an episode, you can use the included `gob` utility to
+list them:
+
+  pkg/bin/gob --file game/episode/jk1.gob --extract episode.jk

@@ -249,12 +249,12 @@ public:
         return matrix_row_element_iterator(mat, row, col - v);
     }
 
-    inline const matrix_row_element_iterator& operator+=(int v) const {
+    inline const matrix_row_element_iterator& operator+=(int v) {
         col += v;
         return *this;
     }
 
-    inline const matrix_row_element_iterator& operator-=(int v) const {
+    inline const matrix_row_element_iterator& operator-=(int v) {
         col -= v;
         return *this;
     }
@@ -308,12 +308,12 @@ public:
         return matrix_row_vector_iterator(mat, row - v);
     }
 
-    inline const matrix_row_vector_iterator& operator+=(int v) const {
+    inline const matrix_row_vector_iterator& operator+=(int v) {
         row += v;
         return *this;
     }
 
-    inline const matrix_row_vector_iterator& operator-=(int v) const {
+    inline const matrix_row_vector_iterator& operator-=(int v) {
         row -= v;
         return *this;
     }
@@ -376,12 +376,12 @@ public:
         return matrix_col_element_iterator(mat, row - v, col);
     }
 
-    inline const matrix_col_element_iterator& operator+=(int v) const {
+    inline const matrix_col_element_iterator& operator+=(int v) {
         row += v;
         return *this;
     }
 
-    inline const matrix_col_element_iterator& operator-=(int v) const {
+    inline const matrix_col_element_iterator& operator-=(int v) {
         row -= v;
         return *this;
     }
@@ -435,12 +435,12 @@ public:
         return matrix_col_vector_iterator(mat, col - v);
     }
 
-    inline const matrix_col_vector_iterator& operator+=(int v) const {
+    inline const matrix_col_vector_iterator& operator+=(int v) {
         col += v;
         return *this;
     }
 
-    inline const matrix_col_vector_iterator& operator-=(int v) const {
+    inline const matrix_col_vector_iterator& operator-=(int v) {
         col -= v;
         return *this;
     }
@@ -503,12 +503,12 @@ public:
         return matrix_row_element_const_iterator(mat, row, col - v);
     }
 
-    inline const matrix_row_element_const_iterator& operator+=(int v) const {
+    inline const matrix_row_element_const_iterator& operator+=(int v) {
         col += v;
         return *this;
     }
 
-    inline const matrix_row_element_const_iterator& operator-=(int v) const {
+    inline const matrix_row_element_const_iterator& operator-=(int v) {
         col -= v;
         return *this;
     }
@@ -562,12 +562,12 @@ public:
         return matrix_row_vector_const_iterator(mat, row - v);
     }
 
-    inline const matrix_row_vector_const_iterator& operator+=(int v) const {
+    inline const matrix_row_vector_const_iterator& operator+=(int v) {
         row += v;
         return *this;
     }
 
-    inline const matrix_row_vector_const_iterator& operator-=(int v) const {
+    inline const matrix_row_vector_const_iterator& operator-=(int v) {
         row -= v;
         return *this;
     }
@@ -626,12 +626,12 @@ public:
         return matrix_col_element_const_iterator(mat, row - v, col);
     }
 
-    inline const matrix_col_element_const_iterator& operator+=(int v) const {
+    inline const matrix_col_element_const_iterator& operator+=(int v) {
         row += v;
         return *this;
     }
 
-    inline const matrix_col_element_const_iterator& operator-=(int v) const {
+    inline const matrix_col_element_const_iterator& operator-=(int v) {
         row -= v;
         return *this;
     }
@@ -685,12 +685,12 @@ public:
         return matrix_col_vector_const_iterator(mat, col - v);
     }
 
-    inline const matrix_col_vector_const_iterator& operator+=(int v) const {
+    inline const matrix_col_vector_const_iterator& operator+=(int v) {
         col += v;
         return *this;
     }
 
-    inline const matrix_col_vector_const_iterator& operator-=(int v) const {
+    inline const matrix_col_vector_const_iterator& operator-=(int v) {
         col -= v;
         return *this;
     }

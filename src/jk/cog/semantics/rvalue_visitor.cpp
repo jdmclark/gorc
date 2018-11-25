@@ -213,7 +213,7 @@ expr_val rvalue_visitor::visit(ast::infix_expression &e)
             break;
         }
 
-        // Deliberate fall-through
+        // Intentionally falls through
     default:
         if(!can_convert_type(left_type, common_type) ||
            !can_convert_type(right_type, common_type)) {
