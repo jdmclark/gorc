@@ -1,7 +1,8 @@
 #pragma once
 
-#include "jk/cog/script/verb_table.hpp"
 #include "continuation.hpp"
+#include "heap.hpp"
+#include "jk/cog/script/verb_table.hpp"
 
 namespace gorc {
     namespace cog {
@@ -10,11 +11,18 @@ namespace gorc {
 
         class virtual_machine {
         private:
-            value internal_execute(verb_table &, executor &, service_registry &, continuation &cc);
+            value internal_execute(heap &globals,
+                                   verb_table &,
+                                   executor &,
+                                   service_registry &,
+                                   continuation &cc);
 
         public:
-            value execute(verb_table &, executor &, service_registry &, continuation &cc);
+            value execute(heap &globals,
+                          verb_table &,
+                          executor &,
+                          service_registry &,
+                          continuation &cc);
         };
-
     }
 }

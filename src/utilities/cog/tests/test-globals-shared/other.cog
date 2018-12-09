@@ -1,0 +1,9 @@
+symbols
+message user0
+end
+code
+user0:
+    printint(global5);
+    global5 = 22125;
+    returnex(7);
+end

@@ -7,25 +7,23 @@ bool gorc::cog::detail::executor_link_comp::operator()(value left, value right) 
     return std::make_tuple(left.get_type(), left) < std::make_tuple(right.get_type(), right);
 }
 
-bool gorc::cog::detail::executor_wait_comp::operator()(
-        std::tuple<message_type, value> const &left,
-        std::tuple<message_type, value> const &right) const
+bool gorc::cog::detail::executor_wait_comp::
+    operator()(std::tuple<message_type, value> const &left,
+               std::tuple<message_type, value> const &right) const
 {
     return std::make_tuple(std::get<0>(left), std::get<1>(left).get_type(), std::get<1>(left)) <
            std::make_tuple(std::get<0>(right), std::get<1>(right).get_type(), std::get<1>(right));
 }
 
-bool gorc::cog::detail::executor_gi_comp::operator()(
-        asset_ref<script> left,
-        asset_ref<script> right) const
+bool gorc::cog::detail::executor_gi_comp::operator()(asset_ref<script> left,
+                                                     asset_ref<script> right) const
 {
     using UT = std::underlying_type<asset_id>::type;
     return static_cast<UT>(left.get_id()) < static_cast<UT>(right.get_id());
 }
 
-bool gorc::cog::detail::executor_timer_comp::operator()(
-        std::tuple<cog_id, value> const &left,
-        std::tuple<cog_id, value> const &right) const
+bool gorc::cog::detail::executor_timer_comp::
+    operator()(std::tuple<cog_id, value> const &left, std::tuple<cog_id, value> const &right) const
 {
     return std::make_tuple(std::get<0>(left), std::get<1>(left).get_type(), std::get<1>(left)) <
            std::make_tuple(std::get<0>(right), std::get<1>(right).get_type(), std::get<1>(right));
@@ -48,40 +46,40 @@ gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stre
     services.add(vm);
 
     binary_deserialize_range(bis, std::back_inserter(instances), [](auto &bis) {
-            return std::make_unique<instance>(deserialization_constructor, bis);
-        });
+        return std::make_unique<instance>(deserialization_constructor, bis);
+    });
 
     binary_deserialize_range(bis, std::back_inserter(sleep_records), [](auto &bis) {
-            return std::make_unique<sleep_record>(deserialization_constructor, bis);
-        });
+        return std::make_unique<sleep_record>(deserialization_constructor, bis);
+    });
 
     binary_deserialize_range(bis, std::inserter(wait_records, wait_records.end()), [](auto &bis) {
-            auto mt = binary_deserialize<message_type>(bis);
-            auto obj = binary_deserialize<value>(bis);
-            auto cont = std::make_unique<continuation>(deserialization_constructor, bis);
-            return std::make_pair(std::make_tuple(mt, obj), std::move(cont));
-        });
+        auto mt = binary_deserialize<message_type>(bis);
+        auto obj = binary_deserialize<value>(bis);
+        auto cont = std::make_unique<continuation>(deserialization_constructor, bis);
+        return std::make_pair(std::make_tuple(mt, obj), std::move(cont));
+    });
 
     binary_deserialize_range(bis, std::inserter(pulse_records, pulse_records.end()), [](auto &is) {
-            auto inst = binary_deserialize<cog_id>(is);
-            return std::make_pair(inst, pulse_record(deserialization_constructor, is));
-        });
+        auto inst = binary_deserialize<cog_id>(is);
+        return std::make_pair(inst, pulse_record(deserialization_constructor, is));
+    });
 
     binary_deserialize_range(bis, std::inserter(timer_records, timer_records.end()), [](auto &is) {
-            auto inst = binary_deserialize<cog_id>(is);
-            auto timer_id = binary_deserialize<value>(is);
-            return std::make_pair(std::make_tuple(inst, timer_id),
-                                  timer_record(deserialization_constructor, is));
-        });
+        auto inst = binary_deserialize<cog_id>(is);
+        auto timer_id = binary_deserialize<value>(is);
+        return std::make_pair(std::make_tuple(inst, timer_id),
+                              timer_record(deserialization_constructor, is));
+    });
 
     binary_deserialize_range(bis, std::inserter(linkages, linkages.end()), [](auto &bis) {
-            auto obj = binary_deserialize<value>(bis);
-            auto st = binary_deserialize<executor_linkage>(bis);
-            return std::make_pair(obj, st);
-        });
+        auto obj = binary_deserialize<value>(bis);
+        auto st = binary_deserialize<executor_linkage>(bis);
+        return std::make_pair(obj, st);
+    });
 
-    binary_deserialize_range(bis, std::inserter(global_instance_map, global_instance_map.end()),
-        [](auto &bis) {
+    binary_deserialize_range(
+        bis, std::inserter(global_instance_map, global_instance_map.end()), [](auto &bis) {
             auto cog_ref = binary_deserialize<asset_ref<script>>(bis);
             auto inst = binary_deserialize<cog_id>(bis);
             return std::make_pair(cog_ref, inst);
@@ -93,39 +91,39 @@ gorc::cog::executor::executor(deserialization_constructor_tag, binary_input_stre
 void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) const
 {
     binary_serialize_range(bos, instances, [](auto &bos, auto const &em) {
-            binary_serialize(bos, *em);
-        });
+        binary_serialize(bos, *em);
+    });
 
     binary_serialize_range(bos, sleep_records, [](auto &bos, auto const &em) {
-            binary_serialize(bos, *em);
-        });
+        binary_serialize(bos, *em);
+    });
 
     binary_serialize_range(bos, wait_records, [](auto &bos, auto const &em) {
-            binary_serialize(bos, std::get<0>(em.first));
-            binary_serialize(bos, std::get<1>(em.first));
-            binary_serialize(bos, *em.second);
-        });
+        binary_serialize(bos, std::get<0>(em.first));
+        binary_serialize(bos, std::get<1>(em.first));
+        binary_serialize(bos, *em.second);
+    });
 
     binary_serialize_range(bos, pulse_records, [](auto &bos, auto const &em) {
-            binary_serialize(bos, em.first);
-            binary_serialize(bos, em.second);
-        });
+        binary_serialize(bos, em.first);
+        binary_serialize(bos, em.second);
+    });
 
     binary_serialize_range(bos, timer_records, [](auto &bos, auto const &em) {
-            binary_serialize(bos, std::get<0>(em.first));
-            binary_serialize(bos, std::get<1>(em.first));
-            binary_serialize(bos, em.second);
-        });
+        binary_serialize(bos, std::get<0>(em.first));
+        binary_serialize(bos, std::get<1>(em.first));
+        binary_serialize(bos, em.second);
+    });
 
     binary_serialize_range(bos, linkages, [](auto &bos, auto const &em) {
-            binary_serialize(bos, em.first);
-            binary_serialize(bos, em.second);
-        });
+        binary_serialize(bos, em.first);
+        binary_serialize(bos, em.second);
+    });
 
     binary_serialize_range(bos, global_instance_map, [](auto &bos, auto const &em) {
-            binary_serialize(bos, em.first);
-            binary_serialize(bos, em.second);
-        });
+        binary_serialize(bos, em.first);
+        binary_serialize(bos, em.second);
+    });
 
     binary_serialize(bos, master_cog);
 }
@@ -133,10 +131,7 @@ void gorc::cog::executor::binary_serialize_object(binary_output_stream &bos) con
 void gorc::cog::executor::add_linkage(cog_id id, instance const &inst)
 {
     for(auto const &link : inst.linkages) {
-        linkages.emplace(link.object,
-                         executor_linkage(link.mask,
-                                          id,
-                                          link.sender_link_id));
+        linkages.emplace(link.object, executor_linkage(link.mask, id, link.sender_link_id));
     }
 }
 
@@ -178,7 +173,7 @@ gorc::cog_id gorc::cog::executor::create_global_instance(asset_ref<cog::script> 
     return new_cog;
 }
 
-gorc::cog::instance& gorc::cog::executor::get_instance(cog_id instance_id)
+gorc::cog::instance &gorc::cog::executor::get_instance(cog_id instance_id)
 {
     return *at_id(instances, instance_id);
 }
@@ -206,37 +201,32 @@ void gorc::cog::executor::add_timer_record(cog_id instance_id,
                           timer_record(duration, param0, param1));
 }
 
-void gorc::cog::executor::erase_timer_record(cog_id instance_id,
-                                             value timer_id)
+void gorc::cog::executor::erase_timer_record(cog_id instance_id, value timer_id)
 {
     timer_records.erase(std::make_tuple(instance_id, timer_id));
 }
 
-void gorc::cog::executor::set_pulse(cog_id instance_id,
-                                    maybe<time_delta> duration)
+void gorc::cog::executor::set_pulse(cog_id instance_id, maybe<time_delta> duration)
 {
     pulse_records.erase(instance_id);
-    maybe_if(duration, [&](time_delta dt) {
-            pulse_records.emplace(instance_id, pulse_record(dt));
-        });
+    maybe_if(duration,
+             [&](time_delta dt) { pulse_records.emplace(instance_id, pulse_record(dt)); });
 }
 
-gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_frame(
-        cog_id target,
-        message_type msg,
-        value sender,
-        value sender_id,
-        value source,
-        value param0,
-        value param1,
-        value param2,
-        value param3)
+gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_frame(cog_id target,
+                                                                                   message_type msg,
+                                                                                   value sender,
+                                                                                   value sender_id,
+                                                                                   value source,
+                                                                                   value param0,
+                                                                                   value param1,
+                                                                                   value param2,
+                                                                                   value param3)
 {
     int inst_index = static_cast<int>(target);
     if(inst_index < 0 || static_cast<size_t>(inst_index) >= instances.size()) {
         LOG_ERROR(format("could not send message %s to cog %d: cog id is out of bounds") %
-                  as_string(msg) %
-                  inst_index);
+                  as_string(msg) % inst_index);
         return nothing;
     }
 
@@ -244,20 +234,12 @@ gorc::maybe<gorc::cog::call_stack_frame> gorc::cog::executor::create_message_fra
     auto addr = inst->cog->exports.get_offset(msg);
     if(!addr.has_value()) {
         LOG_WARNING(format("sent message %s to cog %d, but the message is not exported") %
-                    as_string(msg) %
-                    inst_index);
+                    as_string(msg) % inst_index);
         return nothing;
     }
 
-    return call_stack_frame(target,
-                            addr.get_value(),
-                            sender,
-                            sender_id,
-                            source,
-                            param0,
-                            param1,
-                            param2,
-                            param3);
+    return call_stack_frame(
+        target, addr.get_value(), sender, sender_id, source, param0, param1, param2, param3);
 }
 
 gorc::cog::value gorc::cog::executor::send(cog_id instance,
@@ -281,22 +263,12 @@ gorc::cog::value gorc::cog::executor::send(cog_id instance,
     diagnostic_context dc(inst->cog->filename.c_str());
     LOG_DEBUG(format("instance %d received %s message %s "
                      "from sender %s due to source %s") %
-              static_cast<int>(instance) %
-              send_reason %
-              as_string(t) %
-              as_string(sender) %
+              static_cast<int>(instance) % send_reason % as_string(t) % as_string(sender) %
               as_string(source));
 
-    continuation cc(call_stack_frame(instance,
-                                     addr.get_value(),
-                                     sender,
-                                     sender_id,
-                                     source,
-                                     param0,
-                                     param1,
-                                     param2,
-                                     param3));
-    return vm.execute(verbs, *this, services, cc);
+    continuation cc(call_stack_frame(
+        instance, addr.get_value(), sender, sender_id, source, param0, param1, param2, param3));
+    return vm.execute(globals, verbs, *this, services, cc);
 }
 
 void gorc::cog::executor::send_to_all(message_type t,
@@ -309,16 +281,7 @@ void gorc::cog::executor::send_to_all(message_type t,
                                       value param3)
 {
     for(size_t i = 0; i < instances.size(); ++i) {
-        send(cog_id(i),
-             t,
-             sender,
-             sender_id,
-             source,
-             param0,
-             param1,
-             param2,
-             param3,
-             "broadcast");
+        send(cog_id(i), t, sender, sender_id, source, param0, param1, param2, param3, "broadcast");
     }
 }
 
@@ -357,7 +320,7 @@ void gorc::cog::executor::send_to_linked(message_type t,
     auto wait_rng = wait_records.equal_range(std::make_tuple(t, sender));
     for(auto it = wait_rng.first; it != wait_rng.second;) {
         auto curr_it = it++;
-        vm.execute(verbs, *this, services, *curr_it->second);
+        vm.execute(globals, verbs, *this, services, *curr_it->second);
         wait_records.erase(curr_it);
     }
 }
@@ -443,13 +406,13 @@ void gorc::cog::executor::update(time_delta dt)
         }
     }
 
-    for(auto it = sleep_records.begin(); it != sleep_records.end(); ) {
+    for(auto it = sleep_records.begin(); it != sleep_records.end();) {
         if((*it)->expiration_time <= 0.0s) {
             auto sr = std::move(*it);
             std::swap(*it, sleep_records.back());
             sleep_records.pop_back();
 
-            vm.execute(verbs, *this, services, sr->cc);
+            vm.execute(globals, verbs, *this, services, sr->cc);
         }
         else {
             ++it;

@@ -1,7 +1,7 @@
 #include "rvalue_visitor.hpp"
+#include "ast/variant_location_visitor.hpp"
 #include "lvalue_visitor.hpp"
 #include "utility/zip.hpp"
-#include "ast/variant_location_visitor.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
@@ -31,26 +31,22 @@ expr_val rvalue_visitor::visit(ast::immediate_expression &e)
 
 expr_val rvalue_visitor::visit(ast::string_literal_expression &e)
 {
-    return expr_val(value_type::string,
-                    value(out_script.strings.add_string(e.value)));
+    return expr_val(value_type::string, value(out_script.strings.add_string(e.value)));
 }
 
 expr_val rvalue_visitor::visit(ast::integer_literal_expression &e)
 {
-    return expr_val(value_type::integer,
-                    value(e.value));
+    return expr_val(value_type::integer, value(e.value));
 }
 
 expr_val rvalue_visitor::visit(ast::float_literal_expression &e)
 {
-    return expr_val(value_type::floating,
-                    value(e.value));
+    return expr_val(value_type::floating, value(e.value));
 }
 
 expr_val rvalue_visitor::visit(ast::vector_literal_expression &e)
 {
-    return expr_val(value_type::vector,
-                    value(make_vector(e.x, e.y, e.z)));
+    return expr_val(value_type::vector, value(make_vector(e.x, e.y, e.z)));
 }
 
 expr_val rvalue_visitor::visit(ast::identifier_expression &e)
@@ -63,21 +59,17 @@ expr_val rvalue_visitor::visit(ast::identifier_expression &e)
     }
 
     // Identifier is not a constant
-    auto const &sym = out_script.symbols.get_symbol(e.value->value);
-    return expr_val(sym.type, nothing);
+    auto sym = out_script.symbols.get_symbol(e.value->value);
+    return expr_val(std::get<1>(sym)->type, nothing);
 }
 
 expr_val rvalue_visitor::visit(ast::subscript_expression &e)
 {
-    visit_and_fold_array_subscript(*e.index,
-                                   out_script,
-                                   factory,
-                                   constants,
-                                   verbs);
+    visit_and_fold_array_subscript(*e.index, out_script, factory, constants, verbs);
 
     // Look up base symbol, and assume indexed symbol shares type
-    auto const &sym = out_script.symbols.get_symbol(e.base->value);
-    return expr_val(sym.type, nothing);
+    auto sym = out_script.symbols.get_symbol(e.base->value);
+    return expr_val(std::get<1>(sym)->type, nothing);
 }
 
 expr_val rvalue_visitor::visit(ast::method_call_expression &e)
@@ -95,10 +87,8 @@ expr_val rvalue_visitor::visit(ast::method_call_expression &e)
     verb const &v = verbs.get_verb(vid);
 
     if(e.arguments->elements.size() != v.argument_types.size()) {
-        LOG_ERROR(format("verb '%s' expects %d arguments, found %d") %
-                  v.name %
-                  v.argument_types.size() %
-                  e.arguments->elements.size());
+        LOG_ERROR(format("verb '%s' expects %d arguments, found %d") % v.name %
+                  v.argument_types.size() % e.arguments->elements.size());
         return expr_val(v.return_type, nothing);
     }
 
@@ -111,8 +101,7 @@ expr_val rvalue_visitor::visit(ast::method_call_expression &e)
         auto folded_type = visit_and_fold(rv, *std::get<1>(arg_pair), factory);
         if(!can_convert_type(folded_type, std::get<0>(arg_pair))) {
             diagnostic_context dc(ast_visit(variant_location_visitor(), *std::get<1>(arg_pair)));
-            LOG_WARNING(format("cannot convert argument from %s to %s") %
-                        as_string(folded_type) %
+            LOG_WARNING(format("cannot convert argument from %s to %s") % as_string(folded_type) %
                         as_string(std::get<0>(arg_pair)));
         }
     }
@@ -150,21 +139,19 @@ expr_val rvalue_visitor::visit(ast::unary_expression &e)
         break;
     }
 
-    return maybe_if(std::get<1>(sub_val),
-                    expr_val(return_type, nothing),
-                    [&](value v) {
-            switch(e.op) {
-            case ast::unary_operator::plus:
-                return expr_val(v.get_type(), v);
-            case ast::unary_operator::minus:
-                return expr_val(v.get_type(), -v);
-            case ast::unary_operator::logical_not:
-                return expr_val(value_type::boolean, !v);
-            }
+    return maybe_if(std::get<1>(sub_val), expr_val(return_type, nothing), [&](value v) {
+        switch(e.op) {
+        case ast::unary_operator::plus:
+            return expr_val(v.get_type(), v);
+        case ast::unary_operator::minus:
+            return expr_val(v.get_type(), -v);
+        case ast::unary_operator::logical_not:
+            return expr_val(value_type::boolean, !v);
+        }
 
-            // Catch-all: the above switch statement should handle all cases
-            LOG_FATAL("unhandled unary operator"); // LCOV_EXCL_LINE
-        });
+        // Catch-all: the above switch statement should handle all cases
+        LOG_FATAL("unhandled unary operator"); // LCOV_EXCL_LINE
+    });
 }
 
 expr_val rvalue_visitor::visit(ast::infix_expression &e)
@@ -203,11 +190,9 @@ expr_val rvalue_visitor::visit(ast::infix_expression &e)
     case ast::infix_operator::equal:
     case ast::infix_operator::not_equal:
         if(is_id_type(left_type) && is_id_type(right_type)) {
-            if(left_type != value_type::dynamic &&
-               right_type != value_type::dynamic &&
+            if(left_type != value_type::dynamic && right_type != value_type::dynamic &&
                left_type != right_type) {
-                LOG_WARNING(format("comparison between %s and %s ids") %
-                            as_string(left_type) %
+                LOG_WARNING(format("comparison between %s and %s ids") % as_string(left_type) %
                             as_string(right_type));
             }
             break;
@@ -218,8 +203,7 @@ expr_val rvalue_visitor::visit(ast::infix_expression &e)
         if(!can_convert_type(left_type, common_type) ||
            !can_convert_type(right_type, common_type)) {
             LOG_WARNING(format("used numeric operator on incompatible types %s and %s") %
-                        as_string(left_type) %
-                        as_string(right_type));
+                        as_string(left_type) % as_string(right_type));
         }
         break;
     }
@@ -329,13 +313,13 @@ expr_val rvalue_visitor::visit(ast::infix_expression &e)
 
     // Either the left or right could still need replacement
     maybe_if(std::get<1>(left), [&](value v) {
-            auto loc = ast_visit(variant_location_visitor(), *e.left);
-            *e.left = factory.make<ast::immediate_expression>(loc, v);
-        });
+        auto loc = ast_visit(variant_location_visitor(), *e.left);
+        *e.left = factory.make<ast::immediate_expression>(loc, v);
+    });
     maybe_if(std::get<1>(right), [&](value v) {
-            auto loc = ast_visit(variant_location_visitor(), *e.right);
-            *e.right = factory.make<ast::immediate_expression>(loc, v);
-        });
+        auto loc = ast_visit(variant_location_visitor(), *e.right);
+        *e.right = factory.make<ast::immediate_expression>(loc, v);
+    });
 
     return expr_val(result_type, nothing);
 }
@@ -360,8 +344,7 @@ expr_val rvalue_visitor::visit(ast::assignment_expression &e)
     // Check that this lvalue can accept the value
     if(!can_convert_type(val, lval_type)) {
         LOG_WARNING(format("assignment changes type of lvalue from %s to %s") %
-                    as_string(lval_type) %
-                    as_string(val));
+                    as_string(lval_type) % as_string(val));
     }
 
     return expr_val(val, nothing);
@@ -384,13 +367,13 @@ expr_val rvalue_visitor::visit(ast::comma_expression &e)
 
     // Either the left or right could still need replacement
     maybe_if(std::get<1>(left), [&](value v) {
-            auto loc = ast_visit(variant_location_visitor(), *e.left);
-            *e.left = factory.make<ast::immediate_expression>(loc, v);
-        });
+        auto loc = ast_visit(variant_location_visitor(), *e.left);
+        *e.left = factory.make<ast::immediate_expression>(loc, v);
+    });
     maybe_if(std::get<1>(right), [&](value v) {
-            auto loc = ast_visit(variant_location_visitor(), *e.right);
-            *e.right = factory.make<ast::immediate_expression>(loc, v);
-        });
+        auto loc = ast_visit(variant_location_visitor(), *e.right);
+        *e.right = factory.make<ast::immediate_expression>(loc, v);
+    });
 
     return expr_val(std::get<0>(right), nothing);
 }

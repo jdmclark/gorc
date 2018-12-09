@@ -1,6 +1,6 @@
 #include "lvalue_visitor.hpp"
-#include "rvalue_visitor.hpp"
 #include "ast/variant_location_visitor.hpp"
+#include "rvalue_visitor.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
@@ -25,19 +25,15 @@ value_type lvalue_visitor::visit(ast_node &)
 
 value_type lvalue_visitor::visit(ast::identifier_expression &e)
 {
-    auto const &sym = out_script.symbols.get_symbol(e.value->value);
-    return sym.type;
+    auto sym = out_script.symbols.get_symbol(e.value->value);
+    return std::get<1>(sym)->type;
 }
 
 value_type lvalue_visitor::visit(ast::subscript_expression &e)
 {
-    visit_and_fold_array_subscript(*e.index,
-                                   out_script,
-                                   factory,
-                                   constants,
-                                   verbs);
+    visit_and_fold_array_subscript(*e.index, out_script, factory, constants, verbs);
 
     // Look up base symbol, and assume indexed symbol shares type
     auto const &sym = out_script.symbols.get_symbol(e.base->value);
-    return sym.type;
+    return std::get<1>(sym)->type;
 }

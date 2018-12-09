@@ -1,7 +1,7 @@
 #include "statement_gen_visitor.hpp"
+#include "log/log.hpp"
 #include "nonval_expression_gen_visitor.hpp"
 #include "rval_expression_gen_visitor.hpp"
-#include "log/log.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
@@ -202,12 +202,11 @@ void statement_gen_visitor::visit(ast::labeled_statement &s)
     // Check for exported message
     auto sym = out_script.symbols.get_existing_symbol(s.label->value);
     auto const_it = constants.find(s.label->value);
-    if(const_it != constants.end() &&
-       sym.has_value() &&
-       sym.get_value()->type == value_type::message) {
+    if(const_it != constants.end() && sym.has_value() &&
+       std::get<1>(sym.get_value())->type == value_type::message) {
         // Symbol is an exported message
-        ir.label(ir.get_export_label(message_type(static_cast<int>(const_it->second)),
-                                     s.label->value));
+        ir.label(
+            ir.get_export_label(message_type(static_cast<int>(const_it->second)), s.label->value));
     }
     else {
         // Symbol is not exported
@@ -218,7 +217,7 @@ void statement_gen_visitor::visit(ast::labeled_statement &s)
     ast_visit(*this, *s.code);
 }
 
-void statement_gen_visitor::visit(ast_list_node<ast::statement*> &s)
+void statement_gen_visitor::visit(ast_list_node<ast::statement *> &s)
 {
     for(auto &stmt : s.elements) {
         ast_visit(*this, *stmt);

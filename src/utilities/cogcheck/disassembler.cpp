@@ -1,13 +1,13 @@
 #include "disassembler.hpp"
-#include "jk/cog/vm/opcode.hpp"
 #include "io/binary_input_stream.hpp"
+#include "jk/cog/vm/opcode.hpp"
+#include <iostream>
 #include <map>
 #include <sstream>
-#include <iostream>
 
 void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
 {
-    std::cout << "DISASSEMBLY" << std::endl << std::endl;;
+    std::cout << "DISASSEMBLY" << std::endl << std::endl;
 
     std::map<size_t, std::tuple<std::string, maybe<size_t>>> lines;
     std::map<size_t, std::string> labels;
@@ -17,8 +17,7 @@ void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
         labels.emplace(msg.second, as_string(msg.first));
     }
 
-    auto lazy_add_default_addr = [&](size_t addr)
-    {
+    auto lazy_add_default_addr = [&](size_t addr) {
         auto it = labels.find(addr);
         if(it == labels.end()) {
             labels.emplace(addr, str(format("L%d") % addr));
@@ -51,12 +50,28 @@ void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
             line << "loadi ";
             line << binary_deserialize<size_t>(r);
             break;
+        case cog::opcode::loadg:
+            line << "loadg ";
+            line << binary_deserialize<size_t>(r);
+            break;
+        case cog::opcode::loadgi:
+            line << "loadgi ";
+            line << binary_deserialize<size_t>(r);
+            break;
         case cog::opcode::stor:
             line << "stor ";
             line << binary_deserialize<size_t>(r);
             break;
         case cog::opcode::stori:
             line << "stori ";
+            line << binary_deserialize<size_t>(r);
+            break;
+        case cog::opcode::storg:
+            line << "storg ";
+            line << binary_deserialize<size_t>(r);
+            break;
+        case cog::opcode::storgi:
+            line << "storgi ";
             line << binary_deserialize<size_t>(r);
             break;
         case cog::opcode::jmp:
@@ -164,9 +179,7 @@ void gorc::disassemble_code(cog::script &s, cog::verb_table &verbs)
         else {
             std::cout << "    " << std::get<0>(code_it->second);
             maybe_if(std::get<1>(code_it->second),
-                     [&](size_t addr_print) {
-                std::cout << labels[addr_print];
-            });
+                     [&](size_t addr_print) { std::cout << labels[addr_print]; });
 
             std::cout << std::endl;
 

@@ -1,0 +1,12 @@
+symbols
+cog other
+message startup
+end
+code
+startup:
+    global5 = 945;
+    printint(global5);
+    printint(sendmessage(other, user0));
+    printint(global5);
+    return;
+end

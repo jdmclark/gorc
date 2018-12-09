@@ -51,7 +51,17 @@ void rval_expression_gen_visitor::visit(ast::vector_literal_expression &)
 
 void rval_expression_gen_visitor::visit(ast::identifier_expression &e)
 {
-    ir.load(out_script.symbols.get_symbol_index(e.value->value));
+    auto si = out_script.symbols.get_symbol_index(e.value->value);
+    switch(std::get<0>(si)) {
+    case symbol_scope::global_symbol:
+        ir.loadg(std::get<1>(si));
+        break;
+
+    default:
+    case symbol_scope::local_symbol:
+        ir.load(std::get<1>(si));
+        break;
+    }
 }
 
 void rval_expression_gen_visitor::visit(ast::subscript_expression &e)
@@ -59,7 +69,17 @@ void rval_expression_gen_visitor::visit(ast::subscript_expression &e)
     // Push index
     ast_visit(*this, *e.index);
 
-    ir.loadi(out_script.symbols.get_symbol_index(e.base->value));
+    auto si = out_script.symbols.get_symbol_index(e.base->value);
+    switch(std::get<0>(si)) {
+    case symbol_scope::global_symbol:
+        ir.loadgi(std::get<1>(si));
+        break;
+
+    default:
+    case symbol_scope::local_symbol:
+        ir.loadi(std::get<1>(si));
+        break;
+    }
 }
 
 void rval_expression_gen_visitor::visit(ast::method_call_expression &e)

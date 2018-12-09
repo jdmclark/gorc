@@ -1,0 +1,7 @@
+symbols
+message startup
+end
+code
+startup:
+global5 = 1;
+end

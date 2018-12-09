@@ -1,5 +1,5 @@
-#include "test/test.hpp"
 #include "jk/cog/script/symbol_table.hpp"
+#include "test/test.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
@@ -29,12 +29,14 @@ test_case(basic)
     ++it;
     assert_eq(it, st.end());
 
-    assert_eq(st.get_symbol_index("bar"), size_t(1));
+    auto bar_si = st.get_symbol_index("bar");
+    assert_eq(std::get<0>(bar_si), symbol_scope::local_symbol);
+    assert_eq(std::get<1>(bar_si), 1U);
 
-    auto const& bar_sym = st.get_symbol_by_index(size_t(1));
-    auto const& bar_sym2 = st.get_symbol("bar");
+    auto bar_sym = st.get_symbol_by_index(symbol_scope::local_symbol, size_t(1));
+    auto bar_sym2 = st.get_symbol("bar");
 
-    assert_eq(&bar_sym, &bar_sym2);
+    assert_eq(bar_sym, bar_sym2);
 }
 
 test_case(redefinition)
@@ -44,15 +46,41 @@ test_case(redefinition)
     st.add_symbol("foo");
 
     assert_log_empty();
-    assert_eq(st.get_symbol_index("foo"), size_t(0));
+
+    auto foo_si = st.get_symbol_index("foo");
+    assert_eq(std::get<0>(foo_si), symbol_scope::local_symbol);
+    assert_eq(std::get<1>(foo_si), 0U);
 
     st.add_symbol("foo");
 
     assert_log_message(log_level::warning, "symbol 'foo' redefinition");
     assert_log_empty();
-    assert_eq(st.get_symbol_index("foo"), size_t(1));
 
-    assert_eq(st.get_symbol_by_index(size_t(0)).name, std::string("foo"));
+    auto foo_gsi = st.get_symbol_index("foo");
+    assert_eq(std::get<0>(foo_gsi), symbol_scope::local_symbol);
+    assert_eq(std::get<1>(foo_gsi), 1U);
+
+    assert_eq(std::get<1>(st.get_symbol_by_index(symbol_scope::local_symbol, size_t(0)))->name,
+              std::string("foo"));
+}
+
+test_case(shadow_global)
+{
+    symbol_table st;
+
+    auto g0 = st.get_existing_symbol("global13");
+    assert_eq(std::get<0>(g0.get_value()), symbol_scope::global_symbol);
+    assert_eq(std::get<1>(g0.get_value())->sequence_number, 13U);
+
+    assert_log_empty();
+    st.add_symbol("global13");
+
+    assert_log_message(log_level::warning, "symbol 'global13' shadows global symbol");
+    assert_log_empty();
+
+    auto g1 = st.get_existing_symbol("global13");
+    assert_eq(std::get<0>(g1.get_value()), symbol_scope::local_symbol);
+    assert_eq(std::get<1>(g1.get_value())->sequence_number, 0U);
 }
 
 test_case(undefined)

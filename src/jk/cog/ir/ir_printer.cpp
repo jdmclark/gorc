@@ -2,8 +2,7 @@
 #include "jk/cog/vm/opcode.hpp"
 #include "log/log.hpp"
 
-gorc::cog::ir_printer::ir_printer(file &program_text,
-                                  message_table &exports)
+gorc::cog::ir_printer::ir_printer(file &program_text, message_table &exports)
     : program_text(program_text)
     , program_stream(program_text)
     , exports(exports)
@@ -73,8 +72,7 @@ gorc::cog::label_id gorc::cog::ir_printer::get_export_label(message_type mt,
 void gorc::cog::ir_printer::label(label_id lid)
 {
     // Current position is the label offset
-    bool succeeded = label_offsets.emplace(static_cast<int>(lid),
-                                           program_text.position()).second;
+    bool succeeded = label_offsets.emplace(static_cast<int>(lid), program_text.position()).second;
     if(!succeeded) {
         LOG_FATAL(format("label id %d used for multiple branch targets") % static_cast<int>(lid));
     }
@@ -107,6 +105,20 @@ void gorc::cog::ir_printer::loadi(size_t addr)
     binary_serialize(program_stream, addr);
 }
 
+void gorc::cog::ir_printer::loadg(size_t addr)
+{
+    ends_with_ret = false;
+    binary_serialize(program_stream, opcode::loadg);
+    binary_serialize(program_stream, addr);
+}
+
+void gorc::cog::ir_printer::loadgi(size_t addr)
+{
+    ends_with_ret = false;
+    binary_serialize(program_stream, opcode::loadgi);
+    binary_serialize(program_stream, addr);
+}
+
 void gorc::cog::ir_printer::stor(size_t addr)
 {
     ends_with_ret = false;
@@ -118,6 +130,20 @@ void gorc::cog::ir_printer::stori(size_t addr)
 {
     ends_with_ret = false;
     binary_serialize(program_stream, opcode::stori);
+    binary_serialize(program_stream, addr);
+}
+
+void gorc::cog::ir_printer::storg(size_t addr)
+{
+    ends_with_ret = false;
+    binary_serialize(program_stream, opcode::storg);
+    binary_serialize(program_stream, addr);
+}
+
+void gorc::cog::ir_printer::storgi(size_t addr)
+{
+    ends_with_ret = false;
+    binary_serialize(program_stream, opcode::storgi);
     binary_serialize(program_stream, addr);
 }
 

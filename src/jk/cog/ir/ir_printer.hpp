@@ -1,12 +1,12 @@
 #pragma once
 
-#include "jk/cog/script/value.hpp"
-#include "jk/cog/script/message_table.hpp"
-#include "io/file.hpp"
 #include "io/binary_output_stream.hpp"
+#include "io/file.hpp"
+#include "jk/cog/script/message_table.hpp"
+#include "jk/cog/script/value.hpp"
+#include "jk/cog/vm/opcode.hpp"
 #include "label_id.hpp"
 #include "utility/enum_hash.hpp"
-#include "jk/cog/vm/opcode.hpp"
 #include <string>
 #include <unordered_map>
 
@@ -33,8 +33,7 @@ namespace gorc {
             void write_branch_instruction(opcode op, label_id lid);
 
         public:
-            ir_printer(file &program_text,
-                       message_table &exports);
+            ir_printer(file &program_text, message_table &exports);
 
             void finalize();
 
@@ -49,9 +48,13 @@ namespace gorc {
 
             void load(size_t addr);
             void loadi(size_t addr);
+            void loadg(size_t addr);
+            void loadgi(size_t addr);
 
             void stor(size_t addr);
             void stori(size_t addr);
+            void storg(size_t addr);
+            void storgi(size_t addr);
 
             void jmp(label_id id);
             void jal(label_id id);
@@ -85,6 +88,5 @@ namespace gorc {
             void lt();
             void le();
         };
-
     }
 }

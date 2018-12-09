@@ -1,0 +1,12 @@
+symbols
+int i
+message startup
+end
+code
+startup:
+    global0[0] = 1;
+    global0[1] = 2;
+    for(i = 0; i < 2; i = i + 1) {
+        global0[i] = i + 1;
+    }
+end

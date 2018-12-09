@@ -1,24 +1,25 @@
 #pragma once
 
-#include "instance.hpp"
-#include "sleep_record.hpp"
-#include "pulse_record.hpp"
-#include "timer_record.hpp"
-#include "executor_linkage.hpp"
-#include "jk/cog/script/message_type.hpp"
-#include "virtual_machine.hpp"
-#include "content/id.hpp"
-#include "jk/cog/script/verb_table.hpp"
-#include "utility/service_registry.hpp"
 #include "call_stack_frame.hpp"
 #include "content/asset_ref.hpp"
+#include "content/id.hpp"
+#include "executor_linkage.hpp"
+#include "heap.hpp"
+#include "instance.hpp"
 #include "io/binary_input_stream.hpp"
 #include "io/binary_output_stream.hpp"
+#include "jk/cog/script/message_type.hpp"
+#include "jk/cog/script/verb_table.hpp"
+#include "pulse_record.hpp"
+#include "sleep_record.hpp"
+#include "timer_record.hpp"
 #include "utility/range.hpp"
-#include <vector>
-#include <memory>
+#include "utility/service_registry.hpp"
+#include "virtual_machine.hpp"
 #include <map>
+#include <memory>
 #include <tuple>
+#include <vector>
 
 namespace gorc {
     namespace cog {
@@ -29,8 +30,8 @@ namespace gorc {
             };
 
             struct executor_wait_comp {
-                bool operator()(std::tuple<message_type, value> const&,
-                                std::tuple<message_type, value> const&) const;
+                bool operator()(std::tuple<message_type, value> const &,
+                                std::tuple<message_type, value> const &) const;
             };
 
             struct executor_gi_comp {
@@ -45,6 +46,7 @@ namespace gorc {
 
         class executor {
         private:
+            heap globals;
             verb_table &verbs;
             virtual_machine vm;
             service_registry services;
@@ -54,11 +56,11 @@ namespace gorc {
             std::vector<std::unique_ptr<sleep_record>> sleep_records;
             std::multimap<std::tuple<message_type, value>,
                           std::unique_ptr<continuation>,
-                          detail::executor_wait_comp> wait_records;
+                          detail::executor_wait_comp>
+                wait_records;
             std::map<cog_id, pulse_record> pulse_records;
-            std::multimap<std::tuple<cog_id, value>,
-                          timer_record,
-                          detail::executor_timer_comp> timer_records;
+            std::multimap<std::tuple<cog_id, value>, timer_record, detail::executor_timer_comp>
+                timer_records;
 
             std::multimap<value, executor_linkage, detail::executor_link_comp> linkages;
             std::map<asset_ref<script>, cog_id, detail::executor_gi_comp> global_instance_map;
@@ -77,10 +79,10 @@ namespace gorc {
             cog_id create_instance(asset_ref<cog::script>, std::vector<value> const &);
             cog_id create_global_instance(asset_ref<cog::script>);
 
-            instance& get_instance(cog_id instance_id);
+            instance &get_instance(cog_id instance_id);
 
             void add_sleep_record(std::unique_ptr<sleep_record> &&);
-            void add_wait_record(message_type msg, value sender, std::unique_ptr<continuation>&&);
+            void add_wait_record(message_type msg, value sender, std::unique_ptr<continuation> &&);
             void add_timer_record(cog_id, value id, time_delta, value param0, value param1);
             void erase_timer_record(cog_id, value id);
             void set_pulse(cog_id, maybe<time_delta>);
@@ -134,6 +136,5 @@ namespace gorc {
                 return make_range(linkages);
             }
         };
-
     }
 }

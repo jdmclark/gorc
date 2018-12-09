@@ -1,6 +1,6 @@
 #include "lval_expression_gen_visitor.hpp"
-#include "rval_expression_gen_visitor.hpp"
 #include "log/log.hpp"
+#include "rval_expression_gen_visitor.hpp"
 
 using namespace gorc;
 using namespace gorc::cog;
@@ -30,7 +30,17 @@ void lval_expression_gen_visitor::visit(ast_node &)
 
 void lval_expression_gen_visitor::visit(ast::identifier_expression &e)
 {
-    ir.stor(out_script.symbols.get_symbol_index(e.value->value));
+    auto si = out_script.symbols.get_symbol_index(e.value->value);
+    switch(std::get<0>(si)) {
+    case symbol_scope::global_symbol:
+        ir.storg(std::get<1>(si));
+        break;
+
+    default:
+    case symbol_scope::local_symbol:
+        ir.stor(std::get<1>(si));
+        break;
+    }
 }
 
 void lval_expression_gen_visitor::visit(ast::subscript_expression &e)
@@ -39,5 +49,15 @@ void lval_expression_gen_visitor::visit(ast::subscript_expression &e)
     rval_expression_gen_visitor ev(out_script, ir, verbs, constants);
     ast_visit(ev, *e.index);
 
-    ir.stori(out_script.symbols.get_symbol_index(e.base->value));
+    auto si = out_script.symbols.get_symbol_index(e.base->value);
+    switch(std::get<0>(si)) {
+    case symbol_scope::global_symbol:
+        ir.storgi(std::get<1>(si));
+        break;
+
+    default:
+    case symbol_scope::local_symbol:
+        ir.stori(std::get<1>(si));
+        break;
+    }
 }
