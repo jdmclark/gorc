@@ -57,7 +57,7 @@ The Gorc project has adopted a 100% line coverage policy to encourage the develo
 testable code. The test coverage report must show 100% line coverage before any code changes will
 be accepted.
 
-#### Running
+## Running
 
 Before running Gorc, you must copy your Dark Forces II original `episode` and `resource`
 directories into the `game` directory in the root of this repository. Gorc will not work without

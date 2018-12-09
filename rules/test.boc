@@ -37,7 +37,7 @@ var $EXTRA_REGEX;
 function process_raw_output()
 {
     cp $(RAW_OUTPUT) $(CURRENT_OUTPUT);
-    for regex in $(BUILTIN_REGEX) @ $(EXTRA_REGEX) {
+    for regex in $(EXTRA_REGEX) @ $(BUILTIN_REGEX) {
         sed -i $(regex) $(CURRENT_OUTPUT);
     }
 }
