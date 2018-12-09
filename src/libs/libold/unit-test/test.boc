@@ -1,3 +1,0 @@
-include ../../../../rules/test.boc;
-
-$(TEST_BIN)/libold-test;

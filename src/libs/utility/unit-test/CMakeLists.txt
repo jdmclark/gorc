@@ -1,0 +1,33 @@
+add_executable(utility-test
+    abs_test.cpp
+    apply_test.cpp
+    contains_type_test.cpp
+    event_bus_test.cpp
+    flag_set_test.cpp
+    foreach_test.cpp
+    gcd_test.cpp
+    global_test.cpp
+    join_test.cpp
+    lcm_test.cpp
+    local_test.cpp
+    maybe_test.cpp
+    mod_test.cpp
+    oxford_join_test.cpp
+    range_test.cpp
+    rate_limited_progress_test.cpp
+    runtime_assert_test.cpp
+    scoped_assignment_test.cpp
+    service_registry_test.cpp
+    shell_progress_test.cpp
+    strcat_test.cpp
+    string_search_test.cpp
+    string_view_test.cpp
+    variant_test.cpp
+    wrapped_test.cpp
+    zip_test.cpp
+    )
+
+target_link_libraries(utility-test
+    unittest
+    utility
+    )

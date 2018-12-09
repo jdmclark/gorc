@@ -1,6 +1,6 @@
 ==== stderr ====
-Building 4 out-of-date targets
-Build succeeded
+Running 1 tests
+**** SUITE PASSED ****
 Running 1 tests
 **** SUITE PASSED ****
 ==== stdout ====

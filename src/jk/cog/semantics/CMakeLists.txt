@@ -1,0 +1,20 @@
+add_library(cog-semantics STATIC
+    analyzer.cpp
+    code_visitor.cpp
+    collect_labels.cpp
+    collect_symbols.cpp
+    flow_visitor.cpp
+    for_expression_visitor.cpp
+    lvalue_visitor.cpp
+    rvalue_visitor.cpp
+    symbol_extension_field_integer_visitor.cpp
+    symbol_extension_field_string_visitor.cpp
+    symbol_extension_type.cpp
+    symbol_extension_visitor.cpp
+    symbol_field_visitor.cpp
+    )
+
+target_link_libraries(cog-semantics
+    cog-ast
+    cog-script
+    )

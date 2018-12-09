@@ -1,19 +1,20 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: cpp
 compiler: gcc
 
 before_script:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -qq update
-  - sudo apt-get install -y gcc-5 g++-5 libstdc++-5-dev build-essential libboost-all-dev
+  - sudo apt-get install -y gcc-7 g++-7 libstdc++-7-dev build-essential libboost-all-dev
   - sudo apt-get install -y libsfml-dev libglew-dev libglu-dev
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 90
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
-  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-5 90
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 90
   - sudo pip install cpp-coveralls
 
 script:
   - g++ --version
-  - make bootstrap -j2 THREADS=2
-  - ./bin/boc clean build test coveralls-coverage-report --type coverage -j 2
+  - cmake .
+  - make -j2
+  - ./pkg/bin/boc test --threads 2

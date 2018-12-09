@@ -1,0 +1,8 @@
+add_subdirectory(ast)
+add_subdirectory(codegen)
+add_subdirectory(compiler)
+add_subdirectory(grammar)
+add_subdirectory(ir)
+add_subdirectory(script)
+add_subdirectory(semantics)
+add_subdirectory(vm)

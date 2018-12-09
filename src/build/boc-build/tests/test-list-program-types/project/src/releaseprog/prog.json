@@ -1,7 +1,0 @@
-{
-    "name" : "releaseprog",
-    "type" : "release",
-    "sources" : [
-        "main.cpp"
-    ]
-}

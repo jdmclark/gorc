@@ -1,3 +1,0 @@
-==== stderr ====
-[ERROR] src/notadir/notaprogram/prog.json: No such file or directory
-==== stdout ====

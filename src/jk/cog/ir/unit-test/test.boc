@@ -1,3 +1,3 @@
 include ../../../../../rules/test.boc;
 
-$(TEST_BIN)/ir-test;
+$(TEST_BIN)/cog-ir-test;

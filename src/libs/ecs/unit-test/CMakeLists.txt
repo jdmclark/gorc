@@ -1,0 +1,14 @@
+add_executable(ecs-test
+    component_pool_test.cpp
+    component_registry_test.cpp
+    component_relational_mapping_test.cpp
+    entity_component_system_test.cpp
+    inner_join_aspect_test.cpp
+    pool_test.cpp
+    sequential_entity_generator_test.cpp
+    )
+
+target_link_libraries(ecs-test
+    ecs
+    unittest
+    )

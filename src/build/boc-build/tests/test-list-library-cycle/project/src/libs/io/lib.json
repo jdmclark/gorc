@@ -1,9 +1,0 @@
-{
-    "name" : "io",
-    "sources" : [
-        "memory_file.cpp"
-    ],
-    "dependencies" : [
-        "libs/program"
-    ]
-}

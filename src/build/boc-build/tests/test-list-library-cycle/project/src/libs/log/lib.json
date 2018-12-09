@@ -1,9 +1,0 @@
-{
-    "name" : "log",
-    "sources" : [
-        "log.cpp"
-    ],
-    "dependencies" : [
-        "libs/io"
-    ]
-}

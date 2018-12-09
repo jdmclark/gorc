@@ -1,4 +1,4 @@
-= executing $ROOT$/pkg/test-bin/child-program
+= executing $ROOT$/pkg/bin/child-program
 ==== stdout ====
 HELLO, WORLD!
 

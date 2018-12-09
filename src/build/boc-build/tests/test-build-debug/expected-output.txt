@@ -1,5 +1,0 @@
-Hello, World!
-==== stderr ====
-Building 4 out-of-date targets
-Build succeeded
-==== stdout ====

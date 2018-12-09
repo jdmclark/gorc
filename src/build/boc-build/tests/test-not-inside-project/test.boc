@@ -1,8 +1,0 @@
-include ../test.boc;
-
-pushd ../../../../../..;
-$(BOC_BUILD) 2>>$(RAW_OUTPUT) || true;
-popd;
-
-call process_raw_output();
-call compare_output();

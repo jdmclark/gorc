@@ -1,0 +1,20 @@
+add_executable(input-test
+    bound/bound_input_adapter_test.cpp
+    bound/input_binding_test.cpp
+    bound/keyboard_button_binding_test.cpp
+    bound/linear_axis_bindable_command_test.cpp
+    bound/mock_keyboard.cpp
+    bound/mock_mouse.cpp
+    bound/mouse_axis_binding_test.cpp
+    bound/mouse_button_binding_test.cpp
+    bound/press_button_bindable_command_test.cpp
+    bound/repeat_button_bindable_command_test.cpp
+    input_adapter_test.cpp
+    keyboard_test.cpp
+    mouse_test.cpp
+    )
+
+target_link_libraries(input-test
+    input
+    unittest
+    )

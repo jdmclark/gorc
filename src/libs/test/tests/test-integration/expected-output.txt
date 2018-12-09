@@ -1,13 +1,13 @@
-src/libs/test/tests/example-test-suite/suite.cpp(83): teardown_failure::always_passes failed: Fixture teardown failed
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(83): teardown_failure::always_passes failed: Fixture teardown failed
 Suite teardown_failure failed: 1 cases
-src/libs/test/tests/example-test-suite/suite.cpp(11): failure_suite::valued_print_fail failed: 7 + h * 3(13) == v * 2(14) is false
-src/libs/test/tests/example-test-suite/suite.cpp(26): failure_suite::non_valued_print_fail failed: a == b is false
-src/libs/test/tests/example-test-suite/suite.cpp(31): failure_suite::assertion_failure failed: always failing in assertion
-src/libs/test/tests/example-test-suite/suite.cpp(36): failure_suite::expectation_failure failed: always failing in expectation
-src/libs/test/tests/example-test-suite/suite.cpp(39): failure_suite::unhandled_std_exception_failure failed: Unhandled exception: std::exception
-src/libs/test/tests/example-test-suite/suite.cpp(44): failure_suite::unhandled_unknown_exception_failure failed: Unhandled exception
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(11): failure_suite::valued_print_fail failed: 7 + h * 3(13) == v * 2(14) is false
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(26): failure_suite::non_valued_print_fail failed: a == b is false
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(31): failure_suite::assertion_failure failed: always failing in assertion
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(36): failure_suite::expectation_failure failed: always failing in expectation
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(39): failure_suite::unhandled_std_exception_failure failed: Unhandled exception: std::exception
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(44): failure_suite::unhandled_unknown_exception_failure failed: Unhandled exception
 Suite failure_suite failed: 6 cases
-src/libs/test/tests/example-test-suite/suite.cpp(69): setup_failure::always_passes failed: Fixture setup failed
+$ROOT$/src/libs/test/tests/example-test-suite/suite.cpp(69): setup_failure::always_passes failed: Fixture setup failed
 Suite setup_failure failed: 1 cases
 Test cases passed: 2
 Tests failed: 8

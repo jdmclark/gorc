@@ -1,0 +1,6 @@
+add_subdirectory(build)
+add_subdirectory(client)
+add_subdirectory(game)
+add_subdirectory(jk)
+add_subdirectory(libs)
+add_subdirectory(utilities)

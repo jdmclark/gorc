@@ -1,5 +1,0 @@
-test.boc exists
-==== stderr ====
-Building 7 out-of-date targets
-Build succeeded
-==== stdout ====

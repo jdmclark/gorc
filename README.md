@@ -8,8 +8,8 @@ Gorc is an early-development Dark Forces II game engine recreation. The goal of 
 
 ### Dependencies
 
-* Standard C++11 compiler (Clang 3.3, GCC 4.8)
-* GNU Make
+* Standard C++14 compiler (GCC 7)
+* CMake 3.8 or better
 * SFML 2.1
 * [Boost](http://boost.org)
 * [Gcovr 3.2](http://gcovr.com)
@@ -17,24 +17,19 @@ Gorc is an early-development Dark Forces II game engine recreation. The goal of 
 
 ### Quick Start
 
-#### Bootstrapping
-
-The Gorc build system must be built first. This step only needs to be done once.
-
-* Run `make bootstrap` from the project root.
-
-The Gorc build and test system is now located in the `bin` subdirectory of the project root. For
-convenience, you may run `activate.sh` to launch a new shell with the build tools in PATH.
-
 #### Building
 
-* Build the entire project: run `boc` from the project root.
+* Build the entire project from the project root:
 
-or
-
-* Build a specific component: run `boc` from the component source directory.
+```
+cmake -DCMAKE_BUILD_TYPE=Release .
+make -j4
+```
 
 ### Testing
+
+The test harness is an executable named `boc`. It was built as part of the previous step, and is
+located in the `pkg/bin` directory.
 
 * Run all tests: run `boc test` from the project root.
 
@@ -49,9 +44,10 @@ or
 ### Test Coverage
 
 Gorc uses the `gcov` coverage tool. The Gorc build system provides special options for coverage
-report generation. Use the following command to quickly generate a complete coverage report.
+report generation. Use the following command to quickly generate a complete coverage report with an
+instrumented build.
 
-* Run `boc clean build test coverage-report --type coverage` from the project root.
+* Run `boc test coverage-report` from the project root.
 
 The Gorc project has adopted a 100% line coverage policy to encourage the development of highly
 testable code. The test coverage report must show 100% line coverage before any code changes will
@@ -59,21 +55,28 @@ be accepted.
 
 ## Running
 
+### One-Time Setup
+
 Before running Gorc, you must copy your Dark Forces II original `episode` and `resource`
 directories into the `game` directory in the root of this repository. Gorc will not work without
 these directories. This step only needs to be done once.
 
-After the files have been copied, you can run the Gorc client from the command line. Gorc does not
-currently allow you to play through the levels normally. You must specify an episode GOB and a level
-filename manually.
+### Run Client
+
+Gorc does not currently allow you to play through the levels normally. You must manually specify an
+episode GOB and a level filename on the command line.
 
 For example, to play the first level you would run:
 
-  pkg/bin/client --episode game/episode/jk1.gob --level 01narshadda.jkl
+```
+pkg/bin/client --episode game/episode/jk1.gob --level 01narshadda.jkl
+```
 
 Other episodes and levels can be played by using appropriate `--episode` and `--level` options.
 
 If you do not know the level filenames inside an episode, you can use the included `gob` utility to
 list them:
 
-  pkg/bin/gob --file game/episode/jk1.gob --extract episode.jk
+```
+pkg/bin/gob --file game/episode/jk1.gob --extract episode.jk
+```

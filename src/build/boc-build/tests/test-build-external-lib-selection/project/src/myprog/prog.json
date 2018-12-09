@@ -1,9 +1,0 @@
-{
-    "name" : "myprog",
-    "sources" : [
-        "main.cpp"
-    ],
-    "libraries" : [
-        "boost"
-    ]
-}

@@ -2,7 +2,7 @@ include ../test.boc;
 
 call setup_test_project();
 
-var $boc_args = clean build test;
+var $boc_args = test test;
 call run_boc($boc_args);
 
 echo "intentionally empty" > $(TESTSUITE_DIR)/stderr;

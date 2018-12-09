@@ -1,9 +1,0 @@
-{
-    "name" : "ecs",
-    "dependencies" : [
-        "libs/content"
-    ],
-    "sources" : [
-        "aspect.cpp"
-    ]
-}

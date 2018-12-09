@@ -2,8 +2,8 @@
 ---- test location ----
 ==== stderr ====
 ---- default location ----
-Building 4 out-of-date targets
-Build succeeded
+Running 1 tests
+**** SUITE PASSED ****
 ---- test location ----
 Running 1 tests
 **** SUITE PASSED ****

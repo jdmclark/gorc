@@ -1,1 +1,0 @@
-[ERROR] current directory is not a boc project

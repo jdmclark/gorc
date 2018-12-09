@@ -5,14 +5,10 @@
 
 namespace {
 
-    std::map<std::string, gorc::subcommand_type> type_map {
-        { "build", gorc::subcommand_type::build },
-        { "test", gorc::subcommand_type::test },
-        { "clean", gorc::subcommand_type::clean },
-        { "coverage-report", gorc::subcommand_type::coverage_report },
-        { "coveralls-coverage-report", gorc::subcommand_type::coveralls_coverage_report }
-    };
-
+    std::map<std::string, gorc::subcommand_type> type_map{
+        {"test", gorc::subcommand_type::test},
+        {"coverage-report", gorc::subcommand_type::coverage_report},
+        {"coveralls-coverage-report", gorc::subcommand_type::coveralls_coverage_report}};
 }
 
 gorc::subcommand_type gorc::to_subcommand_type(std::string const &st)

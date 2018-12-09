@@ -1,11 +1,10 @@
-#include "program/program.hpp"
-#include "build/common/paths.hpp"
-#include "utility/join.hpp"
-#include "system/self.hpp"
-#include "system/process.hpp"
-#include "subcommand_type.hpp"
 #include "build/common/change_to_project_root.hpp"
-#include "build/common/project_file.hpp"
+#include "build/common/paths.hpp"
+#include "program/program.hpp"
+#include "subcommand_type.hpp"
+#include "system/process.hpp"
+#include "system/self.hpp"
+#include "utility/join.hpp"
 #include "utility/strcat.hpp"
 #include <boost/filesystem.hpp>
 #include <regex>
@@ -54,16 +53,7 @@ namespace gorc {
 
         int run_autodetect()
         {
-            auto cwd = canonical(current_path());
-
-            std::regex assembled_testname_regex(join(boc_test_default_directories, "|"));
-            if(std::regex_match(cwd.filename().generic_string(), assembled_testname_regex)) {
-                // Current directory is a test name
-                return run_test();
-            }
-            else {
-                return run_build();
-            }
+            return run_test();
         }
 
         int run_sequence()
@@ -79,20 +69,12 @@ namespace gorc {
                 int sub_result = EXIT_FAILURE;
 
                 switch(sub) {
-                case subcommand_type::build:
-                    sub_result = run_build();
-                    break;
-
                 case subcommand_type::test:
                     sub_result = run_test();
                     break;
 
-                case subcommand_type::clean:
-                    sub_result = run_clean();
-                    break;
-
-// LCOV_EXCL_START
-// Requires specialized configuration. Tested manually.
+                    // LCOV_EXCL_START
+                    // Requires specialized configuration. Tested manually.
                 case subcommand_type::coverage_report:
                     sub_result = run_coverage_report();
                     break;
@@ -101,7 +83,7 @@ namespace gorc {
                     sub_result = run_coveralls_coverage_report();
                     break;
                 }
-// LCOV_EXCL_STOP
+                // LCOV_EXCL_STOP
 
                 if(sub_result != EXIT_SUCCESS) {
                     return EXIT_FAILURE;
@@ -113,8 +95,7 @@ namespace gorc {
 
         int run_test()
         {
-            path const &boc_test_path =
-                get_self_executable_path().parent_path() / "boc-test";
+            path const &boc_test_path = get_self_executable_path().parent_path() / "boc-test";
 
             auto args = construct_common_args();
 
@@ -126,28 +107,6 @@ namespace gorc {
                               /* cwd */ nothing);
 
             return test_proc.join();
-        }
-
-        int run_build()
-        {
-            path const &boc_build_path =
-                get_self_executable_path().parent_path() / "boc-build";
-
-            auto args = construct_common_args();
-
-            if(!custom_build_type.empty()) {
-                args.push_back("--type");
-                args.push_back(custom_build_type);
-            }
-
-            process build_proc(boc_build_path,
-                               args,
-                               /* stdin */ nothing,
-                               /* stdout */ nothing,
-                               /* stderr */ nothing,
-                               /* cwd */ nothing);
-
-            return build_proc.join();
         }
 
         class scoped_project_root {
@@ -169,57 +128,19 @@ namespace gorc {
             }
         };
 
-        int run_clean()
-        {
-            // Use 'change to project root' to find build temporaries
-            scoped_project_root srp;
-
-            remove_all("pkg");
-            remove_all(".boc-cache");
-
-            return EXIT_SUCCESS;
-        }
-
-// LCOV_EXCL_START
-// Coverage requires a specialized configuration. Tested manually.
-        std::set<path> get_coverage_exclusions()
-        {
-            std::set<path> rv;
-
-            project_file pf("project.json");
-
-            for(auto const &program : pf.programs) {
-                if(program.second->exclude_test_coverage) {
-                    rv.insert(program.second->source_directory);
-                }
-            }
-
-            for(auto const &library : pf.libraries) {
-                if(library.second->exclude_test_coverage) {
-                    rv.insert(library.second->source_directory);
-                }
-            }
-
-            return rv;
-        }
-
+        // LCOV_EXCL_START
+        // Coverage requires a specialized configuration. Tested manually.
         int run_coverage_report()
         {
             LOG_INFO("Generating coverage report");
             scoped_project_root srp;
 
-            std::vector<std::string> args {
-                "--root", canonical(current_path()).generic_string(),
-                "--object-directory", canonical(current_path()).generic_string(),
-                "--sort-uncovered",
-                "--exclude-unreachable-branches"
-            };
-
-            auto coverage_exclusions = get_coverage_exclusions();
-            for(auto const &excl : coverage_exclusions) {
-                args.push_back("--exclude");
-                args.push_back(excl.generic_string());
-            }
+            std::vector<std::string> args{"--root",
+                                          canonical(current_path()).generic_string(),
+                                          "--object-directory",
+                                          canonical(current_path()).generic_string(),
+                                          "--sort-uncovered",
+                                          "--exclude-unreachable-branches"};
 
             process report_proc("gcovr",
                                 args,
@@ -236,17 +157,12 @@ namespace gorc {
             LOG_INFO("Generating coverage report");
             scoped_project_root srp;
 
-            std::vector<std::string> args {
-                "--gcov-options", "\\-lp",
-                "--root", canonical(current_path()).generic_string(),
-                "--build-root", canonical(current_path()).generic_string()
-            };
-
-            auto coverage_exclusions = get_coverage_exclusions();
-            for(auto const &excl : coverage_exclusions) {
-                args.push_back("--exclude");
-                args.push_back(excl.generic_string());
-            }
+            std::vector<std::string> args{"--gcov-options",
+                                          "\\-lp",
+                                          "--root",
+                                          canonical(current_path()).generic_string(),
+                                          "--build-root",
+                                          canonical(current_path()).generic_string()};
 
             process report_proc("cpp-coveralls",
                                 args,
@@ -257,9 +173,8 @@ namespace gorc {
 
             return report_proc.join();
         }
-// LCOV_EXCL_STOP
+        // LCOV_EXCL_STOP
     };
-
 }
 
 MAKE_MAIN(gorc::boc_frontend_program)

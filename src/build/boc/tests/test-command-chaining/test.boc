@@ -2,7 +2,7 @@ include ../test.boc;
 
 call setup_test_project();
 
-var $boc_args = clean build test --type debug;
+var $boc_args = test test;
 call run_boc($boc_args);
 
 call teardown_test_project();

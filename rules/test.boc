@@ -5,8 +5,8 @@ var $PLATFORM=$[PLATFORM];
 var $PROJECT_ROOT=$[PROJECT_ROOT];
 var $PKG=$(PROJECT_ROOT)/pkg;
 var $BIN=$(PKG)/bin;
-var $TEST_BIN=$(PKG)/test-bin;
-var $BUILD_BIN=$(PKG)/build-bin;
+var $TEST_BIN=$(PKG)/bin;
+var $BUILD_BIN=$(PKG)/bin;
 
 var $FAILED_TEST_LOG=$(PROJECT_ROOT)/test-log.txt;
 

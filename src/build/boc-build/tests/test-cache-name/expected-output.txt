@@ -1,4 +1,0 @@
-cache exists
-==== stderr ====
-All targets are up-to-date
-==== stdout ====

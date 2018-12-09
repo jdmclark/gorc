@@ -6,6 +6,10 @@ test-log.txt
 *.pyc
 pkg/
 .boc-cache
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
 game/episode
 game/resource
 game/restricted/music

@@ -1,8 +1,0 @@
-{
-    "name" : "testprog",
-    "type" : "test",
-    "exclude-coverage" : true,
-    "sources" : [
-        "main.cpp"
-    ]
-}

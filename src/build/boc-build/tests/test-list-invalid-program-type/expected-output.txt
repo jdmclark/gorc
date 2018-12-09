@@ -1,3 +1,0 @@
-==== stderr ====
-[ERROR] src/myprog/prog.json:6:14-6:30: unknown program type 'someinvalidtype'
-==== stdout ====

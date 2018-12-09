@@ -1,4 +1,0 @@
-==== stderr ====
-All targets are up-to-date
-[ERROR] Cannot write cache to file .boc-cache: Is a directory
-==== stdout ====

@@ -1,5 +1,3 @@
 ==== stderr ====
 intentionally empty
 ==== stdout ====
-Failed:
-    pkg/obj/src/myprog/main.o
