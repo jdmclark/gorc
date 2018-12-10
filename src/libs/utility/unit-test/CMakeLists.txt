@@ -12,6 +12,7 @@ add_executable(utility-test
     local_test.cpp
     maybe_test.cpp
     mod_test.cpp
+    narrow_test.cpp
     oxford_join_test.cpp
     range_test.cpp
     rate_limited_progress_test.cpp
@@ -19,6 +20,7 @@ add_executable(utility-test
     scoped_assignment_test.cpp
     service_registry_test.cpp
     shell_progress_test.cpp
+    span_test.cpp
     strcat_test.cpp
     string_search_test.cpp
     string_view_test.cpp

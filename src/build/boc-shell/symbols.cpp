@@ -1,7 +1,7 @@
 #include "symbols.hpp"
 #include "log/log.hpp"
-#include <unordered_map>
 #include "utility/runtime_assert.hpp"
+#include <unordered_map>
 
 namespace {
     std::unordered_map<std::string, std::unique_ptr<gorc::builtin>> builtins;
@@ -17,10 +17,10 @@ gorc::builtin::builtin(size_t args, std::function<shvalue(arglist const &)> code
 void gorc::register_builtin(std::string const &name, std::unique_ptr<builtin> &&obj)
 {
     runtime_assert(builtins.emplace(name, std::forward<std::unique_ptr<builtin>>(obj)).second,
-                   str(format("builtin '%s' redefinition") % name));
+                   str(format("builtin '%s' redefinition") % name).c_str());
 }
 
-gorc::maybe<gorc::builtin*> gorc::get_builtin(std::string const &name)
+gorc::maybe<gorc::builtin *> gorc::get_builtin(std::string const &name)
 {
     auto it = builtins.find(name);
     if(it != builtins.end()) {
@@ -31,7 +31,7 @@ gorc::maybe<gorc::builtin*> gorc::get_builtin(std::string const &name)
 }
 
 namespace {
-    std::unordered_map<std::string, gorc::func_declaration_statement*> functions;
+    std::unordered_map<std::string, gorc::func_declaration_statement *> functions;
 }
 
 void gorc::register_function(gorc::func_declaration_statement &s)
@@ -42,7 +42,7 @@ void gorc::register_function(gorc::func_declaration_statement &s)
     }
 }
 
-gorc::func_declaration_statement& gorc::get_function(std::string const &name)
+gorc::func_declaration_statement &gorc::get_function(std::string const &name)
 {
     auto it = functions.find(name);
     if(it != functions.end()) {
