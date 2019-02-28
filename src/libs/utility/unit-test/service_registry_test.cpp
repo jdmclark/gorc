@@ -72,4 +72,23 @@ test_case(parent)
     assert_eq(parent.get<std::string>(), std::string("Hello, World!"));
 }
 
+test_case(has)
+{
+    gorc::service_registry parent;
+    gorc::service_registry child(&parent);
+
+    assert_true(!parent.has<std::string>());
+    assert_true(!child.has<std::string>());
+
+    std::string msg1 = "Hello, World!";
+    parent.add_or_replace(msg1);
+    assert_true(parent.has<std::string>());
+    assert_true(child.has<std::string>());
+
+    int msg2 = 3;
+    child.add_or_replace(msg2);
+    assert_true(!parent.has<int>());
+    assert_true(child.has<int>());
+}
+
 end_suite(service_registry_test);

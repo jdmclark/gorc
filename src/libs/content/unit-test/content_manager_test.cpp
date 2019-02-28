@@ -1,10 +1,10 @@
-#include "test/test.hpp"
 #include "content/content_manager.hpp"
-#include "vfs/virtual_file_system.hpp"
-#include "io/memory_file.hpp"
 #include "content/loader.hpp"
 #include "content/loader_registry.hpp"
+#include "io/memory_file.hpp"
 #include "log/log.hpp"
+#include "test/test.hpp"
+#include "vfs/virtual_file_system.hpp"
 
 using namespace gorc;
 
@@ -77,13 +77,13 @@ namespace {
     public:
         static fourcc const type;
 
-        virtual std::vector<path> const& get_prefixes() const override
+        virtual std::vector<path> const &get_prefixes() const override
         {
-            static std::vector<path> rv = { "" };
+            static std::vector<path> rv = {""};
             return rv;
         }
 
-        virtual maybe<char const*> get_default() const override
+        virtual maybe<char const *> get_default() const override
         {
             return "dflt";
         }
@@ -91,7 +91,8 @@ namespace {
         virtual std::unique_ptr<asset> deserialize(input_stream &is,
                                                    content_manager &,
                                                    asset_id id,
-                                                   service_registry const &) const override
+                                                   service_registry const &,
+                                                   std::string const &) const override
         {
             LOG_INFO(format("called mock_loader for asset %d") % static_cast<int>(id));
             int value;
@@ -103,7 +104,6 @@ namespace {
     MAKE_ID_TYPE(mock_asset);
 
     fourcc const mock_loader::type = "MOCK"_4CC;
-
 }
 
 namespace gorc {
@@ -112,7 +112,6 @@ namespace gorc {
     struct id_asset_type<mock_asset_id> {
         using type = mock_asset;
     };
-
 }
 
 class content_manager_test_fixture : public test::fixture {

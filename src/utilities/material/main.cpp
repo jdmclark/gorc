@@ -1,12 +1,13 @@
-#include "program/program.hpp"
-#include "jk/content/raw_material.hpp"
 #include "io/binary_input_stream.hpp"
-#include "text/json_output_stream.hpp"
-#include "text/extract_path.hpp"
-#include "io/std_input_stream.hpp"
-#include "log/log.hpp"
-#include "io/path.hpp"
 #include "io/native_file.hpp"
+#include "io/path.hpp"
+#include "io/std_input_stream.hpp"
+#include "jk/content/colormap.hpp"
+#include "jk/content/raw_material.hpp"
+#include "log/log.hpp"
+#include "program/program.hpp"
+#include "text/extract_path.hpp"
+#include "text/json_output_stream.hpp"
 #include <boost/filesystem.hpp>
 
 namespace gorc {
@@ -14,10 +15,12 @@ namespace gorc {
     class mat_program : public program {
     public:
         path extract_path;
+        path colormap_path;
 
         virtual void create_options(options &opts) override
         {
             opts.insert(make_value_option("extract-to", extract_path));
+            opts.insert(make_value_option("colormap", colormap_path));
             return;
         }
 
@@ -37,6 +40,15 @@ namespace gorc {
 
             service_registry services;
 
+            std::unique_ptr<colormap> cmp;
+
+            if(!colormap_path.empty()) {
+                auto cmp_is = make_native_read_only_file(colormap_path);
+                binary_input_stream bis(*cmp_is);
+                cmp = std::make_unique<colormap>(deserialization_constructor, bis);
+                services.add<colormap>(*cmp);
+            }
+
             // Materials contain multiple data chunks.
             // JSON serialization requires supplementary output path.
             extract_path.replace_extension();
@@ -55,7 +67,6 @@ namespace gorc {
             return EXIT_SUCCESS;
         }
     };
-
 }
 
 MAKE_MAIN(gorc::mat_program)

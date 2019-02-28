@@ -1,17 +1,19 @@
 #include "material_loader.hpp"
+#include "libold/content/master_colormap.hpp"
 #include "material.hpp"
+#include "math/color.hpp"
 #include "raw_material.hpp"
 #include "renderer_object_factory.hpp"
-#include "libold/content/master_colormap.hpp"
-#include "math/color.hpp"
+#include <SFML/Graphics/Image.hpp>
+#include <boost/filesystem.hpp>
 
 gorc::fourcc const gorc::material_loader::type = "MAT"_4CC;
 
 namespace {
-    std::vector<gorc::path> const asset_root_path = { "mat", "3do/mat" };
+    std::vector<gorc::path> const asset_root_path = {"mat", "3do/mat"};
 }
 
-std::vector<gorc::path> const& gorc::material_loader::get_prefixes() const
+std::vector<gorc::path> const &gorc::material_loader::get_prefixes() const
 {
     return asset_root_path;
 }
@@ -42,7 +44,8 @@ namespace {
                                          raw_material_cel_record const &cel,
                                          raw_material const &mat,
                                          material_id id,
-                                         int cel_number) = 0;
+                                         int cel_number,
+                                         std::string const &base_name) = 0;
     };
 
     class indexed_material_processor : public material_processor {
@@ -50,8 +53,7 @@ namespace {
         asset_ref<colormap> cmp;
         renderer_object_factory &obj_factory;
 
-        indexed_material_processor(asset_ref<colormap> cmp,
-                                   renderer_object_factory &obj_factory)
+        indexed_material_processor(asset_ref<colormap> cmp, renderer_object_factory &obj_factory)
             : cmp(cmp)
             , obj_factory(obj_factory)
         {
@@ -81,9 +83,10 @@ namespace {
                                          raw_material_cel_record const &cel,
                                          raw_material const &mat,
                                          material_id id,
-                                         int cel_number) override
+                                         int cel_number,
+                                         std::string const &base_name) override
         {
-            grid<color_rgba8> col_img(make_size(tex.width, tex.height));
+            auto col_img = std::make_unique<grid<color_rgba8>>(make_size(tex.width, tex.height));
             grid<color_rgba8> lht_img(make_size(tex.width, tex.height));
 
             auto it = tex.image_data.at(0).begin();
@@ -106,22 +109,43 @@ namespace {
                         alpha = 0;
                     }
 
-                    col_img.get(x, y) = make_color_rgba8(cmp->get_color(idx), alpha);
+                    col_img->get(x, y) = make_color_rgba8(cmp->get_color(idx), alpha);
                     lht_img.get(x, y) = make_color_rgba8(cmp->get_light_color(idx), alpha);
                 }
             }
 
-            obj_factory.set_material_image(id, cel_number, /* diffuse */ 0, col_img);
+            // Check to see if there is an override for this cel
+            boost::filesystem::path p = base_name;
+            boost::filesystem::path newpath =
+                boost::filesystem::path("game/restricted/override/mat") / p.parent_path() /
+                boost::str(boost::format("%s-%d-0_rlt.png") % p.stem().generic_string() %
+                           cel_number);
+            if(boost::filesystem::exists(newpath)) {
+                sf::Image img;
+                img.loadFromFile(newpath.generic_string());
+
+                auto imgsize = img.getSize();
+                col_img = std::make_unique<grid<color_rgba8>>(make_size(imgsize.x, imgsize.y));
+
+                for(size_t y = 0; y < imgsize.y; ++y) {
+                    for(size_t x = 0; x < imgsize.x; ++x) {
+                        auto sfcol = img.getPixel(x, y);
+                        col_img->get(x, y) = make_color_rgba8(sfcol.r, sfcol.g, sfcol.b, sfcol.a);
+                    }
+                }
+            }
+
+            obj_factory.set_material_image(id, cel_number, /* diffuse */ 0, *col_img);
             obj_factory.set_material_image(id, cel_number, /* light */ 1, lht_img);
         }
     };
-
 }
 
 std::unique_ptr<gorc::asset> gorc::material_loader::deserialize(input_stream &is,
                                                                 content_manager &,
                                                                 asset_id id,
-                                                                service_registry const &svc) const
+                                                                service_registry const &svc,
+                                                                std::string const &name) const
 {
     auto mat = std::make_unique<material>();
 
@@ -133,8 +157,8 @@ std::unique_ptr<gorc::asset> gorc::material_loader::deserialize(input_stream &is
     std::unique_ptr<material_processor> proc;
     if(rm.bitdepth == 8) {
         proc = std::make_unique<indexed_material_processor>(
-                svc.get<content::master_colormap>().cmp.get_value(),
-                svc.get<renderer_object_factory>());
+            svc.get<content::master_colormap>().cmp.get_value(),
+            svc.get<renderer_object_factory>());
     }
     else {
         LOG_FATAL("unknown pixel format");
@@ -143,27 +167,18 @@ std::unique_ptr<gorc::asset> gorc::material_loader::deserialize(input_stream &is
     for(int cel = 0; cel < static_cast<int>(rm.cel_records.size()); ++cel) {
         auto const &cel_record = rm.cel_records.at(cel);
         if(cel_record.type == 0) {
-            proc->process_color_cel(cel_record,
-                                    rm,
-                                    mid,
-                                    cel);
+            proc->process_color_cel(cel_record, rm, mid, cel);
 
             mat->cels.push_back(make_size(color_tex_dim, color_tex_dim));
         }
         else if(cel_record.type == 8) {
             auto const &tex_record = rm.texture_records.at(cel_record.texture_index);
-            proc->process_texture_cel(tex_record,
-                                      cel_record,
-                                      rm,
-                                      mid,
-                                      cel);
+            proc->process_texture_cel(tex_record, cel_record, rm, mid, cel, name);
 
             mat->cels.push_back(make_size(tex_record.width, tex_record.height));
         }
         else {
-            LOG_FATAL(format("cel %d has unknown type %d") %
-                      cel %
-                      cel_record.type);
+            LOG_FATAL(format("cel %d has unknown type %d") % cel % cel_record.type);
         }
     }
 

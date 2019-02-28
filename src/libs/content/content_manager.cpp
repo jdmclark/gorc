@@ -1,7 +1,7 @@
 #include "content_manager.hpp"
 #include "loader_registry.hpp"
-#include "vfs/virtual_file_system.hpp"
 #include "log/log.hpp"
+#include "vfs/virtual_file_system.hpp"
 #include <algorithm>
 
 namespace {
@@ -13,7 +13,6 @@ namespace {
         std::transform(name.begin(), name.end(), std::back_inserter(rv), tolower);
         return rv;
     }
-
 }
 
 gorc::content_manager::asset_data::asset_data(fourcc type, std::string const &name)
@@ -65,9 +64,10 @@ void gorc::content_manager::finalize_internal(asset_id id)
 
         try {
             diagnostic_context dc(safe_name.c_str());
-            auto file = services.get<virtual_file_system>().find(unsafe_ref.name,
-                                                                 loader.get_prefixes());
-            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, id, services);
+            auto file =
+                services.get<virtual_file_system>().find(unsafe_ref.name, loader.get_prefixes());
+            at_id(assets, id).content =
+                loader.deserialize(*std::get<1>(file), *this, id, services, at_id(assets, id).name);
         }
         catch(...) {
             auto dflt_name = loader.get_default();
@@ -81,12 +81,13 @@ void gorc::content_manager::finalize_internal(asset_id id)
             diagnostic_context dc(dflt_name.get_value());
             auto file = services.get<virtual_file_system>().find(dflt_name.get_value(),
                                                                  loader.get_prefixes());
-            at_id(assets, id).content = loader.deserialize(*std::get<1>(file), *this, id, services);
+            at_id(assets, id).content =
+                loader.deserialize(*std::get<1>(file), *this, id, services, at_id(assets, id).name);
         }
     }
 }
 
-gorc::asset const& gorc::content_manager::load_from_id(asset_id id)
+gorc::asset const &gorc::content_manager::load_from_id(asset_id id)
 {
     finalize_internal(id);
     return *at_id(assets, id).content;
@@ -103,10 +104,10 @@ gorc::content_manager::content_manager(deserialization_constructor_tag, binary_i
 {
     binary_deserialize_range<asset_data>(bis, std::back_inserter(assets));
     binary_deserialize_range(bis, std::inserter(asset_map, asset_map.end()), [](auto &bis) {
-            auto name = binary_deserialize<std::string>(bis);
-            auto id = binary_deserialize<asset_id>(bis);
-            return std::make_pair(name, id);
-        });
+        auto name = binary_deserialize<std::string>(bis);
+        auto id = binary_deserialize<asset_id>(bis);
+        return std::make_pair(name, id);
+    });
 
     return;
 }
@@ -115,7 +116,7 @@ void gorc::content_manager::binary_serialize_object(binary_output_stream &bos) c
 {
     binary_serialize_range(bos, assets);
     binary_serialize_range(bos, asset_map, [](auto &bos, auto const &em) {
-            binary_serialize(bos, em.first);
-            binary_serialize(bos, em.second);
-        });
+        binary_serialize(bos, em.first);
+        binary_serialize(bos, em.second);
+    });
 }

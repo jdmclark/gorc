@@ -1,9 +1,9 @@
 #include "raw_material.hpp"
-#include "log/log.hpp"
-#include "utility/range.hpp"
-#include "io/path.hpp"
 #include "content/image.hpp"
+#include "io/path.hpp"
+#include "log/log.hpp"
 #include "text/extract_path.hpp"
+#include "utility/range.hpp"
 #include <cstring>
 
 gorc::raw_material_cel_record::raw_material_cel_record(deserialization_constructor_tag,
@@ -31,19 +31,21 @@ gorc::raw_material_cel_record::raw_material_cel_record(deserialization_construct
 
 void gorc::raw_material_cel_record::json_serialize_object(json_output_stream &jos) const
 {
-    json_serialize_members(jos, [&]{
-        json_serialize_member(jos, "type", [&]{ json_serialize(jos, type); });
-        json_serialize_member(jos, "color", [&]{ json_serialize(jos, color_index); });
-        json_serialize_member(jos, "unknown_color", [&]{
-                json_serialize_array(jos, unknown_color);
-            });
+    json_serialize_members(jos, [&] {
+        json_serialize_member(jos, "type", [&] { json_serialize(jos, type); });
+        json_serialize_member(jos, "color", [&] { json_serialize(jos, color_index); });
+        json_serialize_member(jos, "unknown_color", [&] {
+            json_serialize_array(jos, unknown_color);
+        });
 
         if(type == 8) {
             // Texture type: serialize texture elements
-            json_serialize_member(jos, "unknown_texture", [&]{
-                    json_serialize_array(jos, unknown_texture);
-                });
-            json_serialize_member(jos, "texture_index", [&]{ json_serialize(jos, texture_index); });
+            json_serialize_member(jos, "unknown_texture", [&] {
+                json_serialize_array(jos, unknown_texture);
+            });
+            json_serialize_member(jos, "texture_index", [&] {
+                json_serialize(jos, texture_index);
+            });
         }
     });
 }
@@ -76,44 +78,55 @@ gorc::raw_material_texture_record::raw_material_texture_record(deserialization_c
 }
 
 void gorc::raw_material_texture_record::json_serialize_object(
-        json_output_stream &jos,
-        std::string const &base_texture_name) const
+    json_output_stream &jos,
+    std::string const &base_texture_name,
+    maybe<colormap const *> master_colormap) const
 {
-    json_serialize_members(jos, [&]{
-        json_serialize_member(jos, "width", [&]{ json_serialize(jos, width); });
-        json_serialize_member(jos, "height", [&]{ json_serialize(jos, height); });
-        json_serialize_member(jos, "uses_transparency", [&]{ json_serialize(jos, uses_transparency); });
-        json_serialize_member(jos, "unknown", [&]{ json_serialize_array(jos, unknown); });
-        json_serialize_member(jos, "mipmap_count", [&]{ json_serialize(jos, mipmap_count); });
+    json_serialize_members(jos, [&] {
+        json_serialize_member(jos, "width", [&] { json_serialize(jos, width); });
+        json_serialize_member(jos, "height", [&] { json_serialize(jos, height); });
+        json_serialize_member(jos, "uses_transparency", [&] {
+            json_serialize(jos, uses_transparency);
+        });
+        json_serialize_member(jos, "unknown", [&] { json_serialize_array(jos, unknown); });
+        json_serialize_member(jos, "mipmap_count", [&] { json_serialize(jos, mipmap_count); });
 
-        json_serialize_member(jos, "mipmaps", [&]{
-                uint32_t texture_num = 0;
-                uint32_t next_width = width;
-                uint32_t next_height = height;
-                json_serialize_array(jos, image_data, [&](auto const &data) {
-                        image img(make_size(next_width, next_height));
-                        size_t idx = 0;
-                        for(size_t y = 0; y < next_height; ++y) {
-                            for(size_t x = 0; x < next_width && idx < data.size(); ++x, ++idx) {
-                                img.get(x, y) = make_color_rgba8(data[idx],
-                                                                 data[idx],
-                                                                 data[idx],
-                                                                 255);
-                            }
+        json_serialize_member(jos, "mipmaps", [&] {
+            uint32_t texture_num = 0;
+            uint32_t next_width = width;
+            uint32_t next_height = height;
+            json_serialize_array(jos, image_data, [&](auto const &data) {
+                image img(make_size(next_width, next_height));
+                size_t idx = 0;
+
+                if(master_colormap.has_value()) {
+                    auto const *cmp = master_colormap.get_value();
+                    for(size_t y = 0; y < next_height; ++y) {
+                        for(size_t x = 0; x < next_width && idx < data.size(); ++x, ++idx) {
+                            auto pixel = cmp->get_color(data[idx]);
+                            img.get(x, y) =
+                                make_color_rgba8(get<0>(pixel), get<1>(pixel), get<2>(pixel), 255);
                         }
+                    }
+                }
+                else {
+                    for(size_t y = 0; y < next_height; ++y) {
+                        for(size_t x = 0; x < next_width && idx < data.size(); ++x, ++idx) {
+                            img.get(x, y) = make_color_rgba8(data[idx], data[idx], data[idx], 255);
+                        }
+                    }
+                }
 
-                        std::string map_name = str(format("%s-%d.png") %
-                                                   base_texture_name %
-                                                   texture_num);
+                std::string map_name = str(format("%s-%d.png") % base_texture_name % texture_num);
 
-                        save_image_to_file(img, map_name);
-                        json_serialize(jos, map_name);
+                save_image_to_file(img, map_name);
+                json_serialize(jos, map_name);
 
-                        ++texture_num;
-                        next_width >>= 1;
-                        next_height >>= 1;
-                    });
+                ++texture_num;
+                next_width >>= 1;
+                next_height >>= 1;
             });
+        });
     });
 }
 
@@ -158,33 +171,36 @@ gorc::raw_material::raw_material(deserialization_constructor_tag, binary_input_s
 void gorc::raw_material::json_serialize_object(json_output_stream &jos) const
 {
     path extract_path = jos.services.get<gorc::extract_path>().value;
+    maybe<colormap const *> master_colormap;
+    if(jos.services.has<colormap>()) {
+        master_colormap = &jos.services.get<colormap>();
+    }
 
-    json_serialize_members(jos, [&]{
-        json_serialize_member(jos, "magic", [&]{
-                json_serialize(jos, std::string(magic.data(), 4));
+    json_serialize_members(jos, [&] {
+        json_serialize_member(jos, "magic", [&] {
+            json_serialize(jos, std::string(magic.data(), 4));
+        });
+
+        json_serialize_member(jos, "version", [&] { json_serialize(jos, version); });
+
+        json_serialize_member(jos, "type", [&] { json_serialize(jos, type); });
+        json_serialize_member(jos, "record_count", [&] { json_serialize(jos, record_count); });
+        json_serialize_member(jos, "texture_count", [&] { json_serialize(jos, texture_count); });
+        json_serialize_member(jos, "transparency", [&] { json_serialize(jos, transparency); });
+        json_serialize_member(jos, "bitdepth", [&] { json_serialize(jos, bitdepth); });
+
+        json_serialize_member(jos, "unknown", [&] { json_serialize_array(jos, unknown); });
+
+        json_serialize_member(jos, "cels", [&] { json_serialize_array(jos, cel_records); });
+
+        json_serialize_member(jos, "textures", [&] {
+            int tex_num = 0;
+            json_serialize_array(jos, texture_records, [&](auto const &em) {
+                std::string texture_base_name =
+                    str(format("%s-%d") % extract_path.generic_string() % tex_num);
+                em.json_serialize_object(jos, texture_base_name, master_colormap);
+                ++tex_num;
             });
-
-        json_serialize_member(jos, "version", [&]{ json_serialize(jos, version); });
-
-        json_serialize_member(jos, "type", [&]{ json_serialize(jos, type); });
-        json_serialize_member(jos, "record_count", [&]{ json_serialize(jos, record_count); });
-        json_serialize_member(jos, "texture_count", [&]{ json_serialize(jos, texture_count); });
-        json_serialize_member(jos, "transparency", [&]{ json_serialize(jos, transparency); });
-        json_serialize_member(jos, "bitdepth", [&]{ json_serialize(jos, bitdepth); });
-
-        json_serialize_member(jos, "unknown", [&]{ json_serialize_array(jos, unknown); });
-
-        json_serialize_member(jos, "cels", [&]{ json_serialize_array(jos, cel_records); });
-
-        json_serialize_member(jos, "textures", [&]{
-                int tex_num = 0;
-                json_serialize_array(jos, texture_records, [&](auto const &em) {
-                        std::string texture_base_name = str(format("%s-%d") %
-                                                            extract_path.generic_string() %
-                                                            tex_num);
-                        em.json_serialize_object(jos, texture_base_name);
-                        ++tex_num;
-                    });
-            });
+        });
     });
 }

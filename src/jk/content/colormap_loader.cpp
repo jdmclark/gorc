@@ -6,17 +6,18 @@ gorc::fourcc const gorc::colormap_loader::type = "CMP"_4CC;
 std::unique_ptr<gorc::asset> gorc::colormap_loader::deserialize(input_stream &is,
                                                                 content_manager &,
                                                                 asset_id,
-                                                                service_registry const &) const
+                                                                service_registry const &,
+                                                                std::string const & /*name*/) const
 {
     binary_input_stream bis(is);
     return std::make_unique<colormap>(deserialization_constructor, bis);
 }
 
 namespace {
-    std::vector<gorc::path> const asset_root_path = { "misc/cmp" };
+    std::vector<gorc::path> const asset_root_path = {"misc/cmp"};
 }
 
-std::vector<gorc::path> const& gorc::colormap_loader::get_prefixes() const
+std::vector<gorc::path> const &gorc::colormap_loader::get_prefixes() const
 {
     return asset_root_path;
 }

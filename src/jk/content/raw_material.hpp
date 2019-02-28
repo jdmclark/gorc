@@ -1,13 +1,14 @@
 #pragma once
 
 #include <array>
-#include <vector>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
+#include "colormap.hpp"
 #include "content/asset.hpp"
-#include "math/color.hpp"
 #include "io/binary_input_stream.hpp"
+#include "math/color.hpp"
 #include "text/json_output_stream.hpp"
 
 namespace gorc {
@@ -33,10 +34,10 @@ namespace gorc {
         uint32_t mipmap_count;
         std::vector<std::vector<uint8_t>> image_data;
 
-        raw_material_texture_record(deserialization_constructor_tag,
-                                    binary_input_stream &);
+        raw_material_texture_record(deserialization_constructor_tag, binary_input_stream &);
         void json_serialize_object(json_output_stream &,
-                                   std::string const &base_texture_name) const;
+                                   std::string const &base_texture_name,
+                                   maybe<colormap const *> master_colormap) const;
     };
 
     class raw_material {
@@ -60,5 +61,4 @@ namespace gorc {
 
         void json_serialize_object(json_output_stream &) const;
     };
-
 }

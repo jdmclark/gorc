@@ -1,25 +1,26 @@
 #include "sound_loader.hpp"
 #include "io/memory_file.hpp"
 #include "libold/base/content/assets/sound.hpp"
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 gorc::fourcc const gorc::content::loaders::sound_loader::type = "WAV"_4CC;
 
 namespace {
-    const std::vector<gorc::path> asset_root_path = { "sound", "voice" };
+    const std::vector<gorc::path> asset_root_path = {"sound", "voice"};
 }
 
-std::vector<gorc::path> const& gorc::content::loaders::sound_loader::get_prefixes() const
+std::vector<gorc::path> const &gorc::content::loaders::sound_loader::get_prefixes() const
 {
     return asset_root_path;
 }
 
-std::unique_ptr<gorc::asset> gorc::content::loaders::sound_loader::deserialize(
-        input_stream &file,
-        content_manager &,
-        asset_id,
-        service_registry const &) const
+std::unique_ptr<gorc::asset>
+    gorc::content::loaders::sound_loader::deserialize(input_stream &file,
+                                                      content_manager &,
+                                                      asset_id,
+                                                      service_registry const &,
+                                                      std::string const &name) const
 {
     std::unique_ptr<content::assets::sound> wav(new content::assets::sound());
 

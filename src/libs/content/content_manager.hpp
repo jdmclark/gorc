@@ -1,17 +1,17 @@
 #pragma once
 
-#include <vector>
+#include "asset.hpp"
+#include "asset_ref.hpp"
+#include "fourcc.hpp"
+#include "io/binary_input_stream.hpp"
+#include "io/binary_output_stream.hpp"
+#include "log/diagnostic_context.hpp"
+#include "utility/maybe.hpp"
+#include "utility/service_registry.hpp"
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "utility/maybe.hpp"
-#include "asset.hpp"
-#include "fourcc.hpp"
-#include "utility/service_registry.hpp"
-#include "asset_ref.hpp"
-#include "log/diagnostic_context.hpp"
-#include "io/binary_output_stream.hpp"
-#include "io/binary_input_stream.hpp"
+#include <vector>
 
 namespace gorc {
 
@@ -51,7 +51,7 @@ namespace gorc {
             return asset_ref<T>(dynamic_cast<T const &>(*record.content), ref_id);
         }
 
-        asset const& load_from_id(asset_id id);
+        asset const &load_from_id(asset_id id);
 
         template <typename T>
         asset_id load_id(std::string const &name)
@@ -74,5 +74,4 @@ namespace gorc {
     {
         return cm.get_asset(id);
     }
-
 }

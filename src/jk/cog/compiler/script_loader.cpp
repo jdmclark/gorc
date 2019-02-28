@@ -4,21 +4,19 @@
 gorc::fourcc const gorc::cog::script_loader::type = "COG"_4CC;
 
 namespace {
-    std::vector<gorc::path> cog_prefixes = {
-        "cog"
-    };
+    std::vector<gorc::path> cog_prefixes = {"cog"};
 }
 
-std::vector<gorc::path> const& gorc::cog::script_loader::get_prefixes() const
+std::vector<gorc::path> const &gorc::cog::script_loader::get_prefixes() const
 {
     return cog_prefixes;
 }
 
-std::unique_ptr<gorc::asset> gorc::cog::script_loader::deserialize(
-        input_stream &is,
-        content_manager &,
-        asset_id,
-        service_registry const &services) const
+std::unique_ptr<gorc::asset> gorc::cog::script_loader::deserialize(input_stream &is,
+                                                                   content_manager &,
+                                                                   asset_id,
+                                                                   service_registry const &services,
+                                                                   std::string const &name) const
 {
     auto &compiler = services.get<cog::compiler>();
     return compiler.compile(is);

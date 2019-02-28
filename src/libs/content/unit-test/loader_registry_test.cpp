@@ -1,5 +1,5 @@
-#include "test/test.hpp"
 #include "content/loader_registry.hpp"
+#include "test/test.hpp"
 
 using namespace gorc;
 
@@ -17,24 +17,24 @@ namespace {
             return;
         }
 
-        virtual std::vector<path> const& get_prefixes() const override
+        virtual std::vector<path> const &get_prefixes() const override
         {
             static std::vector<path> rv;
 
             return rv;
         }
 
-        virtual std::unique_ptr<asset> deserialize(input_stream&,
-                                                   content_manager&,
+        virtual std::unique_ptr<asset> deserialize(input_stream &,
+                                                   content_manager &,
                                                    asset_id,
-                                                   service_registry const&) const override
+                                                   service_registry const &,
+                                                   std::string const &) const override
         {
             return nullptr;
         }
     };
 
     fourcc const mock_loader::type = "MOCK"_4CC;
-
 }
 
 begin_suite(loader_registry_test);
@@ -45,7 +45,7 @@ test_case(simple_emplace_get)
     lr.emplace_loader<mock_loader>(58);
 
     auto const &ldr = lr.get_loader("MOCK"_4CC);
-    assert_eq(dynamic_cast<mock_loader const&>(ldr).value, 58);
+    assert_eq(dynamic_cast<mock_loader const &>(ldr).value, 58);
 }
 
 test_case(no_loader_exists)
