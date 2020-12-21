@@ -1,6 +1,7 @@
 #include "episode_entry_type.hpp"
 #include "utility/enum_hash.hpp"
 #include <unordered_map>
+#include <stdexcept>
 
 using namespace gorc;
 
